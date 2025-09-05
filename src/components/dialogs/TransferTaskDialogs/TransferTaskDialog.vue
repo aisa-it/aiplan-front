@@ -1,0 +1,541 @@
+<template>
+  <q-dialog ref="dialogRef" @hide="() => clear()" persistent>
+    <q-card class="modal-card">
+      <q-card-section class="column q-pt-none">
+        <h6 class="q-ma-md">Копировать или перенести задачу</h6>
+        <q-select
+          v-model="selectedProject"
+          dense
+          label="Проект"
+          behavior="menu"
+          class="base-selector"
+          popup-content-class="scrollable-content"
+          use-input
+          input-debounce="200"
+          @filter="filterProject"
+          :options="projects"
+          :option-value="(v) => v.id"
+          :option-label="(v) => v.name"
+          :style="'width: 100%'"
+          @update:model-value="updateSelectedProject"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey"> Нет проектов </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+
+        <template v-if="isNotSameProjectSelected">
+          <div v-for="(item, index) of actionsType" :key="item.value">
+            <q-item tag="label">
+              <q-item-section>
+                <q-radio
+                  v-model="selectedAction"
+                  :val="item.value"
+                  :label="`${item.label} задачу`"
+                />
+                <q-item tag="label" @click="setAction(item.value)">
+                  <q-item-section
+                    avatar
+                    :class="{
+                      'no-pointer-events': item.value !== selectedAction,
+                    }"
+                  >
+                    <q-checkbox v-model="actionWithLinkedIssues[index]" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label
+                      >{{ item.label }} всё дерево задач</q-item-label
+                    >
+                    <q-item-label caption>
+                      {{ item.label }} совместно с родительской задачей и всеми
+                      подзадачами
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-if="issueData?.label_details.length === 1"
+                  tag="label"
+                  class="full-w"
+                  @click="setAction(item.value)"
+                >
+                  <q-item-section
+                    avatar
+                    :class="{
+                      'no-pointer-events': item.value !== selectedAction,
+                    }"
+                  >
+                    <q-checkbox v-model="actionByLabel[index]" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ item.label }} по тегу</q-item-label>
+                    <q-item-label caption class="word-wrap">
+                      {{ item.label }} все задачи с тегом
+                      <b>{{ issueData?.label_details[0]?.name }}</b>
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-if="issueData?.label_details.length > 1"
+                  tag="label"
+                  @click="setAction(item.value)"
+                >
+                  <q-item-section
+                    avatar
+                    :class="{
+                      'no-pointer-events': item.value !== selectedAction,
+                    }"
+                  >
+                    <q-checkbox
+                      v-model="actionByLabel[index]"
+                      @update:model-value="updateIsLabelTransferOn"
+                    />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ item.label }} по тегу</q-item-label>
+                    <q-item-label caption>
+                      {{ item.label }} все задачи с выбранным тегом
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-if="
+                    actionByLabel[index] && issueData?.label_details.length > 1
+                  "
+                  class="full-w"
+                >
+                  <q-select
+                    ref="selectTagsRef"
+                    v-model="transferLabel"
+                    dense
+                    :options="issueData?.label_details"
+                    :option-value="(label) => label.id"
+                    :option-label="(label) => label.name"
+                    class="base-selector full-w"
+                    :popup-content-style="selectTagsWidth"
+                    popup-content-class="scrollable-content custom-menu"
+                    label="Теги"
+                  >
+                    <template v-slot:option="scope">
+                      <q-item v-bind="scope.itemProps">
+                        <q-item-section>
+                          <q-item-label class="flex flex-center no-wrap">
+                            <q-badge
+                              rounded
+                              class="q-mr-sm"
+                              :style="'background-color: ' + scope.opt.color"
+                            />
+                            <span class="word-wrap" style="width: 95%">
+                              {{ scope.opt.name }}
+                            </span>
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </q-item>
+              </q-item-section>
+            </q-item>
+          </div>
+          <q-item tag="label">
+            <q-item-section avatar>
+              <q-checkbox v-model="isCreateEntity" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label caption>
+                Создать отсутствующие статусы и теги
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+        <q-item v-else tag="label">
+          <q-item-section>
+            <q-radio
+              v-model="actionsType[0].value"
+              :val="actionsType[0].value"
+              :label="`Копировать задачу`"
+              disable
+            />
+          </q-item-section>
+        </q-item>
+
+        <div v-if="transferErrors.length" class="full-w">
+          <h6 style="margin: 12px 0 0 0 !important; color: #dc3e3e">Ошибки</h6>
+
+          <div class="q-pt-md">
+            <p
+              v-if="isFindTransferErrorsByCurrentIssueIdOrType"
+              style="font-weight: 600; font-size: 16px; margin-bottom: 16px"
+            >
+              Текущая задача
+            </p>
+            <p
+              v-for="(log, index) in filterTransferErrorsByCurrentIssueIdOrType"
+              :key="index"
+              v-html="logsRUS(log.error, log, selectedProject?.name)"
+              class="word-wrap q-mb-sm"
+            ></p>
+            <div v-if="filterTransferErrorsByNotCurrentIssueIdAndType.length">
+              <p style="font-weight: 600; font-size: 16px; margin: 16px 0">
+                Дерево задач
+              </p>
+              <p
+                v-for="(
+                  log, index
+                ) in filterTransferErrorsByNotCurrentIssueIdAndType"
+                :key="index"
+                v-html="logsRUS(log.error, log, selectedProject?.name)"
+                class="word-wrap q-mb-sm"
+              ></p>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          no-caps
+          label="Отменить"
+          class="secondary-btn"
+          v-close-popup
+        />
+        <q-btn
+          flat
+          no-caps
+          label="Выполнить"
+          class="primary-btn"
+          :disable="
+            isNotSameProjectSelected && !(selectedProject && selectedAction)
+          "
+          @click="transfer"
+        />
+      </q-card-actions>
+      <q-inner-loading :showing="loading">
+        <DefaultLoader />
+      </q-inner-loading>
+    </q-card>
+  </q-dialog>
+</template>
+
+<script lang="ts" setup>
+// core
+import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
+import { computed, ref, watch, onMounted } from 'vue';
+import { useNotificationStore } from 'src/stores/notification-store';
+
+// stores
+import { useRolesStore } from 'src/stores/roles-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { useProjectStore } from 'src/stores/project-store';
+
+// components
+import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+
+// interfaces
+import {
+  IIssueTransferById,
+  IIssueTransferByLabel,
+} from 'src/interfaces/issues';
+import { IProject } from 'src/interfaces/projects';
+import { IMigrationError } from 'src/interfaces/notifications';
+
+// utils
+import { logsRUS } from 'src/utils/translator';
+import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
+import { getIssueLink, getProjectLink } from 'src/utils/links';
+import {
+  getSuccessCopyIssueByLabelMessage,
+  getSuccessCopyIssueMessage,
+  getSuccessTransferIssueByLabelMessage,
+  getSuccessTransferIssueMessage,
+} from 'src/utils/notifications';
+
+// constants
+import { DEFAULT_TRANSFER_MODEL } from 'src/constants/constants';
+
+const ACTIONS = {
+  COPY: 'COPY',
+  TRANSFER: 'TRANSFER',
+};
+
+// props
+const props = withDefaults(
+  defineProps<{
+    issue: any;
+  }>(),
+  {
+    issue: () => {
+      return {};
+    },
+  },
+);
+
+// emits
+const emit = defineEmits<{
+  refresh: [];
+}>();
+
+// store
+const rolesStore = useRolesStore();
+const projectStore = useProjectStore();
+const workspaceStore = useWorkspaceStore();
+const singleIssueStore = useSingleIssueStore();
+const { setNotificationView } = useNotificationStore();
+
+// store to refs
+const { currentIssueID } = storeToRefs(singleIssueStore);
+const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+// vars
+const route = useRoute();
+const router = useRouter();
+const transferModel = ref<IIssueTransferById | IIssueTransferByLabel>(
+  DEFAULT_TRANSFER_MODEL,
+);
+const transferId = ref();
+const transferLabel = ref();
+const dialogRef = ref();
+const issueData = ref(props.issue);
+const selectedProject = ref();
+const projects = ref<IProject[]>(workspaceProjects.value as IProject[]);
+const transferErrors = ref([]);
+const selectTagsRef = ref();
+const { getWidthStyle: selectTagsWidth } =
+  useResizeObserverSelect(selectTagsRef);
+const selectedAction = ref();
+const actionWithLinkedIssues = ref<boolean[]>([]);
+const isCreateEntity = ref<boolean>(false);
+const actionByLabel = ref<boolean[]>([]);
+const actionsType = [
+  {
+    label: 'Копировать',
+    value: ACTIONS.COPY,
+  },
+  {
+    label: 'Перенести',
+    value: ACTIONS.TRANSFER,
+  },
+];
+const loading = ref(false);
+
+// computed
+const isNotSameProjectSelected = computed<boolean>(
+  () => selectedProject.value?.identifier !== (route.params.project as string),
+);
+
+const filterTransferErrorsByCurrentIssueIdOrType = computed(() => {
+  return transferErrors.value.filter(
+    (error: any) =>
+      error?.issue_sequence_id == currentIssueID.value || !error?.type,
+  );
+});
+
+const isFindTransferErrorsByCurrentIssueIdOrType = computed(() => {
+  return transferErrors.value.find(
+    (error: any) =>
+      error?.issue_sequence_id == currentIssueID.value || !error?.type,
+  );
+});
+
+const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
+  return transferErrors.value.filter(
+    (error: any) =>
+      error?.issue_sequence_id != currentIssueID.value && !!error?.type,
+  );
+});
+
+// function
+const clear = () => {
+  transferLabel.value = null;
+  transferErrors.value = [];
+  transferModel.value.delete_src = false;
+  transferModel.value.linked_issues = false;
+  selectedProject.value = null;
+  selectedAction.value = null;
+  transferId.value = null;
+};
+
+const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
+  if (type === 'ok') {
+    const link = transferId.value
+      ? props.issue?.short_url
+        ? props.issue.short_url
+        : getIssueLink(
+            currentWorkspaceSlug.value,
+            selectedProject.value.identifier,
+            transferId.value,
+          )
+      : getProjectLink(
+          currentWorkspaceSlug.value,
+          selectedProject.value.identifier,
+        );
+
+    const copyMessage = transferId.value
+      ? getSuccessCopyIssueMessage(
+          link,
+          `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
+        )
+      : getSuccessCopyIssueByLabelMessage(link);
+
+    const transferMessage = transferId.value
+      ? getSuccessTransferIssueMessage(
+          link,
+          `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
+        )
+      : getSuccessTransferIssueByLabelMessage(link);
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage:
+        selectedAction.value === ACTIONS.COPY ? copyMessage : transferMessage,
+    });
+  }
+
+  if (type === 'error') {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      logs: errors ?? [],
+    });
+  }
+
+  if (transferModel.value.delete_src) {
+    router.push(
+      `/${route.params.workspace}/projects/${route.params.project}/issues`,
+    );
+  }
+
+  clear();
+};
+
+const sendDataById = async () => {
+  const transferDataById = {
+    ...transferModel.value,
+    src_issue: issueData.value.id,
+  };
+
+  await singleIssueStore
+    .issueTransferById(
+      transferDataById as IIssueTransferById,
+      isCreateEntity.value,
+    )
+    .then((res) => {
+      transferId.value = res.data.id;
+      dialogRef.value.hide();
+
+      onCancel('ok');
+    })
+    .catch((err) => (transferErrors.value = err.response?.data?.errors))
+    .finally(() => (loading.value = false));
+};
+
+const sendDataByLabel = async () => {
+  const transferDataByLabel = {
+    ...transferModel.value,
+    src_label: transferLabel.value?.id || issueData.value?.label_details[0]?.id,
+  };
+
+  await singleIssueStore
+    .issueTransferByLabel(
+      transferDataByLabel as IIssueTransferByLabel,
+      isCreateEntity.value,
+    )
+    .then(() => {
+      dialogRef.value.hide();
+      onCancel('ok');
+    })
+    .catch((err) => (transferErrors.value = err.response?.data?.errors))
+    .finally(() => (loading.value = false));
+};
+
+const transfer = async () => {
+  loading.value = true;
+  transferModel.value.target_project = selectedProject.value.id;
+  transferModel.value.delete_src = selectedAction.value === ACTIONS.TRANSFER;
+  transferModel.value.linked_issues = actionWithLinkedIssues.value.some(
+    (el) => el === true,
+  );
+  actionByLabel.value.some((el) => el === true)
+    ? await sendDataByLabel()
+    : await sendDataById();
+  emit('refresh');
+};
+
+const filterProject = (val: string, update: any) => {
+  const options = (workspaceProjects.value as IProject[]).filter(
+    (project) =>
+      project?.current_user_membership ||
+      rolesStore.hasPermissionByIssue(
+        props.issue.id,
+        projectStore.project,
+        'transfer-issue',
+      ),
+  );
+
+  if (val === '') {
+    update(() => (projects.value = options));
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    projects.value = options.filter((v) => v.name.indexOf(needle) > -1);
+  });
+};
+
+const updateSelectedProject = () => {
+  transferErrors.value = [];
+};
+
+const updateIsLabelTransferOn = (newVal: boolean) => {
+  if (!newVal) {
+    transferLabel.value = null;
+  }
+};
+
+const setAction = (action: string) => {
+  selectedAction.value = action;
+};
+
+const resetActionOptions = () => {
+  actionsType.forEach((item, index) => {
+    actionWithLinkedIssues.value[index] = false;
+    actionByLabel.value[index] = false;
+  });
+  transferLabel.value = null;
+};
+
+// hooks
+
+watch(
+  () => props.issue,
+  () => (issueData.value = props.issue),
+);
+
+watch(
+  () => route.params.workspace,
+  () => (projects.value = workspaceProjects.value as IProject[]),
+);
+
+watch(
+  () => selectedAction.value,
+  () => resetActionOptions(),
+);
+
+onMounted(() => {
+  actionsType.forEach((item, index) => {
+    actionWithLinkedIssues.value[index] = false;
+    actionByLabel.value[index] = false;
+  });
+});
+</script>
+
+<style lang="scss" scoped>
+:deep(.q-item .q-focus-helper) {
+  display: none;
+}
+</style>

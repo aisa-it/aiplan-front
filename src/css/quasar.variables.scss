@@ -1,0 +1,236 @@
+// Quasar SCSS (& Sass) Variables
+// --------------------------------------------------
+// To customize the look and feel of this app, you can override
+// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+
+// Check documentation for full list of Quasar variables
+
+// Your own variables (that are declared here) and Quasar's own
+// ones will be available out of the box in your .vue/.scss/.sass files
+
+// It's highly recommended to change the default colors
+// to match your app's branding.
+// Tip: Use the "Theme Builder" on Quasar's documentation website.
+
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0');
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+TC:wght@100..900&display=swap');
+
+// @font-face {
+//   font-family: OpenSans;
+//   src: url(./fonts/OpenSans-Regular.woff);
+// }
+
+// src/css/quasar.variables.sass
+:root {
+  --primary-light: #ccdbff;
+  --primary: #3f75ff;
+
+  .body--dark {
+    --primary: #5685fb;
+    --bg-color: #1f2228;
+    --autofill-color: #474a52;
+    --text-color: #bac4d5;
+    --sub-text-color: #8b8b98;
+
+    --border-color: #8b8b98;
+    --dark-border-color: #31363f;
+    --darkest-border-color: #24272e;
+
+    --active-tab-color: #31363f;
+
+    --shadow-tab-color-1: #0607141f;
+    --shadow-tab-color-2: #06071424;
+    --shadow-tab-color-3: #06071433;
+    --shadow-tab-color-4: #0a0d2433;
+
+    --hover-color: #30343d;
+    --active-color: #414652;
+    --scroll-color: #bac4d5;
+
+    --heatmap-level-0: #2e2e31;
+    --heatmap-level-1: #242758;
+    --heatmap-level-2: #39488e;
+    --heatmap-level-3: #6c7cba;
+    --heatmap-level-4: #d9dbe8;
+
+    --spoiler-hover-color: rgba(255, 255, 255, 0.1);
+    --date-bacground-color: rgba(255, 255, 255, 0.2);
+
+    --tiptap-border-color: #8b8b98;
+    --tiptap-th-bg-color: #31363f;
+    --tiptap-codeblock-bg-color: #333842;
+
+    --bg-activities-pattern: url('../assets/patterns/dark_pattern.svg');
+
+    --progress-bg-base: #31363f;
+    --progress-bg-primary: #052c48;
+    --progress-bg-error: #47000b;
+    --progress-bg-success: #17351a;
+
+    --hover-color-picker: #3a486e;
+    --border-color-picker: #31363f;
+
+    --attachment-hover-color: rgba(0, 0, 0, 0.6);
+    --buttons-attachments-bg: #474a52;
+    --buttons-attachments-icons-color: #474a52;
+  }
+
+  .body--light {
+    --primary: #3f75ff;
+
+    --bg-color: #fff;
+    --text-color: #474a52;
+    --sub-text-color: #8b8b98;
+    --autofill-color: #e4ebf5;
+
+    --border-color: #dde2ea;
+    --dark-border-color: #dde2ea;
+    --darkest-border-color: #dde2ea;
+
+    --active-tab-color: #dde2ea;
+
+    --shadow-tab-color-1: #aab6ca1f;
+    --shadow-tab-color-2: #aab6ca24;
+    --shadow-tab-color-3: #aab6ca33;
+    --shadow-tab-color-4: #aab6ca33;
+
+    --hover-color: #e6e6e6;
+    --active-color: #d3d3d3;
+    --scroll-color: #dde2ea;
+
+    --heatmap-level-0: #ececef;
+    --heatmap-level-1: #d2dcff;
+    --heatmap-level-2: #7992f5;
+    --heatmap-level-3: #3f51ae;
+    --heatmap-level-4: #2a2b59;
+
+    --attachment-hover-color: var(--primary);
+    --spoiler-hover-color: rgba(0, 0, 0, 0.2);
+    --date-bacground-color: rgba(0, 0, 0, 0.2);
+
+    --tiptap-th-bg-color: #e4ebf5;
+    --tiptap-border-color: #ccc;
+    --tiptap-codeblock-bg-color: #efeff6;
+
+    --bg-activities-pattern: url('../assets/patterns/light_pattern.svg');
+
+    --progress-bg-base: #dde2ea;
+    --progress-bg-primary: #e1f5fe;
+    --progress-bg-error: #fce4ec;
+    --progress-bg-success: #e8f5e9;
+
+    --hover-color-picker: #f0f4ff;
+    --border-color-picker: #dde2ea;
+
+    --buttons-attachments-bg: rgb(255, 255, 255);
+    --buttons-attachments-icons-color: #474a52;
+  }
+}
+
+$primary: var(--primary);
+$primary-light: var(--primary-light);
+
+$bg-color: var(--bg-color);
+$text-color: var(--text-color);
+$sub-text-color: var(--sub-text-color);
+$border-color: var(--border-color);
+$dark-border-color: var(--dark-border-color);
+$darkest-border-color: var(--darkest-border-color);
+$active-tab-color: var(--active-tab-color);
+
+$autofill-color: var(--autofill-color);
+
+$shadow-tab-color-1: var(--shadow-tab-color-1);
+$shadow-tab-color-2: var(--shadow-tab-color-2);
+$shadow-tab-color-3: var(--shadow-tab-color-3);
+$shadow-tab-color-4: var(--shadow-tab-color-4);
+
+$hover-color: var(--hover-color);
+$active-color: var(--active-color);
+$scroll-color: var(--scroll-color);
+
+$heatmap-level-0: var(--heatmap-level-0);
+$heatmap-level-1: var(--heatmap-level-1);
+$heatmap-level-2: var(--heatmap-level-2);
+$heatmap-level-3: var(--heatmap-level-3);
+$heatmap-level-4: var(--heatmap-level-4);
+
+$attachment-hover-color: var(--attachment-hover-color);
+$buttons-attachments-bg: var(--buttons-attachments-bg);
+
+$tiptap-border-color: var(--tiptap-border-color);
+$tiptap-th-bg-color: var(--tiptap-th-bg-color);
+$tiptap-codeblock-bg-color: var(--tiptap-codeblock-bg-color);
+
+$dark-primary: #5685fb;
+$secondary: #1d8c81;
+$accent: #9c27b0;
+
+$dark: #474a52;
+$dark-page: #121212;
+$night: #1f2228;
+
+$positive: #21ba45;
+$negative: #dc3e3e;
+$negative-light: rgba(239, 68, 68, 0.1);
+$info: #3f75ff;
+$warning: #f2c037;
+$warning-lignt: #f2c03715;
+$orange: #ff9800;
+
+$base: #ffffff;
+$bg-surface: #ffffff;
+$bg-surface-2: rgb(240, 244, 250);
+$bg-light: rgb(240, 244, 255);
+
+$color-border: rgb(221, 226, 234);
+$color-border-2: rgb(221, 226, 234);
+$color-accent: rgb(63, 118, 255);
+$color_accent_light: rgba(63, 118, 255, 0.07);
+$color-bg-accent-light: rgba(241, 244, 249, 0.5);
+$color-shadow: rgba(170, 182, 202, 0.12);
+
+$text-secondary-color: rgb(71, 74, 82);
+$typography-font-family: Rubik, sans-serif !default;
+
+$tiptap-color-picker-light-bg: (
+  'red': #fce4ec,
+  'blue': #e1f5fe,
+  'cyan': #dcf7f9,
+  'green': #e8f5e9,
+  'orange': #ffe4cc,
+  'yellow': #fff1e1,
+  'pink': #fedcf2,
+);
+
+$tiptap-color-picker-dark-bg: (
+  'red': #47000b,
+  'blue': #052c48,
+  'cyan': #0c4246,
+  'green': #17351a,
+  'orange': #522c00,
+  'yellow': #524400,
+  'pink': #530436,
+);
+
+$base-font-size: 16px;
+$small-font-size: 14px;
+
+$radius: 8px;
+$extra-light: #dde2ea;
+$base-height: 40px;
+$small-height: 32px;
+
+$light-primary-border-color: #6692ff;
+$light-red: #ff5c5c;
+$dark-gray: #8b8b98;
+$gray: #bac4d5;
+
+$bg-activities-pattern: var(--bg-activities-pattern);
+
+$progress-bg-base: var(--progress-bg-base);
+$progress-bg-primary: var(--progress-bg-primary);
+$progress-bg-error: var(--progress-bg-error);
+$progress-bg-success: var(--progress-bg-success);

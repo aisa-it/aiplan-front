@@ -1,0 +1,190 @@
+body h1 {
+  font-size: 96px;
+  font-weight: 300;
+  line-height: 113.76px;
+  letter-spacing: -1.5px;
+}
+
+body h2 {
+  font-size: 60px;
+  font-weight: 300;
+  line-height: 71.1px;
+  letter-spacing: -0.5px;
+}
+
+body h3 {
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 56.88px;
+}
+
+@media screen and (max-width: 600px) {
+  body h3 {
+    font-size: 26px;
+    line-height: 36.88px;
+  }
+}
+body h4 {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 40.29px;
+  letter-spacing: 0.25px;
+}
+
+body h5 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 28.44px;
+}
+
+.body-1 {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0.5px;
+}
+.body-1-medium {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: 0.5px;
+}
+.body-2 {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+
+// --------- BUTTONS ---------
+// nav nenu dotted button
+.more-dotted-button {
+  height: 14px;
+  min-height: 14px;
+  max-height: 14px;
+  font-size: 10px;
+  padding: 0;
+}
+
+.btn-select {
+  transition: all 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  .q-focus-helper {
+    display: none;
+    background: none;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border: 1px solid $primary;
+    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .q-ripple {
+    display: none;
+  }
+
+  &[aria-expanded='true'] {
+    border: 1px solid $primary;
+    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.selector-popup {
+  border-radius: $radius;
+  border: 1px solid $border-color;
+  padding: 6px;
+}
+
+.q-field__control:after {
+  border-width: 1px !important;
+}
+
+// --------- TEXTAREA ---------
+.base-textarea-sm {
+  .q-field__control-container {
+    padding: 0;
+  }
+
+  .q-field__control-container {
+    padding: 10px 0 8px;
+    min-height: $base-height;
+  }
+
+  .q-field__native {
+    padding: 2px 0 0;
+  }
+
+  .q-field__control,
+  .q-field__native {
+    min-height: auto;
+  }
+}
+
+.base-title {
+  font-size: 18px;
+  word-break: break-word;
+}
+
+.readonly-title-issue {
+  .q-field__control {
+    padding: 0 0 0 12px !important;
+  }
+}
+
+.without-label {
+  .q-field__native {
+    padding-top: 10px;
+  }
+}
+
+// --------- CHIPS ---------
+.base-chip {
+  border-radius: 16px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  padding: 0px 12px 0px 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.75px;
+  min-height: $base-height;
+}
+
+.base-chip--bordered {
+  min-height: $small-height;
+  border: 1px solid $border-color;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+// ---------- BARS / LISTS ---------
+.projects-lists-inner {
+  height: calc(80vh);
+}
+
+.nav-menu-bottom-bar {
+  height: calc(100vh - 96px - 50px);
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 2px);
+  margin: 0 1px;
+  margin-top: auto;
+}
+
+.negative-btn {
+  color: $negative !important;
+  border: 1px solid $negative !important;
+}
+.positive-btn {
+  color: #05bd8d !important;
+  border: 1px solid #05bd8d !important;
+}
+
+.arrow-up {
+  transition: transform 0.4s ease;
+}

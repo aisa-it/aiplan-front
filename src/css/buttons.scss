@@ -1,0 +1,295 @@
+// --------------------- buttons ---------------------
+
+@mixin btn-common {
+  border-radius: $radius;
+  width: fit-content;
+  padding: 0px 12px !important;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0.75px;
+
+  span {
+    gap: 4px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  &::before {
+    box-shadow: none !important;
+  }
+}
+
+.btn {
+  @include btn-common;
+  min-height: $base-height;
+  color: $text-color;
+}
+
+.btn-sm {
+  @include btn-common;
+  min-height: $small-height;
+  color: $text-color;
+}
+
+@mixin only-icon-btn {
+  border-radius: $radius;
+  padding: 0px 8px;
+  min-height: $base-height;
+  min-width: $base-height;
+  &::before {
+    box-shadow: none !important;
+  }
+}
+
+@mixin only-icon-btn-sm {
+  border-radius: $radius;
+  padding: 0px 0.285em !important;
+  min-height: $small-height;
+  min-width: $small-height;
+
+  &::before {
+    box-shadow: none !important;
+  }
+}
+
+.btn-only-icon {
+  @include only-icon-btn;
+}
+
+.btn-only-icon-sm {
+  @include only-icon-btn-sm;
+}
+
+//  primary button
+@mixin primary-btn-common {
+  @include btn-common;
+  color: $base !important;
+  background-color: $primary;
+}
+
+.primary-btn {
+  @include primary-btn-common;
+  min-height: $base-height;
+}
+
+.primary-btn-sm {
+  @include primary-btn-common;
+  padding: 0 8px !important;
+  min-height: $small-height;
+}
+
+.primary-btn-only-icon {
+  @include only-icon-btn;
+  background-color: $primary;
+}
+
+.primary-btn-only-icon-sm {
+  @include only-icon-btn-sm;
+  background-color: $primary;
+}
+
+//  secondary button
+.secondary-btn {
+  @include btn-common;
+  color: $primary !important;
+  min-height: $base-height;
+
+  &::before {
+    border: 1px solid $primary;
+    background-color: $bg-color;
+  }
+}
+
+.secondary-negative-btn {
+  @include btn-common;
+  color: $negative !important;
+  min-height: $base-height;
+
+  &::before {
+    border: 1px solid $negative;
+    background-color: $bg-color;
+  }
+}
+
+.secondary-positive-btn {
+  @include btn-common;
+  color: #05bd8d !important;
+  min-height: $base-height;
+
+  &::before {
+    border: 1px solid #05bd8d;
+    background-color: $bg-color;
+  }
+}
+
+.secondary-btn-only-icon {
+  @include only-icon-btn;
+  color: $primary !important;
+
+  &::before {
+    border: 1px solid $primary;
+    background-color: $bg-color;
+  }
+}
+
+.secondary-btn-only-icon-sm {
+  @include only-icon-btn-sm;
+  color: $primary !important;
+
+  &::before {
+    border: 1px solid $primary;
+    background-color: $bg-color;
+  }
+}
+
+.orange-btn-only-icon {
+  @include only-icon-btn;
+  color: white !important;
+
+  &::before {
+    border: 1px solid $orange;
+    background-color: $orange;
+  }
+}
+
+//  delete button
+@mixin delete-btn-common {
+  @include btn-common;
+  color: $base !important;
+  background-color: $light-red;
+}
+
+.delete-btn {
+  @include delete-btn-common;
+  min-height: $base-height;
+}
+
+.delete-btn-sm {
+  @include delete-btn-common;
+  padding: 0 8px !important;
+  min-height: $small-height;
+}
+
+.delete-btn-only-icon {
+  @include only-icon-btn;
+  background-color: $light-red;
+}
+
+.delete-btn-only-icon-sm {
+  @include only-icon-btn-sm;
+  background-color: $light-red;
+}
+
+.bordered {
+  &::before {
+    border: 1px solid $border-color;
+  }
+}
+
+.bordered-light {
+  &::before {
+    border: 1px solid $dark-border-color;
+  }
+}
+
+.without-border {
+  border: none !important;
+}
+
+.full-w {
+  width: 100%;
+}
+// -----------------------------------------------------------------------
+.base-btn {
+  min-height: $small-height;
+  border: 1px solid $border-color;
+  background-color: $bg-color;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: $text-color;
+
+  &:hover {
+    // color: $primary;
+    transition: color 0.5s ease;
+  }
+}
+
+.base-btn-only-icon {
+  @include only-icon-btn;
+  border: 1px solid $dark-gray;
+}
+
+//  secondary button
+.upload-btn {
+  height: 90px;
+  color: $primary !important;
+  border: 1px dashed $primary;
+  span {
+    white-space: normal !important;
+  }
+
+  &.dropzone {
+    height: 300px;
+    border-width: 2px !important;
+    background-color: transparent;
+  }
+}
+
+.status-btn {
+  max-width: 179px;
+  min-width: 179px;
+  .q-btn__content {
+    text-align: left;
+    justify-content: space-between;
+    div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.btn-select {
+  transition: all 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  .q-focus-helper {
+    display: none;
+    background: none;
+  }
+
+  &:hover,
+  &:focus-visible {
+    border: 1px solid $primary;
+    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .q-ripple {
+    display: none;
+  }
+
+  &[aria-expanded='true'] {
+    border: 1px solid $primary;
+    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &[disabled] {
+    border-color: $text-color;
+  }
+}
+
+// переписанные стили кнопок vue3-zoomer
+.controls-btn {
+  color: $text-color;
+  background-color: $primary !important;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.zoom-in-btn {
+  content: url('src/assets/add-icon.svg') !important;
+}
+
+.zoom-out-btn {
+  content: url('src/assets/remove-icon.svg') !important;
+}

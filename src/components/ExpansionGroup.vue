@@ -1,0 +1,63 @@
+<template>
+  <div class="menu scrollable-content">
+    <NavMenuProjects v-if="!isAIDoc" />
+    <NavMenuForms v-if="!isAIDoc" />
+    <NavMenuAIDocs
+      v-if="isAIDoc && currentWorkspaceSlug"
+      filterBy="favorites"
+      @updateFavoriteState="updateFavoriteState"
+    />
+    <NavMenuAIDocs
+      v-if="isAIDoc && currentWorkspaceSlug"
+      ref="docsMenu"
+      filterBy="docs"
+    />
+    <JitsiDialog v-if="!isDemo"></JitsiDialog>
+    <q-item v-if="isDemo" clickable class="menu-item centered-horisontally">
+      <q-item-section avatar> <UsersIcon /> </q-item-section>
+      <q-item-section> Конференции </q-item-section>
+      <HintTooltip>
+        Функционал конференций доступен в полной версии
+      </HintTooltip>
+    </q-item>
+    <NavMenuBottomBarHelpAndSupport />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { useUtilsStore } from 'src/stores/utils-store';
+
+import UsersIcon from 'src/components/icons/UsersIcon.vue';
+
+import JitsiDialog from './dialogs/JitsiDialog.vue';
+import NavMenuProjects from './menu/NavMenuProjects.vue';
+import NavMenuForms from './menu/NavMenuForms.vue';
+import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
+import NavMenuAIDocs from './menu/NavMenuAIDocs.vue';
+import { useRoute } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+
+const route = useRoute();
+const utilsStore = useUtilsStore();
+const workspaceStore = useWorkspaceStore();
+const { isDemo } = storeToRefs(utilsStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const docsMenu = ref();
+const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
+
+const updateFavoriteState = (id: string, state: boolean) => {
+  docsMenu.value.setFavoriteState(id, state);
+};
+</script>
+
+<style scoped>
+.menu {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+  width: 300px;
+  height: 100%;
+}
+</style>

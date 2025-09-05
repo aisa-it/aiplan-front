@@ -1,0 +1,1655 @@
+:root {
+  --color-bg-base: rgba(255, 255, 255);
+  --text-brand-secondary: #474a52;
+  --text-brand-base: #121212;
+  --login-panel__btn-color: #fff;
+  --drop-box: #f0f4ff;
+  --q-field: rgba(255, 255, 255);
+  --secondary-button: #f0f4ff;
+  --q-card__section: rgba(255, 255, 255);
+  --th: rgba(255, 255, 255);
+  --button-visually-impaired: rgba(255, 255, 255);
+  --text-primary-visually-impaired: #1976d2;
+  --q-date__header-visually-impaired: #1976d2;
+  --q-item-visually-impaired: rgb(193, 0, 21);
+  --negative-button-visually-impaired: #ef4444;
+  --q-btn-visually-impaired: rgba(255, 255, 255);
+  --q-table__title-size: 20px;
+  --h3-size: 1.875rem;
+  --chip-size: 0.875rem;
+  --h4-size: 1.125rem;
+  --theme-title-wrapper-size: 14px;
+  --q-field__control-container-size: 14px;
+  --q-field__control-size: 14px;
+  --q-field__label-size: 14px;
+  --text-brand-secondary-size: 14px;
+  --header-avatar-width: 8px;
+  --header-avatar-height: 8px;
+  --q-btn-min-width: 80px;
+  --q-btn-min-height: 32px;
+  --chips-height: 70px;
+  --q-btn__content-size: 14px;
+  // --q-field__control-container-height: 40px;
+  --q-table-th-size: 12px;
+  --activity-string-size: 0.75rem;
+  --q-table__bottom-size: 12px;
+  --issue-list__search-input-size: inherit;
+  --issue-list__search-input-height: auto;
+  --td-size: 12px;
+  --nav-menu__title-size: 0.875rem;
+  --nav-menu__title-height: 20px;
+  --nav-menu__title-q-btn-min-height: 20px;
+  --menu-link__btn-min-width: 0px;
+  --nav-menu__create-btn-min-width: 0px;
+  --q-breadcrumbs__el-size: 14px;
+  --q-item__label-size: 14px;
+  --q-item__section--avatar-size: 14px;
+  --ql-editor-size: 13px;
+  --ql-toolbar-height: 45px;
+  --ql-toolbar-ql-formats-button-height: 24px;
+  --ql-toolbar-ql-formats-button-width: 28px;
+  --ql-picker-size: 14px;
+  --ql-tollbar-padding-top: 8px;
+  --q-card--bordered-row-size: 1rem;
+  --q-card--bordered-row-q-btn-min-width: auto;
+  --q-tab__label-size: 14px;
+  --select-attachments__wrapper-margin-top: 0;
+  --q-drawer__content-row-col-size: 14px;
+  --issue-panel__autor-label-button-min-width: 2.4em;
+  --scrollbar-thumb: gray;
+  @media screen and (max-width: 760px) {
+    --issue-panel__autor-label-button-min-width: 3.8em;
+  }
+  --issue-panel__link-btn-min-width: 0px;
+  --issue-panel__link-btn-height: 33px;
+  --issue-panel__link-btn-min-height: 33px;
+  --comments-btn-bgc: #1d8c81;
+  --q-card--bordered-border: rgba(0, 0, 0, 0.12);
+  --q-toggle__label-color: #121212;
+  --comments__date-color: rgba(0, 0, 0, 0.54);
+  --comments__date-size: 0.75rem;
+  --comments__item-bgc: rgba(0, 0, 0, 0.05);
+  --comments__delete-btn-bgc: transparent;
+  --comments__delete-btn-q-btn__content-size: 8px;
+  --comments__delete-btn-min-width: 13.72px;
+  --comments__delete-btn-min-height: 13.72px;
+  --profile-settings__nav-el-color: #121212;
+  --profile-page__upload-btn-color: #121212;
+  --profile-page__save-btn-color: #121212;
+  --issues-list-single-state__title-color: #121212;
+  --issue-side-drawer-border-left: rgba(46, 50, 52, 0.2);
+  --issue-panel__separator-bgc: rgba(46, 50, 52, 0.2);
+  --select-attachments__card-border-color: rgba(46, 50, 52, 0.2);
+  --issue-panel__comments-card-border-color: rgba(46, 50, 52, 0.2);
+  --comments__item__border-color: rgba(46, 50, 52, 0.2);
+  --ql-toolbar-border-color: rgba(46, 50, 52, 0.1);
+  --ql-container-border-color: rgba(46, 50, 52, 0.1);
+  --select-attachments__card-bgc: transparent;
+  --nav-menu__add-new-space-btn: #121212;
+  --chips-color: #121212;
+  --chips-size: 0.875rem;
+  --setting-page__upload-btn: #121212;
+  --setting-page__btn-color: #121212;
+  --setting-page__btn-size: 0.875rem;
+  --issues-list__chip-border: #121212;
+  --issues-list__chip-content: #121212;
+  --new-issue-panel__add-btn-bgc: #3f75ff;
+  --add-tag-btn-bgc: #3f75ff;
+  --comments__item-q-icon: 8px;
+  --q-portal--dialog--2-btn-bgc: #3f75ff;
+  --q-portal--dialog--2-btn-color: #fff;
+  --nav-menu__create-btn-size: 10px;
+  --nav-menu__top-nav-button-q-btn-size: 14px;
+  --q-table-sub-title-color: #121212;
+  --issues-single-board__pagination-btn-size: 12px;
+  --issue-panel__right-drawer-open-color: #121212;
+  --profile-page__input-color: #121212;
+  --nav-menu__create-btn: 0px;
+  --q-portal--dialog--2-secondary-button-bgc: #f0f4ff;
+  --q-portal--dialog--1-btn-color: #fff;
+  --q-portal--dialog--1-btn-secondary-color: #121212;
+  --menu-link__item-width: 100%;
+  --menu-link__item-hover-bgc: rgba(0, 0, 0, 0.05);
+  --q-portal--menu--3-bgc: #fff;
+  --q-portal--menu--3-color: #121212;
+  --issue-name-color: rgba(0, 0, 0, 0.87);
+  --q-dialog-plugin-q-checkbox-border-color: #121212;
+  --activity-string-color: rgb(71, 74, 82);
+  --members-sub-page__table: transparent;
+  --members-sub-page__table-q-btn-bgc: transparent;
+  --issues-single-board__card-color: #000;
+  --search-input-color: #000;
+  --search-input-bgc: #fff;
+  --search-input-placeholder-color: rgba(71, 74, 82, 0.2);
+  --q-router-link--active__color: #3f75ff;
+  --issue-board-id-color: #121212;
+  --q-date__main-bgc: #fff;
+  --q-date__main-color: #121212;
+  --form-tag-new__input-color: #121212;
+  --mobile-block-color: #121212;
+  --settings-members-page__popup-item-color: #121212;
+  --setting-page__input-color: #000000de;
+  --issues-list__extended-search-text-color: #121212;
+  --states-sub-page__mobile-block-title-color: #121212;
+  --extended-search__filters-wrapper-bgc: #fff;
+  --extended-search-icon: #121212;
+  --issues-list__extended-search-border: #f0f4ff;
+  --login-card-bgc: #fff;
+  --login-panel__auth-text-color: #000;
+  --login-panel__input-bgc: #fff;
+  --login-panel__input-border: #474a52;
+  --login-panel__forget-btn-bgc: #fff;
+  --login-panel__forget-btn-color: #000;
+  --login-panel__input-color: #000;
+}
+
+[data-theme='dark'] {
+  --color-bg-base: #121212;
+  --text-brand-secondary: rgba(142, 148, 146);
+  --text-brand-base: rgba(233, 244, 252);
+  --drop-box: rgba(71, 82, 110);
+  --q-field: rgba(255, 255, 255);
+  --secondary-button: rgba(39, 42, 45);
+  --q-card__section: rgba(25, 27, 27);
+  --th: #474a52;
+  --button-visually-impaired: #121212;
+  --text-primary-visually-impaired: #1976d2;
+  --q-date__header-visually-impaired: #1976d2;
+  --q-item-visually-impaired: rgb(193, 0, 21);
+  --negative-button-visually-impaired: #ef4444;
+  --q-btn-visually-impaired: #121212;
+  --q-table__title-size: 20px;
+  --h3-size: 1.875rem;
+  --chip-size: 0.875rem;
+  --h4-size: 1.125rem;
+  --theme-title-wrapper-size: 14px;
+  --q-field__control-container-size: 14px;
+  --q-field__control-size: 14px;
+  --q-field__label-size: 14px;
+  --text-brand-secondary-size: 14px;
+  --header-avatar-width: 8px;
+  --header-avatar-height: 8px;
+  --q-btn-min-width: 80px;
+  --q-btn-min-height: 32px;
+  --chips-height: 70px;
+  --q-btn__content-size: 8px;
+  // --q-field__control-container-height: 40px;
+  --q-table-th-size: 12px;
+  --activity-string-size: 0.75rem;
+  --q-table__bottom-size: 12px;
+  --issue-list__search-input-size: inherit;
+  --issue-list__search-input-height: auto;
+  --td-size: 12px;
+  --nav-menu__title-size: 0.875rem;
+  --nav-menu__title-height: 20px;
+  --nav-menu__title-q-btn-min-height: 20px;
+  --menu-link__btn-min-width: 0px;
+  --nav-menu__create-btn-min-width: 0px;
+  --q-breadcrumbs__el-size: 14px;
+  --q-item__label-size: 14px;
+  --q-item__section--avatar-size: 14px;
+  --ql-editor-size: 13px;
+  --ql-toolbar-height: 45px;
+  --ql-toolbar-ql-formats-button-height: 24px;
+  --ql-toolbar-ql-formats-button-width: 28px;
+  --ql-picker-size: 14px;
+  --ql-tollbar-padding-top: 8px;
+  --q-card--bordered-row-size: 1rem;
+  --q-card--bordered-row-q-btn-min-width: auto;
+  --q-tab__label-size: 14px;
+  --select-attachments__wrapper-margin-top: 0;
+  --q-drawer__content-row-col-size: 14px;
+  --issue-panel__autor-label-button-min-width: 2.4em;
+  @media screen and (max-width: 760px) {
+    --issue-panel__autor-label-button-min-width: 3.8em;
+  }
+  --issue-panel__link-btn-min-width: 0px;
+  --issue-panel__link-btn-height: 33px;
+  --issue-panel__link-btn-min-height: 33px;
+  --issue-panel__assignees-height: 58px;
+  --comments-btn-bgc: #1d8c81;
+  --q-card--bordered-border: #f0f4ff;
+  --login-panel__btn-color: #fff;
+  --q-toggle__label-color: #fff;
+  --comments__date-color: #fff;
+  --comments__date-size: 0.75rem;
+  --comments__item-bgc: transparent;
+  --comments__delete-btn-q-btn__content-size: 8px;
+  --comments__delete-btn-min-width: 13.72px;
+  --comments__delete-btn-min-height: 13.72px;
+  --profile-settings__nav-el-color: #fff;
+  --profile-page__upload-btn-color: #fff;
+  --profile-page__input-color: rgba(233, 244, 252);
+  --profile-page__save-btn-color: #fff;
+  --issues-list-single-state__title-color: #fff;
+  --issue-side-drawer-border-left: rgba(46, 50, 52);
+  --issue-panel__separator-bgc: rgba(46, 50, 52);
+  --select-attachments__card-border-color: rgba(46, 50, 52);
+  --issue-panel__comments-card-border-color: rgba(46, 50, 52);
+  --comments__item__border-color: rgba(46, 50, 52);
+  --ql-toolbar-border-color: rgba(46, 50, 52);
+  --ql-container-border-color: rgba(46, 50, 52);
+  --select-attachments__card-bgc: transparent;
+  --nav-menu__add-new-space-btn: #fff;
+  --chips-color: #fff;
+  --chips-size: 0.875rem;
+  --setting-page__upload-btn: #fff;
+  --setting-page__upload-btn-size: 14px;
+  --setting-page__btn-color: #fff;
+  --setting-page__btn-size: 0.875rem;
+  --issues-list__chip-border: #fff;
+  --issues-list__chip-content: #fff;
+  --new-issue-panel__add-btn-bgc: #3f75ff;
+  --add-tag-btn-bgc: #3f75ff;
+  --comments__item-q-icon: 8px;
+  --q-portal--dialog--2-btn-bgc: #3f75ff;
+  --q-portal--dialog--2-btn-color: #fff;
+  --nav-menu__create-btn-size: 10px;
+  --nav-menu__top-nav-button-q-btn-size: 14px;
+  --q-table-sub-title-color: #fff;
+  --issues-single-board__pagination-btn-size: 12px;
+  --issue-panel__right-drawer-open-color: #fff;
+  --nav-menu__create-btn: 0px;
+  --q-portal--dialog--2-secondary-button-bgc: #121212;
+  --q-portal--dialog--1-btn-color: #fff;
+  --q-portal--dialog--1-btn-secondary-color: #fff;
+  --menu-link__item-width: calc(100% - 46px);
+  --menu-link__item-hover-bgc: rgba(255, 255, 255, 0.05);
+  --q-portal--menu--3-bgc: #121212;
+  --q-portal--menu--3-color: #fff;
+  --issue-name-color: #fff;
+  --q-dialog-plugin-q-checkbox-border-color: #fff;
+  --activity-string-color: #fff;
+  --members-sub-page__table: rgba(25, 27, 27);
+  --members-sub-page__table-q-btn-bgc: #fff;
+  --issues-single-board__card-color: rgb(177, 168, 168);
+  --search-input-color: #fff;
+  --search-input-bgc: rgb(71, 74, 82);
+  --search-input-placeholder-color: #fff;
+  --q-router-link--active__color: #3f75ff;
+  --issue-board-id-color: #fff;
+  --q-date__main-bgc: #121212;
+  --q-date__main-color: #fff;
+  --form-tag-new__input-color: #fff;
+  --mobile-block-color: #fff;
+  --settings-members-page__popup-item-color: #fff;
+  --setting-page__input-color: #fff;
+  --issues-list__extended-search-text-color: #fff;
+  --states-sub-page__mobile-block-title-color: #fff;
+  --extended-search__filters-wrapper-bgc: #121212;
+  --extended-search-icon: #e9f4fc;
+  --issues-list__extended-search-border: #f0f4ff;
+  --login-card-bgc: #474a52;
+  --login-panel__auth-text-color: #fff;
+  --login-panel__input-bgc: rgba(25, 27, 27);
+  --login-panel__forget-btn-bgc: #474a52;
+  --login-panel__forget-btn-color: #fff;
+  --login-panel__input-color: #fff;
+}
+
+[data-theme='visually-impaired'] {
+  --color-bg-base: rgba(255, 255, 255);
+  --text-brand-secondary: #121212;
+  --text-brand-base: #121212;
+  --drop-box: #f0f4ff;
+  --q-field: rgba(255, 255, 255);
+  --secondary-button: #f0f4ff;
+  --q-card__section: rgba(255, 255, 255);
+  --th: rgba(255, 255, 255);
+  --button-visually-impaired: rgba(255, 255, 255);
+  --text-primary-visually-impaired: #121212;
+  --q-date__header-visually-impaired: #121212;
+  --q-item-visually-impaired: #121212;
+  --negative-button-visually-impaired: #121212;
+  --q-btn-visually-impaired: #121212;
+  --q-table__title-size: 50px;
+  --h3-size: 50px;
+  --h4-size: 40px;
+  --chip-size: 20px;
+  --theme-title-wrapper-size: 20px;
+  --q-field__control-container-size: 20px;
+  --q-field__control-size: 20px;
+  --q-field__control-height: 60px;
+  --q-field__label-size: 20px;
+  --text-brand-secondary-size: 20px;
+  --header-avatar-width: 48px;
+  --header-avatar-height: 48px;
+  --q-btn-min-width: 160px;
+  --q-btn-min-height: 64px;
+  --chips-height: 96px;
+  --q-btn__content-size: 17px;
+  --q-field__native-size: 19px;
+  // --q-field__control-container-height: 55px;
+  --q-table-th-size: 22px;
+  --activity-string-size: 22px;
+  --q-table__bottom-size: 20px;
+  --issue-list__search-input-size: 22px;
+  --issue-list__search-input-height: 40px;
+  --td-size: 20px;
+  --nav-menu__title-size: 22px;
+  --nav-menu__title-height: 40px;
+  --nav-menu__title-q-btn-min-height: 35px;
+  --menu-link__item-width: calc(100% - 46px);
+  --menu-link__btn-min-width: 25px;
+  --nav-menu__create-btn-min-width: 20px;
+  --q-breadcrumbs__el-size: 22px;
+  --q-item__label-size: 20px;
+  --q-item__section--avatar-size: 30px;
+  --ql-editor-size: 20px;
+  --ql-toolbar-height: 100px;
+  --ql-toolbar-ql-formats-button-height: 40px;
+  --ql-toolbar-ql-formats-button-width: 40px;
+  --ql-picker-size: 20px;
+  --ql-tollbar-padding-top: 18px;
+  --q-card--bordered-row-size: 22px;
+  --q-card--bordered-row-q-btn-min-width: 30px;
+  --q-tab__label-size: 22px;
+  --select-attachments__wrapper-margin-top: 20px;
+  --q-drawer__content-row-col-size: 20px;
+  --issue-panel__autor-label-button-min-width: 60px;
+  --issue-panel__link-btn-min-width: 80px;
+  --issue-panel__link-btn-height: 33px;
+  --issue-panel__link-btn-min-height: 33px;
+  --issue-panel__assignees-height: 70px;
+  --comments-btn-bgc: #fff;
+  --q-card--bordered-border: rgba(0, 0, 0, 0.12);
+  --login-panel__btn-color: #121212;
+  --q-toggle__label-color: #121212;
+  --comments__date-color: #121212;
+  --comments__date-size: 20px;
+  --comments__item-bgc: rgba(0, 0, 0, 0.05);
+  --comments__delete-btn-bgc: transparent;
+  --comments__delete-btn-q-btn__content-size: 16px;
+  --comments__delete-btn-min-width: 20px;
+  --comments__delete-btn-min-height: 20px;
+  --profile-settings__nav-el-color: #121212;
+  --profile-page__upload-btn-color: #121212;
+  --profile-page__input-color: #121212;
+  --profile-page__save-btn-color: #121212;
+  --issues-list-single-state__title-color: #121212;
+  --issue-side-drawer-border-left: rgba(46, 50, 52);
+  --issue-panel__separator-bgc: rgba(46, 50, 52);
+  --select-attachments__card-border-color: rgba(46, 50, 52);
+  --issue-panel__comments-card-border-color: rgba(46, 50, 52);
+  --comments__item__border-color: rgba(46, 50, 52);
+  --ql-toolbar-border-color: rgba(46, 50, 52);
+  --ql-container-border-color: rgba(46, 50, 52);
+  --select-attachments__card-bgc: transparent;
+  --nav-menu__add-new-space-btn: #121212;
+  --chips-color: #121212;
+  --chips-size: 20px;
+  --setting-page__upload-btn: #121212;
+  --setting-page__upload-btn-size: 14px;
+  --setting-page__btn-color: #121212;
+  --setting-page__btn-size: 20px;
+  --issues-list__chip-border: #121212;
+  --issues-list__chip-content: #121212;
+  --new-issue-panel__add-btn-bgc: #fff;
+  --add-tag-btn-bgc: #fff;
+  --comments__item-q-icon: 14px;
+  --q-portal--dialog--2-btn-bgc: #fff;
+  --q-portal--dialog--2-btn-color: #121212;
+  --nav-menu__create-btn-size: 20px;
+  --nav-menu__top-nav-button-q-btn-size: 20px;
+  --q-table-sub-title-color: #121212;
+  --issues-single-board__pagination-btn-size: 19px;
+  --issue-panel__right-drawer-open-color: #121212;
+  --nav-menu__create-btn: 0;
+  --q-portal--dialog--2-secondary-button-bgc: #f0f4ff;
+  --q-portal--dialog--1-btn-color: #121212;
+  --q-portal--dialog--1-btn-secondary-color: #121212;
+  --menu-link__item-hover-bgc: rgba(0, 0, 0, 0.05);
+  --q-portal--menu--3-bgc: #fff;
+  --q-portal--menu--3-color: #121212;
+  --issue-name-color: rgba(0, 0, 0, 0.87);
+  --q-dialog-plugin-q-checkbox-border-color: #121212;
+  --activity-string-color: rgb(71, 74, 82);
+  --members-sub-page__table: transparent;
+  --members-sub-page__table-q-btn-bgc: transparent;
+  --issues-single-board__card-color: #000;
+  --search-input-color: #000;
+  --search-input-bgc: #fff;
+  --search-input-placeholder-color: rgba(71, 74, 82, 0.2);
+  --q-router-link--active__color: #3f75ff;
+  --q-date__main-bgc: #fff;
+  --q-date__main-color: #121212;
+  --form-tag-new__input-color: #121212;
+  --mobile-block-color: #121212;
+  --settings-members-page__popup-item-color: #121212;
+  --setting-page__input-color: #000000de;
+  --issues-list__extended-search-text-color: #121212;
+  --states-sub-page__mobile-block-title-color: #121212;
+  --extended-search__filters-wrapper-bgc: #fff;
+  --extended-search-icon: #121212;
+  --issues-list__extended-search-border: #f0f4ff;
+  --login-card-bgc: #fff;
+  --login-panel__auth-text-color: #000;
+  --login-panel__input-bgc: #fff;
+  --login-panel__forget-btn-color: #000;
+  --login-panel__input-color: #000;
+}
+
+@import 'editor';
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  font-family: Rubik, sans-serif;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+}
+
+h3 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem; /* 28px */
+  font-weight: 600;
+  margin: 0.375em 0;
+}
+
+.page-control .q-field {
+  height: 12px;
+}
+
+.page-size {
+  height: 10px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.mobile-block {
+  @media (max-width: 760px) {
+    display: block !important;
+    width: 100%;
+  }
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.h-24 {
+  height: 6rem;
+}
+
+.w-96 {
+  width: 24rem;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.gap-x-4 {
+  -moz-column-gap: 1rem;
+  column-gap: 1rem;
+}
+
+.gap-x-sm {
+  -moz-column-gap: 8px;
+  column-gap: 8px;
+}
+
+.gap-x-xs {
+  -moz-column-gap: 4px;
+  column-gap: 4px;
+}
+
+.gap-md {
+  -moz-gap: 12px;
+  gap: 12px;
+}
+
+.gap-lg {
+  -moz-gap: 24px;
+  gap: 24px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+.horizontal-scroll-enable {
+  overflow-x: scroll;
+}
+
+.bg-\[transparent\] {
+  background-color: transparent;
+}
+
+.bg-base {
+  background: var(--color-bg-base);
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.items-start {
+  align-content: flex-start;
+}
+
+.justify-start {
+  flex-grow: 1;
+  justify-content: flex-start;
+}
+
+.elevator-2 {
+  box-shadow: 1px 0px 4px 2px $color-shadow;
+}
+
+.elevator-3 {
+  box-shadow: 0px 9px 5px 0px $color-shadow;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  margin: 8px 0 18px 0;
+  height: 70px;
+  overflow: scroll;
+  white-space: nowrap;
+
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .q-tabs__content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: nowrap;
+    flex: none;
+  }
+
+  .chip {
+    height: auto;
+    min-height: 36px;
+    align-self: auto;
+    margin: 0 !important;
+    opacity: 1;
+
+    .q-tab__content {
+      padding: 0;
+      min-width: auto;
+
+      .q-tab__label {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+    }
+  }
+
+  &.q-tabs--scrollable.q-tabs--mobile-without-arrows {
+    .q-tabs__arrow {
+      display: none !important;
+    }
+  }
+}
+
+.dropzone {
+  height: 300px;
+  padding-top: 0;
+  background-color: $color-bg-accent-light;
+  border: 2px dashed $color-accent;
+  border-radius: 8px;
+  display: flex;
+  vertical-align: middle;
+  align-items: center;
+  text-align: center;
+
+  p {
+    width: 100%;
+    color: $color-accent;
+  }
+}
+
+.link-like {
+  color: $color_accent;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.delete-icon {
+  color: $negative;
+  background-color: $negative_light;
+}
+
+.move-icon {
+  color: $color-accent;
+  background-color: $color_accent_light;
+}
+
+.folder-icon {
+  color: $color-accent;
+  background-color: $color_accent_light;
+}
+
+.plus-icon-xs {
+  width: 8px;
+  height: 8px;
+  font-size: 14px !important;
+}
+
+.modal-card {
+  min-width: 40% !important;
+  border-radius: 16px !important;
+  @media (max-width: 760px) {
+    min-width: 80% !important;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.inner-modal-card {
+  min-width: 30% !important;
+  border-radius: 16px !important;
+  max-width: 70% !important;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  @media (max-width: 760px) {
+    min-width: 60% !important;
+    max-width: 90vw !important;
+  }
+}
+
+.form-modal-card {
+  min-width: 60vw !important;
+  border-radius: 16px !important;
+  @media (max-width: 1010px) {
+    min-width: 90vw !important;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.import-card {
+  min-width: 70% !important;
+  border-radius: 16px !important;
+  @media (max-width: 1400px) {
+    min-width: 80% !important;
+  }
+  @media (max-width: 720px) {
+    min-width: 90vw !important;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.new-issue-card {
+  min-width: 80vw !important;
+  @media (max-width: 760px) {
+    padding: 0;
+    min-width: calc(100vw - 8px) !important;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.list-popup {
+  background-color: $base;
+}
+
+.bordered-table {
+  border-radius: 8px;
+  border: 1px solid $color-border-2;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.animate-pulse {
+  background-color: blue;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.ring {
+  display: inline-block;
+  justify-content: center;
+  align-items: center;
+  border-radius: 9999px;
+  --ring-color: #ffffff;
+}
+
+.user-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  border-width: 2px;
+  border-color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  width: 40px;
+  height: 40px;
+  margin: 16px 16px 16px 0;
+  color: #ffffff;
+  background-color: #374151;
+}
+
+.user-icon-small {
+  display: grid;
+  place-items: center;
+  border-radius: 100%;
+  border-width: 2px;
+  border-color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  width: 16px;
+  height: 16px;
+  margin: 0 4px 0 0;
+  color: #ffffff;
+  background-color: #374151;
+}
+
+.abbriviated-text {
+  width: 100%; /* CHANGE HERE */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.adaptive-select {
+  width: 100%;
+  max-width: 222px;
+  @media screen and (max-width: 760px) {
+    max-width: 183px;
+  }
+  @media screen and (min-width: 671px) and (max-width: 759px) {
+    max-width: 183px;
+  }
+  @media screen and (max-width: 670px) {
+    max-width: 100%;
+  }
+}
+.extended-search-select {
+  width: 183px;
+
+  @media screen and (max-width: 760px) {
+    max-width: 183px;
+  }
+  @media screen and (min-width: 671px) and (max-width: 759px) {
+    max-width: 183px;
+  }
+  @media screen and (max-width: 670px) and (min-width: 290px) {
+    max-width: 120px;
+  }
+}
+.magic-row {
+  min-width: 300px;
+  max-width: 300px;
+}
+
+body .profile-button__exit-text {
+  color: var(--q-item-visually-impaired) !important;
+}
+body .negative-button {
+  border: 1px solid var(--negative-button-visually-impaired);
+  color: var(--negative-button-visually-impaired);
+}
+
+body h3 {
+  font-size: var(--h3-size);
+}
+body h4 {
+  font-size: var(--h4-size);
+}
+body .chips {
+  height: var(--chips-height);
+}
+body .theme-title-wrapper {
+  font-size: var(--theme-title-wrapper-size);
+}
+body .q-field__control-container {
+  font-size: var(--q-field__control-container-size);
+}
+body .q-field__control {
+  font-size: var(--q-field__control-size);
+  min-height: var(--q-field__control-height);
+}
+body .text-brand-secondary {
+  font-size: var(--text-brand-secondary-size);
+}
+body .profile-settings-btn-wrapper {
+  padding-top: 0 !important;
+}
+
+body .q-field__control-container {
+  height: var(--q-field__control-container-height);
+}
+body .q-table th {
+  font-size: var(--q-table-th-size);
+}
+
+body .q-table__bottom {
+  font-size: var(--q-table__bottom-size);
+
+  .q-field__control {
+    font-size: var(--q-table__bottom-size);
+
+    .q-field__native {
+      color: $dark;
+    }
+  }
+
+  .q-field__control-container {
+    font-size: inherit;
+  }
+}
+
+body td {
+  font-size: var(--td-size) !important;
+}
+body .nav-menu__title {
+  font-size: var(--nav-menu__title-size);
+  height: var(--nav-menu__title-height);
+}
+body .nav-menu__title > .q-btn {
+  min-height: var(--nav-menu__title-q-btn-min-height) !important;
+}
+body .menu-link__btn {
+  min-width: var(--menu-link__btn-min-width) !important;
+}
+body .menu-link__item {
+  width: 100%;
+}
+body .menu-link__item:hover {
+  background-color: var(--menu-link__item-hover-bgc);
+}
+body .list-popup > .q-item:hover {
+  background-color: var(--menu-link__item-hover-bgc);
+}
+body .nav-menu__create-btn {
+  min-width: var(--nav-menu__create-btn-min-width);
+}
+// body .q-breadcrumbs__el {
+//   font-size: var(--q-breadcrumbs__el-size);
+// }
+body .q-item__label {
+  font-size: var(--q-item__label-size);
+}
+body .q-item__section--avatar {
+  font-size: var(--q-item__section--avatar-size);
+}
+body .q-card--bordered > .row {
+  font-size: var(--q-card--bordered-row-size) !important;
+}
+body .q-card--bordered > .row > .q-btn {
+  min-width: var(--q-card--bordered-row-q-btn-min-width);
+}
+body .q-tab__label {
+  font-size: var(--q-tab__label-size);
+}
+body .select-attachments__wrapper {
+  margin-top: var(--select-attachments__wrapper-margin-top);
+}
+
+body .issue-panel__link-btn {
+  min-width: var(--issue-panel__link-btn-min-width);
+  height: var(--issue-panel__link-btn-height);
+  min-height: var(--issue-panel__link-btn-min-height);
+}
+body .issue-panel__delete-btn {
+  min-width: var(--issue-panel__link-btn-min-width);
+  height: var(--issue-panel__link-btn-height);
+  min-height: var(--issue-panel__link-btn-min-height);
+}
+.issue-panel__autor-label > button {
+  min-width: var(--issue-panel__autor-label-button-min-width) !important;
+}
+body .issue-panel__assignees > .q-field > .q-field__inner > .q-field__control {
+  min-height: var(--issue-panel__assignees-height) !important;
+}
+body .comments-btn {
+  background-color: var(--comments-btn-bgc) !important;
+}
+body .header-avatar {
+  width: var(--header-avatar-width) !important;
+  height: var(--header-avatar-height) !important;
+}
+body .q-toggle__label {
+  color: var(--q-toggle__label-color);
+}
+body .comments__date {
+  color: var(--comments__date-color);
+  font-size: var(--comments__date-size);
+}
+body .comments__item > .q-card {
+  background-color: var(--comments__item-bgc) !important;
+  border: 1px solid var(--comments__item__border-color);
+}
+body .comments__item > .q-card > .q-btn > .q-btn__content {
+  font-size: var(--comments__item-q-icon);
+}
+body .comments__item > .q-card > .q-btn {
+  background-color: transparent !important;
+}
+body .comments__delete-btn {
+  background-color: var(--comments__delete-btn-bgc) !important;
+  min-width: var(--comments__delete-btn-min-width);
+  min-height: var(--comments__delete-btn-min-height);
+}
+body .comments__delete-btn > .q-btn__content {
+  font-size: var(--comments__delete-btn-q-btn__content-size);
+}
+
+body .profile-page__upload-btn {
+  color: var(--profile-page__upload-btn-color);
+}
+
+body .profile-page__save-btn {
+  color: var(--profile-page__save-btn-color);
+}
+body .issues-list-single-state__title {
+  color: var(--issues-list-single-state__title-color);
+}
+body .issue-panel__layout > .q-drawer-container > .q-drawer {
+  border-color: var(--issue-side-drawer-border-left);
+}
+body .issue-panel__separator {
+  background-color: var(--issue-panel__separator-bgc);
+}
+body .select-attachments__card {
+  border: 1px solid var(--select-attachments__card-border-color);
+}
+
+body .select-attachments__card > .row > .q-table__container > .q-table__top {
+  background-color: var(--select-attachments__card-bgc) !important;
+}
+body .nav-menu__add-new-space-btn {
+  color: var(--nav-menu__add-new-space-btn);
+}
+body .chips {
+  color: var(--chips-color);
+}
+body .chip > .q-btn__content {
+  font-size: var(--chips-size) !important;
+}
+body .setting-page__upload-btn {
+  color: var(--setting-page__upload-btn);
+}
+body .setting-page__upload-btn > .q-btn__content {
+  font-size: var(--setting-page__upload-btn-size);
+}
+body .setting-page__btn-wrapper {
+  background-color: transparent;
+}
+body .setting-page__btn-wrapper > .q-btn {
+  color: var(--setting-page__btn-color);
+}
+body .setting-page__btn > span {
+  font-size: var(--setting-page__btn-size) !important;
+}
+body .issues-list__chip {
+  border: 1px solid var(--issues-list__chip-border);
+}
+
+body .issues-list__chip > .q-icon {
+  color: var(--issues-list__chip-content);
+}
+body .new-issue-panel__input > .q-field__inner {
+  background-color: transparent;
+}
+body .new-issue-panel__add-btn {
+  background-color: var(--new-issue-panel__add-btn-bgc) !important;
+}
+body .add-tag-btn {
+  background-color: var(--add-tag-btn-bgc) !important;
+}
+body
+  .q-dialog--modal
+  > .q-dialog
+  > .q-dialog__inner
+  > .q-card
+  > .q-card__actions
+  > .secondary-button {
+  background-color: var(--q-portal--dialog--2-secondary-button-bgc) !important;
+}
+body
+  .q-dialog--modal
+  > .q-dialog
+  > .q-dialog__inner
+  > .q-card
+  > .q-card__actions
+  > .q-btn
+  > .q-btn__content {
+  color: var(--q-portal--dialog--1-btn-color) !important;
+}
+
+body .nav-menu__create-btn > .q-btn__content {
+  font-size: var(--nav-menu__create-btn-size);
+  margin-right: var(--nav-menu__create-btn);
+}
+body .nav-menu__top-nav-button > .q-btn__content {
+  font-size: var(--nav-menu__top-nav-button-q-btn-size) !important;
+}
+body .nav-menu__help-btn > .q-btn__content {
+  font-size: var(--nav-menu__top-nav-button-q-btn-size) !important;
+}
+body .q-table-sub-title {
+  color: var(--q-table-sub-title-color);
+}
+body
+  .issues-single-board__pagination
+  > .q-pagination__content
+  > .q-btn
+  > .q-btn__content {
+  font-size: var(--issues-single-board__pagination-btn-size);
+}
+body
+  .issues-single-board__pagination
+  > .q-pagination__content
+  > .q-pagination__middle
+  > .q-btn
+  > .q-btn__content {
+  font-size: var(--issues-single-board__pagination-btn-size);
+}
+body .issue-panel__right-drawer-open > .q-btn__content {
+  color: var(--issue-panel__right-drawer-open-color) !important;
+}
+body .q-pagination__middle > .bg-primary {
+  background-color: var(--q-primary) !important;
+}
+body .q-item__section--avatar > .q-btn {
+  padding: 0;
+}
+body .list-popup > .q-item:hover .q-btn {
+  background-color: transparent;
+}
+body > div > .q-menu > .q-item {
+  background-color: $bg-color !important;
+  // color: var(--q-portal--menu--3-color);
+}
+
+body .q-date__calendar-item > .q-btn {
+  background-color: transparent;
+}
+body .q-date__calendar > .q-date__navigation > div > div > .q-btn {
+  background-color: transparent;
+}
+body .q-date__arrow > .q-btn {
+  background-color: transparent;
+}
+
+body
+  .q-dialog-plugin
+  > .q-list
+  > .q-virtual-scroll__content
+  > .q-item
+  > .q-item__section
+  > .q-checkbox
+  > .q-checkbox__inner
+  > .q-checkbox__bg {
+  border: 1px solid var(--q-dialog-plugin-q-checkbox-border-color);
+}
+
+body
+  .members-sub-page__table
+  > .q-table__bottom
+  > .q-table__control
+  > .q-field
+  > .q-field__inner
+  > .q-field__control {
+  background-color: var(--members-sub-page__table) !important;
+}
+
+body .issue-list__header > .q-btn {
+  background-color: transparent;
+}
+body .q-router-link--active > .q-item__section {
+  color: var(--q-router-link--active__color);
+}
+body .q-router-link--active > .q-item__section > .q-item__label {
+  color: var(--primary);
+}
+body .q-router-link--active > .right-icon {
+  padding-top: 4px;
+}
+body .status-btn > .q-btn__content > .q-pl-sm {
+  align-items: center;
+  display: flex;
+}
+body .status-btn > .q-btn__content {
+  display: flex;
+}
+
+body .me > .q-focus-helper {
+  color: #3f76ff !important;
+}
+body .me {
+  background: rgba(63, 118, 255, 0.07) !important;
+}
+body .q-card__actions > .secondary-button {
+  color: var(--mobile-block-color);
+}
+body
+  .members-sub-page__table
+  > .q-table__middle
+  > .q-table
+  > tbody
+  > tr
+  > td
+  > div
+  > .q-btn {
+  background-color: transparent;
+}
+body .list-popup > .q-item > .right-icon {
+  padding-top: 4px;
+}
+body .settings-members-page__popup-item {
+  color: var(--settings-members-page__popup-item-color);
+}
+body .setting-page__btn-del-wrapper {
+  background-color: transparent;
+}
+body
+  .setting-page__input
+  > .q-field__inner
+  > .q-field__control
+  > .q-field__control-container
+  > .q-field__prefix {
+  color: var(--setting-page__input-color);
+}
+body .issues-list__extended-search-text {
+  color: var(--issues-list__extended-search-text-color);
+}
+body .issues-list__extended-search-wrapper > .text-sm {
+  background-color: var(--extended-search__filters-wrapper-bgc);
+  width: 220px;
+  padding: 10px;
+  min-height: 60px;
+  z-index: 10;
+  border: 1px solid var(--issues-list__extended-search-border);
+}
+body .extended-search__filters-wrapper > .q-field {
+  margin-top: 10px;
+}
+body .extended-search-icon {
+  font-size: 18px;
+  color: var(--extended-search-icon);
+}
+body .issues-list__extended-search-btn {
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 5px;
+}
+
+body
+  .login-panel__input
+  > .q-field__inner
+  > .q-field__control
+  > .q-field__control-container
+  > .q-placeholder {
+  color: var(--login-panel__input-color);
+}
+
+body .q-table th {
+  font-weight: 600;
+}
+.issue-panel__select-tags-wrapper > .select-tags {
+  max-width: 100% !important;
+}
+
+.nav-menu {
+  max-width: 350px;
+}
+
+.filters-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  @media screen and (max-width: 350px) {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+
+.issue-panel-card {
+  padding: 10px;
+  border-left: 1px solid $darkest-border-color;
+}
+
+.issue-panel__layout {
+  position: relative;
+  z-index: 1;
+  @media screen and (max-width: 1319px) {
+    z-index: auto;
+    position: inherit;
+  }
+}
+
+.base-card {
+  border-radius: $radius;
+  border: 1px solid $dark-border-color;
+  width: fit-content;
+}
+
+.centered-horisontally {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.issue-link-card {
+  border-radius: $radius;
+  border: 1px solid $dark-border-color;
+}
+
+.issue-links-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.issue-attachments-card {
+  border-radius: $radius;
+  border: 1px solid $border-color;
+  box-shadow: none;
+}
+
+.feedback-card {
+  width: 600px;
+  padding: 6px;
+}
+
+.color-primary {
+  color: $primary;
+}
+
+.q-table__control {
+  gap: 16px;
+
+  .q-table__bottom-item {
+    margin: 0;
+  }
+}
+
+.table-bottom-reverse {
+  .q-table__bottom {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    gap: 8px;
+
+    @media screen and (max-width: 768px) {
+      flex-direction: column-reverse;
+      align-content: center;
+    }
+
+    .q-table__separator {
+      display: none;
+    }
+  }
+}
+
+// kanban styles
+.border-light {
+  border: 1px solid $darkest-border-color;
+}
+
+.fit-select-popup {
+  .q-item__label {
+    min-width: 120px !important;
+    max-width: 120px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .fit-select-popup__item-label {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    word-break: break-word;
+    white-space: inherit !important;
+    overflow: visible !important;
+    text-overflow: inherit !important;
+  }
+}
+
+.user-badge {
+  font-size: 12px;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  font-style: normal;
+  font-weight: 400;
+  margin: 0 8px 0 0;
+  background: $color_accent_light;
+  color: $color_accent;
+}
+
+.scrollable-content {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  display: none;
+}
+
+.q-dialog {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: 0 !important;
+  -ms-overflow-style: none !important;
+}
+
+@media screen and (max-width: 400px) {
+  .issue-icon {
+    display: none;
+  }
+}
+
+.primary-link {
+  text-decoration: none;
+  color: $primary;
+}
+
+.emoji-popup {
+  .q-menu {
+    max-width: 39vw;
+  }
+  .q-virtual-scroll__content {
+    max-width: 39vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: inherit;
+    gap: 4px;
+    padding: 10px;
+  }
+  .q-virtual-scroll__padding {
+    display: none;
+  }
+  div > .q-item {
+    padding: 4px 4px;
+    min-height: 24px !important;
+    min-width: 24px !important;
+  }
+  @media screen and(max-width: 1020px) {
+    .q-virtual-scroll__content {
+      max-width: none;
+    }
+  }
+}
+
+.body-text-md {
+  font-size: 16px !important;
+  font-weight: 600;
+  color: inherit;
+}
+
+.admin-header {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-search {
+  width: 360px;
+}
+
+@media screen and (max-width: 400px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: start;
+  }
+  .admin-search {
+    width: 100%;
+  }
+}
+
+.custom-menu-select {
+  max-height: 320px !important;
+  overflow-y: auto !important;
+}
+
+.inh-popup {
+  max-height: 400px !important;
+  width: min-content !important;
+  .q-item__label {
+    word-wrap: break-word;
+  }
+}
+.q-select__dialog {
+  .inh-popup {
+    width: 100% !important;
+  }
+}
+
+.word-wrap {
+  word-wrap: break-word;
+}
+
+.none-avatar {
+  background-color: $primary-light !important;
+  color: $primary !important;
+}
+
+.text-avatar {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  font-size: 0.75rem;
+  text-align: center;
+  line-height: 0.75rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.q-img__content > .text-avatar {
+  padding: 0;
+}
+
+.hide-btn-input-number {
+  input[type='number'] {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    display: none;
+  }
+}
+
+.primary-text {
+  color: $primary;
+}
+
+.img-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.notification-popup {
+  width: 576px !important;
+  @media (max-width: 768px) {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+.snow {
+  --animation-name: snowfall;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1001111111;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.snow-star {
+  position: relative;
+  color: #c1dcec;
+  top: -1.5em;
+  animation-name: var(--animation-name);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 5px;
+}
+@keyframes snowfall {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(calc(100vh + 1.5em));
+  }
+}
+
+.q-notifications__list {
+  margin-top: 46px !important;
+}
+
+.q-dialog__inner--minimized {
+  padding: 24px 12px !important;
+}
+
+// ------ custom tree --------
+@supports (-moz-appearance: none) {
+  .tree-wrapper {
+    scrollbar-width: thin;
+  }
+}
+.tree-wrapper {
+  overflow: auto;
+}
+.tree-wrapper .q-tree {
+  width: fit-content;
+  min-width: 100%;
+}
+.q-tree > .q-tree__node {
+  padding-left: 5px;
+}
+.q-tree > .q-tree__node--child {
+  padding-left: 17px;
+}
+
+.q-tree > .q-tree__node--child > .q-tree__node-header {
+  padding-left: 4px;
+}
+.q-tree__arrow {
+  display: flex;
+  align-items: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 1px !important;
+  color: transparent;
+  margin-right: 3px;
+  &::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border: solid $dark;
+    border-width: 0 2px 2px 0;
+    transform: rotate(-45deg);
+  }
+  &.q-tree__arrow--rotate {
+    margin: -2px 3px 0 0;
+  }
+}
+.q-tree__node-header::before {
+  display: none;
+}
+.q-tree__node::after {
+  display: none;
+}
+.q-tree__node--child {
+  display: flex;
+  align-items: center;
+  padding-left: 13px;
+  &::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    background-color: $dark;
+    border-radius: 50%;
+    margin: 3px 4px 0 1px;
+  }
+  .q-tree__node-header {
+    width: 100%;
+  }
+}
+.q-tree__children {
+  padding-left: 20px;
+}
+
+.mr-12 {
+  margin-right: 12px;
+}

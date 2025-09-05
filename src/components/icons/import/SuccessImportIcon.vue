@@ -1,0 +1,45 @@
+<template>
+  <svg
+    :width="width"
+    :height="height"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="24" height="24" rx="12" fill="#05BD8D" />
+    <path
+      d="M16.0299 8.96934C16.1704 9.10997 16.2492 9.30059 16.2492 9.49934C16.2492 9.69809 16.1704 9.88871 16.0299 10.0293L11.0299 15.0293C10.8893 15.1698 10.6987 15.2487 10.4999 15.2487C10.3012 15.2487 10.1105 15.1698 9.96991 15.0293L7.96991 13.0293C7.89622 12.9607 7.83712 12.8779 7.79613 12.7859C7.75514 12.6939 7.73309 12.5946 7.73132 12.4939C7.72954 12.3932 7.74807 12.2931 7.78579 12.1997C7.82351 12.1064 7.87965 12.0215 7.95087 11.9503C8.02209 11.8791 8.10692 11.8229 8.20031 11.7852C8.2937 11.7475 8.39373 11.729 8.49443 11.7307C8.59513 11.7325 8.69445 11.7546 8.78645 11.7956C8.87845 11.8366 8.96125 11.8957 9.02991 11.9693L10.4999 13.4393L12.7349 11.2043L14.9699 8.96934C15.1105 8.82889 15.3012 8.75 15.4999 8.75C15.6987 8.75 15.8893 8.82889 16.0299 8.96934Z"
+      fill="white"
+    />
+  </svg>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  name: 'AddIcon',
+  props: {
+    firstColor: {
+      type: String,
+      required: false,
+    },
+    secondColor: {
+      type: String,
+      required: false,
+    },
+    width: {
+      type: Number,
+      required: false,
+      default: () => 24,
+    },
+    height: {
+      type: Number,
+      required: false,
+      default: () => 24,
+    },
+  },
+});
+// fill="#DDE2EA"
+// fill="#BAC4D5"
+</script>
