@@ -54,8 +54,9 @@
       <q-resize-observer v-if="isMobile" @resize="onResize" />
     </div>
 
-    <transition v-if="canEdit && isReadOnly" name="fade">
+    <transition name="fade">
       <span
+        v-if="canEdit && isReadOnly"
         :class="`html-editor__btn-edit ${classPrevent}`"
         title="Нажмите для редактирования"
         @click="$emit('enableEditing')"
