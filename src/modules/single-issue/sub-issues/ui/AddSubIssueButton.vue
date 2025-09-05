@@ -120,7 +120,7 @@ const { loading, onLoad } = useLoad(onRequest);
   align-items: start;
 }
 
-@media screen and(max-width: 600px) {
+@media screen and (max-width: 600px) {
   .btn {
     padding: 0 4px !important;
   }

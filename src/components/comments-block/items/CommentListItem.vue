@@ -411,7 +411,7 @@ pre {
       .q-message-text {
         width: fit-content;
         max-width: 90%;
-        @media screen and(max-width: 720px) {
+        @media screen and (max-width: 720px) {
           max-width: 100%;
         }
         &-content {
