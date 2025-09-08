@@ -14,7 +14,7 @@ defineEmits<{ create: [] }>();
 .admin-header {
   justify-content: space-between;
 }
-@media screen and(max-width: 400px) {
+@media screen and (max-width: 400px) {
   .admin-header {
     flex-direction: row;
     align-items: center;
