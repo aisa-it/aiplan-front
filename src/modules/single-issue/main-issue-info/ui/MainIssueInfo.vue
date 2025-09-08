@@ -2,7 +2,6 @@
   <div class="q-px-sm full-width">
     <div class="flex no-wrap q-py-sm">
       <IssueNameInput :isReadonly="isReadOnlyEditor" />
-
       <q-btn
         v-if="isAdminOrAuthor && isReadOnlyEditor"
         dense
@@ -63,6 +62,36 @@
         </q-btn>
       </div>
     </div>
+    <q-card
+      v-if="lockedBy"
+      class="row items-center q-mb-md q-pa-sm rounded-borders"
+    >
+      <q-icon name="lock" size="20px" class="q-mr-sm text-negative" />
+      <AvatarImage
+        :key="lockedBy.id"
+        size="35px"
+        prefix="Сейчас редактирует"
+        :tooltip="avatarText(lockedBy).join(' ')"
+        :text="
+          [avatarText(lockedBy)[0]?.at(0), avatarText(lockedBy)[1]?.at(0)].join(
+            ' ',
+          )
+        "
+        :image="lockedBy.avatar_id ?? ''"
+        :member="lockedBy"
+        @click.stop="
+          $router.push({
+            path: `/${route.params.workspace}/user-activities/${lockedBy.id}`,
+          })
+        "
+      />
+      <span class="q-ml-sm text-body2 text-weight-medium">
+        {{ getFullName(lockedBy) }}
+      </span>
+      <span class="q-ml-xs text-body2 text-grey-6 text-weight-medium"
+        >сейчас редактирует</span
+      >
+    </q-card>
     <div
       class="full-w"
       v-click-outside:prevent-click-issue-outside="{
@@ -114,10 +143,9 @@
 // core
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/vue-3';
-import { onBeforeRouteLeave } from 'vue-router';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-import { useRoute } from 'vue-router';
+import { useRoute, onBeforeRouteLeave } from 'vue-router';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -128,11 +156,14 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
+import { getFullName } from 'src/utils/helpers';
+import aiplan from 'src/utils/aiplan';
 
 // components
 import IssueTagsDialog from 'src/modules/single-issue/main-issue-info/ui/IssueTagsDialog.vue';
 import MenuIcon from 'components/icons/MenuIcon.vue';
 import EditIcon from 'components/icons/EditIcon.vue';
+import AvatarImage from 'src/components/AvatarImage.vue';
 
 // directives
 import ClickOutside from 'src/directives/click-outside';
@@ -141,6 +172,8 @@ import IssueNameInput from './IssueNameInput.vue';
 import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 
 import { updateIssueInfo } from '../../services/api';
+import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useLockIssueInfo } from '../composables/useLockIssueInfo';
 
 defineOptions({
   directives: {
@@ -176,15 +209,30 @@ const route = useRoute();
 
 const showTagsDialog = ref(false);
 
+const avatarText = (user: DtoUserLight) => {
+  return aiplan.UserName(user);
+};
+
+const { lockedBy, isTimeExpire, handlWrapperForTryingToLock, stopLocking } =
+  useLockIssueInfo(
+    route.params.workspace as string,
+    route.params.project as string,
+    route.params.issue as string,
+  );
+
+watch(isTimeExpire, async (newValue) => {
+  if (newValue) await handleUpdateTitleAndEditor();
+});
+
 const handleUndoEdit = () => {
-  isReadOnlyEditor.value = !isReadOnlyEditor.value;
+  stopLocking();
+  isReadOnlyEditor.value = true;
   issueData.value.name = initialIssueName.value.trim();
   issueData.value.description_html = initialIssueDescription.value;
 };
 
 const handleUpdateTitleAndEditor = async () => {
   const contents = await handleEditorValue(issueData.value.description_html);
-  const descriptionJson = (isReadOnlyEditor.value = true);
   issueData.value.name = issueData.value.name.trim().length
     ? issueData.value.name.trim()
     : initialIssueName.value.trim();
@@ -220,26 +268,37 @@ const handleUpdateTitleAndEditor = async () => {
         issueData.value.name = initialIssueName.value.trim();
         issueData.value.description_html = initialIssueDescription.value;
       }
+      stopLocking();
+    })
+    .finally(() => {
+      isReadOnlyEditor.value = true;
     });
 };
 
 const editTitle = () => {
-  if (isAdminOrAuthor.value) {
-    isReadOnlyEditor.value = false;
-  }
+  handlWrapperForTryingToLock(async () => {
+    await refresh();
 
-  initialIssueName.value = issueData.value.name.trim();
-  initialIssueDescription.value = issueData.value.description_html;
+    if (isAdminOrAuthor.value) {
+      isReadOnlyEditor.value = false;
+    }
+
+    initialIssueName.value = issueData.value.name.trim();
+    initialIssueDescription.value = issueData.value.description_html;
+  });
 };
 
 const handleEnableEdit = () => {
-  isReadOnlyEditor.value = false;
-  initialIssueName.value = issueData.value.name.trim();
-  initialIssueDescription.value = issueData.value.description_html;
+  handlWrapperForTryingToLock(async () => {
+    await refresh();
+    isReadOnlyEditor.value = false;
+    initialIssueName.value = issueData.value.name.trim();
+    initialIssueDescription.value = issueData.value.description_html;
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   });
 };
 
@@ -264,10 +323,9 @@ const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 onBeforeRouteLeave(async (to, from, next) => {
   if (isAutoSave.value && !isReadOnlyEditor.value) {
     await handleAutoSave();
-    next();
-  } else {
-    next();
   }
+  if (!isReadOnlyEditor.value) stopLocking();
+  next();
 });
 
 const handleAddListener = () => {
@@ -290,7 +348,7 @@ const handleRemoveListener = () => {
 
 const refresh = async () => {
   await singleIssueStore.getIssueData(
-    currentWorkspaceSlug.value,
+    currentWorkspaceSlug.value as string,
     currentProjectID.value,
   );
 };
@@ -305,11 +363,17 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   handleAutoSave();
+  if (!isReadOnlyEditor.value) stopLocking();
   handleRemoveListener();
 });
 </script>
 
 <style lang="scss">
+.editor-lock-banner {
+  /* мягкий жёлтый как предупреждение */
+  border: 1px solid #ffeeba;
+}
+
 .issue-chip {
   font-size: 14px;
   border-radius: 16px;
