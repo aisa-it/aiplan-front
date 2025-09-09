@@ -1336,6 +1336,8 @@ export const DrawIoExtension = Node.create({
       dom.classList.add('drawio');
       dom.setAttribute('draggable', 'true');
       dom.setAttribute('data-drawio', 'true');
+      dom.setAttribute('data-asset', node.attrs.src);
+      dom.setAttribute('style', 'cursor: zoom-in');
 
       const openDialog = this.options.openDialog;
 
