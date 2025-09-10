@@ -75,6 +75,8 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
             window.location.href = '/not-found';
           }
           return Promise.reject(error);
+        case 409:
+          return Promise.reject(error);
         default:
           toast.setNotificationView({
             open: true,
