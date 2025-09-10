@@ -171,6 +171,7 @@ import { TextSelection } from '@tiptap/pm/state';
 
 import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IssueLinkMention } from 'src/utils/issueLinkEditor';
+import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 
 const props = withDefaults(
   defineProps<{
@@ -345,6 +346,7 @@ const editorExtensions = computed(() => {
   if (props.isMention) {
     extensions.push(mention);
   }
+  extensions.push(AttachmentLinkMention);
   extensions.push(IssueLinkMention);
   extensions.push(CommentLinkMention);
   if (props.isCodeBlockLowlight) {
