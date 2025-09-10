@@ -179,8 +179,7 @@ export function trimEmptyTags(htmlString?: string) {
 
 export function isDev(): boolean {
   return (
-    location.hostname == 'test.aiplan.aisa.ru' ||
-    location.hostname === 'localhost'
+    location.hostname == 'test.aiplan.aisa.ru'
   );
 }
 
