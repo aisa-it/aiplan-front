@@ -1,7 +1,7 @@
 <template>
   <q-menu
     class="context-menu"
-    style="z-index: 9001"
+    :style="`z-index: ${isTransferOpen || isDeletingOpen ? 6000 : 9001}`"
     context-menu
     touch-position
   >
