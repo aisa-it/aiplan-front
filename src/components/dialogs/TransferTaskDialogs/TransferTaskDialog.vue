@@ -361,9 +361,7 @@ const clear = () => {
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   if (type === 'ok') {
     const link = transferId.value
-      ? props.issue?.short_url
-        ? props.issue.short_url
-        : getIssueLink(
+      ? getIssueLink(
             currentWorkspaceSlug.value,
             selectedProject.value.identifier,
             transferId.value,
@@ -520,6 +518,10 @@ watch(
   () => route.params.workspace,
   () => (projects.value = workspaceProjects.value as IProject[]),
 );
+
+watch(() => isNotSameProjectSelected.value, () => {
+  if (!isNotSameProjectSelected.value) selectedAction.value = ACTIONS.COPY
+})
 
 watch(
   () => selectedAction.value,

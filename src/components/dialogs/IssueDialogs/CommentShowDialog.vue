@@ -204,7 +204,7 @@ const onHide = async () => {
 .issue-comment__editor {
   :deep(.html-editor__container) {
     min-height: 25rem;
-    height: 25rem;
+    height: 100%;
   }
   :deep(.tiptap) {
     min-height: 25rem;
