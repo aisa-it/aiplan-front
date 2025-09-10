@@ -28,6 +28,7 @@ import EditorTaskItem from '../components/EditorTaskItem.vue';
 import EditorListItem from '../components/EditorListItem.vue';
 import EditorMentionList from '../components/EditorMentionList.vue';
 import EditorResizeImageWrapper from '../components/EditorResizeImageWrapper.vue';
+import EditorResizeDrawioWrapper from '../components/EditorResizeDrawioWrapper.vue';
 import EditorTiptapCodeBlockSelect from '../components/EditorTiptapCodeBlockSelect.vue';
 
 // store
@@ -1270,20 +1271,6 @@ declare module '@tiptap/core' {
   }
 }
 
-async function urlToBase64(url: string): Promise<string> {
-  const response = await fetch(url);
-  const blob = await response.blob();
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      resolve(reader.result as string);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 export const DrawIoExtension = Node.create({
   name: 'drawio',
   group: 'inline',
@@ -1293,6 +1280,9 @@ export const DrawIoExtension = Node.create({
   addAttributes() {
     return {
       src: {
+        default: '',
+      },
+      xml: {
         default: '',
       },
       class: {
@@ -1329,108 +1319,9 @@ export const DrawIoExtension = Node.create({
   },
 
   addNodeView() {
-    return ({ editor, node, getPos }) => {
-      const dom = document.createElement('img');
-      dom.src = node.attrs.src;
-
-      dom.classList.add('drawio');
-      dom.setAttribute('draggable', 'true');
-      dom.setAttribute('data-drawio', 'true');
-      dom.setAttribute('data-asset', node.attrs.src);
-      dom.setAttribute('style', 'cursor: zoom-in');
-
-      const openDialog = this.options.openDialog;
-
-      const openModal = (evt: Event) => {
-        const isEditable =
-          editor.isEditable !== false &&
-          editor.view.dom.getAttribute('contenteditable') !== 'false';
-
-        if (!isEditable) return;
-
-        const dialog = document.createElement('dialog');
-        dialog.style.border = '0';
-        dialog.style.padding = '0';
-
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('src', this.options.drawIoLink);
-        iframe.style.width = this.options.width;
-        iframe.style.height = this.options.height;
-
-        const source = evt.target as HTMLElement;
-        dialog.appendChild(iframe);
-        document.body.appendChild(dialog);
-
-        dialog.showModal();
-
-        const receive = async (event: any) => {
-          if (!event.data) return;
-
-          let msg: any;
-          if (typeof event.data === 'string') {
-            try {
-              msg = JSON.parse(event.data);
-            } catch (e) {
-              return;
-            }
-          } else {
-            msg = event.data;
-          }
-
-          switch (msg.event) {
-            case 'init':
-              const src = source.getAttribute('src');
-              let base64 = src;
-
-              if (src && !src.startsWith('data:')) {
-                base64 = await urlToBase64(src);
-              }
-
-              iframe.contentWindow?.postMessage(
-                JSON.stringify({
-                  action: 'load',
-                  xmlpng: base64,
-                }),
-                '*',
-              );
-              break;
-            case 'save':
-              iframe.contentWindow?.postMessage(
-                JSON.stringify({
-                  action: 'export',
-                  format: 'xmlpng',
-                  spinKey: 'saving',
-                }),
-                '*',
-              );
-              break;
-            case 'export':
-              editor.view.dispatch(
-                editor.view.state.tr.setNodeMarkup(getPos(), undefined, {
-                  src: msg.data,
-                  class: 'drawio',
-                  draggable: true,
-                }),
-              );
-              break;
-            case 'exit':
-              window.removeEventListener('message', receive);
-              dialog.close();
-              dialog.remove();
-              break;
-          }
-        };
-
-        window.addEventListener('message', receive);
-      };
-
-      if (openDialog) dom.addEventListener(openDialog, openModal);
-
-      return {
-        dom,
-      };
-    };
+    return VueNodeViewRenderer(EditorResizeDrawioWrapper, {
+      extension: this,
+    });
   },
 
   addCommands() {

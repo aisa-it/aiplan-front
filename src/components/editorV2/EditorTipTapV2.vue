@@ -282,6 +282,7 @@ function handleClickEditor(e: MouseEvent | TouchEvent) {
     const asset = target.dataset.asset;
 
     isOpenDiagram.value = !!target.dataset.drawio;
+
     if (asset) {
       image.value.asset = asset;
       openImage.value = true;
