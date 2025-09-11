@@ -39,7 +39,7 @@
       class="btn upload-btn full-w q-mt-md"
       no-caps
       @click="uploadInput?.click()"
-      @drop="handleDrop"
+      @drop.prevent="handleDrop"
       @dragenter.prevent="isDragIn = true"
       @dragover.prevent="isDragIn = true"
       @dragleave.prevent="isDragIn = false"
