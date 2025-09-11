@@ -73,7 +73,7 @@ import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
 import { setIntervalFunction } from 'src/utils/helpers';
 import { getIcon, getHistoryText } from 'src/utils/strings';
-import { issueActivityRender } from './activity/renders/issue-activity';
+
 //components - icon
 import AvatarImage from './AvatarImage.vue';
 

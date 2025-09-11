@@ -9,16 +9,17 @@ import { docActivityRender } from './doc-activity';
 export function activityRender(
   activity: DtoEntityActivityFull,
   isOnlyProject: boolean,
+  isOnlyWorkspace: boolean,
 ) {
   switch (activity.entity_type) {
     case 'form':
       return formActivityRender(activity);
     case 'issue':
-      return issueActivityRender(activity);
+      return issueActivityRender(activity, isOnlyWorkspace);
     case 'workspace':
       return workspaceActivityRender(activity);
     case 'project':
-      return projectActivityRender(activity, isOnlyProject);
+      return projectActivityRender(activity, isOnlyProject, isOnlyWorkspace);
     case 'doc':
       return docActivityRender(activity);
   }

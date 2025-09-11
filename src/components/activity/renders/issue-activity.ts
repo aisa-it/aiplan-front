@@ -12,7 +12,7 @@ function setValue(activity: DtoEntityActivityFull) {
   if (activity.old_value) return activity.old_value;
   else return '';
 }
-export function issueActivityRender(activity: DtoEntityActivityFull) {
+export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspace = false) {
   const route = useRoute();
   let action = '';
   let value = '';
@@ -25,7 +25,9 @@ export function issueActivityRender(activity: DtoEntityActivityFull) {
                     ${activity?.project_detail?.identifier}-${activity
                       .issue_detail?.sequence_id} "${activity.issue_detail
                       ?.name}"<a/>`;
-  const workspaceSource = `в пространстве <a target="_blank"
+  const workspaceSource = onlyWorkspace
+    ? ''
+    : `в пространстве <a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${
                       activity?.entity_url ??
