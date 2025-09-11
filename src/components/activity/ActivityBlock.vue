@@ -74,7 +74,7 @@ import { activityRender } from './renders';
 import AvatarImage from '../AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
 
-const props = defineProps<{ activityRow: any; onlyProject?: boolean }>();
+const props = defineProps<{ activityRow: any; onlyProject?: boolean; onlyWorkspace?: boolean }>();
 const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
 const { user } = storeToRefs(userStore);
@@ -84,7 +84,7 @@ const activity = ref(props.activityRow);
 const activityComponents = ref(transform());
 
 function transform() {
-  return activityRender(activity.value, props.onlyProject);
+  return activityRender(activity.value, props.onlyProject, props.onlyWorkspace);
 }
 watch(
   () => props.activityRow,

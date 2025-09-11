@@ -34,7 +34,7 @@
       </div>
     </template>
     <template v-slot:body-cell-activity="props">
-      <ActivityBlock :activityRow="props.row" :only-project="onlyProject" />
+      <ActivityBlock :activityRow="props.row" :only-project="onlyProject" :only-workspace="onlyWorkspace"/>
     </template>
   </q-table>
 </template>
@@ -54,7 +54,7 @@ export default defineComponent({
       return dayjs;
     },
   },
-  props: ['rows', 'rowsCount', 'currentDay', 'onlyProject'],
+  props: ['rows', 'rowsCount', 'currentDay', 'onlyProject', 'onlyWorkspace'],
   emits: ['update', 'onCloseClick'],
   setup(props, { emit }) {
     // vars

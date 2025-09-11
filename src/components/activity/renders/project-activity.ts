@@ -6,7 +6,7 @@ import aiplan from 'src/utils/aiplan';
 import { translateAction } from './actionTranslations';
 import { useRoute } from 'vue-router';
 
-export function projectActivityRender(activity: any, onlyProject = false) {
+export function projectActivityRender(activity: any, onlyProject = false, onlyWorkspace = false) {
   const route = useRoute();
   let action = '';
   let value = '';
@@ -34,7 +34,9 @@ export function projectActivityRender(activity: any, onlyProject = false) {
                       issueLinkIdentifier.value.split('-')[1]
                     }`}>
                     ${issueLinkIdentifier.value} "${issueLinkName.value}"</a>`;
-  const workspaceSource = `в пространстве <a target="_blank"
+  const workspaceSource = onlyWorkspace
+    ? ''
+    : `в пространстве <a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${
                       activity?.entity_url ??

@@ -1,5 +1,5 @@
 <template>
-  <ActivitiesList :rows="rows" :rows-count="rowsCount" @update="onRequest" />
+  <ActivitiesList :rows="rows" :rows-count="rowsCount" only-workspace @update="onRequest" />
 </template>
 
 <script setup lang="ts">
