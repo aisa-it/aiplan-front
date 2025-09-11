@@ -65,7 +65,12 @@
       </span>
     </transition>
 
-    <DocPreviewDialog v-if="openImage" v-model="openImage" :file="image" />
+    <DocPreviewDialog
+      v-if="openImage"
+      v-model="openImage"
+      :file="image"
+      :isDiagram="isOpenDiagram"
+    />
     <EditorAnchorDialog
       v-model="editAnchor"
       :editor-instance="editorInstance"
@@ -181,6 +186,7 @@ const isTooltipMention = ref<boolean>(false);
 const tooltipAnchorMention = ref<HTMLElement>();
 const tooltipContentMention = ref<ContentMention>({});
 const isShowEdit = ref<boolean>(false);
+const isOpenDiagram = ref<boolean>(false);
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -274,6 +280,9 @@ function handleClickEditor(e: MouseEvent | TouchEvent) {
   if (target.tagName === 'IMG' && props.readOnlyEditor) {
     e.preventDefault();
     const asset = target.dataset.asset;
+
+    isOpenDiagram.value = !!target.dataset.drawio;
+
     if (asset) {
       image.value.asset = asset;
       openImage.value = true;

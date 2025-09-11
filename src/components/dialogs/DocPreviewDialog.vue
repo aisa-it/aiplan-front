@@ -39,6 +39,7 @@
         :show-zoom-btns="!isImageLoading"
         :class="{
           'zoom-preview--loading': isImageLoading,
+          diagram: isDiagram,
         }"
         @load="
           () => {
@@ -71,6 +72,7 @@ import DefaultLoader from '../loaders/DefaultLoader.vue';
 // props
 const props = defineProps<{
   file: Record<string, any>;
+  isDiagram?: boolean;
 }>();
 
 //constansts
@@ -128,6 +130,11 @@ const src = computed(() => {
   max-height: 80vh;
   height: fit-content;
   width: fit-content;
+}
+
+.diagram :deep(.vz-zoomimg-img) {
+  padding: 16px;
+  min-width: 90vw;
 }
 
 iframe {
