@@ -206,6 +206,9 @@
         </q-td>
       </template>
     </q-table>
+    <div class="text-right q-mr-md" v-show="!loading">
+      Всего: {{ pagination.rowsNumber }}
+    </div>
     <div
       v-show="loading || rows.length === 0"
       style="height: calc(90vh - 122px)"
