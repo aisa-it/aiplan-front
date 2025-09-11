@@ -424,6 +424,7 @@ onMounted(async () => {
     max-width: 250px;
     color: $text-color;
     background-color: transparent !important;
+    cursor: default;
   }
   .tree-drop-dragged-item {
     position: fixed;
