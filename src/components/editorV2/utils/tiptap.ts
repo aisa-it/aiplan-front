@@ -22,7 +22,11 @@ import { inputRegex } from '@tiptap/extension-image';
 
 // utils
 import { ICONS } from '../../../utils/icons';
-import { parseCommentLink, parseIssueLink } from '../../../utils/links';
+import {
+  parseCommentLink,
+  parseIssueLink,
+  parseAttachmentLink,
+} from '../../../utils/links';
 // components
 import EditorTaskItem from '../components/EditorTaskItem.vue';
 import EditorListItem from '../components/EditorListItem.vue';
@@ -876,6 +880,7 @@ export const CustomLink = Link.extend({
 
               const parsedCommentLink = parseCommentLink(text);
               const parsedIssueLink = parseIssueLink(text);
+              const parsedAttachmentLink = parseAttachmentLink(text);
               if (parsedCommentLink) {
                 event.preventDefault();
                 const node =
@@ -892,6 +897,18 @@ export const CustomLink = Link.extend({
                 event.preventDefault();
                 const node =
                   state.schema.nodes.issueLinkMention?.create(parsedIssueLink);
+                if (node) {
+                  const tr = state.tr.replaceSelectionWith(node);
+                  dispatch(tr);
+                  return true;
+                }
+              }
+              if (parsedAttachmentLink) {
+                event.preventDefault();
+                const node =
+                  state.schema.nodes.attachmentLinkMention?.create(
+                    parsedAttachmentLink,
+                  );
                 if (node) {
                   const tr = state.tr.replaceSelectionWith(node);
                   dispatch(tr);
@@ -1004,7 +1021,8 @@ export const isEditorEmpty = (editor?: Editor) => {
     if (
       node.content.size > 0 ||
       node.type.name === 'commentLinkMention' ||
-      node.type.name === 'issueLinkMention'
+      node.type.name === 'issueLinkMention' ||
+      node.type.name === 'attachmentLinkMention'
     ) {
       isEmpty = false;
     }

@@ -37,6 +37,7 @@ import {
 import { useMention } from './customMention';
 import { CommentLinkMention } from 'src/utils/commentLinkEditor';
 import { IssueLinkMention } from 'src/utils/issueLinkEditor';
+import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 import { TableOfContentsCustom } from 'src/utils/tableOfContents';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
@@ -146,6 +147,7 @@ export const getEditorExtensions = (props) => {
   if (props.isMention) {
     extensions.push(mention);
   }
+  extensions.push(AttachmentLinkMention);
   extensions.push(IssueLinkMention);
   extensions.push(CommentLinkMention);
 

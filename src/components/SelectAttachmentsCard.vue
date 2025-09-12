@@ -168,6 +168,8 @@ import LinkIcon from './icons/LinkIcon.vue';
 import BinIcon from './icons/BinIcon.vue';
 import CloseIcon from './icons/CloseIcon.vue';
 import { copyToClipboard } from 'quasar';
+import { useRoute } from 'vue-router';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 interface IProps {
   row: IAttachmentCard;
@@ -185,7 +187,11 @@ const emits = defineEmits<{
   retry: [];
 }>();
 
+const route = useRoute();
+
 const api = useAiplanStore();
+const { issueData } = useSingleIssueStore();
+
 const { setNotificationView } = useNotificationStore();
 
 const iconColor = ref('');
@@ -304,7 +310,16 @@ const handleRetry = () => {
 };
 const handleCopyLink = (file: IAttachmentCard) => {
   try {
-    const link = `${window.location.origin}/uploads/${file.asset.id}`;
+    const base = `${window.location.origin}/uploads/${file.asset.id}`;
+    const type = route.path.includes('aidoc') ? 'aidoc' : 'issue';
+    const slug = route.params.workspace;
+    const from =
+      type === 'issue'
+        ? `${issueData.project_detail?.identifier}-${issueData?.sequence_id}`
+        : route.params.doc;
+    const name = props.row?.asset?.name;
+    const query = `?slug=${slug}&type=${type}&from=${from}&name=${name}`;
+    const link = base + query;
     copyToClipboard(link);
     setNotificationView({
       type: 'success',

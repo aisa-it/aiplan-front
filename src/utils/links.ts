@@ -61,10 +61,47 @@ export function parseIssueLink(href: string) {
   return null;
 }
 
-export function getIssueLink(workspaceSlug: string, projectIdentifier: string, issueId?: string) {
-  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issueId}`
+export function parseAttachmentLink(href: string) {
+  try {
+    const url = new URL(href, window.location.origin);
+    const parts = url.pathname.split('/').filter(Boolean);
+
+    if (parts[0] !== 'uploads') return null;
+
+    const type = url.searchParams.get('type');
+    const slug = url.searchParams.get('slug');
+    const from = url.searchParams.get('from');
+    const name = url.searchParams.get('name');
+
+    if (!type || !slug || !from) return null;
+
+    return {
+      type,
+      slug,
+      title: name,
+      originalUrl: url.origin + url.pathname,
+      ...(type === 'aidoc' && { docId: from }),
+      ...(type === 'issue' && {
+        projectIdentifier: from.split('-')[0],
+        currentIssueId: from.split('-')[1],
+      }),
+    };
+  } catch (e) {
+    return null;
+  }
 }
 
-export function getProjectLink(workspaceSlug: string, projectIdentifier: string) {
-  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues`
+export function getIssueLink(
+  workspaceSlug: string,
+  projectIdentifier: string,
+  issueId?: string,
+) {
+  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issueId}`;
+}
+
+export function getProjectLink(
+  workspaceSlug: string,
+  projectIdentifier: string,
+) {
+  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues`;
 }
