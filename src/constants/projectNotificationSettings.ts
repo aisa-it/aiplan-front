@@ -20,5 +20,6 @@ export const INITIAL_PROJECT_NOTIFICATION_SETTINGS: IProjectNotificationSettings
     disable_issue_transfer: false,
     disable_linked: false,
     disable_sub_issue: false,
+    disable_issue_new: false,
     notify_before_deadline: null,
   };
