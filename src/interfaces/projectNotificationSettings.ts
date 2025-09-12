@@ -17,5 +17,6 @@ export interface IProjectNotificationSettings {
   disable_issue_transfer: boolean;
   disable_linked: boolean;
   disable_sub_issue: boolean;
+  disable_issue_new: false;
   notify_before_deadline: null | Date;
 }
