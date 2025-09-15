@@ -163,7 +163,7 @@ onBeforeMount(async () => {
     (user.value?.last_workspace_slug || userWorkspaces.value.length)
   ) {
     router.push(
-      `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
+      `${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
     );
   }
 });
