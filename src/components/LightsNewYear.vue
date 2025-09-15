@@ -211,7 +211,7 @@
     <li></li>
     <li></li>
   </ul>
-<!--  <div style="margin-bottom: 20px"></div>-->
+  <!--  <div style="margin-bottom: 20px"></div>-->
 </template>
 
 <style lang="scss" scoped>
@@ -246,30 +246,30 @@ body {
     width: $globe-width;
     height: $globe-height;
     border-radius: 50%;
-    margin: $globe-spacing/2;
+    margin: calc($globe-spacing/2);
     display: inline-block;
     background: rgb(136, 255, 132, 1);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(136, 255, 132, 0.5);
     animation-name: flash-1;
     animation-duration: 4s;
     &:nth-child(2n + 1) {
       background: rgb(84, 115, 255);
-      box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+      box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
         rgba(84, 115, 255, 0.5);
       animation-name: flash-2;
       animation-duration: 2.4s;
     }
     &:nth-child(4n + 1) {
       background: rgb(255, 96, 96);
-      box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+      box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
         rgba(255, 96, 96, 1);
       animation-name: flash-3;
       animation-duration: 3.1s;
     }
     &:nth-child(4n + 2) {
       background: rgb(252, 249, 102);
-      box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+      box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
         rgba(252, 249, 102, 1);
       animation-name: flash-4;
       animation-duration: 3.1s;
@@ -285,18 +285,18 @@ body {
       position: absolute;
       background: #4e4e4e;
       width: ($globe-width - 2);
-      height: $globe-height/3;
+      height: calc($globe-height/3);
       border-radius: 3px;
-      top: (0 - ($globe-height/6));
+      top: (0 - calc($globe-height/6));
       left: 1px;
     }
     &:after {
       content: '';
-      top: (0 - $globe-height/2);
+      top: (0 - calc($globe-height/2));
       left: $globe-width - 3;
       position: absolute;
       width: $globe-spacing + 12;
-      height: ($globe-height/3 * 2);
+      height: (calc($globe-height/3) * 2);
       border-bottom: solid #4e4e4e 2px;
       border-radius: 50%;
     }
@@ -312,12 +312,12 @@ body {
   0%,
   100% {
     background: rgb(136, 255, 132);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(136, 255, 132, 1);
   }
   50% {
     background: rgba(102, 255, 97, $light-off-opacity);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(94, 255, 88, 0.2);
   }
 }
@@ -325,12 +325,12 @@ body {
   0%,
   100% {
     background: rgba(84, 115, 255, 1);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(84, 115, 255, 1);
   }
   50% {
     background: rgba(84, 115, 255, $light-off-opacity);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(84, 115, 255, 0.2);
   }
 }
@@ -338,12 +338,12 @@ body {
   0%,
   100% {
     background: rgba(255, 96, 96, 1);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(255, 96, 96, 1);
   }
   50% {
     background: rgba(255, 96, 96, $light-off-opacity);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(255, 96, 96, 0.2);
   }
 }
@@ -352,12 +352,12 @@ body {
   0%,
   100% {
     background: rgba(252, 249, 102, 1);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(252, 249, 102, 1);
   }
   50% {
     background: rgba(252, 249, 102, $light-off-opacity);
-    box-shadow: 0px $globe-height/6 $globe-width * 2 $globe-spread
+    box-shadow: 0px calc($globe-height/6) $globe-width * 2 $globe-spread
       rgba(252, 249, 102, 0.2);
   }
 }
