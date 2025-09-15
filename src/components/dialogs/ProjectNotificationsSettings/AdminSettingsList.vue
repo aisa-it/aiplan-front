@@ -41,7 +41,7 @@ const emits = defineEmits<{ update: [{ field: string; value: boolean }] }>();
 
 const settingsList = [
   { title: 'Изменилось название', field: 'disable_project_name' },
-  { title: 'Изменилась иконка', field: 'disable_project_issue' },
+  { title: 'Изменилась иконка', field: 'disable_project_logo' },
   { title: 'Изменился идентификатор', field: 'disable_project_identifier' },
   { title: 'Изменилась приватность', field: 'disable_project_public' },
   { title: 'Изменился лидер проекта', field: 'disable_project_owner' },

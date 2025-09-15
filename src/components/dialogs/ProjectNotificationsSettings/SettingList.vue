@@ -138,6 +138,23 @@
         ></q-checkbox>
       </div>
       <div class="notification-setting">
+        <span>Появилась новая задача</span>
+        <q-checkbox
+          class="justify-center"
+          v-model="authorSetting.disable_issue_new"
+          @update:model-value="
+            emits('updateEmail', invertedSettings(authorSetting))
+          "
+        ></q-checkbox>
+        <q-checkbox
+          class="justify-center"
+          v-model="memberSettings.disable_issue_new"
+          @update:model-value="
+            emits('updateTelegram', invertedSettings(memberSettings))
+          "
+        ></q-checkbox>
+      </div>
+      <div class="notification-setting">
         <span>Изменилась родительская задача</span>
         <q-checkbox
           class="justify-center"
