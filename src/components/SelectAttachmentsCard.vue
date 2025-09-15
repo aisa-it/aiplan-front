@@ -95,7 +95,7 @@
             </q-btn>
             <q-btn
               v-if="!progress"
-              :disable="!isDisabled"
+              :disable="!isEdit"
               padding="4px 4px"
               flat
               dense
@@ -171,7 +171,7 @@ import { copyToClipboard } from 'quasar';
 
 interface IProps {
   row: IAttachmentCard;
-  isDisabled?: boolean;
+  isEdit?: boolean;
   progress?: number | null | undefined;
   status?: 'pending' | 'uploading' | 'success' | 'error' | 'cancelled';
 }
