@@ -67,7 +67,6 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useProjectStore } from 'src/stores/project-store';
@@ -92,7 +91,6 @@ const emits = defineEmits<{ refresh: [] }>();
 
 // stores
 const { setNotificationView } = useNotificationStore();
-const userStore = useUserStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
@@ -100,7 +98,6 @@ const singleIssueStore = useSingleIssueStore();
 const api = useAiplanStore();
 
 // store to refs
-const { user } = storeToRefs(userStore);
 const { workspaceInfo } = storeToRefs(workspaceStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { currentIssueID, issueData, issueExportPDFLink } =

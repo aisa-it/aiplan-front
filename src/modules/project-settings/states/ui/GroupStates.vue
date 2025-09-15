@@ -154,7 +154,7 @@ const handleDragStart = (event: any, index: number, state: DtoStateLight) => {
 };
 
 const handleDragOver = (event: DragEvent) => {
-  event.dataTransfer!.dropEffect = 'move';
+  event.dataTransfer.dropEffect = 'move';
 };
 
 const handleDrop = async (event: Event, dropIndex: number) => {

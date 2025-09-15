@@ -79,8 +79,9 @@
       />
       <q-resize-observer v-if="isMobile" @resize="onResize" />
     </div>
-    <transition v-if="isShowEdit && isReadOnly">
+    <transition>
       <span
+        v-if="isShowEdit && isReadOnly"
         class="html-editor__btn-edit"
         :class="classPrevent"
         title="Нажмите для редактирования"
@@ -468,13 +469,14 @@ const initialEditor = () => {
 
           if (isCursorInsideSpoiler() && !isLastEmptyParagraph()) {
             const { state } = editorInstance.value;
-            const { $from } = state.selection;
 
-              const paragraph = state.schema.nodes.paragraph.create();
-              const tr = state.tr.replaceSelectionWith(paragraph);
-              tr.setSelection(new TextSelection(tr.doc.resolve(state.selection.$head.pos + 2)))
-              // const transaction = state.tr.insert($from.pos + 1, paragraph);
-              // transaction.setSelection($from.near(transaction.doc.resolve($from.pos + 1)))
+            const paragraph = state.schema.nodes.paragraph.create();
+            const tr = state.tr.replaceSelectionWith(paragraph);
+            tr.setSelection(
+              new TextSelection(tr.doc.resolve(state.selection.$head.pos + 2)),
+            );
+            // const transaction = state.tr.insert($from.pos + 1, paragraph);
+            // transaction.setSelection($from.near(transaction.doc.resolve($from.pos + 1)))
             view.dispatch(tr);
             return true;
           }
@@ -532,7 +534,6 @@ function isLastEmptyParagraph(): boolean {
   const { state } = editorInstance.value;
   const { $from } = state.selection;
   const lastNode = $from.node($from.depth);
-
 
   // Проверка на последний параграф
   return lastNode.type.name !== 'paragraph' ||

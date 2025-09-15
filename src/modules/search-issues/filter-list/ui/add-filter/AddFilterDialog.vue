@@ -266,7 +266,6 @@ import {
   getFilterStates,
   updateFilter,
 } from '../../services/api';
-import { url } from 'inspector';
 
 type Members = 'authors' | 'assignees' | 'watchers';
 

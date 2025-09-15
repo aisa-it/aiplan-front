@@ -303,7 +303,6 @@ const formDates = ref([]);
 const colorPickerDialogsVisible = ref([]);
 const dateDialogsVisible = ref([]);
 const validaionError = ref([]);
-const currentDate = dayjs(new Date()).format('DD.MM.YYYY');
 
 const fieldRefs = ref([]);
 
@@ -406,7 +405,7 @@ const submitForm = async () => {
 };
 
 const resetForm = () => {
-  fields.value.forEach((field, index) => {
+  fields.value.forEach((field) => {
     if (field.type === 'checkbox') {
       field.value = false;
     }

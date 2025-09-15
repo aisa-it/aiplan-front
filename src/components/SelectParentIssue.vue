@@ -37,7 +37,6 @@ import { useIssuesStore } from 'src/stores/issues-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 // components
-import ShareIcon from './icons/ShareIcon.vue';
 import SelectIssueDialog from 'src/components/dialogs/IssueDialogs/SelectIssueDialog.vue';
 
 // constants

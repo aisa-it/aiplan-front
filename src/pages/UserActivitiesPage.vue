@@ -140,7 +140,7 @@ export default defineComponent({
 
     async function onRequest(p: any) {
       //TODO sortBy, descending не используются
-      const { page, rowsPerPage, sortBy, descending, rowsNumber } =
+      const { page, rowsPerPage, rowsNumber } =
         p.pagination;
 
       await userStore

@@ -2,7 +2,6 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
 import { LocalStorage } from 'quasar';
-import * as tus from 'tus-js-client';
 
 // interfaces
 import { IProject, IProjectView } from 'src/interfaces/projects';
@@ -507,7 +506,6 @@ export const useAiplanStore = defineStore('aiplan', {
       ev.preventDefault();
       ev.stopPropagation();
 
-      const uploadUrl = `/api/auth/attachments/tus/`;
 
       /* const uploadFile = (file: File) => {
         return new Promise<void>((resolve, reject) => {

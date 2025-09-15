@@ -85,7 +85,6 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
 
 // store
@@ -108,11 +107,7 @@ import { getRandomEmoji } from 'src/utils/helpers';
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJIS, PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
-import {
-  BASE_ERROR,
-  ERROR_IDENTITY_PROJECT,
-  SUCCESS_PROJECT_CREATE,
-} from 'src/constants/notifications';
+import { SUCCESS_PROJECT_CREATE } from 'src/constants/notifications';
 
 // interfaces
 import { IStateResponse } from 'src/interfaces/states';
@@ -133,7 +128,6 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 // vars
 const cyrillicToTranslit = CyrillicToTranslit();
 const emojiOptions = PROJECT_EMOJI_OPTIONS;
-const router = useRouter();
 const dialogRef = ref();
 const emojiSelect = ref();
 const isConfirmOpen = ref<boolean>(false);
@@ -212,11 +206,9 @@ const createNewProject = async () => {
     name: projectValues.value.name,
     public: projectValues.value.public.value,
   };
-  let projectUrl = '';
   await projectStore
     .createProject(currentWorkspaceSlug.value, payload)
-    .then(async (data) => {
-      projectUrl = data.id;
+    .then(async () => {
       await workspaceStore
         .getAllWorkspaceStates(currentWorkspaceSlug.value)
         .then(() => {

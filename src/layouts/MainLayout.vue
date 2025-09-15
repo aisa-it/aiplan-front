@@ -59,7 +59,6 @@ import MainLayoutDrawer from 'components/drawers/MainLayoutDrawer.vue';
 import MainHeader from 'src/components/headers/MainHeader.vue';
 
 import { useGlobalLoading } from 'src/composables/useGlobalLoader';
-import { DtoReleaseNoteLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 // stores
 const api = useAiplanStore();
 const userStore = useUserStore();

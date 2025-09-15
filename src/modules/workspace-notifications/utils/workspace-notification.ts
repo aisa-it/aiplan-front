@@ -1,12 +1,10 @@
 import { valToRole } from 'src/utils/strings';
 import { translateVerb } from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
-import { NotificationsNotificationDetailResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getDocLink } from '../helpers/getDocLink';
 
 export function workspaceNotificationRender(
   activity: any,
-  members: NotificationsNotificationDetailResponse,
 ) {
   let action = '';
   let value = '';

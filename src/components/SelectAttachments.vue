@@ -217,7 +217,6 @@ import {
   SUCCESS_DOWNLOAD_FILE,
 } from 'src/constants/notifications';
 import {
-  AIDOC_ACCEPT_FILE_TYPES_STRING,
   MAX_SIZE_FILE,
   MAX_SIZE_FILE_VALUE,
   MAX_SIZE_FILE_UNIT,

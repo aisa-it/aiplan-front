@@ -180,7 +180,7 @@ useMeta(() => {
 
 //consts
 const preventClickClass = 'prevent-click-issue-outside';
-const listItem = [
+// const listItem = [
   // { title: 'Права доступа', disabled: true, emit: 'accessRights' },
   // { title: 'Экспорт в PDF', disabled: true, emit: 'exportPdf' },
   // { title: 'Экспорт в Word', disabled: true, emit: 'exportWord' },
@@ -191,8 +191,8 @@ const listItem = [
   //   extensions: ['doc', 'docx'],
   // },
   // { title: 'Переместить', disabled: true, emit: 'moveDocument' },
-  { title: 'Удалить', disabled: false, emit: 'openDeleteDialog' },
-];
+//   { title: 'Удалить', disabled: false, emit: 'openDeleteDialog' },
+// ];
 
 //computeds
 const currentUserRole = computed(() => {
@@ -309,10 +309,10 @@ const openDeleteDialog = () => {
   showDeleteDialog.value = true;
 };
 
-const openImportExportDialog = (type: string) => {
-  currentExportDialogItem.value = listItem.find((el) => el.emit === type);
-  showImportExportDialog.value = true;
-};
+// const openImportExportDialog = (type: string) => {
+//   currentExportDialogItem.value = listItem.find((el) => el.emit === type);
+//   showImportExportDialog.value = true;
+// };
 
 //TODO дубляж функции в компонентах CreateDocPageDialog, AiDocPage, AidocActivityComments, AidocVersionSelect
 const getWorkspaceMembersForMention = async (

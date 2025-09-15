@@ -1,11 +1,9 @@
 import { ref } from 'vue';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 // TODO вытащить в общий компонент для разрыва связи между модулями
 import issueTemplateService from 'src/modules/project-settings/new-issue-template/services/api';
 
 export function useSingleIssueTemplate() {
-  const store = useSingleIssueStore();
   const options = ref<any[]>([]);
   const loading = ref(false);
   const offset = ref(0);

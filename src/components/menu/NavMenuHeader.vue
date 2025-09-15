@@ -262,12 +262,6 @@ const addFavoriteWorkspace = async (uuid: string | undefined) => {
       });
     });
 };
-const isDev = () => {
-  return (
-    location.hostname == 'test.aiplan.aisa.ru' ||
-    location.hostname === 'localhost'
-  );
-};
 </script>
 <style lang="scss" scoped>
 .right-icon {

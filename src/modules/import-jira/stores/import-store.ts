@@ -16,7 +16,6 @@ import type {
   IssuesImportImportStatus,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IImportJiraProject } from 'src/interfaces/jira';
-import { get } from 'http';
 
 export const useImportStore = defineStore('import-store', {
   state: () => {

@@ -153,7 +153,7 @@ interface Version {
   old_body?: string;
 }
 
-const props = defineProps<{
+defineProps<{
   docVersionList: DtoHistoryBodyLight[];
   isDisabled: boolean;
   mini?: boolean;

@@ -15,7 +15,7 @@
         :class="{ 'html-editor__toolbar-readonly': isReadOnly }"
       >
         <div v-if="isReadOnly" class="html-editor__formats">
-          <q-btn dense flat @click="$emit('enableEditing')">
+          <q-btn dense flat @click="emits('enableEditing')">
             <component :is="ICONS.editIcon" />
             <HintTooltip>Редактировать</HintTooltip>
           </q-btn>
@@ -278,7 +278,7 @@
               :editor-instance="editorInstance"
               :is-format-sample-active="isFormatSampleActive"
               :isMobile="isMobile"
-              @toggle-format-sample="$emit('toggleFormatSample')"
+              @toggle-format-sample="emits('toggleFormatSample')"
             />
             <EditorFormatButton
               :editorInstance="editorInstance"
@@ -301,7 +301,7 @@
 
           <EditorFullScreenButton
             v-if="$props.isFullScreen"
-            @toggle-fullscreen="$emit('toggle-fullscreen')"
+            @toggle-fullscreen="emits('toggle-fullscreen')"
             :style="`margin: ${isMobile ? '0 auto' : ' 0 0 0 auto'}`"
           />
         </template>
@@ -423,7 +423,7 @@ const handleSuperscript = (command: string) => {
   if (!props.editorInstance) return;
 
   const editor = props.editorInstance;
-  const { from, to, empty } = editor.state.selection;
+  const { from, empty } = editor.state.selection;
 
   editor.chain().focus()[command]().run();
 

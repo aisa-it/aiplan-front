@@ -77,7 +77,7 @@ import { getIcon, getHistoryText } from 'src/utils/strings';
 //components - icon
 import AvatarImage from './AvatarImage.vue';
 
-const props = defineProps({
+defineProps({
   activitiesData: {
     type: Object,
     required: true,

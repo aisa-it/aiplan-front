@@ -12,7 +12,6 @@ import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 // constants
-import { BASE_ERROR } from 'src/constants/notifications';
 import UploadAvatarDialog from 'src/components/UploadAvatarDialog.vue';
 
 import { SUCCESS_CREATE_IMG_PROFILE } from 'src/constants/notifications';

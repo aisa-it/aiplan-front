@@ -161,7 +161,7 @@ const selectedTextColor = ref<string>('');
 const opacity = ref<number>(0.2);
 
 // Генерация цветов для текста
-const colors = Object.entries(colorMap).map(([key, value]) => ({
+const colors = Object.entries(colorMap).map(([, value]) => ({
   color: value[theme],
   label: value.label,
 }));

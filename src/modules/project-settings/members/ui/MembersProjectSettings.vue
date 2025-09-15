@@ -381,7 +381,7 @@ const confirmDelUser = (row: DtoProjectMemberLight) => {
 const handleRedirectToProfile = (id: string) => {
   if (id === me?.value?.member_id) {
     router.push({
-      path: `/profile`,
+      path: '/profile',
     });
   } else if (currentWorkspaceSlug.value) {
     router.push({

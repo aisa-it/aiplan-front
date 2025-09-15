@@ -383,7 +383,6 @@ import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
 import {
   updateWorkspace,
   resetWorkspaceToken,
-  exportWorkspace,
   deleteWorkspaceLogo,
 } from 'src/modules/workspace-settings/services/api';
 import aiplan from 'src/utils/aiplan';
@@ -391,7 +390,6 @@ import aiplan from 'src/utils/aiplan';
 // constants
 import {
   BASE_ERROR,
-  SUCCESS_EXPORT,
   SUCCESS_UPDATE_DATA,
   SUCCESS_SAVE_WS_SETTINGS,
   SUCCESS_DELETE_IMG_WS,
@@ -577,30 +575,25 @@ const handleUpdateWorkspace = async () => {
     });
 };
 
-const handleOpenImport = () => {
-  isImportOpen.value = !isImportOpen.value;
-};
+// const handleOpenImport = () => {
+//   isImportOpen.value = !isImportOpen.value;
+// };
 
-const downloadBackup = async () => {
-  await exportWorkspace(route.params['workspace'] as string).then(
-    ({ asset }) => {
-      const element = document.createElement('a');
-      element.setAttribute('href', `/uploads/${asset}`);
-      element.setAttribute(
-        'download',
-        `backup-${new Date().toISOString()}.bin`,
-      );
-      element.click();
-      onSuccess(SUCCESS_EXPORT);
-    },
-  );
-};
+// const downloadBackup = async () => {
+//   await exportWorkspace(route.params['workspace'] as string).then(
+//     ({ asset }) => {
+//       const element = document.createElement('a');
+//       element.setAttribute('href', `/uploads/${asset}`);
+//       element.setAttribute(
+//         'download',
+//         `backup-${new Date().toISOString()}.bin`,
+//       );
+//       element.click();
+//       onSuccess(SUCCESS_EXPORT);
+//     },
+//   );
+// };
 
-const currentWorkspaceLogo = computed(() =>
-  typeof workspaceInfoForm.value?.logo === 'string'
-    ? workspaceInfoForm.value?.logo
-    : '',
-);
 
 const isWorkspaceLogo = computed(() => {
   return (

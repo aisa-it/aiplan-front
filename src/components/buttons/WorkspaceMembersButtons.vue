@@ -25,9 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-// core
-import { toRefs } from 'vue';
-
 // components
 import BinIcon from '../icons/BinIcon.vue';
 import EditIcon from '../icons/EditIcon.vue';
@@ -51,6 +48,5 @@ const emits = defineEmits([
   'delete'
 ]);
 
-const { isActive: is_active } = toRefs(props);
 
 </script>

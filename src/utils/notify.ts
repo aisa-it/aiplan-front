@@ -1,8 +1,7 @@
-import { useQuasar, Notify } from 'quasar';
+import {  Notify } from 'quasar';
 import { INotificationParams } from 'src/interfaces/notifications';
 import { BASE_ERROR, SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 
-const $q = useQuasar();
 
 export function handleNotify(notify: INotificationParams) {
   switch (notify.type) {

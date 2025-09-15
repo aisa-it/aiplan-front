@@ -17,7 +17,7 @@ const rows = ref([]);
 const rowsCount = ref(0);
 
 async function onRequest(p: any) {
-  const { page, rowsPerPage, sortBy, descending, rowsNumber } = p.pagination;
+  const { page, rowsPerPage, rowsNumber } = p.pagination;
 
   await getWorkspaceActivities(
     props.currentWsSlug as string,

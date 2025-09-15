@@ -140,7 +140,6 @@
 // core
 import {
   computed,
-  defineComponent,
   onBeforeMount,
   onUnmounted,
   ref,

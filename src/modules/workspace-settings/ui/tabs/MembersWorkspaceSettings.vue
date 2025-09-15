@@ -413,7 +413,7 @@ const editUser = (row: any) => {
 const handleRedirectToProfile = (id: string) => {
   if (id === user?.value.id) {
     router.push({
-      path: `/profile`,
+      path: '/profile',
     });
   } else if (props.currentWsSlug) {
     router.push({

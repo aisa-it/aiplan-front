@@ -38,8 +38,6 @@
 
 <script lang="ts">
 import { storeToRefs } from 'pinia';
-import { useQuasar } from 'quasar';
-import { BASE_ERROR, SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 import { INotification } from 'src/interfaces/notifications';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { logsRUS } from 'src/utils/translator';
@@ -49,11 +47,6 @@ export default defineComponent({
   name: 'NotificationAlert',
 
   setup() {
-    const q = useQuasar();
-    const setNotificationType = (type: string) => {
-      return;
-    };
-
     const store = useNotificationStore();
     const { notificationState } = storeToRefs(store);
 

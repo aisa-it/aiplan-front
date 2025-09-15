@@ -61,7 +61,6 @@ export default defineComponent({
     const userStore = useUserStore();
     const workspaceStore = useWorkspaceStore();
     const { user, userWorkspaces } = storeToRefs(userStore);
-    const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
     onMounted(async () => {
       LocalStorage.remove('next_url');
       workspaceStore.$reset();

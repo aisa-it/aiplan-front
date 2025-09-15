@@ -54,7 +54,6 @@ import CaptchaWidget from 'src/components/CaptchaWidget.vue';
 
 // constants
 import {
-  BASE_ERROR,
   SUCCESS_REGISTRATION_REQUEST,
 } from 'src/constants/notifications';
 import { useQuasar } from 'quasar';

@@ -104,7 +104,6 @@ import LinkDialog from './dialogs/LinkDialog.vue';
 import ConfirmDeleteLinkDialog from './dialogs/ConfirmDeleteLinkDialog.vue';
 
 import {
-  BASE_ERROR,
   SUCCESS_LINK_ADDING,
   SUCCESS_LINK_EDITING,
   SUCCESS_LINK_DELETING,

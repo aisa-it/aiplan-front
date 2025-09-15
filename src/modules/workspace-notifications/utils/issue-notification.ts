@@ -1,4 +1,3 @@
-import { getFullName } from 'src/utils/helpers';
 import { addSpaceIfCamelCase } from 'src/utils/strings';
 import { formatDate } from 'src/utils/time';
 import { translatePrioritets, translateVerb } from 'src/utils/translator';

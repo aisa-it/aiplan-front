@@ -190,7 +190,6 @@ import NotificationsAdminSettingsDialog from 'src/components/dialogs/Notificatio
 
 // constants
 import {
-  BASE_ERROR,
   SUCCESS_ADD_TO_FAVORITE,
   SUCCESS_REMOVE_FROM_FAVORITE,
 } from 'src/constants/notifications';

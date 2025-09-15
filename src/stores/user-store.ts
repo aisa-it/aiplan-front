@@ -13,14 +13,12 @@ import {
   DtoWorkspaceWithCount,
   TypesActivityTable,
   DtoUserLight,
-  AiplanNotificationViewRequest,
   DtoProjectLight,
   DtoProjectFavorites,
   DtoWorkspaceFavorites,
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
-  NotificationsNotificationResponse,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const usersApi = new (withInterceptors(Users))();

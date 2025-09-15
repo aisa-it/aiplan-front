@@ -161,7 +161,6 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const searchQuery = ref('');
 const myEntity = ref();
 const members = ref([]);
-const membersmap = ref({});
 const countMembers = ref(0);
 const selectAssigneeRef = ref();
 const loading = ref(false);

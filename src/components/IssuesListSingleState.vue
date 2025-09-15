@@ -430,7 +430,7 @@ export default defineComponent({
     // store to ref
     const { user } = storeToRefs(userStore);
     const { statesCache } = storeToRefs(statesStore);
-    const { currentProjectID, project } = storeToRefs(projectStore);
+    const {  project } = storeToRefs(projectStore);
     const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
     const { refreshIssues } = storeToRefs(issuesStore);
 

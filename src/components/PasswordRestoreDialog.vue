@@ -37,7 +37,6 @@ import { useDialogPluginComponent } from 'quasar';
 import CaptchaWidget from './CaptchaWidget.vue';
 import {
   SUCCESS_RESTORE_PASS,
-  ERROR_RESTORE_PASS,
 } from 'src/constants/notifications';
 export default {
   emits: [...useDialogPluginComponent.emits, 'update'],

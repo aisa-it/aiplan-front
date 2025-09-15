@@ -137,13 +137,13 @@ const handleStartImport = async () => {
     const keyPriorities = p as keyof EntityPrioritiesMapping;
 
     if (priorities.value[keyPriorities]?.id) {
-      filteredPriorities[keyPriorities] = priorities.value[keyPriorities]!.id;
+      filteredPriorities[keyPriorities] = priorities.value[keyPriorities].id;
     }
   }
 
   await importStore
     .startImport(
-      importStore.jiraProject!.key,
+      importStore.jiraProject.key,
       Object.assign({}, importStore.userInfo, {
         target_workspace_id: importStore.userWs.id as string,
         block_link_id: block.value.id,

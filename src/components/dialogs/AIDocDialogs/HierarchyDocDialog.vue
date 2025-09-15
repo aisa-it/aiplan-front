@@ -156,7 +156,7 @@ const handleDragStart = (event: any) => {
 const handleDragOver = (event: DragEvent) => {
   event.preventDefault();
   if (currentItemId.value !== event?.target?.id)
-    event.dataTransfer!.dropEffect = 'move';
+    event.dataTransfer.dropEffect = 'move';
 };
 
 const onDragEnter = (event: DragEvent) => {

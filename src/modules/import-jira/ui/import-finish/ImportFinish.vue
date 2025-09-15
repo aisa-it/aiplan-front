@@ -82,9 +82,6 @@ import { IssuesImportImportStatus } from '@aisa-it/aiplan-api-ts/src/data-contra
 //hooks
 const route = useRoute();
 
-// emits
-const emits = defineEmits(['next']);
-
 // store
 const importStore = useImportStore();
 const workspaceStore = useWorkspaceStore();

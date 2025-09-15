@@ -116,7 +116,7 @@ import EditorTipTapV2 from '../editorV2/EditorTipTapV2.vue';
 import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
 
 // stores
-const props = defineProps({
+defineProps({
   commentsList: { type: Array, required: true },
   docId: { type: String, required: false },
   isAutoSave: { type: Boolean, required: true },

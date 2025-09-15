@@ -1,7 +1,7 @@
 // core
 import tippy from 'tippy.js';
 import { v4 as uuidv4 } from 'uuid';
-import { Extension, mergeAttributes, Node, nodeInputRule } from '@tiptap/core';
+import { Extension, mergeAttributes, Node } from '@tiptap/core';
 import { Plugin, PluginKey } from 'prosemirror-state';
 import { Editor, VueNodeViewRenderer, VueRenderer } from '@tiptap/vue-3';
 import { all, createLowlight } from 'lowlight';
@@ -18,7 +18,6 @@ import Indent from '@weiruo/tiptap-extension-indent';
 import ResizeImage from 'tiptap-extension-resize-image';
 import { Underline } from '@tiptap/extension-underline';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { inputRegex } from '@tiptap/extension-image';
 
 // utils
 import { ICONS } from '../../../utils/icons';
@@ -845,7 +844,6 @@ export const CustomUnderline = Underline.extend({
 
 export const CustomLink = Link.extend({
   addProseMirrorPlugins() {
-    const { options } = this;
     return [
       ...this.parent?.(),
       new Plugin({
@@ -1134,7 +1132,7 @@ export const SpecialMentionHandler = Extension.create({
 
   addOptions() {
     return {
-      onCommentLink: (_data: any) => void 0,
+      onCommentLink: () => void 0,
     };
   },
 

@@ -81,7 +81,7 @@ export default defineComponent({
     SubIssues,
     IssuesExpansionItem,
   },
-  setup(props) {
+  setup() {
     const userStore = useUserStore();
 
     const route = useRoute();

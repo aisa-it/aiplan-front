@@ -26,7 +26,7 @@
           class="delete-btn"
           label="Удалить"
           v-close-popup
-          @click="$emit('onDelete')"
+          @click="emit('onDelete')"
         />
       </q-card-actions>
     </q-card>

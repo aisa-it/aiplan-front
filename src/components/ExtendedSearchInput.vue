@@ -71,7 +71,7 @@ export default defineComponent({
   components: { DefaultLoader },
   props: ['options', 'loading'],
   emits: ['handle-input'],
-  setup(props, { emit }) {
+  setup() {
     const searchQuery = ref('');
     const search = ref('');
     const showingMenu = ref(false);

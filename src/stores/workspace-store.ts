@@ -4,7 +4,6 @@ import { useUserStore } from './user-store';
 import {
   AiplanActivityTable,
   AiplanCreateWorkspaceRequest,
-  AiplanRequestMessage,
   DaoPaginationResponse,
   DtoProjectLight,
   DtoStateLight,

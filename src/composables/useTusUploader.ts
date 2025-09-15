@@ -132,7 +132,7 @@ export function useTusUploader(options: UseUploaderOptions) {
     }
   };
 
-  const deleteFile = (fileName: string, fileId?: string) => {
+  const deleteFile = (fileName: string) => {
     queue.value = queue.value.filter((f) => f.name !== fileName);
     uploadsState.value = uploadsState.value.filter((f) => f.name !== fileName);
     fileMap.delete(fileName);
@@ -206,7 +206,7 @@ export function useTusUploader(options: UseUploaderOptions) {
               size: file.size,
               error: err.message,
             },
-            ``,
+            '',
             () => retry(file.name),
           );
         }

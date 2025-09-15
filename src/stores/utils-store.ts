@@ -5,7 +5,6 @@ import { ReleaseNotes } from '@aisa-it/aiplan-api-ts/src/ReleaseNotes';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import {
   API_AUTH_PREFIX,
-  API_DOCS_PREFIX,
   API_USERS_ME_PREFIX,
   API_WORKSPACES_PREFIX,
 } from 'src/constants/apiPrefix';

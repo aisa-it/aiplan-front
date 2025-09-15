@@ -19,16 +19,13 @@ import { onMounted } from 'vue';
 
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
 // import ProjectLoader from 'src/components/loaders/ProjectLoader.vue';
 
 const router = useRouter();
 const projectStore = useProjectStore();
-const workspaceStore = useWorkspaceStore();
 const viewProps = useViewPropsStore();
 const { currentProjectID, isLoadProjectInfo } = storeToRefs(projectStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const getCurrentProject = async () => {
   isLoadProjectInfo.value = true;

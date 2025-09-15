@@ -1,7 +1,5 @@
 import { Integrations } from '@aisa-it/aiplan-api-ts/src/Integrations';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
-import { API_IMPORT_JIRA_PREFIX } from 'src/constants/apiPrefix';
-import { api } from 'src/stores/aiplan-store';
 import {
   EntityJiraInfo,
   IssuesImportImportStatus,

@@ -8,17 +8,12 @@ import { useWorkspaceStore } from './workspace-store';
 import { useRolesStore } from './roles-store';
 import {
   AiplanCreateProjectRequest,
-  AiplanGetRulesLogfilterRequest,
   AiplanProjectNotificationRequest,
-  AiplanUpdateStateRequest,
   DaoPaginationResponse,
-  DtoEntityActivityFull,
   DtoLabelLight,
   DtoProject,
   DtoProjectMember,
   DtoProjectMemberLight,
-  DtoRulesLog,
-  DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 

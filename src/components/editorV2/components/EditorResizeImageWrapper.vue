@@ -81,7 +81,6 @@ import {
   shallowRef,
   PropType,
   inject,
-  onMounted,
 } from 'vue';
 import { Editor, NodeViewWrapper } from '@tiptap/vue-3';
 // utils

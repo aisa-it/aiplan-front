@@ -104,7 +104,7 @@ export function isValidDate(val: string): boolean | string {
   if (!match) return message;
 
   // Проверка существования даты
-  const [_, day, month, year] = match;
+  const [day, month, year] = match;
   const date = new Date(`${year}-${month}-${day}`);
 
   if (

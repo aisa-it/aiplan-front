@@ -145,7 +145,6 @@ import { ref, onBeforeMount, onUnmounted, onMounted } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { useLoaderStore } from 'src/stores/loader-store';
 
 // utils
 import { isEmail } from 'src/utils/validation';
@@ -167,7 +166,6 @@ const $q = useQuasar();
 const api = useAiplanStore();
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
-const loaderStore = useLoaderStore();
 
 const router = useRouter();
 const { isSingUp } = storeToRefs(utilsStore);

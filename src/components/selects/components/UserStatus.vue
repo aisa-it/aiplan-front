@@ -27,7 +27,6 @@
 import {
   formatDateTime,
   formatTime,
-  isDateGreaterThanToday,
   isTodayDate,
 } from 'src/utils/time';
 

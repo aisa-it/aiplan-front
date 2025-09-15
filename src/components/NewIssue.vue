@@ -38,9 +38,6 @@ import NewIssueDialog from './NewIssueDialog.vue';
 import NewProjectDialog from './dialogs/NewProjectDialog.vue';
 import CreateDocPageDialog from './dialogs/AIDocDialogs/CreateDocPageDialog.vue';
 
-// emits
-const emit = defineEmits(['update']);
-
 // route
 const route = useRoute();
 

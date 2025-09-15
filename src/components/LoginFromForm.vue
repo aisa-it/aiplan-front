@@ -74,9 +74,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useNotificationStore } from 'src/stores/notification-store';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
-import { ERROR_AUTH, ERROR_AUTH_BLOCKED } from 'src/constants/notifications';
 import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
 import NotificationAlert from 'src/components/notifications/NotificationAlert.vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -87,7 +85,6 @@ import { useQuasar } from 'quasar';
 const api = useAiplanStore();
 const loaderStore = useLoaderStore();
 const quasar = useQuasar();
-const { setNotificationView } = useNotificationStore();
 
 const password = ref('');
 const email = ref('');

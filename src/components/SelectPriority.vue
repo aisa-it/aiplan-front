@@ -51,7 +51,6 @@ import { defineComponent } from 'vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
-import PriorityIcon from 'src/components/icons/PriorityIcon.vue';
 
 export default defineComponent({
   name: 'SelectPriority',

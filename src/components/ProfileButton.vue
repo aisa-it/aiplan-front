@@ -76,7 +76,6 @@ import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { useLoaderStore } from 'src/stores/loader-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
@@ -86,7 +85,6 @@ import aiplan from 'src/utils/aiplan';
 // components
 import AvatarImage from './AvatarImage.vue';
 import {
-  stopGlobalLoading,
   useGlobalLoading,
 } from 'src/composables/useGlobalLoader';
 
@@ -101,7 +99,6 @@ export default defineComponent({
     const store = useAiplanStore();
     const userStore = useUserStore();
     const stateStore = useStatesStore();
-    const loaderStore = useLoaderStore();
     const projectStore = useProjectStore();
     const workspaceStore = useWorkspaceStore();
     const singleIssueStore = useSingleIssueStore();

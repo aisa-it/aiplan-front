@@ -64,8 +64,6 @@ import { issueSingleComment } from 'src/modules/single-issue/services/api';
 // stores
 const route = useRoute();
 
-const emit = defineEmits(['updateComponent']);
-
 const bus = inject('bus') as EventBus;
 
 const router = useRouter();
