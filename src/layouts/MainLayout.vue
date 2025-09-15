@@ -37,15 +37,7 @@ import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import {
-  ref,
-  watch,
-  computed,
-  onUnmounted,
-  onBeforeMount,
-  inject,
-  nextTick,
-} from 'vue';
+import { ref, watch, computed, onUnmounted, onBeforeMount, inject } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -170,7 +162,7 @@ onBeforeMount(async () => {
     !router.currentRoute.value.fullPath.includes('profile') &&
     (user.value?.last_workspace_slug || userWorkspaces.value.length)
   ) {
-    router.replace(
+    router.push(
       `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
     );
   }

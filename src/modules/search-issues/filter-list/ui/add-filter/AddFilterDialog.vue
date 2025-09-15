@@ -277,7 +277,6 @@ import {
   getFilterMembers,
   getFilterStates,
   updateFilter,
-  addMyFilter,
 } from '../../services/api';
 import { url } from 'inspector';
 

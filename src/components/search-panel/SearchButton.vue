@@ -7,15 +7,11 @@
   >
     <SearchIcon />
   </q-btn>
-  <SearchByFiltersDialog
-    :model-value="isSearchOpened"
-    @update:model-value="isSearchOpened = false"
-  />
+  <SearchByFiltersDialog v-model="isSearchOpened" />
 </template>
 <script setup lang="ts">
 //core
 import { ref, onUnmounted, nextTick } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
 //components
