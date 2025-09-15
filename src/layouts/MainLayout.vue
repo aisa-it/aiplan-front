@@ -37,12 +37,21 @@ import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { ref, watch, computed, onUnmounted, onBeforeMount, inject } from 'vue';
+import {
+  ref,
+  watch,
+  computed,
+  onUnmounted,
+  onBeforeMount,
+  inject,
+  nextTick,
+} from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useLoaderStore } from 'src/stores/loader-store';
+import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
@@ -66,6 +75,7 @@ const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const loaderStore = useLoaderStore();
 const singleIssueStore = useSingleIssueStore();
+const filterStore = useFiltersStore();
 
 // store to refs
 const { currentIssueID } = storeToRefs(singleIssueStore);
@@ -147,13 +157,21 @@ onBeforeMount(async () => {
     });
   }
 
+  if (route.name === 'filters') {
+    filterStore.setFilterId(route.params.filterId as string);
+
+    router.replace(
+      `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
+    );
+  }
+
   if (
     !route.params.workspace &&
     !router.currentRoute.value.fullPath.includes('profile') &&
     (user.value?.last_workspace_slug || userWorkspaces.value.length)
   ) {
-    router.push(
-      `${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
+    router.replace(
+      `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
     );
   }
 });
