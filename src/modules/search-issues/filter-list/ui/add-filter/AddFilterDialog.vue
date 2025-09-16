@@ -75,7 +75,7 @@
               <q-btn
                 class="secondary-btn-only-icon"
                 @click="copyLink"
-                :disable="!filter.public"
+                :disable="!props.currentFilter?.public"
                 v-if="isEdit"
               >
                 <LinkIcon color="var(--primary)" />
