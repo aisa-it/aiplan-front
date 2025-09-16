@@ -35,7 +35,7 @@
       </h6>
     </div>
     <q-btn
-      v-if="isDisabled === true"
+      v-if="isEdit === true"
       class="btn upload-btn full-w q-mt-md"
       no-caps
       @click="uploadInput?.click()"
@@ -126,7 +126,7 @@
           <SelectAttachmentsCard
             v-for="row in rows"
             :key="row.id"
-            :isDisabled="isDisabled"
+            :isEdit="isEdit"
             :row="row"
             class="inline-block"
             @delete="handleDeleteClick(row)"
@@ -140,7 +140,7 @@
           <SelectAttachmentsCard
             v-for="file of uploadsStates"
             :key="file.name"
-            :isDisabled="isDisabled"
+            :isEdit="isEdit"
             :row="{
               asset: {
                 name: file.name,
@@ -228,7 +228,7 @@ import AttachmentsInfo from './AttachmentsInfo.vue';
 const props = defineProps<{
   id: string;
   entityType: 'doc' | 'issue';
-  isDisabled?: boolean;
+  isEdit?: boolean;
   deleteAttachmentFunc: (value: string) => Promise<void>;
   getAttachmentFunc: (projectID: Ref<string>, issueID: Ref<string>) => any; //getAttachmentFunc: () => Promise<void>;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
