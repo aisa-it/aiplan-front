@@ -11,6 +11,11 @@ export function issueNotificationRender(data: any, detail: any) {
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
                     href=${detail.issue.url}>
                     ${detail.project.identifier}-${detail.issue?.sequence_id} "${detail.issue?.name}"<a/>`;
+
+  const customLink = (href: string, name: string) => `<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    href=${href}>
+                    "${name}"<a/>`;
   const entityDetail = Boolean(data.new_value)
     ? data.new_entity_detail
     : data.old_entity_detail;
@@ -100,8 +105,8 @@ export function issueNotificationRender(data: any, detail: any) {
         data.new_value !== ''
           ? data.new_value
           : data.old_value !== ''
-          ? data.old_value
-          : '';
+            ? data.old_value
+            : '';
       return `<span>${action} ${value} для задачи ${link}
                 <span/>`;
 
@@ -114,8 +119,8 @@ export function issueNotificationRender(data: any, detail: any) {
         data.new_value !== ''
           ? data.new_value
           : data.old_value !== ''
-          ? data.old_value
-          : '';
+            ? data.old_value
+            : '';
       return `<span>${action} ${value} для задачи ${link}
                 <span/>`;
 
@@ -128,8 +133,8 @@ export function issueNotificationRender(data: any, detail: any) {
         data.new_value !== ''
           ? data.new_value
           : data.old_value !== ''
-          ? data.old_value
-          : '';
+            ? data.old_value
+            : '';
       return `<span>${action} ${value} для задачи ${link}
                             <span/>`;
 
@@ -175,6 +180,18 @@ export function issueNotificationRender(data: any, detail: any) {
       action = translateVerb(data.verb);
       value = 'комментарий';
       return `<span>${action} ${value} в задачe ${link}<span/>`;
+    case 'project':
+      const newProject = data.new_value
+        ? `в проект ${customLink(data.new_entity_detail.url, data.new_entity_detail.name)}`
+        : 'в скрытый/удаленный проект';
+
+      const oldProject = data.old_value
+        ? `из проекта ${customLink(data.old_entity_detail.url, data.old_entity_detail.name)}`
+        : 'из скрытого/удаленного проекта';
+
+      if (data.verb === 'move') {
+        return `<span>перенес(-ла) задачу ${link} ${oldProject} ${newProject} </span>`;
+      }
     case 'issue_transfer':
       const newVal = data.new_value
         ? `в проект "${data.new_value}"`
