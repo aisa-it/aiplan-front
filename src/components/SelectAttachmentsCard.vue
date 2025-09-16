@@ -95,7 +95,7 @@
             </q-btn>
             <q-btn
               v-if="!progress"
-              :disable="!isDisabled"
+              :disable="!isEdit"
               padding="4px 4px"
               flat
               dense
@@ -173,7 +173,7 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 interface IProps {
   row: IAttachmentCard;
-  isDisabled?: boolean;
+  isEdit?: boolean;
   progress?: number | null | undefined;
   status?: 'pending' | 'uploading' | 'success' | 'error' | 'cancelled';
 }

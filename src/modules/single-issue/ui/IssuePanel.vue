@@ -25,7 +25,7 @@
 
         <SelectAttachments
           entityType="issue"
-          :is-disabled="
+          :is-edit="
             hasPermissionByIssue(issueData, project, 'change-issue-secondary')
           "
           :delete-attachment-func="deleteAttachment"
