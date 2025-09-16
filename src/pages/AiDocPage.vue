@@ -80,7 +80,7 @@
             :delete-attachment-func="deleteAttachment"
             :get-attachment-func="getAttachmentsList"
             :upload-attachment-func="uploadAttachments"
-            :is-disabled="hasPermission('change-issue-secondary')"
+            :is-edit="canEdit"
             :id="documentValue.id"
           />
           <div class="q-px-sm">
