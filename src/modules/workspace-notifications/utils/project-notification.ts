@@ -11,17 +11,25 @@ export function projectNotificationRender(
   let action = '';
   let value = '';
   const projectLink = `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
                     href=${getProjectLink(
                       detail?.project?.workspace as string,
                       detail?.project?.identifier as string,
                     )}>
                     "${detail?.project?.name}"</a>`;
 
-  const issueLink = `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${data?.new_entity_detail?.url}>
-                    "${data.new_value}"</a>`;
+  const issueLink = (href: string, prefix: string, name: string) => {
+    return `<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    href=${href}>
+                    ${prefix} "${name}"</a>`;
+  };
+  const customLink = (href: string, name: string) => {
+    return `<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    href=${href}>
+                    "${name}"</a>`;
+  };
   switch (data.field) {
     case 'emoji':
       action = 'изменил(-а)';
@@ -45,9 +53,9 @@ export function projectNotificationRender(
 
     case 'network':
       action = 'изменил(-а)';
-      return `<span>${action} приватность проекта ${projectLink} с "${valToNet(
-        Boolean(data.old_value),
-      )?.label}" на "${valToNet(Boolean(data.new_value))?.label}"<span/>`;
+      return `<span>${action} приватность проекта ${projectLink} с "${
+        valToNet(Boolean(data.old_value))?.label
+      }" на "${valToNet(Boolean(data.new_value))?.label}"<span/>`;
 
     case 'project_lead':
       action = 'изменил(-а)';
@@ -99,9 +107,9 @@ export function projectNotificationRender(
       action = translateVerb(data.verb);
       return `<span>${action} роль пользователя ${getFullName(
         data.new_entity_detail,
-      )} ${projectLink ? `проекта ${projectLink}` : ''} с "${valToRole(
-        +data.old_value,
-      )?.label}" на "${valToRole(+data.new_value)?.label}" <span/>`;
+      )} ${projectLink ? `проекта ${projectLink}` : ''} с "${
+        valToRole(+data.old_value)?.label
+      }" на "${valToRole(+data.new_value)?.label}" <span/>`;
 
     case 'state':
       action = translateVerb(data.verb);
@@ -177,7 +185,7 @@ export function projectNotificationRender(
     case 'issue':
       if (data.verb === 'created') {
         action = 'создал(-а)';
-        return `<span>${action} задачу ${issueLink} ${
+        return `<span>${action} задачу ${issueLink(data?.new_entity_detail?.url, data.new_value, data?.new_entity_detail?.name)} ${
           projectLink ? `в проекте ${projectLink}` : ''
         }<span/>`;
       }
@@ -187,6 +195,16 @@ export function projectNotificationRender(
           "${data.old_value}" ${
             projectLink ? `в проекте ${projectLink}` : ''
           }<span/>`;
+      }
+
+      if (data.verb === 'copied') {
+        return `<span>скопировал(-а) задачу ${issueLink(data?.new_entity_detail?.url, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
+      }
+      if (data.verb === 'removed') {
+        return `<span>убрал(-а) задачу ${issueLink(data?.old_entity_detail?.url, data.old_value, data?.old_entity_detail?.name)} из проекта ${customLink(detail?.project?.url ?? '', detail?.project?.name ?? '')} </span>`;
+      }
+      if (data.verb === 'added') {
+        return `<span>добавил(-а) задачу ${issueLink(data?.new_entity_detail?.url, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
       }
 
     default:
