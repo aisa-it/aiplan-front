@@ -3,6 +3,7 @@
     :rows="rows"
     :rows-count="rowsCount"
     :only-project="true"
+    :only-workspace="true"
     @update="onRequest"
   />
 </template>
