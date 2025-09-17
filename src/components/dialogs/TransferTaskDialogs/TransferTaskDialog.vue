@@ -26,7 +26,7 @@
           </template>
         </q-select>
 
-        <template v-if="isNotSameProjectSelected">
+        <template v-if="isDifferentProjectSelected">
           <div v-for="(item, index) of actionsType" :key="item.value">
             <q-item tag="label">
               <q-item-section>
@@ -206,7 +206,7 @@
           label="Выполнить"
           class="primary-btn"
           :disable="
-            isNotSameProjectSelected && !(selectedProject && selectedAction)
+            isDifferentProjectSelected && !(selectedProject && selectedAction)
           "
           @click="transfer"
         />
@@ -295,7 +295,7 @@ const router = useRouter();
 const transferModel = ref<IIssueTransferById | IIssueTransferByLabel>(
   DEFAULT_TRANSFER_MODEL,
 );
-const transferId = ref();
+const transferData = ref();
 const transferLabel = ref();
 const dialogRef = ref();
 const issueData = ref(props.issue);
@@ -322,7 +322,7 @@ const actionsType = [
 const loading = ref(false);
 
 // computed
-const isNotSameProjectSelected = computed<boolean>(
+const isDifferentProjectSelected = computed<boolean>(
   () => selectedProject.value?.identifier !== (route.params.project as string),
 );
 
@@ -355,30 +355,29 @@ const clear = () => {
   transferModel.value.linked_issues = false;
   selectedProject.value = null;
   selectedAction.value = null;
-  transferId.value = null;
+  transferData.value = null;
 };
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   if (type === 'ok') {
-    const link = transferId.value
+    const link = transferData.value.id
       ? getIssueLink(
-            currentWorkspaceSlug.value,
-            selectedProject.value.identifier,
-            transferId.value,
-          )
+          currentWorkspaceSlug.value,
+          selectedProject.value.identifier,
+          transferData.value.id,
+        )
       : getProjectLink(
           currentWorkspaceSlug.value,
           selectedProject.value.identifier,
         );
-
-    const copyMessage = transferId.value
+    const copyMessage = transferData.value.sequence_id
       ? getSuccessCopyIssueMessage(
           link,
           `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
+          `${selectedProject.value.identifier}-${transferData.value.sequence_id}`,
         )
       : getSuccessCopyIssueByLabelMessage(link);
-
-    const transferMessage = transferId.value
+    const transferMessage = transferData.value.id
       ? getSuccessTransferIssueMessage(
           link,
           `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
@@ -421,10 +420,24 @@ const sendDataById = async () => {
       transferDataById as IIssueTransferById,
       isCreateEntity.value,
     )
-    .then((res) => {
-      transferId.value = res.data.id;
-      dialogRef.value.hide();
+    .then(async (res) => {
+      const issueResponse = await singleIssueStore.getIssueDataById(
+        currentWorkspaceSlug.value,
+        selectedProject.value.identifier,
+        res.data.id,
+      );
+      console.info(issueResponse)
+      const newIssueData = issueResponse.data;
 
+      transferData.value = {
+        id: newIssueData.id,
+        sequence_id: newIssueData.sequence_id,
+        project_identifier:
+          newIssueData.project_detail?.identifier ||
+          newIssueData.project?.identifier,
+      };
+      console.info(transferData.value)
+      dialogRef.value.hide();
       onCancel('ok');
     })
     .catch((err) => (transferErrors.value = err.response?.data?.errors))
@@ -519,9 +532,12 @@ watch(
   () => (projects.value = workspaceProjects.value as IProject[]),
 );
 
-watch(() => isNotSameProjectSelected.value, () => {
-  if (!isNotSameProjectSelected.value) selectedAction.value = ACTIONS.COPY
-})
+watch(
+  () => isDifferentProjectSelected.value,
+  () => {
+    if (!isDifferentProjectSelected.value) selectedAction.value = ACTIONS.COPY;
+  },
+);
 
 watch(
   () => selectedAction.value,

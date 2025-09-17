@@ -215,9 +215,10 @@ export function projectActivityRender(
     case 'issue':
       const linkIssue = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${`/${activity.workspace_detail?.slug}/projects/${activity?.project_detail?.id}/issues/${activity?.new_entity_detail?.sequence_id}`}>
-                    ${activity?.new_value} "${
-                      activity?.new_entity_detail?.name
+                    href=${`/${activity.workspace_detail?.slug}/projects/${activity?.project_detail?.id}/issues/${activity?.new_entity_detail?.sequence_id || activity?.old_entity_detail?.sequence_id}`}>
+                    ${activity?.new_value || activity?.old_value} "${
+                      activity?.new_entity_detail?.name ||
+                      activity?.old_entity_detail?.name
                     }"</a>`;
       if (activity.verb === 'added') {
         if (activity.project_detail?.identifier)
@@ -239,6 +240,10 @@ export function projectActivityRender(
           }`;
       } else if (activity.verb === 'deleted') {
         return `${`<span> удалил(-а) задачу ${activity?.old_value} ${workspaceSource}<span/>`}`;
+      } else if (activity.verb === 'copied') {
+        return `<span> скопировал(-а) задачу ${linkIssue} ${link ? 'в проект' + link : ''} ${workspaceSource}<span/>`;
+      } else if (activity.verb === 'removed') {
+        return `<span> удалил(-а) задачу ${linkIssue} ${link ? 'из проекта' + link : ''} ${workspaceSource}<span/>`;
       }
 
     case 'template':

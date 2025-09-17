@@ -4,8 +4,12 @@ const getSuccessCreateSubissueMessage = (href: string) =>
 const getSuccessCreateIssueMessage = (href: string, issueIndex: string) =>
   `<a target="_blank" href="${href}" class="primary-link">Задача ${issueIndex}</a> создана`;
 
-const getSuccessCopyIssueMessage = (href: string, issueIndex: string) =>
-  `<a target="_blank" href="${href}" class="primary-link">Задача ${issueIndex}</a> скопирована`;
+const getSuccessCopyIssueMessage = (
+  targetHref: string,
+  sourceIssueIndex: string,
+  targetIssueIndex: string,
+) =>
+  `Задача ${sourceIssueIndex} скопирована: <a target="_blank" href="${targetHref}" class="primary-link">${targetIssueIndex}</a>`;
 
 const getSuccessDeleteIssueMessage = (issueIndex: string) =>
   `Задача ${issueIndex} удалена`;
