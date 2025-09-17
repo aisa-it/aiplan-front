@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+console.time('settings-mount');
 // utils
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -40,6 +41,7 @@ function setAnotherTitle(title: string) {
 }
 
 onMounted(async () => {
+  console.timeEnd('settings-mount');
   await workspaceStore.getWorkspaceInfo(route.params.workspace as string);
 
   if (hasPermissionByWorkspace(workspaceInfo?.value, 'ws-settings') === false) {

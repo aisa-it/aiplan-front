@@ -19,18 +19,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 // components
 import SettingsTabs from 'src/shared/components/SettingsTabs.vue';
 import LoadPage from 'src/pages/LoadPage.vue';
-import {
-  GeneralWorkspaceSettings,
-  MembersWorkspaceSettings,
-  ActivitiesWorkspaceSettings,
-  ActivitiesMapWorkspaceSettings,
-  IntegrationWorkspaceSettings,
-} from 'src/modules/workspace-settings/ui/tabs';
+// import {
+//   GeneralWorkspaceSettings,
+//   MembersWorkspaceSettings,
+//   ActivitiesWorkspaceSettings,
+//   ActivitiesMapWorkspaceSettings,
+//   IntegrationWorkspaceSettings,
+// } from 'src/modules/workspace-settings/ui/tabs';
 
 import { useLoad } from 'src/composables/useLoad';
 
@@ -57,11 +57,51 @@ const props = defineProps({
 
 const wsSettingsTab = ref(0);
 const componentTabs = [
-  { name: 0, component: GeneralWorkspaceSettings },
-  { name: 1, component: MembersWorkspaceSettings },
-  { name: 2, component: ActivitiesWorkspaceSettings },
-  { name: 3, component: ActivitiesMapWorkspaceSettings },
-  { name: 4, component: IntegrationWorkspaceSettings },
+  {
+    name: 0,
+    component: defineAsyncComponent(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/GeneralWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 1,
+    component: defineAsyncComponent(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/MembersWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 2,
+    component: defineAsyncComponent(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/ActivitiesWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 3,
+    component: defineAsyncComponent(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/ActivitiesMapWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 4,
+    component: defineAsyncComponent(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/IntegrationWorkspaceSettings.vue'
+        ),
+    ),
+  },
 ];
 const listTabs = [
   {
@@ -95,6 +135,6 @@ const activeComponent = computed(
 );
 
 onMounted(async () => {
-  await onLoad(currentWsSlug.value, props.isInAdminPanel);
+  onLoad(currentWsSlug.value, props.isInAdminPanel);
 });
 </script>

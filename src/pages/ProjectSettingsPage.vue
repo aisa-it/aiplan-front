@@ -133,5 +133,8 @@ const projectInfoRefresh = async () => {
     });
 };
 
-onMounted(async () => await projectInfoRefresh());
+onMounted(async () => {
+  performance.mark('маунт прожект сеттингс');
+  await projectInfoRefresh();
+});
 </script>

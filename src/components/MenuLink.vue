@@ -89,6 +89,7 @@
                   no-caps
                   v-close-popup
                   :style="'font-size: 12px;'"
+                  @click="performance.mark('нажали на настрйоки проекта')"
                   :to="`/${currentWorkspaceSlug}/projects/${
                     identifier || id
                   }/settings`"
@@ -107,8 +108,8 @@
                   :style="'font-size: 12px;'"
                   @click="
                     {
-                      (selectedProject = project),
-                        (isNotificationsSettingsOpen = true);
+                      ((selectedProject = project),
+                        (isNotificationsSettingsOpen = true));
                     }
                   "
                 >
@@ -126,8 +127,8 @@
                   :style="'font-size: 12px;'"
                   @click="
                     {
-                      (selectedProject = project),
-                        (isNotificationsAdminSettingsOpen = true);
+                      ((selectedProject = project),
+                        (isNotificationsAdminSettingsOpen = true));
                     }
                   "
                 >
