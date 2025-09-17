@@ -155,6 +155,7 @@ onBeforeMount(async () => {
     router.replace(
       `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
     );
+    return;
   }
 
   if (
