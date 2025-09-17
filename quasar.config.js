@@ -119,6 +119,10 @@ module.exports = configure(function (ctx) {
           target: env.VITE_API_URL,
           changeOrigin: true,
         },
+        '/sf': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+        },
         '/api': {
           target: env.VITE_API_URL,
           changeOrigin: true,

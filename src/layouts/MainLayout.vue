@@ -43,6 +43,7 @@ import { ref, watch, computed, onUnmounted, onBeforeMount, inject } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useLoaderStore } from 'src/stores/loader-store';
+import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
@@ -65,6 +66,7 @@ const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const loaderStore = useLoaderStore();
 const singleIssueStore = useSingleIssueStore();
+const filterStore = useFiltersStore();
 
 // store to refs
 const { currentIssueID } = storeToRefs(singleIssueStore);
@@ -144,6 +146,15 @@ onBeforeMount(async () => {
       status_emoji: '',
       status_end_date: null,
     });
+  }
+
+  if (route.name === 'filters') {
+    filterStore.setFilterId(route.params.filterId as string);
+
+    router.replace(
+      `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
+    );
+    return;
   }
 
   if (

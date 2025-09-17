@@ -3,6 +3,7 @@ import {
   DtoSearchFilterLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { defineStore } from 'pinia';
+import { getFilterById } from '../services/api';
 
 export const useFiltersStore = defineStore('filters-store', {
   state: () => ({
@@ -20,6 +21,7 @@ export const useFiltersStore = defineStore('filters-store', {
       assignees: true,
       labels: true,
     },
+    filterIdFromRoute: null as string | null,
   }),
   actions: {
     resetColumns() {
@@ -35,6 +37,9 @@ export const useFiltersStore = defineStore('filters-store', {
         assignees: true,
         labels: true,
       });
+    },
+    setFilterId(filterId: string | null) {
+      this.filterIdFromRoute = filterId;
     },
   },
 });

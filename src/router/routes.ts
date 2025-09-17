@@ -93,6 +93,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('src/components/forms/pages/FormPage.vue'),
   },
   {
+    path: '/filters/:filterId',
+    name: 'filters',
+    component: () => import('src/layouts/MainLayout.vue'),
+  },
+  {
     path: '/signin',
     component: () => import('components/LoginPanel.vue'),
   },

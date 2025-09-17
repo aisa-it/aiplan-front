@@ -5,6 +5,7 @@
     @hide="
       () => {
         emits('hide');
+        filterStore.setFilterId(null);
         filter = JSON.parse(JSON.stringify(INIT_FILTER));
       }
     "
@@ -12,7 +13,7 @@
     <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
-          v-if="!currentFilter"
+          v-if="!isEdit"
           v-model="leftDrawerOpen"
           show-if-above
           :width="200"
@@ -41,7 +42,7 @@
             >
               <div class="no-wrap row centered-horisontally">
                 <q-btn
-                  v-if="!currentFilter"
+                  v-if="!isEdit"
                   flat
                   dense
                   round
@@ -53,24 +54,34 @@
                   <MenuIcon />
                 </q-btn>
                 <h6 style="font-weight: 600; margin: 0 !important">
-                  {{
-                    currentFilter ? 'Редактирование фильтра' : 'Новый фильтр'
-                  }}
+                  {{ isEdit ? 'Редактирование фильтра' : 'Новый фильтр' }}
                 </h6>
               </div>
               <q-btn flat dense v-close-popup><CloseIcon /></q-btn>
             </div>
-            <q-input
-              ref="nameRef"
-              v-model="filter.name"
-              label="Название"
-              dense
-              :rules="[
-                (val) =>
-                  (val && val.length > 0) || 'Необходимо ввести название',
-              ]"
-              class="base-input q-mb-sm"
-            />
+            <div class="row items-start justify-between">
+              <q-input
+                ref="nameRef"
+                v-model="filter.name"
+                label="Название"
+                dense
+                :rules="[
+                  (val) =>
+                    (val && val.length > 0) || 'Необходимо ввести название',
+                ]"
+                class="base-input q-mb-sm"
+                :class="isEdit ? 'col-11' : 'col-12'"
+              />
+              <q-btn
+                class="secondary-btn-only-icon"
+                @click="copyLink"
+                :disable="!props.currentFilter?.public"
+                v-if="isEdit"
+              >
+                <LinkIcon color="var(--primary)" />
+                <HintTooltip> Скопировать ссылку</HintTooltip>
+              </q-btn>
+            </div>
             <q-input
               v-model="filter.description"
               label="Описание"
@@ -207,7 +218,7 @@
                 style="padding: 8px 8px 0 !important"
               >
                 <q-btn
-                  v-if="!currentFilter"
+                  v-if="!isEdit"
                   no-caps
                   class="secondary-btn"
                   @click="emits('saveTempFilter', filter)"
@@ -230,7 +241,7 @@
 // core
 import { debounce } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -248,6 +259,7 @@ import {
 import AddFiltersList from './AddFiltersList.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import CloseIcon from 'src/components/icons/CloseIcon.vue';
+import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 import {
@@ -404,6 +416,10 @@ const { getWidthStyle: selectWorkspacesFilterWidth } = useResizeObserverSelect(
   selectWorkspacesFilterRef,
 );
 
+const isEdit = computed(
+  () => !!props.currentFilter?.id && !filterStore.filterIdFromRoute,
+);
+
 // ---------------------- Updating ----------------------
 
 function fixCurrentUserInList(result: []) {
@@ -545,25 +561,26 @@ const handleSaveFilter = async () => {
   nameRef.value.validate();
   if (nameRef.value.hasError) return;
 
-  if (props.currentFilter && props.currentFilter?.id) {
-    let filterBody = {
-      name: filter.value.name,
-      description: filter.value.description,
-      filter: filter.value.filter,
-      public: filter.value.public,
-    };
-    await updateFilter(props.currentFilter?.id, filterBody).then(() => {
-      refreshFilters();
-      emits('refresh');
-      dialogRef.value.hide();
-    });
-  } else {
-    await createSearchFilter(filter.value).then(() => {
-      refreshFilters();
-      emits('refresh');
-      dialogRef.value.hide();
-    });
+  if (!isEdit.value) {
+    await createSearchFilter(filter.value);
+    refreshFilters();
+    emits('refresh');
+    dialogRef.value.hide();
+    return;
   }
+
+  let filterBody = {
+    name: filter.value.name,
+    description: filter.value.description,
+    filter: filter.value.filter,
+    public: filter.value.public,
+  };
+
+  await updateFilter(props.currentFilter?.id, filterBody).then(() => {
+    refreshFilters();
+    emits('refresh');
+    dialogRef.value.hide();
+  });
 };
 
 const editFilter = async (f: any) => {
@@ -724,6 +741,12 @@ const searchLabels = async (searchQuery?: string): Promise<DtoLabelLight[]> => {
 const setOnlyActive = (value: boolean, resetStates = false) => {
   if (value || resetStates) filter.value.filter.states = [];
   filter.value.filter.only_active = value;
+};
+
+const copyLink = () => {
+  navigator.clipboard.writeText(
+    props.currentFilter?.short_url ?? props.currentFilter?.url,
+  );
 };
 
 watch(

@@ -11,4 +11,8 @@ const getMyFilters = async () => {
   return (await api.getMySearchFilterList()).data;
 };
 
-export { getFilters, getMyFilters };
+const getFilterById = async (filterId: string) => {
+  return (await api.getSearchFilter(filterId)).data;
+};
+
+export { getFilters, getMyFilters, getFilterById };

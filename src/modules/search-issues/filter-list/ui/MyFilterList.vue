@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -160,7 +160,7 @@ import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import ConfirmDeleteFilterDialog from 'src/modules/search-issues/filter-list/ui/ConfirmDeleteFilterDialog.vue';
 
 //services
-import { getMyFilters } from '../../services/api';
+import { getMyFilters, getFilterById } from '../../services/api';
 
 const emits = defineEmits<{
   'update-filter': [value?: TypesIssuesListFilters];
@@ -168,6 +168,7 @@ const emits = defineEmits<{
 
 // store
 const filtersStore = useFiltersStore();
+
 // store to refs
 const { myFilterList } = storeToRefs(filtersStore);
 
@@ -187,4 +188,11 @@ const getUserFilters = async () => {
   filters.value = await getMyFilters();
   loading.value = false;
 };
+
+onMounted(async () => {
+  if (!!filtersStore.filterIdFromRoute) {
+    filterToEdit.value = await getFilterById(filtersStore.filterIdFromRoute);
+    isOpenAddingFilter.value = true;
+  }
+});
 </script>
