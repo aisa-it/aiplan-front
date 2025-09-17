@@ -6,7 +6,11 @@ import aiplan from 'src/utils/aiplan';
 import { translateAction } from './actionTranslations';
 import { useRoute } from 'vue-router';
 
-export function projectActivityRender(activity: any, onlyProject = false, onlyWorkspace = false) {
+export function projectActivityRender(
+  activity: any,
+  onlyProject = false,
+  onlyWorkspace = false,
+) {
   const route = useRoute();
   let action = '';
   let value = '';
@@ -28,11 +32,9 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
   );
   const issueLink = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${`/${activity.workspace_detail
-                      ?.slug}/projects/${activity?.project_detail
-                      ?.identifier}/issues/${
-                      issueLinkIdentifier.value.split('-')[1]
-                    }`}>
+                    href=${`/${activity.workspace_detail?.slug}/projects/${
+                      activity?.project_detail?.identifier
+                    }/issues/${issueLinkIdentifier.value.split('-')[1]}`}>
                     ${issueLinkIdentifier.value} "${issueLinkName.value}"</a>`;
   const workspaceSource = onlyWorkspace
     ? ''
@@ -56,10 +58,11 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
       return `<span>изменил(-а) идентификатор проекта ${link} с "${activity?.old_value}" на "${activity?.new_value}" ${workspaceSource}<span/>`;
 
     case 'public':
-      return `<span>изменил(-а) приватность проекта ${link} с "${valToNet(
-        JSON.parse(activity?.old_value),
-      )?.label}" на "${valToNet(JSON.parse(activity?.new_value))
-        ?.label}" ${workspaceSource}<span/>`;
+      return `<span>изменил(-а) приватность проекта ${link} с "${
+        valToNet(JSON.parse(activity?.old_value))?.label
+      }" на "${
+        valToNet(JSON.parse(activity?.new_value))?.label
+      }" ${workspaceSource}<span/>`;
 
     case 'project_lead':
       return `<span>изменил(-а) лидера проекта ${link} с ${getFullName(
@@ -105,8 +108,9 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
       if (activity?.verb === 'added')
         value = `${link ? `в проект ${link}` : ''} пользователя ${aiplan
           .UserName(activity.new_entity_detail)
-          .join(' ')} с ролью "${valToRole(+activity?.new_value)
-          ?.label}" ${workspaceSource}`;
+          .join(' ')} с ролью "${
+          valToRole(+activity?.new_value)?.label
+        }" ${workspaceSource}`;
       if (activity?.verb === 'remove')
         value = ` пользователя ${
           aiplan.UserName(activity.old_entity_detail).join(' ') ||
@@ -118,10 +122,11 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
       action = translateVerb(activity.verb);
       return `<span>${action} роль пользователя ${aiplan
         .UserName(activity.new_entity_detail)
-        .join(' ')} ${link ? `проекта ${link}` : ''} с "${valToRole(
-        +activity?.old_value,
-      )?.label}" на "${valToRole(+activity?.new_value)
-        ?.label}" ${workspaceSource}<span/>`;
+        .join(' ')} ${link ? `проекта ${link}` : ''} с "${
+        valToRole(+activity?.old_value)?.label
+      }" на "${
+        valToRole(+activity?.new_value)?.label
+      }" ${workspaceSource}<span/>`;
 
     case 'state':
       action = translateVerb(activity.verb);
@@ -151,22 +156,25 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
 
     case 'status_description':
       action = 'изменил(-а)';
-      return `<span>${action} описание статуса "${activity?.new_entity_detail
-        ?.name}" с "${activity?.old_value || 'Без описания'}" на "${
+      return `<span>${action} описание статуса "${
+        activity?.new_entity_detail?.name
+      }" с "${activity?.old_value || 'Без описания'}" на "${
         activity?.new_value || 'Без описания'
       }" ${link ? `в проекте ${link} ${workspaceSource}` : ''}<span/>`;
 
     case 'status_group':
       action = 'изменил(-а)';
-      return `<span>${action} группу статуса "${activity?.new_entity_detail
-        .name}" с "${stateRUS(activity?.old_value)}" на "${stateRUS(
+      return `<span>${action} группу статуса "${
+        activity?.new_entity_detail.name
+      }" с "${stateRUS(activity?.old_value)}" на "${stateRUS(
         activity?.new_value,
       )}" ${link ? `в проекте ${link} ${workspaceSource}` : ''} <span/>`;
 
     case 'status_color':
       action = 'изменил(-а)';
-      return `<span>${action} цвет статуса "${activity?.new_entity_detail
-        .name}" с "${activity?.old_value}" на "${activity?.new_value}" ${
+      return `<span>${action} цвет статуса "${
+        activity?.new_entity_detail.name
+      }" с "${activity?.old_value}" на "${activity?.new_value}" ${
         link ? `в проекте ${link} ${workspaceSource}` : ''
       }<span/>`;
 
@@ -198,17 +206,20 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
 
     case 'label_color':
       action = 'изменил(-а)';
-      return `<span>${action} цвет тега "${activity?.new_entity_detail
-        .name}" с "${activity?.old_value}" на "${activity?.new_value}" ${
+      return `<span>${action} цвет тега "${
+        activity?.new_entity_detail.name
+      }" с "${activity?.old_value}" на "${activity?.new_value}" ${
         link ? `в проекте ${link} ${workspaceSource}` : ''
       }<span/>`;
 
     case 'issue':
       const linkIssue = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${`/${activity.workspace_detail?.slug}/projects/${activity?.project_detail?.id}/issues/${activity?.new_entity_detail?.sequence_id}`}>
-                    ${activity?.new_value} "${activity?.new_entity_detail
-                      ?.name}"</a>`;
+                    href=${`/${activity.workspace_detail?.slug}/projects/${activity?.project_detail?.id}/issues/${activity?.new_entity_detail?.sequence_id || activity?.old_entity_detail?.sequence_id}`}>
+                    ${activity?.new_value || activity?.old_value} "${
+                      activity?.new_entity_detail?.name ||
+                      activity?.old_entity_detail?.name
+                    }"</a>`;
       if (activity.verb === 'added') {
         if (activity.project_detail?.identifier)
           return `${
@@ -229,6 +240,10 @@ export function projectActivityRender(activity: any, onlyProject = false, onlyWo
           }`;
       } else if (activity.verb === 'deleted') {
         return `${`<span> удалил(-а) задачу ${activity?.old_value} ${workspaceSource}<span/>`}`;
+      } else if (activity.verb === 'copied') {
+        return `<span> скопировал(-а) задачу ${linkIssue} ${link ? 'в проект' + link : ''} ${workspaceSource}<span/>`;
+      } else if (activity.verb === 'removed') {
+        return `<span> удалил(-а) задачу ${linkIssue} ${link ? 'из проекта' + link : ''} ${workspaceSource}<span/>`;
       }
 
     default:
