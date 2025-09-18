@@ -171,7 +171,8 @@ export const processImageFile = (image, schema, callback) => {
   const reader = new FileReader();
 
   reader.onload = (readerEvent) => {
-    const node = schema.nodes.image.create({
+    // TODO: пропал schema.nodes.image, блокировал вставку изображения, посмотреть куда делся
+    const node = schema.nodes.imageResize.create({
       src: readerEvent.target?.result,
       alt: image.name.replace(/\.[^/.]+$/, ''),
     });
@@ -378,6 +379,7 @@ export const CustomKeyboardBehaviour = Extension.create({
   },
 });
 
+// TODO: возможно уже не нужно
 export const DisableImagesExtension = Extension.create({
   addProseMirrorPlugins() {
     return [

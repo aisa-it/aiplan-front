@@ -178,9 +178,11 @@ export const getEditorExtensions = (props) => {
         allowBase64: true,
       }),
     );
-  } else {
-    extensions.push(DisableImagesExtension);
-  }
+  } 
+  // else {
+    // TODO: расширение блокировало вставку текста с переносами, потом разобраться
+    // extensions.push(DisableImagesExtension);
+  // }
 
   if (props.showHeadings) {
     extensions.push(

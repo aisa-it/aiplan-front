@@ -124,7 +124,7 @@ export const useMention = (
           u.member?.email === node.attrs.label,
       );
 
-      return `${options.suggestion.char}${
+      return `${options.suggestion.char ?? '@'}${
         userName?.member?.username ?? node.attrs.id
       }`;
     },
@@ -134,11 +134,11 @@ export const useMention = (
           u.member?.id === node.attrs.id ||
           u.member?.email === node.attrs.label,
       );
-
+      //TODO: options.suggestion.char почему-то стал отдавать undefined, временно закрыл @
       return [
         'span',
         mergeAttributes(this.HTMLAttributes, options.HTMLAttributes),
-        `${options.suggestion.char}${
+        `${options.suggestion.char ?? '@'}${
           userName?.member?.username ?? node.attrs.id
         }`,
       ];
