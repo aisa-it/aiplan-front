@@ -13,7 +13,7 @@
           @update:model-value="
             () => {
               setAllSettings(aidocSettings, isAllSettingsChecked);
-              emits('updateDocSettings', aidocSettings);
+              emits('updateDocSettings', invertSettingsValue(aidocSettings));
             }
           "
         />

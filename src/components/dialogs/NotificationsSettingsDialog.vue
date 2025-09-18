@@ -196,7 +196,7 @@ const setCurrentSetting = (
   target = 'project',
 ): void => {
   if (target === 'project') settings.value[nameField] = { ...value };
-  if (target === 'doc') aidocSettings.value[nameField] = { ...value };
+  if (target === 'doc') aidocSettings.value[nameField] = { ...aidocSettings.value[nameField], ...value };
 };
 
 const getProjectUser = async () => {
@@ -251,19 +251,31 @@ const getAidocNotificationsSettings = async (): Promise<void> => {
 };
 
 const handleSaveSettings = async () => {
-  await projectStore
-    .setProjectNotificationSettings(
-      currentWorkspaceSlug.value,
-      props.project.id,
-      settings.value,
-    )
-    .then(() => {
-      setNotificationView({
-        open: true,
-        type: 'success',
+  if (props.project) {
+    await projectStore
+      .setProjectNotificationSettings(
+        currentWorkspaceSlug.value,
+        props.project.id,
+        settings.value,
+      )
+      .then(() => {
+        setNotificationView({
+          open: true,
+          type: 'success',
+        });
+        dialogRef.value.hide();
       });
-      dialogRef.value.hide();
-    });
+  } else {
+    await workspaceStore
+      .setAiDocNotificationSettings(currentWorkspaceSlug.value, aidocSettings.value)
+      .then(() => {
+        setNotificationView({
+          open: true,
+          type: 'success',
+        });
+        dialogRef.value.hide();
+      });
+  }
 };
 
 const { loading, onLoad } = useLoad(getProjectUser);
