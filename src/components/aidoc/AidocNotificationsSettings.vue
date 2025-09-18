@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { IDocNotificationsSettings } from 'src/interfaces/aidocNotificationSettings';
+import { INITIAL_AIDOC_NOTIFICATION_SETTINGS } from 'src/constants/aidocNotificationSettings';
 
 const props = defineProps<{
   aidocSettings: IDocNotificationsSettings;
@@ -46,20 +47,6 @@ const props = defineProps<{
 const emits = defineEmits<{
   updateDocSettings: [value: IDocNotificationsSettings];
 }>();
-
-const INITIAL_AIDOC_NOTIFICATION_SETTINGS = {
-  disable_doc_title: false,
-  disable_doc_desc: false,
-  disable_doc_role: false,
-  disable_doc_attachment: false,
-  disable_doc_comment: false,
-  disable_doc_editor: false,
-  disable_doc_watchers: false,
-  disable_doc_reader: false,
-  disable_doc_create: false,
-  disable_doc_delete: false,
-  disable_doc_move: false,
-};
 
 const isAllSettingsChecked = ref<boolean>(false);
 
@@ -93,8 +80,20 @@ const settingsItems = computed<
   }));
 });
 
+// Инвертируем значения для корректного UI. Поле вида disable_setting: false предполагает включенный чекбокс, true - выключенный.
+function invertSettingsValue(
+  settings: IDocNotificationsSettings,
+): IDocNotificationsSettings {
+  const invertedSettings = { ...settings };
+  for (const setting in settings) {
+    invertedSettings[setting as keyof typeof invertedSettings] =
+      !settings[setting as keyof typeof settings];
+  }
+  return invertedSettings;
+}
+
 function initializeSettings(
-  settings: Partial<IDocNotificationsSettings>,
+  settings: IDocNotificationsSettings,
 ): IDocNotificationsSettings {
   // Поля по умолчанию
   const result = { ...INITIAL_AIDOC_NOTIFICATION_SETTINGS };
@@ -108,7 +107,7 @@ function initializeSettings(
       }
     }
   }
-  return result;
+  return invertSettingsValue(result);
 }
 
 const setAllSettings = (
@@ -136,7 +135,7 @@ const getIsAllSettingsCheckedState = (
 
 const handleCheck = (): void => {
   getIsAllSettingsCheckedState(aidocSettings.value);
-  emits('updateDocSettings', aidocSettings.value);
+  emits('updateDocSettings', invertSettingsValue(aidocSettings.value));
 };
 
 onMounted(() => handleCheck());

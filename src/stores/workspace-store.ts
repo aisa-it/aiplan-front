@@ -216,5 +216,13 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         .getWorkspaceJitsiToken(currentWorkspaceSlug)
         .then((res) => res.data);
     },
+
+    async getWorkspaceNotifications(
+      workspaceSlug: string,
+    ): Promise<DtoWorkspaceMember | void> {
+      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+      return (await workspaceApi.getWorkspaceMemberMe(workspaceSlug)).data;
+    },
   },
 });

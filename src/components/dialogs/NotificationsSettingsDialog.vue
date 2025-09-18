@@ -79,11 +79,7 @@
                 :aidoc-settings="aidocSettings.notification_settings_tg"
                 @updateDocSettings="
                   (value) =>
-                    setCurrentSetting(
-                      value,
-                      'notification_settings_tg',
-                      'doc',
-                    )
+                    setCurrentSetting(value, 'notification_settings_tg', 'doc')
                 "
               >
                 <template #subtitle>Настройка уведомлений в Telegram</template>
@@ -111,11 +107,7 @@
                 :aidoc-settings="aidocSettings.notification_settings_app"
                 @updateDocSettings="
                   (value) =>
-                    setCurrentSetting(
-                      value,
-                      'notification_settings_app',
-                      'doc',
-                    )
+                    setCurrentSetting(value, 'notification_settings_app', 'doc')
                 "
               >
                 <template #subtitle>Настройка уведомлений в системе</template>
@@ -184,18 +176,27 @@ const settings = ref({
 });
 
 const aidocSettings = ref({
+  notification_author_settings_email: {},
+  notification_author_settings_tg: {},
+  notification_author_settings_app: {},
   notification_settings_email: {},
   notification_settings_tg: {},
   notification_settings_app: {},
 });
 
 onMounted(async () => {
-  await getProjectUser();
+  props.project
+    ? await getProjectUser()
+    : await getAidocNotificationsSettings();
 });
 
-const setCurrentSetting = (value, nameField: string, target = 'project'): void => {
-  if (target === 'project') (settings.value[nameField] = { ...value });
-  if (target === 'doc') (aidocSettings.value[nameField] = { ...value });
+const setCurrentSetting = (
+  value,
+  nameField: string,
+  target = 'project',
+): void => {
+  if (target === 'project') settings.value[nameField] = { ...value };
+  if (target === 'doc') aidocSettings.value[nameField] = { ...value };
 };
 
 const getProjectUser = async () => {
@@ -220,6 +221,31 @@ const getProjectUser = async () => {
       };
       settings.value.notification_author_settings_app = {
         ...data.notification_author_settings_app,
+      };
+    });
+};
+
+const getAidocNotificationsSettings = async (): Promise<void> => {
+  await workspaceStore
+    .getWorkspaceNotifications(currentWorkspaceSlug.value)
+    .then((data) => {
+      aidocSettings.value.notification_author_settings_email = {
+        ...data.notification_author_settings_email,
+      };
+      aidocSettings.value.notification_author_settings_tg = {
+        ...data.notification_author_settings_tg,
+      };
+      aidocSettings.value.notification_author_settings_app = {
+        ...data.notification_author_settings_app,
+      };
+      aidocSettings.value.notification_settings_email = {
+        ...data.notification_settings_email,
+      };
+      aidocSettings.value.notification_settings_tg = {
+        ...data.notification_settings_tg,
+      };
+      aidocSettings.value.notification_settings_app = {
+        ...data.notification_settings_app,
       };
     });
 };
