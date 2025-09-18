@@ -1,22 +1,17 @@
 <template>
   <div class="row mobile-block">
     <div class="col">
-      <h4 class="text-lg font-semibold text-brand-base">Эмодзи</h4>
-      <p class="text-sm text-brand-secondary">Выберите эмодзи для проекта</p>
+      <h4 class="text-lg font-semibold text-brand-base">
+        Эмодзи или изображение
+      </h4>
+      <p class="text-sm text-brand-secondary">
+        Поддерживается .jpg, .png, и .gif
+      </p>
     </div>
     <div class="col q-mt-xs">
-      <q-select
-        ref="emojiSelectRef"
-        v-model="projectForm.emoji"
-        dense
-        class="base-selector"
-        virtual-scroll-horizontal
-        popup-content-class="emoji-popup scrollable-content"
-        :popup-content-style="emojiSelectWidth"
-        :virtual-scroll-slice-size="PROJECT_EMOJI_OPTIONS?.length"
-        @click="emojiSelectRef.refresh()"
-        @popup-show="emojiSelectRef.refresh()"
-        :options="PROJECT_EMOJI_OPTIONS"
+      <ProjectIconPicker
+        v-model="projectForm.icon"
+        :emojiOptions="PROJECT_EMOJI_OPTIONS"
       />
     </div>
   </div>
@@ -154,6 +149,7 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 // services
 import { updateProject } from '../../services/api';
+import ProjectIconPicker from '../../project-icon-picker/ui/ProjectIconPicker.vue';
 
 //routes
 const router = useRouter();
