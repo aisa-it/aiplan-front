@@ -378,6 +378,7 @@ export const CustomKeyboardBehaviour = Extension.create({
   },
 });
 
+// TODO: возможно уже не нужно
 export const DisableImagesExtension = Extension.create({
   addProseMirrorPlugins() {
     return [

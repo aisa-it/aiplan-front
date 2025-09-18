@@ -53,7 +53,9 @@ export default defineComponent({
     const isOpen = ref(
       notificationState.value ? notificationState.value.open : false,
     );
-
+    const setNotificationType = (type: string) => {
+      return;
+    };
     const content = ref<INotification>(
       setNotificationType(
         notificationState.value ? notificationState.value.type : '',
