@@ -10,17 +10,27 @@
         :list-tabs="listTabs"
         @set="(val: number) => (projectSettingsTab = val)"
       />
-      <component :is="activeTab" @update="projectInfoRefresh" />
+
+      <div
+        class="column flex-center"
+        style="width: 100%; height: calc(100vh - 300px)"
+        v-if="isLoadingComponent"
+      >
+        <DefaultLoader class="self-center q-mt-md q-mb-md" />
+      </div>
+
+      <component v-else :is="activeTab" @update="projectInfoRefresh" />
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
+console.time('project-settings-mount');
 // core
 import { useMeta } from 'quasar';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
 // stores
 import { useRolesStore } from 'stores/roles-store';
@@ -28,15 +38,8 @@ import { useProjectStore } from 'src/stores/project-store';
 
 // components
 import LoadPage from './LoadPage.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import SettingsTabs from 'src/shared/components/SettingsTabs.vue';
-import GeneralProjectSettings from 'src/modules/project-settings/general/ui/GeneralProjectSettings.vue';
-import LabelsProjectSettings from 'src/modules/project-settings/labels/ui/LabelsProjectSettings.vue';
-import ControlProjectSettings from 'src/modules/project-settings/control/ui/ControlProjectSettings.vue';
-import MembersProjectSettings from 'src/modules/project-settings/members/ui/MembersProjectSettings.vue';
-import StatesProjectSettings from 'src/modules/project-settings/states/ui/StatesProjectSettings.vue';
-import RulesProjectSettings from 'src/modules/project-settings/rules/ui/RulesProjectSettings.vue';
-import ActivitiesProjectSettings from 'src/modules/project-settings/activities/ui/ActivitiesProjectSettings.vue';
-import NewIssueTemplate from 'src/modules/project-settings/new-issue-template/ui/NewIssueTemplate.vue';
 
 // stores
 const projectStore = useProjectStore();
@@ -53,24 +56,77 @@ const route = useRoute();
 
 const metadata = ref({ title: 'Загрузка...' });
 
+const isLoadingComponent = ref(false);
+
+function logAsyncImport(loader: () => Promise<any>) {
+  return defineAsyncComponent(async () => {
+    isLoadingComponent.value = true;
+
+    const mod = await loader();
+
+    isLoadingComponent.value = false;
+    return mod;
+  });
+}
+
 const activeTab = computed(() => {
   switch (projectSettingsTab.value) {
     case 1:
-      return ControlProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/control/ui/ControlProjectSettings.vue'
+          ),
+      );
     case 2:
-      return MembersProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/members/ui/MembersProjectSettings.vue'
+          ),
+      );
     case 3:
-      return StatesProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/states/ui/StatesProjectSettings.vue'
+          ),
+      );
     case 4:
-      return LabelsProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/labels/ui/LabelsProjectSettings.vue'
+          ),
+      );
     case 5:
-      return RulesProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/rules/ui/RulesProjectSettings.vue'
+          ),
+      );
     case 6:
-      return ActivitiesProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/activities/ui/ActivitiesProjectSettings.vue'
+          ),
+      );
     case 7:
-      return NewIssueTemplate;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/new-issue-template/ui/NewIssueTemplate.vue'
+          ),
+      );
     default:
-      return GeneralProjectSettings;
+      return logAsyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/general/ui/GeneralProjectSettings.vue'
+          ),
+      );
   }
 });
 
@@ -133,8 +189,8 @@ const projectInfoRefresh = async () => {
     });
 };
 
-onMounted(async () => {
-  performance.mark('маунт прожект сеттингс');
-  await projectInfoRefresh();
+onMounted(() => {
+  console.timeEnd('project-settings-mount');
+  projectInfoRefresh();
 });
 </script>

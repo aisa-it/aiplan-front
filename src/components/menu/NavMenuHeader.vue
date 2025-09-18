@@ -162,7 +162,6 @@
       />
     </q-btn>
     <q-btn
-      @click="performance.mark('нажали на кнопку')"
       v-if="hasPermission('ws-settings')"
       class="nav-menu__top-nav-button"
       data-id="workspace-settings-button-top"

@@ -89,7 +89,6 @@
                   no-caps
                   v-close-popup
                   :style="'font-size: 12px;'"
-                  @click="performance.mark('нажали на настрйоки проекта')"
                   :to="`/${currentWorkspaceSlug}/projects/${
                     identifier || id
                   }/settings`"

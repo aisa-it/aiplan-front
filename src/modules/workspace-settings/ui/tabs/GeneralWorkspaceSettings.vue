@@ -368,7 +368,7 @@ import { Editor } from '@tiptap/vue-3';
 import { useMeta, useQuasar, Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { onMounted, ref, computed, nextTick } from 'vue';
+import { onMounted, ref, computed, nextTick, defineAsyncComponent } from 'vue';
 
 // stores
 import { useUtilsStore } from 'src/stores/utils-store';
@@ -407,7 +407,12 @@ import {
 } from 'src/modules/workspace-settings/ui/dialogs';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
-import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+// import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+
+const EditorTipTapV2 = defineAsyncComponent(
+  () => import('src/components/editorV2/EditorTipTapV2.vue'),
+);
+
 import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
@@ -593,7 +598,6 @@ const handleUpdateWorkspace = async () => {
 //     },
 //   );
 // };
-
 
 const isWorkspaceLogo = computed(() => {
   return (
