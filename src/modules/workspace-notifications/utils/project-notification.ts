@@ -16,7 +16,7 @@ export function projectNotificationRender(
                       detail?.project?.workspace as string,
                       detail?.project?.identifier as string,
                     )}>
-                    "${detail?.project?.name}"</a>`;
+                    ${detail?.project?.name}</a>`;
 
   const issueLink = (href: string, prefix: string, name: string) => {
     return `<a target="_blank"
@@ -28,7 +28,7 @@ export function projectNotificationRender(
     return `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
                     href=${href}>
-                    "${name}"</a>`;
+                    ${name}</a>`;
   };
   switch (data.field) {
     case 'emoji':
