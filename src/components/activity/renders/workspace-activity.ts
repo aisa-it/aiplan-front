@@ -3,9 +3,19 @@ import { translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
 import { getURLDoc } from './doc-activity';
 
-export function workspaceActivityRender(activity: any) {
+export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
   let action = '';
   let value = '';
+
+  const workspaceSource = onlyWorkspace
+    ? ''
+    : `в пространстве <a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
+                    href=${
+                      activity?.entity_url ??
+                      `/${activity.workspace_detail?.slug}`
+                    }>
+                    "${activity.workspace_detail?.name}"<a/>`;
 
   switch (activity.field) {
     case 'logo':
@@ -38,8 +48,9 @@ export function workspaceActivityRender(activity: any) {
       action = translateVerb(activity.verb);
       return `<span>${action} роль участника пространства ${aiplan
         .UserName(activity.new_entity_detail)
-        .join(' ')} с "${valToRole(+activity.old_value)
-        ?.label}" на "${valToRole(+activity.new_value)?.label}" <span/>`;
+        .join(' ')} с "${
+        valToRole(+activity.old_value)?.label
+      }" на "${valToRole(+activity.new_value)?.label}" <span/>`;
 
     case 'description':
       action = translateVerb(activity.verb);
@@ -87,6 +98,17 @@ export function workspaceActivityRender(activity: any) {
         action = 'удалил(-а) проект';
       }
       return `<span>${action} ${projectLink}<span/>`;
+
+    case 'integration':
+      if (activity.verb === 'added') {
+        action = 'добавил(-а) интеграцию';
+      }
+      if (activity.verb === 'removed') {
+        action = 'удалил(-а) интеграцию';
+      }
+      const integrationName =
+        activity.verb === 'added' ? activity.new_value : activity.old_value;
+      return `<span>${action} ${integrationName} ${workspaceSource}<span/>`;
 
     default:
       break;
