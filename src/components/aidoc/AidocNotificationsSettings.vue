@@ -4,16 +4,32 @@
       <slot name="subtitle"></slot>
     </div>
 
+    <div class="setting-card__header">
+      <p class="setting-card__labels-title">Название</p>
+      <p class="setting-card__checkboxes-title">Автор</p>
+      <p class="setting-card__checkboxes-title">Участник</p>
+    </div>
+
     <div class="setting-card__list">
       <div class="setting-card__setting">
         <span class="centered-horisontally">Все</span>
         <q-checkbox
-          v-model="isAllSettingsChecked"
+          v-model="isAllAuthorSettingsChecked"
           class="justify-center"
           @update:model-value="
             () => {
-              setAllSettings(aidocSettings, isAllSettingsChecked);
-              emits('updateDocSettings', invertSettingsValue(aidocSettings));
+              setAllSettings(aidocAuthorSettings, isAllAuthorSettingsChecked);
+              emits('updateDocAuthorSettings', invertSettingsValue(aidocAuthorSettings));
+            }
+          "
+        />
+        <q-checkbox
+          v-model="isAllMemberSettingsChecked"
+          class="justify-center"
+          @update:model-value="
+            () => {
+              setAllSettings(aidocMemberSettings, isAllMemberSettingsChecked);
+              emits('updateDocMemberSettings', invertSettingsValue(aidocMemberSettings));
             }
           "
         />
@@ -26,7 +42,12 @@
       >
         <span class="centered-horisontally">{{ item.label }}</span>
         <q-checkbox
-          v-model="aidocSettings[item.key]"
+          v-model="aidocAuthorSettings[item.key]"
+          class="justify-center"
+          @update:model-value="handleCheck"
+        />
+        <q-checkbox
+          v-model="aidocMemberSettings[item.key]"
           class="justify-center"
           @update:model-value="handleCheck"
         />
@@ -37,35 +58,41 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { IDocNotificationsSettings } from 'src/interfaces/aidocNotificationSettings';
 import { INITIAL_AIDOC_NOTIFICATION_SETTINGS } from 'src/constants/aidocNotificationSettings';
+import { IDocNotificationsSettings } from 'src/interfaces/aidocNotificationSettings';
 
 const props = defineProps<{
-  aidocSettings: IDocNotificationsSettings;
+  aidocAuthorSettings: IDocNotificationsSettings;
+  aidocMemberSettings: IDocNotificationsSettings;
 }>();
 
 const emits = defineEmits<{
-  updateDocSettings: [value: IDocNotificationsSettings];
+  updateDocAuthorSettings: [value: IDocNotificationsSettings];
+  updateDocMemberSettings: [value: IDocNotificationsSettings];
 }>();
 
-const isAllSettingsChecked = ref<boolean>(false);
+const isAllAuthorSettingsChecked = ref<boolean>(false);
+const isAllMemberSettingsChecked = ref<boolean>(false);
 
-const aidocSettings = ref<IDocNotificationsSettings>(
-  initializeSettings(props.aidocSettings),
+const aidocAuthorSettings = ref<IDocNotificationsSettings>(
+  initializeSettings(props.aidocAuthorSettings),
+);
+const aidocMemberSettings = ref<IDocNotificationsSettings>(
+  initializeSettings(props.aidocMemberSettings),
 );
 
 const settingsMap = {
-  disable_doc_title: 'Изменение названия',
-  disable_doc_desc: 'Изменение описания',
-  disable_doc_role: 'Изменение роли',
-  disable_doc_attachment: 'Прикрепление файлов',
-  disable_doc_comment: 'Комментарии',
-  disable_doc_editor: 'Редакторы',
-  disable_doc_watchers: 'Наблюдатели',
-  disable_doc_reader: 'Читатели',
   disable_doc_create: 'Создание документа',
   disable_doc_delete: 'Удаление документа',
-  disable_doc_move: 'Перемещение документа',
+  disable_doc_move: 'Перенос документа',
+  disable_doc_title: 'Изменение названия',
+  disable_doc_desc: 'Изменение описания',
+  disable_doc_attachment: 'Изменение вложений',
+  disable_doc_comment: 'Обновление комментариев',
+  disable_doc_watchers: 'Изменение наблюдателей',
+  disable_doc_role: 'Изменение роли',
+  disable_doc_editor: 'Добавление новых редакторов',
+  disable_doc_reader: 'Добавление новых читателей',
 };
 
 const settingsItems = computed<
@@ -119,23 +146,24 @@ const setAllSettings = (
   }
 };
 
-const getIsAllSettingsCheckedState = (
+const IsAllSettingsChecked = (
   settings: IDocNotificationsSettings,
-): void => {
+): boolean => {
   for (const setting in settings) {
     if (settings[setting as keyof IDocNotificationsSettings] === true) {
       continue;
     } else {
-      isAllSettingsChecked.value = false;
-      return;
+      return false;
     }
   }
-  isAllSettingsChecked.value = true;
+  return true;
 };
 
 const handleCheck = (): void => {
-  getIsAllSettingsCheckedState(aidocSettings.value);
-  emits('updateDocSettings', invertSettingsValue(aidocSettings.value));
+  isAllAuthorSettingsChecked.value = IsAllSettingsChecked(aidocAuthorSettings.value);
+  isAllMemberSettingsChecked.value = IsAllSettingsChecked(aidocMemberSettings.value);
+  emits('updateDocAuthorSettings', invertSettingsValue(aidocAuthorSettings.value));
+  emits('updateDocMemberSettings', invertSettingsValue(aidocMemberSettings.value));
 };
 
 onMounted(() => handleCheck());
@@ -145,17 +173,39 @@ onMounted(() => handleCheck());
 .setting-card {
   box-shadow: none;
 
+  &__header {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    padding: 8px;
+  }
+
   &__subtitle {
     padding: 8px 0;
   }
 
+  &__labels-title {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__checkboxes-title {
+    margin: 0;
+    text-align: center;
+  }
+
+  &__list {
+    margin-bottom: 8px;
+    max-height: calc(100vh - 400px);
+    overflow-y: scroll;
+    padding: 0px 8px;
+    @media screen and (max-width: 480px) {
+      max-height: 30vh;
+    }
+  }
+
   &__setting {
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
     margin-bottom: 8px;
   }
 }

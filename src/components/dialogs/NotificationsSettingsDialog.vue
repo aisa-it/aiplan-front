@@ -44,14 +44,19 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-settings="aidocSettings.notification_settings_email"
-                @updateDocSettings="
+                :aidoc-author-settings="aidocSettings.notification_author_settings_email"
+                :aidoc-member-settings="aidocSettings.notification_settings_email"
+                @updateDocAuthorSettings="
                   (value) =>
                     setCurrentSetting(
                       value,
-                      'notification_settings_email',
+                      'notification_author_settings_email',
                       'doc',
                     )
+                "
+                @updateDocMemberSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_settings_email', 'doc')
                 "
               >
                 <template #subtitle>Настройка уведомлений по почте</template>
@@ -76,8 +81,13 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-settings="aidocSettings.notification_settings_tg"
-                @updateDocSettings="
+                :aidoc-author-settings="aidocSettings.notification_author_settings_tg"
+                :aidoc-member-settings="aidocSettings.notification_settings_tg"
+                @updateDocAuthorSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_author_settings_tg', 'doc')
+                "
+                @updateDocMemberSettings="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_tg', 'doc')
                 "
@@ -104,8 +114,13 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-settings="aidocSettings.notification_settings_app"
-                @updateDocSettings="
+                :aidoc-author-settings="aidocSettings.notification_author_settings_app"
+                :aidoc-member-settings="aidocSettings.notification_settings_app"
+                @updateDocAuthorSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_author_settings_app', 'doc')
+                "
+                @updateDocMemberSettings="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_app', 'doc')
                 "
