@@ -14,6 +14,34 @@
         <q-item-section>
           {{ filterBy === 'docs' ? 'Документы' : 'Избранное' }}
         </q-item-section>
+
+        <q-btn
+          class="q-ml-sm q-mr-sm"
+          flat
+          icon="more_horiz"
+          :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
+          @click.prevent.stop
+        >
+          <q-menu>
+            <q-list>
+              <q-item>
+                <q-btn
+                  v-close-popup
+                  :style="'font-size: 12px;'"
+                  class="full-w"
+                  dense
+                  flat
+                  no-caps
+                  @click="isNotificationsSettingsOpen = true"
+                >
+                  <BellIcon :width="16" :height="16" class="q-mr-sm" /><span>
+                    Настроить уведомления
+                  </span>
+                </q-btn>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </div>
     </template>
     <template v-slot:content>
@@ -152,6 +180,8 @@
         :watchers="docInfo.watchers"
         @refresh="getDocInfo(docInfo.id)"
       />
+
+      <NotificationsSettingsDialog v-model="isNotificationsSettingsOpen" />
     </template>
   </ExpansionItem>
 </template>
@@ -186,7 +216,9 @@ import ExpansionItem from '../ExpansionItem.vue';
 import DocumentIcon from '../icons/DocumentIcon.vue';
 import AidocRulesDialog from 'src/components/aidoc/AidocRulesDialog.vue';
 import AidocWatchersDialog from 'src/components/aidoc/AidocWatchersDialog.vue';
+import NotificationsSettingsDialog from '../dialogs/NotificationsSettingsDialog.vue';
 import AidocLinkMenu from 'src/components/aidoc/AidocLinkMenu.vue';
+import BellIcon from '../icons/BellIcon.vue';
 
 const emits = defineEmits<{
   updateFavoriteState: [id: string, state: boolean];
@@ -222,8 +254,9 @@ const {
 const treeRef = ref<QTree | null>();
 const selectedId = ref('');
 const treeNode = ref<IDocTreeNode[]>([]);
-const isRulesDialogOpen = ref(false);
-const isWatchersDialogOpen = ref(false);
+const isRulesDialogOpen = ref<boolean>(false);
+const isWatchersDialogOpen = ref<boolean>(false);
+const isNotificationsSettingsOpen = ref<boolean>(false);
 const docInfo = ref({});
 const loading = ref(false);
 

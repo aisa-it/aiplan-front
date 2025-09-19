@@ -13,12 +13,21 @@ import {
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
+import { AiplanWorkspaceNotificationRequest } from 'src/interfaces/aidocNotificationSettings';
+
+import {
+  ContentType,
+  HttpClient,
+  RequestParams,
+} from '@aisa-it/aiplan-api-ts/src/http-client';
 
 const rolesStore = useRolesStore();
 const userStore = useUserStore();
 const { userWorkspaces } = storeToRefs(userStore);
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
+
+const api = new HttpClient();
 
 interface RootStore {
   currentWorkspaceSlug: string | null;
@@ -215,6 +224,30 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       return workspaceApi
         .getWorkspaceJitsiToken(currentWorkspaceSlug)
         .then((res) => res.data);
+    },
+
+    async getWorkspaceNotifications(
+      workspaceSlug: string,
+    ): Promise<DtoWorkspaceMember | void> {
+      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+      return (await workspaceApi.getWorkspaceMemberMe(workspaceSlug)).data;
+    },
+
+    async setAiDocNotificationSettings(
+      workspaceSlug: string,
+      notificationSettings: AiplanWorkspaceNotificationRequest,
+      params: RequestParams = {},
+    ) {
+      // workspaceApi.updateMyNotifications(workspaceSlug, data); - нет в Workspace
+      api.request({
+        path: `/api/auth/workspaces/${workspaceSlug}/me/notifications/`,
+        method: 'POST',
+        body: notificationSettings,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      });
     },
   },
 });
