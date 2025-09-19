@@ -360,7 +360,7 @@ const clear = () => {
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   if (type === 'ok') {
-    const link = transferData.value.id
+    const link = (transferData.value && transferData.value.id)
       ? getIssueLink(
           currentWorkspaceSlug.value,
           selectedProject.value.identifier,
@@ -370,14 +370,14 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
           currentWorkspaceSlug.value,
           selectedProject.value.identifier,
         );
-    const copyMessage = transferData.value.sequence_id
+    const copyMessage = (transferData.value && transferData.value.sequence_id)
       ? getSuccessCopyIssueMessage(
           link,
           `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
           `${selectedProject.value.identifier}-${transferData.value.sequence_id}`,
         )
       : getSuccessCopyIssueByLabelMessage(link);
-    const transferMessage = transferData.value.id
+    const transferMessage = (transferData.value && transferData.value.id)
       ? getSuccessTransferIssueMessage(
           link,
           `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
@@ -426,7 +426,6 @@ const sendDataById = async () => {
         selectedProject.value.identifier,
         res.data.id,
       );
-      console.info(issueResponse)
       const newIssueData = issueResponse.data;
 
       transferData.value = {
@@ -436,11 +435,13 @@ const sendDataById = async () => {
           newIssueData.project_detail?.identifier ||
           newIssueData.project?.identifier,
       };
-      console.info(transferData.value)
       dialogRef.value.hide();
       onCancel('ok');
     })
-    .catch((err) => (transferErrors.value = err.response?.data?.errors))
+    .catch((err) => {
+      console.error('Ошибка:', err);
+      transferErrors.value = err.response?.data?.errors;
+    })
     .finally(() => (loading.value = false));
 };
 
@@ -459,7 +460,10 @@ const sendDataByLabel = async () => {
       dialogRef.value.hide();
       onCancel('ok');
     })
-    .catch((err) => (transferErrors.value = err.response?.data?.errors))
+    .catch((err) => {
+      console.error('Ошибка:', err);
+      transferErrors.value = err.response?.data?.errors;
+    })
     .finally(() => (loading.value = false));
 };
 
