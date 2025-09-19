@@ -1,5 +1,5 @@
-import { valToNet, valToRole } from 'src/utils/strings';
-import { stateRUS, translateVerb } from 'src/utils/translator';
+import { capitalizeFirstLetter, valToNet, valToRole } from 'src/utils/strings';
+import { stateRUS, translatePrioritets, translateVerb } from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
 import { NotificationsNotificationDetailResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getProjectLink } from 'src/utils/links';
@@ -185,7 +185,10 @@ export function projectNotificationRender(
     case 'issue':
       if (data.verb === 'created') {
         action = 'создал(-а)';
-        return `<span>${action} задачу ${issueLink(data?.new_entity_detail?.url, data.new_value, data?.new_entity_detail?.name)} ${
+        const priority = data.new_entity_detail.priority
+          ? `с приоритетом "${capitalizeFirstLetter(translatePrioritets(data.new_entity_detail.priority))}"`
+          : 'без приоритета';
+        return `<span>${action} задачу ${issueLink(data?.new_entity_detail?.url, data.new_value, data?.new_entity_detail?.name)} ${priority} ${
           projectLink ? `в проекте ${projectLink}` : ''
         }<span/>`;
       }
