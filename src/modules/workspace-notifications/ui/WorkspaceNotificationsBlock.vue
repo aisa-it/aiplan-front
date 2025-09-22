@@ -3,6 +3,7 @@
     class="flex row justify-between no-wrap full-width workspace-notification__item"
     :class="{ 'text-showed': isShowed }"
     :data-id="notificationRow.id"
+    @click="readNotification"
   >
     <div
       v-if="!isShowed"
