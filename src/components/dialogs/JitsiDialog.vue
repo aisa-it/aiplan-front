@@ -33,7 +33,7 @@
           >
             <div :class="isConfOpen ? 'fullscreen' : 'compact'">
               <JitsiMeeting
-                v-if="!!token && !!jitsiDomain"
+                v-if="shouldMount"
                 :key="workspace + key"
                 :domain="jitsiDomain"
                 :room-name="workspace"
@@ -108,11 +108,19 @@ const apiRef = ref();
 const unreadCountRef = ref(0);
 const isConfOpen = ref(false);
 const isExpanded = ref(false);
+const isJoined = ref(false);
+
 const jitsiExpansion = ref<InstanceType<typeof ExpansionItem> | null>(null);
 
 //computeds
 const workspace = computed(() => {
   return workspaceInfo.value?.name || route.params.workspaceSlug;
+});
+
+const shouldMount = computed(() => {
+  const hasAddress = !!token.value && !!jitsiDomain.value;
+  const isExpanded = jitsiExpansion.value?.isExpanded;
+  return hasAddress && (isExpanded || isJoined.value);
 });
 
 //methods
@@ -121,9 +129,11 @@ const handleApiReady = (apiObj) => {
 
   // Events
   apiRef.value.on('videoConferenceJoined', () => {
+    isJoined.value = true;
     if (jitsiExpansion.value?.isExpanded) handleUpdateUserStatus(true);
   });
   apiRef.value.on('videoConferenceLeft', () => {
+    isJoined.value = false;
     if (jitsiExpansion.value?.isExpanded) handleUpdateUserStatus(false);
   });
   apiRef.value.on('participantJoined', (payload) => {

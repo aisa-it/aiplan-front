@@ -15,7 +15,7 @@ export function issueNotificationRender(data: any, detail: any) {
   const customLink = (href: string, name: string) => `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
                     href=${href}>
-                    "${name}"<a/>`;
+                    ${name}<a/>`;
   const entityDetail = Boolean(data.new_value)
     ? data.new_entity_detail
     : data.old_entity_detail;

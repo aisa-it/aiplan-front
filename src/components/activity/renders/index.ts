@@ -17,7 +17,7 @@ export function activityRender(
     case 'issue':
       return issueActivityRender(activity, isOnlyWorkspace);
     case 'workspace':
-      return workspaceActivityRender(activity);
+      return workspaceActivityRender(activity, isOnlyWorkspace);
     case 'project':
       return projectActivityRender(activity, isOnlyProject, isOnlyWorkspace);
     case 'doc':
