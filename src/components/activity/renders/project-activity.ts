@@ -243,15 +243,15 @@ export function projectActivityRender(
 
     case 'template':
       if (activity.verb === 'created') {
-        return `создал(-а) шаблон задачи ${activity.new_value}`;
+        return `создал(-а) шаблон задачи "${activity.new_value}"`;
       }
       if (activity.verb === 'deleted') {
-        return `удалил(-а) шаблон задачи ${activity.old_value}`;
+        return `удалил(-а) шаблон задачи "${activity.old_value}"`;
       }
     case 'template_template':
     case 'template_name':
       if (activity.verb === 'updated') {
-        return `изменил(-а) шаблон задачи ${activity.new_entity_detail.name}`;
+        return `изменил(-а) шаблон задачи "${activity.new_entity_detail.name}"`;
       }
 
     default:
