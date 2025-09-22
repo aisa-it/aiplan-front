@@ -20,7 +20,6 @@
 
     <component
       v-else
-      :key="wsSettingsTab"
       :is="activeComponent"
       :currentWsInfo="currentWsInfo || {}"
       :currentWsSlug="currentWsSlug"
@@ -64,21 +63,21 @@ const wsSettingsTab = ref(0);
 
 const isLoadingComponent = ref(false);
 
-function logAsyncImport(loader: () => Promise<any>) {
+function asyncImport(loader: () => Promise<any>) {
   return defineAsyncComponent(async () => {
     isLoadingComponent.value = true;
 
-    const mod = await loader();
+    const component = await loader();
 
     isLoadingComponent.value = false;
-    return mod;
+    return component;
   });
 }
 
 const componentTabs = [
   {
     name: 0,
-    component: logAsyncImport(
+    component: asyncImport(
       () =>
         import(
           'src/modules/workspace-settings/ui/tabs/GeneralWorkspaceSettings.vue'
@@ -87,7 +86,7 @@ const componentTabs = [
   },
   {
     name: 1,
-    component: logAsyncImport(
+    component: asyncImport(
       () =>
         import(
           'src/modules/workspace-settings/ui/tabs/MembersWorkspaceSettings.vue'
@@ -96,7 +95,7 @@ const componentTabs = [
   },
   {
     name: 2,
-    component: logAsyncImport(
+    component: asyncImport(
       () =>
         import(
           'src/modules/workspace-settings/ui/tabs/ActivitiesWorkspaceSettings.vue'
@@ -105,7 +104,7 @@ const componentTabs = [
   },
   {
     name: 3,
-    component: logAsyncImport(
+    component: asyncImport(
       () =>
         import(
           'src/modules/workspace-settings/ui/tabs/ActivitiesMapWorkspaceSettings.vue'
@@ -114,7 +113,7 @@ const componentTabs = [
   },
   {
     name: 4,
-    component: logAsyncImport(
+    component: asyncImport(
       () =>
         import(
           'src/modules/workspace-settings/ui/tabs/IntegrationWorkspaceSettings.vue'

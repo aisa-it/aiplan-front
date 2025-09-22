@@ -25,7 +25,6 @@
 </template>
 
 <script setup lang="ts">
-console.time('project-settings-mount');
 // core
 import { useMeta } from 'quasar';
 import { useRoute } from 'vue-router';
@@ -58,70 +57,70 @@ const metadata = ref({ title: 'Загрузка...' });
 
 const isLoadingComponent = ref(false);
 
-function logAsyncImport(loader: () => Promise<any>) {
+function asyncImport(loader: () => Promise<any>) {
   return defineAsyncComponent(async () => {
     isLoadingComponent.value = true;
 
-    const mod = await loader();
+    const component = await loader();
 
     isLoadingComponent.value = false;
-    return mod;
+    return component;
   });
 }
 
 const activeTab = computed(() => {
   switch (projectSettingsTab.value) {
     case 1:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/control/ui/ControlProjectSettings.vue'
           ),
       );
     case 2:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/members/ui/MembersProjectSettings.vue'
           ),
       );
     case 3:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/states/ui/StatesProjectSettings.vue'
           ),
       );
     case 4:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/labels/ui/LabelsProjectSettings.vue'
           ),
       );
     case 5:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/rules/ui/RulesProjectSettings.vue'
           ),
       );
     case 6:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/activities/ui/ActivitiesProjectSettings.vue'
           ),
       );
     case 7:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/new-issue-template/ui/NewIssueTemplate.vue'
           ),
       );
     default:
-      return logAsyncImport(
+      return asyncImport(
         () =>
           import(
             'src/modules/project-settings/general/ui/GeneralProjectSettings.vue'
@@ -190,7 +189,6 @@ const projectInfoRefresh = async () => {
 };
 
 onMounted(() => {
-  console.timeEnd('project-settings-mount');
   projectInfoRefresh();
 });
 </script>

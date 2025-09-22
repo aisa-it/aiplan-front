@@ -35,15 +35,6 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    console.time(`router-guard-${to.fullPath}`);
-    next();
-  });
-
-  Router.afterEach((to) => {
-    console.timeEnd(`router-guard-${to.fullPath}`);
-  });
-
-  Router.beforeEach((to, from, next) => {
     if (to.fullPath.includes('/reset-password')) {
       next();
       return;
