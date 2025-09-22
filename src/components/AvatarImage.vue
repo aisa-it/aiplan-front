@@ -11,7 +11,7 @@
     @click="handleClickBtn"
   >
     <UserInfoPopup
-      v-if="member && isShowMenu"
+      v-if="member && isShowMenu && !disablePopup"
       :isPopupTextCenter="isPopupTextCenter"
       :isShowPopupMiddle="isShowPopupMiddle"
       :showAvatarPopup="showAvatarPopup"
@@ -107,6 +107,7 @@ interface IAvatarImageProps {
   showAvatarPopup?: boolean;
   isPopupTextCenter?: boolean;
   isShowPopupMiddle?: boolean;
+  disablePopup?: boolean;
 }
 
 const props = withDefaults(defineProps<IAvatarImageProps>(), {
@@ -116,6 +117,7 @@ const props = withDefaults(defineProps<IAvatarImageProps>(), {
   showAvatarPopup: true,
   isPopupTextCenter: false,
   isShowPopupMiddle: false,
+  disablePopup: false,
 });
 
 const {
@@ -201,5 +203,4 @@ const userStore = useUserStore();
     filter: drop-shadow(-3px -1px 4px rgba(0, 0, 0, 0.7));
   }
 }
-
 </style>

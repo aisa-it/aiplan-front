@@ -282,6 +282,60 @@ li > a {
     min-width: 50px !important;
   }
 }
+
+.conference-input {
+  .q-field__control:before {
+    border: 1px solid #dde2ea;
+    background-color: #fff;
+  }
+  .q-field__control {
+    border-radius: 8px;
+  }
+  .q-field__label {
+    color: $sub-text-color !important;
+  }
+  .q-field__native {
+    color: #474a52 !important;
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .q-field__append {
+    color: $sub-text-color !important;
+  }
+  .q-field__control:hover::before {
+    border-color: $primary !important;
+  }
+}
+
+.conference-input-dark {
+  .q-field__control:before {
+    border: 0px;
+    background-color: #1f2228;
+  }
+  .q-field__control {
+    border-radius: 8px;
+  }
+  .q-field__label {
+    color: $sub-text-color !important;
+  }
+  .q-field__native {
+    color: $text-color !important;
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  .q-field__append {
+    color: $sub-text-color !important;
+  }
+  .q-field__control:hover::before {
+    border-color: $primary !important;
+  }
+}
 // --------------------- inputs ---------------------
 .base-input {
   color: $dark !important;
