@@ -31,7 +31,7 @@
         >
           <q-badge
             rounded
-            :style="'background-color: ' + t.color"
+            :style="'background-color: ' + getCorrectColor(t.color)"
             class="q-mr-sm"
           />
           <span class="abbriviated-text">
@@ -158,6 +158,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { getFullName } from 'src/utils/helpers';
 import aiplan from 'src/utils/aiplan';
+import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
 
 // components
 import IssueTagsDialog from 'src/modules/single-issue/main-issue-info/ui/IssueTagsDialog.vue';
@@ -208,6 +209,8 @@ const preventClickClass = 'prevent-click-issue-outside';
 const route = useRoute();
 
 const showTagsDialog = ref(false);
+
+const { getCorrectColor } = usePalette();
 
 const avatarText = (user: DtoUserLight) => {
   return aiplan.UserName(user);

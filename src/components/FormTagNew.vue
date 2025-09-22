@@ -18,17 +18,10 @@
               ><q-badge rounded :style="{ backgroundColor: color }"
             /></template>
             <template v-slot:append>
-              <q-icon
-                name="colorize"
-                class="cursor-pointer"
-                @click="colorPickerDialogVisible = true"
-              ></q-icon>
-              <q-dialog v-model="colorPickerDialogVisible">
-                <q-color
-                  v-model="color"
-                  @input="colorPickerDialogVisible = false"
-                />
-              </q-dialog>
+              <ColorPicker
+                :current-color="color"
+                @set-color="(value) => (color = value)"
+              />
             </template>
           </q-input>
           <q-input
@@ -67,19 +60,21 @@ import { computed, defineComponent, ref } from 'vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import CloseIcon from './icons/CloseIcon.vue';
 import AddIcon from './icons/AddIcon.vue';
-import { randomColorHex } from 'src/utils/helpers';
+import ColorPicker from 'src/modules/project-settings/labels/components/ColorPicker.vue';
+import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
+
 export default defineComponent({
   name: 'FormTagNew',
   emits: ['close', 'add'],
-  components: { CloseIcon, AddIcon },
+  components: { CloseIcon, AddIcon, ColorPicker },
   setup(_, { emit }) {
+    const { getRandomcolorFromPalette } = usePalette();
     const api = useAiplanStore();
     const route = useRoute();
     const name = ref('');
-    const color = ref(randomColorHex());
+    const color = ref(getRandomcolorFromPalette());
     const isTagExistError = ref(false);
     const showError = ref(false);
-    const colorPickerDialogVisible = ref(false);
     const myModal = ref(null);
 
     const errorMessage = computed(() => {
@@ -95,7 +90,7 @@ export default defineComponent({
 
     const clearFields = () => {
       name.value = '';
-      color.value = randomColorHex();
+      color.value = getRandomcolorFromPalette();
       isTagExistError.value = false;
     };
 
@@ -131,8 +126,8 @@ export default defineComponent({
       name,
       api,
       clearFields,
-      colorPickerDialogVisible,
       myModal,
+      ColorPicker,
     };
   },
 });

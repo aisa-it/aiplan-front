@@ -30,15 +30,10 @@
             ]"
           >
             <template v-slot:append>
-              <q-icon name="colorize" class="cursor-pointer">
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-color v-model="form.color" />
-                </q-popup-proxy>
-              </q-icon>
+              <ColorPicker
+                :current-color="form.color"
+                @set-color="(value: string) => (form.color = value)"
+              />
             </template>
           </q-input>
 
@@ -76,6 +71,10 @@ import { DEFAULT_LABEL } from 'src/constants/constants';
 import { QForm } from 'quasar';
 import { createProjectLabel } from '../../services/api';
 import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import ColorPicker from '../../components/ColorPicker.vue';
+import { usePalette } from '../../composables/usePalette';
+
+const { getRandomcolorFromPalette } = usePalette();
 
 const emit = defineEmits(['close']);
 
@@ -89,7 +88,7 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const formRef = ref<QForm>();
 const form = ref<DtoLabelLight>({
   ...DEFAULT_LABEL,
-  color: DEFAULT_LABEL.color(),
+  color: getRandomcolorFromPalette(),
 });
 
 const handleSubmit = async () => {
@@ -119,7 +118,7 @@ const close = async () => {
   return new Promise<void>((resolve) => {
     form.value = {
       ...DEFAULT_LABEL,
-      color: DEFAULT_LABEL.color(),
+      color: getRandomcolorFromPalette(),
     };
     resolve();
   });

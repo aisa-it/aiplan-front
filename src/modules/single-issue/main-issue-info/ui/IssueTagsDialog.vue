@@ -33,7 +33,7 @@
           >
             <q-badge
               rounded
-              :style="'background-color: ' + t.color"
+              :style="'background-color: ' + getCorrectColor(t.color)"
               class="q-mr-sm"
             />
             <span class="abbriviated-text q-mr-xs">
@@ -100,6 +100,7 @@ import FormTagNew from 'src/components/FormTagNew.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import type { ITag } from 'src/interfaces/tags';
 import { BASE_ERROR_RULES } from 'src/constants/notifications';
+import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
 
 const props = defineProps<{
   tags: ITag[];
@@ -112,6 +113,8 @@ const emit = defineEmits<{
   refresh: [];
   'update:tags': [tags: ITag[]];
 }>();
+
+const { getCorrectColor } = usePalette();
 
 const api = useAiplanStore();
 const route = useRoute();
