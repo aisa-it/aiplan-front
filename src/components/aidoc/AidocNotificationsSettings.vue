@@ -90,9 +90,7 @@ const settingsMap = {
   disable_doc_attachment: 'Изменение вложений',
   disable_doc_comment: 'Обновление комментариев',
   disable_doc_watchers: 'Изменение наблюдателей',
-  disable_doc_role: 'Изменение роли',
-  disable_doc_editor: 'Добавление новых редакторов',
-  disable_doc_reader: 'Добавление новых читателей',
+  disable_doc_role: 'Изменение роли участника',
 };
 
 const settingsItems = computed<
