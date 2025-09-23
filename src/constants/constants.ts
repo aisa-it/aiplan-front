@@ -25,6 +25,7 @@ export const RESTRICTED_URLS = [
   'not-found',
   'admin-panel',
   'profile',
+  'conference'
 ];
 
 export const STATES_TYPES = [

@@ -4,7 +4,7 @@
       flat
       dense
       class="btn-only-icon-sm bordered"
-      @click="$router.push('/conference/')"
+      @click="$router.push('/conf')"
     >
       <ConferenceIcon /><q-tooltip>Конференция</q-tooltip></q-btn
     >
