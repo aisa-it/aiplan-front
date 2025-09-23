@@ -2,9 +2,10 @@
   <q-dialog ref="dialogRef" @before-show="onLoad()">
     <q-card v-if="loading === false" class="modal-card">
       <q-card-section>
-        <h6 class="q-mb-sm q-mt-sm">
+        <h6 v-if="props.project" class="q-mb-sm q-mt-sm">
           Настройка уведомлений задач проекта "{{ project.name }}"
         </h6>
+        <h6 v-else class="q-mb-sm q-mt-sm">Настройка уведомлений документа</h6>
       </q-card-section>
       <q-card-section>
         <q-tabs
@@ -23,6 +24,7 @@
           <q-tab-panels v-model="tab">
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="email">
               <SettingList
+                v-if="project"
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_email"
                 :memberSettings="settings.notification_settings_email"
@@ -40,9 +42,29 @@
               >
                 <template #subtitle>Настройка уведомлений по почте</template>
               </SettingList>
+              <AidocNotificationsSettings
+                v-else
+                :aidoc-author-settings="aidocSettings.notification_author_settings_email"
+                :aidoc-member-settings="aidocSettings.notification_settings_email"
+                @updateDocAuthorSettings="
+                  (value) =>
+                    setCurrentSetting(
+                      value,
+                      'notification_author_settings_email',
+                      'doc',
+                    )
+                "
+                @updateDocMemberSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_settings_email', 'doc')
+                "
+              >
+                <template #subtitle>Настройка уведомлений по почте</template>
+              </AidocNotificationsSettings>
             </q-tab-panel>
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="tg">
               <SettingList
+                v-if="project"
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_tg"
                 :memberSettings="settings.notification_settings_tg"
@@ -57,9 +79,25 @@
               >
                 <template #subtitle>Настройка уведомлений в Telegram</template>
               </SettingList>
+              <AidocNotificationsSettings
+                v-else
+                :aidoc-author-settings="aidocSettings.notification_author_settings_tg"
+                :aidoc-member-settings="aidocSettings.notification_settings_tg"
+                @updateDocAuthorSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_author_settings_tg', 'doc')
+                "
+                @updateDocMemberSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_settings_tg', 'doc')
+                "
+              >
+                <template #subtitle>Настройка уведомлений в Telegram</template>
+              </AidocNotificationsSettings>
             </q-tab-panel>
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="app">
               <SettingList
+                v-if="project"
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_app"
                 :memberSettings="settings.notification_settings_app"
@@ -74,6 +112,21 @@
               >
                 <template #subtitle>Настройка уведомлений в системе</template>
               </SettingList>
+              <AidocNotificationsSettings
+                v-else
+                :aidoc-author-settings="aidocSettings.notification_author_settings_app"
+                :aidoc-member-settings="aidocSettings.notification_settings_app"
+                @updateDocAuthorSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_author_settings_app', 'doc')
+                "
+                @updateDocMemberSettings="
+                  (value) =>
+                    setCurrentSetting(value, 'notification_settings_app', 'doc')
+                "
+              >
+                <template #subtitle>Настройка уведомлений в системе</template>
+              </AidocNotificationsSettings>
             </q-tab-panel>
           </q-tab-panels>
         </transition>
@@ -111,6 +164,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 import SettingList from './ProjectNotificationsSettings/SettingList.vue';
+import AidocNotificationsSettings from '../aidoc/AidocNotificationsSettings.vue';
 
 // composables
 import { useLoad } from 'src/composables/useLoad';
@@ -136,13 +190,28 @@ const settings = ref({
   notification_author_settings_app: {},
 });
 
-onMounted(async () => {
-  await getProjectUser();
+const aidocSettings = ref({
+  notification_author_settings_email: {},
+  notification_author_settings_tg: {},
+  notification_author_settings_app: {},
+  notification_settings_email: {},
+  notification_settings_tg: {},
+  notification_settings_app: {},
 });
 
-const setCurrentSetting = (value, nameField: string) => {
-  settings.value[nameField] = { ...value };
-  console.log(settings.value);
+onMounted(async () => {
+  props.project
+    ? await getProjectUser()
+    : await getAidocNotificationsSettings();
+});
+
+const setCurrentSetting = (
+  value,
+  nameField: string,
+  target = 'project',
+): void => {
+  if (target === 'project') settings.value[nameField] = { ...value };
+  if (target === 'doc') aidocSettings.value[nameField] = { ...aidocSettings.value[nameField], ...value };
 };
 
 const getProjectUser = async () => {
@@ -171,20 +240,57 @@ const getProjectUser = async () => {
     });
 };
 
-const handleSaveSettings = async () => {
-  await projectStore
-    .setProjectNotificationSettings(
-      currentWorkspaceSlug.value,
-      props.project.id,
-      settings.value,
-    )
-    .then(() => {
-      setNotificationView({
-        open: true,
-        type: 'success',
-      });
-      dialogRef.value.hide();
+const getAidocNotificationsSettings = async (): Promise<void> => {
+  await workspaceStore
+    .getWorkspaceNotifications(currentWorkspaceSlug.value)
+    .then((data) => {
+      aidocSettings.value.notification_author_settings_email = {
+        ...data.notification_author_settings_email,
+      };
+      aidocSettings.value.notification_author_settings_tg = {
+        ...data.notification_author_settings_tg,
+      };
+      aidocSettings.value.notification_author_settings_app = {
+        ...data.notification_author_settings_app,
+      };
+      aidocSettings.value.notification_settings_email = {
+        ...data.notification_settings_email,
+      };
+      aidocSettings.value.notification_settings_tg = {
+        ...data.notification_settings_tg,
+      };
+      aidocSettings.value.notification_settings_app = {
+        ...data.notification_settings_app,
+      };
     });
+};
+
+const handleSaveSettings = async () => {
+  if (props.project) {
+    await projectStore
+      .setProjectNotificationSettings(
+        currentWorkspaceSlug.value,
+        props.project.id,
+        settings.value,
+      )
+      .then(() => {
+        setNotificationView({
+          open: true,
+          type: 'success',
+        });
+        dialogRef.value.hide();
+      });
+  } else {
+    await workspaceStore
+      .setAiDocNotificationSettings(currentWorkspaceSlug.value, aidocSettings.value)
+      .then(() => {
+        setNotificationView({
+          open: true,
+          type: 'success',
+        });
+        dialogRef.value.hide();
+      });
+  }
 };
 
 const { loading, onLoad } = useLoad(getProjectUser);
