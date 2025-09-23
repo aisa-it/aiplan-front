@@ -68,11 +68,11 @@ export default defineComponent({
   emits: ['close', 'add'],
   components: { CloseIcon, AddIcon, ColorPicker },
   setup(_, { emit }) {
-    const { getRandomcolorFromPalette } = usePalette();
+    const { getRandomColorFromPalette } = usePalette();
     const api = useAiplanStore();
     const route = useRoute();
     const name = ref('');
-    const color = ref(getRandomcolorFromPalette());
+    const color = ref(getRandomColorFromPalette());
     const isTagExistError = ref(false);
     const showError = ref(false);
     const myModal = ref(null);
@@ -90,7 +90,7 @@ export default defineComponent({
 
     const clearFields = () => {
       name.value = '';
-      color.value = getRandomcolorFromPalette();
+      color.value = getRandomСolorFromPalette();
       isTagExistError.value = false;
     };
 

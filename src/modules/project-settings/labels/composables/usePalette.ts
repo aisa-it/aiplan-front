@@ -24,7 +24,7 @@ export function usePalette() {
     return scheme;
   });
 
-  const getRandomcolorFromPalette = () => {
+  const getRandomСolorFromPalette = () => {
     return palette.value.flat()[
       Math.floor(Math.random() * palette.value.flat().length)
     ];
@@ -42,7 +42,7 @@ export function usePalette() {
 
   return {
     palette,
-    getRandomcolorFromPalette,
+    getRandomСolorFromPalette,
     getCorrectColor,
   };
 }

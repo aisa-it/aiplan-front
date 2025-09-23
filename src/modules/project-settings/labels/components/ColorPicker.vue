@@ -23,7 +23,7 @@
             icon="check"
             color="white"
             class="button bg-positive"
-            @click="clickComfirmHand"
+            @click="handleConfirm"
           />
           <q-btn
             flat
@@ -31,7 +31,7 @@
             icon="close"
             color="white"
             class="button bg-negative"
-            @click="clickCancelHand"
+            @click="handleCancel"
           />
         </div>
       </teleport>
@@ -46,19 +46,19 @@ import { usePalette } from '../composables/usePalette';
 const props = defineProps<{ currentColor?: string }>();
 const emits = defineEmits<{ setColor: [color: string]; cancel: [] }>();
 
-const { palette, getRandomcolorFromPalette } = usePalette();
+const { palette, getRandomСolorFromPalette } = usePalette();
 
-const color = ref(props.currentColor ?? getRandomcolorFromPalette());
+const color = ref(props.currentColor ?? getRandomСolorFromPalette());
 
 const popupRef = ref();
 const isOpen = ref(false);
 
-const clickComfirmHand = () => {
+const handleConfirm = () => {
   emits('setColor', color.value);
   popupRef.value?.hide();
 };
 
-const clickCancelHand = () => {
+const handleCancel = () => {
   emits('cancel');
   popupRef.value?.hide();
 };
