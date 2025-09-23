@@ -8,25 +8,30 @@
       @set="(val: number) => setTab(val)"
     />
 
-    <GeneralProfileSettings v-if="profileSettingsTab === 0" />
-    <ActivitiesProfileSettings v-else-if="profileSettingsTab === 1" />
-    <DesignProfileSettings v-else-if="profileSettingsTab === 2" />
+    <div
+      class="column flex-center"
+      style="width: 100%; height: calc(100vh - 300px)"
+      v-if="isLoadingComponent"
+    >
+      <DefaultLoader class="self-center q-mt-md q-mb-md" />
+    </div>
+
+    <component v-else :is="listTabs[profileSettingsTab].component" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 // components
 import SettingsTabs from 'src/shared/components/SettingsTabs.vue';
-import GeneralProfileSettings from './components/GeneralProfileSettings.vue';
-import ActivitiesProfileSettings from './components/ActivitiesProfileSettings.vue';
-import DesignProfileSettings from './components/DesignProfileSettings.vue';
 import ProfilePreview from './components/ProfilePreview.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 // composables
 import { useProfileTabs } from './composables/useProfileTabs';
 import { useMetadataTitle } from './composables/useMetadataTitle';
 import { useUserLoadInfo } from './composables/useUserLoadInfo';
 
-const { listTabs, profileSettingsTab, setTab } = useProfileTabs();
+const { listTabs, profileSettingsTab, setTab, isLoadingComponent } =
+  useProfileTabs();
 useUserLoadInfo();
 useMetadataTitle();
 </script>
