@@ -192,7 +192,9 @@ const routes: RouteRecordRaw[] = [
     path: '/not-found',
     component: () => import('pages/ErrorNotFoundPage.vue'),
   },
-  { path: '/conference', component: () => import('pages/ConferencePage.vue') },
+  { path: '/conf', component: () => import('pages/ConferencePage.vue') },
+  { path: '/conf/:roomName', component: () => import('pages/ConferencePage.vue') },
+
   {
     path: '/:catchAll(.*)*',
     name: 'Error404',

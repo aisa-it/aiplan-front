@@ -97,7 +97,7 @@ interface IAvatarImageProps {
   tooltip?: string;
   error?: string;
   icon?: string;
-  image?: string;
+  image?: string | null;
   rounded?: boolean;
   border?: boolean;
   size?: string;
