@@ -201,6 +201,7 @@ module.exports = configure(function (ctx) {
         cfg.navigateFallbackDenylist = cfg.navigateFallbackDenylist || [];
         cfg.navigateFallbackDenylist.push(/^\/api\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/i\/.*$/);
+        cfg.navigateFallbackDenylist.push(/^\/sf\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/d\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/uploads\/.*$/);
       },
