@@ -9,7 +9,17 @@
       :list-tabs="listTabs"
       @set="(val: number) => (wsSettingsTab = val)"
     />
+
+    <div
+      class="column flex-center"
+      style="width: 100%; height: calc(100vh - 300px)"
+      v-if="isLoadingComponent"
+    >
+      <DefaultLoader class="self-center q-mt-md q-mb-md" />
+    </div>
+
     <component
+      v-else
       :is="activeComponent"
       :currentWsInfo="currentWsInfo || {}"
       :currentWsSlug="currentWsSlug"
@@ -19,18 +29,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 // components
 import SettingsTabs from 'src/shared/components/SettingsTabs.vue';
 import LoadPage from 'src/pages/LoadPage.vue';
-import {
-  GeneralWorkspaceSettings,
-  MembersWorkspaceSettings,
-  ActivitiesWorkspaceSettings,
-  ActivitiesMapWorkspaceSettings,
-  IntegrationWorkspaceSettings,
-} from 'src/modules/workspace-settings/ui/tabs';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 
 import { useLoad } from 'src/composables/useLoad';
 
@@ -56,12 +60,66 @@ const props = defineProps({
 });
 
 const wsSettingsTab = ref(0);
+
+const isLoadingComponent = ref(false);
+
+function asyncImport(loader: () => Promise<any>) {
+  return defineAsyncComponent(async () => {
+    isLoadingComponent.value = true;
+
+    const component = await loader();
+
+    isLoadingComponent.value = false;
+    return component;
+  });
+}
+
 const componentTabs = [
-  { name: 0, component: GeneralWorkspaceSettings },
-  { name: 1, component: MembersWorkspaceSettings },
-  { name: 2, component: ActivitiesWorkspaceSettings },
-  { name: 3, component: ActivitiesMapWorkspaceSettings },
-  { name: 4, component: IntegrationWorkspaceSettings },
+  {
+    name: 0,
+    component: asyncImport(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/GeneralWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 1,
+    component: asyncImport(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/MembersWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 2,
+    component: asyncImport(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/ActivitiesWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 3,
+    component: asyncImport(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/ActivitiesMapWorkspaceSettings.vue'
+        ),
+    ),
+  },
+  {
+    name: 4,
+    component: asyncImport(
+      () =>
+        import(
+          'src/modules/workspace-settings/ui/tabs/IntegrationWorkspaceSettings.vue'
+        ),
+    ),
+  },
 ];
 const listTabs = [
   {
@@ -94,7 +152,7 @@ const activeComponent = computed(
     componentTabs.find((tab) => tab.name === wsSettingsTab.value)?.component,
 );
 
-onMounted(async () => {
-  await onLoad(currentWsSlug.value, props.isInAdminPanel);
+onMounted(() => {
+  onLoad(currentWsSlug.value, props.isInAdminPanel);
 });
 </script>

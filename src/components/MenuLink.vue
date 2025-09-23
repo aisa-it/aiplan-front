@@ -107,8 +107,8 @@
                   :style="'font-size: 12px;'"
                   @click="
                     {
-                      (selectedProject = project),
-                        (isNotificationsSettingsOpen = true);
+                      ((selectedProject = project),
+                        (isNotificationsSettingsOpen = true));
                     }
                   "
                 >
@@ -126,8 +126,8 @@
                   :style="'font-size: 12px;'"
                   @click="
                     {
-                      (selectedProject = project),
-                        (isNotificationsAdminSettingsOpen = true);
+                      ((selectedProject = project),
+                        (isNotificationsAdminSettingsOpen = true));
                     }
                   "
                 >
