@@ -13,6 +13,7 @@ export const CLOUD_THEMES = {
     sunColor: 0xff9919,
     sunGlareColor: 0xff6633,
     sunlightColor: 0xff9933,
+    speed: 1.5,
   },
   afternoon: {
     el: '#vanta-clouds-bg',
@@ -28,6 +29,7 @@ export const CLOUD_THEMES = {
     sunColor: 0xe9eab8,
     sunGlareColor: 0x744d2f,
     sunlightColor: 0x422d23,
+    speed: 1.5,
   },
   evening: {
     el: '#vanta-clouds-bg',
@@ -43,6 +45,7 @@ export const CLOUD_THEMES = {
     sunColor: 0xe0d6bb,
     sunGlareColor: 0x47332a,
     sunlightColor: 0xa77a4c,
+    speed: 1.5,
   },
   night: {
     el: '#vanta-clouds-bg',
@@ -58,5 +61,6 @@ export const CLOUD_THEMES = {
     sunColor: 0xe9eab8,
     sunGlareColor: 0x2b1f12,
     sunlightColor: 0x512b1e,
+    speed: 1.5,
   },
 };
