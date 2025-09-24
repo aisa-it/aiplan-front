@@ -203,7 +203,7 @@ const onSubmit = async () => {
   ).then(async () => {
     await projectStore.getProjectInfo(
       route.params.workspace as string,
-      project.value.id,
+      route.params.project as string,
     );
     onSuccess();
   });
