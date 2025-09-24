@@ -190,7 +190,7 @@ function onSuccess() {
     type: 'success',
     customMessage: SUCCESS_SCRIPT_SAVE,
   });
-  refresh();
+  loadLogs();
 }
 
 function handleSaveRule() {
