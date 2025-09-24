@@ -184,13 +184,17 @@ async function refresh() {
 
 onMounted(async () => refresh());
 
-function onSuccess() {
+async function onSuccess() {
   setNotificationView({
     open: true,
     type: 'success',
     customMessage: SUCCESS_SCRIPT_SAVE,
   });
-  loadLogs();
+  await projectStore.getProjectInfo(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
+  refresh();
 }
 
 function handleSaveRule() {
