@@ -247,6 +247,7 @@ import { ref, watch, computed } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 // interfaces
 import { IFilter } from 'src/interfaces/filters';
@@ -278,6 +279,8 @@ import {
   getFilterStates,
   updateFilter,
 } from '../../services/api';
+
+import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
 
 type Members = 'authors' | 'assignees' | 'watchers';
 
@@ -743,10 +746,25 @@ const setOnlyActive = (value: boolean, resetStates = false) => {
   filter.value.filter.only_active = value;
 };
 
-const copyLink = () => {
-  navigator.clipboard.writeText(
-    props.currentFilter?.short_url ?? props.currentFilter?.url,
-  );
+const { setNotificationView } = useNotificationStore();
+
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(
+      props.currentFilter?.short_url ?? props.currentFilter?.url,
+    );
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Ссылка на фильтр скопирована',
+    });
+  } catch (err) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
+    });
+  }
 };
 
 watch(
