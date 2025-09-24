@@ -33,7 +33,9 @@ const deleteState = async (
   projectID: string,
   stateId: string,
 ): Promise<void> => {
-  projectsApi.deleteState(workspaceSlug, projectID, stateId);
+  return projectsApi
+    .deleteState(workspaceSlug, projectID, stateId)
+    .then((res) => res.data);
 };
 
 const createState = async (
