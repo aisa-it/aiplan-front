@@ -75,6 +75,10 @@
     --attachment-hover-color: rgba(0, 0, 0, 0.6);
     --buttons-attachments-bg: #474a52;
     --buttons-attachments-icons-color: #474a52;
+
+    --tab-color-picker-disable: #474a52;
+    --tab-color-picker-header--inactive: #474a52;
+    --tab-color-picker-header--inactive-text: #fff;
   }
 
   .body--light {
@@ -126,6 +130,10 @@
 
     --buttons-attachments-bg: rgb(255, 255, 255);
     --buttons-attachments-icons-color: #474a52;
+
+    --tab-color-picker-disable: #dde2ea;
+    --tab-color-picker-header--inactive: #dde2ea;
+    --tab-color-picker-header--inactive-text: #474a52;
   }
 }
 

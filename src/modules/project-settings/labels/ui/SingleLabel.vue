@@ -1,7 +1,10 @@
 <template>
   <div class="label row q-pa-md no-wrap">
     <div class="row no-wrap gap-x-4 overflow-hidden">
-      <div class="circle" :style="`background-color: ${singleLabel.color}`" />
+      <div
+        class="circle"
+        :style="`background-color: ${getCorrectColor(singleLabel.color ?? '')}`"
+      />
       <div class="overflow-hidden">
         <h6 class="font-medium q-ma-none word-wrap">{{ singleLabel.name }}</h6>
       </div>
@@ -24,6 +27,9 @@
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
 import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { usePalette } from '../composables/usePalette';
+
+const { getCorrectColor } = usePalette();
 
 defineProps<{
   singleLabel: DtoLabelLight;
@@ -33,7 +39,6 @@ const emits = defineEmits<{
   edit: [value: DtoLabelLight];
   delete: [value: DtoLabelLight];
 }>();
-
 </script>
 <style lang="scss" scoped>
 .circle {

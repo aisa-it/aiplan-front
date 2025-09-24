@@ -30,15 +30,10 @@
             ]"
           >
             <template v-slot:append>
-              <q-icon name="colorize" class="cursor-pointer">
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-color v-model="form.color" />
-                </q-popup-proxy>
-              </q-icon>
+              <ColorPicker
+                :current-color="form.color"
+                @set-color="(value: string) => (form.color = value)"
+              />
             </template>
           </q-input>
 
@@ -74,12 +69,16 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import { SUCCESS_UPDATE_TAG } from 'src/constants/notifications';
 import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { updateProjectLabel } from '../../services/api';
+import ColorPicker from '../../components/ColorPicker.vue';
+import { usePalette } from '../../composables/usePalette';
 
 const props = defineProps<{
   currentLabel?: DtoLabelLight;
 }>();
 
 const emit = defineEmits(['close']);
+
+const { getCorrectColor } = usePalette();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -114,6 +113,7 @@ watch(
   () => props.currentLabel,
   () => {
     form.value = JSON.parse(JSON.stringify(props.currentLabel));
+    form.value.color = getCorrectColor(form.value.color);
   },
 );
 </script>

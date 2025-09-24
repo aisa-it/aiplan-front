@@ -74,7 +74,7 @@
             >
               <q-badge
                 rounded
-                :style="'background-color: ' + t.color"
+                :style="'background-color: ' + getCorrectColor(t.color)"
                 class="q-mr-xs"
               />
               <span class="abbriviated-text">
@@ -161,6 +161,7 @@ import { useNotificationStore } from 'stores/notification-store';
 
 //utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
+import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
 
 // interfaces
 import type { ITag } from 'src/interfaces/tags';
@@ -186,6 +187,8 @@ const emits = defineEmits<{
   refresh: [];
   'update:tags': [tags: ITag[]];
 }>();
+
+const { getCorrectColor } = usePalette();
 
 const api = useAiplanStore();
 const projectStore = useProjectStore();
