@@ -53,8 +53,13 @@ const routes: RouteRecordRaw[] = [
             ],
           },
           {
+            path: 'projects/:project/issues',
+            component: async () =>
+              import('src/modules/issue-list/IssueList.vue'),
+          },
+          {
             path: 'projects/:project/',
-            component: () => import('pages/ProjectIssuesPage.vue'),
+            component: async () => import('pages/ProjectIssuesPage.vue'),
             children: [
               {
                 path: 'settings',
@@ -63,12 +68,10 @@ const routes: RouteRecordRaw[] = [
               },
               {
                 path: '',
-                component: () => import('components/IssuesList.vue'),
+                component: async () =>
+                  import('src/modules/issue-list/IssueList.vue'),
               },
-              {
-                path: 'issues',
-                component: () => import('components/IssuesList.vue'),
-              },
+
               {
                 path: 'issues/:issue/:commentId?',
                 name: 'issue',

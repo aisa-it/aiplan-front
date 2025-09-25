@@ -20,7 +20,6 @@ import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
-// import ProjectLoader from 'src/components/loaders/ProjectLoader.vue';
 
 const router = useRouter();
 const projectStore = useProjectStore();
@@ -43,5 +42,5 @@ const getCurrentProject = async () => {
   isLoadProjectInfo.value = false;
 };
 
-onMounted(async () => getCurrentProject());
+onMounted(async () => await getCurrentProject());
 </script>
