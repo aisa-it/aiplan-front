@@ -59,7 +59,12 @@
                 }"
               >
                 <template v-slot:spinner>
-                  <DefaultLoader />
+                  <div
+                    style="width: 100%; height: 100%"
+                    class="row justify-center items-center"
+                  >
+                    <DefaultLoader />
+                  </div>
                 </template>
               </JitsiMeeting>
             </div>
