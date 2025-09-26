@@ -44,8 +44,12 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-author-settings="aidocSettings.notification_author_settings_email"
-                :aidoc-member-settings="aidocSettings.notification_settings_email"
+                :aidoc-author-settings="
+                  aidocSettings.notification_author_settings_email
+                "
+                :aidoc-member-settings="
+                  aidocSettings.notification_settings_email
+                "
                 @updateDocAuthorSettings="
                   (value) =>
                     setCurrentSetting(
@@ -56,7 +60,11 @@
                 "
                 @updateDocMemberSettings="
                   (value) =>
-                    setCurrentSetting(value, 'notification_settings_email', 'doc')
+                    setCurrentSetting(
+                      value,
+                      'notification_settings_email',
+                      'doc',
+                    )
                 "
               >
                 <template #subtitle>Настройка уведомлений по почте</template>
@@ -81,11 +89,17 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-author-settings="aidocSettings.notification_author_settings_tg"
+                :aidoc-author-settings="
+                  aidocSettings.notification_author_settings_tg
+                "
                 :aidoc-member-settings="aidocSettings.notification_settings_tg"
                 @updateDocAuthorSettings="
                   (value) =>
-                    setCurrentSetting(value, 'notification_author_settings_tg', 'doc')
+                    setCurrentSetting(
+                      value,
+                      'notification_author_settings_tg',
+                      'doc',
+                    )
                 "
                 @updateDocMemberSettings="
                   (value) =>
@@ -114,11 +128,17 @@
               </SettingList>
               <AidocNotificationsSettings
                 v-else
-                :aidoc-author-settings="aidocSettings.notification_author_settings_app"
+                :aidoc-author-settings="
+                  aidocSettings.notification_author_settings_app
+                "
                 :aidoc-member-settings="aidocSettings.notification_settings_app"
                 @updateDocAuthorSettings="
                   (value) =>
-                    setCurrentSetting(value, 'notification_author_settings_app', 'doc')
+                    setCurrentSetting(
+                      value,
+                      'notification_author_settings_app',
+                      'doc',
+                    )
                 "
                 @updateDocMemberSettings="
                   (value) =>
@@ -156,7 +176,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 // stores
 import { useProjectStore } from 'src/stores/project-store';
@@ -176,7 +196,7 @@ const { setNotificationView } = useNotificationStore();
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-const props = defineProps(['project']);
+const props = defineProps(['project', 'isAidocPage']);
 
 const dialogRef = ref();
 const tab = ref('email');
@@ -199,19 +219,17 @@ const aidocSettings = ref({
   notification_settings_app: {},
 });
 
-onMounted(async () => {
-  props.project
-    ? await getProjectUser()
-    : await getAidocNotificationsSettings();
-});
-
 const setCurrentSetting = (
   value,
   nameField: string,
   target = 'project',
 ): void => {
   if (target === 'project') settings.value[nameField] = { ...value };
-  if (target === 'doc') aidocSettings.value[nameField] = { ...aidocSettings.value[nameField], ...value };
+  if (target === 'doc')
+    aidocSettings.value[nameField] = {
+      ...aidocSettings.value[nameField],
+      ...value,
+    };
 };
 
 const getProjectUser = async () => {
@@ -282,7 +300,10 @@ const handleSaveSettings = async () => {
       });
   } else {
     await workspaceStore
-      .setAiDocNotificationSettings(currentWorkspaceSlug.value, aidocSettings.value)
+      .setAiDocNotificationSettings(
+        currentWorkspaceSlug.value,
+        aidocSettings.value,
+      )
       .then(() => {
         setNotificationView({
           open: true,
@@ -294,6 +315,15 @@ const handleSaveSettings = async () => {
 };
 
 const { loading, onLoad } = useLoad(getProjectUser);
+
+watch(
+  () => props.project,
+  async () => await getProjectUser(),
+);
+
+onMounted(async () => {
+  if (props.isAidocPage) await getAidocNotificationsSettings();
+});
 </script>
 
 <style scoped lang="scss">
