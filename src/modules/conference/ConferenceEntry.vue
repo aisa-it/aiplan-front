@@ -73,7 +73,11 @@ onMounted(async () => {
   }, 700);
 });
 
-onUnmounted(() => (loading.value = true));
+onUnmounted(() => {
+  loading.value = true;
+  const block = document.getElementById('vanta-clouds-bg');
+  if (block) block.remove()
+});
 
 function isWebGLSupported() {
   const canvas = document.createElement('canvas');
