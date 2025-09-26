@@ -43,6 +43,10 @@ onMounted(() => {
     roomName.value = route.params.roomName;
     connectToConference(true);
   }
+
+  if (history.state.slug) {
+    roomName.value = history.state.slug;
+  }
 });
 
 const connectToConference = (routeByQuery = false) => {

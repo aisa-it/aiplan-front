@@ -4,7 +4,12 @@
       flat
       dense
       class="btn-only-icon-sm bordered"
-      @click="$router.push('/conf')"
+      @click="
+        $router.push({
+          name: 'conference',
+          state: { slug: route.params.workspace },
+        })
+      "
     >
       <ConferenceIcon /><q-tooltip>Конференция</q-tooltip></q-btn
     >
