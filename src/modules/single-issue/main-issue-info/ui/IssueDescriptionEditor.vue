@@ -64,3 +64,17 @@ const getEditor = (value: any) => {
 // emits
 const handleToggleEdit = () => emits('toggleEdit');
 </script>
+
+<style scoped lang="scss">
+.issue-panel__editor {
+  overflow: visible !important;
+}
+
+:deep(.html-editor__toolbar) {
+  width: 99%;
+  position: sticky;
+  z-index: 10;
+  top: 50px;
+  background-color: $bg-color;
+}
+</style>
