@@ -114,7 +114,7 @@ const jitsiExpansion = ref<InstanceType<typeof ExpansionItem> | null>(null);
 
 //computeds
 const workspace = computed(() => {
-  return workspaceInfo.value?.name || route.params.workspaceSlug;
+  return workspaceInfo.value?.slug || route.params.slug;
 });
 
 const shouldMount = computed(() => {
