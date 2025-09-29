@@ -61,7 +61,7 @@
                 <template v-slot:spinner>
                   <div
                     style="width: 100%; height: 100%"
-                    class="row justify-center items-center"
+                    class="row justify-center items-center jitsi-spiner"
                   >
                     <DefaultLoader />
                   </div>
@@ -260,5 +260,9 @@ watch(
   height: 400px;
   display: inline-grid;
   position: relative;
+}
+
+.compact:has(.jitsi-spiner) {
+  display: block;
 }
 </style>
