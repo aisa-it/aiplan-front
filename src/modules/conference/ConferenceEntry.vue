@@ -1,5 +1,5 @@
 <template>
-  <div id="vanta-clouds-bg" class="vanta-container" ref="vantaRef">
+  <div id="vanta-clouds-bg" class="vanta-container">
     <q-btn
       v-show="!loading"
       style="
@@ -34,6 +34,9 @@ import ConferenceEntryCard from './ui/ConferenceEntryCard.vue';
 import { CLOUD_THEMES } from './constants/themes';
 import { defineBackgroundImage } from './utils/defineBackgroundImage';
 
+import * as THREE from 'three';
+import CLOUDS from 'vanta/dist/vanta.clouds.min';
+
 const router = useRouter();
 
 const userStore = useUserStore();
@@ -46,6 +49,8 @@ onBeforeMount(() => {
   useGlobalLoading();
 });
 
+let vantaEffect = null;
+
 onMounted(async () => {
   await userStore.getUserInfo();
   const gpu = await navigator?.gpu;
@@ -57,8 +62,12 @@ onMounted(async () => {
     isEnableGPU.value = isWebGLSupported();
   }
 
-  if (isEnableGPU.value && window.VANTA) {
-    window.VANTA.CLOUDS(CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay]);
+  if (isEnableGPU.value) {
+    vantaEffect = CLOUDS({
+      el: '#vanta-clouds-bg',
+      THREE,
+      ...CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay],
+    });
   } else {
     const block = document.getElementById('vanta-clouds-bg');
     block.style.backgroundImage = `url(${defineBackgroundImage(getCurrentTimeOfDay().timeOfDay)})`;
@@ -75,8 +84,11 @@ onMounted(async () => {
 
 onUnmounted(() => {
   loading.value = true;
-  const block = document.getElementById('vanta-clouds-bg');
-  if (block) block.remove()
+
+  if (vantaEffect) {
+    vantaEffect.destroy();
+    vantaEffect = null;
+  }
 });
 
 function isWebGLSupported() {
