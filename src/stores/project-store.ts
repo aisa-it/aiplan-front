@@ -73,6 +73,10 @@ export const useProjectStore = defineStore('project-store', {
       );
     },
 
+    isKanbanEnabled(): boolean | undefined {
+      return this.projectProps?.issueView === 'kanban';
+    },
+
     /** Возвращает статусы проекта как массив*/
     getStatusesAsArray(): DtoStateLight[] {
       const statuses: DtoStateLight[][] = [];

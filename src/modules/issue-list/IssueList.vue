@@ -11,7 +11,7 @@
         <FiltersList :projectId="route.params.project" :columns="allColumns" />
       </q-card-section>
       <q-separator />
-      <div v-show="loading === false">
+      <div v-show="loading === false && !isKanbanEnabled">
         <transition name="fade">
           <DefaultIssueList v-if="!isGroupingEnabled" />
         </transition>
@@ -104,7 +104,7 @@ import GroupedIssueList from './components/GroupedIssueList.vue';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 
-const { isGroupingEnabled } = storeToRefs(useProjectStore());
+const { isGroupingEnabled, isKanbanEnabled } = storeToRefs(useProjectStore());
 const route = useRoute();
 const loading = ref(true);
 onMounted(async () => {
