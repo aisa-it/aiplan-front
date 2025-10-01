@@ -223,6 +223,9 @@ const clearReply = () => {
   .tiptap {
     min-height: 12.5rem;
   }
+  .html-editor__toolbar {
+    top: 0;
+  }
 }
 ::v-deep(.html-editor__wrapper) {
   height: 100%;
