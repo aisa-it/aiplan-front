@@ -115,8 +115,21 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .issue-comment-edit-dialog {
   min-width: calc(66vw - 25px);
+}
+
+:deep(.html-editor) {
+  overflow: visible !important;
+}
+
+:deep(.html-editor__toolbar) {
+  width: 99%;
+  height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: $bg-color;
 }
 </style>
