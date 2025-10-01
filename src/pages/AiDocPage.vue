@@ -481,7 +481,7 @@ watch(
   width: 99%;
   height: auto;
   position: sticky;
-  top: 0;
+  top: 50px;
   z-index: 10;
   background-color: $bg-color;
 }
