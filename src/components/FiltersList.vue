@@ -4,11 +4,11 @@
     <DotListSelectIcon v-if="isShowIndicators" :width="20" :height="20" />
     <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
       <q-list style="width: 320px; background: white">
-        <div v-show="projectView">
+        <div>
           <q-item-label header style="padding-bottom: 0px"
             >Отображение</q-item-label
           >
-          <q-item v-show="projectView" class="row">
+          <q-item class="row">
             <q-select
               dense
               label="Вид"
@@ -30,7 +30,7 @@
             </q-select>
           </q-item>
 
-          <q-item v-show="projectView" class="row">
+          <q-item class="row">
             <q-select
               dense
               label="Колонки"
@@ -70,7 +70,7 @@
           <q-select
             dense
             label="Группировка"
-            v-model="stateSelector"
+            v-model="groupSelector"
             class="base-selector full-w"
             popup-content-class="fit-select-popup selector-option__wrapper scrollable-content"
             :options="options"
@@ -87,17 +87,14 @@
             </template>
           </q-select>
         </q-item>
-        <q-item v-show="projectView" class="row">
+        <q-item class="row">
           <SelectStatusFilter
             :projectId="projectId"
             @update="onUpdate()"
             class="full-w"
           />
         </q-item>
-        <q-item
-          v-show="projectView"
-          class="centered-horisontally justify-between"
-        >
+        <q-item class="centered-horisontally justify-between">
           Показывать подзадачи
           <q-toggle
             v-model="showSubIssues"
@@ -105,25 +102,22 @@
             @update:model-value="onUpdate()"
           />
         </q-item>
-        <q-item
-          v-show="projectView"
-          class="centered-horisontally justify-between"
-        >
+        <q-item class="centered-horisontally justify-between">
           Показывать черновики
           <q-toggle
-            v-model="draft"
+            v-model="isDraft"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
 
         <q-item
-          v-show="viewProps.props?.filters.group_by !== 'None'"
+          v-show="projectProps?.filters?.group_by !== 'None'"
           class="centered-horisontally justify-between"
         >
           Показывать пустые группы
           <q-toggle
-            v-model="showEmptyGroups"
+            v-model="isShowEmptyGroups"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -132,7 +126,7 @@
         <q-item class="centered-horisontally justify-between"
           >Только активные
           <q-toggle
-            v-model="showOnlyActive"
+            v-model="isShowOnlyActive"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -144,18 +138,25 @@
 
 <script setup lang="ts">
 // core
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, inject } from 'vue';
+import { useRoute } from 'vue-router';
+import { EventBus } from 'quasar';
 
 // store
-import { useViewPropsStore } from 'src/stores/view-props-store';
-
+import { useProjectStore } from 'src/stores/project-store';
 // constants
-import { GROUP_BY_OPTIONS, PROJECT_VIEWS } from 'src/constants/constants';
+import {
+  GROUP_BY_OPTIONS,
+  NEW_GROUP_BY_OPTIONS,
+  PARSED_GROUP,
+  PROJECT_VIEWS,
+} from 'src/constants/constants';
 
 // components
 import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   projectId: string;
@@ -166,27 +167,30 @@ const emits = defineEmits<{
   update: [];
 }>();
 
-const viewProps = useViewPropsStore();
+const route = useRoute();
+const projectStore = useProjectStore();
+const { projectProps } = storeToRefs(projectStore);
+const bus = inject('bus') as EventBus;
 
-const viewSelector = ref(PROJECT_VIEWS[0]);
-const stateSelector = ref(GROUP_BY_OPTIONS[0]);
+const viewSelector = ref();
 const columnsSelector = ref(props.columns);
+const groupSelector = ref();
+const isDraft = ref();
+const isShowEmptyGroups = ref();
+const isShowOnlyActive = ref();
 const showSubIssues = ref(false);
 const draft = ref(false);
-const showEmptyGroups = ref(false);
-const showOnlyActive = ref(false);
 const isPopupOpen = ref(false);
 
-const projectView = !!props.projectId;
-const options = ref(GROUP_BY_OPTIONS);
+const options = ref(NEW_GROUP_BY_OPTIONS);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
   const isNoGroupNone =
-    viewProps.props?.filters.group_by !== GROUP_BY_OPTIONS[0].value;
-  const isShowSubIssues = !viewProps.props?.showSubIssues;
-  const isShowOnlyActive = viewProps.props?.showOnlyActive;
-  const isStatusLength = !!viewProps.props?.filters.states?.length;
+    projectProps?.value?.filters?.group_by !== GROUP_BY_OPTIONS[0].value;
+  const isShowSubIssues = !projectProps?.value?.showSubIssues;
+  const isShowOnlyActive = projectProps?.value?.showOnlyActive;
+  const isStatusLength = !!projectProps.value?.filters.states?.length;
   const isColumnsToShow = props.columns.length !== columnsSelector.value.length;
 
   if (
@@ -201,58 +205,67 @@ const isShowIndicators = computed(() => {
   return isShow;
 });
 
-async function refresh() {
-  viewProps.projectView = projectView;
-  await viewProps.getProps().then((viewProps) => {
-    stateSelector.value = options.value.find(
-      (group) => group.value === viewProps?.filters.group_by,
-    );
-    viewSelector.value = PROJECT_VIEWS.find(
-      (view) => view.value === viewProps?.issueView,
-    ) || { value: 'list', label: 'Список' };
-
-    if (!!viewProps?.columns_to_show && viewProps?.columns_to_show.length > 0) {
-      columnsSelector.value = props.columns.filter(
-        (col) => viewProps?.columns_to_show.some((c) => col.name == c),
-      );
-    }
-
-    showSubIssues.value = viewProps?.showSubIssues;
-    showEmptyGroups.value = viewProps?.showEmptyGroups;
-    showOnlyActive.value = viewProps?.showOnlyActive;
-  });
-}
-
 const popupToggle = () => {
   isPopupOpen.value = !isPopupOpen.value;
 };
 
-onMounted(async () => refresh());
-
 const onUpdate = async () => {
-  viewProps.props.issueView = viewSelector.value.value;
-  viewProps.props.filters.group_by = stateSelector.value.value;
-  viewProps.props.columns_to_show = columnsSelector.value.map(
-    (col) => col.name,
-  );
-  viewProps.props.showSubIssues = showSubIssues.value;
-  viewProps.props.showEmptyGroups = showEmptyGroups.value;
-  viewProps.props.showOnlyActive = showOnlyActive.value;
-  viewProps.props.draft = draft.value;
-  await viewProps.saveProps().then(async () => {
-    emits('update');
-  });
-};
+  try {
+    let props = JSON.parse(JSON.stringify(projectProps.value));
+    props.issueView = viewSelector.value.value;
+    props.filters.group_by = groupSelector.value.value;
+    props.columns_to_show = columnsSelector.value.map((col) => col.name);
+    props.showSubIssues = showSubIssues.value;
+    props.showOnlyActive = isShowOnlyActive.value;
+    props.showEmptyGroups = isShowEmptyGroups.value;
+    props.draft = isDraft.value;
 
+    await projectStore.setProjectProps(
+      route.params.workspace as string,
+      route.params.project as string,
+      props,
+    );
+
+    await projectStore
+      .getMeInProject(
+        route.params.workspace as string,
+        route.params.project as string,
+      )
+      .then(() => {
+        bus.emit(
+          'issues-filters-update',
+          projectProps.value?.filters?.group_by,
+        );
+      });
+  } catch (e) {
+    console.error(e);
+  }
+};
 watch(
-  () => props.projectId,
-  () => refresh(),
+  () => projectProps.value,
+  () => {
+    viewSelector.value =
+      PROJECT_VIEWS.find(
+        (view) => view.value === projectProps.value?.issueView,
+      ) || PROJECT_VIEWS[0];
+
+    groupSelector.value =
+      PARSED_GROUP[projectProps.value?.filters?.group_by || 'None'] ||
+      NEW_GROUP_BY_OPTIONS.find(
+        (option) => option.value === projectProps.value?.filters?.group_by,
+      );
+
+    showSubIssues.value = projectProps.value?.showSubIssues || false;
+    isDraft.value = projectProps.value?.draft || true;
+    isShowEmptyGroups.value = projectProps.value?.showEmptyGroups || false;
+    isShowOnlyActive.value = projectProps.value?.showOnlyActive || false;
+  },
 );
 
 watch(
-  () => viewProps.props.draft,
+  () => projectProps.value?.draft,
   () => {
-    draft.value = viewProps.props.draft;
+    draft.value = projectProps.value?.draft;
   },
   { immediate: true },
 );

@@ -75,12 +75,12 @@ export default defineComponent({
     menuSelf: {
       type: String as PropType<QSelectProps['menuSelf']>,
       required: false,
-      default: 'top middle'
+      default: 'top middle',
     },
     menuAnchor: {
       type: String as PropType<QSelectProps['menuAnchor']>,
       required: false,
-      default: 'bottom middle'
+      default: 'bottom middle',
     },
   },
   setup(props, { emit }) {
@@ -94,6 +94,7 @@ export default defineComponent({
     };
 
     const updateRowsPerPage = (val: number) => {
+      console.log('lolololol');
       emit('update:rowsPerPage', val);
       emit('update:selectedPage', 1);
       emit('request');

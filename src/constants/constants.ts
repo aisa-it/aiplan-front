@@ -91,6 +91,25 @@ export const GROUP_BY_OPTIONS = [
   { value: 'Assignee to', label: 'Исполнитель' },
   { value: 'Watchers', label: 'Наблюдатель' },
 ];
+export const NEW_GROUP_BY_OPTIONS = [
+  { value: 'none', label: 'Нет' },
+  { value: 'state', label: 'Статус' },
+  { value: 'labels', label: 'Теги' },
+  { value: 'priority', label: 'Приоритет' },
+  { value: 'author', label: 'Автор' },
+  { value: 'assignees', label: 'Исполнитель' },
+  { value: 'watchers', label: 'Наблюдатель' },
+];
+
+export const PARSED_GROUP = {
+  None: NEW_GROUP_BY_OPTIONS[0],
+  State: NEW_GROUP_BY_OPTIONS[1],
+  Label: NEW_GROUP_BY_OPTIONS[2],
+  Priority: NEW_GROUP_BY_OPTIONS[3],
+  'Created by': NEW_GROUP_BY_OPTIONS[4],
+  'Assignee to': NEW_GROUP_BY_OPTIONS[5],
+  Watchers: NEW_GROUP_BY_OPTIONS[6],
+};
 
 export const USER_ROLES = [
   { value: 'Founder or leadership team', label: 'Руководитель команды' },

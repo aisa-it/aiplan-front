@@ -1,10 +1,20 @@
 <template>
   <div
-    v-show="currentProjectID"
     class="q-table__title abbriviated-text"
     :style="' max-width: calc(100% - 60px)'"
   >
-    Задачи проекта {{ project?.name }}
+    <transition name="fade">
+      <span v-if="currentProjectID && isLoadProjectInfo === false">
+        Задачи проекта {{ project?.name }}
+      </span>
+    </transition>
+
+    <q-skeleton
+      v-if="isLoadProjectInfo"
+      text
+      style="width: 300px"
+      animation="blink"
+    />
   </div>
 </template>
 
@@ -25,7 +35,8 @@ export default defineComponent({
     const projectStore = useProjectStore();
     const workspaceStore = useWorkspaceStore();
 
-    const { currentProjectID, project } = storeToRefs(projectStore);
+    const { currentProjectID, project, isLoadProjectInfo } =
+      storeToRefs(projectStore);
     const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
     return {
       api,
@@ -34,6 +45,7 @@ export default defineComponent({
       workspaceInfo,
       currentProjectID,
       currentWorkspaceSlug,
+      isLoadProjectInfo,
     };
   },
 });

@@ -36,6 +36,23 @@ export const translatePrioritets = (priority: string) => {
   }
 };
 
+export const translateFirstCharUpperCasePriority = (priority: string) => {
+  switch (priority) {
+    case 'urgent':
+      return 'Критический';
+    case 'high':
+      return 'Высокий';
+    case 'medium':
+      return 'Средний';
+    case 'low':
+      return 'Низкий';
+    case null:
+      return 'Без приоритета';
+    default:
+      return priority;
+  }
+};
+
 export const stateRUS = (val: string) => {
   switch (val.toLowerCase()) {
     case 'backlog':

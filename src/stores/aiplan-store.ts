@@ -264,7 +264,7 @@ export const useAiplanStore = defineStore('aiplan', {
 
     // ------------- Project -------------
 
-    async setProjectView(data: {
+    async   setProjectView(data: {
       view_props?: IProjectView;
       default_props?: IProjectView;
     }): Promise<any> {

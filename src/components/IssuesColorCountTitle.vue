@@ -1,5 +1,5 @@
 <template>
-  <div class="row no-wrap col full-w items-center">
+  <div class="row no-wrap col full-w items-center q-pa-sm">
     <q-badge
       :label="count"
       :style="`
