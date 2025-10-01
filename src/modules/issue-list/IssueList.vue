@@ -11,7 +11,7 @@
         <FiltersList :projectId="route.params.project" :columns="allColumns" />
       </q-card-section>
       <q-separator />
-      <div v-show="loading === false && !isKanbanEnabled">
+      <div v-show="loading === false">
         <transition name="fade">
           <DefaultIssueList v-if="!isGroupingEnabled" />
         </transition>

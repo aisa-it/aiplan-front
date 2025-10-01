@@ -53,47 +53,22 @@
   </transition>
   <transition name="fade">
     <div v-show="!loading">
-      <div v-for="(table, index) in issuesTables" :key="index">
-        <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
-          <GroupedHeader
-            :entity="table?.entity"
-            :group-by="groupBy"
-            :badge-name="defineEntityName(table.entity, groupBy)"
-            :badge-color="table.entity?.color ?? undefined"
-            :issues-count="table?.count"
-        /></q-item>
-
-        <q-expansion-item
-          v-if="table.issues?.length"
-          :default-opened="
-            !useProjectStore().isGroupHide(table?.entity?.id || table.entity)
-          "
-          @update:model-value="
-            (value) =>
-              useProjectStore().setGroupHide(
-                entity?.entity?.id || table.entity,
-                value,
-              )
-          "
-        >
-          <template #header>
-            <GroupedHeader
-              :entity="table?.entity"
-              :group-by="groupBy"
-              :badge-name="defineEntityName(table.entity, groupBy)"
-              :badge-color="table.entity?.color ?? undefined"
-              :issues-count="table?.count"
-            />
-          </template>
-          <IssueTable
-            :rows="table?.issues"
-            :rowsCount="table?.count"
-            @refresh="
-              (pagination) => refreshTable(index, table.entity, pagination)
-            "
-          />
-        </q-expansion-item>
-      </div>
+      <GroupedTables
+        v-if="!isKanbanEnabled"
+        :issues="issuesTables"
+        :group-by="groupBy"
+        @refresh-table="
+          (index, entity, pagination) => refreshTable(index, entity, pagination)
+        "
+      />
+      <GroupedBoard
+        v-if="isKanbanEnabled"
+        :issues="issuesTables"
+        :group-by="groupBy"
+        @refresh-table="
+          (index, entity, pagination) => refreshTable(index, entity, pagination)
+        "
+      />
     </div>
   </transition>
 </template>
@@ -111,18 +86,17 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // components
-import IssueTable from './IssueTable.vue';
-import GroupedHeader from './ui/GroupedHeader.vue';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 
 // utils
-import { defineEntityName } from '../utils/defineEntityName';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import GroupedTables from './table-view/GroupedTables.vue';
+import GroupedBoard from './board-view/GroupedBoard.vue';
 
 const { getGroupedIssues } = useGroupedIssues();
 
 const issuesStore = useIssuesStore();
-const { project, projectProps, isLoadProjectInfo } =
+const { project, projectProps, isLoadProjectInfo, isKanbanEnabled } =
   storeToRefs(useProjectStore());
 
 const { workspaceInfo } = storeToRefs(useWorkspaceStore());

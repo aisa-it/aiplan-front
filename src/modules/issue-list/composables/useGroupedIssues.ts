@@ -16,6 +16,7 @@ interface QuasarPagination {
   rowsPerPage: number;
 }
 
+
 export const useGroupedIssues = () => {
   const issuesStore = useIssuesStore();
 
