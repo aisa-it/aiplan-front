@@ -8,14 +8,13 @@ import {
 } from 'src/constants/constants';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
-interface QuasarPagination {
+export interface QuasarPagination {
   page: number;
   rowsNumber: number;
   sortBy: string;
   descending: boolean;
   rowsPerPage: number;
 }
-
 
 export const useGroupedIssues = () => {
   const issuesStore = useIssuesStore();
@@ -69,5 +68,5 @@ export const useGroupedIssues = () => {
     );
   }
 
-  return { getGroupedIssues };
+  return { getGroupedIssues, parsePagination };
 };
