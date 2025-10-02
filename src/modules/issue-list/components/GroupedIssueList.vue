@@ -65,8 +65,8 @@
         v-if="isKanbanEnabled"
         :issues="issuesTables"
         :group-by="groupBy"
-        @refresh-table="
-          (index, entity, pagination) => refreshTable(index, entity, pagination)
+        @refresh-card="
+          (index, entity, pagination) => refreshCard(index, entity, pagination)
         "
       />
     </div>
@@ -144,6 +144,16 @@ async function refreshTable(index: number, entity: any, pagination: any) {
     return await load();
   }
 
+  const response = await issuesStore.getIssuesTable(
+    workspaceInfo?.value?.id as string,
+    project.value.id as string,
+    {},
+    pagination,
+  );
+  issuesTables.value[index].issues = response?.data.issues;
+}
+
+async function refreshCard(index: number, entity: any, pagination: any) {
   const response = await issuesStore.getIssuesTable(
     workspaceInfo?.value?.id as string,
     project.value.id as string,

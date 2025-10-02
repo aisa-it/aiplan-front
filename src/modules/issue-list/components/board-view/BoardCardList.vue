@@ -29,10 +29,10 @@
         </div>
 
         <PaginationDefault
-          v-show="!isExpanded"
+          v-show="!isExpanded && quasarPagination.rowsNumber / 10 > 1"
           v-model:selected-page="selectedPage"
           :rows-number="quasarPagination.rowsNumber"
-          :rows-per-page="10"
+          :rows-per-page="25"
           :max-pages="3"
           class="issues-single-board__pagination pagination-line"
           @update:selectedPage="(page) => getIssues(page)"
@@ -47,6 +47,18 @@
       </div>
     </div>
   </q-expansion-item>
+
+  <q-item v-else class="empty-board-item">
+    <div class="board-list-header">
+      <GroupedHeader
+        :entity="table?.entity"
+        :group-by="groupBy"
+        :badge-name="defineEntityName(table.entity, groupBy)"
+        :badge-color="table.entity?.color ?? undefined"
+        :issues-count="table?.count"
+      />
+    </div>
+  </q-item>
 </template>
 
 <script setup lang="ts">
@@ -90,8 +102,8 @@ const quasarPagination = ref<QuasarPagination>({
 });
 
 const getIssues = async (p?: any) => {
-  console.log(p);
-  if (p) quasarPagination.value = p;
+  quasarPagination.value.page = await p;
+  
   emits('refresh', parsePagination(quasarPagination.value));
 };
 
@@ -108,6 +120,11 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.empty-board-item {
+  width: 400px;
+  border-radius: 16px;
+  border: 1px solid var(--darkest-border-color);
+}
 .board-card-list {
   display: flex;
   flex-direction: column;
@@ -116,10 +133,18 @@ onMounted(() => {
   overflow-y: scroll;
   height: calc(100vh - 200px);
 }
+.board-item {
+  width: 400px;
 
+  :deep(.q-item) {
+    border-radius: 16px;
+    border: 1px solid var(--darkest-border-color);
+  }
+}
 .board-list-header {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 12px;
   width: 100%;
 }

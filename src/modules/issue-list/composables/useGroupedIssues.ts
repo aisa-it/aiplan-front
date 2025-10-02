@@ -19,7 +19,8 @@ export interface QuasarPagination {
 export const useGroupedIssues = () => {
   const issuesStore = useIssuesStore();
 
-  const { project, projectProps } = storeToRefs(useProjectStore());
+  const { project, projectProps, isKanbanEnabled } =
+    storeToRefs(useProjectStore());
   const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 
   // преобразуем quasar пагинацию в пагинацию бека
@@ -48,8 +49,12 @@ export const useGroupedIssues = () => {
     const quasarPagination: QuasarPagination = {
       page: 1,
       rowsNumber: 0,
-      sortBy: projectProps.value?.filters?.order_by as string,
-      descending: projectProps.value?.filters?.orderDesc as boolean,
+      sortBy: isKanbanEnabled
+        ? 'sequence_id'
+        : (projectProps.value?.filters?.order_by as string),
+      descending: isKanbanEnabled
+        ? true
+        : (projectProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
 

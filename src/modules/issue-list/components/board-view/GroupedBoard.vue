@@ -1,10 +1,6 @@
 <template>
   <div class="horizontal-scroll-enable board-wrapper">
-    <div v-for="(table, index) in issues" :key="index">
-      <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
-        аыаыаыаыва
-      </q-item>
-
+    <div v-for="(table, index) in defineIssues" :key="index">
       <BoardCardList
         :table="table"
         :group-by="groupBy"
@@ -15,29 +11,38 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
 
 import BoardCardList from './BoardCardList.vue';
 
-defineProps<{
+const props = defineProps<{
   issues: [];
   groupBy: string;
 }>();
 
-const emits = defineEmits(['refreshTable', 'refresh']);
+const emits = defineEmits(['refreshCard', 'refresh']);
 
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);
 
 const refreshTable = (index, entity, pagination) => {
-  emits('refreshTable', index, entity, pagination);
+  const p = pagination;
+  delete p.group_by;
+
+  emits('refreshCard', index, entity, pagination);
 };
+
+const defineIssues = computed(() => {
+  return !projectProps.value?.showEmptyGroups
+    ? props.issues.filter((table) => table.issues?.length)
+    : props.issues;
+});
 </script>
 
 <style scoped lang="scss">
-
 .board-wrapper {
   display: flex;
   flex-direction: row;
@@ -52,16 +57,6 @@ const refreshTable = (index, entity, pagination) => {
 .all-boards {
   position: relative;
 }
-
-.board-item {
-  width: 400px;
-
-  :deep(.q-item) {
-    border-radius: 16px;
-    border: 1px solid var(--darkest-border-color);
-  }
-}
-
 
 .board-card {
   border-radius: 16px;
