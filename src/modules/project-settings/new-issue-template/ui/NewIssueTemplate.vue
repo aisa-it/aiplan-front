@@ -288,6 +288,18 @@ watch(
   margin-bottom: 8px;
 }
 
+:deep(.html-editor) {
+  overflow: visible !important;
+}
+
+:deep(.html-editor__toolbar) {
+  
+  position: sticky;
+  top: 50px;
+  z-index: 10;
+  background-color: $bg-color;
+}
+
 @media screen and (max-width: 720px) {
   .issue-selector-label {
     display: none;
