@@ -1,6 +1,7 @@
 import aiplan from 'src/utils/aiplan';
 import { IProject } from 'src/interfaces/projects';
 import { formatDate } from './time';
+import { canBeConvertedToDate } from './canBeConvertedToDate';
 
 export const addSpaceIfCamelCase = (str: string) =>
   str.replace(/([a-z])([A-Z])/g, '$1 $2');
@@ -329,16 +330,24 @@ export const getHistoryText = (m: any, wsProjects: IProject[]) => {
 
     case 'target_date':
       if (m.verb === 'updated') {
-        const newDate = formatDate(m.new_value ?? '');
-        const oldDate = formatDate(
-          m.old_value ? m.old_value.replace(/"/g, '') : '',
-        );
+        const newDate =
+          m.new_value instanceof Date || canBeConvertedToDate(m.new_value)
+            ? formatDate(m.new_value)
+            : '';
+        const oldDate =
+          m.old_value &&
+          (m.old_value instanceof Date || canBeConvertedToDate(m.old_value))
+            ? formatDate(m.old_value.replace(/"/g, ''))
+            : '';
+
         if (m.old_value === '<nil>' || !m.old_value) {
           return `установил(-а) срок исполнения ${newDate}`;
         } else if (m.new_value === '' && oldDate) {
           return `убрал(-а) срок исполнения ${oldDate}`;
         } else {
-          return `изменил(-а) срок исполнения с ${oldDate} на ${newDate}`;
+          return oldDate && newDate
+            ? `изменил(-а) срок исполнения с ${oldDate} на ${newDate}`
+            : 'изменил(-а) срок исполнения';
         }
       }
 
