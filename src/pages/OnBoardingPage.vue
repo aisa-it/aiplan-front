@@ -130,7 +130,6 @@ export default defineComponent({
     const { user, userWorkspaces } = storeToRefs(userStore);
 
     // vars
-    // const $q = useQuasar();
     const lastName = ref();
     const firstName = ref();
     const username = ref();
@@ -186,13 +185,16 @@ export default defineComponent({
       lastName.value.validate();
       firstName.value.validate();
       username.value.validate();
-      !me.value.telegram_id
-        ? (me.value.telegram_id = null)
-        :  me.value.telegram_id = Number(me.value.telegram_id);
+
+      me.value.telegram_id
+        ? me.value.telegram_id = Number(me.value.telegram_id)
+        : me.value.telegram_id = null;
+
       if (
         firstName.value.hasError &&
         lastName.value.hasError &&
-        username.value.hasError
+        username.value.hasError &&
+        (me.value.telegram_id as unknown as any).hasError
       )
         return;
 
