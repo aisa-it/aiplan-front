@@ -30,6 +30,7 @@
           :favorite="project.is_favorite"
           :project="project"
           :workspace-slug="currentWorkspaceSlug"
+          :logo="project.logo ?? null"
         />
       </q-list>
     </template>
