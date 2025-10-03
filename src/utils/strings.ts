@@ -313,6 +313,9 @@ export const getHistoryText = (m: any, wsProjects: IProject[]) => {
       }
 
     case 'description':
+      if (m.verb === 'updated') {
+        return 'изменил(-а) описание'
+      }
       if (m.entity_type === 'doc') {
         return 'изменил(-а) описание';
       }
