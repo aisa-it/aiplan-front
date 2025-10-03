@@ -136,9 +136,9 @@ export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspa
                 <span/>`;
 
     case 'description':
-      return `<span>обновил(-а) описание в задаче ${link} ${workspaceSource}<span/>`;
+      return `<span>изменил(-а) описание в задаче ${link} ${workspaceSource}<span/>`;
     case 'name':
-      return `<span>обновил(-а) название в задаче ${link} ${workspaceSource}<span/>`;
+      return `<span>изменил(-а) название в задаче ${link} ${workspaceSource}<span/>`;
     case 'attachment':
       action = translateVerb(activity.verb as string);
       return `<span>${action} вложение "${
