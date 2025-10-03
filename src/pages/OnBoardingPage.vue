@@ -49,6 +49,33 @@
         :error-message="errorMessageUserName"
         @update:model-value="handleUpdateUserName"
       />
+      <q-input
+        v-model="me.telegram_id"
+        :rules="[
+          (val) =>
+            !val ||
+            !isNaN(Number(val)) ||
+            'Telegram ID может содержать только цифры',
+        ]"
+        class="base-input onboarding-input onboarding-input_optional"
+        data-id="telegram-id-settings"
+        label="Введите Telegram ID"
+        lazy-rules
+        hide-bottom-space
+        dense
+        @update:model-value="handleUpdateUserName"
+      >
+        <template v-slot:hint>
+          Ваш telegram id для получения уведомлений. Напишите
+          <a
+            class="onboarding-input__hint-link"
+            :href="botURL"
+            @click.prevent="openTgLink"
+            >боту</a
+          >
+          для получения id.
+        </template>
+      </q-input>
       <q-card-actions align="center">
         <q-btn
           no-caps
@@ -66,14 +93,14 @@
 
 <script lang="ts">
 // core
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useQuasar } from 'quasar';
 
 // stores
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 // utils
 import {
@@ -96,22 +123,34 @@ export default defineComponent({
     // stores
     const api = useAiplanStore();
     const userStore = useUserStore();
+    const utilsStore = useUtilsStore();
+    const { botURL } = storeToRefs(utilsStore);
 
     // store to refs
     const { user, userWorkspaces } = storeToRefs(userStore);
 
     // vars
-    const $q = useQuasar();
     const lastName = ref();
     const firstName = ref();
     const username = ref();
-    const me = ref({
+
+    const me = ref<{
+      last_name: string;
+      first_name: string;
+      username: string;
+      telegram_id?: number | null;
+    }>({
       last_name: '',
       first_name: '',
       username: '',
+      telegram_id: null,
     });
     const isErrorUserName = ref<boolean>(false);
     const errorMessageUserName = ref<string>('');
+
+    function openTgLink() {
+      window.open(botURL.value, '_blank', 'noopener,noreferrer');
+    }
 
     watch(
       () => user.value,
@@ -120,6 +159,7 @@ export default defineComponent({
           last_name: user.value?.last_name ?? '',
           first_name: user.value?.first_name ?? '',
           username: user.value?.username ?? '',
+          telegram_id: user.value?.telegram_id,
         };
 
         isErrorUserName.value = false;
@@ -145,10 +185,16 @@ export default defineComponent({
       lastName.value.validate();
       firstName.value.validate();
       username.value.validate();
+
+      me.value.telegram_id
+        ? me.value.telegram_id = Number(me.value.telegram_id)
+        : me.value.telegram_id = null;
+
       if (
         firstName.value.hasError &&
         lastName.value.hasError &&
-        username.value.hasError
+        username.value.hasError &&
+        (me.value.telegram_id as unknown as any).hasError
       )
         return;
 
@@ -173,14 +219,12 @@ export default defineComponent({
       errorMessageUserName.value = '';
     };
 
-    watch(
-      () => $q.appVisible,
-      () => {
-        userStore.getUserInfo().then((data) => {
+    onMounted(async () => {
+      await userStore.getUserInfo().then((data) => {
           return data;
         });
-      },
-    );
+      await utilsStore.getNotificationBotUrl();
+    });
 
     return {
       me,
@@ -189,9 +233,9 @@ export default defineComponent({
       username,
       isErrorUserName,
       errorMessageUserName,
-
+      botURL,
       handleSaveName,
-
+      openTgLink,
       isEmpty,
       maxLength,
       isUsername,
@@ -216,7 +260,23 @@ export default defineComponent({
 }
 .onboarding-input {
   margin-bottom: 10px;
+
+  &__hint-link {
+    color: $blue;
+    pointer-events: auto;
+  }
 }
+
+.onboarding-input_optional {
+  :deep(.q-field__label) {
+    &::after {
+      margin-left: 4px;
+      content: '*';
+      color: $red;
+    }
+  }
+}
+
 :deep(.q-field--error .q-field__bottom) {
   width: 600px;
 }
