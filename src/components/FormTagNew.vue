@@ -90,7 +90,7 @@ export default defineComponent({
 
     const clearFields = () => {
       name.value = '';
-      color.value = getRandomСolorFromPalette();
+      color.value = getRandomColorFromPalette();
       isTagExistError.value = false;
     };
 

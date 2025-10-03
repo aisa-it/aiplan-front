@@ -74,7 +74,7 @@ import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import ColorPicker from '../../components/ColorPicker.vue';
 import { usePalette } from '../../composables/usePalette';
 
-const { getRandomСolorFromPalette } = usePalette();
+const { getRandomColorFromPalette } = usePalette();
 
 const emit = defineEmits(['close']);
 
@@ -88,7 +88,7 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const formRef = ref<QForm>();
 const form = ref<DtoLabelLight>({
   ...DEFAULT_LABEL,
-  color: getRandomСolorFromPalette(),
+  color: getRandomColorFromPalette(),
 });
 
 const handleSubmit = async () => {
@@ -118,7 +118,7 @@ const close = async () => {
   return new Promise<void>((resolve) => {
     form.value = {
       ...DEFAULT_LABEL,
-      color: getRandomСolorFromPalette(),
+      color: getRandomColorFromPalette(),
     };
     resolve();
   });

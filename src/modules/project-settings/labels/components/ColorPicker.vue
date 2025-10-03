@@ -46,9 +46,9 @@ import { usePalette } from '../composables/usePalette';
 const props = defineProps<{ currentColor?: string }>();
 const emits = defineEmits<{ setColor: [color: string]; cancel: [] }>();
 
-const { palette, getRandomСolorFromPalette } = usePalette();
+const { palette, getRandomColorFromPalette } = usePalette();
 
-const color = ref(props.currentColor ?? getRandomСolorFromPalette());
+const color = ref(props.currentColor ?? getRandomColorFromPalette());
 
 const popupRef = ref();
 const isOpen = ref(false);
