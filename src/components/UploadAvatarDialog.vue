@@ -60,7 +60,7 @@ import AlertIcon from 'src/components/icons/AlertIcon.vue';
 import { isValidFileSize } from 'src/utils/validation';
 
 const props = defineProps<{
-  title: string;
+  title?: string;
   isProfile?: boolean;
 }>();
 
