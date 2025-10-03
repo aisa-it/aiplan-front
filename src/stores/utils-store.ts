@@ -30,6 +30,8 @@ export const useUtilsStore = defineStore('utils-store', {
       ny: false,
       localVersion: localStorage.getItem('appVersion'),
       openReleaseNote: false,
+      isEnabledJitsi: false,
+      isEnabledCaptcha: false,
     };
   },
 
@@ -42,6 +44,9 @@ export const useUtilsStore = defineStore('utils-store', {
           this.isSingUp = res.data.sign_up;
           this.version = res.data.version;
           this.ny = res.data.ny;
+          this.isEnabledJitsi = res.data.jitsi;
+          this.isEnabledCaptcha = res.data.captcha;
+
           if (
             this.ny === true &&
             !localStorage.getItem('snow')?.includes('disable')

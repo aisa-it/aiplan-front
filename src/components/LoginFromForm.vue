@@ -47,6 +47,7 @@
       </q-input>
       <div class="flex justify-start">
         <CaptchaWidget
+          v-if="isEnabledCaptcha"
           @verified="(payload) => (captchaPayload = payload)"
           :key="updateKey"
         />
@@ -64,7 +65,7 @@
         no-caps
         type="submit"
         id="login"
-        :disable="captchaPayload == ''"
+        :disable="isEnabledCaptcha ? captchaPayload == '' : false"
         >Войти</q-btn
       >
     </q-form>
@@ -81,6 +82,8 @@ import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useLoaderStore } from 'src/stores/loader-store';
 import { isEmail } from 'src/utils/validation';
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 const api = useAiplanStore();
 const loaderStore = useLoaderStore();
@@ -91,7 +94,7 @@ const email = ref('');
 const isPassword = ref(true);
 const captchaPayload = ref('');
 const updateKey = ref(0);
-
+const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
 const login = async () => {
   loaderStore.startLoading();
   await api.login(email.value, password.value, captchaPayload.value);

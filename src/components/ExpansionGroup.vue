@@ -12,7 +12,7 @@
       ref="docsMenu"
       filterBy="docs"
     />
-    <JitsiDialog v-if="!isDemo"></JitsiDialog>
+    <JitsiDialog v-if="!isDemo && isEnabledJitsi"></JitsiDialog>
     <q-item v-if="isDemo" clickable class="menu-item centered-horisontally">
       <q-item-section avatar> <UsersIcon /> </q-item-section>
       <q-item-section> Конференции </q-item-section>
@@ -42,7 +42,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 const route = useRoute();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
-const { isDemo } = storeToRefs(utilsStore);
+const { isDemo, isEnabledJitsi } = storeToRefs(utilsStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const docsMenu = ref();
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
