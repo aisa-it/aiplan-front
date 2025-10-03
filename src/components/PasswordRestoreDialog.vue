@@ -9,7 +9,10 @@
           v-model="email"
           class="base-input q-mb-sm"
         />
-        <CaptchaWidget @verified="(payload) => (captchaPayload = payload)" />
+        <CaptchaWidget
+          v-if="isEnabledCaptcha"
+          @verified="(payload) => (captchaPayload = payload)"
+        />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn unelevated class="secondary-btn" no-caps @click="onDialogCancel">
@@ -19,7 +22,7 @@
           unelevated
           class="primary-btn"
           no-caps
-          :disable="captchaPayload === ''"
+          :disable="isEnabledCaptcha ? captchaPayload == '' : false"
           @click="restore"
         >
           Восстановить
@@ -35,9 +38,9 @@ import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useDialogPluginComponent } from 'quasar';
 import CaptchaWidget from './CaptchaWidget.vue';
-import {
-  SUCCESS_RESTORE_PASS,
-} from 'src/constants/notifications';
+import { SUCCESS_RESTORE_PASS } from 'src/constants/notifications';
+import { storeToRefs } from 'pinia';
+import { useUtilsStore } from 'src/stores/utils-store';
 export default {
   emits: [...useDialogPluginComponent.emits, 'update'],
   setup() {
@@ -49,6 +52,7 @@ export default {
     const email = ref('');
     const captchaPayload = ref('');
 
+    const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
     return {
       email,
       api,
@@ -70,6 +74,7 @@ export default {
       onDialogHide,
       onDialogOK,
       onDialogCancel,
+      isEnabledCaptcha,
     };
   },
   components: { CaptchaWidget },

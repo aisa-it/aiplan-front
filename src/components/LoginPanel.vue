@@ -72,8 +72,9 @@
               </template>
             </q-input>
             <CaptchaWidget
-              @verified="(payload) => (captchaPayload = payload)"
-              :key="updateKey"
+            v-if="isEnabledCaptcha"
+            :key="updateKey"
+            @verified="(payload) => (captchaPayload = payload)"
             />
             <q-btn
               class="login-panel__forget-btn"
@@ -88,7 +89,7 @@
               type="submit"
               id="login"
               :loading="loading"
-              :disable="captchaPayload == ''"
+              :disable="isEnabledCaptcha ? captchaPayload == '' : false"
               >Войти</q-btn
             >
           </q-form>
@@ -169,7 +170,7 @@ const utilsStore = useUtilsStore();
 
 const router = useRouter();
 const { isSingUp } = storeToRefs(utilsStore);
-const { ny } = storeToRefs(utilsStore);
+const { ny, isEnabledCaptcha } = storeToRefs(utilsStore);
 const email = ref('');
 const password = ref('');
 const isPassword = ref(true);

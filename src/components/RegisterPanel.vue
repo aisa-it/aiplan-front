@@ -12,6 +12,7 @@
       ]"
     />
     <CaptchaWidget
+      v-if="isEnabledCaptcha"
       @verified="(payload) => (captchaPayload = payload)"
       :key="updateKey"
     />
@@ -53,10 +54,9 @@ import { isEmail } from 'src/utils/validation';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
 
 // constants
-import {
-  SUCCESS_REGISTRATION_REQUEST,
-} from 'src/constants/notifications';
+import { SUCCESS_REGISTRATION_REQUEST } from 'src/constants/notifications';
 import { useQuasar } from 'quasar';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 export default defineComponent({
   name: 'RegisterPanel',
@@ -74,6 +74,7 @@ export default defineComponent({
     const refreshInterval = ref();
     const userStore = useUserStore();
     const router = useRouter();
+    const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
 
     const sendRegistrationRequest = async () => {
       loading.value = true;
@@ -123,6 +124,7 @@ export default defineComponent({
       captchaPayload,
       sendRegistrationRequest,
       updateKey,
+      isEnabledCaptcha,
     };
   },
 });
