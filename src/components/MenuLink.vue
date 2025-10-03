@@ -19,7 +19,7 @@
       <q-item-section v-else-if="logo" avatar>
         <q-img
           :src="getUrlFile(logo)"
-          :style="`width: 40px; height: 40px; border-radius: 4px; color: white;`"
+          :style="`width: 20px; height: 20px; border-radius: 4px; color: white;`"
         />
       </q-item-section>
 
