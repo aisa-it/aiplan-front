@@ -1,6 +1,7 @@
 <template>
   <div class="extended-search-wrapper">
     <q-btn
+      v-if="isEnabledJitsi"
       flat
       dense
       class="btn-only-icon-sm bordered"
@@ -30,8 +31,12 @@ import NewIssue from 'src/components/NewIssue.vue';
 import WorkspaceNotifications from 'src/modules/workspace-notifications/ui/WorkspaceNotifications.vue';
 import SearchButton from 'src/components/search-panel/SearchButton.vue';
 import ConferenceIcon from '../icons/ConferenceIcon.vue';
+import { storeToRefs } from 'pinia';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 const route = useRoute();
+
+const { isEnabledJitsi } = storeToRefs(useUtilsStore());
 </script>
 
 <style scoped lang="scss">
