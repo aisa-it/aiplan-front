@@ -17,6 +17,6 @@ const router = useRouter();
 onBeforeMount(async () => {
   await utilsStore.getVersion();
 
-  if (isEnabledJitsi.value === true) return router.push('/');
+  if (isEnabledJitsi.value === false) return router.push('/');
 });
 </script>
