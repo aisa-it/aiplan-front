@@ -28,6 +28,7 @@ export const useGroupedIssues = () => {
     return {
       only_count: false,
       show_sub_issue: projectProps.value?.showSubIssues ?? true,
+      only_active: projectProps.value?.showOnlyActive ?? true,
       group_by:
         PARSED_GROUP[projectProps.value?.filters?.group_by]?.value ||
         NEW_GROUP_BY_OPTIONS.find(
@@ -64,7 +65,6 @@ export const useGroupedIssues = () => {
     if (projectProps.value?.filters?.states?.length) {
       filters.states = projectProps?.value?.filters?.states;
     }
-
     return await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project?.value.id,

@@ -31,29 +31,38 @@
       <IssueTable
         :rows="table?.issues"
         :rowsCount="table?.count"
-        @refresh="(pagination) => refreshTable(index, table.entity, pagination)"
+        @refresh="
+          (pagination, isFullUpdate) =>
+            refreshTable(index, table.entity, pagination, isFullUpdate)
+        "
       />
     </q-expansion-item>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useProjectStore } from 'src/stores/project-store';
-import { defineEntityName } from '../../utils/defineEntityName';
-import GroupedHeader from '../ui/GroupedHeader.vue';
-import IssueTable from '../IssueTable.vue';
 import { storeToRefs } from 'pinia';
 
+import { useProjectStore } from 'src/stores/project-store';
+
+import { defineEntityName } from '../../utils/defineEntityName';
+
+import IssueTable from '../IssueTable.vue';
+import GroupedHeader from '../ui/GroupedHeader.vue';
+
+import { IGroupedResponse } from '../../types';
+
 defineProps<{
-  issues: [];
+  issues: IGroupedResponse[];
   groupBy: string;
 }>();
 
 const emits = defineEmits(['refreshTable']);
 
 const projectStore = useProjectStore();
-const {projectProps } = storeToRefs(projectStore)
-const refreshTable = (index, entity, pagination) => {
-  emits('refreshTable', index, entity, pagination);
+const { projectProps } = storeToRefs(projectStore);
+
+const refreshTable = (index, entity, pagination, isFullUpdate) => {
+  emits('refreshTable', index, entity, pagination, isFullUpdate);
 };
 </script>

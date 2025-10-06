@@ -17,9 +17,10 @@ import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 
 import BoardCardList from './BoardCardList.vue';
+import { IGroupedResponse } from '../../types';
 
 const props = defineProps<{
-  issues: [];
+  issues: IGroupedResponse[];
   groupBy: string;
 }>();
 
@@ -28,7 +29,7 @@ const emits = defineEmits(['refreshCard', 'refresh']);
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);
 
-const refreshTable = (index, entity, pagination) => {
+const refreshTable = (index: number, entity, pagination) => {
   const p = pagination;
   delete p.group_by;
 

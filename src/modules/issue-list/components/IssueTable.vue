@@ -3,7 +3,7 @@
     v-if="rows?.length"
     v-model:pagination="quasarPagination"
     class="my-sticky-column-table table-bottom-reverse"
-    row-key="sequence_id"
+    row-key="name"
     flat
     :rows="rows"
     :columns="projectStore.getTableColumns"
@@ -13,7 +13,7 @@
     <template #bottom>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
-        v-model:rows-per-page="quasarPagination.rowsPerPage"
+        :rows-per-page="quasarPagination.rowsPerPage"
         :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="quasarPagination.rowsNumber"
         show-rows-per-page
@@ -123,11 +123,11 @@ import {
   ChipCountColumn,
 } from './issue-table';
 import { storeToRefs } from 'pinia';
-import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 
 const projectStore = useProjectStore();
 
 const { projectProps } = storeToRefs(projectStore);
+
 interface QuasarPagination {
   page: number;
   rowsNumber: number;
@@ -143,11 +143,13 @@ const selectedRow = ref();
 
 const quasarPagination = ref<QuasarPagination>({
   page: 1,
-  rowsNumber: props.rowsCount || 0,
-  sortBy: projectProps.value?.filters?.order_by || 'sequence_id',
-  descending: projectProps.value?.filters?.orderDesc || true,
+  rowsNumber: props.rowsCount,
+  sortBy: projectProps.value?.filters?.order_by,
+  descending: projectProps.value?.filters?.orderDesc,
   rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
+
+const initialOffset = ref(parsePagination(quasarPagination.value)?.offset);
 
 // преобразуем quasar пагинацию в пагинацию бека
 function parsePagination(pagination: QuasarPagination) {
@@ -168,11 +170,17 @@ function parsePagination(pagination: QuasarPagination) {
 }
 
 const getIssues = async (p?: any) => {
+  console.log(p);
+  let isFullUpdate = false;
   if (p) quasarPagination.value = p;
-  emits('refresh', parsePagination(quasarPagination.value));
-};
 
-// onMounted(async () => await getIssues());
+  if (initialOffset.value === parsePagination(quasarPagination.value)?.offset) {
+    isFullUpdate = true;
+  }
+  initialOffset.value = parsePagination(quasarPagination.value)?.offset;
+
+  emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
+};
 
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
@@ -195,7 +203,5 @@ watchEffect(() => {
     left: 0;
     z-index: 100;
   }
-
-
 }
 </style>

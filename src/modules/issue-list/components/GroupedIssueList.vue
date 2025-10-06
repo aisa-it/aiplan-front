@@ -58,7 +58,8 @@
         :issues="issuesTables"
         :group-by="groupBy"
         @refresh-table="
-          (index, entity, pagination) => refreshTable(index, entity, pagination)
+          (index, entity, pagination, isFullUpdate) =>
+            refreshTable(index, entity, pagination, isFullUpdate)
         "
       />
       <GroupedBoard
@@ -89,9 +90,9 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 
 // utils
-import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import GroupedTables from './table-view/GroupedTables.vue';
 import GroupedBoard from './board-view/GroupedBoard.vue';
+import { IGroupedResponse } from '../types';
 
 const { getGroupedIssues } = useGroupedIssues();
 
@@ -101,12 +102,6 @@ const { project, projectProps, isLoadProjectInfo, isKanbanEnabled } =
 
 const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 
-interface IGroupedResponse {
-  entity: any;
-  issues: DtoIssue[];
-  count: number;
-}
-
 const issuesTables = ref<Array<IGroupedResponse>>([]);
 const loading = ref(true);
 const groupBy = ref('');
@@ -114,21 +109,26 @@ const route = useRoute();
 
 const bus = inject('bus') as EventBus;
 
+// реагируем на изменения фильтров в FilterList.vue
 bus.on('issues-filters-update', async (group_by) => {
-  if (group_by !== 'none') {
-    issuesTables.value = [];
-    loading.value = true;
-    const response = await getGroupedIssues();
-    issuesTables.value = response?.data?.issues;
-    groupBy.value = response?.data?.group_by;
-    loading.value = false;
-  }
+  // загружаем только при выбранной группировке
+  if (group_by === 'none') return;
+
+  await load();
 });
 
-async function refreshTable(index: number, entity: any, pagination: any) {
-  if (pagination?.limit !== projectProps.value?.page_size) {
+//
+async function refreshTable(
+  index: number,
+  entity: any,
+  pagination: any,
+  isFullUpdate: boolean,
+) {
+  if (isFullUpdate === true) {
     let props = JSON.parse(JSON.stringify(projectProps.value));
     props.page_size = pagination.limit;
+    props.filters.order_by = pagination.order_by;
+    props.filters.orderDesc = pagination.desc;
 
     await useProjectStore().setProjectProps(
       route.params.workspace as string,
