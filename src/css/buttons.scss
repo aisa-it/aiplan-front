@@ -1,5 +1,3 @@
-// --------------------- buttons ---------------------
-
 @mixin btn-common {
   border-radius: $radius;
   width: fit-content;
@@ -303,9 +301,11 @@
 }
 
 .zoom-in-btn {
-  content: url('src/assets/add-icon.svg') !important;
+  content: none !important;
+  background: url('/src/assets/add-icon.svg') center no-repeat;
 }
 
 .zoom-out-btn {
-  content: url('src/assets/remove-icon.svg') !important;
+  content: none !important;
+  background: url('/src/assets/remove-icon.svg') center no-repeat;
 }
