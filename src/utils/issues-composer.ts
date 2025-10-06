@@ -75,6 +75,11 @@ export default async function issuesComposer(data: IIssueRequestParams) {
         break;
     }
   }
+
+  filters.assigned_to_me = viewProps.props.filters.assigned_to_me || false;
+  filters.authored_by_me = viewProps.props.filters.authored_by_me || false;
+  filters.watched_by_me = viewProps.props.filters.watched_by_me || false;
+
   // if (data.personalIssuesTemplate) {
   //   switch (data.personalIssuesTemplate) {
   //     case 'assigned_to_me':
