@@ -56,6 +56,10 @@
             !val ||
             !isNaN(Number(val)) ||
             'Telegram ID может содержать только цифры',
+          (val) =>
+            !val ||
+            val.length <= 15 ||
+            'Telegram ID слишком длинный (макс. 15 цифр)',
         ]"
         class="base-input onboarding-input onboarding-input_optional"
         data-id="telegram-id-settings"
@@ -187,8 +191,8 @@ export default defineComponent({
       username.value.validate();
 
       me.value.telegram_id
-        ? me.value.telegram_id = Number(me.value.telegram_id)
-        : me.value.telegram_id = null;
+        ? (me.value.telegram_id = Number(me.value.telegram_id))
+        : (me.value.telegram_id = null);
 
       if (
         firstName.value.hasError &&
@@ -221,8 +225,8 @@ export default defineComponent({
 
     onMounted(async () => {
       await userStore.getUserInfo().then((data) => {
-          return data;
-        });
+        return data;
+      });
       await utilsStore.getNotificationBotUrl();
     });
 
