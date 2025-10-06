@@ -366,12 +366,6 @@ const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // functions
-const refresh = async () => {
-  await singleIssueStore.getIssueData(
-    currentWorkspaceSlug.value,
-    currentProjectID.value,
-  );
-};
 
 const updateParent = async (issueId: string) => {
   await singleIssueStore
