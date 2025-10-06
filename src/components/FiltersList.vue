@@ -137,6 +137,32 @@
             @update:model-value="onUpdate()"
           />
         </q-item>
+        <q-item class="centered-horisontally justify-between"
+          >Я исполнитель
+          <q-toggle
+            v-model="assigneeToMe"
+            size="32px"
+            @update:model-value="onUpdate()"
+          />
+        </q-item>
+
+        <q-item class="centered-horisontally justify-between"
+          >Я наблюдатель
+          <q-toggle
+            v-model="watchedByMe"
+            size="32px"
+            @update:model-value="onUpdate()"
+          />
+        </q-item>
+
+        <q-item class="centered-horisontally justify-between"
+          >Я автор
+          <q-toggle
+            v-model="authoredByMe"
+            size="32px"
+            @update:model-value="onUpdate()"
+          />
+        </q-item>
       </q-list>
     </q-popup-proxy>
   </q-btn>
@@ -179,6 +205,9 @@ const isPopupOpen = ref(false);
 
 const projectView = !!props.projectId;
 const options = ref(GROUP_BY_OPTIONS);
+const assigneeToMe = ref(false);
+const watchedByMe = ref(false);
+const authoredByMe = ref(false);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -212,14 +241,17 @@ async function refresh() {
     ) || { value: 'list', label: 'Список' };
 
     if (!!viewProps?.columns_to_show && viewProps?.columns_to_show.length > 0) {
-      columnsSelector.value = props.columns.filter(
-        (col) => viewProps?.columns_to_show.some((c) => col.name == c),
+      columnsSelector.value = props.columns.filter((col) =>
+        viewProps?.columns_to_show.some((c) => col.name == c),
       );
     }
 
     showSubIssues.value = viewProps?.showSubIssues;
     showEmptyGroups.value = viewProps?.showEmptyGroups;
     showOnlyActive.value = viewProps?.showOnlyActive;
+    assigneeToMe.value = viewProps.filters.assigned_to_me || false;
+    watchedByMe.value = viewProps.filters.watched_by_me || false;
+    authoredByMe.value = viewProps.filters.authored_by_me || false;
   });
 }
 
@@ -239,6 +271,10 @@ const onUpdate = async () => {
   viewProps.props.showEmptyGroups = showEmptyGroups.value;
   viewProps.props.showOnlyActive = showOnlyActive.value;
   viewProps.props.draft = draft.value;
+  viewProps.props.filters.assigned_to_me = assigneeToMe.value;
+  viewProps.props.filters.watched_by_me = watchedByMe.value;
+  viewProps.props.filters.authored_by_me = authoredByMe.value;
+
   await viewProps.saveProps().then(async () => {
     emits('update');
   });

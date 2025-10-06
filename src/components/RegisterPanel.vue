@@ -21,7 +21,9 @@
       type="submit"
       no-caps
       :disable="
-        email.length === 0 || captchaPayload === '' || isEmail(email) !== true
+        email.length === 0 ||
+        (isEnabledCaptcha && captchaPayload === '') ||
+        isEmail(email) !== true
       "
       :loading="loading"
     >

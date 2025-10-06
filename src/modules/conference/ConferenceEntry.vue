@@ -1,5 +1,37 @@
 <template>
   <div id="vanta-clouds-bg" class="vanta-container">
+    <div
+      v-if="isMobile === false"
+      style="
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        margin: 0px 12px 12px 0px;
+        color: #fff;
+        border-radius: 16px;
+        padding: 4px;
+      "
+    >
+      <q-btn
+        v-model="isEnableClouds"
+        :class="
+          isNight ? 'dark-btn-only-icon-sm bordered' : 'grey-btn-only-icon-sm'
+        "
+        @click="toggleClouds()"
+      >
+        <CloudsEnable
+          v-if="!isEnableClouds"
+          :color="isNight === true ? '#BAC4D5' : '#474A52'"
+        />
+        <CloudsDisable
+          v-else
+          :color="isNight === true ? '#BAC4D5' : '#474A52'"
+        />
+        <q-tooltip anchor="top start" self="bottom right">{{
+          isEnableClouds ? 'Выключить анимацию' : 'Включить анимацию'
+        }}</q-tooltip></q-btn
+      >
+    </div>
     <q-btn
       v-show="!loading"
       style="
@@ -36,6 +68,9 @@ import { defineBackgroundImage } from './utils/defineBackgroundImage';
 
 import * as THREE from 'three';
 import CLOUDS from 'vanta/dist/vanta.clouds.min';
+import { useQuasar } from 'quasar';
+import CloudsEnable from 'src/components/icons/CloudsEnable.vue';
+import CloudsDisable from 'src/components/icons/CloudsDisable.vue';
 
 const router = useRouter();
 
@@ -44,6 +79,8 @@ const { user } = storeToRefs(userStore);
 
 const loading = ref(true);
 const isEnableGPU = ref(false);
+const isEnableClouds = ref(true);
+const q = useQuasar();
 
 onBeforeMount(() => {
   useGlobalLoading();
@@ -53,6 +90,18 @@ let vantaEffect = null;
 
 onMounted(async () => {
   await userStore.getUserInfo();
+
+  if (q.platform.is.mobile === false) {
+    await createClouds();
+  } else setStaticBg();
+
+  setTimeout(() => {
+    stopGlobalLoading();
+    loading.value = false;
+  }, 700);
+});
+
+async function createClouds() {
   const gpu = await navigator?.gpu;
 
   if (gpu) {
@@ -69,19 +118,22 @@ onMounted(async () => {
       ...CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay],
     });
   } else {
-    const block = document.getElementById('vanta-clouds-bg');
-    block.style.backgroundImage = `url(${defineBackgroundImage(getCurrentTimeOfDay().timeOfDay)})`;
-    block.style.backgroundSize = 'cover';
-    block.style.backgroundRepeat = 'no-repeat';
-    block.style.backgroundPosition = 'center';
+    setStaticBg();
   }
+}
 
-  setTimeout(() => {
-    stopGlobalLoading();
-    loading.value = false;
-  }, 700);
-});
+function toggleClouds() {
+  isEnableClouds.value = !isEnableClouds.value;
 
+  if (isEnableClouds.value === true) {
+    createClouds();
+  } else if (vantaEffect) {
+    vantaEffect.destroy();
+    vantaEffect = null;
+
+    setStaticBg();
+  }
+}
 onUnmounted(() => {
   loading.value = true;
 
@@ -124,6 +176,14 @@ function getCurrentTimeOfDay() {
   };
 }
 
+function setStaticBg() {
+  const block = document.getElementById('vanta-clouds-bg');
+  block.style.backgroundImage = `url(${defineBackgroundImage(getCurrentTimeOfDay().timeOfDay)})`;
+  block.style.backgroundSize = 'cover';
+  block.style.backgroundRepeat = 'no-repeat';
+  block.style.backgroundPosition = 'center';
+}
+
 const routeToWorkspace = () => {
   router.push(`/${user.value.last_workspace_slug || '/'}`);
 };
@@ -131,6 +191,8 @@ const routeToWorkspace = () => {
 const isNight = computed(() => {
   return getCurrentTimeOfDay().timeOfDay === 'night';
 });
+
+const isMobile = computed(() => q.platform.is.mobile);
 </script>
 <style scoped lang="scss">
 .vanta-container {
