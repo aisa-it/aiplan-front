@@ -68,7 +68,12 @@
               v-else-if="crumb?.icon && crumb?.type === 'project'"
               class="q-mr-xs"
             >
-              {{ crumb?.icon }}
+              <q-img
+                v-if="crumb?.logo"
+                :src="getUrlFile(crumb?.logo)"
+                :style="`width: 20px; height: 20px; border-radius: 4px; color: white;`"
+              />
+              <div v-else>{{ crumb?.icon }}</div>
             </div>
             <q-img
               v-else-if="crumb?.icon"
@@ -114,6 +119,8 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+
+import { getUrlFile } from 'src/utils/helpers';
 
 // components
 import UserIcon from 'src/components/icons/UserIcon.vue';
@@ -176,6 +183,7 @@ const breadCrumbsHistory = computed(() => {
             )
           : ''
       }`,
+      logo: project.value?.logo,
       name: ` ${project.value?.name ?? ''}`,
       url: `/${workspaceInfo.value?.slug}/projects/${project.value?.id}/issues`,
       type: 'project',

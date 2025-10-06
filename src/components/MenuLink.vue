@@ -16,6 +16,13 @@
         <q-icon :name="icon" />
       </q-item-section>
 
+      <q-item-section v-else-if="logo" avatar>
+        <q-img
+          :src="getUrlFile(logo)"
+          :style="`width: 20px; height: 20px; border-radius: 4px; color: white;`"
+        />
+      </q-item-section>
+
       <q-item-section v-else-if="emoji" avatar>
         {{ String.fromCodePoint(parseInt(emoji?.value ?? emoji)) }}
       </q-item-section>
@@ -195,6 +202,8 @@ import {
 } from 'src/constants/notifications';
 import StarIcon from './icons/StarIcon.vue';
 
+import { getUrlFile } from 'src/utils/helpers';
+
 const props = withDefaults(
   defineProps<{
     id: string;
@@ -207,6 +216,7 @@ const props = withDefaults(
     project?: any;
     workspaceSlug?: string;
     identifier?: string;
+    logo?: string;
   }>(),
   {
     caption: () => '',

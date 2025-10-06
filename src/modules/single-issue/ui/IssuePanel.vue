@@ -124,6 +124,7 @@ const downloadAllAttachments = async () => {
 </script>
 
 <style lang="scss" scoped>
+
 .issue-side-drawer {
   @media screen and (max-width: 760px) {
     width: 90% !important;

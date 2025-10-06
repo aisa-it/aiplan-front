@@ -1,23 +1,49 @@
 <template>
   <div class="row mobile-block">
-    <div class="col">
-      <h4 class="text-lg font-semibold text-brand-base">Эмодзи</h4>
-      <p class="text-sm text-brand-secondary">Выберите эмодзи для проекта</p>
+    <div class="col q-mb-lg">
+      <h4 class="text-lg font-semibold text-brand-base">
+        Эмодзи или изображение
+      </h4>
+      <p class="text-sm text-brand-secondary q-mb-none">
+        Поддерживается .jpg, .png, и .gif
+      </p>
     </div>
-    <div class="col q-mt-xs">
-      <q-select
-        ref="emojiSelectRef"
-        v-model="projectForm.emoji"
-        dense
-        class="base-selector"
-        virtual-scroll-horizontal
-        popup-content-class="emoji-popup scrollable-content"
-        :popup-content-style="emojiSelectWidth"
-        :virtual-scroll-slice-size="PROJECT_EMOJI_OPTIONS?.length"
-        @click="emojiSelectRef.refresh()"
-        @popup-show="emojiSelectRef.refresh()"
-        :options="PROJECT_EMOJI_OPTIONS"
+    <div class="row items-center col q-mt-xs">
+      <q-img
+        class="q-mr-md"
+        v-if="projectForm.logo"
+        :src="`${projectForm.logo ? getUrlFile(projectForm.logo) : ''}`"
+        :style="`width: 48px; height: 48px; border-radius: 4px; color: white;`"
       />
+      <DefaultImage v-else class="q-mr-md" />
+      <div class="row gap-md items-center">
+        <q-btn class="secondary-btn" no-caps @click="toggleUploaderState">
+          Загрузить
+        </q-btn>
+        <p class="q-mb-none" v-if="!projectForm.logo">или</p>
+        <q-select
+          v-if="!projectForm.logo"
+          ref="emojiSelectRef"
+          v-model="projectForm.emoji"
+          dense
+          class="base-selector"
+          virtual-scroll-horizontal
+          popup-content-class="emoji-popup scrollable-content"
+          :popup-content-style="emojiSelectWidth"
+          :virtual-scroll-slice-size="PROJECT_EMOJI_OPTIONS?.length"
+          @click="emojiSelectRef.refresh()"
+          @popup-show="emojiSelectRef.refresh()"
+          :options="PROJECT_EMOJI_OPTIONS"
+        />
+        <q-btn
+          v-if="projectForm.logo"
+          class="delete-btn"
+          no-caps
+          @click="deleteAvatar"
+        >
+          Удалить
+        </q-btn>
+      </div>
     </div>
   </div>
 
@@ -115,6 +141,10 @@
     @start-loading="loading = true"
     @end-loading="loading = false"
   />
+  <UploadAvatarDialog
+    v-model="isOpenUploadDialog"
+    @upload="uploadProjectAvatar"
+  />
   <q-inner-loading :showing="loading">
     <DefaultLoader />
   </q-inner-loading>
@@ -134,7 +164,9 @@ import { useNotificationStore } from 'src/stores/notification-store';
 
 // components
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import DefaultImage from 'src/components/icons/DefaultImage.vue';
 import DeleteProjectDialog from 'src/modules/project-settings/general/ui/dialogs/DeleteProjectDialog.vue';
+import UploadAvatarDialog from 'src/components/UploadAvatarDialog.vue';
 
 // helpers
 import {
@@ -143,6 +175,7 @@ import {
   validateAllowedCharacters,
 } from 'src/utils/validation';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import { getUrlFile } from 'src/utils/helpers';
 
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
@@ -153,7 +186,11 @@ import { IProject } from 'src/interfaces/projects';
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 // services
-import { updateProject } from '../../services/api';
+import {
+  updateProject,
+  updateProjectLogo,
+  deleteProjectLogo,
+} from '../../services/api';
 
 //routes
 const router = useRouter();
@@ -170,6 +207,7 @@ const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 // vars
 const isDeleteOpen = ref(false);
+const isOpenUploadDialog = ref(false);
 const loading = ref(false);
 const projectForm = ref(Object.assign({}, project.value));
 const isValidName = ref<boolean>(false);
@@ -182,6 +220,21 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
+const updateStores = async () => {
+  await Promise.all([
+    projectStore.getProjectInfo(
+      currentWorkspaceSlug.value as string,
+      project.value.id,
+    ),
+    workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string),
+    userStore.getFavouriteProjects(currentWorkspaceSlug.value as string),
+  ]);
+  router.replace({
+    name: 'project-settings',
+    params: { project: projectForm.value.identifier },
+  });
+};
+
 async function updateThisProject(payload: Partial<IProject>) {
   await updateProject(
     currentWorkspaceSlug.value as string,
@@ -189,20 +242,7 @@ async function updateThisProject(payload: Partial<IProject>) {
     payload,
   )
     .then(async () => {
-      await projectStore.getProjectInfo(
-        currentWorkspaceSlug.value as string,
-        project.value.id,
-      );
-      await workspaceStore.getWorkspaceProjects(
-        currentWorkspaceSlug.value as string,
-      );
-      await userStore.getFavouriteProjects(
-        currentWorkspaceSlug.value as string,
-      );
-      router.replace({
-        name: 'project-settings',
-        params: { project: payload.identifier },
-      });
+      await updateStores();
     })
     .then(() =>
       setNotificationView({
@@ -263,6 +303,40 @@ const validateIdentifier = (val: string): boolean | string => {
 
   isValidIdentifier.value = true;
   return true;
+};
+
+const toggleUploaderState = () => {
+  isOpenUploadDialog.value = true;
+};
+
+const uploadProjectAvatar = async (image: File) => {
+  await updateProjectLogo(
+    currentWorkspaceSlug.value as string,
+    project.value.id,
+    { file: image },
+  ).then(() => {
+    projectForm.value.emoji = PROJECT_EMOJI_OPTIONS.find(
+      (el) => el.label === '💼',
+    );
+    onSubmit();
+  });
+};
+
+const deleteAvatar = async () => {
+  await deleteProjectLogo(
+    currentWorkspaceSlug.value as string,
+    project.value.id,
+  )
+    .then(async () => {
+      await updateStores();
+    })
+    .then(() => {
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: 'Изображение проекта удалено',
+      });
+    });
 };
 
 watch(

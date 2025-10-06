@@ -42,7 +42,6 @@ export default async function issuesComposer(data: IIssueRequestParams) {
   const filters: IIssueFilters = {
     search_query: data.searchText,
     states: viewProps.props?.filters.states,
-    only_active: viewProps.props?.showOnlyActive,
   };
 
   if (data.workspaces) filters.workspaces = data.workspaces;
@@ -121,6 +120,7 @@ export default async function issuesComposer(data: IIssueRequestParams) {
     show_sub_issues: viewProps.props?.showSubIssues,
     only_count: false,
     draft: viewProps.props?.draft,
+    only_active: viewProps.props?.showOnlyActive,
   };
 
   const res = await issuesStore.getIssues(url, pg, filters);
