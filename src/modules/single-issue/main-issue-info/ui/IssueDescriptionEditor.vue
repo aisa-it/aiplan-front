@@ -58,7 +58,7 @@ const getProjectMembersForMention = async (
 
 const getEditor = (value: any) => {
   editor.value = value;
-  emits('getEditor', value)
+  emits('getEditor', value);
 };
 
 // emits
@@ -69,12 +69,13 @@ const handleToggleEdit = () => emits('toggleEdit');
 .issue-panel__editor {
   overflow: visible !important;
 }
-
-:deep(.html-editor__toolbar) {
-  width: 99%;
-  position: sticky;
-  z-index: 10;
-  top: 50px;
-  background-color: $bg-color;
+@media screen and (min-width: 1024px) {
+  :deep(.html-editor__toolbar) {
+    width: 99%;
+    position: sticky;
+    z-index: 10;
+    top: 50px;
+    background-color: $bg-color;
+  }
 }
 </style>
