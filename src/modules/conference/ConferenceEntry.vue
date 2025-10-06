@@ -4,23 +4,32 @@
       v-if="isMobile === false"
       style="
         position: absolute;
-        left: 0;
-        top: 0;
-        margin: 12px 0px 0px 12px;
+        right: 0;
+        bottom: 0;
+        margin: 0px 12px 12px 0px;
         color: #fff;
         border-radius: 16px;
         padding: 4px;
       "
-      :style="`${isEnableClouds ? 'background: var(--primary-light)' : 'background: var(--primary)'}`"
     >
-      <q-toggle
-        size="32px"
+      <q-btn
         v-model="isEnableClouds"
-        @update:model-value="toggleClouds()"
+        :class="
+          isNight ? 'dark-btn-only-icon-sm bordered' : 'grey-btn-only-icon-sm'
+        "
+        @click="toggleClouds()"
       >
-        <q-tooltip anchor="bottom right">{{
+        <CloudsEnable
+          v-if="!isEnableClouds"
+          :color="isNight === true ? '#BAC4D5' : '#474A52'"
+        />
+        <CloudsDisable
+          v-else
+          :color="isNight === true ? '#BAC4D5' : '#474A52'"
+        />
+        <q-tooltip anchor="top start" self="bottom right">{{
           isEnableClouds ? 'Выключить анимацию' : 'Включить анимацию'
-        }}</q-tooltip></q-toggle
+        }}</q-tooltip></q-btn
       >
     </div>
     <q-btn
@@ -60,6 +69,8 @@ import { defineBackgroundImage } from './utils/defineBackgroundImage';
 import * as THREE from 'three';
 import CLOUDS from 'vanta/dist/vanta.clouds.min';
 import { useQuasar } from 'quasar';
+import CloudsEnable from 'src/components/icons/CloudsEnable.vue';
+import CloudsDisable from 'src/components/icons/CloudsDisable.vue';
 
 const router = useRouter();
 
@@ -112,6 +123,8 @@ async function createClouds() {
 }
 
 function toggleClouds() {
+  isEnableClouds.value = !isEnableClouds.value;
+
   if (isEnableClouds.value === true) {
     createClouds();
   } else if (vantaEffect) {

@@ -142,6 +142,22 @@
   }
 }
 
+.grey-btn-only-icon-sm {
+  @include only-icon-btn-sm;
+
+  &::before {
+    background-color: #ffffff7a;
+  }
+}
+
+.dark-btn-only-icon-sm {
+  @include only-icon-btn-sm;
+
+  &::before {
+    background-color: #383838;
+  }
+}
+
 .orange-btn-only-icon {
   @include only-icon-btn;
   color: white !important;
