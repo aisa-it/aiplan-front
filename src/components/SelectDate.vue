@@ -170,7 +170,7 @@ export default defineComponent({
             )
             .then(() => {
               setNotificationView({ type: 'success', open: true });
-              emit('refresh');
+              emit('refresh', proxyDate.value);
             });
         } else {
           emit('update:date', proxyDate.value);
