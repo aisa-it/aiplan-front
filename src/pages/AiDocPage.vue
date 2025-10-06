@@ -443,10 +443,8 @@ watch(
   justify-content: flex-end;
   gap: 1rem;
   width: 99%;
-  height: auto;
-  position: sticky;
-  bottom: 30px;
 }
+
 .issue-panel__wrapper {
   gap: 8px;
   @media screen and (max-width: 550px) {
