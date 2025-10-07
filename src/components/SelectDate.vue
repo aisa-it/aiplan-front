@@ -17,9 +17,7 @@
       <span v-if="!currentIssueID && viewProps.props?.issueView === 'kanban'">{{
         date ? date.split('T')[0].split('-').reverse().join('.') : 'Срок'
       }}</span>
-      <span v-else>{{
-        date ? date.split('T')[0].split('-').reverse().join('.') : placeholder
-      }}</span>
+      <span v-else>{{ date ? formatDateTime(date) : placeholder }}</span>
     </div>
 
     <q-popup-proxy
@@ -28,39 +26,41 @@
       transition-show="scale"
       transition-hide="scale"
     >
-      <q-date
-        v-model="proxyDate"
-        :locale="LOCALE_DATE"
-        :options="optionsFn"
-        mask="YYYY-MM-DDTHH:mm:ss"
-        :navigation-min-year-month="minYearMonth"
-        :navigation-max-year-month="maxYearMonth"
-      >
-        <div class="row items-center no-wrap">
-          <q-btn
-            label="Без даты"
-            class="secondary-btn full-w"
-            style="font-size: 12px"
-            flat
-            @click="
-              () => {
-                proxyDate = null;
-                save();
-              }
-            "
-            v-close-popup
-          />
-          <!-- <q-btn label="Закрыть" color="primary" flat v-close-popup /> -->
-          <q-btn
-            label="Установить"
-            class="primary-btn full-w q-ml-sm"
-            style="font-size: 12px"
-            flat
-            @click="save"
-            v-close-popup
-          />
-        </div>
-      </q-date>
+      <div class="row no-wrap q-pa-md" style="gap: 16px">
+        <q-date
+          v-model="proxyDate"
+          :locale="LOCALE_DATE"
+          :options="optionsFn"
+          mask="YYYY-MM-DDTHH:mm:ss"
+          :navigation-min-year-month="minYearMonth"
+          :navigation-max-year-month="maxYearMonth"
+        />
+        <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
+      </div>
+
+      <div class="row items-center no-wrap q-px-md q-py-sm">
+        <q-btn
+          label="Без даты"
+          class="secondary-btn full-w"
+          style="font-size: 12px"
+          flat
+          @click="
+            () => {
+              proxyDate = null;
+              save();
+            }
+          "
+          v-close-popup
+        />
+        <q-btn
+          label="Установить"
+          class="primary-btn full-w q-ml-sm"
+          style="font-size: 12px"
+          flat
+          @click="save"
+          v-close-popup
+        />
+      </div>
     </q-popup-proxy>
   </q-btn>
 </template>
@@ -78,6 +78,7 @@ import { useNotificationStore } from 'src/stores/notification-store';
 
 import CalendarIcon from './icons/CalendarIcon.vue';
 import { LOCALE_DATE } from 'src/constants/locale';
+import { formatDateTime } from '../utils/time';
 
 export default defineComponent({
   name: 'SelectDate',
@@ -137,9 +138,14 @@ export default defineComponent({
     const { setNotificationView } = useNotificationStore();
     const { currentIssueID } = storeToRefs(issueStore);
     const open = ref(false);
-    const proxyDate = ref(new Date().toISOString());
 
-    const optionsFn = (date) => {
+    const proxyDate = ref<string | null>(null);
+    const minutes = [...Array(60)].map((_, i) => i);
+    const hours = [...Array(24)].map((_, i) => i);
+    const selectedHour = ref<number>(12);
+    const selectedMinute = ref<number>(30);
+
+    const optionsFn = (date: string): boolean => {
       return date >= dayjs(new Date()).format('YYYY/MM/DD');
     };
 
@@ -150,14 +156,22 @@ export default defineComponent({
       viewProps,
       proxyDate,
       currentIssueID,
+      selectedHour,
+      selectedMinute,
+      minutes,
+      hours,
       optionsFn,
+      formatDateTime,
       updateProxy() {
         proxyDate.value = props.date
-          ? new Date(props.date as string).toISOString()
-          : new Date().toISOString();
+          ? dayjs.utc(props.date).local().format('YYYY-MM-DDTHH:mm:ss')
+          : dayjs().format('YYYY-MM-DDTHH:mm:ss');
       },
 
       save() {
+        const targetDateValue = proxyDate.value
+          ? dayjs(proxyDate.value).toISOString()
+          : null;
         if (props.issueid) {
           api
             .issuePartialUpdate(
@@ -165,7 +179,7 @@ export default defineComponent({
               props.projectid,
               props.issueid,
               {
-                target_date: proxyDate.value,
+                target_date: targetDateValue,
               },
             )
             .then(() => {
@@ -173,7 +187,7 @@ export default defineComponent({
               emit('refresh');
             });
         } else {
-          emit('update:date', proxyDate.value);
+          emit('update:date', targetDateValue);
         }
       },
       LOCALE_DATE,
