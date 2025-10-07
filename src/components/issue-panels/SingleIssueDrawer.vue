@@ -1,6 +1,6 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons @refresh="refresh()" />
+    <SingleIssueButtons />
 
     <q-separator class="issue-panel__separator" />
 
@@ -24,7 +24,6 @@
           "
           :states-from-cache="statesCache[issueData?.project]"
           @set-status="(val) => (issueData.state_detail = val)"
-          @refresh="refresh()"
         />
       </div>
     </div>
@@ -86,7 +85,6 @@
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
           :current-member="user"
-          @refresh="refresh()"
         ></SelectAssignee>
       </div>
     </div>
@@ -112,7 +110,6 @@
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
-          @refresh="refresh()"
         ></SelectWatchers>
       </div>
     </div>
@@ -137,7 +134,7 @@
           :is-disabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @update:priority="(val) => (issueData.priority = val)"
         >
         </SelectPriority>
       </div>
@@ -175,7 +172,7 @@
           :is-disabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="(val) => (issueData.target_date = val)"
         />
       </div>
     </div>
@@ -229,7 +226,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="updateParent"
         ></SelectParentIssue>
         <q-btn
           v-if="
@@ -261,7 +258,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="updateBlockerListAndLinks"
         />
       </div>
     </div>
@@ -283,7 +280,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="updateBlockerListAndLinks"
         />
       </div>
     </div>
@@ -297,7 +294,7 @@
       :isDisabled="
         hasPermissionByIssue(issueData, project, 'change-issue-secondary')
       "
-      @refresh="refresh()"
+      @refresh="updateBlockerListAndLinks"
     >
     </SelectLinks>
   </div>
@@ -369,11 +366,29 @@ const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // functions
-const refresh = async () => {
-  await singleIssueStore.getIssueData(
-    currentWorkspaceSlug.value,
-    currentProjectID.value,
-  );
+const updateParent = async (issueId: string) => {
+  await singleIssueStore
+    .getIssueDataById(
+      currentWorkspaceSlug.value,
+      currentProjectID.value,
+      issueId,
+    )
+    .then((res) => {
+      issueData.value.parent_detail = res.data;
+    });
+};
+const updateBlockerListAndLinks = async () => {
+  await singleIssueStore
+    .getIssueDataById(
+      currentWorkspaceSlug.value,
+      currentProjectID.value,
+      issueData.value.id,
+    )
+    .then((res) => {
+      issueData.value.blocker_issues = res.data.blocker_issues;
+      issueData.value.blocked_issues = res.data.blocked_issues;
+      issueData.value.issue_link = res.data.issue_link;
+    });
 };
 
 const handleRemoveParentIssue = async () => {
@@ -390,7 +405,7 @@ const handleRemoveParentIssue = async () => {
         open: true,
         customMessage: SUCCESS_UPDATE_DATA,
       });
-      await refresh();
+      issueData.value.parent_detail = null;
     });
 };
 

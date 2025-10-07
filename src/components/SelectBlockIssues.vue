@@ -70,7 +70,7 @@ const props = withDefaults(
     target: '_self',
   },
 );
-const emits = defineEmits<{ refresh: [] }>();
+const emits = defineEmits<{ refresh: [data: any] }>();
 
 const api = useAiplanStore();
 
@@ -97,7 +97,7 @@ const saveBlockIssues = async (items) => {
     .issuePartialUpdate(props.workspaceId, props.projectid, props.issueid, data)
     .then(() => {
       setNotificationView({ type: 'success', open: true });
-      emits('refresh');
+      emits('refresh', items);
     });
 };
 
@@ -116,7 +116,7 @@ const updateModelValue = (val: any) => {
     .issuePartialUpdate(props.workspaceId, props.projectid, props.issueid, data)
     .then(() => {
       setNotificationView({ type: 'success', open: true });
-      emits('refresh');
+      emits('refresh', ids);
       delete listDisableIssue.value[val[nameDetail.value].id];
     })
     .catch(() => {
@@ -125,8 +125,9 @@ const updateModelValue = (val: any) => {
 };
 
 const getLabel = (val: any) => {
-  return `${issueData.value.project_detail.identifier}-${val[nameDetail.value]
-    ?.sequence_id}`;
+  return `${issueData.value.project_detail.identifier}-${
+    val[nameDetail.value]?.sequence_id
+  }`;
 };
 
 const disableIssueItem = (val: any) => {
