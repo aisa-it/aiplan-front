@@ -476,7 +476,6 @@ watch(
 }
 
 :deep(.html-editor__toolbar) {
-  width: 99%;
   height: auto;
   position: sticky;
   top: 50px;

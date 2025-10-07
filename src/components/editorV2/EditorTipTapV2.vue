@@ -5,7 +5,7 @@
       'html-editor',
       { 'html-editor--mobile': isMobile, classPrevent: classPrevent },
     ]"
-    :style="{ paddingLeft: isMobile && !isReadOnly ? '48px' : '0' }"
+    :style="{ flexDirection: isMobile && !isReadOnly ? 'row' : 'column' }"
     @mousemove="handleMouseMove"
     @mouseleave="handleMouseLeave"
   >
@@ -369,7 +369,11 @@ defineExpose({
     overflow: hidden;
     position: sticky;
     flex-shrink: 0;
+    top: 0;
+    z-index: 10;
+    background-color: $bg-color;
   }
+
   &__wrapper {
     overflow-y: hidden;
     flex-grow: 1;
@@ -378,5 +382,17 @@ defineExpose({
 
 .html-editor ::-webkit-scrollbar {
   display: block !important;
+}
+
+@media screen and (width < 1024px) {
+  .html-editor {
+    flex-direction: row;
+    overflow-y: visible;
+
+    &__toolbar {
+      max-height: 100vh;
+      position: sticky !important;
+    }
+  }
 }
 </style>
