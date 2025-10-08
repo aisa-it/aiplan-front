@@ -91,9 +91,15 @@ let vantaEffect = null;
 onMounted(async () => {
   await userStore.getUserInfo();
 
-  if (q.platform.is.mobile === false) {
+  if (
+    q.platform.is.mobile === false &&
+    localStorage.getItem('clouds-enable') != '0'
+  ) {
     await createClouds();
-  } else setStaticBg();
+  } else {
+    isEnableClouds.value = false;
+    setStaticBg();
+  }
 
   setTimeout(() => {
     stopGlobalLoading();
@@ -124,6 +130,8 @@ async function createClouds() {
 
 function toggleClouds() {
   isEnableClouds.value = !isEnableClouds.value;
+
+  localStorage.setItem('clouds-enable', isEnableClouds.value ? '1' : '0');
 
   if (isEnableClouds.value === true) {
     createClouds();
