@@ -1,65 +1,20 @@
 <template>
-  <transition name="fade">
-    <q-markup-table
-      v-show="loading"
-      style="position: absolute; z-index: 1000; width: 100%; box-shadow: none"
-    >
-      <thead>
-        <tr>
-          <th class="text-left" style="width: 150px">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-          <th class="text-right">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-          <th class="text-right">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-          <th class="text-right">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-          <th class="text-right">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-          <th class="text-right">
-            <q-skeleton animation="blink" type="text" />
-          </th>
-        </tr>
-      </thead>
+  <!-- <transition name="fade">
+    <div v-if="loading">
+      <TableListSkeleton v-show="!isKanbanEnabled" />
+      <BoardListSkeleton v-show="isKanbanEnabled" />
+    </div>
+  </transition> -->
 
-      <tbody>
-        <tr v-for="n in 15" :key="n">
-          <td class="text-left">
-            <q-skeleton animation="blink" type="text" width="85px" />
-          </td>
-          <td class="text-right">
-            <q-skeleton animation="blink" type="text" width="50px" />
-          </td>
-          <td class="text-right">
-            <q-skeleton animation="blink" type="text" width="35px" />
-          </td>
-          <td class="text-right">
-            <q-skeleton animation="blink" type="text" width="65px" />
-          </td>
-          <td class="text-right">
-            <q-skeleton animation="blink" type="text" width="25px" />
-          </td>
-          <td class="text-right">
-            <q-skeleton animation="blink" type="text" width="85px" />
-          </td>
-        </tr>
-      </tbody>
-    </q-markup-table>
-  </transition>
   <transition name="fade">
-    <div v-show="!loading">
+    <div v-show="!issuesLoader">
       <GroupedTables
         v-if="!isKanbanEnabled"
         :issues="issuesTables"
         :group-by="groupBy"
         @refresh-table="
-          (index, entity, pagination, isFullUpdate) =>
-            refreshTable(index, entity, pagination, isFullUpdate)
+          (index, pagination, isFullUpdate) =>
+            refreshTable(index, pagination, isFullUpdate)
         "
       />
       <GroupedBoard
@@ -67,7 +22,8 @@
         :issues="issuesTables"
         :group-by="groupBy"
         @refresh-card="
-          (index, entity, pagination) => refreshCard(index, entity, pagination)
+          (index, pagination, isFullUpdate) =>
+            refreshCard(index, pagination, isFullUpdate)
         "
       />
     </div>
@@ -76,7 +32,6 @@
 
 <script setup lang="ts">
 // core
-import { EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { watch, ref, inject } from 'vue';
@@ -93,34 +48,29 @@ import { useGroupedIssues } from '../composables/useGroupedIssues';
 import GroupedTables from './table-view/GroupedTables.vue';
 import GroupedBoard from './board-view/GroupedBoard.vue';
 import { IGroupedResponse } from '../types';
+import TableListSkeleton from './skeletons/TableListSkeleton.vue';
+import BoardListSkeleton from './skeletons/BoardListSkeleton.vue';
 
 const { getGroupedIssues } = useGroupedIssues();
 
 const issuesStore = useIssuesStore();
-const { project, projectProps, isLoadProjectInfo, isKanbanEnabled } =
+const { project, projectProps, issuesLoader, isKanbanEnabled } =
   storeToRefs(useProjectStore());
 
 const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 
+const props = defineProps(['initGroupedIssues', 'initGroupBy']);
 const issuesTables = ref<Array<IGroupedResponse>>([]);
 const loading = ref(true);
 const groupBy = ref('');
 const route = useRoute();
 
-const bus = inject('bus') as EventBus;
 
-// реагируем на изменения фильтров в FilterList.vue
-bus.on('issues-filters-update', async (group_by) => {
-  // загружаем только при выбранной группировке
-  if (group_by === 'none') return;
 
-  await load();
-});
 
 //
 async function refreshTable(
   index: number,
-  entity: any,
   pagination: any,
   isFullUpdate: boolean,
 ) {
@@ -153,7 +103,15 @@ async function refreshTable(
   issuesTables.value[index].issues = response?.data.issues;
 }
 
-async function refreshCard(index: number, entity: any, pagination: any) {
+async function refreshCard(
+  index: number,
+  pagination: any,
+  isFullUpdate: boolean,
+) {
+  if (isFullUpdate) {
+    return load();
+  }
+
   const response = await issuesStore.getIssuesTable(
     workspaceInfo?.value?.id as string,
     project.value.id as string,
@@ -173,11 +131,15 @@ async function load() {
 }
 
 watch(
-  () => isLoadProjectInfo.value,
-  async () => {
-    if (isLoadProjectInfo.value === false) {
-      await load();
-    }
+  () => props.initGroupedIssues,
+  () => {
+    issuesTables.value = props.initGroupedIssues;
+  },
+);
+watch(
+  () => props.initGroupBy,
+  () => {
+    groupBy.value = props.initGroupBy;
   },
 );
 </script>

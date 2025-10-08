@@ -4,7 +4,10 @@
       <BoardCardList
         :table="table"
         :group-by="groupBy"
-        @refresh="(pagination) => refreshTable(index, table.entity, pagination)"
+        @refresh="
+          (pagination, isFullUpdate) =>
+            refreshTable(index, pagination, isFullUpdate)
+        "
       />
     </div>
   </div>
@@ -29,11 +32,11 @@ const emits = defineEmits(['refreshCard', 'refresh']);
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);
 
-const refreshTable = (index: number, entity, pagination) => {
+const refreshTable = (index: number, pagination, isFullUpdate) => {
   const p = pagination;
   delete p.group_by;
 
-  emits('refreshCard', index, entity, pagination);
+  emits('refreshCard', index, pagination, isFullUpdate);
 };
 
 const defineIssues = computed(() => {

@@ -48,6 +48,14 @@
         :issueid="card?.id"
         :priority="card?.priority ?? 'Нет'"
         :issue="card"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            card,
+            project,
+            'change-issue-primary',
+          )
+        "
+        @refresh="emits('refresh', true)"
       />
       <SelectDate
         v-if="projectProps?.columns_to_show?.includes('target_date')"
@@ -57,6 +65,14 @@
         :issueid="card?.id"
         :date="card?.target_date"
         :issue="card"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            card,
+            project,
+            'change-issue-primary',
+          )
+        "
+        @refresh="emits('refresh', true)"
       />
     </div>
 
@@ -69,6 +85,10 @@
         :status="card?.state_detail"
         :issue="card"
         :states-from-cache="statesCache[card.project]"
+        :isDisabled="
+          !rolesStore.hasPermissionByIssue(card, project, 'change-issue-status')
+        "
+        @refresh="emits('refresh', true)"
       />
 
       <div class="row">
@@ -146,20 +166,22 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import QuantityChip from 'src/components/QuantityChip.vue';
 import { useProjectStore } from 'src/stores/project-store';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
+import { useRolesStore } from 'src/stores/roles-store';
 
 const { user } = storeToRefs(useUserStore());
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 const route = useRoute();
 const props = defineProps<{ card: any }>();
-
+const rolesStore = useRolesStore();
 const avatarText = aiplan.UserName;
 
 const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
+const emits = defineEmits(['refresh']);
 const { statesCache } = storeToRefs(useStatesStore());
-const { projectProps } = storeToRefs(useProjectStore());
+const { projectProps, project } = storeToRefs(useProjectStore());
 </script>
 
 <style scoped lang="scss">

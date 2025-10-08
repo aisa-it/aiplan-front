@@ -73,7 +73,6 @@ const isMembers = computed(() => {
 watch(
   () => props.badgeColor,
   () => {
-    if (props.badgeColor) console.log(props.badgeColor);
     let rgb = hexToRgb(props.badgeColor);
     textColor.value = getContrastYIQ(rgb[0], rgb[1], rgb[2]);
   },

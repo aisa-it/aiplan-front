@@ -1,84 +1,38 @@
 <template>
-  <q-page>
-    <q-card class="single-list relative" flat dense>
-      <q-card-section
-        class="row issue-list__header"
-        :style="'padding: 12px 16px'"
-      >
-        <IssuesListTitle />
-        <q-space />
+  <q-card class="single-list relative" flat dense>
+    <q-card-section
+      class="row issue-list__header"
+      :style="'padding: 12px 16px'"
+    >
+      <IssuesListTitle />
+      <q-space />
 
-        <FiltersList :projectId="route.params.project" :columns="allColumns" />
-      </q-card-section>
-      <q-separator />
-      <div v-show="loading === false">
-        <transition name="fade">
-          <DefaultIssueList v-if="!isGroupingEnabled" />
-        </transition>
-        <transition name="fade">
-          <GroupedIssueList v-if="isGroupingEnabled" />
-        </transition>
+      <FiltersList :projectId="route.params.project" :columns="allColumns" />
+    </q-card-section>
+    <q-separator />
+
+    <transition name="fade">
+      <div v-show="issuesLoader === false">
+        <DefaultIssueList
+          v-if="!isGroupingEnabled"
+          :defaultIssues="initDefaultIssues"
+          :defaultIssuesCount="initDefaultIssuesCount"
+        />
+        <GroupedIssueList
+          v-if="isGroupingEnabled"
+          :initGroupedIssues="initGroupedIssues"
+          :initGroupBy="initGroupedIssuesGroupBy"
+        />
       </div>
+    </transition>
 
-      <transition name="fade">
-        <q-markup-table
-          v-show="loading"
-          style="
-            position: absolute;
-            z-index: 1000;
-            width: 100%;
-            box-shadow: none;
-          "
-        >
-          <thead>
-            <tr>
-              <th class="text-left" style="width: 150px">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-              <th class="text-right">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-              <th class="text-right">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-              <th class="text-right">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-              <th class="text-right">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-              <th class="text-right">
-                <q-skeleton animation="blink" type="text" />
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-for="n in 15" :key="n">
-              <td class="text-left">
-                <q-skeleton animation="blink" type="text" width="85px" />
-              </td>
-              <td class="text-right">
-                <q-skeleton animation="blink" type="text" width="50px" />
-              </td>
-              <td class="text-right">
-                <q-skeleton animation="blink" type="text" width="35px" />
-              </td>
-              <td class="text-right">
-                <q-skeleton animation="blink" type="text" width="65px" />
-              </td>
-              <td class="text-right">
-                <q-skeleton animation="blink" type="text" width="25px" />
-              </td>
-              <td class="text-right">
-                <q-skeleton animation="blink" type="text" width="85px" />
-              </td>
-            </tr>
-          </tbody>
-        </q-markup-table>
-      </transition>
-    </q-card>
-  </q-page>
+    <transition name="fade">
+      <div v-show="issuesLoader">
+        <TableListSkeleton v-show="!isKanbanEnabled" />
+        <BoardListSkeleton v-show="isKanbanEnabled" />
+      </div>
+    </transition>
+  </q-card>
 </template>
 
 <script setup lang="ts">
@@ -94,23 +48,63 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 
+import { EventBus } from 'quasar';
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
 import { storeToRefs } from 'pinia';
 import DefaultIssueList from './components/DefaultIssueList.vue';
 import GroupedIssueList from './components/GroupedIssueList.vue';
+import TableListSkeleton from './components/skeletons/TableListSkeleton.vue';
+import BoardListSkeleton from './components/skeletons/BoardListSkeleton.vue';
+import { useDefaultIssues } from './composables/useDefaultIssues';
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { useGroupedIssues } from './composables/useGroupedIssues';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
+const { onRequest } = useDefaultIssues();
+const { getGroupedIssues } = useGroupedIssues();
 
-const { isGroupingEnabled, isKanbanEnabled } = storeToRefs(useProjectStore());
+const { isGroupingEnabled, isKanbanEnabled, issuesLoader } =
+  storeToRefs(useProjectStore());
 const route = useRoute();
-const loading = ref(true);
+
+const initDefaultIssues = ref([]);
+const initDefaultIssuesCount = ref(null);
+
+const initGroupedIssues = ref([]);
+const initGroupedIssuesGroupBy = ref('');
+
+const load = async () => {
+  issuesLoader.value = true;
+
+  if (isGroupingEnabled.value === false) {
+    const response = await onRequest();
+    initDefaultIssues.value = response.data.issues;
+    initDefaultIssuesCount.value = response.data.count || DEF_ROWS_PER_PAGE;
+  } else if (isGroupingEnabled.value === true) {
+    const response = await getGroupedIssues();
+    initGroupedIssues.value = response?.data.issues;
+    initGroupedIssuesGroupBy.value = response?.data.group_by;
+  }
+  issuesLoader.value = false;
+};
+
+const bus = inject('bus') as EventBus;
+
+// реагируем на изменения фильтров в FilterList.vue
+bus.on('issues-filters-update', async (group_by) => {
+  // // загружаем только при выбранной группировке
+  // if (group_by === 'none') return;
+
+  await load();
+});
+
 onMounted(async () => {
-  loading.value = true;
+  issuesLoader.value = true;
   await getAllProjectInfo();
-  loading.value = false;
+  await load();
 });
 </script>
 

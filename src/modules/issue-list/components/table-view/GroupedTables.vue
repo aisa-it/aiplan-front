@@ -33,7 +33,7 @@
         :rowsCount="table?.count"
         @refresh="
           (pagination, isFullUpdate) =>
-            refreshTable(index, table.entity, pagination, isFullUpdate)
+            refreshTable(index, pagination, isFullUpdate)
         "
       />
     </q-expansion-item>
@@ -62,7 +62,7 @@ const emits = defineEmits(['refreshTable']);
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);
 
-const refreshTable = (index, entity, pagination, isFullUpdate) => {
-  emits('refreshTable', index, entity, pagination, isFullUpdate);
+const refreshTable = (index, pagination, isFullUpdate) => {
+  emits('refreshTable', index, pagination, isFullUpdate);
 };
 </script>

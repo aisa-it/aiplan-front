@@ -43,7 +43,7 @@
 
     <div class="board-card-list scrollable-content">
       <div v-for="card in table.issues" :key="card.id">
-        <BoardCard :card="card" />
+        <BoardCard :card="card" @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"/>
       </div>
     </div>
   </q-expansion-item>
@@ -101,10 +101,10 @@ const quasarPagination = ref<QuasarPagination>({
   rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
-const getIssues = async (p?: any) => {
+const getIssues = async (p?: any, isFullUpdate?:boolean) => {
   quasarPagination.value.page = await p;
   
-  emits('refresh', parsePagination(quasarPagination.value));
+  emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
 
 const toggleList = async (entity, value) => {
@@ -131,7 +131,7 @@ onMounted(() => {
   gap: 8px;
   margin-top: 8px;
   overflow-y: scroll;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 250px);
 }
 .board-item {
   width: 400px;

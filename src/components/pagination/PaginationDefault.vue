@@ -94,6 +94,7 @@ export default defineComponent({
     };
 
     const updateRowsPerPage = (val: number) => {
+      console.log(val);
       emit('update:rowsPerPage', val);
       emit('update:selectedPage', 1);
       emit('request');

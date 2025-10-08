@@ -1,72 +1,37 @@
 <template>
-  <div>
-    <transition name="fade">
-      <q-markup-table
-        v-show="loading"
-        style="position: absolute; z-index: 1000; width: 100%; box-shadow: none"
-      >
-        <thead>
-          <tr>
-            <th class="text-left" style="width: 150px">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-            <th class="text-right">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-            <th class="text-right">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-            <th class="text-right">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-            <th class="text-right">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-            <th class="text-right">
-              <q-skeleton animation="blink" type="text" />
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr v-for="n in 15" :key="n">
-            <td class="text-left">
-              <q-skeleton animation="blink" type="text" width="85px" />
-            </td>
-            <td class="text-right">
-              <q-skeleton animation="blink" type="text" width="50px" />
-            </td>
-            <td class="text-right">
-              <q-skeleton animation="blink" type="text" width="35px" />
-            </td>
-            <td class="text-right">
-              <q-skeleton animation="blink" type="text" width="65px" />
-            </td>
-            <td class="text-right">
-              <q-skeleton animation="blink" type="text" width="25px" />
-            </td>
-            <td class="text-right">
-              <q-skeleton animation="blink" type="text" width="85px" />
-            </td>
-          </tr>
-        </tbody>
-      </q-markup-table>
-    </transition>
-
+  <div v-show="!issuesLoader">
     <transition name="fade">
       <IssueTable
+        v-show="rows?.length"
         key="table"
         :rows="rows"
         :rows-count="rowsCount"
-        @refresh="(pagination) => onRequest(pagination)"
+        @refresh="(pagination) => load(pagination)"
       />
+    </transition>
+
+    <transition name="fade">
+      <div
+        v-show="!rows.length"
+        style="
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: calc(100vh - 150px);
+        "
+      >
+        <DocumentIcon :width="56" :height="56" />
+        <h6>Нет задач</h6>
+      </div>
     </transition>
   </div>
 </template>
 
 <script setup lang="ts">
 // core
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 // stores
@@ -82,14 +47,23 @@ import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contract
 
 // components
 import IssueTable from './IssueTable.vue';
+import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
+import { useDefaultIssues } from '../composables/useDefaultIssues';
 
 const issuesStore = useIssuesStore();
-const { project, projectProps } = storeToRefs(useProjectStore());
+const { project, projectProps, issuesLoader } = storeToRefs(useProjectStore());
 const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 const route = useRoute();
 const rows = ref([]);
 const rowsCount = ref<number | null>(null);
 const loading = ref(true);
+const { onRequest } = useDefaultIssues();
+
+const props = defineProps([
+  'projectInfoLoading',
+  'defaultIssues',
+  'defaultIssuesCount',
+]);
 
 const defineIssuesFilters = computed(() => {
   return {
@@ -110,22 +84,22 @@ const defineIssuesPagination = computed(() => {
   };
 });
 
-const onRequest = async (
-  pagination: IQuery,
-  filters?: TypesIssuesListFilters,
-) => {
-  const { data } = await issuesStore.getIssueList(
-    filters || defineIssuesFilters.value,
-    pagination,
-  );
-  rows.value = data.issues;
-  rowsCount.value = data.count || DEF_ROWS_PER_PAGE;
+const load = async (pagination) => {
+  const response = await onRequest(pagination);
+  rows.value = response.data.issues;
+  rowsCount.value = response.data.count || DEF_ROWS_PER_PAGE;
 };
 
-onMounted(async () => {
-  loading.value = true;
-
-  await onRequest(defineIssuesPagination.value, defineIssuesFilters.value);
-  loading.value = false;
-});
+watch(
+  () => props.defaultIssues,
+  () => {
+    rows.value = props.defaultIssues;
+  },
+);
+watch(
+  () => props.defaultIssuesCount,
+  () => {
+    rowsCount.value = props.defaultIssuesCount;
+  },
+);
 </script>

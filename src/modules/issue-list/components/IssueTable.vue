@@ -3,7 +3,7 @@
     v-if="rows?.length"
     v-model:pagination="quasarPagination"
     class="my-sticky-column-table table-bottom-reverse"
-    row-key="name"
+    row-key="sequence_id"
     flat
     :rows="rows"
     :columns="projectStore.getTableColumns"
@@ -17,7 +17,13 @@
         :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="quasarPagination.rowsNumber"
         show-rows-per-page
-        @request="getIssues()"
+        @request="() => getIssues()"
+        @update:rowsPerPage="
+          (rowsPerPage) =>
+            getIssues(
+              Object.assign(quasarPagination, { rowsPerPage: rowsPerPage }),
+            )
+        "
       />
     </template>
 
@@ -32,7 +38,7 @@
     </template>
 
     <template v-slot:body-cell-priority="props">
-      <PriorityColumn :row-info="props" @refresh="getIssues()" />
+      <PriorityColumn :row-info="props" @refresh="updateIssuesList()" />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
@@ -42,7 +48,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            getIssues();
+            updateIssuesList();
           }
         "
       />
@@ -50,7 +56,7 @@
     </template>
 
     <template v-slot:body-cell-target_date="props">
-      <TargetDateColumn :row-info="props" @refresh="getIssues()" />
+      <TargetDateColumn :row-info="props" @refresh="updateIssuesList()" />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
@@ -170,7 +176,6 @@ function parsePagination(pagination: QuasarPagination) {
 }
 
 const getIssues = async (p?: any) => {
-  console.log(p);
   let isFullUpdate = false;
   if (p) quasarPagination.value = p;
 
@@ -182,6 +187,9 @@ const getIssues = async (p?: any) => {
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
 
+const updateIssuesList = () => {
+  emits('refresh', parsePagination(quasarPagination.value), true);
+};
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });

@@ -38,6 +38,7 @@ interface IProjectState {
   errorLoadProjects: boolean;
   projectProps: TypesViewProps | null;
   projectStatuses: Record<string, DtoStateLight[]>;
+  issuesLoader: boolean;
 }
 export const api = axios.create({ baseURL: '', withCredentials: true });
 
@@ -53,6 +54,7 @@ export const useProjectStore = defineStore('project-store', {
       errorLoadProjects: false,
       projectProps: null,
       projectStatuses: {},
+      issuesLoader: false,
     };
   },
 
