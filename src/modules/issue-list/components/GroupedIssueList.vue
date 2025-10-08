@@ -1,33 +1,24 @@
 <template>
-  <!-- <transition name="fade">
-    <div v-if="loading">
-      <TableListSkeleton v-show="!isKanbanEnabled" />
-      <BoardListSkeleton v-show="isKanbanEnabled" />
-    </div>
-  </transition> -->
-
-  <transition name="fade">
-    <div v-show="!issuesLoader">
-      <GroupedTables
-        v-if="!isKanbanEnabled"
-        :issues="issuesTables"
-        :group-by="groupBy"
-        @refresh-table="
-          (index, pagination, isFullUpdate) =>
-            refreshTable(index, pagination, isFullUpdate)
-        "
-      />
-      <GroupedBoard
-        v-if="isKanbanEnabled"
-        :issues="issuesTables"
-        :group-by="groupBy"
-        @refresh-card="
-          (index, pagination, isFullUpdate) =>
-            refreshCard(index, pagination, isFullUpdate)
-        "
-      />
-    </div>
-  </transition>
+  <div>
+    <GroupedTables
+      v-if="!isKanbanEnabled"
+      :issues="issuesTables"
+      :group-by="groupBy"
+      @refresh-table="
+        (index, pagination, isFullUpdate) =>
+          refreshTable(index, pagination, isFullUpdate)
+      "
+    />
+    <GroupedBoard
+      v-if="isKanbanEnabled"
+      :issues="issuesTables"
+      :group-by="groupBy"
+      @refresh-card="
+        (index, pagination, isFullUpdate) =>
+          refreshCard(index, pagination, isFullUpdate)
+      "
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -61,12 +52,8 @@ const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 
 const props = defineProps(['initGroupedIssues', 'initGroupBy']);
 const issuesTables = ref<Array<IGroupedResponse>>([]);
-const loading = ref(true);
-const groupBy = ref('');
+const groupBy = ref();
 const route = useRoute();
-
-
-
 
 //
 async function refreshTable(
@@ -123,11 +110,13 @@ async function refreshCard(
 
 async function load() {
   issuesTables.value = [];
-  loading.value = true;
+  issuesLoader.value = true;
+
   const response = await getGroupedIssues();
+
   issuesTables.value = response?.data?.issues;
   groupBy.value = response?.data?.group_by;
-  loading.value = false;
+  issuesLoader.value = false;
 }
 
 watch(

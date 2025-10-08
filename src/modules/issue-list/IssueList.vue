@@ -7,31 +7,32 @@
       <IssuesListTitle />
       <q-space />
 
-      <FiltersList :projectId="route.params.project" :columns="allColumns" />
+      <FiltersList
+        :projectId="route.params.project"
+        :columns="allColumns"
+        @update="load()"
+      />
     </q-card-section>
     <q-separator />
 
-    <transition name="fade">
-      <div v-show="issuesLoader === false">
-        <DefaultIssueList
-          v-if="!isGroupingEnabled"
-          :defaultIssues="initDefaultIssues"
-          :defaultIssuesCount="initDefaultIssuesCount"
-        />
-        <GroupedIssueList
-          v-if="isGroupingEnabled"
-          :initGroupedIssues="initGroupedIssues"
-          :initGroupBy="initGroupedIssuesGroupBy"
-        />
-      </div>
-    </transition>
+    <div v-show="issuesLoader === false">
+      <DefaultIssueList
+        v-if="!isGroupingEnabled"
+        :defaultIssues="initDefaultIssues"
+        :defaultIssuesCount="initDefaultIssuesCount"
+      />
 
-    <transition name="fade">
-      <div v-show="issuesLoader">
-        <TableListSkeleton v-show="!isKanbanEnabled" />
-        <BoardListSkeleton v-show="isKanbanEnabled" />
-      </div>
-    </transition>
+      <GroupedIssueList
+        v-if="isGroupingEnabled"
+        :initGroupedIssues="initGroupedIssues"
+        :initGroupBy="initGroupedIssuesGroupBy"
+      />
+    </div>
+
+    <div v-show="issuesLoader === true">
+      <TableListSkeleton v-if="!isKanbanEnabled" />
+      <BoardListSkeleton v-if="isKanbanEnabled" />
+    </div>
   </q-card>
 </template>
 
@@ -48,9 +49,8 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
-import { inject, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-import { EventBus } from 'quasar';
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
 import { storeToRefs } from 'pinia';
@@ -90,16 +90,6 @@ const load = async () => {
   }
   issuesLoader.value = false;
 };
-
-const bus = inject('bus') as EventBus;
-
-// реагируем на изменения фильтров в FilterList.vue
-bus.on('issues-filters-update', async (group_by) => {
-  // // загружаем только при выбранной группировке
-  // if (group_by === 'none') return;
-
-  await load();
-});
 
 onMounted(async () => {
   issuesLoader.value = true;

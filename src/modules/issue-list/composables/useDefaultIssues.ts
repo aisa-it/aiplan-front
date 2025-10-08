@@ -27,10 +27,16 @@ export const useDefaultIssues = () => {
     pagination?: IQuery,
     filters?: TypesIssuesListFilters,
   ) {
+    const projectFilters = {
+      states: [] as string[],
+    };
+    if (projectProps.value?.filters?.states?.length) {
+      projectFilters.states = projectProps?.value?.filters?.states;
+    }
     return await issuesStore.getIssuesTable(
       currentWorkspaceSlug.value,
       project.value.id,
-      filters,
+      filters || projectFilters,
       pagination || defineIssuesPagination.value,
     );
   }

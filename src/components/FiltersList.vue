@@ -163,9 +163,7 @@ const props = defineProps<{
   columns: any[];
 }>();
 
-const emits = defineEmits<{
-  update: [];
-}>();
+const emits = defineEmits(['update']);
 
 const route = useRoute();
 const projectStore = useProjectStore();
@@ -232,10 +230,7 @@ const onUpdate = async () => {
         route.params.project as string,
       )
       .then(() => {
-        bus.emit(
-          'issues-filters-update',
-          projectProps.value?.filters?.group_by,
-        );
+        emits('update', projectProps.value?.filters?.group_by);
       });
   } catch (e) {
     console.error(e);

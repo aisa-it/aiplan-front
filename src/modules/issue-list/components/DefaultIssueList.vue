@@ -1,32 +1,9 @@
 <template>
-  <div v-show="!issuesLoader">
-    <transition name="fade">
-      <IssueTable
-        v-show="rows?.length"
-        key="table"
-        :rows="rows"
-        :rows-count="rowsCount"
-        @refresh="(pagination) => load(pagination)"
-      />
-    </transition>
-
-    <transition name="fade">
-      <div
-        v-show="!rows.length"
-        style="
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-          height: calc(100vh - 150px);
-        "
-      >
-        <DocumentIcon :width="56" :height="56" />
-        <h6>Нет задач</h6>
-      </div>
-    </transition>
-  </div>
+  <IssueTable
+    :rows="rows"
+    :rows-count="rowsCount"
+    @refresh="(pagination) => load(pagination)"
+  />
 </template>
 
 <script setup lang="ts">
@@ -65,26 +42,23 @@ const props = defineProps([
   'defaultIssuesCount',
 ]);
 
-const defineIssuesFilters = computed(() => {
-  return {
-    workspaces: [workspaceInfo?.value?.id],
-    projects: [project.value?.id],
-  };
-});
-
-const defineIssuesPagination = computed(() => {
-  return {
-    only_count: false,
-    show_sub_issue: projectProps.value?.showSubIssues ?? true,
-    draft: projectProps.value?.draft ?? true,
-    order_by: projectProps.value?.filters?.order_by,
-    desc: projectProps.value?.filters?.orderDesc,
-    offset: 0,
-    limit: projectProps.value?.page_size,
-  };
-});
-
 const load = async (pagination) => {
+  let props = JSON.parse(JSON.stringify(projectProps.value));
+  props.page_size = pagination.limit;
+  props.filters.order_by = pagination.order_by;
+  props.filters.orderDesc = pagination.desc;
+
+  await useProjectStore().setProjectProps(
+    route.params.workspace as string,
+    route.params.project as string,
+    props,
+  );
+
+  await useProjectStore().getMeInProject(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
+
   const response = await onRequest(pagination);
   rows.value = response.data.issues;
   rowsCount.value = response.data.count || DEF_ROWS_PER_PAGE;

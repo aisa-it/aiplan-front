@@ -1,6 +1,5 @@
 <template>
   <q-table
-    v-if="rows?.length"
     v-model:pagination="quasarPagination"
     class="my-sticky-column-table table-bottom-reverse"
     row-key="sequence_id"
