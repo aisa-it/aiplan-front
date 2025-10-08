@@ -2,9 +2,7 @@
   <q-dialog ref="dialogRef" @before-show="onLoad()">
     <q-card v-if="!loading" class="modal-card">
       <q-card-section>
-        <h6 class="q-mb-sm q-mt-sm">
-          Настройка уведомлений проекта "{{ project.name }}"
-        </h6>
+        <slot name="header" />
       </q-card-section>
       <q-card-section>
         <q-tabs
@@ -32,6 +30,7 @@
             >
               <AdminSettingsList
                 :settings="settings[tab.field]"
+                :settingsList="settingsList"
                 @update="
                   (updatedField: { field: string; value: boolean }) =>
                     setCurrentSetting(updatedField, tab.field)
@@ -68,20 +67,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import { useRoute } from 'vue-router';
-import { useProjectStore } from 'src/stores/project-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
-import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-
-import DefaultLoader from '../loaders/DefaultLoader.vue';
-import AdminSettingsList from './ProjectNotificationsSettings/AdminSettingsList.vue';
+import DefaultLoader from '../../loaders/DefaultLoader.vue';
+import AdminSettingsList from './AdminSettingsList.vue';
 
 const loading = ref(false);
 const onLoad = () => getUserSettings();
 
-const props = defineProps<{ project: DtoProjectLight }>();
-const route = useRoute();
+const props = defineProps<{
+  settingsList: { title: string; field: string }[];
+  getUserSettings: () => any;
+  saveUserSettings: (settings: SettingsType) => any;
+}>();
 
 const tab = ref('email');
 
@@ -125,42 +123,30 @@ const settings = ref<SettingsType>({
   notification_settings_app: {},
 });
 
-const projectStore = useProjectStore();
-
 const getUserSettings = async () => {
-  if (!props.project?.id) return;
+  await props.getUserSettings().then((data) => {
+    if (!data) return;
 
-  await projectStore
-    .getMeInProject(route.params.workspace as string, props.project?.id)
-    .then((data) => {
-      if (!data) return;
-
-      (Object.keys(settings.value) as Array<keyof SettingsType>).forEach(
-        (key) => {
-          if (data.hasOwnProperty(key)) {
-            settings.value[key] = { ...data[key] };
-          }
-        },
-      );
-    });
+    (Object.keys(settings.value) as Array<keyof SettingsType>).forEach(
+      (key) => {
+        if (data.hasOwnProperty(key)) {
+          settings.value[key] = { ...data[key] };
+        }
+      },
+    );
+  });
 };
 
 const dialogRef = ref();
 const { setNotificationView } = useNotificationStore();
 const handleSaveSettings = async () => {
-  await projectStore
-    .setProjectNotificationSettings(
-      route.params.workspace as string,
-      props.project?.id ?? '',
-      settings.value,
-    )
-    .then(() => {
-      setNotificationView({
-        open: true,
-        type: 'success',
-      });
-      dialogRef.value.hide();
+  await props.saveUserSettings(settings.value).then(() => {
+    setNotificationView({
+      open: true,
+      type: 'success',
     });
+    dialogRef.value.hide();
+  });
 };
 
 const MemberSettingToAuthor = (setting: keyof SettingsType) => {

@@ -162,18 +162,18 @@
       />
     </q-btn>
     <q-btn
-      v-if="hasPermission('ws-settings')"
       class="nav-menu__top-nav-button"
       data-id="workspace-settings-button-top"
       :text-color="'dark'"
-      :to="`/${currentWorkspaceSlug}/settings`"
+      @click="notificationSettingsOpen = !notificationSettingsOpen"
     >
-      <SettingsIcon
-        :color="`${router.path.includes('settings') ? activeIconColor : ''}`"
-      />
+      <BellIcon :color="`${notificationSettingsOpen ? activeIconColor : ''}`" />
     </q-btn>
   </q-btn-group>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
+  <NotificationsAdminWorkspaceSettingsDialog
+    v-model="notificationSettingsOpen"
+  />
 </template>
 
 <script setup lang="ts">
@@ -195,6 +195,7 @@ import HomeIcon from '../icons/HomeIcon.vue';
 import AvatarImage from '../AvatarImage.vue';
 import HatXmasIcon from '../icons/HatXmasIcon.vue';
 import SettingsIcon from '../icons/SettingsIcon.vue';
+import BellIcon from '../icons/BellIcon.vue';
 import NewWorkspaceDialog from '../dialogs/NewWorkspaceDialog.vue';
 import StarIcon from 'components/icons/StarIcon.vue';
 import {
@@ -206,6 +207,7 @@ import { useNotificationStore } from 'stores/notification-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import AIDocIcon from '../icons/AIDocIcon.vue';
 import { useGlobalLoading } from 'src/composables/useGlobalLoader';
+import NotificationsAdminWorkspaceSettingsDialog from '../dialogs/NotificationsAdminWorkspaceSettingsDialog.vue';
 
 const activeIconColor = '#3f75ff';
 
@@ -223,6 +225,7 @@ const router = useRoute();
 
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
+const notificationSettingsOpen = ref(false);
 const { setNotificationView } = useNotificationStore();
 
 const deleteFavoriteWorkspace = async (uuid: string | undefined) => {

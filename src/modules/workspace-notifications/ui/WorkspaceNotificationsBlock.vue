@@ -18,7 +18,12 @@
           {{ title }}
         </p>
         <p class="q-mb-none body-2">
-          {{ props.notificationRow?.detail?.workspace?.name }}
+          {{
+            props.notificationRow?.data?.entity_type === 'workspace' &&
+            props.notificationRow?.data?.field === 'name'
+              ? props.notificationRow?.data?.old_value
+              : props.notificationRow?.detail?.workspace?.name
+          }}
         </p>
       </div>
       <div class="notification-content body-1 q-mt-xs word-wrap full-width">
