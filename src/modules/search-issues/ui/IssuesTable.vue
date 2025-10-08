@@ -283,6 +283,7 @@ onMounted(() => {
 
 const onRequest = async (p) => {
   loading.value = true;
+  // TODO: удалять only_active из req, так как он будет отправляться в query
   let req = Object.assign((filter.value as any) ?? {}, {
     search_query: searchQuery.value,
   });
@@ -294,6 +295,7 @@ const onRequest = async (p) => {
     offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
     light: true,
+    only_active: filter.value?.only_active || false,
   });
   rows.value = [];
   rows.value = issues;
