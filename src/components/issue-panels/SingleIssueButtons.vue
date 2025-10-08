@@ -116,6 +116,7 @@ const switchDraft = async () => {
       { draft: !issueData.value.draft },
     )
     .then(() => {
+      issueData.value.draft = !issueData.value.draft;
       setNotificationView({
         type: 'success',
         open: true,
