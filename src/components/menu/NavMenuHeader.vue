@@ -171,9 +171,7 @@
     </q-btn>
   </q-btn-group>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
-  <NotificationsAdminWorkspaceSettingsDialog
-    v-model="notificationSettingsOpen"
-  />
+  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" />
 </template>
 
 <script setup lang="ts">
@@ -207,7 +205,7 @@ import { useNotificationStore } from 'stores/notification-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import AIDocIcon from '../icons/AIDocIcon.vue';
 import { useGlobalLoading } from 'src/composables/useGlobalLoader';
-import NotificationsAdminWorkspaceSettingsDialog from '../dialogs/NotificationsAdminWorkspaceSettingsDialog.vue';
+import NotificationsWorkspaceSettingsDialog from '../dialogs/NotificationsWorkspaceSettingsDialog.vue';
 
 const activeIconColor = '#3f75ff';
 
