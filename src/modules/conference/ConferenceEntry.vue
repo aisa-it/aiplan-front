@@ -90,21 +90,29 @@ let vantaEffect = null;
 
 onMounted(async () => {
   await userStore.getUserInfo();
+  try {
+    if (
+      q.platform.is.mobile === false &&
+      localStorage.getItem('clouds-enable') != '0'
+    ) {
+      await createClouds();
+    } else {
+      isEnableClouds.value = false;
+      setStaticBg();
+    }
 
-  if (
-    q.platform.is.mobile === false &&
-    localStorage.getItem('clouds-enable') != '0'
-  ) {
-    await createClouds();
-  } else {
+    setTimeout(() => {
+      stopGlobalLoading();
+      loading.value = false;
+    }, 700);
+  } catch {
     isEnableClouds.value = false;
     setStaticBg();
+    setTimeout(() => {
+      stopGlobalLoading();
+      loading.value = false;
+    }, 700);
   }
-
-  setTimeout(() => {
-    stopGlobalLoading();
-    loading.value = false;
-  }, 700);
 });
 
 async function createClouds() {
@@ -129,17 +137,22 @@ async function createClouds() {
 }
 
 function toggleClouds() {
-  isEnableClouds.value = !isEnableClouds.value;
+  try {
+    isEnableClouds.value = !isEnableClouds.value;
 
-  localStorage.setItem('clouds-enable', isEnableClouds.value ? '1' : '0');
+    localStorage.setItem('clouds-enable', isEnableClouds.value ? '1' : '0');
 
-  if (isEnableClouds.value === true) {
-    createClouds();
-  } else if (vantaEffect) {
-    vantaEffect.destroy();
-    vantaEffect = null;
+    if (isEnableClouds.value === true) {
+      createClouds();
+    } else if (vantaEffect) {
+      vantaEffect.destroy();
+      vantaEffect = null;
 
+      setStaticBg();
+    }
+  } catch {
     setStaticBg();
+    isEnableClouds.value = false;
   }
 }
 onUnmounted(() => {
