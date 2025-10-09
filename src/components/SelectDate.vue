@@ -21,47 +21,100 @@
     </div>
 
     <q-popup-proxy
+      v-if="Screen.width > 662"
       @before-show="updateProxy"
       cover
       transition-show="scale"
       transition-hide="scale"
     >
-      <div class="row no-wrap q-pa-md" style="gap: 16px">
-        <q-date
-          v-model="proxyDate"
-          :locale="LOCALE_DATE"
-          :options="optionsFn"
-          mask="YYYY-MM-DDTHH:mm:ss"
-          :navigation-min-year-month="minYearMonth"
-          :navigation-max-year-month="maxYearMonth"
-        />
-        <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
-      </div>
+      <div class="date-block">
+        <div class="date-block__calendar q-px-md q-py-sm row items-center">
+          <q-date
+            v-model="proxyDate"
+            :locale="LOCALE_DATE"
+            :options="optionsFn"
+            mask="YYYY-MM-DDTHH:mm:ss"
+            :navigation-min-year-month="minYearMonth"
+            :navigation-max-year-month="maxYearMonth"
+          />
+          <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
+        </div>
 
-      <div class="row items-center no-wrap q-px-md q-py-sm">
-        <q-btn
-          label="Без даты"
-          class="secondary-btn full-w"
-          style="font-size: 12px"
-          flat
-          @click="
-            () => {
-              proxyDate = null;
-              save();
-            }
-          "
-          v-close-popup
-        />
-        <q-btn
-          label="Установить"
-          class="primary-btn full-w q-ml-sm"
-          style="font-size: 12px"
-          flat
-          @click="save"
-          v-close-popup
-        />
+        <div
+          class="date-block__buttons row items-center no-wrap q-px-md q-py-sm date-buttons"
+        >
+          <q-btn
+            label="Без даты"
+            class="secondary-btn full-w"
+            style="font-size: 12px"
+            flat
+            @click="
+              () => {
+                proxyDate = null;
+                save();
+              }
+            "
+            v-close-popup
+          />
+          <q-btn
+            label="Установить"
+            class="primary-btn full-w q-ml-sm"
+            style="font-size: 12px"
+            flat
+            @click="save"
+            v-close-popup
+          />
+        </div>
       </div>
     </q-popup-proxy>
+    <q-menu
+      cover
+      max-height="100vh"
+      transition-show="scale"
+      transition-hide="scale"
+      v-else
+      @before-show="updateProxy"
+    >
+      <div class="date-block">
+        <div class="date-block__calendar q-px-md q-py-sm row items-center">
+          <q-date
+            v-model="proxyDate"
+            :locale="LOCALE_DATE"
+            :options="optionsFn"
+            mask="YYYY-MM-DDTHH:mm:ss"
+            :navigation-min-year-month="minYearMonth"
+            :navigation-max-year-month="maxYearMonth"
+          />
+          <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
+        </div>
+
+        <div
+          class="date-block__buttons row items-center no-wrap q-px-md q-py-sm date-buttons"
+        >
+          <q-btn
+            label="Без даты"
+            class="secondary-btn full-w"
+            style="font-size: 12px"
+            flat
+            @click="
+              () => {
+                proxyDate = null;
+                save();
+              }
+            "
+            v-close-popup
+          />
+          <q-btn
+            label="Установить"
+            class="primary-btn full-w q-ml-sm"
+            style="font-size: 12px"
+            flat
+            @click="save"
+            v-close-popup
+          />
+        </div>
+      </div>
+    </q-menu>
   </q-btn>
 </template>
 
@@ -200,6 +253,19 @@ export default defineComponent({
 .new-issue-btn {
   .q-btn__content {
     justify-content: space-between !important;
+  }
+}
+
+.date-block__calendar {
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media screen and (width < 662px) {
+  .date-block {
+    &__calendar {
+      flex-direction: column;
+    }
   }
 }
 </style>
