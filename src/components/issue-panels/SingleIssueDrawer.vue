@@ -378,7 +378,6 @@ const refresh = async () => {
       issueData.value.id,
     )
     .then((res) => {
-      console.log(res);
       issueData.value.draft = res.data.draft;
       issueData.value.state_detail = res.data.state_detail;
       issueData.value.assignee_details = res.data.assignee_details;
