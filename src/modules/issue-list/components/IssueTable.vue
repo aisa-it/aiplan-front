@@ -142,7 +142,7 @@ interface QuasarPagination {
 }
 
 const emits = defineEmits(['refresh']);
-const props = defineProps(['rows', 'rowsCount']);
+const props = defineProps(['rows', 'rowsCount', 'loading']);
 
 const selectedRow = ref();
 

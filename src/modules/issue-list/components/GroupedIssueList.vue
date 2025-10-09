@@ -124,11 +124,13 @@ watch(
   () => {
     issuesTables.value = props.initGroupedIssues;
   },
+  { immediate: true },
 );
 watch(
   () => props.initGroupBy,
   () => {
     groupBy.value = props.initGroupBy;
   },
+  { immediate: true },
 );
 </script>

@@ -15,24 +15,13 @@
     </q-card-section>
     <q-separator />
 
-    <div v-show="issuesLoader === false">
-      <DefaultIssueList
-        v-if="!isGroupingEnabled"
-        :defaultIssues="initDefaultIssues"
-        :defaultIssuesCount="initDefaultIssuesCount"
-      />
-
-      <GroupedIssueList
-        v-if="isGroupingEnabled"
-        :initGroupedIssues="initGroupedIssues"
-        :initGroupBy="initGroupedIssuesGroupBy"
-      />
-    </div>
-
-    <div v-show="issuesLoader === true">
-      <TableListSkeleton v-if="!isKanbanEnabled" />
-      <BoardListSkeleton v-if="isKanbanEnabled" />
-    </div>
+    <component
+      :is="currentIssueList"
+      :defaultIssues="initDefaultIssues"
+      :defaultIssuesCount="initDefaultIssuesCount"
+      :initGroupedIssues="initGroupedIssues"
+      :initGroupBy="initGroupedIssuesGroupBy"
+    />
   </q-card>
 </template>
 
@@ -49,7 +38,7 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
@@ -61,6 +50,7 @@ import BoardListSkeleton from './components/skeletons/BoardListSkeleton.vue';
 import { useDefaultIssues } from './composables/useDefaultIssues';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { useGroupedIssues } from './composables/useGroupedIssues';
+import { C } from 'app/dist/pwa/assets/aiplan-store.45a92a50';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues();
@@ -96,6 +86,25 @@ onMounted(async () => {
   await getAllProjectInfo();
   await load();
 });
+
+const currentIssueList = computed(() => {
+  let view: string;
+  let component;
+
+  view = issuesLoader.value === true ? 'skeleton' : 'list';
+  console.log(view);
+  switch (view) {
+    case 'list': {
+      component = isGroupingEnabled.value ? GroupedIssueList : DefaultIssueList;
+      return component;
+    }
+    case 'skeleton': {
+      component = isKanbanEnabled.value ? BoardListSkeleton : TableListSkeleton;
+      return component;
+    }
+  }
+  return component;
+});
 </script>
 
 <style>
@@ -108,5 +117,21 @@ onMounted(async () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.fade-element {
+  transition: all 0.3s ease-in-out;
+}
+
+.fade-element-enter-from,
+.fade-element-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.fade-element-enter-to,
+.fade-element-leave-from {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>
