@@ -183,7 +183,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
-import SettingList from './ProjectNotificationsSettings/SettingList.vue';
+import SettingList from './NotificationsSettings/SettingList.vue';
 import AidocNotificationsSettings from '../aidoc/AidocNotificationsSettings.vue';
 
 // composables
