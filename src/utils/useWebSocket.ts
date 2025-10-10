@@ -5,10 +5,15 @@ export function useWebSocket(wsUrl: string) {
   const isConnected = ref(false);
   const reconnectInterval = 5000;
   const messages = ref<any[]>([]);
+  let currentUrl = wsUrl;
+  if (window.location.protocol === 'http:') {
+    currentUrl = currentUrl.replace('wss://', 'ws://');
+  }
+
   function connect(parser: (event: any) => void) {
     if (isConnected.value || socket.value) return;
 
-    socket.value = new WebSocket(wsUrl);
+    socket.value = new WebSocket(currentUrl);
 
     socket.value.onopen = () => {
       isConnected.value = true;
@@ -18,7 +23,7 @@ export function useWebSocket(wsUrl: string) {
     socket.value.onmessage = (event) => {
       if (event.data) {
         try {
-          const message = parser(event)
+          const message = parser(event);
           messages.value.unshift(message);
         } catch {
           return;
@@ -34,6 +39,13 @@ export function useWebSocket(wsUrl: string) {
 
     socket.value.onerror = (error) => {
       console.error('Error WebSocket:', error);
+
+      if (currentUrl.startsWith('wss://')) {
+        const fallbackUrl = currentUrl.replace('wss://', 'ws://');
+        console.warn(`WebSocket fallback to ${fallbackUrl}`);
+        currentUrl = fallbackUrl;
+      }
+
       socket.value?.close();
       setTimeout(() => {
         connect(parser);
@@ -46,11 +58,12 @@ export function useWebSocket(wsUrl: string) {
       socket.value.close();
       socket.value = null;
       isConnected.value = false;
+      currentUrl = wsUrl;
     }
   }
-  
+
   function clear() {
-    messages.value = []
+    messages.value = [];
   }
 
   return {
