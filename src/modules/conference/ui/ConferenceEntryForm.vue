@@ -37,24 +37,26 @@ import { useQuasar } from 'quasar';
 import CheckIcon from 'src/components/icons/CheckIcon.vue';
 import { useRoute } from 'vue-router';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from 'src/stores/user-store';
 
+const { user } = storeToRefs(useUserStore());
 const q = useQuasar();
 const route = useRoute();
-const roomName = ref();
+const roomName = ref(user.value.last_workspace_slug || '');
 const inputRef = ref();
+
 defineProps<{
   isNight: boolean;
 }>();
 
-onMounted(() => {
+onMounted(async () => {
+  await useUserStore().getUserInfo();
+
   if (route.params.roomName?.length) {
     roomName.value = route.params.roomName;
     connectToConference(true);
-  }
-
-  if (history.state.slug) {
-    roomName.value = history.state.slug;
-  }
+  } else roomName.value = user.value.last_workspace_slug || '';
 });
 
 const connectToConference = (routeByQuery = false) => {

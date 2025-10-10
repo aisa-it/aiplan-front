@@ -5,12 +5,7 @@
       flat
       dense
       class="btn-only-icon-sm bordered"
-      @click="
-        $router.push({
-          name: 'conference',
-          state: { slug: route.params.workspace },
-        })
-      "
+      @click="() => openConference()"
     >
       <ConferenceIcon /><q-tooltip>Конференция</q-tooltip></q-btn
     >
@@ -37,6 +32,10 @@ import { useUtilsStore } from 'src/stores/utils-store';
 const route = useRoute();
 
 const { isEnabledJitsi } = storeToRefs(useUtilsStore());
+
+function openConference() {
+  window.open(`/conf/`);
+}
 </script>
 
 <style scoped lang="scss">

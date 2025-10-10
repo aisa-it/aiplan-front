@@ -89,7 +89,6 @@ onBeforeMount(() => {
 let vantaEffect = null;
 
 onMounted(async () => {
-  await userStore.getUserInfo();
 
   if (
     q.platform.is.mobile === false &&
