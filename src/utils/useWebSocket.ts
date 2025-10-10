@@ -41,9 +41,8 @@ export function useWebSocket(wsUrl: string) {
       console.error('Error WebSocket:', error);
 
       if (currentUrl.startsWith('wss://')) {
-        const fallbackUrl = currentUrl.replace('wss://', 'ws://');
-        console.warn(`WebSocket fallback to ${fallbackUrl}`);
-        currentUrl = fallbackUrl;
+        currentUrl = currentUrl.replace('wss://', 'ws://');
+        console.log(`WebSocket fallback to ${currentUrl}`);
       }
 
       socket.value?.close();
