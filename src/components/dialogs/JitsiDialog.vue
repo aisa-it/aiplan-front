@@ -40,7 +40,7 @@
                 lang="ru"
                 :jwt="token"
                 :width="'100%'"
-                :height="'100%'"
+                :height="'90vh'"
                 @on-ready-to-close="
                   () => {
                     isConfOpen = false;
