@@ -47,6 +47,7 @@ import { isEmpty } from 'src/utils/validation';
 import { api } from '../services/api';
 
 const props = defineProps<{ newEmail: string }>();
+const emits = defineEmits<{ emailUpdated: [] }>();
 
 const code = ref('');
 const dialogRef = ref();
@@ -57,7 +58,10 @@ let timer: number | null = null;
 const sendCode = async () => {
   api
     .verifyMyEmail({ code: code.value, new_email: props.newEmail })
-    .then(() => dialogRef.value.hide());
+    .then(() => {
+      emits('emailUpdated');
+      dialogRef.value.hide();
+    });
 };
 
 const resendCode = async () => {

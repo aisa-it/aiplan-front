@@ -253,7 +253,11 @@
     </q-inner-loading>
   </q-form>
 
-  <ChangeEmailDialog v-model="isOpenChangeEmailDialog" :new-email="new_email" />
+  <ChangeEmailDialog
+    v-model="isOpenChangeEmailDialog"
+    :new-email="new_email"
+    @email-updated="userInfo.email = new_email"
+  />
 </template>
 
 <script setup lang="ts">
