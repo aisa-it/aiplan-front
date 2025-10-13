@@ -56,6 +56,9 @@
         Загрузить ещё
       </q-btn>
     </q-list>
+    <div v-else class="q-mt-lg q-mb-md q-px-sm">
+      <span class="body-1 header-title-text">У этой задачи пока нет активностей</span>
+    </div>
   </div>
 </template>
 
