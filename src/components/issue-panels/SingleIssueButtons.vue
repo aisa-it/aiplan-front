@@ -120,7 +120,7 @@ const switchDraft = async () => {
       setNotificationView({
         type: 'success',
         open: true,
-        customMessage: issueData.value.draft
+        customMessage: !issueData.value.draft
           ? SUCCESS_PUBLISH_ISSUE
           : SUCCESS_SAVE_DRAFT,
       });
