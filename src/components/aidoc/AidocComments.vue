@@ -23,14 +23,8 @@
             <AidocActivityComments />
           </q-tab-panel>
           <q-tab-panel ref="tabActivity" name="activity">
-            <div
-              v-if="!docActivitiesData?.activities?.length"
-              class="body-1 text-dark q-my-lg q-px-sm"
-            >
-              Для этого документа еще нет активности
-            </div>
             <SelectActivity
-              :activitiesData="docActivitiesData"
+              :activitiesData="docActivitiesData" type="docs"
               @refreshData="getActivityData"
             />
           </q-tab-panel>
