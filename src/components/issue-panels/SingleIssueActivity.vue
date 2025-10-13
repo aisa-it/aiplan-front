@@ -27,7 +27,7 @@
             <SingleIssueActivityComments @updateComponent="updateHeight" />
           </q-tab-panel>
           <q-tab-panel ref="tabActivity" name="activity">
-            <SelectActivity
+            <SelectActivity type="tasks"
               :activitiesData="issueActivitiesData"
               @updateComponent="updateHeight"
               @refreshData="getActivityData"
