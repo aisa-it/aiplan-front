@@ -66,8 +66,10 @@ module.exports = configure(function (ctx) {
 
       vueRouterMode: 'history',
 
-      uglifyOptions: {
-        compress: { drop_console: true },
+      extendViteConf(conf) {
+        conf.esbuild = {
+          drop: ['console'],
+        };
       },
       // available values: 'hash', 'history'
       // vueRouterBase,
