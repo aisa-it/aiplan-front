@@ -9,15 +9,15 @@
           <q-input
             v-model="code"
             :rules="[(val) => isEmpty(val, 'код')]"
-            class="col-8"
+            class="col-9 self-center"
             label="Введите код"
             lazy-rules
             hide-bottom-space
             dense
           />
           <q-btn
-            label="Отправить"
-            class="secondary-btn form-userdata__btn col-3 self-center q-ml-auto"
+            label="Подтвердить"
+            class="secondary-btn form-userdata__btn self-center q-ml-auto"
             no-caps
             @click="sendCode"
           />
