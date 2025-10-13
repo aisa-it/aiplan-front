@@ -56,6 +56,10 @@
         Загрузить ещё
       </q-btn>
     </q-list>
+    <div v-else class="q-mt-lg q-mb-md q-px-sm">
+      <span v-if="type === 'tasks'" class="body-1 header-title-text">У этой задачи пока нет активностей</span>
+      <span v-if="type === 'docs'" class="body-1 header-title-text">Для этого документа еще нет активности</span>
+    </div>
   </div>
 </template>
 
@@ -82,6 +86,10 @@ defineProps({
     type: Object,
     required: true,
   },
+    type: {
+      type: String,
+      required: true,
+    }
 });
 
 const emits = defineEmits<{
