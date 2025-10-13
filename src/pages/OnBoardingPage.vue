@@ -7,7 +7,7 @@
         dense
         data-id="first-name-onboarding"
         v-model="me.first_name"
-        class="base-input onboarding-input"
+        class="base-input onboarding-input onboarding-input_required"
         label="Введите имя"
         lazy-rules
         :rules="[
@@ -21,7 +21,7 @@
         ref="lastName"
         dense
         data-id="last-name-onboarding"
-        class="base-input onboarding-input"
+        class="base-input onboarding-input onboarding-input_required"
         v-model="me.last_name"
         label="Введите фамилию"
         lazy-rules
@@ -36,7 +36,7 @@
         ref="username"
         dense
         data-id="user-name-onboarding"
-        class="base-input onboarding-input"
+        class="base-input onboarding-input onboarding-input_required"
         v-model="me.username"
         label="Введите имя пользователя"
         lazy-rules
@@ -61,7 +61,7 @@
             val.length <= 15 ||
             'Telegram ID слишком длинный (макс. 15 цифр)',
         ]"
-        class="base-input onboarding-input onboarding-input_optional"
+        class="base-input onboarding-input"
         data-id="telegram-id-settings"
         label="Введите Telegram ID"
         lazy-rules
@@ -271,7 +271,7 @@ export default defineComponent({
   }
 }
 
-.onboarding-input_optional {
+.onboarding-input_required {
   :deep(.q-field__label) {
     &::after {
       margin-left: 4px;

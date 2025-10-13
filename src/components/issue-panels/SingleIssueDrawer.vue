@@ -226,7 +226,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="updateParent"
+          @refresh="refresh"
         ></SelectParentIssue>
         <q-btn
           v-if="
@@ -258,7 +258,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="updateBlockerListAndLinks"
+          @refresh="refresh"
         />
       </div>
     </div>
@@ -280,7 +280,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="updateBlockerListAndLinks"
+          @refresh="refresh"
         />
       </div>
     </div>
@@ -294,14 +294,14 @@
       :isDisabled="
         hasPermissionByIssue(issueData, project, 'change-issue-secondary')
       "
-      @refresh="updateBlockerListAndLinks"
+      @refresh="refresh"
     >
     </SelectLinks>
   </div>
 </template>
 <script setup lang="ts">
 // core
-import { computed } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -349,6 +349,8 @@ import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 // constants
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 
+import { setIntervalFunction } from 'src/utils/helpers';
+
 // stores
 const userStore = useUserStore();
 const statesStore = useStatesStore();
@@ -365,19 +367,10 @@ const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
+const refreshCycle = ref();
+
 // functions
-const updateParent = async (issueId: string) => {
-  await singleIssueStore
-    .getIssueDataById(
-      currentWorkspaceSlug.value,
-      currentProjectID.value,
-      issueId,
-    )
-    .then((res) => {
-      issueData.value.parent_detail = res.data;
-    });
-};
-const updateBlockerListAndLinks = async () => {
+const refresh = async () => {
   await singleIssueStore
     .getIssueDataById(
       currentWorkspaceSlug.value,
@@ -385,6 +378,13 @@ const updateBlockerListAndLinks = async () => {
       issueData.value.id,
     )
     .then((res) => {
+      issueData.value.draft = res.data.draft;
+      issueData.value.state_detail = res.data.state_detail;
+      issueData.value.assignee_details = res.data.assignee_details;
+      issueData.value.watcher_details = res.data.watcher_details;
+      issueData.value.priority = res.data.priority;
+      issueData.value.target_date = res.data.target_date;
+      issueData.value.parent_detail = res.data.parent_detail;
       issueData.value.blocker_issues = res.data.blocker_issues;
       issueData.value.blocked_issues = res.data.blocked_issues;
       issueData.value.issue_link = res.data.issue_link;
@@ -431,6 +431,14 @@ const getCompareText = () => {
     )}`;
   }
 };
+
+onMounted(() => {
+  refreshCycle.value = setIntervalFunction(refresh);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshCycle.value);
+});
 </script>
 
 <style scoped lang="scss">

@@ -99,17 +99,25 @@
         <h4 class="text-lg font-semibold text-brand-base">Email</h4>
         <p class="text-sm text-brand-secondary">Ваш адрес электронной почты</p>
       </div>
-      <div class="col form-userdata__col">
+      <div class="col row form-userdata__inputs-row form-userdata__col">
         <q-input
-          v-model="userInfo.email"
-          :rules="[(val) => isEmpty(val, 'email')]"
-          class="base-input"
+          v-model="new_email"
+          :rules="[(val) => isEmail(val)]"
+          class="base-input col"
           label="Введите email"
-          disable
           lazy-rules
           hide-bottom-space
           dense
         />
+        <div class="col">
+          <q-btn
+            class="secondary-btn form-userdata__btn"
+            no-caps
+            @click="openChangeEmailDialog"
+          >
+            Изменить
+          </q-btn>
+        </div>
       </div>
     </div>
 
@@ -244,6 +252,12 @@
       <DefaultLoader />
     </q-inner-loading>
   </q-form>
+
+  <ChangeEmailDialog
+    v-model="isOpenChangeEmailDialog"
+    :new-email="new_email"
+    @email-updated="userInfo.email = new_email"
+  />
 </template>
 
 <script setup lang="ts">
@@ -258,6 +272,7 @@ import { TIMEZONES } from 'src/constants/constants';
 // components
 import UploadUserAvatarDialog from 'src/components/dialogs/UploadUserAvatarDialog.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import ChangeEmailDialog from './ChangeEmailDialog.vue';
 // validation
 import {
   isEmpty,
@@ -265,6 +280,7 @@ import {
   isUsername,
   notDefisOnly,
   latinAndCyrillic,
+  isEmail,
 } from 'src/utils/validation';
 // composables
 import { useFormToken } from '../composables/general-profile-settings/useFormToken';
@@ -274,6 +290,8 @@ import { useFormUserdata } from '../composables/general-profile-settings/useForm
 import { getUrlFile } from 'src/utils/helpers';
 // types
 import { IUser } from 'src/interfaces/users';
+
+import { api } from '../services/api';
 
 // stores
 const userStore = useUserStore();
@@ -292,6 +310,8 @@ const userInfo = ref({
   telegram_id: null,
   user_timezone: '',
 } as Partial<IUser>);
+
+const new_email = ref('');
 
 // composables
 // Форма настроек пользователя
@@ -317,12 +337,24 @@ const {
   handleResetProfileToken,
 } = useFormToken();
 
+const isOpenChangeEmailDialog = ref(false);
+
+const openChangeEmailDialog = async () => {
+  if (!new_email.value) return;
+  new_email.value = new_email.value.trim();
+
+  await api.changeMyEmail({ new_email: new_email.value }).then(() => {
+    isOpenChangeEmailDialog.value = true;
+  });
+};
+
 // Получаем актуальную информацию о пользователе
 onMounted(async () => {
   await userStore.getAuthToken();
   await utilsStore.getNotificationBotUrl();
 
   userInfo.value = JSON.parse(JSON.stringify(user.value));
+  new_email.value = userInfo.value.email ?? '';
 });
 
 watch(
