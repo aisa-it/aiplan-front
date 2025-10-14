@@ -19,11 +19,29 @@
         />
       </q-item>
     </q-list>
+
+    <div class="deadline-notification">
+      <p class="deadline-notification__label">
+        Выберите за сколько вы хотите получать уведомление об истечении срока
+        задачи
+      </p>
+      <q-select
+        v-model="deadlineNotificationTime"
+        :options="notificationOptions"
+        class="deadline-notification__select q-field__native base-selector "
+        emit-value
+        map-options
+        option-value="hours"
+        option-label="text"
+        dense
+        @update:model-value="changeNotificationSettings({ deadline_notification: deadlineNotificationTime })"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from 'src/stores/user-store';
@@ -36,6 +54,24 @@ const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const { setNotificationView } = useNotificationStore();
+
+const notificationOptions: {
+  text: string;
+  hours: number;
+}[] = [
+  { text: 'Никогда', hours: 0 },
+  { text: '1 час', hours: 1 },
+  { text: '2 часа', hours: 2 },
+  { text: '3 часа', hours: 3 },
+  { text: '4 часа', hours: 4 },
+  { text: '5 часов', hours: 5 },
+  { text: '6 часов', hours: 6 },
+  { text: '1 день', hours: 24 },
+  { text: '2 дня', hours: 48 },
+  { text: '3 дня', hours: 72 },
+];
+
+const deadlineNotificationTime = ref<number>(user.value?.settings?.deadline_notification ?? 24);
 
 const showNotification = (type: 'success' | 'error', msg?: string) => {
   setNotificationView({
@@ -71,4 +107,29 @@ const toggles = computed(() =>
       changeNotificationSettings({ [el.key]: !newValue }),
   })),
 );
+
+watch(
+  () => user.value?.settings?.deadline_notification,
+  (newValue) => {
+    if (newValue !== undefined) {
+      deadlineNotificationTime.value = newValue;
+    }
+  },
+  { immediate: true }
+);
 </script>
+
+<style scoped lang="scss">
+.deadline-notification {
+  margin-top: 10px;
+
+  &__label {
+    margin: 0;
+  }
+
+  &__select {
+    margin: 10px 0 0 16px;
+    max-width: 168px;
+  }
+}
+</style>
