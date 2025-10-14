@@ -444,6 +444,44 @@ export const useAiplanStore = defineStore('aiplan', {
       return data.data;
     },
 
+    async issueAttachmentsUploadFile(
+      file: File,
+      issueId: string,
+      onProgress?: (percent: number) => void,
+    ) {
+      const workspaceSlug = this.router.currentRoute.value.params.workspace;
+      const projectId = this.router.currentRoute.value.params.project;
+
+      if (!workspaceSlug || !projectId) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('asset', file);
+
+      try {
+        const response = await api.post(
+          `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectId}/issues/${issueId}/issue-attachments/`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: (event) => {
+              if (onProgress && event.total) {
+                const percent = Math.round((event.loaded * 100) / event.total);
+                onProgress(percent);
+              }
+            },
+          },
+        );
+
+        return response.data;
+      } catch (err) {
+        throw err;
+      }
+    },
+
     issueAttachmentsUpload(
       ev: any,
       issueId: string | number,
@@ -505,7 +543,6 @@ export const useAiplanStore = defineStore('aiplan', {
     ): Promise<void> {
       ev.preventDefault();
       ev.stopPropagation();
-
 
       /* const uploadFile = (file: File) => {
         return new Promise<void>((resolve, reject) => {
@@ -582,7 +619,7 @@ export const useAiplanStore = defineStore('aiplan', {
       for (const file of files) {
         await simulateUpload(file);
       }
-      /* 
+      /*
       await Promise.all(files.map(uploadFile)); */
     },
 
