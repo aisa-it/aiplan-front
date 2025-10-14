@@ -32,7 +32,14 @@
             @openDeleteDialog="openDeleteDialog"
             @updateDocument="updateDocument"
           />
-          <div class="q-px-sm full-w">
+          <div
+            class="q-px-sm full-w"
+            ref="editorContainer"
+            @drop.prevent="
+              (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
+            "
+            @dragover.prevent
+          >
             <EditorTipTapV2
               v-model="documentValue.content"
               ref="aidocEditor"
@@ -50,6 +57,7 @@
               v-click-outside:prevent-click-issue-outside="{
                 isAutoSave,
               }"
+              @get-editor="(value) => (editor = value)"
             />
           </div>
 
@@ -82,6 +90,7 @@
             :upload-attachment-func="uploadAttachments"
             :is-edit="canEdit"
             :id="documentValue.id"
+            ref="selectAttachments"
           />
           <div class="q-px-sm">
             <q-separator class="q-mt-sm" />
@@ -141,6 +150,8 @@ import { SUCCESS_UPDATE_DOCUMENT } from 'src/constants/notifications';
 //utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
+import { Editor } from '@tiptap/vue-3';
+import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 
 //composables
 const route = useRoute();
@@ -181,16 +192,16 @@ useMeta(() => {
 //consts
 const preventClickClass = 'prevent-click-issue-outside';
 // const listItem = [
-  // { title: 'Права доступа', disabled: true, emit: 'accessRights' },
-  // { title: 'Экспорт в PDF', disabled: true, emit: 'exportPdf' },
-  // { title: 'Экспорт в Word', disabled: true, emit: 'exportWord' },
-  // {
-  //   title: 'Импорт документа в Word',
-  //   disabled: false,
-  //   emit: 'importWord',
-  //   extensions: ['doc', 'docx'],
-  // },
-  // { title: 'Переместить', disabled: true, emit: 'moveDocument' },
+// { title: 'Права доступа', disabled: true, emit: 'accessRights' },
+// { title: 'Экспорт в PDF', disabled: true, emit: 'exportPdf' },
+// { title: 'Экспорт в Word', disabled: true, emit: 'exportWord' },
+// {
+//   title: 'Импорт документа в Word',
+//   disabled: false,
+//   emit: 'importWord',
+//   extensions: ['doc', 'docx'],
+// },
+// { title: 'Переместить', disabled: true, emit: 'moveDocument' },
 //   { title: 'Удалить', disabled: false, emit: 'openDeleteDialog' },
 // ];
 
@@ -352,6 +363,22 @@ const getListVersion = async () => {
     route.params.doc,
   );
 };
+
+const editorContainer = ref<HTMLElement>();
+const selectAttachments = ref();
+const editor = ref<Editor>();
+
+const { handleDrop } = useAttachmentsWithEditor(
+  editor,
+  (file: File) =>
+    aidocStore.uploadDocAttachments(
+      route.params?.workspace as string,
+      route.params?.doc as string,
+      [file],
+    ),
+  getAttachmentsList,
+  () => selectAttachments.value.refresh(),
+);
 
 //hooks
 onMounted(async () => {

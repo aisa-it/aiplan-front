@@ -106,6 +106,11 @@
         @autoSave="handleAutoSave()"
         @toggleEdit="handleEnableEdit()"
         @get-editor="(editorInstance) => (editor = editorInstance)"
+        ref="editorContainer"
+        @drop.prevent="
+          (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
+        "
+        @dragover.prevent
       />
     </div>
     <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
@@ -153,12 +158,15 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useAiplanStore } from 'src/stores/aiplan-store';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { getFullName } from 'src/utils/helpers';
 import aiplan from 'src/utils/aiplan';
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
+
+import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 
 // components
 import IssueTagsDialog from 'src/modules/single-issue/main-issue-info/ui/IssueTagsDialog.vue';
@@ -182,12 +190,17 @@ defineOptions({
   },
 });
 
-const emit = defineEmits(['update:issuePage', 'toggleDrawer']);
+const emit = defineEmits([
+  'update:issuePage',
+  'toggleDrawer',
+  'uploadAttachment',
+]);
 
 // stores
 const userStore = useUserStore();
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
+const aiplanStore = useAiplanStore();
 const { hasPermissionByIssue } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 
@@ -359,6 +372,20 @@ const refresh = async () => {
 const toggleDrawer = () => {
   emit('toggleDrawer');
 };
+
+const editorContainer = ref<HTMLElement>();
+
+const { handleDrop } = useAttachmentsWithEditor(
+  editor,
+  (file: File) =>
+    aiplanStore.issueAttachmentsUploadFile(file, issueData.value.id),
+  () =>
+    aiplanStore.issueAttachmentsList(
+      issueData.value.project,
+      issueData.value.id,
+    ),
+  () => emit('uploadAttachment'),
+);
 
 onMounted(() => {
   handleAddListener();
