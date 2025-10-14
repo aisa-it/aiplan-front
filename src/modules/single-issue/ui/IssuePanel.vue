@@ -1,14 +1,9 @@
 <template>
   <q-layout v-if="issueData" class="flex flex-col no-wrap" view="hHh lpr fFf">
-    <q-drawer
-      show-if-above
+    <SingleIssueDrawer
       v-model="rightDrawerOpen"
-      side="right"
-      class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
       :width="dynamicWidthDrawer"
-    >
-      <SingleIssueDrawer />
-    </q-drawer>
+    />
 
     <q-page-container class="flex-grow">
       <div class="flex flex-col full-w full-height no-wrap">
