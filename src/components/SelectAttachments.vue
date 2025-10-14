@@ -323,6 +323,8 @@ const refresh = async () => {
   }
 };
 
+defineExpose({ refresh });
+
 const getCustomMessageOnNotify = (type: 'success' | 'error' | 'cancelled') => {
   switch (type) {
     case 'success':
