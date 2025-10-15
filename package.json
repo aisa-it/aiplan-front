@@ -13,7 +13,7 @@
     "build": "quasar mode add pwa && quasar build --mode pwa"
   },
   "dependencies": {
-    "@aisa-it/aiplan-api-ts": "^1.76.0",
+    "@aisa-it/aiplan-api-ts": "^1.77.0",
     "@headlessui/vue": "^1.7.17",
     "@jitsi/vue-sdk": "^1.0.4",
     "@quasar/extras": "^1.16.4",
@@ -43,11 +43,13 @@
     "@tiptap/starter-kit": "^2.6.4",
     "@tiptap/suggestion": "^2.5.1",
     "@tiptap/vue-3": "^2.4.0",
+    "@types/frappe-gantt": "^0.9.0",
     "@weiruo/tiptap-extension-indent": "^2.0.4-1",
     "altcha": "^0.2.3",
     "axios": "^1.2.1",
     "cyrillic-to-translit-js": "^3.2.1",
     "dayjs": "^1.11.10",
+    "frappe-gantt": "^1.0.4",
     "highlight.js": "^11.9.0",
     "lowlight": "^3.1.0",
     "lunr": "^2.3.9",
