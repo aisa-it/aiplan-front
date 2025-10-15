@@ -1,334 +1,305 @@
 <template>
-  <q-drawer
-    show-if-above
-    side="right"
-    class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
-    :overlay="preview"
-    :width="width"
-  >
-    <div class="col q-pb-sm q-px-sm">
-      <div v-if="preview" class="row justify-end flex q-gutter-sm">
-        <q-btn
-          class="secondary-btn-only-icon"
-          icon="open_in_full"
-          @click="emits('open', issueData.id)"
-        >
-          <HintTooltip>Открыть</HintTooltip>
-        </q-btn>
-        <q-btn
-          class="secondary-btn-only-icon"
-          icon="close"
-          @click="emits('update:modelValue', false)"
-        >
-          <HintTooltip>Закрыть</HintTooltip>
-        </q-btn>
-      </div>
+  <div class="col q-pb-sm q-px-sm">
+    <slot name="extend-buttons" />
+    <SingleIssueButtons />
+    <slot name="extend-header" />
+    <q-separator class="issue-panel__separator" />
 
-      <SingleIssueButtons />
-
-      <q-separator class="issue-panel__separator" />
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col q-mb-sm">
-          <div class="row items-center">
-            <CheckStatusIcon class="issue-icon" /><span class="q-ml-sm">
-              Статус
-            </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders">
-          <SelectStatus
-            class="issue-selector full-w"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :issue="issueData"
-            :status="issueData.state_detail"
-            :isDisabled="
-              !hasPermissionByIssue(issueData, project, 'change-issue-status')
-            "
-            :states-from-cache="statesCache[issueData?.project]"
-            @set-status="(val) => (issueData.state_detail = val)"
-          />
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col q-mb-sm">
+        <div class="row items-center">
+          <CheckStatusIcon class="issue-icon" /><span class="q-ml-sm">
+            Статус
+          </span>
         </div>
       </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <UserIcon class="issue-icon" /><span class="q-ml-sm"> Автор </span>
-          </div>
-        </div>
-        <div
-          class="col flex rounded-borders issue-panel__autor-label items-center no-wrap"
-        >
-          <AvatarImage
-            :rounded="true"
-            btnsize="10px"
-            class="issue-panel-avatar"
-            :tooltip="aiplan.UserName(issueData.author_detail).join(' ')"
-            :text="
-              [
-                aiplan
-                  .UserName(issueData.author_detail)[0]
-                  ?.at(0)
-                  ?.toUpperCase(),
-                aiplan
-                  .UserName(issueData.author_detail)[1]
-                  ?.at(0)
-                  ?.toUpperCase(),
-              ].join(' ')
-            "
-            :image="issueData.author_detail.avatar_id"
-            :member="issueData.author_detail"
-            @click="
-              $router.push({
-                path: `/${currentWorkspaceSlug}/user-activities/${issueData.author_detail.id}`,
-              })
-            "
-          />
-          <div class="q-ml-sm wrapped-string">
-            {{ aiplan.UserName(issueData.author_detail).join(' ') }}
-          </div>
-        </div>
+      <div class="col flex rounded-borders">
+        <SelectStatus
+          class="issue-selector full-w"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :issue="issueData"
+          :status="issueData.state_detail"
+          :isDisabled="
+            !hasPermissionByIssue(issueData, project, 'change-issue-status')
+          "
+          :states-from-cache="statesCache[issueData?.project]"
+          @set-status="(val) => (issueData.state_detail = val)"
+        />
       </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <UsersIcon class="issue-icon" />
-            <span class="q-ml-sm"> Исполнители </span>
-          </div>
-        </div>
-        <div
-          class="col flex rounded-borders issue-panel__assignees issue-panel__q-select-wrapper"
-        >
-          <SelectAssignee
-            class="issue-selector"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :assigness="
-              issueData.assignee_details.map((assignee) => {
-                return { member: assignee };
-              })
-            "
-            :isDisabled="
-              !hasPermissionByIssue(issueData, project, 'change-issue-basic')
-            "
-            :current-member="user"
-          ></SelectAssignee>
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <ObserveIcon class="issue-icon" />
-            <span class="q-ml-sm"> Наблюдатели </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders issue-panel__q-select-wrapper">
-          <SelectWatchers
-            class="issue-selector"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :watchers="
-              issueData.watcher_details.map((watcher) => {
-                return { member: watcher };
-              })
-            "
-            :current-member="user"
-            :isDisabled="
-              !hasPermissionByIssue(issueData, project, 'change-issue-basic')
-            "
-          ></SelectWatchers>
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <PriorityIcon class="issue-icon" />
-            <span class="q-ml-sm"> Приоритет </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders">
-          <SelectPriority
-            label="Приоритет"
-            class="issue-selector"
-            :workspace-slug="issueData.workspace_detail.slug"
-            :projectid="issueData.project"
-            editIssue
-            :issueid="issueData.id"
-            :priority="issueData.priority"
-            :issue="issueData"
-            :is-disabled="
-              !hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            @update:priority="(val) => (issueData.priority = val)"
-          >
-          </SelectPriority>
-        </div>
-      </div>
-
-      <q-separator class="q-mt-md issue-panel__separator" />
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <CreateDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Дата создания </span>
-          </div>
-        </div>
-        <div class="col pseudo-btn">
-          {{ formatDateTime(issueData.created_at) }}
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <ExecuteDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Срок исполнения </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders">
-          <SelectDate
-            class="full-w"
-            :workspace-id="issueData.workspace_detail.slug"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :date="issueData.target_date"
-            :issue="issueData"
-            :is-disabled="
-              !hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            @refresh="(val) => (issueData.target_date = val)"
-          />
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <StartDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Дата начала </span>
-          </div>
-        </div>
-        <div class="col pseudo-btn">
-          {{ getDate(issueData.start_date) }}
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <EndDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Дата завершения</span>
-          </div>
-        </div>
-        <div class="col pseudo-btn">
-          {{ getDate(issueData.completed_at) }}
-          <span
-            v-if="issueData.target_date && issueData.completed_at"
-            :class="[
-              'q-ml-xs',
-              getCompareDate < 0 ? 'text-negative' : 'text-positive',
-            ]"
-            >({{ getCompareText() }})</span
-          >
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <ParentIcon class="issue-icon" />
-            <span class="q-ml-sm"> Родитель </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders no-wrap">
-          <SelectParentIssue
-            class="full-w"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :issue="issueData.parent_detail"
-            :project="project"
-            :isDisabled="
-              hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            @refresh="refresh"
-          ></SelectParentIssue>
-          <q-btn
-            v-if="
-              issueData.parent_detail &&
-              hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            class="btn-only-icon-sm q-ml-xs"
-            style="padding: 0 3px"
-            @click="handleRemoveParentIssue"
-            ><CloseIcon
-          /></q-btn>
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <AlertIcon :color="'rgb(236, 177, 104)'" class="issue-icon" />
-            <span class="q-ml-sm"> Блокирует </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders column">
-          <SelectBlockIssues
-            :workspace-id="issueData.workspace"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :issues="issueData.blocker_issues"
-            :target="user.theme?.open_in_new ? '_blank' : '_self'"
-            :isDisabled="
-              hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            @refresh="refresh"
-          />
-        </div>
-      </div>
-
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col">
-          <div class="row items-center">
-            <AlertIcon :color="'rgb(230, 111, 96)'" class="issue-icon" />
-            <span class="q-ml-sm"> Заблокирована </span>
-          </div>
-        </div>
-        <div class="col flex rounded-borders column">
-          <SelectBlockedIssues
-            :workspace-id="issueData.workspace"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :issues="issueData.blocked_issues"
-            :target="user.theme?.open_in_new ? '_blank' : '_self'"
-            :isDisabled="
-              hasPermissionByIssue(issueData, project, 'change-issue-primary')
-            "
-            @refresh="refresh"
-          />
-        </div>
-      </div>
-
-      <q-separator class="q-mt-md issue-panel__separator" />
-
-      <SelectLinks
-        :projectid="issueData.project"
-        :issueid="issueData.id"
-        :links="issueData.issue_link"
-        :isDisabled="
-          hasPermissionByIssue(issueData, project, 'change-issue-secondary')
-        "
-        @refresh="refresh"
-      >
-      </SelectLinks>
     </div>
-  </q-drawer>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <UserIcon class="issue-icon" /><span class="q-ml-sm"> Автор </span>
+        </div>
+      </div>
+      <div
+        class="col flex rounded-borders issue-panel__autor-label items-center no-wrap"
+      >
+        <AvatarImage
+          :rounded="true"
+          btnsize="10px"
+          class="issue-panel-avatar"
+          :tooltip="aiplan.UserName(issueData.author_detail).join(' ')"
+          :text="
+            [
+              aiplan.UserName(issueData.author_detail)[0]?.at(0).toUpperCase(),
+              aiplan.UserName(issueData.author_detail)[1]?.at(0).toUpperCase(),
+            ].join(' ')
+          "
+          :image="issueData.author_detail.avatar_id"
+          :member="issueData.author_detail"
+          @click="
+            $router.push({
+              path: `/${currentWorkspaceSlug}/user-activities/${issueData.author_detail.id}`,
+            })
+          "
+        />
+        <div class="q-ml-sm wrapped-string">
+          {{ aiplan.UserName(issueData.author_detail).join(' ') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <UsersIcon class="issue-icon" />
+          <span class="q-ml-sm"> Исполнители </span>
+        </div>
+      </div>
+      <div
+        class="col flex rounded-borders issue-panel__assignees issue-panel__q-select-wrapper"
+      >
+        <SelectAssignee
+          class="issue-selector"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :assigness="
+            issueData.assignee_details.map((assignee) => {
+              return { member: assignee };
+            })
+          "
+          :isDisabled="
+            !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+          "
+          :current-member="user"
+        ></SelectAssignee>
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <ObserveIcon class="issue-icon" />
+          <span class="q-ml-sm"> Наблюдатели </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders issue-panel__q-select-wrapper">
+        <SelectWatchers
+          class="issue-selector"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :watchers="
+            issueData.watcher_details.map((watcher) => {
+              return { member: watcher };
+            })
+          "
+          :current-member="user"
+          :isDisabled="
+            !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+          "
+        ></SelectWatchers>
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <PriorityIcon class="issue-icon" />
+          <span class="q-ml-sm"> Приоритет </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders">
+        <SelectPriority
+          label="Приоритет"
+          class="issue-selector"
+          :workspace-slug="issueData.workspace_detail.slug"
+          :projectid="issueData.project"
+          editIssue
+          :issueid="issueData.id"
+          :priority="issueData.priority"
+          :issue="issueData"
+          :is-disabled="
+            !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          @update:priority="(val) => (issueData.priority = val)"
+        >
+        </SelectPriority>
+      </div>
+    </div>
+
+    <q-separator class="q-mt-md issue-panel__separator" />
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <CreateDateIcon :height="19" class="issue-icon" />
+          <span class="q-ml-sm">Дата создания </span>
+        </div>
+      </div>
+      <div class="col pseudo-btn">
+        {{ formatDateTime(issueData.created_at) }}
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <ExecuteDateIcon :height="19" class="issue-icon" />
+          <span class="q-ml-sm">Срок исполнения </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders">
+        <SelectDate
+          class="full-w"
+          :workspace-id="issueData.workspace_detail.slug"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :date="issueData.target_date"
+          :issue="issueData"
+          :is-disabled="
+            !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          @refresh="(val) => (issueData.target_date = val)"
+        />
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <StartDateIcon :height="19" class="issue-icon" />
+          <span class="q-ml-sm">Дата начала </span>
+        </div>
+      </div>
+      <div class="col pseudo-btn">
+        {{ getDate(issueData.start_date) }}
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <EndDateIcon :height="19" class="issue-icon" />
+          <span class="q-ml-sm">Дата завершения</span>
+        </div>
+      </div>
+      <div class="col pseudo-btn">
+        {{ getDate(issueData.completed_at) }}
+        <span
+          v-if="issueData.target_date && issueData.completed_at"
+          :class="[
+            'q-ml-xs',
+            getCompareDate < 0 ? 'text-negative' : 'text-positive',
+          ]"
+          >({{ getCompareText() }})</span
+        >
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <ParentIcon class="issue-icon" />
+          <span class="q-ml-sm"> Родитель </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders no-wrap">
+        <SelectParentIssue
+          class="full-w"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :issue="issueData.parent_detail"
+          :project="project"
+          :isDisabled="
+            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          @refresh="refresh"
+        ></SelectParentIssue>
+        <q-btn
+          v-if="
+            issueData.parent_detail &&
+            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          class="btn-only-icon-sm q-ml-xs"
+          style="padding: 0 3px"
+          @click="handleRemoveParentIssue"
+          ><CloseIcon
+        /></q-btn>
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <AlertIcon :color="'rgb(236, 177, 104)'" class="issue-icon" />
+          <span class="q-ml-sm"> Блокирует </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders column">
+        <SelectBlockIssues
+          :workspace-id="issueData.workspace"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :issues="issueData.blocker_issues"
+          :target="user.theme?.open_in_new ? '_blank' : '_self'"
+          :isDisabled="
+            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          @refresh="refresh"
+        />
+      </div>
+    </div>
+
+    <div class="row q-pt-md centered-horisontally">
+      <div class="col">
+        <div class="row items-center">
+          <AlertIcon :color="'rgb(230, 111, 96)'" class="issue-icon" />
+          <span class="q-ml-sm"> Заблокирована </span>
+        </div>
+      </div>
+      <div class="col flex rounded-borders column">
+        <SelectBlockedIssues
+          :workspace-id="issueData.workspace"
+          :projectid="issueData.project"
+          :issueid="issueData.id"
+          :issues="issueData.blocked_issues"
+          :target="user.theme?.open_in_new ? '_blank' : '_self'"
+          :isDisabled="
+            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+          "
+          @refresh="refresh"
+        />
+      </div>
+    </div>
+
+    <q-separator class="q-mt-md issue-panel__separator" />
+
+    <SelectLinks
+      :projectid="issueData.project"
+      :issueid="issueData.id"
+      :links="issueData.issue_link"
+      :isDisabled="
+        hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+      "
+      @refresh="refresh"
+    >
+    </SelectLinks>
+    <slot name="extend-content" />
+  </div>
 </template>
 <script setup lang="ts">
 // core
@@ -382,17 +353,6 @@ import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 
 import { setIntervalFunction } from 'src/utils/helpers';
 
-const props = defineProps<{
-  width?: number;
-  preview?: boolean;
-}>();
-
-const emits = defineEmits<{
-  refresh: [];
-  open: [id: string];
-  'update:modelValue': [value: boolean];
-}>();
-
 // stores
 const userStore = useUserStore();
 const statesStore = useStatesStore();
@@ -406,7 +366,7 @@ const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { statesCache } = storeToRefs(statesStore);
 
-const { issueData } = storeToRefs(singleIssueStore);
+const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const refreshCycle = ref();
@@ -417,7 +377,7 @@ const refresh = async () => {
     .getIssueDataById(
       currentWorkspaceSlug.value,
       currentProjectID.value,
-      issueData.value.id,
+      currentIssueID.value,
     )
     .then((res) => {
       issueData.value.draft = res.data.draft;
@@ -438,7 +398,7 @@ const handleRemoveParentIssue = async () => {
     .updateIssueData(
       currentWorkspaceSlug.value,
       currentProjectID.value,
-      issueData.value.id,
+      currentIssueID.value,
       { parent: null },
     )
     .then(async () => {

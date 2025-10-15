@@ -548,11 +548,9 @@
         <q-linear-progress indeterminate rounded />
       </div> -->
     </q-card>
-    <SingleIssueDrawer
+    <IssuePreview
       v-if="isOpenPreview"
       v-model="isOpenPreview"
-      :width="600"
-      preview
       @refresh="refresh"
       @open="
         (id) =>
@@ -607,7 +605,8 @@ import ParentIssueChip from 'src/components/ParentIssueChip.vue';
 import PaginationDefault from './pagination/PaginationDefault.vue';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
-import SingleIssueDrawer from './issue-panels/SingleIssueDrawer.vue';
+import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
+
 
 defineProps<{
   projectId?: string | null;

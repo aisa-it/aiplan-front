@@ -1,19 +1,34 @@
 <template>
-  <q-layout v-if="issueData" class="flex flex-col no-wrap" view="hHh lpr fFf">
-    <q-drawer
-      show-if-above
-      v-model="rightDrawerOpen"
-      side="right"
-      class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
-      :width="dynamicWidthDrawer"
-    >
-      <SingleIssueDrawer />
-    </q-drawer>
-
-    <q-page-container class="flex-grow">
-      <div class="flex flex-col full-w full-height no-wrap">
-        <MainIssueInfo @toggleDrawer="toggleDrawer" />
-
+  <q-drawer
+    show-if-above
+    side="right"
+    class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
+    overlay
+    :width="600"
+  >
+    <SingleIssueDrawer>
+      <template #extend-buttons>
+        <div class="row justify-end flex q-gutter-sm">
+          <q-btn
+            class="secondary-btn-only-icon"
+            icon="open_in_full"
+            @click="emits('open', issueData.id)"
+          >
+            <HintTooltip>Расширить</HintTooltip>
+          </q-btn>
+          <q-btn
+            class="secondary-btn-only-icon"
+            icon="close"
+            @click="emits('update:modelValue', false)"
+          >
+            <HintTooltip>Закрыть</HintTooltip>
+          </q-btn>
+        </div>
+      </template>
+      <template #extend-header>
+        <MainIssueInfo preview />
+      </template>
+      <template #extend-content>
         <SelectChildren
           :projectid="issueData.project"
           :issueid="issueData.id"
@@ -36,12 +51,12 @@
         />
 
         <SingleIssueActivity />
-      </div>
-    </q-page-container>
-  </q-layout>
+      </template>
+    </SingleIssueDrawer>
+  </q-drawer>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -59,12 +74,16 @@ import SelectChildren from 'src/modules/single-issue/sub-issues/ui/SubIssuesPane
 import SelectAttachments from 'src/components/SelectAttachments.vue';
 import SingleIssueDrawer from 'src/components/issue-panels/SingleIssueDrawer.vue';
 import SingleIssueActivity from 'src/components/issue-panels/SingleIssueActivity.vue';
-import { MainIssueInfo } from 'src/modules/single-issue/main-issue-info';
-import LinkedIssuesPanel from '../linked-issues/ui/LinkedIssuesPanel.vue';
+import LinkedIssuesPanel from '../../linked-issues/ui/LinkedIssuesPanel.vue';
 import { FileAttUploadProgressFunc } from 'src/interfaces/files';
+import MainIssueInfo from '../../main-issue-info/ui/MainIssueInfo.vue';
 
-// emits: ['update:issuePage'],
-// stores
+const emits = defineEmits<{
+  refresh: [];
+  open: [id: string];
+  'update:modelValue': [value: boolean];
+}>();
+
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 const aiplanStore = useAiplanStore();
@@ -75,10 +94,7 @@ const { hasPermissionByIssue } = useRolesStore();
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-// vars
-const rightDrawerOpen = ref(Screen.width > 1323);
 
-// блок вложений
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(
     currentProjectID.value,
@@ -95,14 +111,6 @@ const uploadAttachments = async (
 
 const deleteAttachment = async (attachmentId: string) => {
   await aiplanStore.issueAttachmentDelete(currentIssueID.value, attachmentId);
-};
-
-const dynamicWidthDrawer = computed(() =>
-  Screen.width > 760 ? 400 : Screen.width * 0.9,
-);
-
-const toggleDrawer = () => {
-  rightDrawerOpen.value = !rightDrawerOpen.value;
 };
 
 // заменить на сервис после обновления апи
@@ -122,18 +130,3 @@ const downloadAllAttachments = async () => {
   return { url, fileName };
 };
 </script>
-
-<style lang="scss" scoped>
-
-.issue-side-drawer {
-  @media screen and (max-width: 760px) {
-    width: 90% !important;
-  }
-}
-:deep(.q-drawer) {
-  position: fixed;
-  top: 50px;
-  margin-right: 10px !important;
-  background: none;
-}
-</style>
