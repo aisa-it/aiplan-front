@@ -28,13 +28,17 @@
       <q-select
         v-model="deadlineNotificationTime"
         :options="notificationOptions"
-        class="deadline-notification__select q-field__native base-selector "
+        class="deadline-notification__select q-field__native base-selector"
         emit-value
         map-options
         option-value="hours"
         option-label="text"
         dense
-        @update:model-value="changeNotificationSettings({ deadline_notification: deadlineNotificationTime })"
+        @update:model-value="
+          changeNotificationSettings({
+            deadline_notification: hoursToNanoseconds(deadlineNotificationTime),
+          })
+        "
       />
     </div>
   </div>
@@ -49,6 +53,10 @@ import { TypesUserSettings } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { useNotificationStore } from 'src/stores/notification-store';
 import { SUCCESS_UPDATE_DATA, BASE_ERROR } from 'src/constants/notifications';
+import {
+  hoursToNanoseconds,
+  nanosecondsToHours,
+} from 'src/utils/hoursToNanoseconds';
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
@@ -71,7 +79,11 @@ const notificationOptions: {
   { text: '3 дня', hours: 72 },
 ];
 
-const deadlineNotificationTime = ref<number>(user.value?.settings?.deadline_notification ?? 24);
+const deadlineNotificationTime = ref<number>(
+  user.value?.settings?.deadline_notification
+    ? nanosecondsToHours(user.value?.settings?.deadline_notification)
+    : 24,
+);
 
 const showNotification = (type: 'success' | 'error', msg?: string) => {
   setNotificationView({
@@ -112,10 +124,10 @@ watch(
   () => user.value?.settings?.deadline_notification,
   (newValue) => {
     if (newValue !== undefined) {
-      deadlineNotificationTime.value = newValue;
+      deadlineNotificationTime.value = nanosecondsToHours(newValue);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
