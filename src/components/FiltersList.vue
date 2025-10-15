@@ -195,7 +195,6 @@ const emits = defineEmits<{
 const viewProps = useViewPropsStore();
 
 const viewSelector = ref(PROJECT_VIEWS[0]);
-const stateSelector = ref(GROUP_BY_OPTIONS[0]);
 const columnsSelector = ref(props.columns);
 const showSubIssues = ref(false);
 const draft = ref(false);
@@ -204,10 +203,17 @@ const showOnlyActive = ref(false);
 const isPopupOpen = ref(false);
 
 const projectView = !!props.projectId;
-const options = ref(GROUP_BY_OPTIONS);
 const assigneeToMe = ref(false);
 const watchedByMe = ref(false);
 const authoredByMe = ref(false);
+
+const options = computed<{ value: string; label: string }[]>(() => {
+  return viewSelector.value.value === 'list'
+    ? GROUP_BY_OPTIONS
+    : GROUP_BY_OPTIONS.filter((option) => option.value !== 'None');
+});
+
+const stateSelector = ref<{ value: string; label: string }>(options.value[0]);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -235,7 +241,7 @@ async function refresh() {
   await viewProps.getProps().then((viewProps) => {
     stateSelector.value = options.value.find(
       (group) => group.value === viewProps?.filters.group_by,
-    );
+    ) ?? options.value[0];
     viewSelector.value = PROJECT_VIEWS.find(
       (view) => view.value === viewProps?.issueView,
     ) || { value: 'list', label: 'Список' };
@@ -292,7 +298,23 @@ watch(
   },
   { immediate: true },
 );
+
+watch(
+  () => viewSelector.value,
+  () => {
+    const isCurrentOptionAvailable = options.value.some(
+      (opt) => opt.value === stateSelector.value.value,
+    );
+
+    if (!isCurrentOptionAvailable && options.value.length > 0) {
+      stateSelector.value = options.value[0];
+      onUpdate();
+    }
+  },
+  { immediate: true },
+);
 </script>
+
 <style lang="scss" scoped>
 .selector-option {
   &__wrapper {
