@@ -189,8 +189,8 @@ const watcherid = ref(
         return e?.id || e;
       })
     : defWatcher.value && defWatcher.value.length
-    ? defWatcher.value
-    : null,
+      ? defWatcher.value
+      : null,
 );
 const pagination = {
   offset: 0,
@@ -390,6 +390,20 @@ watch(
     pagination.search_query = '';
 
     refresh();
+  },
+);
+
+watch(
+  () => props.watchers,
+  (newVal) => {
+    watcherid.value =
+      newVal && newVal?.length > 0
+        ? newVal.map((e) => {
+            return e?.id || e;
+          })
+        : defWatcher.value && defWatcher.value.length
+          ? defWatcher.value
+          : null;
   },
 );
 </script>
