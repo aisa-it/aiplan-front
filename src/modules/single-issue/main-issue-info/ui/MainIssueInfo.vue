@@ -340,7 +340,6 @@ onBeforeRouteLeave(async (to, from, next) => {
   if (isAutoSave.value && !isReadOnlyEditor.value) {
     await handleAutoSave();
   }
-  if (!isReadOnlyEditor.value) stopLocking();
   next();
 });
 
