@@ -174,8 +174,8 @@ const assignessid = ref(
         return e?.id || e;
       })
     : defAssignee.value && defAssignee.value.length
-    ? defAssignee.value
-    : null,
+      ? defAssignee.value
+      : null,
 );
 
 //composibles
@@ -198,9 +198,10 @@ const options = computed(() => {
     assignessid.value,
   ).filter((m) => m?.role > 5);
 
-  const membersList = props.assigness && !isSearch.value
-    ? [...props.assigness, ...filteredMembers]
-    : filteredMembers;
+  const membersList =
+    props.assigness && !isSearch.value
+      ? [...props.assigness, ...filteredMembers]
+      : filteredMembers;
 
   return membersList.filter(
     (item, idx, arr) =>
@@ -326,6 +327,20 @@ watch(
     pagination.search_query = '';
 
     refresh();
+  },
+);
+
+watch(
+  () => props.assigness,
+  (newVal) => {
+    assignessid.value =
+      newVal && newVal?.length > 0
+        ? newVal.map((e) => {
+            return e?.id || e;
+          })
+        : defAssignee.value && defAssignee.value.length
+          ? defAssignee.value
+          : null;
   },
 );
 </script>
