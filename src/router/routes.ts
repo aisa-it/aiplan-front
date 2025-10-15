@@ -89,6 +89,19 @@ const routes: RouteRecordRaw[] = [
             path: 'user-activities/:id',
             component: () => import('pages/UserActivitiesPage.vue'),
           },
+          {
+            path: 'sprints/:sprintId/:project',
+            component: () => import('pages/SprintsPage.vue'),
+            children: [
+              {
+                path: '',
+                component: () => import('components/IssuesList.vue'),
+                props: {
+                  isSprint: true,
+                },
+              },
+            ],
+          },
         ],
       },
     ],
