@@ -135,6 +135,7 @@ import ArrowDown from '../icons/ArrowDown.vue';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -395,12 +396,21 @@ watch(
 
 watch(
   () => props.watchers,
-  (newVal) => {
+  (_) => {
+    if (!props.watchers) return;
+
+    let watchers: DtoWorkspaceMember[] = [...props.watchers];
+
+    if (watchers.length && typeof watchers[0] === 'string') {
+      watchers =
+        members.value.filter((opt) =>
+          props.watchers?.includes(opt?.member_id),
+        ) ?? [];
+    }
+
     watcherid.value =
-      newVal && newVal?.length > 0
-        ? newVal.map((e) => {
-            return e?.id || e;
-          })
+      watchers.length > 0
+        ? watchers
         : defWatcher.value && defWatcher.value.length
           ? defWatcher.value
           : null;
