@@ -253,7 +253,7 @@ const startAutosaveTimer = () => {
 
   timerInterval.value = setInterval(() => {
     if (autoSaveTimer.value <= 0) {
-      handleAutoSave();
+      handleUpdateTitleAndEditor();
       return;
     }
 
@@ -271,7 +271,7 @@ const stopAutoSaveTimer = () => {
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, 0)}`
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 }
 
 const handleUndoEdit = () => {
@@ -377,7 +377,7 @@ const isAdminOrAuthor = computed(() => {
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 
 const showAutoSaveTimer = computed(() => {
-  return !isReadOnlyEditor.value && isAutoSave.value;
+  return !isReadOnlyEditor.value;
 });
 
 //hook
