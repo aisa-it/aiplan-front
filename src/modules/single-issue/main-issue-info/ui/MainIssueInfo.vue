@@ -14,6 +14,7 @@
         <EditIcon />
       </q-btn>
       <q-btn
+        v-if="!preview"
         class="btn-only-icon-sm q-pa-sm issue-panel__right-drawer-open"
         flat
         @click.stop="toggleDrawer()"
@@ -94,6 +95,7 @@
     </q-card>
     <div
       class="full-w"
+      :style="preview ? 'height: 10rem' : ''"
       v-click-outside:prevent-click-issue-outside="{
         isAutoSave,
         onClickOutside: handleAutoSave,
@@ -194,6 +196,10 @@ defineOptions({
   },
 });
 
+defineProps<{
+  preview?: boolean;
+}>();
+
 const emit = defineEmits([
   'update:issuePage',
   'toggleDrawer',
@@ -211,7 +217,7 @@ const workspaceStore = useWorkspaceStore();
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
-const { issueData } = storeToRefs(singleIssueStore);
+const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -240,7 +246,7 @@ const { lockedBy, isTimeExpire, handlWrapperForTryingToLock, stopLocking } =
   useLockIssueInfo(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value,
   );
 
 watch(isTimeExpire, async (newValue) => {
@@ -292,7 +298,7 @@ const handleUpdateTitleAndEditor = async () => {
   await updateIssueInfo(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value,
     {
       name: issueData.value.name,
       description_html: contents.html as string,

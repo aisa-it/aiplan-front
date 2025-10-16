@@ -55,6 +55,7 @@ import SubIssues from './SubIssues.vue';
 import { useRoute } from 'vue-router';
 import AddSubIssueButton from 'src/modules/single-issue/sub-issues/ui/AddSubIssueButton.vue';
 import IssuesExpansionItem from 'src/modules/single-issue/ui/components/IssuesExpansionItem.vue';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 import { setIntervalFunction } from 'src/utils/helpers';
 
@@ -85,10 +86,10 @@ export default defineComponent({
   },
   setup() {
     const userStore = useUserStore();
-
+    const singleIssueStore = useSingleIssueStore()
     const route = useRoute();
     const { user } = storeToRefs(userStore);
-
+    const { currentIssueID } = storeToRefs(singleIssueStore);
     const subIssues = ref();
     const stateDistribution = ref();
     const manualSortMode = ref(false);
@@ -98,7 +99,7 @@ export default defineComponent({
       const { data } = await getSubIssues(
         route.params.workspace as string,
         route.params.project as string,
-        route.params.issue as string,
+        currentIssueID.value,
         manualSortMode.value,
       );
 

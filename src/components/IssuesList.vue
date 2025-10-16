@@ -59,6 +59,7 @@
                   :columns="columns"
                   :show-empty-group="viewProps.props.showEmptyGroups"
                   @globalRefresh="refresh()"
+                  @open="openPreview"
                 />
               </div>
 
@@ -70,6 +71,7 @@
                 :projectid="route.params.project"
                 :columns="columns"
                 :show-empty-group="viewProps.props?.showEmptyGroups"
+                @open="openPreview"
               />
             </div>
 
@@ -91,6 +93,7 @@
                   :projectid="route.params.project"
                   :columns="columns"
                   :show-empty-group="viewProps.props.showEmptyGroups"
+                  @open="openPreview"
                 />
               </div>
             </div>
@@ -118,6 +121,7 @@
                 :stateOrLabelInfo="{ name: workspace?.name, color: '#6692ff' }"
                 :columns="columns"
                 :show-empty-group="viewProps.props?.showEmptyGroups"
+                @open="openPreview"
               />
             </div>
           </div>
@@ -154,6 +158,7 @@
                 :stateOrLabelInfo="{ name: project?.name, color: '#6692ff' }"
                 :columns="columns"
                 :show-empty-group="viewProps.props?.showEmptyGroups"
+                @open="openPreview"
               />
             </div>
           </div>
@@ -189,16 +194,14 @@
                 <q-td
                   :props="props"
                   :style="`font-size: 12px; padding: 7px 4px; cursor: pointer;`"
-                  @click="
-                    () =>
-                      singleIssueStore.openIssue(
-                        props.row.sequence_id,
-                        user.theme?.open_in_new ? '_blank' : '_self',
-                      )
-                  "
+                  @click="() => onIssueClick(props.row.sequence_id)"
                 >
                   {{ props.value[0] }}-{{ props.value[1] }}
-                  <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+                  <IssueContextMenu
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -211,7 +214,7 @@
                 >
                   <div class="row justify-between">
                     <q-btn
-                      :to="`/${route.params.workspace}/projects/${route.params.project}/issues/${props.row.sequence_id}`"
+                      @click="() => onIssueClick(props.row.sequence_id)"
                       :target="user.theme?.open_in_new ? '_blank' : '_self'"
                       no-caps
                       flat
@@ -277,10 +280,10 @@
                     ></SelectPriority>
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -304,16 +307,17 @@
                       "
                       @set-status="
                         (val: any) => (
-                          (props.row.state_detail = val), refresh()
+                          (props.row.state_detail = val),
+                          refresh()
                         )
                       "
                     />
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -337,10 +341,10 @@
                     ></SelectDate>
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -350,10 +354,10 @@
                     {{ props.value }}
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -363,10 +367,10 @@
                     {{ props.value }}
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -391,10 +395,10 @@
                     </q-badge>
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -418,10 +422,10 @@
                     "
                   ></AvatarImage>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -448,10 +452,10 @@
                   >
                   </AvatarImage>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -461,10 +465,10 @@
                     <QuantityChip :type="'sub-issues'" :value="props.value" />
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -477,10 +481,10 @@
                     />
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -490,10 +494,10 @@
                     <QuantityChip :type="'links'" :value="props.value" />
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -503,10 +507,10 @@
                     <QuantityChip :type="'attachments'" :value="props.value" />
                   </div>
                   <IssueContextMenu
-                      :row="props.row"
-                      :rowId="props.rowIndex"
-                      @refresh="refresh"
-                    />
+                    :row="props.row"
+                    :rowId="props.rowIndex"
+                    @refresh="refresh"
+                  />
                 </q-td>
               </template>
 
@@ -544,6 +548,17 @@
         <q-linear-progress indeterminate rounded />
       </div> -->
     </q-card>
+    <IssuePreview
+      v-model="isOpenPreview"
+      @refresh="refresh"
+      @open="
+        (id) =>
+          singleIssueStore.openIssue(
+            id,
+            user.theme?.open_in_new ? '_blank' : '_self',
+          )
+      "
+    />
   </div>
 </template>
 
@@ -551,7 +566,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { useMeta } from 'quasar';
+import { Screen, useMeta } from 'quasar';
 import { ref, watch, computed, onMounted, toRaw } from 'vue';
 
 // stores
@@ -589,6 +604,7 @@ import ParentIssueChip from 'src/components/ParentIssueChip.vue';
 import PaginationDefault from './pagination/PaginationDefault.vue';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
+import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 
 defineProps<{
   projectId?: string | null;
@@ -615,6 +631,7 @@ const { project, currentProjectID, isLoadProjectInfo } =
   storeToRefs(projectStore);
 const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { refreshIssues } = storeToRefs(issuesStore);
+const { currentIssueID } = storeToRefs(singleIssueStore);
 const avatarText = aiplan.UserName;
 // issues vars
 const rows = ref([]);
@@ -631,6 +648,7 @@ const projectMembers = ref<any[]>([]);
 const projectIssuesLabels = ref();
 const projectGroupedProperty = ref<any[]>([]);
 
+const isOpenPreview = ref(false);
 // vars
 const loading = ref(true);
 // metadata
@@ -659,8 +677,8 @@ const sortedProjectGrouped = computed(() =>
           a?.member_id === user.value?.id
             ? -1
             : b?.member_id === user.value?.id
-            ? 1
-            : 0,
+              ? 1
+              : 0,
         )
     : projectGroupedProperty.value,
 );
@@ -673,11 +691,34 @@ const sortedProjectMembers = computed(() =>
           a?.member_id === user.value?.id
             ? -1
             : b?.member_id === user.value?.id
-            ? 1
-            : 0,
+              ? 1
+              : 0,
         )
     : projectMembers.value,
 );
+
+const isMobile = computed(() => Screen.width <= 650);
+
+async function onIssueClick(id: string) {
+  isMobile.value
+    ? singleIssueStore.openIssue(
+        id,
+        user.value.theme?.open_in_new ? '_blank' : '_self',
+      )
+    : openPreview(id);
+}
+
+async function openPreview(id: string) {
+  if (!route.params.workspace || !route.params.project) return;
+  isOpenPreview.value = false;
+  currentIssueID.value = id;
+
+  await singleIssueStore.getIssueData(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
+  isOpenPreview.value = true;
+}
 // pagination request
 async function onRequest(p: any) {
   if (
@@ -820,7 +861,7 @@ const onFiltersGroupBy = async () => {
   if (currentProjectID.value) {
     switch (viewProps.props?.filters.group_by) {
       case 'None':
-      case 'Priority':  
+      case 'Priority':
         onRequest({ pagination: pagination.value });
         break;
 
@@ -859,6 +900,13 @@ watch(
   async () => {
     if (refreshIssues.value) await refresh();
     refreshIssues.value = false;
+  },
+);
+
+watch(
+  isMobile,
+  () => {
+    if (isMobile.value) isOpenPreview.value = false;
   },
 );
 
