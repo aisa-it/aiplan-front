@@ -549,7 +549,6 @@
       </div> -->
     </q-card>
     <IssuePreview
-      v-if="isOpenPreview"
       v-model="isOpenPreview"
       @refresh="refresh"
       @open="
@@ -606,7 +605,6 @@ import PaginationDefault from './pagination/PaginationDefault.vue';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
-
 
 defineProps<{
   projectId?: string | null;
@@ -712,13 +710,13 @@ async function onIssueClick(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
+  isOpenPreview.value = false;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
     route.params.project as string,
   );
-
   isOpenPreview.value = true;
 }
 // pagination request
@@ -902,6 +900,13 @@ watch(
   async () => {
     if (refreshIssues.value) await refresh();
     refreshIssues.value = false;
+  },
+);
+
+watch(
+  isMobile,
+  () => {
+    if (isMobile.value) isOpenPreview.value = false;
   },
 );
 

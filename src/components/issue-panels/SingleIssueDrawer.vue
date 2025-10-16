@@ -1,7 +1,7 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
     <slot name="extend-buttons" />
-    <SingleIssueButtons />
+    <SingleIssueButtons @refresh="handleRefresh"/>
     <slot name="extend-header" />
     <q-separator class="issue-panel__separator" />
 
@@ -25,6 +25,7 @@
           "
           :states-from-cache="statesCache[issueData?.project]"
           @set-status="(val) => (issueData.state_detail = val)"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -86,6 +87,7 @@
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
           :current-member="user"
+          @refresh="handleRefresh"
         ></SelectAssignee>
       </div>
     </div>
@@ -111,6 +113,7 @@
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
+          @refresh="handleRefresh"
         ></SelectWatchers>
       </div>
     </div>
@@ -136,6 +139,7 @@
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
           @update:priority="(val) => (issueData.priority = val)"
+          @refresh="handleRefresh"
         >
         </SelectPriority>
       </div>
@@ -173,7 +177,7 @@
           :is-disabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="(val) => (issueData.target_date = val)"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -227,7 +231,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh"
+          @refresh="handleRefresh"
         ></SelectParentIssue>
         <q-btn
           v-if="
@@ -259,7 +263,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -281,7 +285,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -295,7 +299,7 @@
       :isDisabled="
         hasPermissionByIssue(issueData, project, 'change-issue-secondary')
       "
-      @refresh="refresh"
+      @refresh="handleRefresh"
     >
     </SelectLinks>
     <slot name="extend-content" />
@@ -369,9 +373,19 @@ const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
+const emits = defineEmits<{
+  refresh: [];
+}>();
+
 const refreshCycle = ref();
 
 // functions
+
+const handleRefresh = async () => {
+  await refresh();
+  emits('refresh');
+};
+
 const refresh = async () => {
   await singleIssueStore
     .getIssueDataById(
@@ -408,6 +422,7 @@ const handleRemoveParentIssue = async () => {
         customMessage: SUCCESS_UPDATE_DATA,
       });
       issueData.value.parent_detail = null;
+      handleRefresh()
     });
 };
 
