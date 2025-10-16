@@ -37,7 +37,12 @@
             :navigation-min-year-month="minYearMonth"
             :navigation-max-year-month="maxYearMonth"
           />
-          <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
+          <q-time
+            v-model="proxyDate"
+            :options="timeOptionsFn"
+            mask="YYYY-MM-DDTHH:mm:ss"
+            format24h
+          />
         </div>
 
         <div
@@ -85,7 +90,12 @@
             :navigation-min-year-month="minYearMonth"
             :navigation-max-year-month="maxYearMonth"
           />
-          <q-time v-model="proxyDate" mask="YYYY-MM-DDTHH:mm:ss" format24h />
+          <q-time
+            v-model="proxyDate"
+            :options="timeOptionsFn"
+            mask="YYYY-MM-DDTHH:mm:ss"
+            format24h
+          />
         </div>
 
         <div
@@ -198,8 +208,34 @@ export default defineComponent({
     const selectedHour = ref<number>(12);
     const selectedMinute = ref<number>(30);
 
+    // Выбор допустимой даты
     const optionsFn = (date: string): boolean => {
       return date >= dayjs(new Date()).format('YYYY/MM/DD');
+    };
+
+    // Выбор допустимого времени
+    const timeOptionsFn = (hour: number, minute: number | null): boolean => {
+      const currentDate = proxyDate.value ? dayjs(proxyDate.value) : dayjs();
+      const today = dayjs().startOf('day');
+      const expectedDay = currentDate.startOf('day');
+
+      // Если день не сегодняшний - доступны все часы и минуты
+      if (!expectedDay.isSame(today, 'day')) {
+        return true;
+      }
+
+      // Разрешенное время - не раньше чем через 15 минут после текущей минуты
+      const expectedTime = dayjs().add(15, 'minute');
+      // Проверка допустимого часа, если минута не указана пользователем
+      if (minute === null) {
+        // Час доступен для выбора, если его последняя минута позже или равна предполагаемой минуте выбираемого времени
+        const hourEnd = currentDate.hour(hour).minute(59).second(59);
+        return hourEnd.isAfter(expectedTime) || hourEnd.isSame(expectedTime);
+      }
+
+      // Проверка для минуты, позже ли она разрешенного времени
+      const expectedMinute = currentDate.hour(hour).minute(minute).second(0);
+      return expectedMinute.isAfter(expectedTime);
     };
 
     return {
@@ -214,11 +250,20 @@ export default defineComponent({
       minutes,
       hours,
       optionsFn,
+      timeOptionsFn,
       formatDateTime,
       updateProxy() {
-        proxyDate.value = props.date
-          ? dayjs.utc(props.date).local().format('YYYY-MM-DDTHH:mm:ss')
-          : dayjs().format('YYYY-MM-DDTHH:mm:ss');
+        // Инициализация. Если дата была задана - берем её, в противном случае сразу предлагаем новую допустимую со смещением
+        let initialDate = props.date
+          ? dayjs.utc(props.date).local()
+          : dayjs().add(15, 'minute');
+
+        // Если старая дата вне допустимого диапазона на текущий момент - меняем на допустимую
+        if (initialDate.isBefore(dayjs().add(15, 'minute'))) {
+          initialDate = dayjs().add(15, 'minute').startOf('minute');
+        }
+
+        proxyDate.value = initialDate.format('YYYY-MM-DDTHH:mm:ss');
       },
 
       save() {

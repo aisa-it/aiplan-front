@@ -78,11 +78,7 @@
           class="issue-selector"
           :projectid="issueData.project"
           :issueid="issueData.id"
-          :assigness="
-            issueData.assignee_details.map((assignee) => {
-              return { member: assignee };
-            })
-          "
+          :assigness="assignees"
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
@@ -104,11 +100,7 @@
           class="issue-selector"
           :projectid="issueData.project"
           :issueid="issueData.id"
-          :watchers="
-            issueData.watcher_details.map((watcher) => {
-              return { member: watcher };
-            })
-          "
+          :watchers="watchers"
           :current-member="user"
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
@@ -435,6 +427,18 @@ const getCompareDate = computed(() => {
   const targetdDate = new Date(issueData.value.target_date).getTime();
   return targetdDate - completedDate;
 });
+
+const assignees = computed(() =>
+  issueData.value?.assignee_details.map((assignee) => ({
+    member: assignee,
+  })),
+);
+
+const watchers = computed(() =>
+  issueData.value?.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+);
 
 const getCompareText = () => {
   const dateToDays = getCompareDate.value / 86400000;

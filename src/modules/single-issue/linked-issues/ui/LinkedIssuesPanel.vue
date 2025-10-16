@@ -57,7 +57,7 @@
 // core
 import { EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref, onBeforeUnmount } from 'vue';
 
 // stores
 import { useRolesStore } from 'stores/roles-store';
@@ -87,6 +87,7 @@ import {
   getLinkedIssues,
   addIssueLinkedIssueList,
 } from '../services/api';
+import { setIntervalFunction } from 'src/utils/helpers';
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -160,5 +161,14 @@ const onRequest = async (params: IIssueSelectRequest) => {
 };
 const { loading, onLoad } = useLoad(onRequest);
 
-onMounted(async () => await refresh());
+const refreshCycle = ref();
+
+onMounted(async () => {
+  await refresh();
+  refreshCycle.value = setIntervalFunction(refresh);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshCycle.value);
+});
 </script>

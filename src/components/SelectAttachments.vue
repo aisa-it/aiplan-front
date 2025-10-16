@@ -208,6 +208,8 @@ import SelectAttachmentsCard from './SelectAttachmentsCard.vue';
 //utils
 import { ScrollManager } from 'src/utils/scrollBtnManager';
 import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
+
+import { setIntervalFunction } from 'src/utils/helpers';
 //consts
 import {
   CANCELLED_ADD_ATTACHMENT,
@@ -308,20 +310,23 @@ const scroll = (direction: number) => {
   scrollManager.value?.scroll(direction);
 };
 
+const getAttachments = async () => {
+  rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
+  resetUploadStates();
+};
+
 const refresh = async () => {
   try {
     loading.value = true;
     isDragIn.value = false;
 
-    rows.value = await props.getAttachmentFunc(
-      currentProjectID,
-      currentIssueID,
-    );
-    resetUploadStates();
+    await getAttachments();
   } finally {
     loading.value = false;
   }
 };
+
+defineExpose({ refresh });
 
 const getCustomMessageOnNotify = (type: 'success' | 'error' | 'cancelled') => {
   switch (type) {
@@ -431,6 +436,9 @@ const handleDownload = async () => {
   }
 };
 //hooks
+
+const refreshCycle = ref();
+
 onMounted(async () => {
   await refresh();
   scrollManager.value = new ScrollManager(scrollContainer.value, false);
@@ -441,6 +449,8 @@ onMounted(async () => {
   ) {
     mouseWheelScrollHandler(scrollContainer.value, false);
   }
+
+  refreshCycle.value = setIntervalFunction(getAttachments);
 });
 
 onBeforeUnmount(() => {
@@ -448,6 +458,8 @@ onBeforeUnmount(() => {
     scrollManager.value.removeResize();
   }
   abortController.abort();
+
+  clearInterval(refreshCycle.value);
 });
 
 watch(

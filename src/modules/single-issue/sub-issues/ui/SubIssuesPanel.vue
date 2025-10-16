@@ -41,7 +41,7 @@
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -56,6 +56,8 @@ import { useRoute } from 'vue-router';
 import AddSubIssueButton from 'src/modules/single-issue/sub-issues/ui/AddSubIssueButton.vue';
 import IssuesExpansionItem from 'src/modules/single-issue/ui/components/IssuesExpansionItem.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
+
+import { setIntervalFunction } from 'src/utils/helpers';
 
 export default defineComponent({
   name: 'SelectChildren',
@@ -110,8 +112,14 @@ export default defineComponent({
       await refresh();
     };
 
+    const refreshCycle = ref();
+
     onMounted(() => {
       refresh();
+      refreshCycle.value = setIntervalFunction(refresh);
+    });
+    onBeforeUnmount(() => {
+      clearInterval(refreshCycle.value);
     });
     return {
       user,

@@ -101,6 +101,10 @@
         onClickOutside: handleAutoSave,
       }"
     >
+      <p v-if="showAutoSaveTimer" class="issue-autosave-notice">
+    Задача будет автоматически сохранена через {{ formatTime(autoSaveTimer) }}
+      </p>
+
       <IssueDescriptionEditor
         :isReadonly="isReadOnlyEditor"
         :isAutosave="isAutoSave"
@@ -108,6 +112,11 @@
         @autoSave="handleAutoSave()"
         @toggleEdit="handleEnableEdit()"
         @get-editor="(editorInstance) => (editor = editorInstance)"
+        ref="editorContainer"
+        @drop.prevent="
+          (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
+        "
+        @dragover.prevent
       />
     </div>
     <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
@@ -155,12 +164,15 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useAiplanStore } from 'src/stores/aiplan-store';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { getFullName } from 'src/utils/helpers';
 import aiplan from 'src/utils/aiplan';
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
+
+import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 
 // components
 import IssueTagsDialog from 'src/modules/single-issue/main-issue-info/ui/IssueTagsDialog.vue';
@@ -188,12 +200,17 @@ defineProps<{
   preview?: boolean;
 }>();
 
-const emit = defineEmits(['update:issuePage', 'toggleDrawer']);
+const emit = defineEmits([
+  'update:issuePage',
+  'toggleDrawer',
+  'uploadAttachment',
+]);
 
 // stores
 const userStore = useUserStore();
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
+const aiplanStore = useAiplanStore();
 const { hasPermissionByIssue } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 
@@ -210,6 +227,9 @@ const isReadOnlyEditor = ref(true);
 
 const initialIssueName = ref();
 const initialIssueDescription = ref();
+
+const autoSaveTimer = ref(300);
+const timerInterval = ref<NodeJS.Timeout | null>(null);
 
 const preventClickClass = 'prevent-click-issue-outside';
 const route = useRoute();
@@ -233,7 +253,35 @@ watch(isTimeExpire, async (newValue) => {
   if (newValue) await handleUpdateTitleAndEditor();
 });
 
+const startAutosaveTimer = () => {
+  stopAutoSaveTimer();
+  autoSaveTimer.value = 300;
+
+  timerInterval.value = setInterval(() => {
+    if (autoSaveTimer.value <= 0) {
+      handleUpdateTitleAndEditor();
+      return;
+    }
+
+    autoSaveTimer.value--;
+  }, 1000);
+};
+
+const stopAutoSaveTimer = () => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
+};
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
 const handleUndoEdit = () => {
+  stopAutoSaveTimer();
   stopLocking();
   isReadOnlyEditor.value = true;
   issueData.value.name = initialIssueName.value.trim();
@@ -241,6 +289,8 @@ const handleUndoEdit = () => {
 };
 
 const handleUpdateTitleAndEditor = async () => {
+  stopAutoSaveTimer();
+
   const contents = await handleEditorValue(issueData.value.description_html);
   issueData.value.name = issueData.value.name.trim().length
     ? issueData.value.name.trim()
@@ -290,6 +340,7 @@ const editTitle = () => {
 
     if (isAdminOrAuthor.value) {
       isReadOnlyEditor.value = false;
+      startAutosaveTimer();
     }
 
     initialIssueName.value = issueData.value.name.trim();
@@ -301,6 +352,9 @@ const handleEnableEdit = () => {
   handlWrapperForTryingToLock(async () => {
     await refresh();
     isReadOnlyEditor.value = false;
+
+    startAutosaveTimer();
+
     initialIssueName.value = issueData.value.name.trim();
     initialIssueDescription.value = issueData.value.description_html;
 
@@ -328,12 +382,15 @@ const isAdminOrAuthor = computed(() => {
 
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 
+const showAutoSaveTimer = computed(() => {
+  return !isReadOnlyEditor.value;
+});
+
 //hook
 onBeforeRouteLeave(async (to, from, next) => {
   if (isAutoSave.value && !isReadOnlyEditor.value) {
     await handleAutoSave();
   }
-  if (!isReadOnlyEditor.value) stopLocking();
   next();
 });
 
@@ -366,12 +423,27 @@ const toggleDrawer = () => {
   emit('toggleDrawer');
 };
 
+const editorContainer = ref<HTMLElement>();
+
+const { handleDrop } = useAttachmentsWithEditor(
+  editor,
+  (file: File) =>
+    aiplanStore.issueAttachmentsUploadFile(file, issueData.value.id),
+  () =>
+    aiplanStore.issueAttachmentsList(
+      issueData.value.project,
+      issueData.value.id,
+    ),
+  () => emit('uploadAttachment'),
+);
+
 onMounted(() => {
   handleAddListener();
 });
 
 onBeforeUnmount(() => {
   handleAutoSave();
+  stopAutoSaveTimer();
   if (!isReadOnlyEditor.value) stopLocking();
   handleRemoveListener();
 });
@@ -393,6 +465,10 @@ onBeforeUnmount(() => {
   }
 }
 .issue-tags-edit-btn {
+  color: $dark-gray;
+}
+
+.issue-autosave-notice {
   color: $dark-gray;
 }
 </style>
