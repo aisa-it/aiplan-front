@@ -14,6 +14,7 @@
         <EditIcon />
       </q-btn>
       <q-btn
+        v-if="!preview"
         class="btn-only-icon-sm q-pa-sm issue-panel__right-drawer-open"
         flat
         @click.stop="toggleDrawer()"
@@ -94,11 +95,16 @@
     </q-card>
     <div
       class="full-w"
+      :style="preview ? 'height: 10rem' : ''"
       v-click-outside:prevent-click-issue-outside="{
         isAutoSave,
         onClickOutside: handleAutoSave,
       }"
     >
+      <p v-if="showAutoSaveTimer" class="issue-autosave-notice">
+    Задача будет автоматически сохранена через {{ formatTime(autoSaveTimer) }}
+      </p>
+
       <IssueDescriptionEditor
         :isReadonly="isReadOnlyEditor"
         :isAutosave="isAutoSave"
@@ -190,6 +196,10 @@ defineOptions({
   },
 });
 
+defineProps<{
+  preview?: boolean;
+}>();
+
 const emit = defineEmits([
   'update:issuePage',
   'toggleDrawer',
@@ -207,7 +217,7 @@ const workspaceStore = useWorkspaceStore();
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
-const { issueData } = storeToRefs(singleIssueStore);
+const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -217,6 +227,9 @@ const isReadOnlyEditor = ref(true);
 
 const initialIssueName = ref();
 const initialIssueDescription = ref();
+
+const autoSaveTimer = ref(300);
+const timerInterval = ref<NodeJS.Timeout | null>(null);
 
 const preventClickClass = 'prevent-click-issue-outside';
 const route = useRoute();
@@ -233,14 +246,42 @@ const { lockedBy, isTimeExpire, handlWrapperForTryingToLock, stopLocking } =
   useLockIssueInfo(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value,
   );
 
 watch(isTimeExpire, async (newValue) => {
   if (newValue) await handleUpdateTitleAndEditor();
 });
 
+const startAutosaveTimer = () => {
+  stopAutoSaveTimer();
+  autoSaveTimer.value = 300;
+
+  timerInterval.value = setInterval(() => {
+    if (autoSaveTimer.value <= 0) {
+      handleUpdateTitleAndEditor();
+      return;
+    }
+
+    autoSaveTimer.value--;
+  }, 1000);
+};
+
+const stopAutoSaveTimer = () => {
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
+};
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
 const handleUndoEdit = () => {
+  stopAutoSaveTimer();
   stopLocking();
   isReadOnlyEditor.value = true;
   issueData.value.name = initialIssueName.value.trim();
@@ -248,6 +289,8 @@ const handleUndoEdit = () => {
 };
 
 const handleUpdateTitleAndEditor = async () => {
+  stopAutoSaveTimer();
+
   const contents = await handleEditorValue(issueData.value.description_html);
   issueData.value.name = issueData.value.name.trim().length
     ? issueData.value.name.trim()
@@ -255,7 +298,7 @@ const handleUpdateTitleAndEditor = async () => {
   await updateIssueInfo(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value,
     {
       name: issueData.value.name,
       description_html: contents.html as string,
@@ -297,6 +340,7 @@ const editTitle = () => {
 
     if (isAdminOrAuthor.value) {
       isReadOnlyEditor.value = false;
+      startAutosaveTimer();
     }
 
     initialIssueName.value = issueData.value.name.trim();
@@ -308,6 +352,9 @@ const handleEnableEdit = () => {
   handlWrapperForTryingToLock(async () => {
     await refresh();
     isReadOnlyEditor.value = false;
+
+    startAutosaveTimer();
+
     initialIssueName.value = issueData.value.name.trim();
     initialIssueDescription.value = issueData.value.description_html;
 
@@ -334,6 +381,10 @@ const isAdminOrAuthor = computed(() => {
 });
 
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);
+
+const showAutoSaveTimer = computed(() => {
+  return !isReadOnlyEditor.value;
+});
 
 //hook
 onBeforeRouteLeave(async (to, from, next) => {
@@ -392,6 +443,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   handleAutoSave();
+  stopAutoSaveTimer();
   if (!isReadOnlyEditor.value) stopLocking();
   handleRemoveListener();
 });
@@ -413,6 +465,10 @@ onBeforeUnmount(() => {
   }
 }
 .issue-tags-edit-btn {
+  color: $dark-gray;
+}
+
+.issue-autosave-notice {
   color: $dark-gray;
 }
 </style>

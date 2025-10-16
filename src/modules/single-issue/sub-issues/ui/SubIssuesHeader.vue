@@ -49,7 +49,7 @@
     </div>
     <AddSubIssueButton
       :projectid="route.params.project"
-      :issueid="route.params.issue"
+      :issueid="currentIssueID"
       :isDisabled="props.isDisabled"
       @refresh="refresh()"
     ></AddSubIssueButton>
@@ -63,6 +63,8 @@ import IssuesColorCountTitle from 'src/components/IssuesColorCountTitle.vue';
 import AddSubIssueButton from './AddSubIssueButton.vue';
 import ToggleExpansionButton from 'src/components/buttons/ToggleExpansionButton.vue';
 import IssuesHeaderWrapper from 'src/modules/single-issue/ui/components/IssuesHeaderWrapper.vue';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 
@@ -79,6 +81,9 @@ const expanded = computed({
 });
 
 const emits = defineEmits(['refresh', 'update:isExpanded']);
+
+const singleIssueStore = useSingleIssueStore();
+const { currentIssueID } = storeToRefs(singleIssueStore);
 
 function calculateSum(keys: string[]) {
   return (

@@ -95,7 +95,7 @@ const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 const { hasPermissionByIssue } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
-const { issueData } = storeToRefs(singleIssueStore);
+const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(userStore);
 const { project } = storeToRefs(projectStore);
 
@@ -112,7 +112,7 @@ const moveChildUp = async (id: string) => {
   await moveSubIssueUp(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value as string,
     id,
   );
   emits('refresh');
@@ -122,7 +122,7 @@ const moveChildDown = async (id: string) => {
   await moveSubIssueDown(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value as string,
     id,
   );
   emits('refresh');

@@ -125,6 +125,7 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -332,12 +333,21 @@ watch(
 
 watch(
   () => props.assigness,
-  (newVal) => {
+  (_) => {
+    if (!props.assigness) return;
+
+    let assigness: DtoWorkspaceMember[] = [...props.assigness];
+
+    if (assigness.length && typeof assigness[0] === 'string') {
+      assigness =
+        members.value.filter((opt) =>
+          props.assigness?.includes(opt?.member_id),
+        ) ?? [];
+    }
+
     assignessid.value =
-      newVal && newVal?.length > 0
-        ? newVal.map((e) => {
-            return e?.id || e;
-          })
+      assigness.length > 0
+        ? assigness
         : defAssignee.value && defAssignee.value.length
           ? defAssignee.value
           : null;

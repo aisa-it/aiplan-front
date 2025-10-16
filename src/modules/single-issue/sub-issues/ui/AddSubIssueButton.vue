@@ -49,6 +49,7 @@ import { SUCCESS_ADD_SUBISSUE } from 'src/constants/notifications';
 import { IIssueSelectRequest } from 'src/interfaces/issues';
 import { useLoad } from 'src/composables/useLoad';
 import { getAvailableSubIssues, updateSubIssues } from '../services/api';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 const props = defineProps<{
   projectid: string | null;
@@ -60,9 +61,10 @@ const emits = defineEmits<{ refresh: [] }>();
 const $q = useQuasar();
 const { setNotificationView } = useNotificationStore();
 const projectStore = useProjectStore();
+const singleIssueStore = useSingleIssueStore();
 const route = useRoute();
 const bus = inject('bus') as EventBus;
-
+const { currentIssueID } = storeToRefs(singleIssueStore);
 const { project} = storeToRefs(projectStore)
 const { issueid: parentId } = toRefs(props);
 const isChildrenOpen = ref(false);
@@ -73,7 +75,7 @@ const addIssue = (items: Array<string>) => {
   updateSubIssues(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value as string,
     items,
   ).then(() => {
     setNotificationView({
@@ -99,7 +101,7 @@ const onRequest = async (params: IIssueSelectRequest) => {
   getAvailableSubIssues(
     route.params.workspace as string,
     route.params.project as string,
-    route.params.issue as string,
+    currentIssueID.value as string,
     params,
   ).then(({ data }) => bus.emit('updateSelectIssue', data));
 };
