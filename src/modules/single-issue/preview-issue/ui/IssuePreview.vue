@@ -17,7 +17,7 @@
             icon="open_in_full"
             @click="emits('open', issueData.id)"
           >
-            <HintTooltip>Расширить</HintTooltip>
+            <HintTooltip>Развернуть</HintTooltip>
           </q-btn>
           <q-btn class="secondary-btn-only-icon" icon="close" @click="onClose">
             <HintTooltip>Закрыть</HintTooltip>
