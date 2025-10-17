@@ -303,7 +303,7 @@ export default defineComponent({
 
 .date-block__calendar {
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 @media screen and (width < 662px) {

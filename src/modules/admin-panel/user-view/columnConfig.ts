@@ -60,4 +60,10 @@ export const columns: QTableColumn<DtoUserLight>[] = [
     label: '',
     field: (row) => row,
   },
+  {
+    name: 'delete',
+    align: 'center',
+    label: '',
+    field: (row) => row,
+  },
 ];

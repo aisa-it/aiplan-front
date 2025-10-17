@@ -551,13 +551,7 @@
     <IssuePreview
       v-model="isOpenPreview"
       @refresh="refresh"
-      @open="
-        (id) =>
-          singleIssueStore.openIssue(
-            id,
-            user.theme?.open_in_new ? '_blank' : '_self',
-          )
-      "
+      @open="openIssue"
     />
   </div>
 </template>
@@ -706,6 +700,12 @@ async function onIssueClick(id: string) {
         user.value.theme?.open_in_new ? '_blank' : '_self',
       )
     : openPreview(id);
+}
+
+async function openIssue(id: string) {
+  isOpenPreview.value = false;
+
+  singleIssueStore.openIssue(id, user.value.theme?.open_in_new ? '_blank' : '_self');
 }
 
 async function openPreview(id: string) {
@@ -903,12 +903,9 @@ watch(
   },
 );
 
-watch(
-  isMobile,
-  () => {
-    if (isMobile.value) isOpenPreview.value = false;
-  },
-);
+watch(isMobile, () => {
+  if (isMobile.value) isOpenPreview.value = false;
+});
 
 const allColumns = [
   {

@@ -131,7 +131,7 @@ const handleSaveLinkedIssues = async (ids: string[], type?: string) => {
 };
 
 const refresh = async () => {
-  if (!currentWorkspaceSlug.value) return;
+  if (!currentWorkspaceSlug.value || !currentProjectID.value || !currentIssueID.value) return;
   const data = await getLinkedIssues(
     currentWorkspaceSlug.value,
     currentProjectID.value,
