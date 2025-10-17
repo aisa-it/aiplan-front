@@ -345,12 +345,7 @@ watch(
         ) ?? [];
     }
 
-    assignessid.value =
-      assigness.length > 0
-        ? assigness
-        : defAssignee.value && defAssignee.value.length
-          ? defAssignee.value
-          : null;
+    assignessid.value = assigness;
   },
 );
 </script>

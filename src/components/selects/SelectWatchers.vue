@@ -408,12 +408,7 @@ watch(
         ) ?? [];
     }
 
-    watcherid.value =
-      watchers.length > 0
-        ? watchers
-        : defWatcher.value && defWatcher.value.length
-          ? defWatcher.value
-          : null;
+    watcherid.value = watchers;
   },
 );
 </script>
