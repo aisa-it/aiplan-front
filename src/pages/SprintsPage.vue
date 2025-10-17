@@ -23,6 +23,8 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
 // import ProjectLoader from 'src/components/loaders/ProjectLoader.vue';
 
+import { getSprints, createSprint } from 'src/modules/sprints/services/api';
+
 const router = useRouter();
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -32,19 +34,32 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const getCurrentProject = async () => {
   isLoadProjectInfo.value = true;
-  currentProjectID.value = 'MAR';
+  currentProjectID.value = 'LED';
 
   await projectStore.getProjectInfo(
     router.currentRoute.value.params.workspace as string,
-    'MAR',
+    'LED',
   );
   await projectStore.getMeInProject(
     router.currentRoute.value.params.workspace as string,
-    'MAR',
+    'LED',
   );
   await viewProps.getProjectProps();
   isLoadProjectInfo.value = false;
 };
 
-onMounted(async () => getCurrentProject());
+onMounted(async () => {
+  getCurrentProject();
+
+  const res1 = await createSprint(
+    router.currentRoute.value.params.workspace as string,
+    { name: 'sprint_new' },
+  );
+  console.log(res1);
+
+  const res2 = await getSprints(
+    router.currentRoute.value.params.workspace as string,
+  );
+  console.log(res2);
+});
 </script>

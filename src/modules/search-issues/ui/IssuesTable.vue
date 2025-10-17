@@ -81,11 +81,13 @@
     <q-table
       v-if="!loading && rows.length"
       v-model:pagination="pagination"
+      v-model:selected="checkedRows"
       flat
       row-key="id"
       class="my-sticky-column-table search-filters-table table-bottom-reverse"
       :hide-no-data="true"
       :rows="rows"
+      :selection="selection"
       :columns="allColumns"
       :rows-per-page-options="
         Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
@@ -109,6 +111,11 @@
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
           <div style="text-overflow: ellipsis; overflow: hidden">
+            <span v-html="parseBoldText(props.value)" />
+            <HintTooltip>
+              <span v-html="parseBoldText(props.value)"
+            /></HintTooltip>
+
             <span v-html="parseBoldText(props.value)" />
             <HintTooltip>
               <span v-html="parseBoldText(props.value)"
@@ -234,6 +241,7 @@ import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store'
 // utils
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
+import { parseBoldText } from 'src/utils/helpers';
 
 // components
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
@@ -243,20 +251,27 @@ import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'components/pagination/PaginationDefault.vue';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
-import { parseBoldText } from 'src/utils/helpers';
 
 const props = defineProps<{
   currentFilter: any;
+  checkedRows?: any[];
+  selection?: 'single' | 'multiple' | 'none';
 }>();
 
 const emits = defineEmits<{
-  toggle: [];
+  (event: 'toggle'): void;
+  (event: 'update:checkedRows', checkedRows: any[]): void;
 }>();
 
+//hooks
+const router = useRouter();
+
+//stores
 const { extendedSearchIssues } = useIssuesStore();
 const filtersStore = useFiltersStore();
 const { columnsToShow } = storeToRefs(filtersStore);
-const router = useRouter();
+
+//state
 const rows = ref([] as any);
 const loading = ref(true);
 const searchQuery = ref('');
@@ -269,6 +284,26 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
+//computeds
+const allColumns = computed(() => {
+  return (
+    columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+  );
+  // columns.filter((col) => {
+  //   if (!columnsToShow.value || columnsToShow.value.length == 0)
+  //     return true;
+  //   return columnsToShow.value.some((c: any) => c === col.name);
+  // });
+});
+
+const checkedRows = computed({
+  get: () => props.checkedRows,
+  set: (val) => {
+    if (val) emits('update:checkedRows', val);
+  },
+});
+
+//constants
 const p = {
   urgent: 'Критический',
   high: 'Высокий',
@@ -277,10 +312,11 @@ const p = {
   null: 'Нет',
 };
 
-onMounted(() => {
-  onRequest(pagination.value);
-});
+// onMounted(() => {
+//   onRequest(pagination.value);
+// });
 
+//methods
 const onRequest = async (p) => {
   loading.value = true;
   // TODO: удалять only_active из req, так как он будет отправляться в query
@@ -320,25 +356,32 @@ const handleSearchIssues = debounce(() => {
   onRequest(pagination.value);
 }, 700);
 
-watch(
-  () => props.currentFilter,
-  () => {
-    filter.value = props.currentFilter ? props.currentFilter : {};
-    onRequest(pagination.value);
-  },
-  { deep: true },
-);
+// watch(
+//   () => props.currentFilter,
+//   () => {
+//     filter.value = props.currentFilter ? props.currentFilter : {};
+//     onRequest(pagination.value);
+//   },
+//   { deep: true },
+// );
 
-const allColumns = computed(() => {
-  return (
-    columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+// const allColumns = computed(() => {
+//   return (
+//     columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+//   );
+// columns.filter((col) => {
+//   if (!columnsToShow.value || columnsToShow.value.length == 0)
+//     return true;
+//   return columnsToShow.value.some((c: any) => c === col.name);
+// });
+// });
+
+const route = (row) => {
+  const routeData = router.resolve(
+    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
   );
-  // columns.filter((col) => {
-  //   if (!columnsToShow.value || columnsToShow.value.length == 0)
-  //     return true;
-  //   return columnsToShow.value.some((c: any) => c === col.name);
-  // });
-});
+  window.open(routeData.href, '_blank');
+};
 
 const columns = [
   {
@@ -443,13 +486,6 @@ const columns = [
     sortable: true,
   },
 ];
-
-const route = (row) => {
-  const routeData = router.resolve(
-    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
-  );
-  window.open(routeData.href, '_blank');
-};
 </script>
 
 <style scoped lang="scss">
