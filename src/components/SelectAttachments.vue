@@ -311,6 +311,7 @@ const scroll = (direction: number) => {
 };
 
 const getAttachments = async () => {
+  if (!currentProjectID.value || !currentIssueID.value) return;
   rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
   resetUploadStates();
 };
