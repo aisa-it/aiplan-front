@@ -25,7 +25,7 @@ export const RESTRICTED_URLS = [
   'not-found',
   'admin-panel',
   'profile',
-  'conference'
+  'conference',
 ];
 
 export const STATES_TYPES = [
@@ -82,6 +82,11 @@ export const PROJECT_VIEWS = [
   { value: 'kanban', label: 'Доска' },
 ];
 
+export const SPRINT_VIEWS = [
+  ...PROJECT_VIEWS,
+  { value: 'gantt', label: 'Диаграмма Ганта' },
+];
+
 export const GROUP_BY_OPTIONS = [
   { value: 'None', label: 'Нет' },
   { value: 'State', label: 'Статус' },
@@ -110,6 +115,11 @@ export const PARSED_GROUP = {
   'Assignee to': NEW_GROUP_BY_OPTIONS[5],
   Watchers: NEW_GROUP_BY_OPTIONS[6],
 };
+
+export const GROUP_SPRINT_BY_OPTIONS = [
+  ...GROUP_BY_OPTIONS,
+  { value: 'Project', label: 'Проект' },
+];
 
 export const USER_ROLES = [
   { value: 'Founder or leadership team', label: 'Руководитель команды' },

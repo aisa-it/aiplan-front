@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aisa-it/aiplan-api-ts@^1.77.0":
-  version "1.77.0"
-  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.77.0.tgz#eb97dd3ed948efa2fffa4d216cfd5da7ac98ca6f"
-  integrity sha512-LtfEKe0C5ig7KyGupQ3mOQQB1gxT5wlgOAxVpe6JGck2OvU8xYcMg5sn38Y7DFoDOVASHJ6OULGgGOoZY8kgRw==
+"@aisa-it/aiplan-api-ts@^1.78.0":
+  version "1.78.0"
+  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.78.0.tgz#d64d7cfe62b0326ab140ba81e69b86c0c151ecd5"
+  integrity sha512-PgcR2rJggmQEnXP5AdHK4XhvTM90+OxBmvP8SkGFwmvmo4mlhgeKHv8f/9UQYo137KDElrv/COjSbeY6Xuw1fQ==
   dependencies:
     axios "^1.7.9"
 
