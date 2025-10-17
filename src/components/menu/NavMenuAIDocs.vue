@@ -181,7 +181,7 @@
         @refresh="getDocInfo(docInfo.id)"
       />
 
-      <NotificationsSettingsDialog v-model="isNotificationsSettingsOpen" :is-aidoc-page="true" />
+      <NotificationsSettingsDialog v-model="isNotificationsSettingsOpen" is-aidoc-page />
     </template>
   </ExpansionItem>
 </template>

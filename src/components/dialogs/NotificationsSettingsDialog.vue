@@ -329,15 +329,7 @@ const { loading, onLoad } = useLoad(loadSettings);
 
 watch(
   () => props.project,
-  async () => {
-    if (props.isAidocPage) {
-    await getAidocNotificationsSettings();
-    console.log('Loading AI Doc notifications settings...');
-  } else {
-    console.log('Loading project notifications settings...');
-    await getProjectUser();
-  }
-  }
+  async () => await getProjectUser(),
 );
 
 onMounted(async () => {
