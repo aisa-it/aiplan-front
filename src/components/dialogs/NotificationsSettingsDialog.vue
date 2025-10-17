@@ -196,7 +196,10 @@ const { setNotificationView } = useNotificationStore();
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-const props = defineProps(['project', 'isAidocPage']);
+const props = defineProps<{
+  project?: any;
+  isAidocPage?: boolean;
+}>();
 
 const dialogRef = ref();
 const tab = ref('email');
@@ -231,6 +234,14 @@ const setCurrentSetting = (
       ...value,
     };
 };
+
+const loadSettings = async () => {
+  if (props.isAidocPage) {
+    await getAidocNotificationsSettings();
+  } else {
+    await getProjectUser();
+  }
+}
 
 const getProjectUser = async () => {
   if (!props.project?.id) return;
@@ -314,11 +325,19 @@ const handleSaveSettings = async () => {
   }
 };
 
-const { loading, onLoad } = useLoad(getProjectUser);
+const { loading, onLoad } = useLoad(loadSettings);
 
 watch(
   () => props.project,
-  async () => await getProjectUser(),
+  async () => {
+    if (props.isAidocPage) {
+    await getAidocNotificationsSettings();
+    console.log('Loading AI Doc notifications settings...');
+  } else {
+    console.log('Loading project notifications settings...');
+    await getProjectUser();
+  }
+  }
 );
 
 onMounted(async () => {
