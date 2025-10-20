@@ -46,22 +46,23 @@
 </template>
 
 <script lang="ts" setup>
+import { TypesSprintStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  issuesCount: number;
-  stateDistribution: Record<string, number>;
+  stats: TypesSprintStats;
 }>();
 
 const radius = 15.9155;
 const circumference = 2 * Math.PI * radius;
+const issuesCount = props.stats.all_issues ?? 0;
 
 function calculateFraction(keys: string[]) {
-  const sum = Object.entries(props.stateDistribution).reduce(
+  const sum = Object.entries(props.stats).reduce(
     (acc, [key, value]) => (keys.includes(key) ? acc + value : acc),
     0,
   );
-  return props.issuesCount > 0 ? sum / props.issuesCount : 0;
+  return issuesCount > 0 ? sum / issuesCount : 0;
 }
 
 const cancelledArc = computed(
@@ -71,7 +72,7 @@ const completedArc = computed(
   () => calculateFraction(['completed']) * circumference,
 );
 const startedArc = computed(
-  () => calculateFraction(['started']) * circumference,
+  () => calculateFraction(['in_progress']) * circumference,
 );
 
 const donePercentage = computed(

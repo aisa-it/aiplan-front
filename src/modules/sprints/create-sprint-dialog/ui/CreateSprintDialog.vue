@@ -29,10 +29,10 @@
             :current-filter="currentFilter"
           />
 
-          <CreateSprintForm
+          <!-- <CreateSprintForm
             v-model:issues="checkedIssues"
             class="col no-wrap"
-          />
+          /> -->
         </div>
       </q-card-section>
     </q-card>

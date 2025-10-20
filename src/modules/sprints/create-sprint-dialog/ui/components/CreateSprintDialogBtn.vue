@@ -5,7 +5,6 @@
   <CreateSprintDialog v-model="isSearchOpened" />
 </template>
 <script setup lang="ts">
-//core
 import { ref } from 'vue';
 import CreateSprintDialog from '../CreateSprintDialog.vue';
 
