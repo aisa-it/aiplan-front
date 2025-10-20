@@ -14,14 +14,16 @@
       />
     </q-card-section>
     <q-separator />
-
-    <component
-      :is="currentIssueList"
-      :defaultIssues="initDefaultIssues"
-      :defaultIssuesCount="initDefaultIssuesCount"
-      :initGroupedIssues="initGroupedIssues"
-      :initGroupBy="initGroupedIssuesGroupBy"
-    />
+    
+    <transition name="fade" mode="out-in">
+      <component
+        :is="currentIssueList"
+        :defaultIssues="initDefaultIssues"
+        :defaultIssuesCount="initDefaultIssuesCount"
+        :initGroupedIssues="initGroupedIssues"
+        :initGroupBy="initGroupedIssuesGroupBy"
+      />
+    </transition>
   </q-card>
 </template>
 
@@ -50,7 +52,6 @@ import BoardListSkeleton from './components/skeletons/BoardListSkeleton.vue';
 import { useDefaultIssues } from './composables/useDefaultIssues';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { useGroupedIssues } from './composables/useGroupedIssues';
-import { C } from 'app/dist/pwa/assets/aiplan-store.45a92a50';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues();
@@ -92,7 +93,6 @@ const currentIssueList = computed(() => {
   let component;
 
   view = issuesLoader.value === true ? 'skeleton' : 'list';
-  console.log(view);
   switch (view) {
     case 'list': {
       component = isGroupingEnabled.value ? GroupedIssueList : DefaultIssueList;

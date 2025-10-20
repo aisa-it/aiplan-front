@@ -16,13 +16,7 @@
         :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="quasarPagination.rowsNumber"
         show-rows-per-page
-        @request="() => getIssues()"
-        @update:rowsPerPage="
-          (rowsPerPage) =>
-            getIssues(
-              Object.assign(quasarPagination, { rowsPerPage: rowsPerPage }),
-            )
-        "
+        @request="(pagination, action) => getIssues(pagination, action)"
       />
     </template>
 
@@ -109,7 +103,7 @@
 <script lang="ts" setup>
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-import { onMounted, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import { useProjectStore } from 'src/stores/project-store';
 
@@ -154,8 +148,6 @@ const quasarPagination = ref<QuasarPagination>({
   rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
-const initialOffset = ref(parsePagination(quasarPagination.value)?.offset);
-
 // преобразуем quasar пагинацию в пагинацию бека
 function parsePagination(pagination: QuasarPagination) {
   return {
@@ -174,14 +166,10 @@ function parsePagination(pagination: QuasarPagination) {
   };
 }
 
-const getIssues = async (p?: any) => {
-  let isFullUpdate = false;
-  if (p) quasarPagination.value = p;
+const getIssues = async (p: any, action = 'sorting') => {
+  let isFullUpdate = action !== 'selectedPage' ? true : false;
 
-  if (initialOffset.value === parsePagination(quasarPagination.value)?.offset) {
-    isFullUpdate = true;
-  }
-  initialOffset.value = parsePagination(quasarPagination.value)?.offset;
+  quasarPagination.value = await Object.assign(quasarPagination.value, p);
 
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
@@ -189,6 +177,7 @@ const getIssues = async (p?: any) => {
 const updateIssuesList = () => {
   emits('refresh', parsePagination(quasarPagination.value), true);
 };
+
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });

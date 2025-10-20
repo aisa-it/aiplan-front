@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia';
 import { useAiplanStore } from './aiplan-store';
 import { IIssueFilters } from 'src/interfaces/issues';
-import { API_AUTH_PREFIX, API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
+import {
+  API_AUTH_PREFIX,
+  API_WORKSPACES_PREFIX,
+} from 'src/constants/apiPrefix';
 
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
@@ -50,6 +53,8 @@ export const useIssuesStore = defineStore('issues-store', {
     return {
       personalIssues: [] as any[],
       refreshIssues: false,
+      groupedIssueList: [],
+      groupByIssues: '',
     };
   },
   actions: {

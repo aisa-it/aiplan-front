@@ -2,8 +2,8 @@
   <div>
     <GroupedTables
       v-if="!isKanbanEnabled"
-      :issues="issuesTables"
-      :group-by="groupBy"
+      :issues="issuesStore.groupedIssueList"
+      :group-by="issuesStore.groupByIssues"
       @refresh-table="
         (index, pagination, isFullUpdate) =>
           refreshTable(index, pagination, isFullUpdate)
@@ -11,8 +11,8 @@
     />
     <GroupedBoard
       v-if="isKanbanEnabled"
-      :issues="issuesTables"
-      :group-by="groupBy"
+      :issues="issuesStore.groupedIssueList"
+      :group-by="issuesStore.groupByIssues"
       @refresh-card="
         (index, pagination, isFullUpdate) =>
           refreshCard(index, pagination, isFullUpdate)
@@ -25,7 +25,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { watch, ref, inject } from 'vue';
+import { watch, ref } from 'vue';
 
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -39,8 +39,6 @@ import { useGroupedIssues } from '../composables/useGroupedIssues';
 import GroupedTables from './table-view/GroupedTables.vue';
 import GroupedBoard from './board-view/GroupedBoard.vue';
 import { IGroupedResponse } from '../types';
-import TableListSkeleton from './skeletons/TableListSkeleton.vue';
-import BoardListSkeleton from './skeletons/BoardListSkeleton.vue';
 
 const { getGroupedIssues } = useGroupedIssues();
 
@@ -52,7 +50,6 @@ const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 
 const props = defineProps(['initGroupedIssues', 'initGroupBy']);
 const issuesTables = ref<Array<IGroupedResponse>>([]);
-const groupBy = ref();
 const route = useRoute();
 
 //
@@ -61,6 +58,7 @@ async function refreshTable(
   pagination: any,
   isFullUpdate: boolean,
 ) {
+  console.log(isFullUpdate);
   if (isFullUpdate === true) {
     let props = JSON.parse(JSON.stringify(projectProps.value));
     props.page_size = pagination.limit;
@@ -109,28 +107,10 @@ async function refreshCard(
 }
 
 async function load() {
-  issuesTables.value = [];
   issuesLoader.value = true;
 
-  const response = await getGroupedIssues();
+  await getGroupedIssues();
 
-  issuesTables.value = response?.data?.issues;
-  groupBy.value = response?.data?.group_by;
   issuesLoader.value = false;
 }
-
-watch(
-  () => props.initGroupedIssues,
-  () => {
-    issuesTables.value = props.initGroupedIssues;
-  },
-  { immediate: true },
-);
-watch(
-  () => props.initGroupBy,
-  () => {
-    groupBy.value = props.initGroupBy;
-  },
-  { immediate: true },
-);
 </script>

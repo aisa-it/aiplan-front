@@ -90,14 +90,13 @@ export default defineComponent({
 
     const updateSelectedPage = (val: number) => {
       emit('update:selectedPage', val);
-      emit('request');
+      emit('request', { page: val }, 'selectedPage');
     };
 
     const updateRowsPerPage = (val: number) => {
-      console.log(val);
       emit('update:rowsPerPage', val);
       emit('update:selectedPage', 1);
-      emit('request');
+      emit('request', { page: 1, rowsPerPage: val }, 'rowsPerPage');
     };
 
     return {

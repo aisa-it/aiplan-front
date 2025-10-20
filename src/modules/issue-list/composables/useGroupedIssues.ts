@@ -65,12 +65,15 @@ export const useGroupedIssues = () => {
     if (projectProps.value?.filters?.states?.length) {
       filters.states = projectProps?.value?.filters?.states;
     }
-    return await issuesStore.getIssuesTable(
+    const response = await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project?.value.id,
       filters,
       parsePagination(quasarPagination),
     );
+
+    issuesStore.groupedIssueList = await response?.data.issues;
+    issuesStore.groupByIssues = await response?.data.group_by;
   }
 
   return { getGroupedIssues, parsePagination };
