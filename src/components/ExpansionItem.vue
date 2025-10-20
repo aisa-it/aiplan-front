@@ -70,8 +70,7 @@ const defineClass = () => {
 watch(
   () => props.isExpanding,
   () => {
-    if (props.isExpanding === true && isExpanded.value === false)
-      isExpanded.value = true;
+    isExpanded.value = props.isExpanding;
   },
 );
 

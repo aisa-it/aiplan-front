@@ -312,9 +312,9 @@ const p = {
   null: 'Нет',
 };
 
-// onMounted(() => {
-//   onRequest(pagination.value);
-// });
+onMounted(() => {
+  onRequest(pagination.value);
+});
 
 //methods
 const onRequest = async (p) => {
