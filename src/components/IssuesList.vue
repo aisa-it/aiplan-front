@@ -2,26 +2,16 @@
   <div class="q-pa-none fit full-height relative">
     <q-card class="single-list relative" flat dense>
       <q-card-section
-        class="row issue-list__header no-wrap"
+        class="row issue-list__header"
         :style="'padding: 12px 16px'"
       >
-        <div class="row items-center full-w">
-          <IssuesListTitle :title="'Sprint1'" style="width: fit-content" />
-          <StatusLinearProgressBar
-            v-if="isSprint"
-            class="q-ml-sm"
-            style="max-width: 320px"
-            :issues="[1, 2, 3]"
-            :state-distribution="{ started: 1, completed: 1, cancelled: 1 }"
-          />
-        </div>
-        <CreateSprintDialogBtn v-if="isSprint" />
+        <IssuesListTitle />
+        <q-space />
 
         <FiltersList
           :projectId="route.params.project"
           :columns="allColumns.filter((col) => !col.exclude)"
           @update="refresh()"
-          :isSprint="true"
         />
       </q-card-section>
       <q-separator />
@@ -555,10 +545,6 @@
           @useFullRefresh="() => refresh()"
           :style="'position: relative; width: 100%;'"
         />
-
-        <GanttView
-          v-if="route.params.project && viewProps.props?.issueView === 'gantt'"
-        />
       </div>
       <!-- <div v-show="loading">
         <q-linear-progress indeterminate rounded />
@@ -616,14 +602,10 @@ import PaginationDefault from './pagination/PaginationDefault.vue';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
-import StatusLinearProgressBar from './progress-bars/StatusLinearProgressBar.vue';
-import CreateSprintDialogBtn from 'src/modules/sprints/ui/create-sprint-dialog/ui/components/CreateSprintDialogBtn.vue';
-import GanttView from 'src/modules/sprints/ui/gantt-view/ui/GanttView.vue';
 
 defineProps<{
   projectId?: string | null;
   title?: string;
-  isSprint?: boolean;
 }>();
 
 // core
@@ -1083,17 +1065,6 @@ const allColumns = [
     },
     sortable: true,
   },
-
-  /*   {
-    style: 'width: 10px',
-    name: 'project',
-    align: 'center',
-    label: 'Проект',
-    field: (row: any) => {
-      return row.project;
-    },
-    sortable: true,
-  }, */
 ];
 
 onBeforeUnmount(() => {

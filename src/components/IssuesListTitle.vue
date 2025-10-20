@@ -37,6 +37,7 @@ export default defineComponent({
 
     const { currentProjectID, project, isLoadProjectInfo } =
       storeToRefs(projectStore);
+
     const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
     return {
       api,
