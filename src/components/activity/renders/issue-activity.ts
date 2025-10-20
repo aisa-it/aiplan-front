@@ -1,10 +1,11 @@
 import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import aiplan from 'src/utils/aiplan';
 import { addSpaceIfCamelCase } from 'src/utils/strings';
-import { formatDate } from 'src/utils/time';
+import { formatDateTime } from 'src/utils/time';
 import { translatePrioritets, translateVerb } from 'src/utils/translator';
 import { translateAction } from './actionTranslations';
 import { useRoute } from 'vue-router';
+import dayjs from 'dayjs';
 
 function setValue(activity: DtoEntityActivityFull) {
   if (activity.new_value) return activity.new_value;
@@ -89,16 +90,17 @@ export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspa
 
     case 'target_date':
       if (activity.verb === 'updated') {
-        const newDate = formatDate(activity.new_value ?? '');
-        const oldDate = formatDate(
-          activity.old_value ? activity.old_value.replace(/"/g, '') : '',
-        );
+        const newDate = activity.new_value ?? ''
+        const oldDate = activity.old_value ? activity.old_value.replace(/"/g, '') : '';
+        const newValidDate = dayjs(newDate).isValid() ? formatDateTime(newDate) : newDate;
+        const oldValidDate = dayjs(oldDate).isValid() ? formatDateTime(oldDate) : oldDate;
+
         if (activity.old_value === '<nil>' || !activity.old_value) {
-          return `установил(-а) срок исполнения ${newDate} для задачи ${link} ${workspaceSource}`;
-        } else if (activity.new_value === '' && oldDate) {
-          return `убрал(-а) срок исполнения ${oldDate} из задачи ${link} ${workspaceSource}`;
+          return `установил(-а) срок исполнения ${newValidDate} для задачи ${link} ${workspaceSource}`;
+        } else if (activity.new_value === '' && oldValidDate) {
+          return `убрал(-а) срок исполнения ${oldValidDate} из задачи ${link} ${workspaceSource}`;
         } else {
-          return `изменил(-а) срок исполнения с ${oldDate} на ${newDate} в задаче ${link} ${workspaceSource}`;
+          return `изменил(-а) срок исполнения с ${oldValidDate} на ${newValidDate} в задаче ${link} ${workspaceSource}`;
         }
       }
 

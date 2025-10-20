@@ -27,13 +27,19 @@
         />
       </q-td>
     </template>
-
+    
     <template v-slot:body-cell-block="props">
       <q-td :props="props">
         <BlockButton
           :active="isActive(props.row) || false"
           @click.stop="$emit('openBlockDialog', props.row)"
         />
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell-delete="props">
+      <q-td :props="props">
+        <DeleteButton @click.stop="$emit('openDeleteDialog', props.row)"/>
       </q-td>
     </template>
 
@@ -60,9 +66,11 @@ import { isActive } from '../../utils/active';
 import { useTableWithPagination } from '../../composables/useTableWithPagination';
 
 import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import DeleteButton from 'src/modules/admin-panel/user-view/ui/DeleteButton.vue';
 
 const emits = defineEmits<{
   openBlockDialog: [user: DtoUserLight];
+  openDeleteDialog: [user: DtoUserLight];
   successUpdateUser: [];
 }>();
 

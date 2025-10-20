@@ -59,7 +59,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  refresh: [];
+  refresh: [issue: any | null];
   'update:issue': [issue: any | null];
 }>();
 
@@ -91,7 +91,7 @@ const saveParentIssue = (issue: any, extendedIssue?: any) => {
       )
       .then(() => {
         setNotificationView({ type: 'success', open: true });
-        emits('refresh');
+        emits('refresh', issue);
         onLoad();
       });
   else emits('update:issue', issue && props.newIssue ? extendedIssue : null);

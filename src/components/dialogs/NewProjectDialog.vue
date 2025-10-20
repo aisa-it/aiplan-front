@@ -140,7 +140,7 @@ const projectValues = ref({
   identifier: '',
   description: '',
   public: { value: true, label: 'Публичный' },
-  emoji_and_icon: emojiOptions[3],
+  emoji_and_icon: emojiOptions.find((el) => el.label === '💼'),
   cover_image: '',
 });
 
@@ -151,7 +151,7 @@ const clear = () => {
     identifier: '',
     description: '',
     public: { value: true, label: 'Публичный' },
-    emoji_and_icon: emojiOptions[3],
+    emoji_and_icon: emojiOptions.find((el) => el.label === '💼'),
     cover_image: '',
   };
   isConfirmOpen.value = false;

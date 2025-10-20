@@ -83,20 +83,18 @@
             @update:selectedPage="onRequest({ pagination })"
           />
         </template>
-
         <template v-slot:body-cell-sequence_id="props">
           <q-td
             :props="props"
             :style="`font-size: 12px; padding: 7px 4px; cursor: pointer;`"
-            @click="
-              () =>
-                $router.push(
-                  `/${$route.params.workspace}/projects/${$route.params.project}/issues/${props.row.sequence_id}`,
-                )
-            "
+            @click="() => onIssueClick(props.row.sequence_id)"
           >
             {{ props.value[0] }}-{{ props.value[1] }}
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -106,7 +104,7 @@
               <q-btn
                 no-caps
                 flat
-                :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${props.row.sequence_id}`"
+                @click="() => onIssueClick(props.row.sequence_id)"
                 :target="user.theme?.open_in_new ? '_blank' : '_self'"
                 class="issues-list__task-name"
                 :style="`padding: 0 4px; width: ${
@@ -135,7 +133,11 @@
                 :target="user.theme?.open_in_new ? '_blank' : '_self'"
               />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -163,7 +165,11 @@
                 "
               ></SelectPriority>
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -194,7 +200,11 @@
                 "
               />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -217,7 +227,11 @@
                 @refresh="refresh().then(() => emitSyncIssue(props.row.id))"
               ></SelectDate>
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -226,7 +240,11 @@
             <div :style="'width: 150px; max-width: 150px'" class="body-2">
               {{ props.value }}
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -247,7 +265,11 @@
                 </span>
               </q-badge>
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
         <template v-slot:body-cell-author="props">
@@ -269,7 +291,11 @@
                 })
               "
             ></AvatarImage>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -292,7 +318,11 @@
                 })
               "
             ></AvatarImage>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -301,7 +331,11 @@
             <div class="table-chip-wrap">
               <QuantityChip :type="'sub-issues'" :value="props.value" />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -313,7 +347,11 @@
                 :value="props.value"
               />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -322,7 +360,11 @@
             <div class="table-chip-wrap">
               <QuantityChip :type="'links'" :value="props.value" />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -331,7 +373,11 @@
             <div class="table-chip-wrap">
               <QuantityChip :type="'attachments'" :value="props.value" />
             </div>
-            <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refresh"/>
+            <IssueContextMenu
+              :row="props.row"
+              :rowId="props.rowIndex"
+              @refresh="refresh"
+            />
           </q-td>
         </template>
 
@@ -352,6 +398,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   onMounted,
   onUnmounted,
@@ -361,7 +408,7 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -398,6 +445,7 @@ import ArrowUp from 'components/icons/ArrowUp.vue';
 import ParentIssueChip from './ParentIssueChip.vue';
 import PaginationDefault from './pagination/PaginationDefault.vue';
 import { inject } from 'vue';
+import { Screen } from 'quasar';
 
 export default defineComponent({
   name: 'IssuesListSingleState',
@@ -412,7 +460,7 @@ export default defineComponent({
     'me',
     'showEmptyGroup',
   ],
-  emits: ['globalRefresh', 'end-loading', 'start-loading'],
+  emits: ['globalRefresh', 'end-loading', 'start-loading', 'open'],
 
   setup(props, { emit }) {
     // stores
@@ -430,12 +478,13 @@ export default defineComponent({
     // store to ref
     const { user } = storeToRefs(userStore);
     const { statesCache } = storeToRefs(statesStore);
-    const {  project } = storeToRefs(projectStore);
+    const { project } = storeToRefs(projectStore);
     const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
     const { refreshIssues } = storeToRefs(issuesStore);
 
     // issues vars
     const route = useRoute();
+    const router = useRouter();
     const rows = ref([]);
     const bus = inject('bus');
     const pagination = ref({
@@ -457,6 +506,16 @@ export default defineComponent({
 
     const name = ref();
     const color = ref();
+
+    const isMobile = computed(() => Screen.width <= 650);
+
+    async function onIssueClick(id: string) {
+      isMobile.value
+        ? router.push(
+            `/${route.params.workspace}/projects/${route.params.project}/issues/${id}`,
+          )
+        : emit('open', id);
+    }
 
     // issues request
     async function onRequest(p: any) {
@@ -577,6 +636,7 @@ export default defineComponent({
       project,
       statesCache,
       projectIssuesState,
+      onIssueClick,
       onRequest,
       pagination,
       searchText,
