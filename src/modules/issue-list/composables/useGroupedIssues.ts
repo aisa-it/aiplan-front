@@ -7,6 +7,7 @@ import {
   PARSED_GROUP,
 } from 'src/constants/constants';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export interface QuasarPagination {
   page: number;
@@ -50,10 +51,10 @@ export const useGroupedIssues = () => {
     const quasarPagination: QuasarPagination = {
       page: 1,
       rowsNumber: 0,
-      sortBy: isKanbanEnabled
+      sortBy: isKanbanEnabled.value
         ? 'sequence_id'
         : (projectProps.value?.filters?.order_by as string),
-      descending: isKanbanEnabled
+      descending: isKanbanEnabled.value
         ? true
         : (projectProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
@@ -65,6 +66,7 @@ export const useGroupedIssues = () => {
     if (projectProps.value?.filters?.states?.length) {
       filters.states = projectProps?.value?.filters?.states;
     }
+    console.log(quasarPagination);
     const response = await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project?.value.id,
@@ -76,5 +78,49 @@ export const useGroupedIssues = () => {
     issuesStore.groupByIssues = await response?.data.group_by;
   }
 
-  return { getGroupedIssues, parsePagination };
+  function defineFiltersByEntity(entity) {
+    let filters;
+    switch (issuesStore.groupByIssues) {
+      case 'state': {
+        filters = { states: [entity.id] };
+        return filters;
+      }
+      case 'labels': {
+        filters = { labels: [entity.id] };
+        return filters;
+      }
+      case 'priority': {
+        filters = { priorities: [entity] };
+        return filters;
+      }
+      case 'watcher': {
+        filters = { watchers: [entity.id] };
+        return filters;
+      }
+      case 'assignee': {
+        filters = { assignees: [entity.id] };
+        return filters;
+      }
+      case 'author': {
+        filters = { authors: [entity.id] };
+        return filters;
+      }
+    }
+    return filters;
+  }
+
+  async function getCurrentTable(index: number, pagination: any, entity: any) {
+    const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
+
+    const response = await issuesStore.getIssuesTable(
+      workspaceInfo?.value?.id as string,
+      project.value.id as string,
+      filters,
+      pagination,
+    );
+
+    issuesStore.groupedIssueList[index].issues = response?.data.issues;
+  }
+
+  return { getGroupedIssues, parsePagination, getCurrentTable };
 };

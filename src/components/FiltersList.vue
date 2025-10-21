@@ -157,6 +157,7 @@ import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
 import { storeToRefs } from 'pinia';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 const props = defineProps<{
   projectId: string;
@@ -167,7 +168,7 @@ const emits = defineEmits(['update']);
 
 const route = useRoute();
 const projectStore = useProjectStore();
-const { projectProps } = storeToRefs(projectStore);
+const { projectProps, issuesLoader } = storeToRefs(projectStore);
 const bus = inject('bus') as EventBus;
 
 const viewSelector = ref();
@@ -209,6 +210,7 @@ const popupToggle = () => {
 
 const onUpdate = async () => {
   try {
+    issuesLoader.value = true;
     let props = JSON.parse(JSON.stringify(projectProps.value));
     props.issueView = viewSelector.value.value;
     props.filters.group_by = groupSelector.value.value;

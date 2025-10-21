@@ -54,7 +54,7 @@ export const useProjectStore = defineStore('project-store', {
       errorLoadProjects: false,
       projectProps: null,
       projectStatuses: {},
-      issuesLoader: false,
+      issuesLoader: true,
     };
   },
 

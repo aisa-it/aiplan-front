@@ -29,8 +29,8 @@
         </div>
 
         <PaginationDefault
-          v-show="!isExpanded && quasarPagination.rowsNumber / 10 > 1"
-          v-model:selected-page="selectedPage"
+          v-show="!isExpanded && quasarPagination.rowsNumber / 25 > 1"
+          v-model:selected-page="quasarPagination.page"
           :rows-number="quasarPagination.rowsNumber"
           :rows-per-page="25"
           :max-pages="3"
@@ -43,7 +43,10 @@
 
     <div class="board-card-list scrollable-content">
       <div v-for="card in table.issues" :key="card.id">
-        <BoardCard :card="card" @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"/>
+        <BoardCard
+          :card="card"
+          @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"
+        />
       </div>
     </div>
   </q-expansion-item>
@@ -101,9 +104,9 @@ const quasarPagination = ref<QuasarPagination>({
   rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
-const getIssues = async (p?: any, isFullUpdate?:boolean) => {
+const getIssues = async (p?: any, isFullUpdate = false) => {
   quasarPagination.value.page = await p;
-  
+
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
 

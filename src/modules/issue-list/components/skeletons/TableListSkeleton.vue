@@ -26,7 +26,7 @@
     </thead>
 
     <tbody>
-      <tr v-for="n in 15" :key="n">
+      <tr v-for="row in rowCount" :key="row">
         <td class="text-left">
           <q-skeleton animation="blink" type="text" width="85px" />
         </td>
@@ -49,3 +49,9 @@
     </tbody>
   </q-markup-table>
 </template>
+
+<script setup lang="ts">
+withDefaults(defineProps<{ rowCount: number }>(), {
+  rowCount: 15,
+});
+</script>

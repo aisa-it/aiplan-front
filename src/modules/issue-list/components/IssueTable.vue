@@ -4,6 +4,7 @@
     class="my-sticky-column-table table-bottom-reverse"
     row-key="sequence_id"
     flat
+    :loading="loadingTable"
     :rows="rows"
     :columns="projectStore.getTableColumns"
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
@@ -13,7 +14,7 @@
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
         :rows-per-page="quasarPagination.rowsPerPage"
-        :rows-per-page-options="[10, 25, 50, 100]"
+        :rows-per-page-options="[10, 25, 50]"
         :rows-number="quasarPagination.rowsNumber"
         show-rows-per-page
         @request="(pagination, action) => getIssues(pagination, action)"
@@ -31,7 +32,10 @@
     </template>
 
     <template v-slot:body-cell-priority="props">
-      <PriorityColumn :row-info="props" @refresh="updateIssuesList()" />
+      <PriorityColumn
+        :row-info="props"
+        @refresh="updateIssuesList('priority')"
+      />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
@@ -41,7 +45,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateIssuesList();
+            updateIssuesList('state', status);
           }
         "
       />
@@ -49,7 +53,10 @@
     </template>
 
     <template v-slot:body-cell-target_date="props">
-      <TargetDateColumn :row-info="props" @refresh="updateIssuesList()" />
+      <TargetDateColumn
+        :row-info="props"
+        @refresh="updateIssuesList('targetDate')"
+      />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
@@ -103,7 +110,7 @@
 <script lang="ts" setup>
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-import { ref, watchEffect } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 
 import { useProjectStore } from 'src/stores/project-store';
 
@@ -122,6 +129,7 @@ import {
   ChipCountColumn,
 } from './issue-table';
 import { storeToRefs } from 'pinia';
+import TableListSkeleton from './skeletons/TableListSkeleton.vue';
 
 const projectStore = useProjectStore();
 
@@ -135,11 +143,11 @@ interface QuasarPagination {
   rowsPerPage: number;
 }
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits(['refresh', 'updateIssueField']);
 const props = defineProps(['rows', 'rowsCount', 'loading']);
 
 const selectedRow = ref();
-
+const loadingTable = ref(false);
 const quasarPagination = ref<QuasarPagination>({
   page: 1,
   rowsNumber: props.rowsCount,
@@ -171,16 +179,30 @@ const getIssues = async (p: any, action = 'sorting') => {
 
   quasarPagination.value = await Object.assign(quasarPagination.value, p);
 
+  if (isFullUpdate === false) loadingTable.value = true;
+
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
 
-const updateIssuesList = () => {
-  emits('refresh', parsePagination(quasarPagination.value), true);
+const updateIssuesList = (updatedField: string, fieldValue: any) => {
+  emits(
+    'updateIssueField',
+    parsePagination(quasarPagination.value),
+    updatedField,
+    fieldValue,
+  );
 };
 
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });
+
+watch(
+  () => props.rows,
+  () => {
+    loadingTable.value = false;
+  },
+);
 </script>
 
 <style lang="scss">
@@ -198,6 +220,19 @@ watchEffect(() => {
     position: sticky;
     left: 0;
     z-index: 100;
+  }
+
+  .q-linear-progress {
+    position: absolute !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    font-size: 4px !important;
+    height: 1px !important;
+    color: var(--q-primary) !important;
+    transform: scale3d(1, 1, 1) !important;
+    border: 0px;
+    z-index: 101;
+    background-color: $color-shadow !important;
   }
 }
 </style>

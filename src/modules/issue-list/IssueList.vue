@@ -14,14 +14,12 @@
       />
     </q-card-section>
     <q-separator />
-    
+
     <transition name="fade" mode="out-in">
       <component
         :is="currentIssueList"
         :defaultIssues="initDefaultIssues"
         :defaultIssuesCount="initDefaultIssuesCount"
-        :initGroupedIssues="initGroupedIssues"
-        :initGroupBy="initGroupedIssuesGroupBy"
       />
     </transition>
   </q-card>
@@ -75,9 +73,7 @@ const load = async () => {
     initDefaultIssues.value = response.data.issues;
     initDefaultIssuesCount.value = response.data.count || DEF_ROWS_PER_PAGE;
   } else if (isGroupingEnabled.value === true) {
-    const response = await getGroupedIssues();
-    initGroupedIssues.value = response?.data.issues;
-    initGroupedIssuesGroupBy.value = response?.data.group_by;
+    await getGroupedIssues();
   }
   issuesLoader.value = false;
 };
@@ -120,7 +116,7 @@ const currentIssueList = computed(() => {
 }
 
 .fade-element {
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .fade-element-enter-from,

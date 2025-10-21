@@ -6,7 +6,7 @@
         :group-by="groupBy"
         @refresh="
           (pagination, isFullUpdate) =>
-            refreshTable(index, pagination, isFullUpdate)
+            refreshTable(index, pagination, isFullUpdate, table.entity)
         "
       />
     </div>
@@ -32,11 +32,11 @@ const emits = defineEmits(['refreshCard', 'refresh']);
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);
 
-const refreshTable = (index: number, pagination, isFullUpdate) => {
+const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
   const p = pagination;
   delete p.group_by;
 
-  emits('refreshCard', index, pagination, isFullUpdate);
+  emits('refreshCard', index, pagination, isFullUpdate, entity);
 };
 
 const defineIssues = computed(() => {
