@@ -193,8 +193,9 @@
               <template v-slot:body-cell-sequence_id="props">
                 <q-td
                   :props="props"
+                  class="prevent-preview-side-drawer"
                   :style="`font-size: 12px; padding: 7px 4px; cursor: pointer;`"
-                  @click="() => onIssueClick(props.row.sequence_id)"
+                  @click.prevent="() => onIssueClick(props.row.sequence_id)"
                 >
                   {{ props.value[0] }}-{{ props.value[1] }}
                   <IssueContextMenu
@@ -214,17 +215,18 @@
                 >
                   <div class="row justify-between">
                     <q-btn
-                      @click="() => onIssueClick(props.row.sequence_id)"
+                      :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${props.row.sequence_id}`"
                       :target="user.theme?.open_in_new ? '_blank' : '_self'"
                       no-caps
                       flat
-                      class="issues-list__task-name"
+                      class="issues-list__task-name prevent-preview-side-drawer"
                       :style="`padding: 0 4px; width: ${
                         !!props.row.parent &&
                         !!props.row?.parent_detail?.sequence_id
                           ? 'calc(100% - 80px)'
                           : '100%'
                       }`"
+                      @click.prevent="() => onIssueClick(props.row.sequence_id)"
                     >
                       <span
                         :style="`text-align: left;`"
@@ -552,6 +554,7 @@
       v-model="isOpenPreview"
       @refresh="refresh"
       @open="openIssue"
+      @close="closePreview"
     />
   </div>
 </template>
@@ -561,7 +564,7 @@
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Screen, useMeta } from 'quasar';
-import { ref, watch, computed, onMounted, toRaw } from 'vue';
+import { ref, watch, computed, onMounted, toRaw, onBeforeUnmount } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -691,7 +694,7 @@ const sortedProjectMembers = computed(() =>
     : projectMembers.value,
 );
 
-const isMobile = computed(() => Screen.width <= 650);
+const isMobile = computed(() => Screen.width <= 1200);
 
 async function onIssueClick(id: string) {
   isMobile.value
@@ -705,11 +708,15 @@ async function onIssueClick(id: string) {
 async function openIssue(id: string) {
   isOpenPreview.value = false;
 
-  singleIssueStore.openIssue(id, user.value.theme?.open_in_new ? '_blank' : '_self');
+  singleIssueStore.openIssue(
+    id,
+    user.value.theme?.open_in_new ? '_blank' : '_self',
+  );
 }
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
+  if (currentIssueID.value === id && isOpenPreview.value) return;
   isOpenPreview.value = false;
   currentIssueID.value = id;
 
@@ -719,6 +726,13 @@ async function openPreview(id: string) {
   );
   isOpenPreview.value = true;
 }
+
+async function closePreview() {
+  if (!isOpenPreview.value) return;
+  isOpenPreview.value = false;
+  currentIssueID.value = '';
+}
+
 // pagination request
 async function onRequest(p: any) {
   if (
@@ -904,7 +918,7 @@ watch(
 );
 
 watch(isMobile, () => {
-  if (isMobile.value) isOpenPreview.value = false;
+  if (isMobile.value) closePreview();
 });
 
 const allColumns = [
@@ -1050,6 +1064,10 @@ const allColumns = [
     sortable: true,
   },
 ];
+
+onBeforeUnmount(() => {
+  closePreview();
+});
 </script>
 
 <style lang="sass">

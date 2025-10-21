@@ -95,7 +95,6 @@
     </q-card>
     <div
       class="full-w"
-      :style="preview ? 'height: 10rem' : ''"
       v-click-outside:prevent-click-issue-outside="{
         isAutoSave,
         onClickOutside: handleAutoSave,

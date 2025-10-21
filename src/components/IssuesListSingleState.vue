@@ -86,8 +86,9 @@
         <template v-slot:body-cell-sequence_id="props">
           <q-td
             :props="props"
+            class="prevent-preview-side-drawer"
             :style="`font-size: 12px; padding: 7px 4px; cursor: pointer;`"
-            @click="() => onIssueClick(props.row.sequence_id)"
+            @click.prevent="() => onIssueClick(props.row.sequence_id)"
           >
             {{ props.value[0] }}-{{ props.value[1] }}
             <IssueContextMenu
@@ -104,9 +105,10 @@
               <q-btn
                 no-caps
                 flat
-                @click="() => onIssueClick(props.row.sequence_id)"
+                :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${props.row.sequence_id}`"
+                @click.prevent="() => onIssueClick(props.row.sequence_id)"
                 :target="user.theme?.open_in_new ? '_blank' : '_self'"
-                class="issues-list__task-name"
+                class="issues-list__task-name prevent-preview-side-drawer"
                 :style="`padding: 0 4px; width: ${
                   !!props.row.parent && !!props.row?.parent_detail?.sequence_id
                     ? 'calc(100% - 80px)'
@@ -507,7 +509,7 @@ export default defineComponent({
     const name = ref();
     const color = ref();
 
-    const isMobile = computed(() => Screen.width <= 650);
+    const isMobile = computed(() => Screen.width <= 1200);
 
     async function onIssueClick(id: string) {
       isMobile.value
