@@ -2,9 +2,10 @@ import { issueActivityRender } from './issue-activity';
 import { projectActivityRender } from './project-activity';
 import { workspaceActivityRender } from './workspace-activity';
 import { formActivityRender } from './form-activity';
+import { docActivityRender } from './doc-activity';
+import { rootActivityRender } from './root-activity';
 
 import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { docActivityRender } from './doc-activity';
 
 export function activityRender(
   activity: DtoEntityActivityFull,
@@ -22,5 +23,7 @@ export function activityRender(
       return projectActivityRender(activity, isOnlyProject, isOnlyWorkspace);
     case 'doc':
       return docActivityRender(activity);
+    case 'root':
+      return rootActivityRender(activity);
   }
 }

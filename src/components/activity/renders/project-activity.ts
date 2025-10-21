@@ -47,6 +47,7 @@ export function projectActivityRender(
                     "${activity.workspace_detail?.name}"<a/>`;
   switch (activity.field) {
     case 'emoji':
+    case 'logo':
       return `<span>изменил(-а) иконку проекта ${link} ${workspaceSource}<span/>`;
 
     case 'name':
@@ -111,7 +112,7 @@ export function projectActivityRender(
           .join(' ')} с ролью "${
           valToRole(+activity?.new_value)?.label
         }" ${workspaceSource}`;
-      if (activity?.verb === 'remove')
+      if (activity?.verb === 'removed')
         value = ` пользователя ${
           aiplan.UserName(activity.old_entity_detail).join(' ') ||
           activity.old_value
