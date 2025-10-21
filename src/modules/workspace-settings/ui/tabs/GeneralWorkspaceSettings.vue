@@ -557,9 +557,6 @@ const getLeadOptions = async () => {
 // апдейт данных спейса
 const handleUpdateWorkspace = async () => {
   if (!workspaceInfoForm.value) return;
-  if (isEditorEmpty(editorDOMvalue.value)) {
-    workspaceInfoForm.value.description = '';
-  }
 
   const payload = {
     name: workspaceInfoForm.value.name,
