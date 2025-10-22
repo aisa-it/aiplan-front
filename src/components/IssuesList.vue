@@ -1067,7 +1067,7 @@ const allColumns = [
     // border-right: 2px solid $color-shadow
 
   td:first-child
-    background: $bg-surface
+    background: $bg-surface 
     border-right: 2px solid $color-shadow
 
   th:first-child,

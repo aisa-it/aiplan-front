@@ -75,12 +75,12 @@ export default defineComponent({
     menuSelf: {
       type: String as PropType<QSelectProps['menuSelf']>,
       required: false,
-      default: 'top middle'
+      default: 'top middle',
     },
     menuAnchor: {
       type: String as PropType<QSelectProps['menuAnchor']>,
       required: false,
-      default: 'bottom middle'
+      default: 'bottom middle',
     },
   },
   setup(props, { emit }) {
@@ -90,13 +90,13 @@ export default defineComponent({
 
     const updateSelectedPage = (val: number) => {
       emit('update:selectedPage', val);
-      emit('request');
+      emit('request', { page: val }, 'selectedPage');
     };
 
     const updateRowsPerPage = (val: number) => {
       emit('update:rowsPerPage', val);
       emit('update:selectedPage', 1);
-      emit('request');
+      emit('request', { page: 1, rowsPerPage: val }, 'rowsPerPage');
     };
 
     return {

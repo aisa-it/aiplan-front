@@ -9,7 +9,7 @@
     popup-content-class="fit-select-popup scrollable-content inh-popup"
     map-options
     :model-value="statesSelect"
-    :options="states"
+    :options="getStatusesAsArray"
     :option-label="(state) => state.name || 'Не выбран'"
     :option-value="(state) => state.id || null"
     @update:model-value="onUpdate"
@@ -31,52 +31,38 @@
   </q-select>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent, onMounted, computed } from 'vue';
+<script lang="ts" setup>
+import { ref, onMounted, computed } from 'vue';
 import { useStatesStore } from 'src/stores/states-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
 import { IState } from 'src/interfaces/states';
+import { storeToRefs } from 'pinia';
+import { useProjectStore } from 'src/stores/project-store';
 
-export default defineComponent({
-  name: 'SelectStatusFilter',
-  props: ['projectId'],
-  emits: ['update'],
-  setup(props, { emit }) {
-    const viewProps = useViewPropsStore();
-    const statesStore = useStatesStore();
+const emits = defineEmits(['update']);
+const props = defineProps(['projectId']);
 
-    const statesSelect = computed(() =>
-      states.value.filter((state) => {
-        if (!viewProps.props.filters.states) {
-          viewProps.props.filters.states = [];
-          return false;
-        }
-        return viewProps.props.filters.states.some((s) => s === state.id);
-      }),
-    );
-    const states = ref([]);
+const viewProps = useViewPropsStore();
+const statesStore = useStatesStore();
+const { projectProps, getStatusesAsArray } = storeToRefs(useProjectStore());
 
-    const onUpdate = (states: IState[] | undefined) => {
-      if (!states) {
-        viewProps.props.filters.states = [];
-      } else {
-        viewProps.props.filters.states = states.map((state) => state.id);
-      }
-      emit('update');
-    };
+const statesSelect = computed(() =>
+  getStatusesAsArray.value.filter((state) => {
+    if (!projectProps.value?.filters?.states) {
+      projectProps.value.filters.states = [];
+      return false;
+    }
+    return projectProps.value?.filters?.states.some((s) => s === state.id);
+  }),
+);
+const states = ref([]);
 
-    onMounted(async () => {
-      statesStore
-        .getStatesList(props.projectId as string, false)
-        .then((statesList) => (states.value = statesList));
-    });
-
-    return {
-      states,
-      statesSelect,
-      viewProps,
-      onUpdate,
-    };
-  },
-});
+const onUpdate = (states: IState[] | undefined) => {
+  if (!states) {
+    projectProps.value.filters.states = [];
+  } else {
+    projectProps.value.filters.states = states.map((state) => state.id);
+  }
+  emits('update');
+};
 </script>
