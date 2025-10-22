@@ -77,6 +77,19 @@
           </q-card>
         </q-menu>
       </q-btn>
+
+      <q-btn
+        v-if="isCreateSprint"
+        flat
+        dense
+        round
+        aria-label="Menu"
+        style="height: 30px; width: 30px"
+        class="q-mr-sm q-ml-sm"
+        @click="emits('toggle-right')"
+      >
+        <MenuIcon />
+      </q-btn>
     </div>
     <q-table
       v-if="!loading && rows.length"
@@ -221,8 +234,14 @@
       style="height: calc(90vh - 122px)"
       class="centered-horisontally justify-center"
     >
-      <h6 v-if="!loading && rows.length === 0">Нет задач</h6>
       <DefaultLoader v-if="loading" />
+      <h6 v-else-if="rows.length === 0">
+        {{
+          isCreateSprint
+            ? 'Не найдено задач в данном пространстве'
+            : 'Нет задач'
+        }}
+      </h6>
     </div>
   </div>
 </template>
@@ -256,10 +275,12 @@ const props = defineProps<{
   currentFilter: any;
   checkedRows?: any[];
   selection?: 'single' | 'multiple' | 'none';
+  isCreateSprint?: boolean;
 }>();
 
 const emits = defineEmits<{
   (event: 'toggle'): void;
+  (event: 'toggle-right'): void;
   (event: 'update:checkedRows', checkedRows: any[]): void;
 }>();
 
@@ -318,6 +339,7 @@ onMounted(() => {
 
 //methods
 const onRequest = async (p) => {
+  if (props.isCreateSprint && !filter.value) return;
   loading.value = true;
   // TODO: удалять only_active из req, так как он будет отправляться в query
   let req = Object.assign((filter.value as any) ?? {}, {
@@ -356,14 +378,14 @@ const handleSearchIssues = debounce(() => {
   onRequest(pagination.value);
 }, 700);
 
-// watch(
-//   () => props.currentFilter,
-//   () => {
-//     filter.value = props.currentFilter ? props.currentFilter : {};
-//     onRequest(pagination.value);
-//   },
-//   { deep: true },
-// );
+watch(
+  () => props.currentFilter,
+  () => {
+    filter.value = props.currentFilter ? props.currentFilter : {};
+    onRequest(pagination.value);
+  },
+  { deep: true },
+);
 
 // const allColumns = computed(() => {
 //   return (
