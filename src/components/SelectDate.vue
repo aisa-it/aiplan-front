@@ -132,7 +132,7 @@
 import dayjs from 'dayjs';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
@@ -237,6 +237,20 @@ export default defineComponent({
       const expectedMinute = currentDate.hour(hour).minute(minute).second(0);
       return expectedMinute.isAfter(expectedTime);
     };
+
+    // При переключении на текущий день проверяем допустимое время
+    watch(proxyDate, (newVal) => {
+      if (!newVal) return;
+
+      const selectedDate = dayjs(newVal).startOf('day');
+      const today = dayjs().startOf('day');
+      const isSelectedToday = selectedDate.isSame(today, 'day');
+      const expectedTime = dayjs().add(15, 'minute');
+
+      if (isSelectedToday && selectedDate.isBefore(expectedTime)) {
+        proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
+      }
+    });
 
     return {
       api,
