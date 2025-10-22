@@ -8,6 +8,8 @@ import {
 } from 'src/constants/constants';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { inject } from 'vue';
+import { EventBus } from 'quasar';
 
 export interface QuasarPagination {
   page: number;
@@ -19,6 +21,7 @@ export interface QuasarPagination {
 
 export const useGroupedIssues = () => {
   const issuesStore = useIssuesStore();
+  const bus = inject('bus') as EventBus;
 
   const { project, projectProps, isKanbanEnabled } =
     storeToRefs(useProjectStore());
@@ -93,11 +96,11 @@ export const useGroupedIssues = () => {
         filters = { priorities: [entity] };
         return filters;
       }
-      case 'watcher': {
+      case 'watchers': {
         filters = { watchers: [entity.id] };
         return filters;
       }
-      case 'assignee': {
+      case 'assignees': {
         filters = { assignees: [entity.id] };
         return filters;
       }
@@ -120,7 +123,38 @@ export const useGroupedIssues = () => {
     );
 
     issuesStore.groupedIssueList[index].issues = response?.data.issues;
+    issuesStore.groupedIssueList[index].count = response?.data.count;
   }
 
-  return { getGroupedIssues, parsePagination, getCurrentTable };
+  async function updateCurrentTable(field, fieldValue, initialEntity) {
+    switch (issuesStore.groupByIssues) {
+      case 'state': {
+        bus.emit('updateIssueTable', 'state', initialEntity.id);
+        bus.emit('updateIssueTable', 'state', fieldValue.state_detail.id);
+        break;
+      }
+      case 'labels': {
+        fieldValue?.label_details.forEach((label) => {
+          bus.emit('updateIssueTable', 'labels', label.id);
+        });
+        break;
+      }
+      case 'assignees':
+      case 'watchers':
+      case 'author': {
+        fieldValue.assignee_details.forEach((assignee) => {
+          bus.emit('updateIssueTable', 'members', assignee.id);
+        });
+        break;
+      }
+    }
+    return;
+  }
+
+  return {
+    getGroupedIssues,
+    parsePagination,
+    getCurrentTable,
+    updateCurrentTable,
+  };
 };

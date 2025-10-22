@@ -31,19 +31,10 @@
       <IssueTable
         :rows="table?.issues"
         :rowsCount="table?.count"
+        :entity="table.entity"
         @refresh="
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table?.entity)
-        "
-        @updateIssueField="
-          (pagination, field, fieldValue) =>
-            handleUpdateIssueField(
-              index,
-              pagination,
-              table?.entity,
-              field,
-              fieldValue,
-            )
         "
       />
     </q-expansion-item>
@@ -74,15 +65,5 @@ const { projectProps } = storeToRefs(projectStore);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
-};
-
-const handleUpdateIssueField = (
-  index,
-  pagination,
-  entity,
-  field,
-  fieldValue,
-) => {
-  emits('updateIssueField', index, pagination, entity, field, fieldValue);
 };
 </script>

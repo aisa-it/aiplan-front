@@ -45,7 +45,11 @@
       <div v-for="card in table.issues" :key="card.id">
         <BoardCard
           :card="card"
+          :entity="table.entity"
           @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"
+          @update-table="
+            (field, row, entity) => updateTable(field, row, entity)
+          "
         />
       </div>
     </div>
@@ -65,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
@@ -84,8 +88,9 @@ import {
   useGroupedIssues,
 } from '../../composables/useGroupedIssues';
 import ArrowUp from 'src/components/icons/ArrowUp.vue';
+import { EventBus } from 'quasar';
 
-const { parsePagination } = useGroupedIssues();
+const { parsePagination, updateCurrentTable } = useGroupedIssues();
 
 const projectStore = useProjectStore();
 
@@ -105,7 +110,7 @@ const quasarPagination = ref<QuasarPagination>({
 });
 
 const getIssues = async (p?: any, isFullUpdate = false) => {
-  quasarPagination.value.page = await p;
+  if (p) quasarPagination.value.page = await p;
 
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
@@ -119,6 +124,20 @@ onMounted(() => {
   isExpanded.value = projectStore.isGroupHide(
     props?.table?.entity?.id || props?.table?.entity,
   );
+});
+
+const bus = inject('bus') as EventBus;
+
+const updateTable = (field, row, entity) => {
+  console.log(field, row, entity);
+  updateCurrentTable(field, row, entity);
+};
+
+bus.on('updateIssueTable', (field, entityId) => {
+  console.log(entityId);
+  if (props.table.entity?.id && entityId === props.table.entity?.id) {
+    getIssues();
+  }
 });
 </script>
 

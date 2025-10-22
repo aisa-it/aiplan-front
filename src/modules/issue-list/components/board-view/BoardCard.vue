@@ -55,7 +55,11 @@
             'change-issue-primary',
           )
         "
-        @refresh="emits('refresh', true)"
+        @refresh="
+          () => {
+            emits('updateTable', 'priority', card, entity);
+          }
+        "
       />
       <SelectDate
         v-if="projectProps?.columns_to_show?.includes('target_date')"
@@ -72,7 +76,7 @@
             'change-issue-primary',
           )
         "
-        @refresh="emits('refresh', true)"
+        @refresh="emits('updateTable', 'targetDate', card, entity)"
       />
     </div>
 
@@ -88,7 +92,16 @@
         :isDisabled="
           !rolesStore.hasPermissionByIssue(card, project, 'change-issue-status')
         "
-        @refresh="emits('refresh', true)"
+        @refresh="
+          (status) => {
+            emits(
+              'updateTable',
+              'state',
+              Object.assign(card, { state_detail: status }),
+              entity,
+            );
+          }
+        "
       />
 
       <div class="row">
@@ -167,11 +180,12 @@ import QuantityChip from 'src/components/QuantityChip.vue';
 import { useProjectStore } from 'src/stores/project-store';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
+import { useGroupedIssues } from '../../composables/useGroupedIssues';
 
 const { user } = storeToRefs(useUserStore());
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 const route = useRoute();
-const props = defineProps<{ card: any }>();
+const props = defineProps<{ card: any; entity: any }>();
 const rolesStore = useRolesStore();
 const avatarText = aiplan.UserName;
 
@@ -179,7 +193,7 @@ const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits(['refresh', 'updateTable']);
 const { statesCache } = storeToRefs(useStatesStore());
 const { projectProps, project } = storeToRefs(useProjectStore());
 </script>

@@ -34,7 +34,7 @@
     <template v-slot:body-cell-priority="props">
       <PriorityColumn
         :row-info="props"
-        @refresh="updateIssuesList('priority')"
+        @refresh="updateCurrentTable('priority', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -45,7 +45,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateIssuesList('state', status);
+            updateCurrentTable('state', props.row, entity);
           }
         "
       />
@@ -55,7 +55,7 @@
     <template v-slot:body-cell-target_date="props">
       <TargetDateColumn
         :row-info="props"
-        @refresh="updateIssuesList('targetDate')"
+        @refresh="updateCurrentTable('targetDate', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -110,7 +110,7 @@
 <script lang="ts" setup>
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-import { ref, watch, watchEffect } from 'vue';
+import { inject, ref, watch, watchEffect } from 'vue';
 
 import { useProjectStore } from 'src/stores/project-store';
 
@@ -129,7 +129,8 @@ import {
   ChipCountColumn,
 } from './issue-table';
 import { storeToRefs } from 'pinia';
-import TableListSkeleton from './skeletons/TableListSkeleton.vue';
+import { useGroupedIssues } from '../composables/useGroupedIssues';
+import { EventBus } from 'quasar';
 
 const projectStore = useProjectStore();
 
@@ -142,9 +143,12 @@ interface QuasarPagination {
   descending: boolean;
   rowsPerPage: number;
 }
+const { updateCurrentTable } = useGroupedIssues();
 
 const emits = defineEmits(['refresh', 'updateIssueField']);
-const props = defineProps(['rows', 'rowsCount', 'loading']);
+const props = defineProps(['entity', 'rows', 'rowsCount', 'loading']);
+
+const bus = inject('bus') as EventBus;
 
 const selectedRow = ref();
 const loadingTable = ref(false);
@@ -184,14 +188,12 @@ const getIssues = async (p: any, action = 'sorting') => {
   emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
 };
 
-const updateIssuesList = (updatedField: string, fieldValue: any) => {
-  emits(
-    'updateIssueField',
-    parsePagination(quasarPagination.value),
-    updatedField,
-    fieldValue,
-  );
-};
+bus.on('updateIssueTable', (field, entityId) => {
+  if (props.entity?.id && entityId === props.entity?.id) {
+    loadingTable.value = true;
+    emits('refresh', parsePagination(quasarPagination.value), false);
+  }
+});
 
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;

@@ -8,10 +8,6 @@
         (index, pagination, isFullUpdate, entity) =>
           refreshTable(index, pagination, isFullUpdate, entity)
       "
-      @updateIssueField="
-        (index, pagination, entity, field, fieldValue) =>
-          updateIssueField(index, pagination, entity, field, fieldValue)
-      "
     />
     <GroupedBoard
       v-if="isKanbanEnabled"
@@ -80,25 +76,6 @@ async function refreshTable(
 
   return await load();
 }
-
-const updateIssueField = async (
-  index,
-  pagination,
-  entity,
-  field,
-  fieldValue,
-) => {
-  if (field === 'state') {
-    let indexTable = issuesStore.groupedIssueList.findIndex(
-      (table) => table.entity?.id === fieldValue.id,
-    );
-    await Promise.all([
-      getCurrentTable(index, pagination, entity),
-      getCurrentTable(indexTable, pagination, fieldValue),
-    ]);
-  }
-  return;
-};
 
 async function load() {
   issuesLoader.value = true;
