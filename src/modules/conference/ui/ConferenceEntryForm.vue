@@ -14,10 +14,17 @@
       class="conference-input full-w"
       :class="isNight ? 'conference-input-dark' : 'conference-input'"
     />
-    <q-btn class="primary-btn" no-caps @click="connectToConference()"
-      ><span v-if="q.screen.width > 480"> Начать встречу </span>
-      <CheckIcon v-else
-    /></q-btn>
+    <div class="row items-center no-wrap">
+      <q-btn class="primary-btn q-mr-sm" no-caps @click="connectToConference()"
+        ><span v-if="q.screen.width > 480"> Начать встречу </span>
+        <CheckIcon v-else
+      /></q-btn>
+      <q-btn class="grey-btn-only-icon-sm"
+        ><LinkIcon color="#474A52" @click="copyLinkToConference" /><HintTooltip
+          >Скопировать ссылку</HintTooltip
+        ></q-btn
+      >
+    </div>
   </div>
 </template>
 
@@ -29,24 +36,27 @@ import { useQuasar } from 'quasar';
 // components
 import CheckIcon from 'src/components/icons/CheckIcon.vue';
 import { useRoute } from 'vue-router';
+import LinkIcon from 'src/components/icons/LinkIcon.vue';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from 'src/stores/user-store';
 
+const { user } = storeToRefs(useUserStore());
 const q = useQuasar();
 const route = useRoute();
-const roomName = ref();
+const roomName = ref(user.value.last_workspace_slug || '');
 const inputRef = ref();
+
 defineProps<{
   isNight: boolean;
 }>();
 
-onMounted(() => {
+onMounted(async () => {
+  await useUserStore().getUserInfo();
+
   if (route.params.roomName?.length) {
     roomName.value = route.params.roomName;
     connectToConference(true);
-  }
-
-  if (history.state.slug) {
-    roomName.value = history.state.slug;
-  }
+  } else roomName.value = user.value.last_workspace_slug || '';
 });
 
 const connectToConference = (routeByQuery = false) => {
@@ -60,6 +70,12 @@ const connectToConference = (routeByQuery = false) => {
     // production
     window.location.href = `${window.location.origin}/api/auth/conf/${roomName.value}/`;
   }
+};
+
+const copyLinkToConference = () => {
+  navigator.clipboard.writeText(
+    `${location.protocol}//${location.host}/conf/${roomName.value}/`,
+  );
 };
 </script>
 

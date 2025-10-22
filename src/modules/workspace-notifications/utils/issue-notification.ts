@@ -1,7 +1,8 @@
 import { addSpaceIfCamelCase } from 'src/utils/strings';
-import { formatDate } from 'src/utils/time';
+import { formatDateTime } from 'src/utils/time';
 import { translatePrioritets, translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
+import dayjs from 'dayjs';
 
 export function issueNotificationRender(data: any, detail: any) {
   let action = '';
@@ -92,7 +93,7 @@ export function issueNotificationRender(data: any, detail: any) {
         data.new_value && data.new_value !== ''
           ? data.new_value
           : data.old_value.replace(/"/g, '');
-      value = formatDate(date);
+      value = dayjs(date).isValid() ? formatDateTime(date) : date;
       return `<span>${action} ${value} для задачи ${link}
                 <span/>`;
 

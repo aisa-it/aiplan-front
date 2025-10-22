@@ -21,6 +21,9 @@ export const useViewPropsStore = defineStore('view_props', {
           states: [],
           workspaces: [],
           projects: [],
+          assigned_to_me: false,
+          authored_by_me: false,
+          watched_by_me: false,
         },
         issueView: 'list',
         showEmptyGroups: true,
@@ -101,10 +104,10 @@ export const useViewPropsStore = defineStore('view_props', {
           this.props.filters.group_by == 'Watchers'
             ? 'uuid_w-'
             : this.props.filters.group_by == 'Assignee to'
-            ? 'uuid_ass-'
-            : this.props.filters.group_by == 'Created by'
-            ? 'uuid_a-'
-            : '';
+              ? 'uuid_ass-'
+              : this.props.filters.group_by == 'Created by'
+                ? 'uuid_a-'
+                : '';
 
       return this.props.group_tables_hide[prefix + groupId];
     },
@@ -119,10 +122,10 @@ export const useViewPropsStore = defineStore('view_props', {
           this.props.filters.group_by == 'Watchers'
             ? 'uuid_w-'
             : this.props.filters.group_by == 'Assignee to'
-            ? 'uuid_ass-'
-            : this.props.filters.group_by == 'Created by'
-            ? 'uuid_a-'
-            : '';
+              ? 'uuid_ass-'
+              : this.props.filters.group_by == 'Created by'
+                ? 'uuid_a-'
+                : '';
 
       this.props.group_tables_hide[prefix + groupId] = status;
     },

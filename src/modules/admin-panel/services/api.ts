@@ -21,4 +21,7 @@ export const api = {
   updateUser: async (userId: string, data: DtoUserLight) => {
     return apiAdminPanel.updateUser(userId, data).then((res) => res.data);
   },
+  deleteUser: async (userId: string) => {
+    return apiAdminPanel.deleteUser(userId).then((res) => res.data);
+  }
 };

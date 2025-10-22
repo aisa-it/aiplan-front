@@ -4,6 +4,7 @@
     ref="editorToolbar"
     class="html-editor__toolbar"
     :class="classPrevent"
+    :style="{ width: isMobile ? 'auto' : '99%' }"
   >
     <div
       @scroll="scrollManager?.updateBtnVisible()"

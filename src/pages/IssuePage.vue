@@ -33,13 +33,8 @@ const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 
 // store to refs
-const {
-  issueData,
-  currentIssueID,
-  isRefreshIssue,
-  issueActivitiesData,
-  issueStatusesData,
-} = storeToRefs(singleIssueStore);
+const { issueData, currentIssueID, issueActivitiesData, issueStatusesData } =
+  storeToRefs(singleIssueStore);
 
 // metadata
 const metadata = ref({
@@ -52,19 +47,30 @@ useMeta(() => {
   };
 });
 
+const isRefreshIssue = ref(true);
+
 // functions
+const setMetaTitle = () => {
+  metadata.value.title = `Задача ${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`;
+};
+
+const issuePageInit = async () => {
+  if (issueData.value && issueData.value.id === currentIssueID.value) {
+    setMetaTitle();
+  } else {
+    await refresh();
+  }
+};
+
 const refresh = async () => {
   await singleIssueStore
     .getIssueData(route.params.workspace, route.params.project)
-    .then(
-      () =>
-        (metadata.value.title = `Задача ${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`),
-    );
+    .then(setMetaTitle);
 };
 
 const refreshActivitiesComments = async () => {
   await singleIssueStore.issueCommentsList(1, 25);
-}
+};
 
 const refreshActivities = async () => {
   await refreshActivitiesComments();
@@ -80,7 +86,7 @@ const refreshPromise = async () => {
   isRefreshIssue.value = true;
   issueActivitiesData.value = undefined;
   issueStatusesData.value = undefined;
-  await Promise.allSettled([refresh(), refreshActivities()]).then(
+  await Promise.allSettled([issuePageInit(), refreshActivities()]).then(
     () => (isRefreshIssue.value = false),
   );
 };

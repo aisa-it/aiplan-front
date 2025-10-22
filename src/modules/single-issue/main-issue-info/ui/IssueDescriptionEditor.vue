@@ -69,13 +69,12 @@ const handleToggleEdit = () => emits('toggleEdit');
 .issue-panel__editor {
   overflow: visible !important;
 }
-@media screen and (min-width: 1024px) {
-  :deep(.html-editor__toolbar) {
-    width: 99%;
-    position: sticky;
-    z-index: 10;
-    top: 50px;
-    background-color: $bg-color;
-  }
+
+:deep(.html-editor__toolbar) {
+  width: 99%;
+  position: sticky;
+  z-index: 10;
+  top: 50px;
+  background-color: $bg-color;
 }
 </style>

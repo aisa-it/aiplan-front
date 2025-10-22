@@ -12,7 +12,10 @@
 
     <q-page-container class="flex-grow">
       <div class="flex flex-col full-w full-height no-wrap">
-        <MainIssueInfo @toggleDrawer="toggleDrawer" />
+        <MainIssueInfo
+          @toggleDrawer="toggleDrawer"
+          @upload-attachment="refreshAttachments"
+        />
 
         <SelectChildren
           :projectid="issueData.project"
@@ -33,6 +36,7 @@
           :upload-attachment-func="uploadAttachments"
           :download-all-func="downloadAllAttachments"
           :id="issueData.id"
+          ref="selectAttachments"
         />
 
         <SingleIssueActivity />
@@ -78,12 +82,18 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 // vars
 const rightDrawerOpen = ref(Screen.width > 1323);
 
+const selectAttachments = ref();
+
 // блок вложений
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(
     currentProjectID.value,
     currentIssueID.value,
   );
+};
+
+const refreshAttachments = () => {
+  selectAttachments.value.refresh();
 };
 
 const uploadAttachments = async (
@@ -124,7 +134,6 @@ const downloadAllAttachments = async () => {
 </script>
 
 <style lang="scss" scoped>
-
 .issue-side-drawer {
   @media screen and (max-width: 760px) {
     width: 90% !important;

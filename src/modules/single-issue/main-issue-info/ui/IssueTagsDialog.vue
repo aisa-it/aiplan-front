@@ -101,6 +101,8 @@ import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import type { ITag } from 'src/interfaces/tags';
 import { BASE_ERROR_RULES } from 'src/constants/notifications';
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   tags: ITag[];
@@ -120,6 +122,8 @@ const api = useAiplanStore();
 const route = useRoute();
 const projectStore = useProjectStore();
 const { setNotificationView } = useNotificationStore();
+const singleIssueStore = useSingleIssueStore();
+const { currentIssueID } = storeToRefs(singleIssueStore);
 
 const labels = ref<ITag[]>([]);
 const currentTags = ref<ITag[]>([]);
@@ -159,7 +163,7 @@ const handleAddTag = (newTag: ITag) => {
       .issuePartialUpdate(
         route.params.workspace,
         route.params.project,
-        route.params.issue,
+        currentIssueID.value,
         {
           labels_list: [...currentTagsId.value, newTag.id],
         },
@@ -206,7 +210,7 @@ const handleSaveTags = () => {
     .issuePartialUpdate(
       route.params.workspace,
       route.params.project,
-      route.params.issue,
+      currentIssueID.value,
       {
         labels_list: currentTagsId.value || [],
       },

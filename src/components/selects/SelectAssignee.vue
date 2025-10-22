@@ -125,6 +125,7 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -174,8 +175,8 @@ const assignessid = ref(
         return e?.id || e;
       })
     : defAssignee.value && defAssignee.value.length
-    ? defAssignee.value
-    : null,
+      ? defAssignee.value
+      : null,
 );
 
 //composibles
@@ -198,9 +199,10 @@ const options = computed(() => {
     assignessid.value,
   ).filter((m) => m?.role > 5);
 
-  const membersList = props.assigness && !isSearch.value
-    ? [...props.assigness, ...filteredMembers]
-    : filteredMembers;
+  const membersList =
+    props.assigness && !isSearch.value
+      ? [...props.assigness, ...filteredMembers]
+      : filteredMembers;
 
   return membersList.filter(
     (item, idx, arr) =>
@@ -326,6 +328,24 @@ watch(
     pagination.search_query = '';
 
     refresh();
+  },
+);
+
+watch(
+  () => props.assigness,
+  (_) => {
+    if (!props.assigness) return;
+
+    let assigness: DtoWorkspaceMember[] = [...props.assigness];
+
+    if (assigness.length && typeof assigness[0] === 'string') {
+      assigness =
+        members.value.filter((opt) =>
+          props.assigness?.includes(opt?.member_id),
+        ) ?? [];
+    }
+
+    assignessid.value = assigness;
   },
 );
 </script>

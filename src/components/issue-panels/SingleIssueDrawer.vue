@@ -1,7 +1,8 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons @refresh="refresh()" />
-
+    <slot name="extend-buttons" />
+    <SingleIssueButtons @refresh="handleRefresh"/>
+    <slot name="extend-header" />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -24,7 +25,7 @@
           "
           :states-from-cache="statesCache[issueData?.project]"
           @set-status="(val) => (issueData.state_detail = val)"
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -77,16 +78,12 @@
           class="issue-selector"
           :projectid="issueData.project"
           :issueid="issueData.id"
-          :assigness="
-            issueData.assignee_details.map((assignee) => {
-              return { member: assignee };
-            })
-          "
+          :assigness="assignees"
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
           :current-member="user"
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         ></SelectAssignee>
       </div>
     </div>
@@ -103,16 +100,12 @@
           class="issue-selector"
           :projectid="issueData.project"
           :issueid="issueData.id"
-          :watchers="
-            issueData.watcher_details.map((watcher) => {
-              return { member: watcher };
-            })
-          "
+          :watchers="watchers"
           :current-member="user"
           :isDisabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-basic')
           "
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         ></SelectWatchers>
       </div>
     </div>
@@ -137,7 +130,8 @@
           :is-disabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @update:priority="(val) => (issueData.priority = val)"
+          @refresh="handleRefresh"
         >
         </SelectPriority>
       </div>
@@ -175,7 +169,7 @@
           :is-disabled="
             !hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -229,7 +223,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         ></SelectParentIssue>
         <q-btn
           v-if="
@@ -261,7 +255,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -283,7 +277,7 @@
           :isDisabled="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
           "
-          @refresh="refresh()"
+          @refresh="handleRefresh"
         />
       </div>
     </div>
@@ -297,14 +291,15 @@
       :isDisabled="
         hasPermissionByIssue(issueData, project, 'change-issue-secondary')
       "
-      @refresh="refresh()"
+      @refresh="handleRefresh"
     >
     </SelectLinks>
+    <slot name="extend-content" />
   </div>
 </template>
 <script setup lang="ts">
 // core
-import { computed } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -352,6 +347,8 @@ import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 // constants
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 
+import { setIntervalFunction } from 'src/utils/helpers';
+
 // stores
 const userStore = useUserStore();
 const statesStore = useStatesStore();
@@ -368,12 +365,38 @@ const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
+const emits = defineEmits<{
+  refresh: [];
+}>();
+
+const refreshCycle = ref();
+
 // functions
+
+const handleRefresh = async () => {
+  await refresh();
+  emits('refresh');
+};
+
 const refresh = async () => {
-  await singleIssueStore.getIssueData(
-    currentWorkspaceSlug.value,
-    currentProjectID.value,
-  );
+  await singleIssueStore
+    .getIssueDataById(
+      currentWorkspaceSlug.value,
+      currentProjectID.value,
+      currentIssueID.value,
+    )
+    .then((res) => {
+      issueData.value.draft = res.data.draft;
+      issueData.value.state_detail = res.data.state_detail;
+      issueData.value.assignee_details = res.data.assignee_details;
+      issueData.value.watcher_details = res.data.watcher_details;
+      issueData.value.priority = res.data.priority;
+      issueData.value.target_date = res.data.target_date;
+      issueData.value.parent_detail = res.data.parent_detail;
+      issueData.value.blocker_issues = res.data.blocker_issues;
+      issueData.value.blocked_issues = res.data.blocked_issues;
+      issueData.value.issue_link = res.data.issue_link;
+    });
 };
 
 const handleRemoveParentIssue = async () => {
@@ -390,7 +413,8 @@ const handleRemoveParentIssue = async () => {
         open: true,
         customMessage: SUCCESS_UPDATE_DATA,
       });
-      await refresh();
+      issueData.value.parent_detail = null;
+      handleRefresh()
     });
 };
 
@@ -404,6 +428,18 @@ const getCompareDate = computed(() => {
   return targetdDate - completedDate;
 });
 
+const assignees = computed(() =>
+  issueData.value?.assignee_details.map((assignee) => ({
+    member: assignee,
+  })),
+);
+
+const watchers = computed(() =>
+  issueData.value?.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+);
+
 const getCompareText = () => {
   const dateToDays = getCompareDate.value / 86400000;
   if (dateToDays === 0 || dateToDays > 9) {
@@ -416,6 +452,14 @@ const getCompareText = () => {
     )}`;
   }
 };
+
+onMounted(() => {
+  refreshCycle.value = setIntervalFunction(refresh);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshCycle.value);
+});
 </script>
 
 <style scoped lang="scss">

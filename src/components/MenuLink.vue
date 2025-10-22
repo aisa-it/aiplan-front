@@ -167,7 +167,7 @@
     v-model="isNotificationsSettingsOpen"
     :project="selectedProject"
   />
-  <NotificationsAdminSettingsDialog
+  <NotificationsAdminProjectSettingsDialog
     v-model="isNotificationsAdminSettingsOpen"
     :project="selectedProject"
   />
@@ -193,7 +193,7 @@ import MutedIcon from './icons/MutedIcon.vue';
 
 import SettingsIcon from './icons/SettingsIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
-import NotificationsAdminSettingsDialog from 'src/components/dialogs/NotificationsAdminSettingsDialog.vue';
+import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
 
 // constants
 import {
