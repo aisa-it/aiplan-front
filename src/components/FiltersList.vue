@@ -126,33 +126,31 @@
         <q-item class="centered-horisontally justify-between"
           >Только активные
           <q-toggle
-            v-model="showOnlyActive"
+            v-model="isShowOnlyActive"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-        <q-item class="centered-horisontally justify-between"
-          >Я исполнитель
+        <q-item class="centered-horisontally justify-between">
+          Я исполнитель
           <q-toggle
-            v-model="assigneeToMe"
+            v-model="isAssigneeToMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-
-        <q-item class="centered-horisontally justify-between"
-          >Я наблюдатель
+        <q-item class="centered-horisontally justify-between">
+          Я наблюдатель
           <q-toggle
-            v-model="watchedByMe"
+            v-model="isWatchedByMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-
-        <q-item class="centered-horisontally justify-between"
-          >Я автор
+        <q-item class="centered-horisontally justify-between">
+          Я автор
           <q-toggle
-            v-model="authoredByMe"
+            v-model="isAuthoredByMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -197,28 +195,20 @@ const projectStore = useProjectStore();
 const { projectProps, issuesLoader } = storeToRefs(projectStore);
 const bus = inject('bus') as EventBus;
 
-const viewSelector = ref(PROJECT_VIEWS[0]);
+const viewSelector = ref();
 const columnsSelector = ref(props.columns);
 const groupSelector = ref();
-const isDraft = ref();
+const isDraft = ref(projectProps.value?.draft);
 const isShowEmptyGroups = ref();
 const isShowOnlyActive = ref();
 const showSubIssues = ref(false);
-const draft = ref(false);
+const draft = ref(projectProps.value?.draft);
 const isPopupOpen = ref(false);
+const options = ref(NEW_GROUP_BY_OPTIONS);
 
-const projectView = !!props.projectId;
-const assigneeToMe = ref(false);
-const watchedByMe = ref(false);
-const authoredByMe = ref(false);
-
-const options = computed<{ value: string; label: string }[]>(() => {
-  return viewSelector.value.value === 'list'
-    ? GROUP_BY_OPTIONS
-    : GROUP_BY_OPTIONS.filter((option) => option.value !== 'None');
-});
-
-const stateSelector = ref<{ value: string; label: string }>(options.value[0]);
+const isAssigneeToMe = ref(false);
+const isWatchedByMe = ref(false);
+const isAuthoredByMe = ref(false);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -241,64 +231,70 @@ const isShowIndicators = computed(() => {
   return isShow;
 });
 
-async function refresh() {
-  viewProps.projectView = projectView;
-  await viewProps.getProps().then((viewProps) => {
-    stateSelector.value = options.value.find(
-      (group) => group.value === viewProps?.filters.group_by,
-    ) ?? options.value[0];
-    viewSelector.value = PROJECT_VIEWS.find(
-      (view) => view.value === viewProps?.issueView,
-    ) || { value: 'list', label: 'Список' };
-
-    if (!!viewProps?.columns_to_show && viewProps?.columns_to_show.length > 0) {
-      columnsSelector.value = props.columns.filter((col) =>
-        viewProps?.columns_to_show.some((c) => col.name == c),
-      );
-    }
-
-    showSubIssues.value = viewProps?.showSubIssues;
-    showEmptyGroups.value = viewProps?.showEmptyGroups;
-    showOnlyActive.value = viewProps?.showOnlyActive;
-    assigneeToMe.value = viewProps.filters.assigned_to_me || false;
-    watchedByMe.value = viewProps.filters.watched_by_me || false;
-    authoredByMe.value = viewProps.filters.authored_by_me || false;
-  });
-}
-
->>>>>>> a06fd444d63d4ed5e68f9a5dee88cc5f5a20b5cf
 const popupToggle = () => {
   isPopupOpen.value = !isPopupOpen.value;
 };
 
 const onUpdate = async () => {
-  viewProps.props.issueView = viewSelector.value.value;
-  viewProps.props.filters.group_by = stateSelector.value.value;
-  viewProps.props.columns_to_show = columnsSelector.value.map(
-    (col) => col.name,
-  );
-  viewProps.props.showSubIssues = showSubIssues.value;
-  viewProps.props.showEmptyGroups = showEmptyGroups.value;
-  viewProps.props.showOnlyActive = showOnlyActive.value;
-  viewProps.props.draft = draft.value;
-  viewProps.props.filters.assigned_to_me = assigneeToMe.value;
-  viewProps.props.filters.watched_by_me = watchedByMe.value;
-  viewProps.props.filters.authored_by_me = authoredByMe.value;
+  try {
+    issuesLoader.value = true;
+    let props = JSON.parse(JSON.stringify(projectProps.value));
+    props.issueView = viewSelector.value.value;
+    props.filters.group_by = groupSelector.value.value;
+    props.columns_to_show = columnsSelector.value.map((col) => col.name);
+    props.showSubIssues = showSubIssues.value;
+    props.showOnlyActive = isShowOnlyActive.value;
+    props.showEmptyGroups = isShowEmptyGroups.value;
+    props.draft = isDraft.value;
+    props.filters.assignedToMe = isAssigneeToMe.value;
+    props.filters.watchedToMe = isWatchedByMe.value;
+    props.filters.authoredToMe = isAuthoredByMe.value;
 
-  await viewProps.saveProps().then(async () => {
-    emits('update');
-  });
+    console.log(props);
+    await projectStore.setProjectProps(
+      route.params.workspace as string,
+      route.params.project as string,
+      props,
+    );
+    await projectStore
+      .getMeInProject(
+        route.params.workspace as string,
+        route.params.project as string,
+      )
+      .then(() => {
+        emits('update', projectProps.value?.filters?.group_by);
+      });
+  } catch (e) {
+    console.error(e);
+  }
 };
-
 watch(
-  () => props.projectId,
-  () => refresh(),
+  () => projectProps.value,
+  () => {
+    viewSelector.value =
+      PROJECT_VIEWS.find(
+        (view) => view.value === projectProps.value?.issueView,
+      ) || PROJECT_VIEWS[0];
+
+    groupSelector.value =
+      PARSED_GROUP[projectProps.value?.filters?.group_by || 'None'] ||
+      NEW_GROUP_BY_OPTIONS.find(
+        (option) => option.value === projectProps.value?.filters?.group_by,
+      );
+    showSubIssues.value = projectProps.value?.showSubIssues || false;
+    isDraft.value = projectProps.value?.draft || true;
+    isShowEmptyGroups.value = projectProps.value?.showEmptyGroups || false;
+    isShowOnlyActive.value = projectProps.value?.showOnlyActive || false;
+    isAssigneeToMe.value = projectProps.value?.filters.assignedToMe || false;
+    isWatchedByMe.value = projectProps.value?.filters.watchedToMe || false;
+    isAuthoredByMe.value = projectProps.value?.filters.authoredToMe || false;
+  },
 );
 
 watch(
-  () => viewProps.props.draft,
+  () => projectProps.value?.draft,
   () => {
-    draft.value = viewProps.props.draft;
+    isDraft.value = projectProps.value?.draft;
   },
   { immediate: true },
 );
@@ -306,16 +302,13 @@ watch(
 watch(
   () => viewSelector.value,
   () => {
-    const isCurrentOptionAvailable = options.value.some(
-      (opt) => opt.value === stateSelector.value.value,
-    );
+    if (viewSelector.value.value === 'kanban') {
+      options.value = options.value.filter((opt) => opt.value !== 'none');
+      groupSelector.value = options.value[0];
+    } else options.value = NEW_GROUP_BY_OPTIONS;
 
-    if (!isCurrentOptionAvailable && options.value.length > 0) {
-      stateSelector.value = options.value[0];
-      onUpdate();
-    }
+    onUpdate();
   },
-  { immediate: true },
 );
 </script>
 

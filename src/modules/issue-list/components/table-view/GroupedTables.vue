@@ -36,6 +36,7 @@
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table?.entity)
         "
+        @open-preview="(id) => emits('openPreview',id)"
       />
     </q-expansion-item>
   </div>
@@ -58,7 +59,7 @@ defineProps<{
   groupBy: string;
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField']);
+const emits = defineEmits(['refreshTable', 'updateIssueField','openPreview']);
 
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);

@@ -40,6 +40,7 @@ export const useGroupedIssues = () => {
         )?.value,
       order_by: pagination.sortBy,
       desc: pagination.descending,
+      draft: projectProps.value?.draft,
       offset:
         (pagination.page - 1) *
         (pagination.rowsPerPage == 0 ? 10 : pagination.rowsPerPage),
@@ -65,6 +66,9 @@ export const useGroupedIssues = () => {
 
     const filters = {
       states: [] as string[],
+      assigned_to_me: projectProps.value?.filters.assignedToMe,
+      authored_by_me: projectProps.value?.filters.authoredToMe,
+      watched_by_me: projectProps.value?.filters.watchedToMe,
     };
     if (projectProps.value?.filters?.states?.length) {
       filters.states = projectProps?.value?.filters?.states;

@@ -27,7 +27,7 @@
     </template>
 
     <template v-slot:body-cell-name="props">
-      <NameColumn :row-info="props" />
+      <NameColumn :row-info="props" @open-preview="emits('openPreview', props.row.sequence_id)" />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
@@ -145,7 +145,7 @@ interface QuasarPagination {
 }
 const { updateCurrentTable } = useGroupedIssues();
 
-const emits = defineEmits(['refresh', 'updateIssueField']);
+const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview']);
 const props = defineProps(['entity', 'rows', 'rowsCount', 'loading']);
 
 const bus = inject('bus') as EventBus;

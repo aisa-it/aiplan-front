@@ -12,11 +12,11 @@
     <div class="name-row">
       <q-btn
         v-if="projectProps?.columns_to_show?.includes('name')"
-        :to="`/${route.params.workspace}/projects/${route.params.project}/issues/${card.sequence_id}`"
-        :target="user.theme?.open_in_new ? '_blank' : '_self'"
+
         no-caps
         flat
         style="padding: 0 4px"
+        @click="emits('openPreview', card.sequence_id)"
       >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
@@ -193,7 +193,7 @@ const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits(['refresh', 'updateTable']);
+const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
 const { statesCache } = storeToRefs(useStatesStore());
 const { projectProps, project } = storeToRefs(useProjectStore());
 </script>

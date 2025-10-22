@@ -8,6 +8,7 @@
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table.entity)
         "
+        @openPreview="(id) => emits('openPreview', id)"
       />
     </div>
   </div>
@@ -27,7 +28,7 @@ const props = defineProps<{
   groupBy: string;
 }>();
 
-const emits = defineEmits(['refreshCard', 'refresh']);
+const emits = defineEmits(['refreshCard', 'refresh', 'openPreview']);
 
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);

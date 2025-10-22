@@ -1,9 +1,34 @@
 <template>
   <IssueTable
+    v-if="rows.length"
     :rows="rows"
     :rows-count="rowsCount"
     :loading="loadingTable"
     @refresh="(pagination) => load(pagination)"
+    @open-preview="(id) => openPreview(id)"
+  />
+  <div
+    v-else
+    class="column flex-center"
+    style="width: 100%; height: calc(100vh - 200px)"
+  >
+    <DocumentIcon :width="56" :height="56" />
+    <h6>Нет задач</h6>
+  </div>
+  <IssuePreview
+    v-model="isOpenPreview"
+    @refresh="
+      load(
+        parsePagination({
+          page: 1,
+          rowsNumber: 0,
+          sortBy: projectProps?.filters?.order_by,
+          descending: projectProps?.filters?.orderDesc,
+          rowsPerPage: projectProps?.page_size ?? DEF_ROWS_PER_PAGE,
+        }),
+      )
+    "
+    @open="openIssue"
   />
 </template>
 
@@ -23,6 +48,10 @@ import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 // components
 import IssueTable from './IssueTable.vue';
 import { useDefaultIssues } from '../composables/useDefaultIssues';
+import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
+import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { useUserStore } from 'src/stores/user-store';
 
 const { projectProps, issuesLoader } = storeToRefs(useProjectStore());
 
@@ -38,7 +67,11 @@ const props = defineProps([
   'defaultIssues',
   'defaultIssuesCount',
 ]);
+const isOpenPreview = ref(false);
 const loadingTable = ref(false);
+const singleIssueStore = useSingleIssueStore();
+const { currentIssueID } = storeToRefs(singleIssueStore);
+const { user } = storeToRefs(useUserStore());
 const load = async (pagination) => {
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(projectProps.value));
@@ -64,6 +97,43 @@ const load = async (pagination) => {
   loadingTable.value = false;
 };
 
+async function openIssue(id: string) {
+  isOpenPreview.value = false;
+
+  singleIssueStore.openIssue(
+    id,
+    user.value.theme?.open_in_new ? '_blank' : '_self',
+  );
+}
+
+async function openPreview(id: string) {
+  if (!route.params.workspace || !route.params.project) return;
+  isOpenPreview.value = false;
+  currentIssueID.value = id;
+
+  await singleIssueStore.getIssueData(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
+  isOpenPreview.value = true;
+}
+
+function parsePagination(pagination) {
+  return {
+    only_count: false,
+    show_sub_issue: projectProps.value.showSubIssues ?? true,
+    draft: projectProps.value?.draft ?? true,
+    order_by: pagination.sortBy,
+    desc: pagination.descending,
+    offset:
+      (pagination.page - 1) *
+      (pagination.rowsPerPage == 0 ? 10 : pagination.rowsPerPage),
+    limit:
+      pagination.rowsPerPage == 0
+        ? pagination.rowsNumber || 10
+        : pagination.rowsPerPage,
+  };
+}
 watch(
   () => props.defaultIssues,
   () => {

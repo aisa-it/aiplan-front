@@ -50,6 +50,7 @@
           @update-table="
             (field, row, entity) => updateTable(field, row, entity)
           "
+          @openPreview="(id) => emits('openPreview', id)"
         />
       </div>
     </div>
@@ -96,7 +97,7 @@ const projectStore = useProjectStore();
 
 const { projectProps } = storeToRefs(projectStore);
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits(['refresh', 'openPreview']);
 const props = defineProps<{ table: any; groupBy: string }>();
 
 const selectedPage = ref(1);
