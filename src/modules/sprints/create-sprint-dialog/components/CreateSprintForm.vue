@@ -108,7 +108,7 @@ const dateRange = ref<{ from: string; to: string }>({
   to: dayjs(new Date()).add(7, 'day').format('DD/MM/YYYY'),
 });
 const description = ref('');
-const editorValue = ref();
+const editorValue = ref('');
 const checkedIssues = ref<string[]>([]);
 
 //computeds

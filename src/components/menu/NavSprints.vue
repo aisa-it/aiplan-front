@@ -69,7 +69,7 @@ import { useRolesStore } from 'src/stores/roles-store';
 import ExpansionItem from '../ExpansionItem.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 import StatusCircularProgressBar from '../progress-bars/StatusCircularProgressBar.vue';
-import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/ui/components/CreateSprintDialogBtn.vue';
+import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/components/CreateSprintDialogBtn.vue';
 
 import { getSprints } from 'src/modules/sprints/services/api';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
