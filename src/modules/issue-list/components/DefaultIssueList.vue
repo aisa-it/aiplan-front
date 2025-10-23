@@ -16,7 +16,7 @@
     <h6>Нет задач</h6>
   </div>
   <IssuePreview
-    v-model="isOpenPreview"
+    v-model="isPreview"
     @refresh="
       load(
         parsePagination({
@@ -29,12 +29,14 @@
       )
     "
     @open="openIssue"
+    @close="closePreview"
   />
 </template>
 
 <script setup lang="ts">
 // core
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 // stores
@@ -67,11 +69,13 @@ const props = defineProps([
   'defaultIssues',
   'defaultIssuesCount',
 ]);
-const isOpenPreview = ref(false);
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
-const { currentIssueID } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
+
+const isMobile = computed(() => Screen.width <= 1200);
+
 const load = async (pagination) => {
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(projectProps.value));
@@ -98,7 +102,7 @@ const load = async (pagination) => {
 };
 
 async function openIssue(id: string) {
-  isOpenPreview.value = false;
+  isPreview.value = false;
 
   singleIssueStore.openIssue(
     id,
@@ -108,14 +112,24 @@ async function openIssue(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
-  isOpenPreview.value = false;
+  if (currentIssueID.value === id && isPreview.value || isMobile.value) {
+    openIssue(id);
+    return;
+  }
+  isPreview.value = false;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
     route.params.project as string,
   );
-  isOpenPreview.value = true;
+  isPreview.value = true;
+}
+
+async function closePreview() {
+  if (!isPreview.value) return;
+  isPreview.value = false;
+  currentIssueID.value = '';
 }
 
 function parsePagination(pagination) {
@@ -148,4 +162,7 @@ watch(
   },
   { immediate: true },
 );
+watch(isMobile, () => {
+  if (isMobile.value) closePreview();
+});
 </script>
