@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 // core
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
@@ -164,5 +164,9 @@ watch(
 );
 watch(isMobile, () => {
   if (isMobile.value) closePreview();
+});
+
+onBeforeUnmount(() => {
+  closePreview();
 });
 </script>
