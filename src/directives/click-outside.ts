@@ -4,6 +4,7 @@ export default {
   beforeMount(el: HTMLElement, binding: DirectiveBinding) {
     const classPrevent = '.' + binding.arg || '';
     const isAutoSave = binding.value.isAutoSave;
+    const excludeClasses: string[] = binding.value.exclude || [];
     let isDragging = false;
 
     const clickOutsideEvent = (event: MouseEvent | TouchEvent) => {
@@ -14,7 +15,9 @@ export default {
       }
 
       if (!(el === target || el.contains(target))) {
-        const isClickInsideExcludedElement = target.closest(classPrevent);
+        const isClickInsideExcludedElement =
+          target.closest(classPrevent) ||
+          excludeClasses.some((el) => (target as Element).closest('.' + el));
         if (!isClickInsideExcludedElement) {
           binding.value.onClickOutside(event);
           return;
@@ -32,7 +35,9 @@ export default {
     };
 
     const onUp = () => {
-      setTimeout(() => { isDragging = false; }, 0);
+      setTimeout(() => {
+        isDragging = false;
+      }, 0);
     };
 
     if (!isAutoSave) return;
@@ -57,7 +62,7 @@ export default {
   },
 
   unmounted(el: HTMLElement) {
-    if (!el.clickOutsideEvent) return
+    if (!el.clickOutsideEvent) return;
 
     document.removeEventListener('click', el.clickOutsideEvent);
     document.removeEventListener('touchstart', el.clickOutsideEvent);

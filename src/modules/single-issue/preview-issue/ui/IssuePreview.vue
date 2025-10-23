@@ -2,7 +2,7 @@
   <q-drawer
     v-model="model"
     side="right"
-    class="prevent-preview-side-drawer flex flex-col q-ml-sm issue-panel-card hide-scrollbar no-wrap relative-position"
+    class="prevent-preview-side-drawer flex flex-col issue-panel-card hide-scrollbar no-wrap relative-position"
     overlay
     bordered
     :width="adaptiveWidth"
@@ -10,28 +10,35 @@
     v-click-outside:prevent-preview-side-drawer="{
       isAutoSave: true,
       onClickOutside: () => emits('close'),
+      exclude: [...QUASAR_SELECTORS_CLASSES, 'prevent-click-issue-outside']
     }"
   >
     <div
-      class="q-px-sm q-pt-sm fixed-top row justify-between items-center flex"
+      v-if="model"
+      class="row q-px-sm q-pt-sm flex-center fixed-top"
       style="z-index: 999; background: inherit"
     >
-      <q-btn
-        class="secondary-btn-only-icon "
-        icon="open_in_full"
-        @click="emits('open', issueData.id)"
-      >
-        <HintTooltip>Развернуть</HintTooltip>
-      </q-btn>
-      <q-btn class="secondary-btn-only-icon" icon="close" @click="onClose">
-        <HintTooltip>Закрыть</HintTooltip>
-      </q-btn>
+      <h6 class="col q-px-sm">
+        {{ issueData.project_detail.identifier }}-{{ issueData.sequence_id }}
+      </h6>
+      <div class="row justify-end flex q-gutter-sm">
+        <q-btn
+          class="secondary-btn-only-icon"
+          icon="open_in_full"
+          @click="emits('open', issueData.id)"
+        >
+          <HintTooltip>Развернуть</HintTooltip>
+        </q-btn>
+        <q-btn class="secondary-btn-only-icon" icon="close" @click="onClose">
+          <HintTooltip>Закрыть</HintTooltip>
+        </q-btn>
+      </div>
     </div>
 
     <div
       v-if="model"
       class="flex flex-col full-width full-height no-wrap"
-      style="padding-right: 400px; padding-top: 40px"
+      style="padding-right: 400px; padding-top: 50px"
     >
       <MainIssueInfo preview @update:issue-page="emits('refresh')" />
 
@@ -59,8 +66,9 @@
     </div>
     <SingleIssueDrawer
       v-if="model"
+      preview
       class="fixed-right"
-      style="width: 400px; top: 48px"
+      style="width: 400px; top: 62px"
       @refresh="emits('refresh')"
     />
 
@@ -92,6 +100,9 @@ import SingleIssueActivity from 'src/components/issue-panels/SingleIssueActivity
 import LinkedIssuesPanel from '../../linked-issues/ui/LinkedIssuesPanel.vue';
 import { FileAttUploadProgressFunc } from 'src/interfaces/files';
 import MainIssueInfo from '../../main-issue-info/ui/MainIssueInfo.vue';
+
+// constants
+import { QUASAR_SELECTORS_CLASSES } from 'src/constants/quasarSelectorsClasses';
 
 const model = defineModel<boolean>({ default: false });
 

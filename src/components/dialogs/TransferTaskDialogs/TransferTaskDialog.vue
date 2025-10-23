@@ -286,7 +286,7 @@ const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
 
 // store to refs
-const { currentIssueID } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // vars
@@ -401,6 +401,10 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   }
 
   if (transferModel.value.delete_src) {
+    if (isPreview.value) {
+      emit('refresh');
+      isPreview.value = false
+    }
     router.push(
       `/${route.params.workspace}/projects/${route.params.project}/issues`,
     );

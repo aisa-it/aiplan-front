@@ -551,7 +551,7 @@
       </div> -->
     </q-card>
     <IssuePreview
-      v-model="isOpenPreview"
+      v-model="isPreview"
       @refresh="refresh"
       @open="openIssue"
       @close="closePreview"
@@ -628,7 +628,7 @@ const { project, currentProjectID, isLoadProjectInfo } =
   storeToRefs(projectStore);
 const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { refreshIssues } = storeToRefs(issuesStore);
-const { currentIssueID } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const avatarText = aiplan.UserName;
 // issues vars
 const rows = ref([]);
@@ -645,7 +645,6 @@ const projectMembers = ref<any[]>([]);
 const projectIssuesLabels = ref();
 const projectGroupedProperty = ref<any[]>([]);
 
-const isOpenPreview = ref(false);
 // vars
 const loading = ref(true);
 // metadata
@@ -706,7 +705,7 @@ async function onIssueClick(id: string) {
 }
 
 async function openIssue(id: string) {
-  isOpenPreview.value = false;
+  isPreview.value = false;
 
   singleIssueStore.openIssue(
     id,
@@ -716,20 +715,23 @@ async function openIssue(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
-  if (currentIssueID.value === id && isOpenPreview.value) return;
-  isOpenPreview.value = false;
+  if (currentIssueID.value === id && isPreview.value) {
+    openIssue(id);
+    return;
+  }
+  isPreview.value = false;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
     route.params.project as string,
   );
-  isOpenPreview.value = true;
+  isPreview.value = true;
 }
 
 async function closePreview() {
-  if (!isOpenPreview.value) return;
-  isOpenPreview.value = false;
+  if (!isPreview.value) return;
+  isPreview.value = false;
   currentIssueID.value = '';
 }
 

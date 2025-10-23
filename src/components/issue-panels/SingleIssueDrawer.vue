@@ -1,6 +1,6 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons @refresh="handleRefresh"/>
+    <SingleIssueButtons :preview="preview" @refresh="emits('refresh')" />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -361,6 +361,10 @@ const { statesCache } = storeToRefs(statesStore);
 
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+defineProps<{
+  preview?: boolean;
+}>();
 
 const emits = defineEmits<{
   refresh: [];

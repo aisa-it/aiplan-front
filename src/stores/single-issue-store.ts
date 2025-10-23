@@ -84,6 +84,7 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       issueActivitiesData: undefined as unknown as any,
       issueStatusesData: undefined as unknown as any,
       isRefreshIssue: false,
+      isPreview: false
     };
   },
 
