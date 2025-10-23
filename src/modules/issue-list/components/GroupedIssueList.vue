@@ -28,12 +28,19 @@
       <DocumentIcon :width="56" :height="56" />
       <h6>Нет задач</h6>
     </div>
-    <IssuePreview v-model="isOpenPreview" @refresh="load" @open="openIssue" />
+    <IssuePreview
+      v-model="isPreview"
+      @refresh="load"
+      @open="openIssue"
+      @close="closePreview"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 // core
+import { computed, onBeforeUnmount, watch } from 'vue';
+import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
@@ -48,7 +55,6 @@ import { useGroupedIssues } from '../composables/useGroupedIssues';
 import GroupedTables from './table-view/GroupedTables.vue';
 import GroupedBoard from './board-view/GroupedBoard.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
-import { ref } from 'vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
@@ -60,11 +66,12 @@ const { projectProps, issuesLoader, isKanbanEnabled } =
   storeToRefs(useProjectStore());
 const singleIssueStore = useSingleIssueStore();
 
-const { currentIssueID } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const route = useRoute();
-const isOpenPreview = ref(false);
+
+const isMobile = computed(() => Screen.width <= 1200);
 //
 async function refreshTable(
   index: number,
@@ -106,7 +113,7 @@ async function load() {
 }
 
 async function openIssue(id: string) {
-  isOpenPreview.value = false;
+  isPreview.value = false;
 
   singleIssueStore.openIssue(
     id,
@@ -116,13 +123,29 @@ async function openIssue(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
-  isOpenPreview.value = false;
+  if (currentIssueID.value === id && isPreview.value || isMobile.value) {
+    openIssue(id);
+    return;
+  }
+  isPreview.value = false;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
     route.params.project as string,
   );
-  isOpenPreview.value = true;
+  isPreview.value = true;
 }
+
+async function closePreview() {
+  if (!isPreview.value) return;
+  isPreview.value = false;
+  currentIssueID.value = '';
+}
+watch(isMobile, () => {
+  if (isMobile.value) closePreview();
+});
+onBeforeUnmount(() => {
+  closePreview();
+});
 </script>

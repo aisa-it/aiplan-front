@@ -5,7 +5,9 @@
         no-caps
         flat
         style="padding: 0 4px"
-        @click="emits('openPreview')"
+        :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${rowInfo.row.sequence_id}`"
+        :target="user.theme?.open_in_new ? '_blank' : '_self'"
+        @click.prevent="emits('openPreview')"
       >
         <span class="abbriviated-text" style="text-align: left">
           {{ rowInfo.value }}
@@ -46,7 +48,7 @@ const props = defineProps<{
   rowInfo: any;
 }>();
 
-const emits = defineEmits(['openPreview'])
+const emits = defineEmits(['openPreview']);
 const { user } = storeToRefs(useUserStore());
 const route = useRoute();
 

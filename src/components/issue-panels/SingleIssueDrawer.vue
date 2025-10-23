@@ -1,8 +1,6 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <slot name="extend-buttons" />
-    <SingleIssueButtons @refresh="handleRefresh"/>
-    <slot name="extend-header" />
+    <SingleIssueButtons :preview="preview" @refresh="emits('refresh')" />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -294,7 +292,6 @@
       @refresh="handleRefresh"
     >
     </SelectLinks>
-    <slot name="extend-content" />
   </div>
 </template>
 <script setup lang="ts">
@@ -364,6 +361,10 @@ const { statesCache } = storeToRefs(statesStore);
 
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+defineProps<{
+  preview?: boolean;
+}>();
 
 const emits = defineEmits<{
   refresh: [];

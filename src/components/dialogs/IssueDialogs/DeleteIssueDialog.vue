@@ -59,7 +59,7 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { currentProjectID } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { issueData } = storeToRefs(issueStore);
+const { issueData, isPreview } = storeToRefs(issueStore);
 
 const router = useRouter();
 
@@ -87,7 +87,10 @@ const handleDeleteIssue = async () => {
           }`,
         ),
       });
-      if (props.issue) emit('refresh');
+      if (props.issue || isPreview.value) {
+        emit('refresh');
+        isPreview.value = false;
+      }
     })
     .catch(() => {
       router.push(
