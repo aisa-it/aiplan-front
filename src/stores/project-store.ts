@@ -14,8 +14,12 @@ import {
   DtoProject,
   DtoProjectMember,
   DtoProjectMemberLight,
+  DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { allColumns } from 'src/modules/issue-list/constants/tableColumns';
+import axios from 'axios';
+import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
 
 const workspaceStore = useWorkspaceStore();
 const { workspaceProjects } = storeToRefs(workspaceStore);
@@ -32,7 +36,11 @@ interface IProjectState {
   meInProject: DtoProjectMember;
   isLoadProjectInfo: boolean;
   errorLoadProjects: boolean;
+  projectProps: TypesViewProps | null;
+  projectStatuses: Record<string, DtoStateLight[]>;
+  issuesLoader: boolean;
 }
+export const api = axios.create({ baseURL: '', withCredentials: true });
 
 export const useProjectStore = defineStore('project-store', {
   state: (): IProjectState => {
@@ -44,6 +52,9 @@ export const useProjectStore = defineStore('project-store', {
       meInProject: {} as DtoProjectMember,
       isLoadProjectInfo: false, // TODO не используется
       errorLoadProjects: false,
+      projectProps: null,
+      projectStatuses: {},
+      issuesLoader: true,
     };
   },
 
@@ -57,6 +68,33 @@ export const useProjectStore = defineStore('project-store', {
     // TODO нигде не используется, поля notification_author_settings_telegram нет в DtoProjectMember
     getAuthorEmailNotification(): any {
       return this.meInProject.notification_author_settings_tg;
+    },
+    isGroupingEnabled(): boolean | undefined {
+      return (
+        this.projectProps?.filters?.group_by?.toLowerCase() !== 'none' || false
+      );
+    },
+
+    isKanbanEnabled(): boolean | undefined {
+      return this.projectProps?.issueView === 'kanban';
+    },
+
+    /** Возвращает статусы проекта как массив*/
+    getStatusesAsArray(): DtoStateLight[] {
+      const statuses: DtoStateLight[][] = [];
+      for (const state in this.projectStatuses) {
+        statuses.push(this.projectStatuses[state]);
+      }
+      return statuses.flat();
+    },
+    getTableColumns() {
+      return allColumns.filter((column) => {
+        if (column.name === 'sequence_id') return true;
+
+        return this.projectProps?.columns_to_show?.some(
+          (c) => c === column?.name,
+        );
+      });
     },
   },
 
@@ -132,7 +170,29 @@ export const useProjectStore = defineStore('project-store', {
     ): Promise<DtoLabelLight[]> {
       return projectsApi
         .getIssueLabelList(workspaceSlug, projectID, queryData)
-        .then((res) => (this.projectLabels = res.data));
+        .then((response) => {
+          if (!queryData?.search_query) {
+            this.projectLabels = response.data;
+          }
+          return response.data;
+        });
+    },
+
+    // ----------------------------- PROJECT STATUSES -----------------------------
+
+    async getProjectStatuses(
+      workspaceSlug: string,
+      projectID: string,
+      queryData?: { search_query?: string },
+    ): Promise<Record<string, DtoStateLight[]>> {
+      return projectsApi
+        .getStateList(workspaceSlug, projectID, queryData)
+        .then((response) => {
+          if (!queryData?.search_query) {
+            this.projectStatuses = response.data;
+          }
+          return response.data;
+        });
     },
 
     // ----------------------------- PROJECT MEMBERS -----------------------------
@@ -160,7 +220,9 @@ export const useProjectStore = defineStore('project-store', {
       return projectsApi
         .getProjectMemberList(workspaceSlug, projectID, queryData)
         .then((res) => {
-          this.projectMembers = res.data.result || [];
+          if (!queryData) {
+            this.projectMembers = res.data.result || [];
+          }
           return res.data;
         })
         .catch((err) => {
@@ -236,7 +298,11 @@ export const useProjectStore = defineStore('project-store', {
 
       return projectsApi
         .getProjectMemberMe(workspaceSlug, projectID)
-        .then((res) => (this.meInProject = res.data))
+        .then((res) => {
+          this.meInProject = res.data;
+          this.projectProps = res.data?.view_props || null;
+          return res.data;
+        })
         .catch((err) => {
           if (err.response.status == 404) {
             this.router.replace('/not-found');
@@ -267,21 +333,43 @@ export const useProjectStore = defineStore('project-store', {
     ) {
       projectsApi.updateMyNotifications(workspaceSlug, projectID, data);
     },
+
+    async setProjectProps(
+      workspaceSlug: string,
+      projectID: string,
+      view_props: TypesViewProps,
+    ) {
+      return projectsApi.updateProjectView(
+        workspaceSlug,
+        projectID,
+        view_props,
+      );
+    },
+
+    isGroupHide(groupId: string) {
+      if (
+        this.projectProps?.group_tables_hide &&
+        this.projectProps?.group_tables_hide[groupId]
+      )
+        return Boolean(this.projectProps?.group_tables_hide[groupId]);
+      else return false;
+    },
+
+    async setGroupHide(groupToHide: string, hideValue: boolean) {
+      const props = JSON.parse(JSON.stringify(this.projectProps));
+
+      if (!props.group_tables_hide) props.group_tables_hide = {};
+
+      props.group_tables_hide[groupToHide] = !hideValue;
+      try {
+        await this.setProjectProps(
+          this.router.currentRoute.value.params.workspace as string,
+          this.router.currentRoute.value.params.project as string,
+          props,
+        );
+        this.projectProps = props;
+        return props;
+      } catch (e) {}
+    },
   },
 });
-
-// async checkProjectIdentifierAvailability(data: string): Promise<any> {
-//   return api
-//     .get(
-//       `/api/workspaces/${this.router.currentRoute.value.params['workspace']}/project-identifiers`,
-//       {
-//         params: {
-//           name: data,
-//         },
-//       },
-//     )
-//     .then((response) => response?.data)
-//     .catch((error) => {
-//       throw error?.response?.data;
-//     });
-// },

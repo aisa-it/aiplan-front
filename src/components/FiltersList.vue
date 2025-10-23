@@ -4,11 +4,11 @@
     <DotListSelectIcon v-if="isShowIndicators" :width="20" :height="20" />
     <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
       <q-list style="width: 320px; background: white">
-        <div v-show="projectView">
+        <div>
           <q-item-label header style="padding-bottom: 0px"
             >Отображение</q-item-label
           >
-          <q-item v-show="projectView" class="row">
+          <q-item class="row">
             <q-select
               dense
               label="Вид"
@@ -30,7 +30,7 @@
             </q-select>
           </q-item>
 
-          <q-item v-show="projectView" class="row">
+          <q-item class="row">
             <q-select
               dense
               label="Колонки"
@@ -70,7 +70,7 @@
           <q-select
             dense
             label="Группировка"
-            v-model="stateSelector"
+            v-model="groupSelector"
             class="base-selector full-w"
             popup-content-class="fit-select-popup selector-option__wrapper scrollable-content"
             :options="options"
@@ -87,17 +87,14 @@
             </template>
           </q-select>
         </q-item>
-        <q-item v-show="projectView" class="row">
+        <q-item class="row">
           <SelectStatusFilter
             :projectId="projectId"
             @update="onUpdate()"
             class="full-w"
           />
         </q-item>
-        <q-item
-          v-show="projectView"
-          class="centered-horisontally justify-between"
-        >
+        <q-item class="centered-horisontally justify-between">
           Показывать подзадачи
           <q-toggle
             v-model="showSubIssues"
@@ -105,25 +102,22 @@
             @update:model-value="onUpdate()"
           />
         </q-item>
-        <q-item
-          v-show="projectView"
-          class="centered-horisontally justify-between"
-        >
+        <q-item class="centered-horisontally justify-between">
           Показывать черновики
           <q-toggle
-            v-model="draft"
+            v-model="isDraft"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
 
         <q-item
-          v-show="viewProps.props?.filters.group_by !== 'None'"
+          v-show="projectProps?.filters?.group_by !== 'None'"
           class="centered-horisontally justify-between"
         >
           Показывать пустые группы
           <q-toggle
-            v-model="showEmptyGroups"
+            v-model="isShowEmptyGroups"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -132,33 +126,31 @@
         <q-item class="centered-horisontally justify-between"
           >Только активные
           <q-toggle
-            v-model="showOnlyActive"
+            v-model="isShowOnlyActive"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-        <q-item class="centered-horisontally justify-between"
-          >Я исполнитель
+        <q-item class="centered-horisontally justify-between">
+          Я исполнитель
           <q-toggle
-            v-model="assigneeToMe"
+            v-model="isAssigneeToMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-
-        <q-item class="centered-horisontally justify-between"
-          >Я наблюдатель
+        <q-item class="centered-horisontally justify-between">
+          Я наблюдатель
           <q-toggle
-            v-model="watchedByMe"
+            v-model="isWatchedByMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
-
-        <q-item class="centered-horisontally justify-between"
-          >Я автор
+        <q-item class="centered-horisontally justify-between">
+          Я автор
           <q-toggle
-            v-model="authoredByMe"
+            v-model="isAuthoredByMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -170,58 +162,61 @@
 
 <script setup lang="ts">
 // core
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, inject } from 'vue';
+import { useRoute } from 'vue-router';
+import { EventBus } from 'quasar';
 
 // store
-import { useViewPropsStore } from 'src/stores/view-props-store';
-
+import { useProjectStore } from 'src/stores/project-store';
 // constants
-import { GROUP_BY_OPTIONS, PROJECT_VIEWS } from 'src/constants/constants';
+import {
+  GROUP_BY_OPTIONS,
+  NEW_GROUP_BY_OPTIONS,
+  PARSED_GROUP,
+  PROJECT_VIEWS,
+} from 'src/constants/constants';
 
 // components
 import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
+import { storeToRefs } from 'pinia';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 const props = defineProps<{
   projectId: string;
   columns: any[];
 }>();
 
-const emits = defineEmits<{
-  update: [];
-}>();
+const emits = defineEmits(['update']);
 
-const viewProps = useViewPropsStore();
+const route = useRoute();
+const projectStore = useProjectStore();
+const { projectProps, issuesLoader } = storeToRefs(projectStore);
+const bus = inject('bus') as EventBus;
 
-const viewSelector = ref(PROJECT_VIEWS[0]);
+const viewSelector = ref();
 const columnsSelector = ref(props.columns);
+const groupSelector = ref();
+const isDraft = ref(projectProps.value?.draft);
+const isShowEmptyGroups = ref();
+const isShowOnlyActive = ref();
 const showSubIssues = ref(false);
-const draft = ref(false);
-const showEmptyGroups = ref(false);
-const showOnlyActive = ref(false);
+const draft = ref(projectProps.value?.draft);
 const isPopupOpen = ref(false);
+const options = ref(NEW_GROUP_BY_OPTIONS);
 
-const projectView = !!props.projectId;
-const assigneeToMe = ref(false);
-const watchedByMe = ref(false);
-const authoredByMe = ref(false);
-
-const options = computed<{ value: string; label: string }[]>(() => {
-  return viewSelector.value.value === 'list'
-    ? GROUP_BY_OPTIONS
-    : GROUP_BY_OPTIONS.filter((option) => option.value !== 'None');
-});
-
-const stateSelector = ref<{ value: string; label: string }>(options.value[0]);
+const isAssigneeToMe = ref(false);
+const isWatchedByMe = ref(false);
+const isAuthoredByMe = ref(false);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
   const isNoGroupNone =
-    viewProps.props?.filters.group_by !== GROUP_BY_OPTIONS[0].value;
-  const isShowSubIssues = !viewProps.props?.showSubIssues;
-  const isShowOnlyActive = viewProps.props?.showOnlyActive;
-  const isStatusLength = !!viewProps.props?.filters.states?.length;
+    projectProps?.value?.filters?.group_by !== GROUP_BY_OPTIONS[0].value;
+  const isShowSubIssues = !projectProps?.value?.showSubIssues;
+  const isShowOnlyActive = projectProps?.value?.showOnlyActive;
+  const isStatusLength = !!projectProps.value?.filters.states?.length;
   const isColumnsToShow = props.columns.length !== columnsSelector.value.length;
 
   if (
@@ -236,65 +231,70 @@ const isShowIndicators = computed(() => {
   return isShow;
 });
 
-async function refresh() {
-  viewProps.projectView = projectView;
-  await viewProps.getProps().then((viewProps) => {
-    stateSelector.value = options.value.find(
-      (group) => group.value === viewProps?.filters.group_by,
-    ) ?? options.value[0];
-    viewSelector.value = PROJECT_VIEWS.find(
-      (view) => view.value === viewProps?.issueView,
-    ) || { value: 'list', label: 'Список' };
-
-    if (!!viewProps?.columns_to_show && viewProps?.columns_to_show.length > 0) {
-      columnsSelector.value = props.columns.filter((col) =>
-        viewProps?.columns_to_show.some((c) => col.name == c),
-      );
-    }
-
-    showSubIssues.value = viewProps?.showSubIssues;
-    showEmptyGroups.value = viewProps?.showEmptyGroups;
-    showOnlyActive.value = viewProps?.showOnlyActive;
-    assigneeToMe.value = viewProps.filters.assigned_to_me || false;
-    watchedByMe.value = viewProps.filters.watched_by_me || false;
-    authoredByMe.value = viewProps.filters.authored_by_me || false;
-  });
-}
-
 const popupToggle = () => {
   isPopupOpen.value = !isPopupOpen.value;
 };
 
-onMounted(async () => refresh());
-
 const onUpdate = async () => {
-  viewProps.props.issueView = viewSelector.value.value;
-  viewProps.props.filters.group_by = stateSelector.value.value;
-  viewProps.props.columns_to_show = columnsSelector.value.map(
-    (col) => col.name,
-  );
-  viewProps.props.showSubIssues = showSubIssues.value;
-  viewProps.props.showEmptyGroups = showEmptyGroups.value;
-  viewProps.props.showOnlyActive = showOnlyActive.value;
-  viewProps.props.draft = draft.value;
-  viewProps.props.filters.assigned_to_me = assigneeToMe.value;
-  viewProps.props.filters.watched_by_me = watchedByMe.value;
-  viewProps.props.filters.authored_by_me = authoredByMe.value;
+  try {
+    issuesLoader.value = true;
+    let props = JSON.parse(JSON.stringify(projectProps.value));
+    props.issueView = viewSelector.value.value;
+    props.filters.group_by = groupSelector.value.value;
+    props.columns_to_show = columnsSelector.value.map((col) => col.name);
+    props.showSubIssues = showSubIssues.value;
+    props.showOnlyActive = isShowOnlyActive.value;
+    props.showEmptyGroups = isShowEmptyGroups.value;
+    props.draft = isDraft.value;
+    props.filters.assignedToMe = isAssigneeToMe.value;
+    props.filters.watchedToMe = isWatchedByMe.value;
+    props.filters.authoredToMe = isAuthoredByMe.value;
 
-  await viewProps.saveProps().then(async () => {
-    emits('update');
-  });
+    console.log(props);
+    await projectStore.setProjectProps(
+      route.params.workspace as string,
+      route.params.project as string,
+      props,
+    );
+    await projectStore
+      .getMeInProject(
+        route.params.workspace as string,
+        route.params.project as string,
+      )
+      .then(() => {
+        emits('update', projectProps.value?.filters?.group_by);
+      });
+  } catch (e) {
+    console.error(e);
+  }
 };
-
 watch(
-  () => props.projectId,
-  () => refresh(),
+  () => projectProps.value,
+  () => {
+    viewSelector.value =
+      PROJECT_VIEWS.find(
+        (view) => view.value === projectProps.value?.issueView,
+      ) || PROJECT_VIEWS[0];
+
+    groupSelector.value =
+      PARSED_GROUP[projectProps.value?.filters?.group_by || 'None'] ||
+      NEW_GROUP_BY_OPTIONS.find(
+        (option) => option.value === projectProps.value?.filters?.group_by,
+      );
+    showSubIssues.value = projectProps.value?.showSubIssues || false;
+    isDraft.value = projectProps.value?.draft || true;
+    isShowEmptyGroups.value = projectProps.value?.showEmptyGroups || false;
+    isShowOnlyActive.value = projectProps.value?.showOnlyActive || false;
+    isAssigneeToMe.value = projectProps.value?.filters.assignedToMe || false;
+    isWatchedByMe.value = projectProps.value?.filters.watchedToMe || false;
+    isAuthoredByMe.value = projectProps.value?.filters.authoredToMe || false;
+  },
 );
 
 watch(
-  () => viewProps.props.draft,
+  () => projectProps.value?.draft,
   () => {
-    draft.value = viewProps.props.draft;
+    isDraft.value = projectProps.value?.draft;
   },
   { immediate: true },
 );
@@ -302,16 +302,13 @@ watch(
 watch(
   () => viewSelector.value,
   () => {
-    const isCurrentOptionAvailable = options.value.some(
-      (opt) => opt.value === stateSelector.value.value,
-    );
+    if (viewSelector.value.value === 'kanban') {
+      options.value = options.value.filter((opt) => opt.value !== 'none');
+      groupSelector.value = options.value[0];
+    } else options.value = NEW_GROUP_BY_OPTIONS;
 
-    if (!isCurrentOptionAvailable && options.value.length > 0) {
-      stateSelector.value = options.value[0];
-      onUpdate();
-    }
+    onUpdate();
   },
-  { immediate: true },
 );
 </script>
 
