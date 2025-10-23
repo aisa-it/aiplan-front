@@ -1,5 +1,7 @@
 import {
+  AiplanRequestIssueIdList,
   AiplanRequestSprint,
+  AiplanRequestUserIdList,
   DtoSprint,
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -19,4 +21,24 @@ export const createSprint = async (
   data: AiplanRequestSprint,
 ): Promise<DtoSprint> => {
   return api.createSprint(workspaceSlug, data).then((res) => res.data);
+};
+
+export const sprintIssuesUpdate = async (
+  workspaceSlug: string,
+  sprintId: string,
+  data: AiplanRequestIssueIdList,
+): Promise<void> => {
+  return api
+    .sprintIssuesUpdate(workspaceSlug, sprintId, data)
+    .then((res) => res.data);
+};
+
+export const sprintWatchersUpdate = async (
+  workspaceSlug: string,
+  sprintId: string,
+  data: AiplanRequestUserIdList,
+): Promise<void> => {
+  return api
+    .sprintWatchersUpdate(workspaceSlug, sprintId, data)
+    .then((res) => res.data);
 };
