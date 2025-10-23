@@ -3,7 +3,7 @@
     label="Дата окончания"
     class="base-input"
     dense
-    :model-value="`${dateRange.from}-${dateRange.to}`"
+    :model-value="`${localRange.from}-${localRange.to}`"
     @update:model-value="onInputChange"
     mask="##.##.####-##.##.####"
   >
@@ -11,14 +11,14 @@
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
           <q-date
-            v-model="dateRange"
+            v-model="localRange"
             range
             mask="DD.MM.YYYY"
-            :min="minYearMonth"
-            :max="maxYearMonth"
+            :min="minDate"
+            :max="maxDate"
           >
             <div class="row items-center justify-end">
-              <q-btn v-close-popup label="Close" color="primary" flat />
+              <q-btn v-close-popup label="Закрыть" color="primary" flat />
             </div>
           </q-date>
         </q-popup-proxy>
@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, onMounted } from 'vue';
+import { computed } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps<{
@@ -36,33 +36,17 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['update:modelValue']);
 
-const dateRange = ref({ ...props.modelValue });
+const minDate = dayjs().format('DD.MM.YYYY');
+const maxDate = dayjs().add(10, 'year').endOf('year').format('DD.MM.YYYY');
 
-const maxYearMonth = `${dayjs().year() + 10}/12`;
-const minYearMonth = `${dayjs().year()}/01`;
-
-watch(
-  () => dateRange.value,
-  (val) => {
-    emit('update:modelValue', val);
-  },
-  { deep: true },
-);
-
-watch(
-  () => props.modelValue,
-  (val) => {
-    dateRange.value = { ...val };
-  },
-  { deep: true },
-);
+const localRange = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+});
 
 function onInputChange(value: string | number | null) {
   const input = String(value ?? '');
   const [from, to] = input.split('-').map((v) => v.trim());
-  dateRange.value = { from, to };
+  emit('update:modelValue', { from, to });
 }
-onMounted(() => {
-  dateRange.value = { ...props.modelValue };
-});
 </script>

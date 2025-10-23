@@ -1,9 +1,9 @@
 <template>
   <div class="column w-full h-full" style="max-height: 100%; overflow: hidden">
-    <div class="col-auto">
+    <div class="col-auto q-mb-lg">
       <q-input
         v-model="sprintName"
-        class="q-mb-sm base-input"
+        class="q-mb-sm base-input q-pa-none"
         label="Название спринта"
         :rules="[(val) => !!val || 'Введите название спринта']"
         dense
@@ -11,127 +11,134 @@
     </div>
     <div class="col column no-wrap" style="overflow-y: scroll">
       <div class="col-auto">
-        <div class="row q-mb-sm centered-horisontally">
+        <div class="row q-mb-md centered-horisontally">
           <div class="col centered-horisontally issue-selector-label">
             <ObserveIcon />
-            <span class="q-ml-sm"> Наблюдатель </span>
+            <span class="q-ml-sm"> Наблюдатели </span>
           </div>
-          <ObserveIcon class="issue-selector-icon mr-12" />
 
           <SelectWatchers
             v-model:watchers="watchers"
-            :projectid="project.id"
             :current-member="user"
             label="Выберите наблюдателя"
             class="col centered-horisontally"
           />
         </div>
 
-        <div class="row q-mb-sm centered-horisontally">
+        <div class="row q-mb-md centered-horisontally">
           <div class="col centered-horisontally issue-selector-label">
             <WatchDashedIcon />
             <span class="q-ml-sm"> Интервал </span>
           </div>
-          <WatchDashedIcon class="issue-selector-icon mr-12" />
           <CreateSprintDateRange class="col" v-model="dateRange" />
         </div>
       </div>
 
+      <p class="q-mb-md">Цель спринта:</p>
       <EditorTipTapV2
-        v-model="editorValue"
-        editor-id="aidoc-editor"
-        class="col-auto"
+        v-model="description"
+        editor-id="create-sprint-editor"
+        class="col-auto q-mb-lg"
+        style="height: 312px"
       />
 
-      <div class="flex column no-wrap q-mt-sm">
-        <div class="centered-horisontally">
+      <div class="flex column no-wrap q-mb-lg">
+        <div class="centered-horisontally q-mb-sm">
           <LinkIcon />
           <span class="q-ml-sm">Задачи</span>
         </div>
 
         <SelectSprintIssues
           v-if="issues && issues.length > 0"
-          v-model="checkedIssues"
-          :issues="
-            issues.map((i) => {
-              return {
-                id: i.id,
-                name: i.name,
-              };
-            })
-          "
-          class="scrollable-content"
-          style="overflow-y: auto"
+          :issues="issues"
+          @delete="(id) => emit('delete', id)"
+          class="q-pr-lg visible-scroll"
+          style="overflow-y: auto; max-height: 216px; scrollbar-width: auto"
         />
       </div>
     </div>
 
-    <div class="col-auto flex q-mt-sm justify-end">
-      <q-btn label="Создать спринт" color="primary" @click="createSprint" />
-    </div>
+    <q-btn
+      label="Создать спринт"
+      flat
+      dense
+      no-caps
+      class="primary-btn"
+      style="width: 100%"
+      @click="createSprint"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
+
 import { storeToRefs } from 'pinia';
-import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
-import WatchDashedIcon from 'src/components/icons/WatchDashedIcon.vue';
-import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 import { useUserStore } from 'src/stores/user-store';
-import { computed, ref } from 'vue';
+
+import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import SelectSprintIssues from './SelectSprintIssues.vue';
+
+import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
+import WatchDashedIcon from 'src/components/icons/WatchDashedIcon.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 
 const props = defineProps<{
-  issues: any[];
+  issues?: any[];
 }>();
 
 const emit = defineEmits<{
-  (event: 'update:issues', checkedRows: any[]): void;
+  (event: 'delete', id: string): void;
+  (event: 'create', data: any): void;
 }>();
 
-//stores
 const userStore = useUserStore();
 
-//storesToRefs
 const { user } = storeToRefs(userStore);
 
-//state
 const sprintName = ref('');
 const watchers = ref([]);
-const project = ref([]);
-const dateRange = ref<{ from: string; to: string }>({
-  from: dayjs(new Date()).format('DD/MM/YYYY'),
-  to: dayjs(new Date()).add(7, 'day').format('DD/MM/YYYY'),
-});
-const description = ref('');
-const editorValue = ref('');
-const checkedIssues = ref<string[]>([]);
 
-//computeds
-const issues = computed({
-  get: () => props.issues,
-  set: (val) => emit('update:issues', val),
+const dateRange = ref({
+  from: dayjs().format('DD.MM.YYYY'),
+  to: dayjs().add(7, 'day').format('DD.MM.YYYY'),
 });
 
-//methods
+const description = ref();
+
+const toISO = (data: string) => {
+  const parsed = dayjs(data, 'DD.MM.YYYY', true);
+  return parsed.isValid() ? parsed.toISOString() : null;
+};
+
 const createSprint = () => {
-  console.log({
-    sprintName: sprintName.value,
-    watchers: watchers.value,
-    dateRange: dateRange.value,
-    description: description.value,
-    issues: checkedIssues.value,
+  emit('create', {
+    createSprintData: {
+      name: sprintName.value,
+      description: description.value,
+      start_date: toISO(dateRange.value.from),
+      end_date: toISO(dateRange.value.to),
+    },
+    issuesSprint: { issues_add: props.issues?.map((el) => el.id) },
+    membersSprint: { members_add: watchers.value },
   });
 };
 </script>
 
 <style scoped>
-.q-page {
-  max-width: 600px;
-  margin: auto;
+.visible-scroll {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
 }
 </style>

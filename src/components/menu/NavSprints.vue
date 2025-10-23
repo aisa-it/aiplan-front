@@ -11,7 +11,7 @@
           <SprintIcon :is-dark="$q.dark.isActive" />
         </q-item-section>
         <q-item-section>Спринты</q-item-section>
-        <CreateSprintDialogBtn />
+        <CreateSprintDialogBtn @update-sprints="refreshSprints" />
       </div>
     </template>
     <template v-slot:content>
@@ -83,8 +83,12 @@ const route = useRoute();
 const sprints = ref([] as DtoSprintLight[]);
 
 onMounted(async () => {
-  sprints.value = await getSprints(route.params.workspace as string);
+  refreshSprints();
 });
+
+const refreshSprints = async () => {
+  sprints.value = await getSprints(route.params.workspace as string);
+};
 
 watch(
   () => route.params.workspace,

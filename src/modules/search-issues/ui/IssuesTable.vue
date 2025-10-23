@@ -128,11 +128,6 @@
             <HintTooltip>
               <span v-html="parseBoldText(props.value)"
             /></HintTooltip>
-
-            <span v-html="parseBoldText(props.value)" />
-            <HintTooltip>
-              <span v-html="parseBoldText(props.value)"
-            /></HintTooltip>
           </div>
         </q-td>
       </template>

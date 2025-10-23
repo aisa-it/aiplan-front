@@ -42,7 +42,9 @@
           class="no-wrap q-pl-lg"
         >
           <CreateSprintForm
-            v-model:issues="checkedIssues"
+            :issues="checkedIssues"
+            @delete="deleteIssueById"
+            @create="createSprintHandle"
             class="col no-wrap"
           />
         </q-drawer>
@@ -67,6 +69,14 @@ import {
 import CreateSprintForm from './components/CreateSprintForm.vue';
 import { MyFilterList } from 'src/modules/search-issues/filter-list/ui';
 import IssuesTable from 'src/modules/search-issues/ui/IssuesTable.vue';
+
+import {
+  createSprint,
+  sprintIssuesUpdate,
+  sprintWatchersUpdate,
+} from '../services/api';
+
+const emits = defineEmits<{ updateSprints: [] }>();
 
 const filtersStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
@@ -111,15 +121,43 @@ const refreshMyFilters = async () => {
 };
 
 const handleOpen = async () => {
+  checkedIssues.value = [];
   currentFilter.value = {
     workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
   };
   await refresh();
 };
 
+const deleteIssueById = (id: string) => {
+  checkedIssues.value = checkedIssues.value.filter((el) => el.id !== id);
+};
+
 const handleClose = () => {
   filtersStore.resetColumns();
   currentFilter.value = {};
+  checkedIssues.value = [];
+};
+
+const createSprintHandle = async (data: any) => {
+  const res = await createSprint(
+    workspaceStore.currentWorkspaceSlug ?? '',
+    data.createSprintData,
+  );
+  await Promise.all([
+    sprintIssuesUpdate(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      res.id ?? '',
+      data.issuesSprint,
+    ),
+    sprintWatchersUpdate(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      res.id ?? '',
+      data.membersSprint,
+    ),
+  ]);
+
+  emits('updateSprints');
+  dialogRef.value?.hide();
 };
 
 const refresh = async () => {
