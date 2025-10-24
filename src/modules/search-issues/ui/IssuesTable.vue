@@ -514,6 +514,24 @@ const columns = [
     display: block;
   }
 }
+
+.search-filters-table :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
+.search-filters-table :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
+  background: $primary !important;
+  border-color: $primary !important;
+}
+
+.search-filters-table
+  :deep(.q-checkbox__inner--truthy .q-checkbox__svg path.q-checkbox__truthy),
+.search-filters-table
+  :deep(.q-checkbox__inner--indet .q-checkbox__svg path.q-checkbox__indet) {
+  stroke: white !important;
+}
+
+.search-filters-table :deep(.q-checkbox__inner--truthy),
+.search-filters-table :deep(.q-checkbox__inner--indet) {
+  color: $primary !important;
+}
 </style>
 <style lang="scss">
 .search-filters-table {

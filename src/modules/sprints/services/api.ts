@@ -16,6 +16,13 @@ export const getSprints = async (
   return api.getSprintList(workspaceSlug).then((res) => res.data);
 };
 
+export const getSprint = async (
+  workspaceSlug: string,
+  sprintId: string,
+): Promise<DtoSprint> => {
+  return api.getSprint(workspaceSlug, sprintId).then((res) => res.data);
+};
+
 export const createSprint = async (
   workspaceSlug: string,
   data: AiplanRequestSprint,
