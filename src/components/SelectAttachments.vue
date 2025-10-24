@@ -196,6 +196,8 @@ import {
 import { storeToRefs } from 'pinia';
 //stores
 import { useProjectStore } from 'src/stores/project-store';
+import { useAiDocStore } from 'src/stores/aidoc-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 //components
@@ -254,13 +256,17 @@ const uploader = useTusUploader({
 });
 
 //stores
+const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
+const aiDocStore = useAiDocStore();
 const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { currentProjectID } = storeToRefs(projectStore);
 const { currentIssueID } = storeToRefs(singleIssueStore);
+const { selectedDocId } = storeToRefs(aiDocStore);
 
 //variables
 const file = ref();
@@ -311,8 +317,13 @@ const scroll = (direction: number) => {
 };
 
 const getAttachments = async () => {
-  if (!currentProjectID.value || !currentIssueID.value) return;
-  rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
+  if (currentWorkspaceSlug.value && selectedDocId.value) {
+    rows.value = await props.getAttachmentFunc(currentWorkspaceSlug, selectedDocId);
+  } else if (currentProjectID.value && currentIssueID.value) {
+    rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
+  } else {
+    return;
+  }
   resetUploadStates();
 };
 
