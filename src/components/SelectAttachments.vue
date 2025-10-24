@@ -23,15 +23,30 @@
           >
         </div>
 
-        <q-btn
-          v-if="!!props.downloadAllFunc && rows.length"
-          no-caps
-          class="btn-only-icon-sm q-ml-sm"
-          icon="download"
-          @click="handleDownload"
-        >
-          <HintTooltip> Скачать все </HintTooltip></q-btn
-        >
+        <q-btn class="btn-only-icon-sm q-ml-sm" icon="more_horiz" flat>
+          <q-menu>
+            <q-list separator>
+              <q-item
+                v-if="showDownloadAll"
+                clickable
+                v-close-popup
+                @click="handleDownload"
+              >
+                <q-item-section class="col-auto q-pr-sm">
+                  <q-icon name="download" />
+                </q-item-section>
+                <q-item-section>Скачать все</q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup @click="openAttachmentsList">
+                <q-item-section class="col-auto q-pr-sm">
+                  <q-icon name="list" />
+                </q-item-section>
+                <q-item-section>Открыть как список</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </h6>
     </div>
     <q-btn
@@ -173,6 +188,26 @@
       </div>
     </div>
     <AttachmentsInfo class="q-mt-sm" />
+    <AttachmentsListDialog
+      v-model="isOpenAttachmentsList"
+      :attachments="rows"
+      :loading="loading"
+      :download-all-func="downloadAllFunc"
+      @open="
+        (val) => {
+          openDoc = true;
+          file = val;
+        }
+      "
+      @delete="
+        (name) => {
+          handleDeleteClick({
+            asset: { name, id: file.id, size: file.size },
+            id: file.id,
+          });
+        }
+      "
+    />
     <DocPreviewDialog v-model="openDoc" :file="file" />
     <DeleteAttachmentDialog
       v-model="showDeleteAttachmentDialog"
@@ -202,6 +237,7 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import DocPreviewDialog from './dialogs/DocPreviewDialog.vue';
+import AttachmentsListDialog from './dialogs/AttachmentsListDialog.vue';
 import DeleteAttachmentDialog from 'src/components/dialogs/DeleteAttachmentDialog.vue';
 import IssuesColorCountTitle from './IssuesColorCountTitle.vue';
 import SelectAttachmentsCard from './SelectAttachmentsCard.vue';
@@ -272,12 +308,16 @@ const openDoc = ref(false);
 const isDragIn = ref(false);
 const uploadInput = ref<HTMLInputElement>();
 const currentAttachmentDelete = ref();
+const isOpenAttachmentsList = ref<boolean>(false);
 const showDeleteAttachmentDialog = ref<boolean>(false);
 
 const abortController = new AbortController();
 
 //computeds
 const uploadsStates = computed(() => uploader.uploadsState.value.map((e) => e));
+const showDownloadAll = computed(
+  () => !!props.downloadAllFunc && rows.value.length > 0,
+);
 
 //methods
 const handleFiles = async (files: FileList) => {
@@ -314,6 +354,10 @@ const getAttachments = async () => {
   if (!currentProjectID.value || !currentIssueID.value) return;
   rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
   resetUploadStates();
+};
+
+const openAttachmentsList = (): void => {
+  isOpenAttachmentsList.value = true;
 };
 
 const refresh = async () => {
