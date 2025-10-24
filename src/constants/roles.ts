@@ -4,6 +4,7 @@ export const ROLES = {
       'ws-settings',
       'delete-ws',
       'create-project',
+      'create-sprint',
       'delete-project',
       'add-comment',
       'create-issue',

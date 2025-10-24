@@ -11,7 +11,10 @@
           <SprintIcon :is-dark="$q.dark.isActive" />
         </q-item-section>
         <q-item-section>Спринты</q-item-section>
-        <CreateSprintDialogBtn @update-sprints="refreshSprints" />
+        <CreateSprintDialogBtn
+          @update-sprints="refreshSprints"
+          v-if="hasPermission('create-sprint')"
+        />
       </div>
     </template>
     <template v-slot:content>
