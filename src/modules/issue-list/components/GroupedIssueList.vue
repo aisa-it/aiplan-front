@@ -21,7 +21,10 @@
         (index, pagination, isFullUpdate, entity) =>
           refreshTable(index, pagination, isFullUpdate, entity)
       "
-      @open-preview="(id) => openPreview(id)"
+      @open-preview="
+        (id, index, pagination, entity) =>
+          openPreview(id, index, pagination, entity)
+      "
     />
     <div
       v-if="!issuesStore.groupedIssueList.length"

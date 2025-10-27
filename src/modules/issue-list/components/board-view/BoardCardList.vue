@@ -50,7 +50,9 @@
           @update-table="
             (field, row, entity) => updateTable(field, row, entity)
           "
-          @openPreview="(id) => emits('openPreview', id)"
+          @openPreview="
+            (id) => emits('openPreview', id, parsePagination(quasarPagination))
+          "
         />
       </div>
     </div>
