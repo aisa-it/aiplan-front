@@ -251,6 +251,10 @@ const refreshDocument = async () => {
     route.params.doc,
   );
   documentValue.value = data;
+  documentValue.value.content = data.content.replaceAll(
+    '\t',
+    '&nbsp;&nbsp;&nbsp;&nbsp;',
+  );
   const parentDocId = data.parent_doc ? data.parent_doc : null;
   aidocStore.setParentDoc(parentDocId);
   aidocStore.selectDoc(data.id, data.title);
