@@ -71,7 +71,9 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('delete', attachment.asset.name, attachment.id)"
+                @click="
+                  emit('delete', attachment)
+                "
               >
                 <BinIcon :width="20" :height="20" color="#DC3E3E" />
                 <HintTooltip>Удалить</HintTooltip>
@@ -117,7 +119,7 @@
                     clickable
                     v-close-popup
                     @click="
-                      emit('delete', attachment.asset.name, attachment.id)
+                      emit('delete', attachment)
                     "
                   >
                     <q-item-section class="col-auto q-pr-sm">
@@ -141,11 +143,13 @@
           v-if="props.downloadAllFunc && props.attachments.length > 0"
           :loading="loading"
           unelevated
+          flat
+          dense
           no-caps
           icon="download"
           label="Скачать все"
           color="primary"
-          class="full-width"
+          class="full-width primary-btn-sm"
           @click="handleDownloadAll"
         />
       </q-card-actions>
@@ -186,7 +190,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   open: [value: IAttachmentCard];
-  delete: [fileName: string, id: string];
+  delete: [value: IAttachmentCard];
 }>();
 
 const $q = useQuasar();
@@ -288,6 +292,7 @@ const handleDownloadAll = async (): Promise<void> => {
 
 <style scoped lang="scss">
 .attachments-list {
+  min-width: 360px;
   max-width: 600px;
 
   &__heading {
@@ -319,5 +324,11 @@ const handleDownloadAll = async (): Promise<void> => {
 .q-item:hover .attachments-list__actions {
   opacity: 1;
   visibility: visible;
+}
+
+@media screen and (width < 600px) {
+  .attachments-list {
+    min-width: auto;
+  }
 }
 </style>

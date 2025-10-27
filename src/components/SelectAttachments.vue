@@ -23,7 +23,12 @@
           >
         </div>
 
-        <q-btn class="btn-only-icon-sm q-ml-sm" icon="more_horiz" flat>
+        <q-btn
+          v-show="rows.length || uploadsStates.length"
+          class="btn-only-icon-sm q-ml-sm"
+          icon="more_horiz"
+          flat
+        >
           <q-menu>
             <q-list separator>
               <q-item
@@ -189,6 +194,7 @@
     </div>
     <AttachmentsInfo class="q-mt-sm" />
     <AttachmentsListDialog
+      v-if="rows.length || uploadsStates.length"
       v-model="isOpenAttachmentsList"
       :attachments="rows"
       :loading="loading"
@@ -200,11 +206,8 @@
         }
       "
       @delete="
-        (name) => {
-          handleDeleteClick({
-            asset: { name, id: file.id, size: file.size },
-            id: file.id,
-          });
+        (attachment) => {
+          handleDeleteClick(attachment);
         }
       "
     />
@@ -452,6 +455,12 @@ const handleDelete = async () => {
       open: true,
       type: 'success',
       customMessage: SUCCESS_DELETE_ATTACHMENT,
+    });
+  } catch (error) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: ERROR_ADD_ATTACHMENT,
     });
   } finally {
     await refresh();
