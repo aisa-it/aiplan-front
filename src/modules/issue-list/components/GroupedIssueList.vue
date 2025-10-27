@@ -8,7 +8,10 @@
         (index, pagination, isFullUpdate, entity) =>
           refreshTable(index, pagination, isFullUpdate, entity)
       "
-      @open-preview="(id) => openPreview(id)"
+      @open-preview="
+        (id, index, pagination, entity) =>
+          openPreview(id, index, pagination, entity)
+      "
     />
     <GroupedBoard
       v-if="isKanbanEnabled && issuesStore.groupedIssueList.length"
@@ -30,7 +33,7 @@
     </div>
     <IssuePreview
       v-model="isPreview"
-      @refresh="load"
+      @refresh="refreshByPreview"
       @open="openIssue"
       @close="closePreview"
     />
@@ -39,7 +42,7 @@
 
 <script setup lang="ts">
 // core
-import { computed, onBeforeUnmount, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
@@ -72,7 +75,18 @@ const { user } = storeToRefs(useUserStore());
 const route = useRoute();
 
 const isMobile = computed(() => Screen.width <= 1200);
-//
+
+// TODO типизировать
+const refreshReviewInfo = ref<{
+  index: number | null;
+  pagination?: any;
+  entity?: any;
+}>({
+  index: null,
+  pagination: undefined,
+  entity: undefined,
+});
+// TODO типизировать
 async function refreshTable(
   index: number,
   pagination: any,
@@ -121,9 +135,14 @@ async function openIssue(id: string) {
   );
 }
 
-async function openPreview(id: string) {
+async function openPreview(
+  id: string,
+  index?: number,
+  pagination?: any,
+  entity?: any,
+) {
   if (!route.params.workspace || !route.params.project) return;
-  if (currentIssueID.value === id && isPreview.value || isMobile.value) {
+  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
     openIssue(id);
     return;
   }
@@ -134,6 +153,9 @@ async function openPreview(id: string) {
     route.params.workspace as string,
     route.params.project as string,
   );
+
+  Object.assign(refreshReviewInfo.value, { index, pagination, entity });
+
   isPreview.value = true;
 }
 
@@ -141,6 +163,12 @@ async function closePreview() {
   if (!isPreview.value) return;
   isPreview.value = false;
   currentIssueID.value = '';
+}
+
+async function refreshByPreview(isFullUpdate?: boolean) {
+  const { index, pagination, entity } = refreshReviewInfo.value;
+  if (index === null) return;
+  refreshTable(index, pagination, !!isFullUpdate, entity);
 }
 watch(isMobile, () => {
   if (isMobile.value) closePreview();

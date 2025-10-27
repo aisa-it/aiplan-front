@@ -27,7 +27,7 @@
     </template>
 
     <template v-slot:body-cell-name="props">
-      <NameColumn :row-info="props" @open-preview="emits('openPreview', props.row.sequence_id)" />
+      <NameColumn :row-info="props" @open-preview="emits('openPreview', props.row.sequence_id, parsePagination(quasarPagination))" />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 

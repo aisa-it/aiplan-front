@@ -36,7 +36,7 @@
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table?.entity)
         "
-        @open-preview="(id) => emits('openPreview',id)"
+        @open-preview="(id, pagination) => emits('openPreview',id, index, pagination, table?.entity)"
       />
     </q-expansion-item>
   </div>

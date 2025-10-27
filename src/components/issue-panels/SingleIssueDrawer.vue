@@ -1,6 +1,6 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons :preview="preview" @refresh="emits('refresh')" />
+    <SingleIssueButtons :preview="preview" @refresh="(v) => emits('refresh', v)" />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -367,7 +367,7 @@ defineProps<{
 }>();
 
 const emits = defineEmits<{
-  refresh: [];
+  refresh: [isFullRefresh?: boolean];
 }>();
 
 const refreshCycle = ref();
