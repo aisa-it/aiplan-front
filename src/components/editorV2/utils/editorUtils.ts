@@ -13,15 +13,16 @@ export const isEditorEmpty = (editor) => {
 
   for (let i = 0; i < editor.childCount; i++) {
     const node = editor.child(i);
+
     if (node.type.name === 'paragraph') {
-      const text = node.textContent.trim();
+      const text = node.textContent.replace(/\u200B/g, '').trim();
       if (text.length > 0) return false;
       if (node.content && node.content.childCount > 0) {
         for (let j = 0; j < node.content.childCount; j++) {
           const child = node.content.child(j);
           if (
             child.type.name !== 'text' ||
-            child.textContent.trim().length > 0
+            child.textContent.replace(/\u200B/g, '').trim().length > 0
           ) {
             return false;
           }
