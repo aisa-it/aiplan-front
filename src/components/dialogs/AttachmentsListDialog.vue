@@ -71,9 +71,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="
-                  emit('delete', attachment)
-                "
+                @click="emit('delete', attachment)"
               >
                 <BinIcon :width="20" :height="20" color="#DC3E3E" />
                 <HintTooltip>Удалить</HintTooltip>
@@ -118,9 +116,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="
-                      emit('delete', attachment)
-                    "
+                    @click="emit('delete', attachment)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <BinIcon :width="20" :height="20" color="#DC3E3E" />
@@ -198,8 +194,6 @@ const route = useRoute();
 const { issueData } = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
 const api = useAiplanStore();
-
-const loading = ref<boolean>(props.loading);
 const downloadProgress = ref<number>(0);
 
 function formatFileSize(bytes: number): string {
@@ -267,25 +261,20 @@ const handleDownload = async (file: IAttachmentCard): Promise<void> => {
 };
 
 const handleDownloadAll = async (): Promise<void> => {
-  try {
-    loading.value = true;
-    if (props.downloadAllFunc) {
-      const { url, fileName } = await props.downloadAllFunc();
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DOWNLOAD_FILE,
-      });
-    }
-  } finally {
-    loading.value = false;
+  if (props.downloadAllFunc && !props.loading) {
+    const { url, fileName } = await props.downloadAllFunc();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setNotificationView({
+      type: 'success',
+      open: true,
+      customMessage: SUCCESS_DOWNLOAD_FILE,
+    });
   }
 };
 </script>
