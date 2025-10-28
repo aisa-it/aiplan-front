@@ -324,7 +324,6 @@ const getAttachments = async () => {
   } else {
     return;
   }
-  resetUploadStates();
 };
 
 const refresh = async () => {
@@ -335,6 +334,7 @@ const refresh = async () => {
     await getAttachments();
   } finally {
     loading.value = false;
+    resetUploadStates();
   }
 };
 
