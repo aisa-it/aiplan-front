@@ -481,7 +481,6 @@ const transfer = async () => {
   actionByLabel.value.some((el) => el === true)
     ? await sendDataByLabel()
     : await sendDataById();
-  emit('refresh');
 };
 
 const filterProject = (val: string, update: any) => {

@@ -10,7 +10,7 @@
     v-click-outside:prevent-preview-side-drawer="{
       isAutoSave: true,
       onClickOutside: () => emits('close'),
-      exclude: [...QUASAR_SELECTORS_CLASSES, 'prevent-click-issue-outside']
+      exclude: [...QUASAR_SELECTORS_CLASSES, 'prevent-click-issue-outside'],
     }"
   >
     <div
@@ -23,13 +23,17 @@
       </h6>
       <div class="row justify-end flex q-gutter-sm">
         <q-btn
-          class="secondary-btn-only-icon"
+          class="secondary-btn-only-icon-sm"
           icon="open_in_full"
           @click="emits('open', issueData.id)"
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
-        <q-btn class="secondary-btn-only-icon" icon="close" @click="onClose">
+        <q-btn
+          class="secondary-btn-only-icon-sm"
+          icon="close"
+          @click="emits('close')"
+        >
           <HintTooltip>Закрыть</HintTooltip>
         </q-btn>
       </div>
@@ -69,7 +73,7 @@
       preview
       class="fixed-right"
       style="width: 400px; top: 62px"
-      @refresh="emits('refresh')"
+      @refresh="(v) => emits('refresh', v)"
     />
 
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
@@ -107,7 +111,7 @@ import { QUASAR_SELECTORS_CLASSES } from 'src/constants/quasarSelectorsClasses';
 const model = defineModel<boolean>({ default: false });
 
 const emits = defineEmits<{
-  refresh: [];
+  refresh: [isFullRefresh?: boolean];
   open: [id: string];
   close: [];
 }>();

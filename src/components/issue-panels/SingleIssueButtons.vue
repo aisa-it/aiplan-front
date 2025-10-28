@@ -64,12 +64,12 @@
   <TransferTaskDialog
     v-model="isTransferOpen"
     :issue="issueData"
-    @refresh="emits('refresh')"
+    @refresh="emits('refresh', true)"
   />
   <DeleteIssueDialog
     v-model="isDeletingOpen"
     :issue="issueData"
-    @refresh="emits('refresh')"
+    @refresh="emits('refresh', true)"
   />
 </template>
 <script setup lang="ts">
@@ -101,7 +101,7 @@ defineProps<{
   preview?: boolean;
 }>();
 // emits
-const emits = defineEmits<{ refresh: [] }>();
+const emits = defineEmits<{ refresh: [isFullRefresh?: boolean] }>();
 
 // stores
 const { setNotificationView } = useNotificationStore();
