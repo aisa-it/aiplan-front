@@ -152,35 +152,34 @@ export function getFullName(member?: DtoUserLight) {
 export function trimEmptyTags(htmlString?: string) {
   if (!htmlString) return '';
 
-  const regex = /<p(?:\s+[^>]*)?>(?:\s*|\s*?\s*)<\/p>/g;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
 
-  while (htmlString.startsWith('<p>') && htmlString.indexOf('</p>') > -1) {
-    const endIndex: number = htmlString.indexOf('</p>') + 4;
-    const tag = htmlString.substring(0, endIndex);
-    if (tag.match(regex)) {
-      htmlString = htmlString.substring(endIndex).trim();
-    } else {
-      break;
-    }
+  let firstChild = doc.body.firstChild;
+  while (
+    firstChild &&
+    firstChild.nodeName === 'P' &&
+    isElementEmpty(firstChild)
+  ) {
+    doc.body.removeChild(firstChild);
+    firstChild = doc.body.firstChild;
   }
 
-  while (htmlString.endsWith('</p>') && htmlString.indexOf('<p>') > -1) {
-    const startIndex = htmlString.lastIndexOf('<p>');
-    const tag = htmlString.substring(startIndex);
-    if (tag.match(regex)) {
-      htmlString = htmlString.substring(0, startIndex).trim();
-    } else {
-      break;
-    }
+  let lastChild = doc.body.lastChild;
+  while (lastChild && lastChild.nodeName === 'P' && isElementEmpty(lastChild)) {
+    doc.body.removeChild(lastChild);
+    lastChild = doc.body.lastChild;
   }
-  console.log(htmlString);
-  return htmlString;
+
+  return doc.body.innerHTML;
+}
+
+function isElementEmpty(el: Node): boolean {
+  return el.textContent?.trim() === '' && el.childNodes.length === 0;
 }
 
 export function isDev(): boolean {
-  return (
-    location.hostname == 'test.aiplan.aisa.ru'
-  );
+  return location.hostname == 'test.aiplan.aisa.ru';
 }
 
 export function isServerVersionNewer(serverAppVersion: string) {
