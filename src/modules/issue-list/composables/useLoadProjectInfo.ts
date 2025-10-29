@@ -3,10 +3,12 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
+import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
 
 const projectStore = useProjectStore();
 const viewProps = useViewPropsStore();
-const { currentProjectID, isLoadProjectInfo } = storeToRefs(projectStore);
+const { currentProjectID, isLoadProjectInfo, projectProps } =
+  storeToRefs(projectStore);
 
 export const useLoadProjectInfo = () => {
   const route = useRoute();

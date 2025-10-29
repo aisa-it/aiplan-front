@@ -8,6 +8,7 @@
       <q-space />
 
       <FiltersList
+        v-if="is.object(projectProps)"
         :projectId="route.params.project"
         :columns="allColumns"
         @update="load()"
@@ -16,11 +17,7 @@
     <q-separator />
 
     <transition name="fade" mode="out-in">
-      <component
-        :is="currentIssueList"
-        :defaultIssues="initDefaultIssues"
-        :defaultIssuesCount="initDefaultIssuesCount"
-      />
+      <component :is="currentIssueList" />
     </transition>
   </q-card>
 </template>
@@ -28,7 +25,7 @@
 <script setup lang="ts">
 // core
 import { useRoute } from 'vue-router';
-
+import { is } from 'quasar';
 // stores
 import { useProjectStore } from 'src/stores/project-store';
 
@@ -38,40 +35,32 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
-import { computed, onMounted, ref } from 'vue';
+import {
+  defineAsyncComponent,
+  onMounted,
+  shallowRef,
+  watchEffect,
+} from 'vue';
 
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
 import { storeToRefs } from 'pinia';
-import DefaultIssueList from './components/DefaultIssueList.vue';
-import GroupedIssueList from './components/GroupedIssueList.vue';
-import TableListSkeleton from './components/skeletons/TableListSkeleton.vue';
-import BoardListSkeleton from './components/skeletons/BoardListSkeleton.vue';
 import { useDefaultIssues } from './composables/useDefaultIssues';
-import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { useGroupedIssues } from './composables/useGroupedIssues';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues();
 const { getGroupedIssues } = useGroupedIssues();
 
-const { isGroupingEnabled, isKanbanEnabled, issuesLoader } =
+const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
   storeToRefs(useProjectStore());
 const route = useRoute();
-
-const initDefaultIssues = ref([]);
-const initDefaultIssuesCount = ref(null);
-
-const initGroupedIssues = ref([]);
-const initGroupedIssuesGroupBy = ref('');
 
 const load = async () => {
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
-    const response = await onRequest();
-    initDefaultIssues.value = response.data.issues;
-    initDefaultIssuesCount.value = response.data.count || DEF_ROWS_PER_PAGE;
+    await onRequest();
   } else if (isGroupingEnabled.value === true) {
     await getGroupedIssues();
   }
@@ -84,22 +73,33 @@ onMounted(async () => {
   await load();
 });
 
-const currentIssueList = computed(() => {
-  let view: string;
-  let component;
+const components = {
+  DefaultIssueList: defineAsyncComponent(
+    () => import('./components/DefaultIssueList.vue'),
+  ),
+  GroupedIssueList: defineAsyncComponent(
+    () => import('./components/GroupedIssueList.vue'),
+  ),
+  TableListSkeleton: defineAsyncComponent(
+    () => import('./components/skeletons/TableListSkeleton.vue'),
+  ),
+  BoardListSkeleton: defineAsyncComponent(
+    () => import('./components/skeletons/BoardListSkeleton.vue'),
+  ),
+};
 
-  view = issuesLoader.value === true ? 'skeleton' : 'list';
-  switch (view) {
-    case 'list': {
-      component = isGroupingEnabled.value ? GroupedIssueList : DefaultIssueList;
-      return component;
-    }
-    case 'skeleton': {
-      component = isKanbanEnabled.value ? BoardListSkeleton : TableListSkeleton;
-      return component;
-    }
+const currentIssueList = shallowRef();
+
+watchEffect(() => {
+  if (issuesLoader.value === false) {
+    currentIssueList.value = isGroupingEnabled.value
+      ? components.GroupedIssueList
+      : components.DefaultIssueList;
+  } else {
+    currentIssueList.value = isKanbanEnabled.value
+      ? components.BoardListSkeleton
+      : components.TableListSkeleton;
   }
-  return component;
 });
 </script>
 

@@ -73,7 +73,6 @@ export const useGroupedIssues = () => {
     if (projectProps.value?.filters?.states?.length) {
       filters.states = projectProps?.value?.filters?.states;
     }
-    console.log(quasarPagination);
     const response = await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project?.value.id,

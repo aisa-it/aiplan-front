@@ -14,7 +14,7 @@
       "
     />
     <GroupedBoard
-      v-if="isKanbanEnabled && issuesStore.groupedIssueList.length"
+      v-if="isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
       :group-by="issuesStore.groupByIssues"
       @refresh-card="

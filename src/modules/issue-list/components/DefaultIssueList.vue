@@ -1,36 +1,38 @@
 <template>
-  <IssueTable
-    v-if="rows.length"
-    :rows="rows"
-    :rows-count="rowsCount"
-    :loading="loadingTable"
-    @refresh="(pagination) => load(pagination)"
-    @open-preview="(id) => openPreview(id)"
-  />
-  <div
-    v-else
-    class="column flex-center"
-    style="width: 100%; height: calc(100vh - 200px)"
-  >
-    <DocumentIcon :width="56" :height="56" />
-    <h6>Нет задач</h6>
+  <div>
+    <IssueTable
+      v-if="rows.length"
+      :rows="rows"
+      :rows-count="rowsCount"
+      :loading="loadingTable"
+      @refresh="(pagination) => load(pagination)"
+      @open-preview="(id) => openPreview(id)"
+    />
+    <div
+      v-else
+      class="column flex-center"
+      style="width: 100%; height: calc(100vh - 200px)"
+    >
+      <DocumentIcon :width="56" :height="56" />
+      <h6>Нет задач</h6>
+    </div>
+    <IssuePreview
+      v-model="isPreview"
+      @refresh="
+        load(
+          parsePagination({
+            page: 1,
+            rowsNumber: 0,
+            sortBy: projectProps?.filters?.order_by,
+            descending: projectProps?.filters?.orderDesc,
+            rowsPerPage: projectProps?.page_size ?? DEF_ROWS_PER_PAGE,
+          }),
+        )
+      "
+      @open="openIssue"
+      @close="closePreview"
+    />
   </div>
-  <IssuePreview
-    v-model="isPreview"
-    @refresh="
-      load(
-        parsePagination({
-          page: 1,
-          rowsNumber: 0,
-          sortBy: projectProps?.filters?.order_by,
-          descending: projectProps?.filters?.orderDesc,
-          rowsPerPage: projectProps?.page_size ?? DEF_ROWS_PER_PAGE,
-        }),
-      )
-    "
-    @open="openIssue"
-    @close="closePreview"
-  />
 </template>
 
 <script setup lang="ts">
@@ -54,6 +56,7 @@ import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 const { projectProps, issuesLoader } = storeToRefs(useProjectStore());
 
@@ -75,7 +78,7 @@ const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const isMobile = computed(() => Screen.width <= 1200);
-
+const issuesStore = useIssuesStore();
 const load = async (pagination) => {
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(projectProps.value));
@@ -112,7 +115,7 @@ async function openIssue(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
-  if (currentIssueID.value === id && isPreview.value || isMobile.value) {
+  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
     openIssue(id);
     return;
   }
@@ -149,19 +152,14 @@ function parsePagination(pagination) {
   };
 }
 watch(
-  () => props.defaultIssues,
+  () => issuesStore.ungroupedIssueList,
   () => {
-    rows.value = props.defaultIssues;
+    rows.value = issuesStore.ungroupedIssueList?.issues;
+    rowsCount.value = issuesStore.ungroupedIssueList?.count;
   },
   { immediate: true },
 );
-watch(
-  () => props.defaultIssuesCount,
-  () => {
-    rowsCount.value = props.defaultIssuesCount;
-  },
-  { immediate: true },
-);
+
 watch(isMobile, () => {
   if (isMobile.value) closePreview();
 });

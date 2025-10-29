@@ -8,10 +8,10 @@
     class="base-selector"
     popup-content-class="fit-select-popup scrollable-content inh-popup"
     map-options
-    :model-value="statesSelect"
+    v-model="states"
     :options="getStatusesAsArray"
-    :option-label="(state) => state.name || 'Не выбран'"
-    :option-value="(state) => state.id || null"
+    :option-label="(state) => state.name"
+    :option-value="(state) => state.id"
     @update:model-value="onUpdate"
   >
     <template v-slot:option="scope">
@@ -32,37 +32,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
-import { useStatesStore } from 'src/stores/states-store';
-import { useViewPropsStore } from 'src/stores/view-props-store';
+import { ref } from 'vue';
 import { IState } from 'src/interfaces/states';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 
 const emits = defineEmits(['update']);
-const props = defineProps(['projectId']);
+const props = defineProps(['statesProps']);
 
-const viewProps = useViewPropsStore();
-const statesStore = useStatesStore();
-const { projectProps, getStatusesAsArray } = storeToRefs(useProjectStore());
+const { getStatusesAsArray } = storeToRefs(useProjectStore());
 
-const statesSelect = computed(() =>
-  getStatusesAsArray.value.filter((state) => {
-    if (!projectProps.value?.filters?.states) {
-      projectProps.value.filters.states = [];
-      return false;
-    }
-    return projectProps.value?.filters?.states.some((s) => s === state.id);
-  }),
-);
-const states = ref([]);
+const states = ref([...props.statesProps]);
 
 const onUpdate = (states: IState[] | undefined) => {
-  if (!states) {
-    projectProps.value.filters.states = [];
-  } else {
-    projectProps.value.filters.states = states.map((state) => state.id);
-  }
-  emits('update');
+  emits(
+    'update',
+    states?.length ? states.map((state) => state.id || state) : [],
+  );
 };
 </script>

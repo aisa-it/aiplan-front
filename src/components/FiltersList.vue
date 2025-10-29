@@ -12,11 +12,16 @@
             <q-select
               dense
               label="Вид"
-              v-model="viewSelector"
+              v-model="viewForm.issueView"
+              map-options
               class="base-selector full-w"
               popup-content-class="fit-select-popup scrollable-content selector-option__wrapper"
               :options="PROJECT_VIEWS"
-              @update:model-value="onUpdate()"
+              @update:model-value="
+                () => {
+                  updateIssueView();
+                }
+              "
             >
               <template v-slot:option="{ itemProps, opt }">
                 <q-item v-bind="itemProps" class="selector-option__wrapper">
@@ -32,15 +37,20 @@
 
           <q-item class="row">
             <q-select
+              v-model="viewForm.columns_to_show"
               dense
               label="Колонки"
-              v-model="columnsSelector"
               class="base-selector full-w"
+              multiple
+              map-options
               :options="columns"
-              @update:model-value="onUpdate()"
               :option-label="(col) => col.label"
               :option-value="(col) => col.name"
-              multiple
+              @update:model-value="
+                () => {
+                  onUpdate();
+                }
+              "
             >
               <template
                 v-slot:option="{ itemProps, opt, selected, toggleOption }"
@@ -70,11 +80,17 @@
           <q-select
             dense
             label="Группировка"
-            v-model="groupSelector"
+            v-model="viewForm.filters.group_by"
+            map-options
             class="base-selector full-w"
             popup-content-class="fit-select-popup selector-option__wrapper scrollable-content"
             :options="options"
-            @update:model-value="onUpdate()"
+            @update:model-value="
+              () => {
+                viewForm.filters.group_by = viewForm.filters.group_by.value;
+                onUpdate();
+              }
+            "
           >
             <template v-slot:option="{ itemProps, opt }">
               <q-item v-bind="itemProps" class="selector-option__wrapper">
@@ -90,14 +106,20 @@
         <q-item class="row">
           <SelectStatusFilter
             :projectId="projectId"
-            @update="onUpdate()"
+            :states-props="viewForm.filters.states || []"
+            @update="
+              (states) => {
+                viewForm.filters.states = states;
+                onUpdate();
+              }
+            "
             class="full-w"
           />
         </q-item>
         <q-item class="centered-horisontally justify-between">
           Показывать подзадачи
           <q-toggle
-            v-model="showSubIssues"
+            v-model="viewForm.showSubIssues"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -105,19 +127,19 @@
         <q-item class="centered-horisontally justify-between">
           Показывать черновики
           <q-toggle
-            v-model="isDraft"
+            v-model="viewForm.draft"
             size="32px"
             @update:model-value="onUpdate()"
           />
         </q-item>
 
         <q-item
-          v-show="projectProps?.filters?.group_by !== 'None'"
+          v-show="projectProps?.filters?.group_by !== 'none'"
           class="centered-horisontally justify-between"
         >
           Показывать пустые группы
           <q-toggle
-            v-model="isShowEmptyGroups"
+            v-model="viewForm.showEmptyGroups"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -126,7 +148,7 @@
         <q-item class="centered-horisontally justify-between"
           >Только активные
           <q-toggle
-            v-model="isShowOnlyActive"
+            v-model="viewForm.showOnlyActive"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -134,7 +156,7 @@
         <q-item class="centered-horisontally justify-between">
           Я исполнитель
           <q-toggle
-            v-model="isAssigneeToMe"
+            v-model="viewForm.filters.assignedToMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -142,7 +164,7 @@
         <q-item class="centered-horisontally justify-between">
           Я наблюдатель
           <q-toggle
-            v-model="isWatchedByMe"
+            v-model="viewForm.filters.watchedToMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -150,7 +172,7 @@
         <q-item class="centered-horisontally justify-between">
           Я автор
           <q-toggle
-            v-model="isAuthoredByMe"
+            v-model="viewForm.filters.authoredToMe"
             size="32px"
             @update:model-value="onUpdate()"
           />
@@ -162,9 +184,8 @@
 
 <script setup lang="ts">
 // core
-import { ref, onMounted, watch, computed, inject } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { EventBus } from 'quasar';
 
 // store
 import { useProjectStore } from 'src/stores/project-store';
@@ -181,34 +202,25 @@ import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
 import { storeToRefs } from 'pinia';
-import { useIssuesStore } from 'src/stores/issues-store';
+import { is } from 'quasar';
 
 const props = defineProps<{
   projectId: string;
   columns: any[];
 }>();
 
-const emits = defineEmits(['update']);
+const emits = defineEmits(['update', 'readyToLoadIssues']);
 
 const route = useRoute();
 const projectStore = useProjectStore();
 const { projectProps, issuesLoader } = storeToRefs(projectStore);
-const bus = inject('bus') as EventBus;
 
-const viewSelector = ref();
+const viewForm = ref();
+
 const columnsSelector = ref(props.columns);
-const groupSelector = ref();
-const isDraft = ref(projectProps.value?.draft);
-const isShowEmptyGroups = ref();
-const isShowOnlyActive = ref();
-const showSubIssues = ref(false);
-const draft = ref(projectProps.value?.draft);
+
 const isPopupOpen = ref(false);
 const options = ref(NEW_GROUP_BY_OPTIONS);
-
-const isAssigneeToMe = ref(false);
-const isWatchedByMe = ref(false);
-const isAuthoredByMe = ref(false);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -238,19 +250,12 @@ const popupToggle = () => {
 const onUpdate = async () => {
   try {
     issuesLoader.value = true;
-    let props = JSON.parse(JSON.stringify(projectProps.value));
-    props.issueView = viewSelector.value.value;
-    props.filters.group_by = groupSelector.value.value;
-    props.columns_to_show = columnsSelector.value.map((col) => col.name);
-    props.showSubIssues = showSubIssues.value;
-    props.showOnlyActive = isShowOnlyActive.value;
-    props.showEmptyGroups = isShowEmptyGroups.value;
-    props.draft = isDraft.value;
-    props.filters.assignedToMe = isAssigneeToMe.value;
-    props.filters.watchedToMe = isWatchedByMe.value;
-    props.filters.authoredToMe = isAuthoredByMe.value;
+    // приводим поле columns_to_show к формату string[], иногда туда залетает объект
+    viewForm.value.columns_to_show = viewForm.value.columns_to_show.map(
+      (column) => column?.name || column,
+    );
 
-    console.log(props);
+    let props = JSON.parse(JSON.stringify(viewForm.value));
     await projectStore.setProjectProps(
       route.params.workspace as string,
       route.params.project as string,
@@ -262,53 +267,59 @@ const onUpdate = async () => {
         route.params.project as string,
       )
       .then(() => {
+        viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
         emits('update', projectProps.value?.filters?.group_by);
       });
-  } catch (e) {
-    console.error(e);
+  } catch {
+    issuesLoader.value = false;
   }
 };
+
+onMounted(() => {
+  // если выбран канбан, то убираем возможность выбрать "Нет" в группировке
+
+  if (viewForm.value.issueView === 'kanban') {
+    options.value = options.value.filter((opt) => opt.value !== 'none');
+  } else {
+    options.value = NEW_GROUP_BY_OPTIONS;
+  }
+});
+
+const updateIssueView = async () => {
+  // разворачиваем объект, тк нужно только значение value
+  viewForm.value.issueView = viewForm.value.issueView.value;
+
+  // подменяем в сторе чтобы корректно отобразиоть скелетон
+  projectProps.value.issueView = viewForm.value.issueView;
+
+  // если выбран канбан, то убираем возможность выбрать "Нет" в группировке
+  if (viewForm.value.issueView === 'kanban') {
+    options.value = options.value.filter((opt) => opt.value !== 'none');
+
+    if (viewForm.value.filters?.group_by === 'none') {
+      viewForm.value.filters.group_by = options.value[0].value;
+    }
+  } else {
+    options.value = NEW_GROUP_BY_OPTIONS;
+  }
+
+  await onUpdate();
+};
+
+// для обновления формы пропсов
 watch(
   () => projectProps.value,
   () => {
-    viewSelector.value =
-      PROJECT_VIEWS.find(
-        (view) => view.value === projectProps.value?.issueView,
-      ) || PROJECT_VIEWS[0];
-
-    groupSelector.value =
-      PARSED_GROUP[projectProps.value?.filters?.group_by || 'None'] ||
-      NEW_GROUP_BY_OPTIONS.find(
-        (option) => option.value === projectProps.value?.filters?.group_by,
-      );
-    showSubIssues.value = projectProps.value?.showSubIssues || false;
-    isDraft.value = projectProps.value?.draft || true;
-    isShowEmptyGroups.value = projectProps.value?.showEmptyGroups || false;
-    isShowOnlyActive.value = projectProps.value?.showOnlyActive || false;
-    isAssigneeToMe.value = projectProps.value?.filters.assignedToMe || false;
-    isWatchedByMe.value = projectProps.value?.filters.watchedToMe || false;
-    isAuthoredByMe.value = projectProps.value?.filters.authoredToMe || false;
-  },
-);
-
-watch(
-  () => projectProps.value?.draft,
-  () => {
-    isDraft.value = projectProps.value?.draft;
+    if (is.object(projectProps.value)) {
+      viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
+      if (viewForm.value.issueView === 'kanban') {
+        options.value = options.value.filter((opt) => opt.value !== 'none');
+      } else {
+        options.value = NEW_GROUP_BY_OPTIONS;
+      }
+    }
   },
   { immediate: true },
-);
-
-watch(
-  () => viewSelector.value,
-  () => {
-    if (viewSelector.value.value === 'kanban') {
-      options.value = options.value.filter((opt) => opt.value !== 'none');
-      groupSelector.value = options.value[0];
-    } else options.value = NEW_GROUP_BY_OPTIONS;
-
-    onUpdate();
-  },
 );
 </script>
 

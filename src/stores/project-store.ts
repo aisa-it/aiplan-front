@@ -300,7 +300,24 @@ export const useProjectStore = defineStore('project-store', {
         .getProjectMemberMe(workspaceSlug, projectID)
         .then((res) => {
           this.meInProject = res.data;
-          this.projectProps = res.data?.view_props || null;
+
+          // решение для старых вариантов группировок, подменяем здесь значения на новые
+          const props = res.data.view_props;
+          if (
+            Object.keys(PARSED_GROUP).includes(
+              props?.filters?.group_by as string,
+            ) &&
+            props?.filters?.group_by
+          ) {
+            props.filters.group_by =
+              PARSED_GROUP[props.filters.group_by]?.value;
+          }
+          // проверяем отсутствие группировки как поля
+          if (!props?.filters?.group_by) {
+            props.filters.group_by = NEW_GROUP_BY_OPTIONS[0].value;
+          }
+
+          this.projectProps = props || null;
           return res.data;
         })
         .catch((err) => {

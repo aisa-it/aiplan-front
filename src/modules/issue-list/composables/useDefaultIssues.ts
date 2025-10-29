@@ -33,12 +33,14 @@ export const useDefaultIssues = () => {
     if (projectProps.value?.filters?.states?.length) {
       projectFilters.states = projectProps?.value?.filters?.states;
     }
-    return await issuesStore.getIssuesTable(
+
+    const response = await issuesStore.getIssuesTable(
       currentWorkspaceSlug.value,
       project.value.id,
       filters || projectFilters,
       pagination || defineIssuesPagination.value,
     );
+    issuesStore.ungroupedIssueList = response?.data;
   }
 
   return { onRequest };

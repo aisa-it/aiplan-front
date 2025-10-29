@@ -55,6 +55,7 @@ export const useIssuesStore = defineStore('issues-store', {
       refreshIssues: false,
       groupedIssueList: [],
       groupByIssues: '',
+      ungroupedIssueList: [],
     };
   },
   actions: {

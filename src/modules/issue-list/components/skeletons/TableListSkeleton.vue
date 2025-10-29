@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{ rowCount: number }>(), {
+withDefaults(defineProps<{ rowCount?: number }>(), {
   rowCount: 15,
 });
 </script>
