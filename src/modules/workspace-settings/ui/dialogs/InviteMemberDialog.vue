@@ -2,9 +2,8 @@
   <q-dialog>
     <q-card class="modal-card">
       <q-card-section class="column q-pt-none">
-        <h6 class="q-ma-md">Приглашение пользователя</h6>
+        <h6 class="q-ma-md">Приглашение пользователей</h6>
         <q-select class="base-input adaptive-input"
-          clearable
           use-input
           use-chips
           multiple
@@ -21,6 +20,7 @@
           :rules="[validateEmails]"
           @keydown.space="handleInput"
           @keydown.enter="handleInput"
+          @blur="handleInput"
           @remove="handleChipRemove"
           ref="emailInputRef"
           />
@@ -130,7 +130,7 @@ const handleChipRemove = (details: {index: number, value: string}) => {
   triggerValidation();
 }
 
-const handleInput = (event: KeyboardEvent) => {
+const handleInput = (event: Event) => {
     event.preventDefault();
 
     const input = getCurrentInput();
