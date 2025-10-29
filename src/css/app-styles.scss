@@ -366,6 +366,13 @@ li > a {
     border-bottom-style: solid !important;
   }
 }
+
+.adaptive-input {
+  .q-field__control {
+    height: auto;
+  }
+}
+
 .readonly-title-issue {
   &__edit {
     background-color: $bg-color !important;

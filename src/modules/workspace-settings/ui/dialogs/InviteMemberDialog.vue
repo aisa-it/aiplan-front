@@ -3,20 +3,28 @@
     <q-card class="modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ma-md">Приглашение пользователя</h6>
+        <q-select class="base-input adaptive-input"
+          clearable
+          use-input
+          use-chips
+          multiple
+          hide-dropdown-icon
+          v-model="form.emailsList"
+          new-value-mode="add-unique"
+          type="email"
+          input-debounce="0"
+          behavior="menu"
 
-        <q-input
-          dense
-          class="base-input"
-          :model-value="form.email"
           data-id="invite-member-email"
-          @update:model-value="setNewValueMail"
           label="Введите email"
           lazy-rules
-          :rules="[
-            (val) => (val && val.length > 0) || 'Необходимо ввести email',
-            (val) => isEmail(val),
-          ]"
-        />
+          :rules="[validateEmails]"
+          @keydown.space="handleInput"
+          @keydown.enter="handleInput"
+          @remove="handleChipRemove"
+          ref="emailInputRef"
+          />
+
         <q-select
           dense
           data-id="select-roles-member-email"
@@ -54,7 +62,7 @@
           data-id="invite-member-button"
           label="Пригласить"
           @click="inviteMember"
-          :disable="isEmail(form.email) !== true || form.email.length === 0"
+          :disable="!areAllEmailsValid || form.emailsList.length === 0"
           class="primary-btn"
           v-close-popup
         />
@@ -64,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onUpdated, ref } from 'vue';
+import { computed, onUpdated, ref, nextTick } from 'vue';
 import { ROLES } from 'src/constants/constants';
 import { isEmail } from 'src/utils/validation';
 import { inviteWorkspace } from 'src/modules/workspace-settings/services/api';
@@ -78,27 +86,87 @@ const props = defineProps<{
 
 const emits = defineEmits(['success', 'error', 'update']);
 
+// interfaces
+interface Form {
+  emailsList: string[];
+  role: typeof ROLES[number];
+}
+
 // vars
-const form = ref({
-  email: '',
+const form = ref<Form>({
+  emailsList: [],
   role: ROLES[0],
 });
+
 const currentUserDisable = ref();
+const emailInputRef = ref();
 
 // function
-const setNewValueMail = (val: any) => {
-  form.value.email = val;
-  if (props.isSuperuser && form.value.email === props.userMail) {
-    form.value.role = ROLES[2];
-    currentUserDisable.value = true;
-  } else {
-    currentUserDisable.value = false;
+const isEmailValid = (email: string) => isEmail(email) === true
+
+const areAllEmailsValid = computed(() => {
+  return form.value.emailsList.every(email => isEmailValid(email))
+})
+
+const validateEmails = (emails: string[]) => {
+  if(!emails || emails.length === 0) {
+    return 'Необходимо ввести email';
   }
-};
+
+  const allValid = emails.every(email => isEmailValid(email))
+    return allValid || 'Все email должны быть корректными';
+}
+
+const triggerValidation = () => {
+  nextTick(() => {
+    emailInputRef.value?.validate();
+  })
+}
+
+const handleChipRemove = (details: {index: number, value: string}) => {
+  form.value?.emailsList.splice(details.index, 1);
+
+  emailInputRef.value?.updateInputValue('', true);
+  triggerValidation();
+}
+
+const handleInput = (event: KeyboardEvent) => {
+    event.preventDefault();
+
+    const input = getCurrentInput();
+
+    if (input && input.value.trim()) {
+      const textValue = input.value.trim();
+
+      emailInputRef.value?.add(textValue, true);
+      emailInputRef.value?.updateInputValue('', true);
+
+      triggerValidation();
+
+      if (props.isSuperuser && form.value.emailsList.includes(props.userMail)) {
+        form.value.role = ROLES[2];
+        currentUserDisable.value = true;
+      } else {
+        currentUserDisable.value = false;
+      }
+  }
+}
+
+const getCurrentInput = () => {
+  return emailInputRef.value?.$el?.querySelector('input')
+}
+
 
 const inviteMember = async () => {
+  const emailsArray = form.value.emailsList.map(email => {
+      return {
+        email: email,
+        role: form.value.role.value
+      }
+    });
+
   await inviteWorkspace(props.currentWsSlug, {
-    emails: [{ email: form.value.email, role: form.value.role.value }],
+    emails: emailsArray,
   })
     .then(async () => {
       emits('update');
@@ -111,7 +179,7 @@ const inviteMember = async () => {
 onUpdated(
   () =>
     (form.value = {
-      email: '',
+      emailsList: [],
       role: ROLES[0],
     }),
 );
