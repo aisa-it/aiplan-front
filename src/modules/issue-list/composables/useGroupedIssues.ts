@@ -38,7 +38,7 @@ export const useGroupedIssues = () => {
         NEW_GROUP_BY_OPTIONS.find(
           (option) => option.value === projectProps.value?.filters?.group_by,
         )?.value,
-      order_by: pagination.sortBy,
+      order_by: pagination.sortBy ?? 'sequence_id',
       desc: pagination.descending,
       draft: projectProps.value?.draft,
       offset:
@@ -117,7 +117,7 @@ export const useGroupedIssues = () => {
 
   async function getCurrentTable(index: number, pagination: any, entity: any) {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
-
+    pagination.order_by = pagination.order_by ?? 'sequence_id'
     const response = await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project.value.id as string,
