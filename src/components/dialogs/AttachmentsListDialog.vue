@@ -283,6 +283,11 @@ const handleDownloadAll = async (): Promise<void> => {
 .attachments-list {
   min-width: 360px;
   max-width: 600px;
+  max-height: 90vh;
+
+  &::-webkit-scrollbar {
+    display: block;
+  }
 
   &__heading {
     padding: 0 16px;

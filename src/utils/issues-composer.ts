@@ -120,7 +120,7 @@ export default async function issuesComposer(data: IIssueRequestParams) {
       data.pagination.rowsPerPage == 0
         ? data.pagination.rowsNumber || DEF_ROWS_PER_PAGE
         : data.pagination.rowsPerPage,
-    order_by: data.pagination.sortBy,
+    order_by: data.pagination.sortBy ?? 'sequence_id',
     desc: data.pagination.descending,
     show_sub_issues: viewProps.props?.showSubIssues,
     only_count: false,

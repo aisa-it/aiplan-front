@@ -258,7 +258,7 @@ function createEditor() {
     editorInstance.value.destroy();
   }
   editorInstance.value = new Editor({
-    content: props.modelValue,
+    content: props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
     editable: !isReadOnly.value,
     extensions: editorExtensions.value,
     onUpdate: () => {
