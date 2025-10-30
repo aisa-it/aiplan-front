@@ -16,7 +16,7 @@ export const useDefaultIssues = () => {
       only_count: false,
       show_sub_issue: projectProps.value?.showSubIssues ?? true,
       draft: projectProps.value?.draft ?? true,
-      order_by: projectProps.value?.filters?.order_by,
+      order_by: projectProps.value?.filters?.order_by ?? 'sequence_id',
       desc: projectProps.value?.filters?.orderDesc,
       offset: 0,
       limit: projectProps.value?.page_size,
@@ -30,6 +30,9 @@ export const useDefaultIssues = () => {
     const projectFilters = {
       states: [] as string[],
     };
+    if (pagination) {
+      pagination.order_by = pagination.order_by ?? 'sequence_id';
+    }
     if (projectProps.value?.filters?.states?.length) {
       projectFilters.states = projectProps?.value?.filters?.states;
     }
