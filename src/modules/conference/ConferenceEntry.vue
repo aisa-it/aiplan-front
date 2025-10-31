@@ -66,8 +66,6 @@ import ConferenceEntryCard from './ui/ConferenceEntryCard.vue';
 import { CLOUD_THEMES } from './constants/themes';
 import { defineBackgroundImage } from './utils/defineBackgroundImage';
 
-import * as THREE from 'three';
-import CLOUDS from 'vanta/dist/vanta.clouds.min';
 import { useQuasar } from 'quasar';
 import CloudsEnable from 'src/components/icons/CloudsEnable.vue';
 import CloudsDisable from 'src/components/icons/CloudsDisable.vue';
@@ -82,7 +80,7 @@ const isEnableGPU = ref(false);
 const isEnableClouds = ref(true);
 const q = useQuasar();
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   useGlobalLoading();
 });
 
@@ -115,7 +113,7 @@ onMounted(async () => {
   }
 });
 
-async function createClouds() {
+async function createClouds(three, clouds) {
   const gpu = await navigator?.gpu;
 
   if (gpu) {
@@ -125,11 +123,28 @@ async function createClouds() {
     isEnableGPU.value = isWebGLSupported();
   }
 
+  const [THREE, CLOUDS] = await Promise.all([
+    import('three'),
+    import('vanta/dist/vanta.clouds.min'),
+  ]);
+
   if (isEnableGPU.value) {
-    vantaEffect = CLOUDS({
+    vantaEffect = CLOUDS.default({
       el: '#vanta-clouds-bg',
-      THREE,
-      ...CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay],
+      THREE: THREE,
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.0,
+      minWidth: 200.0,
+      backgroundColor: 0x0,
+      skyColor: 0x1788e8,
+      cloudColor: 0xafc7e5,
+      cloudShadowColor: 0x182e3d,
+      sunColor: 0xe9eab8,
+      sunGlareColor: 0x744d2f,
+      sunlightColor: 0x422d23,
+      speed: 1.5,
     });
   } else {
     setStaticBg();

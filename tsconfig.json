@@ -1,6 +1,39 @@
 {
-  "extends": "@quasar/app-vite/tsconfig-preset",
   "compilerOptions": {
-    "baseUrl": "."
-  }
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "types": ["vite/client", "quasar"],
+    "paths": {
+      "src/*": ["./src/*"],
+      "app/*": ["./*"],
+      "components/*": ["./src/components/*"],
+      "layouts/*": ["./src/layouts/*"],
+      "pages/*": ["./src/pages/*"],
+      "assets/*": ["./src/assets/*"],
+      "boot/*": ["./src/boot/*"],
+      "stores/*": ["./src/stores/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src-pwa/**/*.ts",
+    "src-pwa/**/*.d.ts"
+  ]
 }
