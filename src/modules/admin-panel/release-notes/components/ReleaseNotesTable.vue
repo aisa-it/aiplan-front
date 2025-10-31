@@ -51,7 +51,7 @@ defineEmits<{
 }>();
 </script>
 
-<css scoped lang="scss">
+<style scoped lang="scss">
 .description-cell {
   max-width: 100px;
   text-overflow: ellipsis;
@@ -62,4 +62,4 @@ defineEmits<{
 :deep(td) {
   border-bottom-width: 1px;
 }
-</css>
+</style>

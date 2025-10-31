@@ -289,7 +289,6 @@ const columns = [
   {
     name: 'email',
     label: 'Email',
-    field: 'email',
     sortable: true,
     align: 'left',
     field: (row: any) => row.member.email,
