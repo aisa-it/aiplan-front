@@ -22,7 +22,7 @@ import BaseNotificationsSettingsDialog from './NotificationsSettings/BaseNotific
 
 import { settingsList } from './NotificationsSettings/projectNotificationsConfig';
 
-const props = defineProps<{ project: DtoProjectLight }>();
+const props = defineProps<{ project?: DtoProjectLight }>();
 const route = useRoute();
 
 const projectStore = useProjectStore();

@@ -1,7 +1,7 @@
 <template>
   <q-btn dense flat @click="handleClick">
     <HintTooltip>Вставить диаграмму</HintTooltip>
-    <DrawioIcon width="24px" height="24px" />
+    <DrawioIcon :width="24" :height="24" />
   </q-btn>
 </template>
 
