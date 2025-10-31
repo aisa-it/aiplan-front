@@ -70,9 +70,9 @@ export default configure(function (ctx) {
       chunkSizeWarningLimit: 1000,
 
       extendViteConf(viteConf) {
-        viteConf.esbuild = {
-          drop: ['console'],
-        };
+        // viteConf.esbuild = {
+        //   drop: ['console'],
+        // };
 
         // Добавляем оптимизацию chunks
         if (viteConf.build && viteConf.build.rollupOptions) {
@@ -95,7 +95,7 @@ export default configure(function (ctx) {
                 }
                 return 'vendor';
               }
-              
+
               // Разделяем собственный код на chunks по модулям
               if (id.includes('src/modules/')) {
                 const moduleName = id.split('src/modules/')[1]?.split('/')[0];
