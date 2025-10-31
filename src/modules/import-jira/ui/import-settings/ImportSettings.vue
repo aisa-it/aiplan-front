@@ -93,7 +93,6 @@ import { Screen } from 'quasar';
 import { computed, ref } from 'vue';
 //store
 import { useImportStore } from 'src/modules/import-jira/stores/import-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 // components
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import SelectPriority from './select-priority/SelectPriority.vue';
@@ -109,7 +108,6 @@ const emits = defineEmits(['next', 'get-back']);
 
 //stores
 const importStore = useImportStore();
-const { setNotificationView } = useNotificationStore();
 
 //state
 const block = ref();
@@ -155,24 +153,6 @@ const handleStartImport = async () => {
         priorities_mapping: filteredPriorities,
       }) as AiplanJiraInfoRequest,
     )
-    .then(() => {
-      setNotificationView({
-        open: true,
-        type: 'success',
-        customMessage: 'Начато импортирование проекта',
-      });
-      emits('next');
-    })
-    .catch((error) => {
-      if (error.response?.status === 409) {
-        setNotificationView({
-          open: true,
-          type: 'error',
-          customMessage: error.response.data.ru_error || 'Произошла ошибка при импорте',
-        });
-      }
-    })
-
     .finally(() => {
       loading.value = false;
     });
