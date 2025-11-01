@@ -1,6 +1,9 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons :preview="preview" @refresh="(v) => emits('refresh', v)" />
+    <SingleIssueButtons
+      :preview="preview"
+      @refresh="(v) => emits('refresh', v)"
+    />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -415,12 +418,20 @@ const handleRemoveParentIssue = async () => {
         customMessage: SUCCESS_UPDATE_DATA,
       });
       issueData.value.parent_detail = null;
-      handleRefresh()
+      handleRefresh();
     });
 };
 
 const getDate = (dateVal: string | null) => {
-  return dateVal ? new Date(dateVal).toLocaleDateString() : 'Нет даты';
+  return dateVal
+    ? new Date(dateVal).toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'Нет даты';
 };
 
 const getCompareDate = computed(() => {
