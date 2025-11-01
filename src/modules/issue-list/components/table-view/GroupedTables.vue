@@ -65,10 +65,9 @@ defineProps<{
 
 const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
 
-const issuesStore = useIssuesStore();
 const projectStore = useProjectStore();
 
-const { groupedIssueList, groupByIssues } = storeToRefs(issuesStore);
+const { groupedIssueList, groupByIssues } = storeToRefs(useIssuesStore());
 const { projectProps } = storeToRefs(projectStore);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
