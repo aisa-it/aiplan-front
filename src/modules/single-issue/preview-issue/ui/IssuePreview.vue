@@ -71,8 +71,8 @@
     <SingleIssueDrawer
       v-if="model"
       preview
-      class="fixed-right"
-      style="width: 400px; top: 62px"
+      class="fixed-right hide-scrollbar issue-drawer-preview"
+      style="top: 62px;"
       @refresh="(v) => emits('refresh', v)"
     />
 
@@ -259,5 +259,11 @@ onBeforeUnmount(() => {
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+}
+
+.issue-drawer-preview {
+  width: 400px;
+  height: calc(100vh - 112px);
+  overflow: auto;
 }
 </style>

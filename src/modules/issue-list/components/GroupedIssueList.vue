@@ -72,7 +72,8 @@ const { projectProps, issuesLoader, isKanbanEnabled } =
   storeToRefs(useProjectStore());
 const singleIssueStore = useSingleIssueStore();
 
-const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
+  storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const route = useRoute();
@@ -150,6 +151,8 @@ async function openPreview(
     return;
   }
   isPreview.value = false;
+  issueCommentsData.value = undefined;
+  issueActivitiesData.value = undefined;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(
@@ -171,11 +174,14 @@ async function closePreview() {
 async function refreshByPreview(isFullUpdate?: boolean) {
   const { index, pagination, entity } = refreshReviewInfo.value;
   if (index === null) return;
+  if (isKanbanEnabled.value) delete pagination.group_by;
   refreshTable(index, pagination, !!isFullUpdate, entity);
 }
+
 watch(isMobile, () => {
   if (isMobile.value) closePreview();
 });
+
 onBeforeUnmount(() => {
   closePreview();
 });
