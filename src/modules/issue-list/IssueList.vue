@@ -35,12 +35,7 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
-import {
-  defineAsyncComponent,
-  onMounted,
-  shallowRef,
-  watchEffect,
-} from 'vue';
+import { defineAsyncComponent, onMounted, shallowRef, watchEffect } from 'vue';
 
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
@@ -86,15 +81,22 @@ const components = {
   BoardListSkeleton: defineAsyncComponent(
     () => import('./components/skeletons/BoardListSkeleton.vue'),
   ),
+  GroupedTables: defineAsyncComponent(
+    () => import('./components/table-view/GroupedTables.vue'),
+  ),
 };
 
 const currentIssueList = shallowRef();
 
 watchEffect(() => {
   if (issuesLoader.value === false) {
-    currentIssueList.value = isGroupingEnabled.value
-      ? components.GroupedIssueList
-      : components.DefaultIssueList;
+    if (isGroupingEnabled.value === false) {
+      currentIssueList.value = components.DefaultIssueList;
+    } else {
+      currentIssueList.value = isKanbanEnabled.value
+        ? components.GroupedIssueList
+        : components.GroupedTables;
+    }
   } else {
     currentIssueList.value = isKanbanEnabled.value
       ? components.BoardListSkeleton

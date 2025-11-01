@@ -1,9 +1,9 @@
 <template>
-  <div v-for="(table, index) in issues" :key="index">
+  <div v-for="(table, index) in groupedIssueList" :key="index">
     <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
       <GroupedHeader
         :entity="table?.entity"
-        :group-by="groupBy"
+        :group-by="groupByIssues"
         :badge-name="defineEntityName(table.entity, groupBy)"
         :badge-color="table.entity?.color ?? undefined"
         :issues-count="table?.count"
@@ -36,7 +36,10 @@
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table?.entity)
         "
-        @open-preview="(id, pagination) => emits('openPreview',id, index, pagination, table?.entity)"
+        @open-preview="
+          (id, pagination) =>
+            emits('openPreview', id, index, pagination, table?.entity)
+        "
       />
     </q-expansion-item>
   </div>
@@ -53,15 +56,19 @@ import IssueTable from '../IssueTable.vue';
 import GroupedHeader from '../ui/GroupedHeader.vue';
 
 import { IGroupedResponse } from '../../types';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField','openPreview']);
+const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
 
+const issuesStore = useIssuesStore();
 const projectStore = useProjectStore();
+
+const { groupedIssueList, groupByIssues } = storeToRefs(issuesStore);
 const { projectProps } = storeToRefs(projectStore);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {

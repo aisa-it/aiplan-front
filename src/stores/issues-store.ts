@@ -9,6 +9,7 @@ import {
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { IGroupedResponse } from 'src/modules/issue-list/types';
 
 const issuesApi = new (withInterceptors(Issues))();
 
@@ -53,7 +54,7 @@ export const useIssuesStore = defineStore('issues-store', {
     return {
       personalIssues: [] as any[],
       refreshIssues: false,
-      groupedIssueList: [],
+      groupedIssueList: [] as IGroupedResponse[],
       groupByIssues: '',
       ungroupedIssueList: [],
     };
