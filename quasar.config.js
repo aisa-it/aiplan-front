@@ -95,7 +95,7 @@ export default configure(function (ctx) {
                 }
                 return 'vendor';
               }
-              
+
               // Разделяем собственный код на chunks по модулям
               if (id.includes('src/modules/')) {
                 const moduleName = id.split('src/modules/')[1]?.split('/')[0];
