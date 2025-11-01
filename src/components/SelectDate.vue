@@ -130,9 +130,9 @@
 
 <script lang="ts">
 import dayjs from 'dayjs';
-import { Screen } from 'quasar';
+import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
@@ -195,18 +195,63 @@ export default defineComponent({
   emits: ['refresh', 'update:date'],
   components: { CalendarIcon },
   setup(props, { emit }) {
+    const $q = useQuasar();
     const api = useAiplanStore();
     const viewProps = useViewPropsStore();
     const issueStore = useSingleIssueStore();
     const { setNotificationView } = useNotificationStore();
     const { currentIssueID } = storeToRefs(issueStore);
-    const open = ref(false);
 
     const proxyDate = ref<string | null>(null);
     const minutes = [...Array(60)].map((_, i) => i);
     const hours = [...Array(24)].map((_, i) => i);
     const selectedHour = ref<number>(12);
     const selectedMinute = ref<number>(30);
+
+    // Тикание часов
+    let tickTimeout: ReturnType<typeof setTimeout> | null = null;
+    let tickInterval: ReturnType<typeof setInterval> | null = null;
+
+    function stopTick() {
+      if (tickTimeout) {
+        clearTimeout(tickTimeout);
+        tickTimeout = null;
+      }
+      if (tickInterval) {
+        clearInterval(tickInterval);
+        tickInterval = null;
+      }
+    }
+
+    function scheduleTick() {
+      stopTick();
+      // Начало следующей минуты и время до ее наступления
+      const now = new Date();
+      const nextMinute = new Date(now.getTime());
+      nextMinute.setSeconds(0, 0);
+      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+      const delay = nextMinute.getTime() - now.getTime();
+      // Первая корректировка до начала следующей минуты, дальше корректировка времени по интервалу раз в минуту
+      tickTimeout = setTimeout(() => {
+        adjustTime();
+        tickInterval = setInterval(adjustTime, 60 * 1000);
+      }, delay);
+    }
+
+    // Корректировка времени, если оно было раньше доминимально допустимого
+    const adjustTime = (): void => {
+      if (!proxyDate.value) return;
+
+      const selectedDate = dayjs(proxyDate.value);
+      const today = dayjs().startOf('day');
+
+      if (!selectedDate.isSame(today, 'day')) return;
+
+      const expectedTime = dayjs().add(15, 'minute').startOf('minute');
+      if (selectedDate.isBefore(expectedTime)) {
+        proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
+      }
+    };
 
     // Выбор допустимой даты
     const optionsFn = (date: string): boolean => {
@@ -238,23 +283,34 @@ export default defineComponent({
       return expectedMinute.isAfter(expectedTime);
     };
 
-    // При переключении на текущий день проверяем допустимое время
-    watch(proxyDate, (newVal) => {
-      if (!newVal) return;
+    watch(
+      () => proxyDate.value,
+      () => {
+        adjustTime();
+      },
+    );
 
-      const selectedDate = dayjs(newVal).startOf('day');
-      const today = dayjs().startOf('day');
-      const isSelectedToday = selectedDate.isSame(today, 'day');
-      const expectedTime = dayjs().add(15, 'minute');
+    watch(
+      () => $q.appVisible,
+      (visible) => {
+        if (visible) {
+          stopTick();
+          adjustTime();
+          scheduleTick()
+        }
+      },
+    );
 
-      if (isSelectedToday && selectedDate.isBefore(expectedTime)) {
-        proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
-      }
+    onMounted(() => {
+      scheduleTick();
+    });
+
+    onBeforeUnmount(() => {
+      stopTick();
     });
 
     return {
       api,
-      open,
       Screen,
       viewProps,
       proxyDate,
