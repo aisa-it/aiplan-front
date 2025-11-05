@@ -153,6 +153,9 @@ const handleStartImport = async () => {
         priorities_mapping: filteredPriorities,
       }) as AiplanJiraInfoRequest,
     )
+    .then(() => {
+      emits('next');
+    })
     .finally(() => {
       loading.value = false;
     });
