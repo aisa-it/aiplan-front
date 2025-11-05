@@ -33,10 +33,14 @@
                   subIssue.state_detail.name
                 }}</HintTooltip></q-badge
               >
-              {{ subIssue.project_detail.identifier }}-{{
-                subIssue.sequence_id
-              }}
-              {{ subIssue.name }}
+              <span>
+                {{ subIssue.project_detail.identifier }}-{{
+                  subIssue.sequence_id
+                }}
+              </span>
+              <span class="subissue-name">
+                {{ subIssue.name }}
+              </span>
             </q-item-label>
           </router-link>
         </q-item-section>
@@ -183,5 +187,10 @@ const canDelete = (subIssue: DtoIssue): boolean => {
 
 .issue-subtask {
   padding: 20px 0;
+}
+
+.subissue-name {
+  width: 80%;
+  word-break: break-all;
 }
 </style>
