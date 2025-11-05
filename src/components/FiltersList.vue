@@ -5,9 +5,20 @@
     <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
       <q-list style="width: 320px; background: white">
         <div>
-          <q-item-label header style="padding-bottom: 0px"
-            >Отображение</q-item-label
-          >
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <q-item-label header
+              >Отображение</q-item-label
+            >
+            <q-btn
+              flat
+              dense
+              class="q-mr-md btn-refresh"
+              icon="refresh"
+              @click="refreshFilters"
+            >
+              <q-tooltip anchor="bottom middle" self="top middle">Сбросить</q-tooltip>
+            </q-btn>
+          </div>
           <q-item class="row">
             <q-select
               dense
@@ -275,6 +286,44 @@ const onUpdate = async () => {
   }
 };
 
+const refreshFilters = async () => {
+  viewForm.value = {
+    activeTab: 'all',
+    issueView: 'list',
+    columns_to_show: [
+      "name",
+      "priority",
+      "state",
+      "target_date",
+      "created_at",
+      "author",
+      "assignees",
+      "labels",
+      "sub_issues_count",
+      "linked_issues_count",
+      "link_count",
+      "attachment_count"
+    ],
+    filters: {
+      group_by: 'none',
+      order_by: 'sequence_id',
+      orderDesc: true,
+      states: [],
+      workspaces: [],
+      projects: [],
+      assignedToMe: false,
+      authoredToMe: false,
+      watchedToMe: false,
+    },
+    showSubIssues: true,
+    draft: false,
+    page_size: 25,
+    showOnlyActive: false,
+    showEmptyGroups: false,
+  };
+  await onUpdate();
+};
+
 onMounted(() => {
   // если выбран канбан, то убираем возможность выбрать "Нет" в группировке
 
@@ -336,5 +385,9 @@ watch(
       padding-right: 12px;
     }
   }
+}
+
+.btn-refresh {
+  color: $text-color;
 }
 </style>
