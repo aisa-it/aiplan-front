@@ -214,6 +214,7 @@ import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
 import { storeToRefs } from 'pinia';
 import { is } from 'quasar';
+import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 
 const props = defineProps<{
   projectId: string;
@@ -232,6 +233,8 @@ const columnsSelector = ref(props.columns);
 
 const isPopupOpen = ref(false);
 const options = ref(NEW_GROUP_BY_OPTIONS);
+
+const defaultViewForm = ref(DEFAULT_VIEW_PROPS);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -287,40 +290,7 @@ const onUpdate = async () => {
 };
 
 const refreshFilters = async () => {
-  viewForm.value = {
-    activeTab: 'all',
-    issueView: 'list',
-    columns_to_show: [
-      "name",
-      "priority",
-      "state",
-      "target_date",
-      "created_at",
-      "author",
-      "assignees",
-      "labels",
-      "sub_issues_count",
-      "linked_issues_count",
-      "link_count",
-      "attachment_count"
-    ],
-    filters: {
-      group_by: 'none',
-      order_by: 'sequence_id',
-      orderDesc: true,
-      states: [],
-      workspaces: [],
-      projects: [],
-      assignedToMe: false,
-      authoredToMe: false,
-      watchedToMe: false,
-    },
-    showSubIssues: true,
-    draft: false,
-    page_size: 25,
-    showOnlyActive: false,
-    showEmptyGroups: false,
-  };
+  viewForm.value = DEFAULT_VIEW_PROPS;
   await onUpdate();
 };
 
