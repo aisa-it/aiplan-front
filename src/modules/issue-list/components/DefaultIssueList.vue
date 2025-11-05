@@ -74,7 +74,8 @@ const props = defineProps([
 ]);
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
-const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
+  storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const isMobile = computed(() => Screen.width <= 1200);
@@ -120,6 +121,8 @@ async function openPreview(id: string) {
     return;
   }
   isPreview.value = false;
+  issueCommentsData.value = undefined;
+  issueActivitiesData.value = undefined;
   currentIssueID.value = id;
 
   await singleIssueStore.getIssueData(

@@ -264,6 +264,7 @@ import { useRoute } from 'vue-router';
 import { useFormStore } from 'src/stores/form-store';
 import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 //constants
 import { SUCCESS_SEND_FORM } from 'src/constants/notifications';
 //components
@@ -279,7 +280,6 @@ import {
   getMask,
 } from 'src/components/forms/helper/helperForm';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
-
 //composables
 const route = useRoute();
 const quasar = useQuasar();
@@ -287,8 +287,8 @@ const quasar = useQuasar();
 //stores
 const formStore = useFormStore();
 const userStore = useUserStore();
+const utilsStore = useUtilsStore();
 const { setNotificationView } = useNotificationStore();
-
 //state
 const fields = ref([]);
 const description = ref('');
@@ -476,6 +476,7 @@ useMeta(() => {
 onMounted(async () => {
   try {
     loadReq.value = true;
+    await utilsStore.getVersion();
     await userStore.getMe();
     localStorage.setItem('dark', String(userStore.user?.theme.dark));
     useAuth.value = true;

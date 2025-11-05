@@ -1,7 +1,10 @@
 <template>
   <q-item-section class="no-wrap">
     <div class="row q-mb-xs gap-x-4 items-center">
-      <span> Вопрос {{ number }} {{ typeLabel }}</span>
+      <span>
+        {{ isOptionsInSelect ? 'Вариант' : 'Вопрос' }} {{ number }}
+        {{ typeLabel }}</span
+      >
       <slot name="toggle"></slot>
     </div>
     <div class="no-wrap row justify-between flex-center">
@@ -9,7 +12,7 @@
         <q-input
           v-model.trim="computedValue"
           dense
-          label="Введите вопрос"
+          :label="`Введите ${isOptionsInSelect ? 'вариант' : 'вопрос'}`"
           class="base-input full-w q-mr-sm q-pb-sm"
           lazy-rules
           :rules="[(val: string) => isEmpty(val, 'вопрос')]"
@@ -64,6 +67,7 @@ const props = defineProps<{
   number: number;
   showArrow: boolean;
   type?: string;
+  isOptionsInSelect?: boolean;
 }>();
 
 const emits = defineEmits<{

@@ -84,16 +84,16 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       issueActivitiesData: undefined as unknown as any,
       issueStatusesData: undefined as unknown as any,
       isRefreshIssue: false,
-      isPreview: false
+      isPreview: false,
     };
   },
 
   getters: {
     issueLink(): string {
-      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.router.currentRoute.value.params.issue}`;
+      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}`;
     },
     issueExportPDFLink(): string {
-      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.router.currentRoute.value.params.issue}/pdf`;
+      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}/pdf`;
     },
   },
 

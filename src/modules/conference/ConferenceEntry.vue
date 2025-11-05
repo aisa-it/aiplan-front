@@ -66,8 +66,6 @@ import ConferenceEntryCard from './ui/ConferenceEntryCard.vue';
 import { CLOUD_THEMES } from './constants/themes';
 import { defineBackgroundImage } from './utils/defineBackgroundImage';
 
-import * as THREE from 'three';
-import CLOUDS from 'vanta/dist/vanta.clouds.min';
 import { useQuasar } from 'quasar';
 import CloudsEnable from 'src/components/icons/CloudsEnable.vue';
 import CloudsDisable from 'src/components/icons/CloudsDisable.vue';
@@ -82,7 +80,7 @@ const isEnableGPU = ref(false);
 const isEnableClouds = ref(true);
 const q = useQuasar();
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   useGlobalLoading();
 });
 
@@ -115,23 +113,38 @@ onMounted(async () => {
   }
 });
 
-async function createClouds() {
-  const gpu = await navigator?.gpu;
+async function createClouds(three, clouds) {
+  try {
+    const adapter = await navigator.gpu?.requestAdapter().catch(() => null);
+    isEnableGPU.value = !!adapter || isWebGLSupported();
 
-  if (gpu) {
-    const adapter = await gpu?.requestAdapter();
-    isEnableGPU.value = Boolean(adapter);
-  } else {
-    isEnableGPU.value = isWebGLSupported();
-  }
+    const [THREE, CLOUDS] = await Promise.all([
+      import('three'),
+      import('vanta/dist/vanta.clouds.min'),
+    ]);
 
-  if (isEnableGPU.value) {
-    vantaEffect = CLOUDS({
-      el: '#vanta-clouds-bg',
-      THREE,
-      ...CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay],
-    });
-  } else {
+    if (isEnableGPU.value) {
+      vantaEffect = CLOUDS.default({
+        el: '#vanta-clouds-bg',
+        THREE: THREE,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.0,
+        minWidth: 200.0,
+        backgroundColor: 0x0,
+        skyColor: 0x1788e8,
+        cloudColor: 0xafc7e5,
+        cloudShadowColor: 0x182e3d,
+        sunColor: 0xe9eab8,
+        sunGlareColor: 0x744d2f,
+        sunlightColor: 0x422d23,
+        speed: 1.5,
+      });
+    } else {
+      setStaticBg();
+    }
+  } catch (err) {
     setStaticBg();
   }
 }

@@ -8,12 +8,12 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers');
-const path = require('path');
-const { loadEnv } = require('vite');
+import { configure } from 'quasar/wrappers';
+import path from 'path';
+import { loadEnv } from 'vite';
 
-module.exports = configure(function (ctx) {
-  const env = loadEnv(ctx.mode, process.cwd());
+export default configure(function (ctx) {
+  const env = loadEnv(ctx.mode, process.cwd(), '');
 
   return {
     eslint: {
@@ -57,38 +57,56 @@ module.exports = configure(function (ctx) {
       'material-icons-round',
     ],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property%3A-build
     build: {
       target: {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16',
       },
 
-      vueRouterMode: 'history',
+      vueRouterMode: 'history', // available values: 'hash', 'history'
 
-      extendViteConf(conf) {
-        conf.esbuild = {
+      // Увеличиваем лимит предупреждения о размере chunks
+      chunkSizeWarningLimit: 1000,
+
+      extendViteConf(viteConf) {
+        viteConf.esbuild = {
           drop: ['console'],
         };
+
+        // Добавляем оптимизацию chunks
+        if (viteConf.build && viteConf.build.rollupOptions) {
+          viteConf.build.rollupOptions.output = {
+            ...viteConf.build.rollupOptions.output,
+            manualChunks(id) {
+              // Разделяем node_modules на отдельные chunks
+              if (id.includes('node_modules')) {
+                if (id.includes('quasar')) {
+                  return 'quasar-vendor';
+                }
+                if (id.includes('vue')) {
+                  return 'vue-vendor';
+                }
+                if (id.includes('chart.js') || id.includes('apexcharts')) {
+                  return 'charts-vendor';
+                }
+                if (id.includes('@tiptap')) {
+                  return 'tiptap-vendor';
+                }
+                return 'vendor';
+              }
+
+              // Разделяем собственный код на chunks по модулям
+              if (id.includes('src/modules/')) {
+                const moduleName = id.split('src/modules/')[1]?.split('/')[0];
+                if (moduleName) {
+                  return `module-${moduleName}`;
+                }
+              }
+            },
+          };
+        }
       },
-      // available values: 'hash', 'history'
-      // vueRouterBase,
-      // vueDevtools,
-      // vueOptionsAPI: false,
-
-      // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
-
-      // publicPath: '/',
-      // analyze: true,
-      // env: {},
-      // rawDefine: {}
-      // ignorePublicFolder: true,
-      // minify: false,
-      // polyfillModulePreload: true,
-      // distDir
-
-      // extendViteConf (viteConf) {},
-      // viteVuePluginOptions: {},
 
       vitePlugins: [
         [
@@ -193,7 +211,7 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: 'generateSW', // or 'injectManifest'
+      workboxMode: 'GenerateSW', // or 'InjectManifest'
       injectPwaMetaTags: true,
       swFilename: 'sw.js',
       manifestFilename: 'manifest.json',

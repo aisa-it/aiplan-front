@@ -257,8 +257,9 @@ function createEditor() {
   if (editorInstance.value) {
     editorInstance.value.destroy();
   }
+
   editorInstance.value = new Editor({
-    content: props.modelValue,
+    content: props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
     editable: !isReadOnly.value,
     extensions: editorExtensions.value,
     onUpdate: () => {
@@ -348,6 +349,7 @@ watch(
 watch(
   () => props.modelValue,
   (newVal) => {
+    newVal = newVal.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;');
     if (editorInstance.value && newVal !== editorInstance.value.getHTML()) {
       let content = replaceColor(newVal, $q.dark.isActive ? 'dark' : 'light');
       editorInstance.value.commands.setContent(content, false);

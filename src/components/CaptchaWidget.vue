@@ -34,6 +34,8 @@ export default defineComponent({
 });
 </script>
 
-<style>
-
+<style scoped lang="scss">
+:deep(.altcha) {
+  border: none;
+}
 </style>
