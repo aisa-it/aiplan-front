@@ -5,9 +5,20 @@
     <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
       <q-list style="width: 320px; background: white">
         <div>
-          <q-item-label header style="padding-bottom: 0px"
-            >Отображение</q-item-label
-          >
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <q-item-label header
+              >Отображение</q-item-label
+            >
+            <q-btn
+              flat
+              dense
+              class="q-mr-md btn-refresh"
+              icon="refresh"
+              @click="refreshFilters"
+            >
+              <q-tooltip anchor="bottom middle" self="top middle">Сбросить</q-tooltip>
+            </q-btn>
+          </div>
           <q-item class="row">
             <q-select
               dense
@@ -203,6 +214,7 @@ import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
 import { storeToRefs } from 'pinia';
 import { is } from 'quasar';
+import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 
 const props = defineProps<{
   projectId: string;
@@ -221,6 +233,8 @@ const columnsSelector = ref(props.columns);
 
 const isPopupOpen = ref(false);
 const options = ref(NEW_GROUP_BY_OPTIONS);
+
+const defaultViewForm = ref(DEFAULT_VIEW_PROPS);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -273,6 +287,11 @@ const onUpdate = async () => {
   } catch {
     issuesLoader.value = false;
   }
+};
+
+const refreshFilters = async () => {
+  viewForm.value = DEFAULT_VIEW_PROPS;
+  await onUpdate();
 };
 
 onMounted(() => {
@@ -336,5 +355,9 @@ watch(
       padding-right: 12px;
     }
   }
+}
+
+.btn-refresh {
+  color: $text-color;
 }
 </style>
