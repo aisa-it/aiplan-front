@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { EventBus } from 'quasar';
 
 import { useUserStore } from 'src/stores/user-store';
-import { useFormStore } from 'src/stores/form-store';
+import { useFormStore } from 'src/modules/ai-forms/stores/form-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import { stopGlobalLoading } from 'src/composables/useGlobalLoader';

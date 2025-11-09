@@ -94,7 +94,8 @@
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 //stores
-import { useFormStore } from 'src/stores/form-store';
+import { useFormStore } from 'src/modules/ai-forms/stores/form-store';
+import { api } from '../services/api';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 //utils
@@ -134,16 +135,16 @@ const headContent = computed(() => {
 
 //methods
 const getCurrentAnswer = async () => {
-  const { data } = await formStore.getFormAnswer(
-    currentWorkspaceSlug.value,
+  const data = await api.getAnswer(
+    currentWorkspaceSlug.value as string,
     props.formSlug,
-    props.answerId,
+    props.answerId.toString(),
   );
   answer.value = data;
 };
 
 const getCurrentForm = async () => {
-  const { data } = await formStore.getSettingsForm(props.formSlug, true);
+  const data = await api.getFormAuth(props.formSlug);
   form.value = data;
 };
 

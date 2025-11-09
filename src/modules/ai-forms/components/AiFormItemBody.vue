@@ -80,7 +80,7 @@ import {
   deleteQuestion,
   lower,
   upper,
-} from '../helper/helperForm';
+} from 'src/components/forms/helper/helperForm';
 import AddQuestionTypeField from './AddQuestionTypeField.vue';
 
 const props = defineProps<{

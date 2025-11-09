@@ -19,7 +19,7 @@ import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { ref, watch, onBeforeMount } from 'vue';
 
-import { useFormStore } from 'src/stores/form-store';
+import { useFormStore } from 'src/modules/ai-forms/stores/form-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';

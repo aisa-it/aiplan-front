@@ -98,12 +98,13 @@ import aiplan from 'src/utils/aiplan';
 import { parseText } from 'src/utils/helpers';
 import { formatDateTime } from 'src/utils/time';
 //stores
-import { useFormStore } from 'src/stores/form-store';
+import { useFormStore } from 'src/modules/ai-forms/stores/form-store';
+import { api } from 'src/modules/ai-forms/services/api';
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
-import FormAnswers from 'src/components/forms/dialogs/FormAnswers.vue';
+import FormAnswers from 'src/modules/ai-forms/dialogs/FormAnswers.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 
 //stores
@@ -142,15 +143,13 @@ const refresh = async (props) => {
 
   loading.value = true;
 
-  const { data } = await formStore
-    .getFormAnswers(
+  const data = await api
+    .getAnswers(
       route.params.workspace as string,
       route.params.formSlug as string,
       {
         offset: offset,
         limit: limit,
-        order_by: sortBy,
-        desc: descending,
       },
     )
     .finally(() => (loading.value = false));
@@ -164,7 +163,7 @@ const refresh = async (props) => {
 };
 
 const getCurrentForm = async () => {
-  const { data } = await formStore.getSettingsForm(route.params.formSlug, true);
+  const data = await api.getFormAuth(route.params.formSlug as string);
   form.value = data;
 };
 
