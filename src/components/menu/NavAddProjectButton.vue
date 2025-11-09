@@ -12,10 +12,7 @@
         <q-item clickable @click="isProjectCreateOpen = !isProjectCreateOpen">
           <q-item-section v-close-popup> Создать проект </q-item-section>
         </q-item>
-        <q-item
-          :clickable="!isDemo"
-          @click="isFormCreateOpen = !isFormCreateOpen"
-        >
+        <q-item :clickable="!isDemo" @click="formDialogStore.openForCreat">
           <q-item-section v-close-popup>
             Создать форму
             <HintTooltip v-if="isDemo">
@@ -34,7 +31,11 @@
   </q-btn>
   <ImportJiraDialog v-if="!isDemo" v-model="isImportOpen" />
   <NewProjectDialog v-model="isProjectCreateOpen" />
-  <FormDialog v-model="isFormCreateOpen" @success-create="refreshForms" />
+  <FormDialog
+    v-if="!isDemo"
+    v-model="formDialogStore.isOpen"
+    :form-for-edit="formDialogStore.form"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -44,31 +45,23 @@ import { ref } from 'vue';
 // services
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useFormStore } from 'src/stores/form-store';
+import { useFormDialogStore } from 'src/modules/ai-forms/stores/form-dialog-store';
 // components
 import NewProjectDialog from 'src/components/dialogs/NewProjectDialog.vue';
 import ImportJiraDialog from 'src/modules/import-jira/ui/ImportJiraDialog.vue';
-import FormDialog from '../forms/dialogs/FormDialog.vue';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
+import FormDialog from '../../modules/ai-forms/dialogs/FormDialog.vue';
 
 //hooks
 
 // stroes
 const utilsStore = useUtilsStore();
-const formStore = useFormStore();
-const workspaceStore = useWorkspaceStore();
+const formDialogStore = useFormDialogStore();
 const { hasPermission } = useRolesStore();
 
 // store to refs
 const { isDemo } = storeToRefs(utilsStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // dialogs vars
 const isImportOpen = ref(false);
 const isProjectCreateOpen = ref(false);
-const isFormCreateOpen = ref(false);
-
-const refreshForms = async () => {
-  formStore.getFormList(currentWorkspaceSlug.value);
-};
 </script>

@@ -261,7 +261,8 @@ import {
 } from 'quasar';
 import { useRoute } from 'vue-router';
 //stores
-import { useFormStore } from 'src/stores/form-store';
+import { useFormStore } from 'src/modules/ai-forms/stores/form-store';
+import { api } from 'src/modules/ai-forms/services/api';
 import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUtilsStore } from 'src/stores/utils-store';
@@ -390,11 +391,12 @@ const submitForm = async () => {
     }
   });
   try {
-    await formStore.sendForm(
-      route.params.slug,
-      res,
-      useAuth.value ? true : false,
-    );
+    if (useAuth.value) {
+      await api.createAnswerNoAuth(route.params.slug, res);
+    } else {
+      await api.createAnswerNoAuth(route.params.slug, res);
+    }
+
     setNotificationView({
       open: true,
       type: 'success',
@@ -484,14 +486,11 @@ onMounted(async () => {
     useAuth.value = false;
   } finally {
     if (useAuth.value) {
-      const { data } = await formStore.getSettingsForm(route.params.slug, true);
+      const data = await api.getFormAuth(route.params.slug);
       validateReq(data);
     } else {
       try {
-        const { data } = await formStore.getSettingsForm(
-          route.params.slug,
-          false,
-        );
+        const data = await api.getFormNoAuth(route.params.slug);
         validateReq(data);
       } catch (e) {
         onlyAuth.value = true;

@@ -23,6 +23,8 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
+
 defineProps<{
   disable: boolean;
   isEdit?: boolean;
@@ -32,4 +34,6 @@ const emits = defineEmits<{
   close: [];
   save: [];
 }>();
+
+const $q = useQuasar();
 </script>
