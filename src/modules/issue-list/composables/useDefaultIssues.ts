@@ -44,6 +44,7 @@ export const useDefaultIssues = () => {
       pagination || defineIssuesPagination.value,
     );
     issuesStore.ungroupedIssueList = response?.data;
+    return response;
   }
 
   return { onRequest };

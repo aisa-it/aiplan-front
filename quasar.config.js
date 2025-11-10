@@ -70,10 +70,6 @@ export default configure(function (ctx) {
       chunkSizeWarningLimit: 1000,
 
       extendViteConf(viteConf) {
-        viteConf.esbuild = {
-          drop: ['console'],
-        };
-
         // Добавляем оптимизацию chunks
         if (viteConf.build && viteConf.build.rollupOptions) {
           viteConf.build.rollupOptions.output = {

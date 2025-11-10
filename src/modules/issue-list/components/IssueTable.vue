@@ -27,14 +27,23 @@
     </template>
 
     <template v-slot:body-cell-name="props">
-      <NameColumn :row-info="props" @open-preview="emits('openPreview', props.row.sequence_id, parsePagination(quasarPagination))" />
+      <NameColumn
+        :row-info="props"
+        @open-preview="
+          emits(
+            'openPreview',
+            props.row.sequence_id,
+            parsePagination(quasarPagination),
+          )
+        "
+      />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
     <template v-slot:body-cell-priority="props">
       <PriorityColumn
         :row-info="props"
-        @refresh="updateCurrentTable('priority', props.row, entity)"
+        @refresh="updateIssueField('priority', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -45,7 +54,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateCurrentTable('state', props.row, entity);
+            updateIssueField('state', props.row, entity);
           }
         "
       />
@@ -55,7 +64,7 @@
     <template v-slot:body-cell-target_date="props">
       <TargetDateColumn
         :row-info="props"
-        @refresh="updateCurrentTable('targetDate', props.row, entity)"
+        @refresh="updateIssueField('targetDate', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -134,7 +143,7 @@ import { EventBus } from 'quasar';
 
 const projectStore = useProjectStore();
 
-const { projectProps } = storeToRefs(projectStore);
+const { projectProps, isGroupingEnabled } = storeToRefs(projectStore);
 
 interface QuasarPagination {
   page: number;
@@ -195,6 +204,11 @@ bus.on('updateIssueTable', (field, entityId) => {
   }
 });
 
+const updateIssueField = (action?: string, row?: any, entity?: any) => {
+  if (isGroupingEnabled.value === true) {
+    updateCurrentTable(action, row, entity);
+  } else emits('refresh', parsePagination(quasarPagination.value));
+};
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });
