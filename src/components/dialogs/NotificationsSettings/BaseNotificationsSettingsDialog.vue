@@ -155,8 +155,6 @@ const MemberSettingToAuthor = (setting: keyof SettingsType) => {
       return 'notification_author_settings_email';
     case 'notification_settings_tg':
       return 'notification_author_settings_tg';
-    case 'notification_settings_email':
-      return 'notification_author_settings_email';
     default:
       return setting;
   }

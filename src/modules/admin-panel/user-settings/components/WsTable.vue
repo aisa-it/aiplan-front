@@ -28,7 +28,7 @@
             :options="ROLES"
             map-options
             @update:model-value="
-              (newRole) => updateUserRole(props.row.id, newRole.value)
+              (newRole) => updateUserRole(props.row, newRole.value)
             "
           />
         </q-td>
@@ -38,7 +38,7 @@
             v-if="props.row.current_user_membership?.role"
             dense
             flat
-            @click="deleteFromWsHandler(props.row.id)"
+            @click="deleteFromWsHandler(props.row)"
           >
             <RemoveIcon />
             <HintTooltip>Удалить из рабочего пространства</HintTooltip>
@@ -114,15 +114,27 @@ const $q = useQuasar();
 const currentWs = ref('');
 const expanded = ref<string[]>([]);
 
-const updateUserRole = async (wsId: string, role: number) => {
-  await api.changeUserRoleInWorkspace(wsId, props.userId, { role: role });
-  refresh({ pagination: pagination.value }, searchQuery.value);
+const updateUserRole = async (ws: DtoWorkspace, role: number) => {
+  await api.changeUserRoleInWorkspace(ws.id ?? '', props.userId, {
+    role: role,
+  });
+  await refresh({ pagination: pagination.value }, searchQuery.value);
+  emits(
+    'selectRow',
+    rows.value?.find((el) => el.id === ws.id) ?? ({} as DtoWorkspace),
+  );
 };
 
-const deleteFromWsHandler = async (wsId: string) => {
-  const result = await store.showDialog(props.userId, wsId);
+const deleteFromWsHandler = async (ws: DtoWorkspace) => {
+  const result = await store.showDialog(props.userId, ws.id ?? '');
 
-  if (result) refresh({ pagination: pagination.value }, searchQuery.value);
+  if (result) {
+    await refresh({ pagination: pagination.value }, searchQuery.value);
+    emits(
+      'selectRow',
+      rows.value?.find((el) => el.id === ws.id) ?? ({} as DtoWorkspace),
+    );
+  }
 };
 
 const toggleExpand = (id: string) => {

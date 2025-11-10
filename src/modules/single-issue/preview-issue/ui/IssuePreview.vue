@@ -2,58 +2,80 @@
   <q-drawer
     v-model="model"
     side="right"
-    class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
+    class="prevent-preview-side-drawer flex flex-col issue-panel-card hide-scrollbar no-wrap relative-position"
     overlay
     bordered
-    content-class="relative"
-    :width="drawerWidth"
+    :width="adaptiveWidth"
     :breakpoint="0"
+    v-click-outside:prevent-preview-side-drawer="{
+      isAutoSave: true,
+      onClickOutside: () => emits('close'),
+      exclude: [...QUASAR_SELECTORS_CLASSES, 'prevent-click-issue-outside'],
+    }"
   >
-    <SingleIssueDrawer v-if="model" @refresh="emits('refresh')">
-      <template #extend-buttons>
-        <div class="row justify-end flex q-gutter-sm">
-          <q-btn
-            class="secondary-btn-only-icon"
-            icon="open_in_full"
-            @click="emits('open', issueData.id)"
-          >
-            <HintTooltip>Развернуть</HintTooltip>
-          </q-btn>
-          <q-btn class="secondary-btn-only-icon" icon="close" @click="onClose">
-            <HintTooltip>Закрыть</HintTooltip>
-          </q-btn>
-        </div>
-      </template>
-      <template #extend-header>
-        <MainIssueInfo preview @update:issue-page="emits('refresh')" />
-      </template>
-      <template #extend-content>
-        <div style="margin-right: -8px">
-          <SelectChildren
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :is-disabled="
-              hasPermissionByIssue(issueData, project, 'add-sub-issue')
-            "
-          />
-          <LinkedIssuesPanel />
+    <div
+      v-if="model"
+      class="row q-px-sm q-pt-sm flex-center fixed-top"
+      style="z-index: 999; background: inherit"
+    >
+      <h6 class="col q-px-sm">
+        {{ issueData.project_detail.identifier }}-{{ issueData.sequence_id }}
+      </h6>
+      <div class="row justify-end flex q-gutter-sm">
+        <q-btn
+          class="secondary-btn-only-icon-sm"
+          icon="open_in_full"
+          @click="emits('open', issueData.id)"
+        >
+          <HintTooltip>Развернуть</HintTooltip>
+        </q-btn>
+        <q-btn
+          class="secondary-btn-only-icon-sm"
+          icon="close"
+          @click="emits('close')"
+        >
+          <HintTooltip>Закрыть</HintTooltip>
+        </q-btn>
+      </div>
+    </div>
 
-          <SelectAttachments
-            entityType="issue"
-            :is-edit="
-              hasPermissionByIssue(issueData, project, 'change-issue-secondary')
-            "
-            :delete-attachment-func="deleteAttachment"
-            :get-attachment-func="getAttachmentsList"
-            :upload-attachment-func="uploadAttachments"
-            :download-all-func="downloadAllAttachments"
-            :id="issueData.id"
-          />
+    <div
+      v-if="model"
+      class="flex flex-col full-width full-height no-wrap"
+      style="padding-right: 400px; padding-top: 50px"
+    >
+      <MainIssueInfo preview @update:issue-page="emits('refresh')" />
 
-          <SingleIssueActivity />
-        </div>
-      </template>
-    </SingleIssueDrawer>
+      <SelectChildren
+        :projectid="issueData.project"
+        :issueid="issueData.id"
+        :is-disabled="hasPermissionByIssue(issueData, project, 'add-sub-issue')"
+      />
+      <LinkedIssuesPanel />
+
+      <SelectAttachments
+        entityType="issue"
+        :is-edit="
+          hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+        "
+        :delete-attachment-func="deleteAttachment"
+        :get-attachment-func="getAttachmentsList"
+        :upload-attachment-func="uploadAttachments"
+        :download-all-func="downloadAllAttachments"
+        :id="issueData.id"
+        ref="selectAttachments"
+      />
+
+      <SingleIssueActivity />
+    </div>
+    <SingleIssueDrawer
+      v-if="model"
+      preview
+      class="fixed-right hide-scrollbar issue-drawer-preview"
+      style="top: 62px;"
+      @refresh="(v) => emits('refresh', v)"
+    />
+
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
   </q-drawer>
 </template>
@@ -71,6 +93,9 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
+// directives
+import clickOutside from 'src/directives/click-outside';
+
 // components
 import SelectChildren from 'src/modules/single-issue/sub-issues/ui/SubIssuesPanel.vue';
 import SelectAttachments from 'src/components/SelectAttachments.vue';
@@ -80,12 +105,22 @@ import LinkedIssuesPanel from '../../linked-issues/ui/LinkedIssuesPanel.vue';
 import { FileAttUploadProgressFunc } from 'src/interfaces/files';
 import MainIssueInfo from '../../main-issue-info/ui/MainIssueInfo.vue';
 
+// constants
+import { QUASAR_SELECTORS_CLASSES } from 'src/constants/quasarSelectorsClasses';
+
 const model = defineModel<boolean>({ default: false });
 
 const emits = defineEmits<{
-  refresh: [];
+  refresh: [isFullRefresh?: boolean];
   open: [id: string];
+  close: [];
 }>();
+
+defineOptions({
+  directives: {
+    clickOutside,
+  },
+});
 
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
@@ -97,12 +132,15 @@ const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-const MIN_W = 400;
-const MAX_W = computed(() => Screen.width / 2);
 let rafId: number | null = null;
+const minWidth = computed(() => Math.max(Screen.width / 2, 900));
+const maxWidth = computed(() => Screen.width);
+const adaptiveWidth = computed(() =>
+  Math.min(drawerWidth.value, maxWidth.value),
+);
 
-const drawerWidth = ref(400);
-const targetWidth = ref(400);
+const drawerWidth = ref(Math.max(Screen.width / 2, 900));
+const targetWidth = ref(Math.max(Screen.width / 2, 900));
 const startX = ref(0);
 const startW = ref(0);
 const moving = ref(false);
@@ -142,13 +180,8 @@ const downloadAllAttachments = async () => {
   return { url, fileName };
 };
 
-const onClose = () => {
-  model.value = false;
-  currentIssueID.value = '';
-};
-
 const clamp = (w: number) => {
-  return Math.min(MAX_W.value, Math.max(MIN_W, Math.round(w)));
+  return Math.min(maxWidth.value, Math.max(minWidth.value, Math.round(w)));
 };
 
 const startRaf = () => {
@@ -206,8 +239,8 @@ watch(drawerWidth, (val) => {
 onMounted(() => {
   const saved = LocalStorage.getItem('drawerWidth');
   if (saved) {
-    drawerWidth.value = Number(saved);
-    targetWidth.value = Number(saved);
+    drawerWidth.value = Math.max(Number(saved), minWidth.value);
+    targetWidth.value = Math.max(Number(saved), minWidth.value);
   }
 });
 
@@ -226,5 +259,11 @@ onBeforeUnmount(() => {
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+}
+
+.issue-drawer-preview {
+  width: 400px;
+  height: calc(100vh - 112px);
+  overflow: auto;
 }
 </style>

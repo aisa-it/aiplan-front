@@ -1,10 +1,13 @@
 <template>
   <div class="col">
     <div class="row q-pb-sm flex-center">
-      <h6 class="col">
+      <h6 v-if="!preview" class="col">
         {{ issueData.project_detail.identifier }}-{{ issueData.sequence_id }}
       </h6>
-      <div class="row justify-end flex q-gutter-sm">
+      <div
+        class="row justify-end flex q-gutter-sm"
+        :class="{ 'q-ml-none full-w': preview }"
+      >
         <q-btn
           v-if="
             hasPermissionByIssue(issueData, project, 'change-issue-primary')
@@ -58,8 +61,16 @@
       </div>
     </div>
   </div>
-  <TransferTaskDialog v-model="isTransferOpen" :issue="issueData" />
-  <DeleteIssueDialog v-model="isDeletingOpen" :issue="issueData" />
+  <TransferTaskDialog
+    v-model="isTransferOpen"
+    :issue="issueData"
+    @refresh="emits('refresh', true)"
+  />
+  <DeleteIssueDialog
+    v-model="isDeletingOpen"
+    :issue="issueData"
+    @refresh="emits('refresh', true)"
+  />
 </template>
 <script setup lang="ts">
 // core
@@ -86,8 +97,11 @@ import {
 } from 'src/constants/notifications';
 import ExportPdfIcon from '../icons/ExportPdfIcon.vue';
 
+defineProps<{
+  preview?: boolean;
+}>();
 // emits
-const emits = defineEmits<{ refresh: [] }>();
+const emits = defineEmits<{ refresh: [isFullRefresh?: boolean] }>();
 
 // stores
 const { setNotificationView } = useNotificationStore();

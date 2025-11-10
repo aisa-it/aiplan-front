@@ -304,14 +304,17 @@ const updateProjectWatchers = async (e: any) => {
 };
 
 const updateDocWatchers = async (e: any) => {
+  if (!props.docId) {
+    // Сохраняем полные объекты, а не только ID
+    const selectedWatchers = e || [];
+    emit('update:watchers', selectedWatchers);
+    return;
+  }
+
   const watchersIds = e
     ? e.map((d) => (d.member ? d.member?.id || d?.id : d))
     : [];
 
-  if (!props.docId) {
-    emit('update:watchers', watchersIds);
-    return;
-  }
   aidocStore
     .updateDocument(
       {

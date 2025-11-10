@@ -10,7 +10,10 @@
       @lower="emits('lower')"
     >
       <template v-slot:toggle>
-        <div v-if="computedValue.type !== 'checkbox'" class="centered-horisontally">
+        <div
+          v-if="computedValue.type !== 'checkbox'"
+          class="centered-horisontally"
+        >
           <q-toggle v-model="computedValue.required" size="32px" />
           Обязательное поле
         </div>
@@ -43,6 +46,7 @@
               "
               @upper="upper(index, computedValue.validate.opt)"
               @lower="lower(index, computedValue.validate.opt)"
+              is-options-in-select
             />
           </q-item>
         </div>

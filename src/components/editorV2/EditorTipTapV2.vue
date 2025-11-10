@@ -26,44 +26,47 @@
       @enable-editing="$emit('enableEditing')"
       @toggle-fullscreen="$emit('toggle-fullscreen')"
     />
-    <div class="html-editor__wrapper">
-      <div v-if="loading" class="html-editor__loading-overlay"></div>
-      <DefaultLoader v-if="loading" class="html-editor__loader" />
-      <EditorContent
-        :id="editorId"
-        :key="editorKey"
-        :editor="editorInstance"
-        :class="[
-          'html-editor__container',
-          {
-            'html-editor__readonly': isReadOnly,
-            'html-editor__scroll-visible': isReadOnly,
-            'html-editor__resize': canResize,
-          },
-          classPrevent,
-        ]"
-        @click="handleClickEditor"
-      />
-      <EditorTooltipMention
-        :content="tooltipContentMention"
-        :anchor="tooltipAnchorMention"
-        :show-tooltip="isTooltipMention"
-        :class-prevent="classPrevent"
-        @showTooltip="isTooltipMention = false"
-      />
-      <q-resize-observer v-if="isMobile" @resize="onResize" />
-    </div>
 
-    <transition name="fade">
-      <span
-        v-if="canEdit && isReadOnly"
-        :class="`html-editor__btn-edit ${classPrevent}`"
-        title="Нажмите для редактирования"
-        @click="$emit('enableEditing')"
-      >
-        <EditIcon />
-      </span>
-    </transition>
+    <div class="html-editor__outer">
+      <transition name="fade">
+        <span
+          v-if="canEdit && isReadOnly"
+          :class="`html-editor__btn-edit ${classPrevent}`"
+          title="Нажмите для редактирования"
+          @click="$emit('enableEditing')"
+        >
+          <EditIcon />
+        </span>
+      </transition>
+
+      <div class="html-editor__wrapper">
+        <div v-if="loading" class="html-editor__loading-overlay"></div>
+        <DefaultLoader v-if="loading" class="html-editor__loader" />
+        <EditorContent
+          :id="editorId"
+          :key="editorKey"
+          :editor="editorInstance"
+          :class="[
+            'html-editor__container',
+            {
+              'html-editor__readonly': isReadOnly,
+              'html-editor__scroll-visible': isReadOnly,
+              'html-editor__resize': canResize,
+            },
+            classPrevent,
+          ]"
+          @click="handleClickEditor"
+        />
+        <EditorTooltipMention
+          :content="tooltipContentMention"
+          :anchor="tooltipAnchorMention"
+          :show-tooltip="isTooltipMention"
+          :class-prevent="classPrevent"
+          @showTooltip="isTooltipMention = false"
+        />
+        <q-resize-observer v-if="isMobile" @resize="onResize" />
+      </div>
+    </div>
 
     <DocPreviewDialog
       v-if="openImage"
@@ -88,6 +91,7 @@ import {
   onMounted,
   provide,
   inject,
+  nextTick,
 } from 'vue';
 import { useQuasar, Screen, EventBus } from 'quasar';
 
@@ -253,8 +257,9 @@ function createEditor() {
   if (editorInstance.value) {
     editorInstance.value.destroy();
   }
+
   editorInstance.value = new Editor({
-    content: props.modelValue,
+    content: props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
     editable: !isReadOnly.value,
     extensions: editorExtensions.value,
     onUpdate: () => {
@@ -330,16 +335,21 @@ const updateToC = () => {
 
 watch(
   () => isReadOnly.value,
-  (newVal) => {
-    editorInstance.value.setOptions({
-      editable: !newVal,
-    });
+  (newVal, oldVal) => {
+    if (oldVal && !newVal) {
+      const scrollY = window.scrollY;
+      editorInstance.value.setOptions({ editable: true });
+      nextTick(() => window.scrollTo({ top: scrollY }));
+    } else {
+      editorInstance.value.setOptions({ editable: !newVal });
+    }
   },
 );
 
 watch(
   () => props.modelValue,
   (newVal) => {
+    newVal = newVal.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;');
     if (editorInstance.value && newVal !== editorInstance.value.getHTML()) {
       let content = replaceColor(newVal, $q.dark.isActive ? 'dark' : 'light');
       editorInstance.value.commands.setContent(content, false);
@@ -360,7 +370,7 @@ defineExpose({
 
 <style scoped lang="scss">
 .html-editor {
-  overflow-y: hidden;
+  // overflow-y: hidden;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -372,6 +382,31 @@ defineExpose({
     top: 0;
     z-index: 10;
     background-color: $bg-color;
+  }
+
+  &__outer {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: stretch;
+  }
+
+  &__btn-edit {
+    display: none;
+    cursor: pointer;
+    background-color: $bg-color;
+    border-radius: 0 8px 8px 0;
+    border-left: 1px solid $dark-border-color;
+  }
+
+  &__btn-edit svg {
+    overflow: hidden;
+    position: sticky;
+    top: 50px;
+    right: 0;
+    width: 30px;
+    flex-shrink: 0;
+    height: 30px;
+    z-index: 10;
   }
 
   &__wrapper {

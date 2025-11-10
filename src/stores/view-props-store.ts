@@ -3,6 +3,7 @@ import { useAiplanStore } from './aiplan-store';
 import { IProjectView } from 'src/interfaces/projects';
 import { useUserStore } from './user-store';
 import { useProjectStore } from './project-store';
+import { allColumns } from 'src/modules/issue-list/constants/tableColumns';
 
 const userStore = useUserStore();
 const aiplanStore = useAiplanStore();
@@ -127,6 +128,16 @@ export const useViewPropsStore = defineStore('view_props', {
                 : '';
 
       this.props.group_tables_hide[prefix + groupId] = status;
+    },
+  },
+
+  getters: {
+    getTableColumns() {
+      return allColumns.filter((column) => {
+        if (column.name === 'sequence_id') return true;
+
+        return this.props.columns_to_show.some((c) => c === column?.name);
+      });
     },
   },
 });
