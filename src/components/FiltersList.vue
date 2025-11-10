@@ -5,10 +5,14 @@
     <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
       <q-list style="width: 320px; background: white">
         <div>
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <q-item-label header
-              >Отображение</q-item-label
-            >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <q-item-label header>Отображение</q-item-label>
             <q-btn
               flat
               dense
@@ -16,7 +20,9 @@
               icon="refresh"
               @click="refreshFilters"
             >
-              <q-tooltip anchor="bottom middle" self="top middle">Сбросить</q-tooltip>
+              <q-tooltip anchor="bottom middle" self="top middle"
+                >Сбросить</q-tooltip
+              >
             </q-btn>
           </div>
           <q-item class="row">
@@ -67,6 +73,7 @@
                 v-slot:option="{ itemProps, opt, selected, toggleOption }"
               >
                 <q-item
+                  v-if="opt.name !== 'sequence_id'"
                   v-bind="itemProps"
                   class="selector-option__wrapper selector-option-columns__wrapper q-py-none"
                 >
