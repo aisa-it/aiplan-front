@@ -39,6 +39,7 @@ import {
   defineAsyncComponent,
   onMounted,
   shallowRef,
+  watch,
   watchEffect,
 } from 'vue';
 
@@ -47,6 +48,7 @@ import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from './composables/useDefaultIssues';
 import { useGroupedIssues } from './composables/useGroupedIssues';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues();
@@ -54,6 +56,8 @@ const { getGroupedIssues } = useGroupedIssues();
 
 const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
   storeToRefs(useProjectStore());
+
+const { refreshIssues } = storeToRefs(useIssuesStore());
 const route = useRoute();
 
 const load = async () => {
@@ -73,6 +77,15 @@ onMounted(async () => {
   await load();
 });
 
+watch(
+  () => refreshIssues.value,
+  async () => {
+    if (refreshIssues.value === true) {
+      await load();
+      refreshIssues.value = false;
+    }
+  },
+);
 const components = {
   DefaultIssueList: defineAsyncComponent(
     () => import('./components/DefaultIssueList.vue'),
