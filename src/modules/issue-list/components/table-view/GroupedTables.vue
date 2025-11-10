@@ -2,6 +2,7 @@
   <q-scroll-area
     ref="scrollContainer"
     class="scroll-container"
+    :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
     <div v-for="(table, index) in issueList" :key="index">

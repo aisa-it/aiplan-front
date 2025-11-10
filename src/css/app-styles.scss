@@ -1459,3 +1459,15 @@ select:-ms-autofill {
   transition: transform 0.3s ease;
   transform-origin: center;
 }
+
+.scroll-container {
+  height: calc(100vh - 105px);
+  overflow-y: auto;
+
+  .q-scrollarea__container {
+    overflow-x: hidden !important;
+  }
+  .q-scrollarea__content {
+    width: inherit;
+  }
+}
