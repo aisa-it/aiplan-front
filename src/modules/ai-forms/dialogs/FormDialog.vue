@@ -180,7 +180,7 @@ const save = async () => {
 
 const validateDate = (val: string) => validDate(val);
 
-const refresh = async () => {
+const refreshProjects = async () => {
   clear();
 
   await workspaceStore
@@ -194,7 +194,7 @@ const refresh = async () => {
 };
 
 const getForm = async () => {
-  refresh();
+  refreshProjects();
 
   if (!props.formForEdit?.slug) return;
 

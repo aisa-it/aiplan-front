@@ -22,12 +22,12 @@ const props = defineProps<{
   modelValue: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
+const emits = defineEmits<{
+  'update:modelValue': [boolean];
 }>();
 
 const model = computed({
   get: () => props.modelValue,
-  set: (val: boolean) => emit('update:modelValue', val),
+  set: (val: boolean) => emits('update:modelValue', val),
 });
 </script>

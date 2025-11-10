@@ -35,17 +35,17 @@ const props = defineProps<{
   projects: Array<DtoProject>;
 }>();
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: AiplanReqForm): void;
-  (e: 'update:isAutoCreateProject', value: boolean): void;
+const emits = defineEmits<{
+  'update:modelValue': [AiplanReqForm];
+  'update:isAutoCreateProject': [boolean];
 }>();
 
 const localForm = ref<AiplanReqForm>({ ...props.modelValue });
 const localIsAutoCreate = ref(props.isAutoCreateProject);
 
-watch(localForm, (val) => emit('update:modelValue', val), { deep: true });
+watch(localForm, (val) => emits('update:modelValue', val), { deep: true });
 
-watch(localIsAutoCreate, (val) => emit('update:isAutoCreateProject', val));
+watch(localIsAutoCreate, (val) => emits('update:isAutoCreateProject', val));
 
 watch(
   () => props.modelValue,

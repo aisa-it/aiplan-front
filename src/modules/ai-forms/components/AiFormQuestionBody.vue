@@ -1,10 +1,7 @@
 <template>
   <q-item-section class="no-wrap">
     <div class="row q-mb-xs gap-x-4 items-center">
-      <span>
-        {{ isOptionsInSelect ? 'Вариант' : 'Вопрос' }} {{ number }}
-        {{ typeLabel }}</span
-      >
+      <span> {{ entityLabel }} {{ number }} {{ typeLabel }} </span>
       <slot name="toggle"></slot>
     </div>
     <div class="no-wrap row justify-between flex-center">
@@ -12,7 +9,7 @@
         <q-input
           v-model.trim="computedValue"
           dense
-          :label="`Введите ${isOptionsInSelect ? 'вариант' : 'вопрос'}`"
+          :label="`Введите ${entityLabel.toLowerCase()}`"
           class="base-input full-w q-mr-sm q-pb-sm"
           lazy-rules
           :rules="[(val: string) => isEmpty(val, 'вопрос')]"
@@ -57,6 +54,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { QUESTION_TYPE_FIELD_OPTIONS } from 'src/constants/constants';
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import ArrowDown from 'src/components/icons/ArrowDown.vue';
@@ -88,4 +86,10 @@ const typeLabel = computed(() => {
   );
   return option?.label ? `(${option?.label})` : '';
 });
+
+const entityLabel = computed(() =>
+  props.isOptionsInSelect ? 'Вариант' : 'Вопрос',
+);
+
+const $q = useQuasar();
 </script>
