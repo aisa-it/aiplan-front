@@ -92,23 +92,23 @@ export const useGroupedIssues = () => {
         return filters;
       }
       case 'labels': {
-        filters = { labels: [entity.id] };
+        filters = { labels: [entity ? entity.id : ''] };
         return filters;
       }
       case 'priority': {
-        filters = { priorities: [entity] };
+        filters = { priorities: [entity || ''] };
         return filters;
       }
       case 'watchers': {
-        filters = { watchers: [entity.id] };
+        filters = { watchers: [entity ? entity.id : ''] };
         return filters;
       }
       case 'assignees': {
-        filters = { assignees: [entity.id] };
+        filters = { assignees: [entity ? entity.id : ''] };
         return filters;
       }
       case 'author': {
-        filters = { authors: [entity.id] };
+        filters = { authors: [entity ? entity.id : ''] };
         return filters;
       }
     }
@@ -117,7 +117,7 @@ export const useGroupedIssues = () => {
 
   async function getCurrentTable(index: number, pagination: any, entity: any) {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
-    pagination.order_by = pagination.order_by ?? 'sequence_id'
+    pagination.order_by = pagination.order_by ?? 'sequence_id';
     const response = await issuesStore.getIssuesTable(
       workspaceInfo?.value?.id as string,
       project.value.id as string,
