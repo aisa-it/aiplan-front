@@ -8,6 +8,10 @@
     :rows="rows"
     :columns="projectStore.getTableColumns"
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
+    @row-click="
+      (_, row) =>
+        emits('openPreview', row.sequence_id, parsePagination(quasarPagination))
+    "
     @request="(e) => getIssues(e.pagination)"
   >
     <template #bottom>
