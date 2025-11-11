@@ -31,7 +31,7 @@ export const useGroupedIssues = () => {
   function parsePagination(pagination: QuasarPagination) {
     return {
       only_count: false,
-      show_sub_issue: projectProps.value?.showSubIssues ?? true,
+      show_sub_issues: projectProps.value?.showSubIssues ?? true,
       only_active: projectProps.value?.showOnlyActive ?? true,
       group_by:
         PARSED_GROUP[projectProps.value?.filters?.group_by]?.value ||

@@ -141,7 +141,7 @@ async function closePreview() {
 function parsePagination(pagination) {
   return {
     only_count: false,
-    show_sub_issue: projectProps.value.showSubIssues ?? true,
+    show_sub_issues: projectProps.value.showSubIssues ?? true,
     draft: projectProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
