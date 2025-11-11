@@ -284,6 +284,7 @@ const handleDownloadAll = async (): Promise<void> => {
   min-width: 360px;
   max-width: 600px;
   max-height: 90vh;
+  border-radius: 8px;
 
   &::-webkit-scrollbar {
     display: block;
