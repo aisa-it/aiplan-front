@@ -63,13 +63,12 @@ const isParent = computed((): boolean => {
 <style scoped lang="scss">
 .name-row {
   padding: 8px 0px;
-  max-width: 20rem;
-  min-width: 20rem;
+  max-width: 25rem;
+  min-width: 25rem;
 
   &__wrapper {
     display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
+    grid-template-columns: 100%;
     gap: 16px;
   }
   &__wrapper:has(.parent-issue-chip) {
