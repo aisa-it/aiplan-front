@@ -133,8 +133,10 @@ const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 let rafId: number | null = null;
+const leftbarWidth = 300
+
 const minWidth = computed(() => Math.max(Screen.width / 2, 900));
-const maxWidth = computed(() => Screen.width);
+const maxWidth = computed(() => Screen.width - leftbarWidth);
 const adaptiveWidth = computed(() =>
   Math.min(drawerWidth.value, maxWidth.value),
 );

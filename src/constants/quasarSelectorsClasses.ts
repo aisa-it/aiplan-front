@@ -8,4 +8,5 @@ export const QUASAR_SELECTORS_CLASSES = [
   'q-virtual-scroll__content',
   'q-bottom-sheet',
   'q-notification',
+  'q-list'
 ];
