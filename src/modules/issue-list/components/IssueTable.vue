@@ -1,6 +1,7 @@
 <template>
   <q-table
     v-model:pagination="quasarPagination"
+    binary-state-sort
     class="my-sticky-column-table table-bottom-reverse"
     row-key="sequence_id"
     flat
@@ -168,7 +169,7 @@ const loadingTable = ref(false);
 const quasarPagination = ref<QuasarPagination>({
   page: 1,
   rowsNumber: props.rowsCount,
-  sortBy: projectProps.value?.filters?.order_by,
+  sortBy: projectProps.value?.filters?.order_by ?? 'sequence_id',
   descending: projectProps.value?.filters?.orderDesc,
   rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
