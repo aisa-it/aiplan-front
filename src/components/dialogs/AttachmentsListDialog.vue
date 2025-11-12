@@ -42,7 +42,7 @@
         </template>
 
         <template v-slot:body-cell-type="props">
-          <q-td :props="props"
+          <q-td :props="props" class="attachments-list__column_thin"
             >{{
               props.row.asset.content_type
                 ? props.row.asset.content_type
@@ -52,17 +52,14 @@
         </template>
 
         <template v-slot:body-cell-size="props">
-          <q-td :props="props"
+          <q-td :props="props" class="attachments-list__column_thin"
             >{{ formatFileSize(props.row.asset.size) }}
           </q-td>
         </template>
 
         <template v-slot:body-cell-actions="props">
-          <q-td :props="props">
-            <div
-              v-if="!$q.screen.lt.md"
-              class="q-gutter-xs justify-end"
-            >
+          <q-td :props="props" class="attachments-list__column_thin">
+            <div v-if="!$q.screen.lt.md" class="q-gutter-xs justify-end">
               <q-btn
                 flat
                 dense
@@ -337,10 +334,14 @@ const handleDownloadAll = async (): Promise<void> => {
 <style scoped lang="scss">
 .attachments-list {
   min-width: 360px;
-  max-width: 40%;
+  max-width: 800px;
   width: 100%;
   max-height: 90vh;
   border-radius: 16px;
+
+  @media screen and (width > 1900px) {
+    max-width: 40%;
+  }
 
   &::-webkit-scrollbar {
     display: block;
@@ -355,7 +356,7 @@ const handleDownloadAll = async (): Promise<void> => {
   }
 
   &__column {
-    width: 190px;
+    width: 350px;
   }
 
   &__item {
@@ -372,19 +373,46 @@ const handleDownloadAll = async (): Promise<void> => {
   }
 }
 
-@media screen and (width < 600px) {
+@media screen and (width < 660px) {
   .attachments-list {
     min-width: auto;
     max-width: 100%;
 
     &__column {
-      max-width: 150px;
+      width: 200px;
     }
   }
 
   :deep(.q-table__control) {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media screen and (width < 524px) {
+  .attachments-list {
+    min-width: auto;
+    max-width: 100%;
+
+    &__column {
+      width: 100px;
+    }
+
+    &__column_thin {
+      width: 80px;
+    }
+  }
+
+  :deep(.q-table td),
+  :deep(.q-table th) {
+    padding: 5px 10px;
+  }
+}
+
+@media screen and (width < 400px) {
+  :deep(.q-table td),
+  :deep(.q-table th) {
+    padding: 5px 8px;
   }
 }
 </style>
