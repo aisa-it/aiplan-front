@@ -1,4 +1,3 @@
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { IQuery, useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
@@ -20,27 +19,28 @@ export const useDefaultIssues = () => {
       desc: projectProps.value?.filters?.orderDesc,
       offset: 0,
       limit: projectProps.value?.page_size,
+      only_active: projectProps.value?.showOnlyActive ?? true,
     };
   });
 
-  async function onRequest(
-    pagination?: IQuery,
-    filters?: TypesIssuesListFilters,
-  ) {
-    const projectFilters = {
-      states: [] as string[],
-    };
+  async function onRequest(pagination?: IQuery) {
     if (pagination) {
       pagination.order_by = pagination.order_by ?? 'sequence_id';
     }
+    const filters = {
+      states: [] as string[],
+      assigned_to_me: projectProps?.value?.filters?.assignedToMe,
+      authored_by_me: projectProps?.value?.filters?.authoredToMe,
+      watched_by_me: projectProps?.value?.filters?.watchedToMe,
+    };
     if (projectProps.value?.filters?.states?.length) {
-      projectFilters.states = projectProps?.value?.filters?.states;
+      filters.states = projectProps?.value?.filters?.states;
     }
 
     const response = await issuesStore.getIssuesTable(
       currentWorkspaceSlug.value,
       project.value.id,
-      filters || projectFilters,
+      filters,
       pagination || defineIssuesPagination.value,
     );
     issuesStore.ungroupedIssueList = response?.data;
