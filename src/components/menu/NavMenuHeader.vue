@@ -147,7 +147,7 @@
     <q-btn class="nav-menu__top-nav-button" :to="`/${currentWorkspaceSlug}`">
       <HomeIcon
         :color="`${
-          router.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
+          route.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
         }`"
       />
     </q-btn>
@@ -158,7 +158,7 @@
       :to="`/${currentWorkspaceSlug}/aidoc`"
     >
       <AIDocIcon
-        :color="`${router.path.includes('aidoc') ? activeIconColor : ''}`"
+        :color="`${route.path.includes('aidoc') ? activeIconColor : ''}`"
       />
     </q-btn>
     <q-btn
@@ -169,7 +169,7 @@
       @click="navigateToGit"
     >
       <GitIcon
-        :color="`${router.path.includes('/git') ? activeIconColor : ''}`"
+        :color="`${route.path.includes('/git') ? activeIconColor : ''}`"
       />
       <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
@@ -190,7 +190,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 
 // store
@@ -238,7 +238,8 @@ const { user, userWorkspaces } = storeToRefs(userStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { ny, isDemo } = storeToRefs(utilsStore);
 // router
-const router = useRoute();
+const route = useRoute();
+const router = useRouter();
 
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
@@ -286,18 +287,15 @@ const addFavoriteWorkspace = async (uuid: string | undefined) => {
 /**
  * Обработчик клика по иконке Git
  *
- * TODO: После реализации страницы Git репозиториев - добавить навигацию
- * Сейчас показывает информационное сообщение
+ * Переход на главную страницу Git расширения
+ * @see src/modules/git/pages/GitHomePage.vue
  */
 const navigateToGit = () => {
-  // TODO: Реализовать навигацию к странице Git репозиториев
-  // Например: router.push(`/${currentWorkspaceSlug.value}/git`)
-
-  $q.notify({
-    message: 'Git repositories страница в разработке',
-    color: 'info',
-    position: 'top',
-    timeout: 2000,
+  router.push({
+    name: 'git-home',
+    params: {
+      workspace: currentWorkspaceSlug.value,
+    },
   });
 };
 </script>

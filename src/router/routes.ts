@@ -1,5 +1,11 @@
 import { RouteRecordRaw } from 'vue-router';
 
+// ========== GIT EXTENSION ==========
+// Импорт роутов из git расширения (src/modules/git)
+// @see src/modules/git/router.ts
+import { gitRoutes } from 'src/modules/git/index';
+// ===================================
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -83,6 +89,11 @@ const routes: RouteRecordRaw[] = [
             path: 'user-activities/:id',
             component: () => import('pages/UserActivitiesPage.vue'),
           },
+          // ========== GIT EXTENSION ROUTES ==========
+          // Роуты Git расширения регистрируются динамически
+          // @see src/modules/git/router.ts
+          ...gitRoutes,
+          // ==========================================
         ],
       },
     ],
