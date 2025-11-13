@@ -254,7 +254,7 @@ const isPossibleToOpen = (value: IAttachmentCard) => {
 
 const handleDownload = async (file: IAttachmentCard) => {
   try {
-    const { data } = await api.api.get(`/api/file/${file.asset.id}`, {
+    const { data } = await api.api.get(`/api/auth/file/${file.asset.id}`, {
       responseType: 'blob',
       onDownloadProgress: (progressEvent) => {
         downloadProgress.value = Math.round(
