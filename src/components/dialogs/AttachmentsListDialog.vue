@@ -206,7 +206,7 @@ function formatFileSize(bytes: number): string {
 
 const handleCopyLink = (file: IAttachmentCard): void => {
   try {
-    const base = `${window.location.origin}/uploads/${file.asset.id}`;
+    const base = `${window.location.origin}/api/auth/file/${file.asset.id}`;
     const type = route.path.includes('aidoc') ? 'aidoc' : 'issue';
     const slug = route.params.workspace;
     const from =

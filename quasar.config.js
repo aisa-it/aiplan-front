@@ -127,10 +127,6 @@ export default configure(function (ctx) {
       // https: true
       open: true, // opens browser window automatically
       proxy: {
-        '/uploads': {
-          target: env.VITE_MINIO_URL,
-          changeOrigin: true,
-        },
         '/i': {
           target: env.VITE_API_URL,
           changeOrigin: true,
@@ -219,7 +215,6 @@ export default configure(function (ctx) {
         cfg.navigateFallbackDenylist.push(/^\/i\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/sf\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/d\/.*$/);
-        cfg.navigateFallbackDenylist.push(/^\/uploads\/.*$/);
       },
       // useFilenameHashes: true,
       // extendGenerateSWOptions (cfg) {}
