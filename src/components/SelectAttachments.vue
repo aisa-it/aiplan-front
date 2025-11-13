@@ -35,7 +35,7 @@
                 v-if="showDownloadAll"
                 clickable
                 v-close-popup
-                @click="handleDownload"
+                @click.stop="handleDownload"
               >
                 <q-item-section class="col-auto q-pr-sm">
                   <q-icon name="download" />
@@ -43,7 +43,7 @@
                 <q-item-section>Скачать все</q-item-section>
               </q-item>
 
-              <q-item clickable v-close-popup @click="openAttachmentsList">
+              <q-item clickable v-close-popup @click.stop="openAttachmentsList">
                 <q-item-section class="col-auto q-pr-sm">
                   <q-icon name="list" />
                 </q-item-section>

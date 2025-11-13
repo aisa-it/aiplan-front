@@ -3,45 +3,69 @@
     <q-card class="attachments-list">
       <h6 class="attachments-list__heading">Вложения</h6>
       <q-separator />
-      <q-list v-if="props.attachments.length" dense>
-        <q-item
-          v-for="(attachment, idx) in props.attachments"
-          :key="idx"
-          class="attachments-list__item q-py-md"
-        >
-          <q-item-section class="col-auto q-pr-sm">
-            <component
-              :is="
-                getIconFormat(getFileExtension(attachment, 'extension')) ||
-                FileNoneIcon
-              "
-              :width="20"
-              :height="20"
-            />
-          </q-item-section>
 
-          <q-item-section>
-            <q-item-label class="attachments-list__item-name"
-              >{{ attachment.asset.name
-              }}<HintTooltip>{{ attachment.asset.name }}</HintTooltip>
-            </q-item-label>
-            <q-item-label caption>
-              {{ attachment.asset.content_type }} •
-              {{ formatFileSize(attachment.asset.size) }}
-            </q-item-label>
-          </q-item-section>
+      <q-table
+        v-if="props.attachments.length"
+        :rows="props.attachments"
+        :columns="columns"
+        :rows-per-page-options="
+          !$q.screen.lt.sm ? [10, 15, 20, 25, 50, 0] : [5, 10, 15, 0]
+        "
+        class="attachments-list__table"
+      >
+        <template v-slot:body-cell-name="props">
+          <q-td :props="props">
+            <div class="attachments-list__column row items-center no-wrap">
+              <component
+                :is="
+                  getIconFormat(getFileExtension(props.row, 'extension')) ||
+                  FileNoneIcon
+                "
+                :width="20"
+                :height="20"
+                class="q-mr-sm attachments-list__icon"
+              />
+              <span class="ellipsis">{{
+                props.row.asset.name.slice(
+                  0,
+                  props.row.asset.name.lastIndexOf('.'),
+                )
+              }}</span>
+              <HintTooltip>{{
+                props.row.asset.name.slice(
+                  0,
+                  props.row.asset.name.lastIndexOf('.'),
+                )
+              }}</HintTooltip>
+            </div>
+          </q-td>
+        </template>
 
-          <q-item-section side>
-            <div
-              v-if="!$q.screen.lt.md"
-              class="attachments-list__actions row q-gutter-xs"
-            >
+        <template v-slot:body-cell-type="props">
+          <q-td :props="props" class="attachments-list__column_thin"
+            >{{
+              props.row.asset.content_type
+                ? props.row.asset.content_type
+                : getFileExtension(props.row, 'extension')
+            }}
+          </q-td>
+        </template>
+
+        <template v-slot:body-cell-size="props">
+          <q-td :props="props" class="attachments-list__column_thin"
+            >{{ formatFileSize(props.row.asset.size) }}
+          </q-td>
+        </template>
+
+        <template v-slot:body-cell-actions="props">
+          <q-td :props="props" class="attachments-list__column_thin">
+            <div v-if="!$q.screen.lt.md" class="q-gutter-xs justify-end">
               <q-btn
                 flat
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="handleCopyLink(attachment)"
+                @click="handleCopyLink(props.row)"
               >
                 <LinkIcon :width="20" :height="20" />
                 <HintTooltip>Скопировать ссылку</HintTooltip>
@@ -51,7 +75,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="handleDownload(attachment)"
+                @click="handleDownload(props.row)"
               >
                 <LoadIcon :width="20" :height="20" />
                 <HintTooltip>Скачать</HintTooltip>
@@ -61,7 +85,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('open', attachment)"
+                @click="emit('open', props.row)"
               >
                 <ZoomIcon :width="20" :height="20" />
                 <HintTooltip>Предпросмотр</HintTooltip>
@@ -71,7 +95,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('delete', attachment)"
+                @click="emit('delete', props.row)"
               >
                 <BinIcon :width="20" :height="20" color="#DC3E3E" />
                 <HintTooltip>Удалить</HintTooltip>
@@ -83,40 +107,37 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="handleCopyLink(attachment)"
+                    @click="handleCopyLink(props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <LinkIcon :width="20" :height="20" />
                     </q-item-section>
                     <q-item-section>Скопировать ссылку</q-item-section>
                   </q-item>
-
                   <q-item
                     clickable
                     v-close-popup
-                    @click="handleDownload(attachment)"
+                    @click="handleDownload(props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <LoadIcon :width="20" :height="20" />
                     </q-item-section>
                     <q-item-section>Скачать</q-item-section>
                   </q-item>
-
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('open', attachment)"
+                    @click="emit('open', props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <ZoomIcon :width="20" :height="20" />
                     </q-item-section>
                     <q-item-section>Предпросмотр</q-item-section>
                   </q-item>
-
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('delete', attachment)"
+                    @click="emit('delete', props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <BinIcon :width="20" :height="20" color="#DC3E3E" />
@@ -126,9 +147,9 @@
                 </q-list>
               </q-menu>
             </q-btn>
-          </q-item-section>
-        </q-item>
-      </q-list>
+          </q-td>
+        </template>
+      </q-table>
 
       <q-card-section v-else class="text-center text-grey">
         Нет вложений
@@ -155,7 +176,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useQuasar, copyToClipboard } from 'quasar';
+import { useQuasar, copyToClipboard, QTableProps } from 'quasar';
 import { useRoute } from 'vue-router';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
@@ -195,6 +216,37 @@ const { issueData } = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
 const api = useAiplanStore();
 const downloadProgress = ref<number>(0);
+
+const columns: QTableProps['columns'] = [
+  {
+    name: 'name',
+    label: 'Имя',
+    field: (row) => row.asset.name,
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'type',
+    label: 'Тип',
+    field: (row) =>
+      row.asset.content_type || getFileExtension(row, 'extension'),
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'size',
+    label: 'Размер',
+    field: (row) => row.asset.size,
+    align: 'right',
+    sortable: true,
+  },
+  {
+    name: 'actions',
+    label: 'Действия',
+    field: '',
+    align: 'center',
+  },
+];
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Б';
@@ -282,8 +334,14 @@ const handleDownloadAll = async (): Promise<void> => {
 <style scoped lang="scss">
 .attachments-list {
   min-width: 360px;
-  max-width: 600px;
+  max-width: 800px;
+  width: 100%;
   max-height: 90vh;
+  border-radius: 16px;
+
+  @media screen and (width > 1900px) {
+    max-width: 40%;
+  }
 
   &::-webkit-scrollbar {
     display: block;
@@ -291,6 +349,14 @@ const handleDownloadAll = async (): Promise<void> => {
 
   &__heading {
     padding: 0 16px;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+  }
+
+  &__column {
+    width: 350px;
   }
 
   &__item {
@@ -305,24 +371,48 @@ const handleDownloadAll = async (): Promise<void> => {
     overflow: hidden;
     white-space: nowrap;
   }
+}
 
-  &__actions {
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity 0.2s,
-      visibility 0.2s;
+@media screen and (width < 660px) {
+  .attachments-list {
+    min-width: auto;
+    max-width: 100%;
+
+    &__column {
+      width: 200px;
+    }
+  }
+
+  :deep(.q-table__control) {
+    width: 100%;
+    justify-content: center;
   }
 }
 
-.q-item:hover .attachments-list__actions {
-  opacity: 1;
-  visibility: visible;
-}
-
-@media screen and (width < 600px) {
+@media screen and (width < 524px) {
   .attachments-list {
     min-width: auto;
+    max-width: 100%;
+
+    &__column {
+      width: 100px;
+    }
+
+    &__column_thin {
+      width: 80px;
+    }
+  }
+
+  :deep(.q-table td),
+  :deep(.q-table th) {
+    padding: 5px 10px;
+  }
+}
+
+@media screen and (width < 400px) {
+  :deep(.q-table td),
+  :deep(.q-table th) {
+    padding: 5px 8px;
   }
 }
 </style>
