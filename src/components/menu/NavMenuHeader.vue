@@ -162,6 +162,18 @@
       />
     </q-btn>
     <q-btn
+      v-if="gitStore.gitEnabled"
+      class="nav-menu__top-nav-button"
+      data-id="git-repositories-button"
+      :text-color="'dark'"
+      @click="navigateToGit"
+    >
+      <GitIcon
+        :color="`${router.path.includes('/git') ? activeIconColor : ''}`"
+      />
+      <q-tooltip>Git Repositories</q-tooltip>
+    </q-btn>
+    <q-btn
       class="nav-menu__top-nav-button"
       data-id="workspace-settings-button-top"
       :text-color="'dark'"
@@ -179,11 +191,13 @@
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useQuasar } from 'quasar';
 
 // store
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useGitStore } from 'src/stores/git-store';
 
 // utils
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
@@ -194,6 +208,7 @@ import AvatarImage from '../AvatarImage.vue';
 import HatXmasIcon from '../icons/HatXmasIcon.vue';
 import SettingsIcon from '../icons/SettingsIcon.vue';
 import BellIcon from '../icons/BellIcon.vue';
+import GitIcon from '../icons/GitIcon.vue';
 import NewWorkspaceDialog from '../dialogs/NewWorkspaceDialog.vue';
 import StarIcon from 'components/icons/StarIcon.vue';
 import {
@@ -213,7 +228,11 @@ const activeIconColor = '#3f75ff';
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
+const gitStore = useGitStore();
 const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
+
+// quasar
+const $q = useQuasar();
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -262,6 +281,24 @@ const addFavoriteWorkspace = async (uuid: string | undefined) => {
         customMessage: BASE_ERROR,
       });
     });
+};
+
+/**
+ * Обработчик клика по иконке Git
+ *
+ * TODO: После реализации страницы Git репозиториев - добавить навигацию
+ * Сейчас показывает информационное сообщение
+ */
+const navigateToGit = () => {
+  // TODO: Реализовать навигацию к странице Git репозиториев
+  // Например: router.push(`/${currentWorkspaceSlug.value}/git`)
+
+  $q.notify({
+    message: 'Git repositories страница в разработке',
+    color: 'info',
+    position: 'top',
+    timeout: 2000,
+  });
 };
 </script>
 <style lang="scss" scoped>
