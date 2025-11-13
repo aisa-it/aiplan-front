@@ -585,7 +585,7 @@ const handleUpdateWorkspace = async () => {
 //   await exportWorkspace(route.params['workspace'] as string).then(
 //     ({ asset }) => {
 //       const element = document.createElement('a');
-//       element.setAttribute('href', `/uploads/${asset}`);
+//       element.setAttribute('href', `/api/auth/file/${asset}`);
 //       element.setAttribute(
 //         'download',
 //         `backup-${new Date().toISOString()}.bin`,

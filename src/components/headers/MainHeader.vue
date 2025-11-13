@@ -154,7 +154,7 @@ const breadCrumbsHistory = computed(() => {
   let existPath = [];
   existPath[0] = {
     icon: workspaceInfo.value?.logo
-      ? `/api/file/${workspaceInfo.value?.logo}`
+      ? `/api/auth/file/${workspaceInfo.value?.logo}`
       : '',
     name: workspaceInfo.value?.name,
     url: `/${workspaceInfo.value?.slug}`,

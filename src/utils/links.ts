@@ -66,7 +66,7 @@ export function parseAttachmentLink(href: string) {
     const url = new URL(href, window.location.origin);
     const parts = url.pathname.split('/').filter(Boolean);
 
-    if (parts[0] !== 'uploads') return null;
+    if (parts[0] !== 'api' && parts[1] !== 'auth' && parts[2] !== 'file') return null;
 
     const type = url.searchParams.get('type');
     const slug = url.searchParams.get('slug');
