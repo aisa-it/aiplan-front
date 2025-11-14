@@ -66,7 +66,7 @@
             class="primary-btn full-w q-ml-sm"
             style="font-size: 12px"
             flat
-            @click="save"
+            @click="save(true)"
             v-close-popup
           />
         </div>
@@ -119,7 +119,7 @@
             class="primary-btn full-w q-ml-sm"
             style="font-size: 12px"
             flat
-            @click="save"
+            @click="save(true)"
             v-close-popup
           />
         </div>
@@ -132,7 +132,14 @@
 import dayjs from 'dayjs';
 import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+} from 'vue';
 
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
@@ -161,6 +168,11 @@ export default defineComponent({
     date: {
       type: String,
       required: false,
+    },
+    autoUpdate: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
     issue: {
       type: Object,
@@ -203,38 +215,40 @@ export default defineComponent({
     const { currentIssueID } = storeToRefs(issueStore);
 
     const proxyDate = ref<string | null>(null);
-    const minutes = [...Array(60)].map((_, i) => i);
-    const hours = [...Array(24)].map((_, i) => i);
     const selectedHour = ref<number>(12);
     const selectedMinute = ref<number>(30);
 
     // Тикание часов
-    let tickTimeout: ReturnType<typeof setTimeout> | null = null;
-    let tickInterval: ReturnType<typeof setInterval> | null = null;
+    interface ClockTimer {
+      timeout: ReturnType<typeof setTimeout> | null;
+      interval: ReturnType<typeof setInterval> | null;
+    }
 
-    function stopTick() {
-      if (tickTimeout) {
-        clearTimeout(tickTimeout);
-        tickTimeout = null;
+    const clockTimer = reactive<ClockTimer>({ timeout: null, interval: null });
+    const fieldTimer = reactive<ClockTimer>({ timeout: null, interval: null });
+
+    function stopTick(timer: ClockTimer): void {
+      if (timer.timeout) {
+        clearTimeout(timer.timeout);
+        timer.timeout = null;
       }
-      if (tickInterval) {
-        clearInterval(tickInterval);
-        tickInterval = null;
+      if (timer.interval) {
+        clearInterval(timer.interval);
+        timer.interval = null;
       }
     }
 
-    function scheduleTick() {
-      stopTick();
-      // Начало следующей минуты и время до ее наступления
+    function scheduleTick(timer: ClockTimer, callback: () => void): void {
+      stopTick(timer);
       const now = new Date();
-      const nextMinute = new Date(now.getTime());
+      const nextMinute = new Date(now);
       nextMinute.setSeconds(0, 0);
       nextMinute.setMinutes(nextMinute.getMinutes() + 1);
       const delay = nextMinute.getTime() - now.getTime();
-      // Первая корректировка до начала следующей минуты, дальше корректировка времени по интервалу раз в минуту
-      tickTimeout = setTimeout(() => {
-        adjustTime();
-        tickInterval = setInterval(adjustTime, 60 * 1000);
+
+      timer.timeout = setTimeout(() => {
+        callback();
+        timer.interval = setInterval(callback, 60_000);
       }, delay);
     }
 
@@ -251,6 +265,12 @@ export default defineComponent({
       if (selectedDate.isBefore(expectedTime)) {
         proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
       }
+    };
+
+    // Обновление даты в поле
+    const fieldDateUpdate = (): void => {
+      adjustTime();
+      save();
     };
 
     // Выбор допустимой даты
@@ -283,6 +303,29 @@ export default defineComponent({
       return expectedMinute.isAfter(expectedTime);
     };
 
+    function save(notify: boolean = false): void {
+      const targetDateValue = proxyDate.value
+        ? dayjs(proxyDate.value).toISOString()
+        : null;
+      if (props.issueid) {
+        api
+          .issuePartialUpdate(
+            props.workspaceId,
+            props.projectid,
+            props.issueid,
+            {
+              target_date: targetDateValue,
+            },
+          )
+          .then(() => {
+            if (notify) setNotificationView({ type: 'success', open: true });
+            emit('refresh', proxyDate.value);
+          });
+      } else {
+        emit('update:date', targetDateValue);
+      }
+    }
+
     watch(
       () => proxyDate.value,
       () => {
@@ -294,19 +337,32 @@ export default defineComponent({
       () => $q.appVisible,
       (visible) => {
         if (visible) {
-          stopTick();
+          stopTick(clockTimer);
           adjustTime();
-          scheduleTick()
+          scheduleTick(clockTimer, adjustTime);
         }
       },
     );
 
+    watch(
+      () => props.autoUpdate,
+      (isEnabled) => {
+        if (isEnabled) {
+          scheduleTick(fieldTimer, fieldDateUpdate);
+        } else {
+          stopTick(fieldTimer);
+        }
+      },
+      { immediate: true },
+    );
+
     onMounted(() => {
-      scheduleTick();
+      scheduleTick(clockTimer, adjustTime);
     });
 
     onBeforeUnmount(() => {
-      stopTick();
+      stopTick(clockTimer);
+      stopTick(fieldTimer);
     });
 
     return {
@@ -317,8 +373,6 @@ export default defineComponent({
       currentIssueID,
       selectedHour,
       selectedMinute,
-      minutes,
-      hours,
       optionsFn,
       timeOptionsFn,
       formatDateTime,
@@ -336,28 +390,7 @@ export default defineComponent({
         proxyDate.value = initialDate.format('YYYY-MM-DDTHH:mm:ss');
       },
 
-      save() {
-        const targetDateValue = proxyDate.value
-          ? dayjs(proxyDate.value).toISOString()
-          : null;
-        if (props.issueid) {
-          api
-            .issuePartialUpdate(
-              props.workspaceId,
-              props.projectid,
-              props.issueid,
-              {
-                target_date: targetDateValue,
-              },
-            )
-            .then(() => {
-              setNotificationView({ type: 'success', open: true });
-              emit('refresh', proxyDate.value);
-            });
-        } else {
-          emit('update:date', targetDateValue);
-        }
-      },
+      save,
       LOCALE_DATE,
     };
   },
