@@ -89,15 +89,17 @@ const routes: RouteRecordRaw[] = [
             path: 'user-activities/:id',
             component: () => import('pages/UserActivitiesPage.vue'),
           },
-          // ========== GIT EXTENSION ROUTES ==========
-          // Роуты Git расширения регистрируются динамически
-          // @see src/modules/git/router.ts
-          ...gitRoutes,
-          // ==========================================
         ],
       },
     ],
   },
+
+  // ========== GIT ROUTES (INDEPENDENT LAYOUT) ==========
+  // Git роуты теперь на верхнем уровне с собственным GitLayout
+  // @see src/modules/git/router.ts
+  ...gitRoutes,
+  // ====================================================
+
   {
     path: '/access-denied',
     component: () => import('pages/AccessDeniedPage.vue'),
