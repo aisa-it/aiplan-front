@@ -81,7 +81,7 @@
               s.slug === currentWorkspaceSlug ? 'q-router-link--active' : ''
             "
             @click="
-              $route.params.workspace !== s.slug ? useGlobalLoading() : ''
+              router.currentRoute.value.params.workspace !== s.slug ? useGlobalLoading() : ''
             "
           >
             <q-item-section avatar>
@@ -147,7 +147,7 @@
     <q-btn class="nav-menu__top-nav-button" :to="`/${currentWorkspaceSlug}`">
       <HomeIcon
         :color="`${
-          route.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
+          router.currentRoute.value.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
         }`"
       />
     </q-btn>
@@ -158,7 +158,7 @@
       :to="`/${currentWorkspaceSlug}/aidoc`"
     >
       <AIDocIcon
-        :color="`${route.path.includes('aidoc') ? activeIconColor : ''}`"
+        :color="`${router.currentRoute.value.path.includes('aidoc') ? activeIconColor : ''}`"
       />
     </q-btn>
     <q-btn
@@ -169,7 +169,7 @@
       @click="navigateToGit"
     >
       <GitIcon
-        :color="`${route.path.includes('/git') ? activeIconColor : ''}`"
+        :color="`${router.currentRoute.value.path.includes('/git') ? activeIconColor : ''}`"
       />
       <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
@@ -190,8 +190,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 
 // store
 import { useUserStore } from 'src/stores/user-store';
@@ -231,14 +230,11 @@ const workspaceStore = useWorkspaceStore();
 const gitStore = useGitStore();
 const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
 
-// quasar
-const $q = useQuasar();
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { ny, isDemo } = storeToRefs(utilsStore);
 // router
-const route = useRoute();
 const router = useRouter();
 
 // dialogs vars

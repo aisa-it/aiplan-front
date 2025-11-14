@@ -13,33 +13,18 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-/**
- * Git иконка - отображает Git логотип из Bootstrap Icons
- *
- * Используется в верхнем меню для навигации к Git репозиториям
- */
 export default defineComponent({
   name: 'GitIcon',
   props: {
-    /**
-     * Цвет иконки (опционально)
-     * Если не указан - используется дефолтный цвет #474A52
-     */
     color: {
       type: String,
       required: false,
     },
-    /**
-     * Ширина иконки в пикселях
-     */
     width: {
       type: Number,
       required: false,
       default: () => 24,
     },
-    /**
-     * Высота иконки в пикселях
-     */
     height: {
       type: Number,
       required: false,

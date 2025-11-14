@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia';
 import { useAiplanStore } from './aiplan-store';
-
-/**
- * Git configuration интерфейс (ответ от API /api/auth/git/config/)
- */
-interface GitConfig {
-  git_enabled: boolean;
-  git_repositories_path: string;
-}
+import type { GitConfig } from 'src/modules/git/types';
 
 /**
  * Pinia store для управления Git конфигурацией
