@@ -33,11 +33,10 @@
                   subIssue.state_detail.name
                 }}</HintTooltip></q-badge
               >
-              <span>
-                {{ subIssue.project_detail.identifier }}-{{
-                  subIssue.sequence_id
-                }}
-              </span>
+              {{ subIssue.project_detail.identifier }}-{{
+                subIssue.sequence_id
+              }}
+
               <span class="subissue-name">
                 {{ subIssue.name }}
               </span>
