@@ -264,7 +264,7 @@ export const useAiplanStore = defineStore('aiplan', {
 
     // ------------- Project -------------
 
-    async   setProjectView(data: {
+    async setProjectView(data: {
       view_props?: IProjectView;
       default_props?: IProjectView;
     }): Promise<any> {
@@ -751,6 +751,9 @@ api.interceptors.response.use(
       //   window.location.href = '/service-unavailable';
       //   break;
       case 401:
+        const isGitConfigRequest = error.config.url.includes(
+          '/api/auth/git/config/',
+        );
         if (
           !validateRouteCheck(window.location.hash) &&
           window.location.pathname != '/signin' &&
@@ -760,6 +763,7 @@ api.interceptors.response.use(
         ) {
           window.location.href = '/signin';
         } else {
+          if (isGitConfigRequest) break;
           //TODO: убрать после переноса логина в стор юзера
           toast.setNotificationView({
             open: true,
