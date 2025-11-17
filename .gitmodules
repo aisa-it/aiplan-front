@@ -1,0 +1,3 @@
+[submodule "src/modules/git"]
+	path = src/modules/git
+	url = git@github.com:aisa-it/aiplan-front-git.git

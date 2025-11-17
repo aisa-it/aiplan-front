@@ -1,5 +1,11 @@
 import { RouteRecordRaw } from 'vue-router';
 
+// ========== GIT EXTENSION ==========
+// Импорт роутов из git расширения (src/modules/git)
+// @see src/modules/git/router.ts
+import { gitRoutes } from 'src/modules/git/index';
+// ===================================
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -87,6 +93,13 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
+  // ========== GIT ROUTES (INDEPENDENT LAYOUT) ==========
+  // Git роуты теперь на верхнем уровне с собственным GitLayout
+  // @see src/modules/git/router.ts
+  ...gitRoutes,
+  // ====================================================
+
   {
     path: '/access-denied',
     component: () => import('pages/AccessDeniedPage.vue'),
