@@ -17,7 +17,7 @@ export function useAttachmentsWithEditor(
     return {
       id: uploaded?.asset?.id,
       name: uploaded?.asset?.name,
-      url: `${window.location.origin}/api/file/${uploaded?.asset?.id}`,
+      url: `${window.location.origin}/api/auth/file/${uploaded?.asset?.id}`,
     };
   };
 
