@@ -353,7 +353,6 @@ export default defineComponent({
           stopTick(fieldTimer);
         }
       },
-      { immediate: true },
     );
 
     onMounted(() => {
