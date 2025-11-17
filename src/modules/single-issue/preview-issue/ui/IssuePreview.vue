@@ -25,7 +25,7 @@
         <q-btn
           class="secondary-btn-only-icon-sm"
           icon="open_in_full"
-          @click="emits('open', issueData.id)"
+          @click="emits('open', issueData.sequence_id)"
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
@@ -72,7 +72,7 @@
       v-if="model"
       preview
       class="fixed-right hide-scrollbar issue-drawer-preview"
-      style="top: 62px;"
+      style="top: 62px"
       @refresh="(v) => emits('refresh', v)"
     />
 
@@ -133,7 +133,7 @@ const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 let rafId: number | null = null;
-const leftbarWidth = 300
+const leftbarWidth = 300;
 
 const minWidth = computed(() => Math.max(Screen.width / 2, 900));
 const maxWidth = computed(() => Screen.width - leftbarWidth);
