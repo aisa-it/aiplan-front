@@ -6,7 +6,8 @@
       :rows-count="rowsCount"
       :loading="loadingTable"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(id) => openPreview(id)"
+      @open-preview="(issue) => openPreview(issue)"
+      :context-type="contextType"
     />
     <div
       v-else
@@ -23,9 +24,9 @@
           parsePagination({
             page: 1,
             rowsNumber: 0,
-            sortBy: projectProps?.filters?.order_by,
-            descending: projectProps?.filters?.orderDesc,
-            rowsPerPage: projectProps?.page_size ?? DEF_ROWS_PER_PAGE,
+            sortBy: contextProps?.filters?.order_by,
+            descending: contextProps?.filters?.orderDesc,
+            rowsPerPage: contextProps?.page_size ?? DEF_ROWS_PER_PAGE,
           }),
         )
       "
@@ -41,13 +42,9 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-// stores
-import { useProjectStore } from 'src/stores/project-store';
 
 // constants
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-
-// types
 
 // components
 import IssueTable from './IssueTable.vue';
@@ -57,8 +54,14 @@ import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useIssueContext } from '../composables/useIssueContext';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const { projectProps, issuesLoader } = storeToRefs(useProjectStore());
+const props = defineProps<{
+  contextType: 'project' | 'sprint';
+}>();
+
+const { contextProps, updateProps } = useIssueContext(props.contextType);
 
 const route = useRoute();
 const rows = ref([]);
@@ -67,11 +70,6 @@ const rowsCount = ref<number | null>(null);
 
 const { onRequest } = useDefaultIssues();
 
-const props = defineProps([
-  'projectInfoLoading',
-  'defaultIssues',
-  'defaultIssuesCount',
-]);
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
 const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
@@ -82,21 +80,12 @@ const isMobile = computed(() => Screen.width <= 1200);
 const issuesStore = useIssuesStore();
 const load = async (pagination) => {
   loadingTable.value = true;
-  let props = JSON.parse(JSON.stringify(projectProps.value));
+  let props = JSON.parse(JSON.stringify(contextProps.value));
   props.page_size = pagination.limit;
   props.filters.order_by = pagination.order_by;
   props.filters.orderDesc = pagination.desc;
 
-  await useProjectStore().setProjectProps(
-    route.params.workspace as string,
-    route.params.project as string,
-    props,
-  );
-
-  await useProjectStore().getMeInProject(
-    route.params.workspace as string,
-    route.params.project as string,
-  );
+  await updateProps(props);
 
   const response = await onRequest(pagination);
   table.value = response.data;
@@ -114,8 +103,11 @@ async function openIssue(id: string) {
   );
 }
 
-async function openPreview(id: string) {
-  if (!route.params.workspace || !route.params.project) return;
+async function openPreview(issue: DtoIssue) {
+  if (!route.params.workspace || !(issue.project || route.params.project))
+    return;
+
+  const id = String(issue.sequence_id);
   if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
     openIssue(id);
     return;
@@ -127,7 +119,7 @@ async function openPreview(id: string) {
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
-    route.params.project as string,
+    issue.project ?? (route.params.project as string),
   );
   isPreview.value = true;
 }
@@ -141,8 +133,8 @@ async function closePreview() {
 function parsePagination(pagination) {
   return {
     only_count: false,
-    show_sub_issues: projectProps.value.showSubIssues ?? true,
-    draft: projectProps.value?.draft ?? true,
+    show_sub_issue: contextProps.value.showSubIssues ?? true,
+    draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
     offset:

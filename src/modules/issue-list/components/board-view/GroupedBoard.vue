@@ -9,8 +9,8 @@
             refreshTable(index, pagination, isFullUpdate, table.entity)
         "
         @open-preview="
-          (id, pagination) =>
-            emits('openPreview', id, index, pagination, table?.entity)
+          (issue, pagination) =>
+            emits('openPreview', issue, index, pagination, table?.entity)
         "
       />
     </div>

@@ -9,7 +9,7 @@
     popup-content-class="fit-select-popup scrollable-content inh-popup"
     map-options
     v-model="states"
-    :options="getStatusesAsArray"
+    :options="statuses"
     :option-label="(state) => state.name"
     :option-value="(state) => state.id"
   >
@@ -33,13 +33,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { IState } from 'src/interfaces/states';
-import { storeToRefs } from 'pinia';
-import { useProjectStore } from 'src/stores/project-store';
 
 const emits = defineEmits(['update']);
-const props = defineProps(['statesProps']);
-
-const { getStatusesAsArray } = storeToRefs(useProjectStore());
+const props = defineProps(['statesProps', 'statuses']);
 
 const states = computed<any[]>({
   get() {

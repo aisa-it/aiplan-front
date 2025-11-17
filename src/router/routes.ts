@@ -91,7 +91,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'sprints/:sprint',
-            component: () => import('pages/SprintsPage.vue'),
+            component: () => import('src/pages/SprintPage.vue'),
           },
         ],
       },

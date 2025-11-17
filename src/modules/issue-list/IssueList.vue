@@ -7,9 +7,8 @@
       <IssuesListTitle />
       <q-space />
 
-      <FiltersList
+      <ProjectFiltersList
         v-if="is.object(projectProps)"
-        :projectId="route.params.project"
         :columns="allColumns"
         @update="load()"
       />
@@ -17,7 +16,7 @@
     <q-separator />
 
     <transition name="fade" mode="out-in">
-      <component :is="currentIssueList" />
+      <component :is="currentIssueList" contextType="project" />
     </transition>
   </q-card>
 </template>
@@ -30,7 +29,7 @@ import { is } from 'quasar';
 import { useProjectStore } from 'src/stores/project-store';
 
 // components
-import FiltersList from 'src/components/FiltersList.vue';
+import ProjectFiltersList from './components/ProjectFiltersList.vue';
 import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 
 // constants
@@ -68,6 +67,7 @@ const load = async () => {
   } else if (isGroupingEnabled.value === true) {
     await getGroupedIssues();
   }
+
   issuesLoader.value = false;
 };
 

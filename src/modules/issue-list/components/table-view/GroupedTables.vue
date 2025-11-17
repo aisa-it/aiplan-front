@@ -38,6 +38,7 @@
           :rows="table?.issues"
           :rowsCount="table?.count"
           :entity="table.entity"
+          context-type="project"
           @refresh="
             (pagination, isFullUpdate) =>
               refreshTable(index, pagination, isFullUpdate, table?.entity)

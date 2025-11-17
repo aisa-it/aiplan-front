@@ -12,11 +12,10 @@
     <div class="name-row">
       <q-btn
         v-if="projectProps?.columns_to_show?.includes('name')"
-
         no-caps
         flat
         style="padding: 0 4px"
-        @click="emits('openPreview', card.sequence_id)"
+        @click="emits('openPreview', card)"
       >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
@@ -36,9 +35,7 @@
         :row="card"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
-        @click.prevent.stop="
-          emits('openPreview', card.parent_detail?.sequence_id)
-        "
+        @click.prevent.stop="emits('openPreview', card.parent_detail)"
       />
     </div>
 

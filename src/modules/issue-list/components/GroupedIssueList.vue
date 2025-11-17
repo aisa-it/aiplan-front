@@ -22,8 +22,8 @@
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (id, index, pagination, entity) =>
-          openPreview(id, index, pagination, entity)
+        (issue, index, pagination, entity) =>
+          openPreview(issue, index, pagination, entity)
       "
     />
     <div
@@ -52,7 +52,6 @@ import { useRoute } from 'vue-router';
 
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
-import { useProjectStore } from 'src/stores/project-store';
 
 // components
 import { useGroupedIssues } from '../composables/useGroupedIssues';
@@ -65,11 +64,20 @@ import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
 
+import { useIssueContext } from '../composables/useIssueContext';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const props = defineProps<{
+  contextType: 'project' | 'sprint';
+}>();
+
+const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
+  useIssueContext(props.contextType);
+
 const { getGroupedIssues, getCurrentTable } = useGroupedIssues();
 
 const issuesStore = useIssuesStore();
-const { projectProps, issuesLoader, isKanbanEnabled } =
-  storeToRefs(useProjectStore());
+
 const singleIssueStore = useSingleIssueStore();
 
 const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
@@ -102,21 +110,12 @@ async function refreshTable(
   }
 
   if (isKanbanEnabled.value === false) {
-    let props = JSON.parse(JSON.stringify(projectProps.value));
+    let props = JSON.parse(JSON.stringify(contextProps.value));
     props.page_size = pagination.limit;
     props.filters.order_by = pagination.order_by;
     props.filters.orderDesc = pagination.desc;
 
-    await useProjectStore().setProjectProps(
-      route.params.workspace as string,
-      route.params.project as string,
-      props,
-    );
-
-    await useProjectStore().getMeInProject(
-      route.params.workspace as string,
-      route.params.project as string,
-    );
+    await updateProps(props);
   }
 
   return await load();
@@ -140,12 +139,15 @@ async function openIssue(id: string) {
 }
 
 async function openPreview(
-  id: string,
+  issue: DtoIssue,
   index?: number,
   pagination?: any,
   entity?: any,
 ) {
-  if (!route.params.workspace || !route.params.project) return;
+  if (!route.params.workspace || !(issue.project ?? route.params.project))
+    return;
+
+  const id = String(issue.sequence_id);
   if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
     openIssue(id);
     return;
@@ -157,7 +159,7 @@ async function openPreview(
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
-    route.params.project as string,
+    issue.project ?? (route.params.project as string),
   );
 
   Object.assign(refreshReviewInfo.value, { index, pagination, entity });
