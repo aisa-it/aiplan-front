@@ -81,7 +81,7 @@
               s.slug === currentWorkspaceSlug ? 'q-router-link--active' : ''
             "
             @click="
-              $route.params.workspace !== s.slug ? useGlobalLoading() : ''
+              router.currentRoute.value.params.workspace !== s.slug ? useGlobalLoading() : ''
             "
           >
             <q-item-section avatar>
@@ -147,7 +147,7 @@
     <q-btn class="nav-menu__top-nav-button" :to="`/${currentWorkspaceSlug}`">
       <HomeIcon
         :color="`${
-          router.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
+          router.currentRoute.value.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
         }`"
       />
     </q-btn>
@@ -158,8 +158,20 @@
       :to="`/${currentWorkspaceSlug}/aidoc`"
     >
       <AIDocIcon
-        :color="`${router.path.includes('aidoc') ? activeIconColor : ''}`"
+        :color="`${router.currentRoute.value.path.includes('aidoc') ? activeIconColor : ''}`"
       />
+    </q-btn>
+    <q-btn
+      v-if="gitStore.gitEnabled"
+      class="nav-menu__top-nav-button"
+      data-id="git-repositories-button"
+      :text-color="'dark'"
+      @click="navigateToGit"
+    >
+      <GitIcon
+        :color="`${router.currentRoute.value.path.includes('/git') ? activeIconColor : ''}`"
+      />
+      <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
     <q-btn
       class="nav-menu__top-nav-button"
@@ -178,12 +190,13 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 // store
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useGitStore } from 'src/stores/git-store';
 
 // utils
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
@@ -194,6 +207,7 @@ import AvatarImage from '../AvatarImage.vue';
 import HatXmasIcon from '../icons/HatXmasIcon.vue';
 import SettingsIcon from '../icons/SettingsIcon.vue';
 import BellIcon from '../icons/BellIcon.vue';
+import GitIcon from '../icons/GitIcon.vue';
 import NewWorkspaceDialog from '../dialogs/NewWorkspaceDialog.vue';
 import StarIcon from 'components/icons/StarIcon.vue';
 import {
@@ -213,13 +227,15 @@ const activeIconColor = '#3f75ff';
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
+const gitStore = useGitStore();
 const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
+
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { ny, isDemo } = storeToRefs(utilsStore);
 // router
-const router = useRoute();
+const router = useRouter();
 
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
@@ -262,6 +278,21 @@ const addFavoriteWorkspace = async (uuid: string | undefined) => {
         customMessage: BASE_ERROR,
       });
     });
+};
+
+/**
+ * Обработчик клика по иконке Git
+ *
+ * Переход на главную страницу Git расширения
+ * @see src/modules/git/pages/GitHomePage.vue
+ */
+const navigateToGit = () => {
+  router.push({
+    name: 'git-home',
+    params: {
+      workspace: currentWorkspaceSlug.value,
+    },
+  });
 };
 </script>
 <style lang="scss" scoped>
