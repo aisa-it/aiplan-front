@@ -76,7 +76,7 @@ const props = defineProps<{
 }>();
 
 //constansts
-const prefix = '/api/auth/file/';
+const prefix = '/api/file/';
 
 // vars
 const zoomImgRef = ref<InstanceType<typeof ZoomImg> | null>(null);

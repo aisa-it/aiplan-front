@@ -254,7 +254,7 @@ const isPossibleToOpen = (value: IAttachmentCard) => {
 
 const handleDownload = async (file: IAttachmentCard) => {
   try {
-    const { data } = await api.api.get(`/api/auth/file/${file.asset.id}`, {
+    const { data } = await api.api.get(`/api/file/${file.asset.id}`, {
       responseType: 'blob',
       onDownloadProgress: (progressEvent) => {
         downloadProgress.value = Math.round(
@@ -310,7 +310,7 @@ const handleRetry = () => {
 };
 const handleCopyLink = (file: IAttachmentCard) => {
   try {
-    const base = `${window.location.origin}/api/auth/file/${file.asset.id}`;
+    const base = `${window.location.origin}/api/file/${file.asset.id}`;
     const type = route.path.includes('aidoc') ? 'aidoc' : 'issue';
     const slug = route.params.workspace;
     const from =

@@ -105,7 +105,7 @@ export function buildFormData(
   return formData;
 }
 
-export function getUrlFile(id = '', url = '/api/auth/file/') {
+export function getUrlFile(id = '', url = '/api/file/') {
   if (!id) return '';
 
   return url + id;

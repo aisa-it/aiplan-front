@@ -509,7 +509,7 @@ export const handleEditorValue = async (value: string | undefined | null) => {
   const imageFiles = [...files];
   newValue = newValue.replace(base64ImageRegex, (match, p1) => {
     const image = imageFiles.shift(); // Получаем и удаляем первый объект из массива
-    return match.replace(p1, `/api/auth/file/${image.name}`); // Заменяем base64 на кастомное имя
+    return match.replace(p1, `/api/file/${image.name}`); // Заменяем base64 на кастомное имя
   });
 
   return { html: newValue, files: files };

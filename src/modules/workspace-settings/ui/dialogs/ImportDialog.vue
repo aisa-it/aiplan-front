@@ -153,7 +153,7 @@ export default defineComponent({
 
     const downloadBackup = (asset: string) => {
       const element = document.createElement('a');
-      element.setAttribute('href', `/api/auth/file/${asset}`);
+      element.setAttribute('href', `/api/file/${asset}`);
       element.setAttribute(
         'download',
         `backup-${
