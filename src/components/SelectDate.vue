@@ -172,7 +172,7 @@ export default defineComponent({
     autoUpdate: {
       type: Boolean,
       required: false,
-      default: true,
+      default: false,
     },
     issue: {
       type: Object,
@@ -353,6 +353,7 @@ export default defineComponent({
           stopTick(fieldTimer);
         }
       },
+      { immediate: true },
     );
 
     onMounted(() => {
