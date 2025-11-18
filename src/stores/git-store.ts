@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useAiplanStore } from './aiplan-store';
+import axios from 'axios';
 import type { GitConfig } from 'src/modules/git/types';
 
 /**
@@ -37,8 +37,7 @@ export const useGitStore = defineStore('git-store', {
       this.loading = true;
 
       try {
-        const aiplanStore = useAiplanStore();
-        const api = aiplanStore.api;
+        const api = axios.create({ baseURL: '', withCredentials: true });
 
         const response = await api.get<GitConfig>('/api/auth/git/config/');
 
