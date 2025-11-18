@@ -104,7 +104,7 @@ const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const sprintName = ref('');
-const watchers = ref([]);
+const watchers = ref<any>([]);
 
 const dateRange = ref({
   from: dayjs().format('DD.MM.YYYY'),
@@ -127,7 +127,7 @@ const createSprint = () => {
       end_date: toISO(dateRange.value.to),
     },
     issuesSprint: { issues_add: props.issues?.map((el) => el.id) },
-    membersSprint: { members_add: watchers.value },
+    membersSprint: { members_add: watchers.value.map((el) => el.id) },
   });
 };
 </script>

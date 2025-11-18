@@ -189,7 +189,7 @@ function parsePagination(pagination: QuasarPagination) {
   return {
     only_count: false,
     only_active: contextProps.value?.showOnlyActive,
-    show_sub_issue: contextProps.value.showSubIssues ?? true,
+    show_sub_issues: contextProps.value.showSubIssues ?? true,
     draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
