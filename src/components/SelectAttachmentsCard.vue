@@ -268,6 +268,7 @@ const handleDownload = async (file: IAttachmentCard) => {
     a.href = url;
     a.download = file.asset.name;
     document.body.appendChild(a);
+    a.className = 'prevent-click-issue-outside';
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
