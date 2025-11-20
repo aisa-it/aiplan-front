@@ -56,6 +56,7 @@ export const useIssuesStore = defineStore('issues-store', {
       groupedIssueList: [],
       groupByIssues: '',
       ungroupedIssueList: [],
+      pinnedIssues: [] as any[],
     };
   },
   actions: {
@@ -114,6 +115,14 @@ export const useIssuesStore = defineStore('issues-store', {
         );
         return response;
       } catch {}
+    },
+
+    pinIssue(issue: any): void {
+      this.pinnedIssues.find((id) => issue.id === id)
+        ? (this.pinnedIssues = this.pinnedIssues.filter(
+            (id) => issue.id === id,
+          ))
+        : this.pinnedIssues.push(issue);
     },
   },
 });

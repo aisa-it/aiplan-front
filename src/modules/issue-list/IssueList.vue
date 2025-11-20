@@ -14,7 +14,10 @@
         @update="load()"
       />
     </q-card-section>
-    <q-separator />
+
+    <q-card-section v-if="pinnedIssues.length">
+      <PinnedIssueList :pinned-issues="pinnedIssues" />
+    </q-card-section>
 
     <transition name="fade" mode="out-in">
       <component :is="currentIssueList" />
@@ -32,6 +35,7 @@ import { useProjectStore } from 'src/stores/project-store';
 // components
 import FiltersList from 'src/components/FiltersList.vue';
 import IssuesListTitle from 'src/components/IssuesListTitle.vue';
+import PinnedIssueList from './components/PinnedIssueList.vue';
 
 // constants
 import { allColumns } from './constants/tableColumns';
@@ -57,7 +61,7 @@ const { getGroupedIssues } = useGroupedIssues();
 const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
   storeToRefs(useProjectStore());
 
-const { refreshIssues } = storeToRefs(useIssuesStore());
+const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const route = useRoute();
 
 const load = async () => {
