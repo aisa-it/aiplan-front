@@ -18,12 +18,35 @@
               dense
               class="q-mr-md btn-refresh"
               icon="refresh"
-              @click="refreshFilters"
+              @click="isConfirmResetDialogOpen = true"
             >
               <q-tooltip anchor="bottom middle" self="top middle"
                 >Сбросить</q-tooltip
               >
             </q-btn>
+
+            <q-dialog v-model="isConfirmResetDialogOpen">
+              <q-card>
+                <q-card-section class="text-body1">
+                  Настройки отображения списка задач будут выставлены по умолчанию. Продолжить?
+                </q-card-section>
+                <q-card-actions align="right">
+                  <q-btn
+                    no-caps
+                    class="secondary-btn q-mr-xs"
+                    label="Отменить"
+                    v-close-popup
+                  />
+                  <q-btn
+                    flat
+                    no-caps
+                    label="Выполнить"
+                    class="primary-btn"
+                    @click="onConfirmRefresh"
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
           </div>
           <q-item class="row">
             <q-select
@@ -242,6 +265,7 @@ const isPopupOpen = ref(false);
 const options = ref(NEW_GROUP_BY_OPTIONS);
 
 const defaultViewForm = ref(DEFAULT_VIEW_PROPS);
+const isConfirmResetDialogOpen = ref(false);
 
 const isShowIndicators = computed(() => {
   let isShow = false;
@@ -299,6 +323,11 @@ const onUpdate = async () => {
 const refreshFilters = async () => {
   viewForm.value = DEFAULT_VIEW_PROPS;
   await onUpdate();
+};
+
+const onConfirmRefresh = async () => {
+  await refreshFilters();
+  isConfirmResetDialogOpen.value = false;
 };
 
 onMounted(() => {
