@@ -79,7 +79,7 @@
       </q-btn>
     </div>
     <q-table
-      v-if="!loading"
+      v-if="!loading && rows.length"
       v-model:pagination="pagination"
       flat
       row-key="id"
@@ -347,7 +347,7 @@ const columns = [
     label: 'ID',
     align: 'left',
     field: (row: any) => {
-      return `${row.project_detail.identifier} - ${row.sequence_id}`;
+      return `${row.project_detail?.identifier} - ${row.sequence_id}`;
     },
     sortable: true,
   },
