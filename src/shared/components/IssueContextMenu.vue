@@ -6,6 +6,9 @@
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
+      <q-item clickable v-close-popup @click="pinIssue(props.row)">
+        <q-item-section>Закрепить</q-item-section>
+      </q-item>
       <q-item clickable v-close-popup @click="copyIssueLink">
         <q-item-section>Скопировать ссылку</q-item-section>
       </q-item>
@@ -45,6 +48,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import { useIssuesStore } from 'src/stores/issues-store';
+
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
 
@@ -56,6 +61,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   refresh: [];
 }>();
+
+const { pinIssue } = useIssuesStore();
 
 const issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);
