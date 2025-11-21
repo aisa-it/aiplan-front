@@ -5,9 +5,8 @@
     multiple
     clearable
     map-options
-    class="base-selector"
+    :class="`${isIssueTransfer ? 'base-selector-sm' : 'base-selector'}  ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     popup-content-class="inh-popup scrollable-content"
-    :class="{ 'adaptive-select': isAdaptiveSelect }"
     :popup-content-style="selectAssigneeWidth"
     :label="label"
     :disable="isDisabled"
@@ -138,6 +137,7 @@ const props = withDefaults(
     label?: string;
     isAdaptiveSelect?: boolean;
     currentMember: any;
+    isIssueTransfer?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -349,3 +349,11 @@ watch(
   },
 );
 </script>
+
+<style lang="scss" scoped>
+  .base-selector-sm {
+    :deep(.q-field__control) {
+      align-items: flex-end;
+    }
+  }
+</style>
