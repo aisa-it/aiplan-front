@@ -295,6 +295,7 @@ const onRequest = async (p) => {
     offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
     light: true,
+    show_sub_issues: true,
     only_active: filter.value?.only_active || false,
   });
   rows.value = [];
