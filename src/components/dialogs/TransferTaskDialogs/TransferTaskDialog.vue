@@ -364,7 +364,7 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
       ? getIssueLink(
           currentWorkspaceSlug.value,
           selectedProject.value.identifier,
-          transferData.value.id,
+          transferData.value.sequence_id || transferData.value.id,
         )
       : getProjectLink(
           currentWorkspaceSlug.value,

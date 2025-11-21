@@ -185,7 +185,7 @@ const breadCrumbsHistory = computed(() => {
       }`,
       logo: project.value?.logo,
       name: ` ${project.value?.name ?? ''}`,
-      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.id}/issues`,
+      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}/issues`,
       type: 'project',
     };
   else if (user.value && currentPath.includes('profile'))
@@ -212,7 +212,7 @@ const breadCrumbsHistory = computed(() => {
               issueData.value?.parent_detail.sequence_id
             : ''
         } `,
-        url: `/${workspaceInfo.value.slug}/projects/${project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
+        url: `/${workspaceInfo.value.slug}/projects/${project.value?.identifier || project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
 
         type: 'issue',
       };
