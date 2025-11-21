@@ -304,16 +304,14 @@ const updateProjectWatchers = async (e: any) => {
 };
 
 const updateDocWatchers = async (e: any) => {
-  if (!props.docId) {
-    // Сохраняем полные объекты, а не только ID
-    const selectedWatchers = e || [];
-    emit('update:watchers', selectedWatchers);
-    return;
-  }
-
   const watchersIds = e
     ? e.map((d) => (d.member ? d.member?.id || d?.id : d))
     : [];
+
+  if (!props.docId) {
+    emit('update:watchers', watchersIds);
+    return;
+  }
 
   aidocStore
     .updateDocument(
@@ -402,16 +400,30 @@ watch(
   (_) => {
     if (!props.watchers) return;
 
-    let watchers: DtoWorkspaceMember[] = [...props.watchers];
-
-    if (watchers.length && typeof watchers[0] === 'string') {
-      watchers =
-        members.value.filter((opt) =>
-          props.watchers?.includes(opt?.member_id),
-        ) ?? [];
+    if (props.watchers.length > 0 && typeof props.watchers[0] !== 'string') {
+      watcherid.value = [...props.watchers];
+      return;
     }
 
-    watcherid.value = watchers;
+    const watcherIds: string[] = [...props.watchers];
+    let isMyEntityIncluded = false;
+
+    const newWatchers = members.value.filter((member) => {
+      if(watcherIds.includes(member.member_id)) {
+          if (!isMyEntityIncluded && member.member_id === myEntity.value.id) {
+            isMyEntityIncluded = true;
+          }
+          return true;
+        }
+      }
+    )
+
+    if(!isMyEntityIncluded && watcherIds.includes(myEntity.value.id)) {
+      watcherid.value = [myEntity.value, ...newWatchers];
+      return;
+    }
+
+    watcherid.value = [...newWatchers];
   },
 );
 </script>

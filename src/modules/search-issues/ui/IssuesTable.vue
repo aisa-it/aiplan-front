@@ -79,7 +79,7 @@
       </q-btn>
     </div>
     <q-table
-      v-if="!loading"
+      v-if="!loading && rows.length"
       v-model:pagination="pagination"
       flat
       row-key="id"
@@ -295,6 +295,7 @@ const onRequest = async (p) => {
     offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
     light: true,
+    show_sub_issues: true,
     only_active: filter.value?.only_active || false,
   });
   rows.value = [];
@@ -346,7 +347,7 @@ const columns = [
     label: 'ID',
     align: 'left',
     field: (row: any) => {
-      return `${row.project_detail.identifier} - ${row.sequence_id}`;
+      return `${row.project_detail?.identifier} - ${row.sequence_id}`;
     },
     sortable: true,
   },
