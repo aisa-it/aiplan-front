@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="pinned-card elevator-1"
-    @click="emits('openPreview', props.card.sequence_id)"
-  >
+  <div class="pinned-card elevator-1">
     <div class="pinned-card__header">
       <span class="pinned-card__issue-id">
         {{
@@ -10,23 +7,25 @@
         }}
       </span>
 
-      <q-badge
-        v-if="props.card?.draft"
-        floating
-        color="orange"
-        style="left: 2px; right: auto; top: -6px"
-        >Черновик</q-badge
+      <q-btn
+        class="pinned-card__issue-name"
+        no-caps
+        flat
+        style="padding: 0"
+        @click="emits('openPreview', card.sequence_id)"
       >
-      <span v-else class="pinned-card__issue-name abbriviated-text">
-        {{ props.card?.name }}
-      </span>
-
-      <ParentIssueChip
-        v-if="isParent"
-        :row="props.card"
-        :target="user.theme?.open_in_new ? '_blank' : '_self'"
-        class="parent-issue-chip"
-      />
+        <span class="abbriviated-text">
+          {{ props.card?.name }}
+        </span>
+        <HintTooltip>{{ card?.name }}</HintTooltip>
+        <q-badge
+          v-if="props.card?.draft"
+          floating
+          color="orange"
+          style="left: 2px; right: auto; top: -6px"
+          >Черновик</q-badge
+        >
+      </q-btn>
     </div>
 
     <div class="pinned-card__chips">
@@ -41,10 +40,7 @@
         </span>
       </div>
 
-      <div
-        v-if="projectProps?.columns_to_show?.includes('assignees')"
-        style="padding-left: 10px"
-      >
+      <div v-if="props.card.assignee_details.length" style="padding-left: 10px">
         <AvatarImage
           v-for="(l, n) in props.card?.assignee_details"
           :style="{ zIndex: props.card?.assignee_details?.length - n + 2 }"
@@ -59,25 +55,40 @@
               path: `/${currentWorkspaceSlug}/user-activities/${props.card.assignee_details[n]?.id}`,
             })
           "
-        >
-        </AvatarImage>
+        />
       </div>
 
-      <QuantityChip
-        :type="'sub-issues'"
-        :value="props.card?.sub_issues_count"
+      <AvatarImage
+        v-else
+        :key="props.card.author_detail.id"
+        :tooltip="avatarText(card.author_detail).join(' ')"
+        :text="
+          [
+            avatarText(props.card.author_detail)[0]?.at(0),
+            avatarText(props.card.author_detail)[1]?.at(0),
+          ].join(' ')
+        "
+        :image="props.card.author_detail.avatar_id"
+        :member="props.card.author_detail"
+        @click.stop="
+          router.push({
+            path: `/${currentWorkspaceSlug}/user-activities/${props.card.author_detail.id}`,
+          })
+        "
       />
-      <!-- <QuantityChip
-        :type="'linked_issues_count'"
-        :value="props.card?.linked_issues_count"
+      <ParentIssueChip
+        v-if="isParent"
+        :row="props.card"
+        :target="user.theme?.open_in_new ? '_blank' : '_self'"
+        style="padding: 0px 8px"
       />
-      <QuantityChip :type="'links'" :value="props.card?.link_count" /> -->
+
       <QuantityChip
         :type="'attachments'"
         :value="props.card?.attachment_count"
       />
     </div>
-    <IssueContextMenu :row="props.card" />
+    <IssueContextMenu :row="props.card" unpin />
   </div>
 </template>
 
@@ -90,7 +101,6 @@ import AvatarImage from 'src/components/AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import QuantityChip from 'src/components/QuantityChip.vue';
-import { useProjectStore } from 'src/stores/project-store';
 import { useRouter } from 'vue-router';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 
@@ -106,7 +116,6 @@ const isParent = computed((): boolean => {
 });
 
 const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
-const { projectProps } = storeToRefs(useProjectStore());
 </script>
 
 <style scoped lang="scss">
@@ -150,8 +159,14 @@ const { projectProps } = storeToRefs(useProjectStore());
   }
 
   &__issue-name {
-    font-weight: 400;
-    color: var(--sub-text-color);
+    &:deep(.q-btn__content) {
+      font-size: 16px;
+      font-weight: 400;
+      text-align: left;
+      color: var(--sub-text-color);
+      padding: 0 4px; // Отличается от макета. Добавлено, поскольку обводка при наведении будет в упор к тексту
+      letter-spacing: 0.5px;
+    }
   }
 
   &__chips {
@@ -169,5 +184,4 @@ const { projectProps } = storeToRefs(useProjectStore());
     height: 32px;
   }
 }
-
 </style>

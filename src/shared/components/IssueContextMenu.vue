@@ -6,8 +6,16 @@
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
-      <q-item clickable v-close-popup @click="pinIssue(props.row)">
+      <q-item
+        v-if="!props.unpin"
+        clickable
+        v-close-popup
+        @click="pinIssue(props.row)"
+      >
         <q-item-section>Закрепить</q-item-section>
+      </q-item>
+      <q-item v-else clickable v-close-popup @click="unpinIssue(props.row)">
+        <q-item-section>Открепить</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="copyIssueLink">
         <q-item-section>Скопировать ссылку</q-item-section>
@@ -55,14 +63,14 @@ import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/Trans
 
 const props = defineProps<{
   row: object | null;
-  rowId?: number | null;
+  unpin?: boolean;
 }>();
 
 const emit = defineEmits<{
   refresh: [];
 }>();
 
-const { pinIssue } = useIssuesStore();
+const { pinIssue, unpinIssue } = useIssuesStore();
 
 const issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);

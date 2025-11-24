@@ -118,11 +118,12 @@ export const useIssuesStore = defineStore('issues-store', {
     },
 
     pinIssue(issue: any): void {
-      this.pinnedIssues.find((id) => issue.id === id)
-        ? (this.pinnedIssues = this.pinnedIssues.filter(
-            (id) => issue.id === id,
-          ))
-        : this.pinnedIssues.push(issue);
+      const isIssuePinned = this.pinnedIssues.some((pinned) =>  pinned.id === issue.id);
+      if (!isIssuePinned) this.pinnedIssues.push(issue);
+    },
+
+    unpinIssue(issue: any): void {
+      this.pinnedIssues = this.pinnedIssues.filter(pinned => pinned.id !== issue.id);
     },
   },
 });
