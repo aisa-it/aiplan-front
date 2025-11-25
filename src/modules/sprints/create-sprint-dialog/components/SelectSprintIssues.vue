@@ -15,7 +15,7 @@
     >
       <q-checkbox
         :model-value="!!issue.id"
-        @update:model-value="() => emit('delete', issue.id)"
+        @update:model-value="() => emit('delete', issue.id ?? '')"
       />
 
       <span> {{ issue?.project_detail?.name }}-{{ issue?.sequence_id }}</span>
@@ -26,8 +26,10 @@
 </template>
 
 <script setup lang="ts">
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 const props = defineProps<{
-  issues: { id: string; name: string }[];
+  issues: DtoIssue[];
 }>();
 
 const emit = defineEmits<{

@@ -1,24 +1,29 @@
 import { defineStore } from 'pinia';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
-import { TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoSprint,
+  TypesIssuesListFilters,
+  TypesViewProps,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { IQuery } from 'src/stores/issues-store';
+import { useAiplanStore } from 'src/stores/aiplan-store';
 
 const usersApi = new (withInterceptors(Users))();
 const workspaceStore = useWorkspaceStore();
 
-interface IProjectState {
-  sprintProps: TypesViewProps | null;
-  issuesLoader: boolean;
-}
+const aiplan = useAiplanStore();
+const api = aiplan.api;
 
 export const useSprintStore = defineStore('sprint-store', {
-  state: (): IProjectState => {
+  state: () => {
     return {
       sprintProps: null,
       issuesLoader: false,
+      refreshSprintData: false,
     };
   },
 
@@ -27,6 +32,10 @@ export const useSprintStore = defineStore('sprint-store', {
       return (
         this.sprintProps?.filters?.group_by?.toLowerCase() !== 'none' || false
       );
+    },
+
+    isGanttDiagramm(): boolean | undefined {
+      return this.sprintProps?.issueView === 'gantt_chart';
     },
 
     isKanbanEnabled(): boolean | undefined {
@@ -53,7 +62,7 @@ export const useSprintStore = defineStore('sprint-store', {
             if (!acc[key]) {
               acc[key] = { name: item.name, color: item.color, id: [] };
             }
-            acc[key].id.push(id);
+            acc[key].id.push(item.id);
           });
           return acc;
         },
@@ -65,6 +74,9 @@ export const useSprintStore = defineStore('sprint-store', {
   },
 
   actions: {
+    triggerSprintRefresh() {
+      this.refreshSprintData = true;
+    },
     async getMyViewProps() {
       return usersApi.getCurrentUser().then((res) => {
         const props = res.data.view_props;
@@ -101,6 +113,19 @@ export const useSprintStore = defineStore('sprint-store', {
         this.sprintProps = props;
         return props;
       } catch (e) {}
+    },
+
+    async getIssueList(
+      wsSlug: string,
+      sprintSlug: string,
+      filters?: TypesIssuesListFilters,
+      query?: IQuery,
+    ) {
+      return api.post(
+        `/api/auth/workspaces/${wsSlug}/sprints/${sprintSlug}/issues/search/`,
+        { ...filters },
+        { params: query },
+      );
     },
   },
 });

@@ -50,8 +50,8 @@ import { useGroupedIssues } from './composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
-const { onRequest } = useDefaultIssues();
-const { getGroupedIssues } = useGroupedIssues();
+const { onRequest } = useDefaultIssues('project');
+const { getGroupedIssues } = useGroupedIssues('project');
 
 const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
   storeToRefs(useProjectStore());

@@ -6,7 +6,7 @@
     @scroll="handleScroll"
   >
     <div v-for="(table, index) in issueList" :key="index">
-      <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
+      <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
           :entity="table?.entity"
           :group-by="groupBy"
@@ -17,12 +17,9 @@
 
       <q-expansion-item
         v-if="table.issues?.length"
-        :default-opened="
-          !projectStore.isGroupHide(table?.entity?.id || table.entity)
-        "
+        :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
-          (value) =>
-            projectStore.setGroupHide(entity?.entity?.id || table.entity, value)
+          (value) => setGroupHide(entity?.entity?.id || table.entity, value)
         "
       >
         <template #header>
@@ -38,15 +35,15 @@
           :rows="table?.issues"
           :rowsCount="table?.count"
           :entity="table.entity"
-          context-type="project"
           @refresh="
             (pagination, isFullUpdate) =>
               refreshTable(index, pagination, isFullUpdate, table?.entity)
           "
           @open-preview="
-            (id, pagination) =>
-              emits('openPreview', id, index, pagination, table?.entity)
+            (issue, pagination) =>
+              emits('openPreview', issue, index, pagination, table?.entity)
           "
+          :context-type="contextType"
         />
       </q-expansion-item>
     </div>
@@ -55,9 +52,7 @@
 </template>
 
 <script lang="ts" setup>
-import { storeToRefs } from 'pinia';
-
-import { useProjectStore } from 'src/stores/project-store';
+import { useIssueContext } from '../../composables/useIssueContext';
 
 import { defineEntityName } from '../../utils/defineEntityName';
 
@@ -71,12 +66,14 @@ import { throttle } from 'quasar';
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
+  contextType: 'project' | 'sprint';
 }>();
 
 const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
 
-const projectStore = useProjectStore();
-const { projectProps } = storeToRefs(projectStore);
+const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
+  props.contextType,
+);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);

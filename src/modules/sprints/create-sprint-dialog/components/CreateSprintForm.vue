@@ -59,19 +59,19 @@
     </div>
 
     <q-btn
-      label="Создать спринт"
+      :label="defaultProps ? 'Обновить спринт' : 'Создать спринт'"
       flat
       dense
       no-caps
       class="primary-btn"
       style="width: 100%"
-      @click="createSprint"
+      @click="pushData"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -89,47 +89,157 @@ import SelectSprintIssues from './SelectSprintIssues.vue';
 import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
 import WatchDashedIcon from 'src/components/icons/WatchDashedIcon.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
+import {
+  DtoIssueLight,
+  DtoSprint,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  issues?: any[];
+  issues?: DtoIssueLight[];
+  defaultProps?: DtoSprint | null;
 }>();
 
 const emit = defineEmits<{
-  (event: 'delete', id: string): void;
-  (event: 'create', data: any): void;
+  delete: [id: string];
+  create: [data: any];
+  edit: [data: any];
 }>();
 
 const userStore = useUserStore();
 
 const { user } = storeToRefs(userStore);
 
-const sprintName = ref('');
-const watchers = ref<any>([]);
+const sprintName = ref(props.defaultProps?.name ?? '');
+const watchers = ref<any>(
+  props.defaultProps?.watchers?.map((el) => {
+    return { id: el.id, member: el };
+  }) ?? [],
+);
 
 const dateRange = ref({
-  from: dayjs().format('DD.MM.YYYY'),
-  to: dayjs().add(7, 'day').format('DD.MM.YYYY'),
+  from: props.defaultProps?.start_date
+    ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
+    : dayjs().format('DD.MM.YYYY'),
+
+  to: props.defaultProps?.end_date
+    ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
+    : dayjs().add(7, 'day').format('DD.MM.YYYY'),
 });
 
-const description = ref();
+const description = ref(props.defaultProps?.description ?? '');
 
 const toISO = (data: string) => {
   const parsed = dayjs(data, 'DD.MM.YYYY', true);
-  return parsed.isValid() ? parsed.toISOString() : null;
+
+  if (!parsed.isValid()) return null;
+
+  return dayjs
+    .utc()
+    .set('year', parsed.year())
+    .set('month', parsed.month())
+    .set('date', parsed.date())
+    .startOf('day')
+    .toISOString();
 };
 
-const createSprint = () => {
-  emit('create', {
+const removeAndAddArrayHelper = <T extends { id?: string }>(
+  startData: T[] | undefined,
+  currentData: T[] = [],
+) => {
+  if (!props.defaultProps || !startData?.length)
+    return {
+      remove: [],
+      add: currentData.map((el) => el.id),
+    };
+
+  if (!currentData) return { remove: [], add: [] };
+
+  const remove =
+    startData.filter((el) => !currentData.some((i) => i.id === el.id)) ?? [];
+
+  const add =
+    currentData.filter((el) => !remove?.some((del) => del.id === el.id)) ?? [];
+
+  return {
+    remove: remove.map((el) => el.id),
+    add: add.map((el) => el.id),
+  };
+};
+
+const removeAndAddWatcher = () => {
+  if (!props.defaultProps?.watchers || !props.defaultProps?.watchers.length) {
+    return {
+      add: watchers.value.map((el) => el.member.id),
+      remove: [],
+    };
+  }
+
+  if (!watchers.value) return { remove: [], add: [] };
+
+  const remove =
+    props.defaultProps?.watchers?.filter(
+      (el) => !watchers.value.some((i) => i.member.id === el.id),
+    ) ?? [];
+
+  const add =
+    watchers.value.filter(
+      (el) => !remove?.some((del) => del.id === el.member.id),
+    ) ?? [];
+
+  return {
+    remove: remove.map((el) => el.id),
+    add: add.map((el) => el.member.id),
+  };
+};
+
+const pushData = () => {
+  const { remove: removeIssues, add: addIssues } = removeAndAddArrayHelper(
+    props.defaultProps?.issues,
+    props.issues,
+  );
+
+  const { remove: removeWatchers, add: addWatchers } = removeAndAddWatcher();
+
+  const data = {
     createSprintData: {
       name: sprintName.value,
       description: description.value,
       start_date: toISO(dateRange.value.from),
       end_date: toISO(dateRange.value.to),
     },
-    issuesSprint: { issues_add: props.issues?.map((el) => el.id) },
-    membersSprint: { members_add: watchers.value.map((el) => el.id) },
-  });
+    issuesSprint: { issues_add: addIssues, issues_remove: removeIssues },
+    membersSprint: { members_add: addWatchers, members_remove: removeWatchers },
+  };
+
+  if (props.defaultProps) {
+    emit('edit', data);
+  } else {
+    emit('create', data);
+  }
 };
+
+watch(
+  () => props.defaultProps,
+  () => {
+    sprintName.value = props.defaultProps?.name ?? '';
+    watchers.value =
+      props.defaultProps?.watchers?.map((el) => {
+        return { id: el.id, member: el };
+      }) ?? [];
+
+    dateRange.value = {
+      from: props.defaultProps?.start_date
+        ? dayjs(props.defaultProps.start_date).format('DD.MM.YYYY')
+        : dayjs().format('DD.MM.YYYY'),
+
+      to: props.defaultProps?.end_date
+        ? dayjs(props.defaultProps.end_date).format('DD.MM.YYYY')
+        : dayjs().add(7, 'day').format('DD.MM.YYYY'),
+    };
+
+    description.value = props.defaultProps?.description ?? '';
+  },
+);
 </script>
 
 <style scoped>

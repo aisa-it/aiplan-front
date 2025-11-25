@@ -5,6 +5,7 @@ export const ROLES = {
       'delete-ws',
       'create-project',
       'create-sprint',
+      'show-sprint-popup',
       'delete-project',
       'add-comment',
       'create-issue',

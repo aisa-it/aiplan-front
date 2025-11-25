@@ -350,6 +350,7 @@ const onRequest = async (p) => {
     light: true,
     show_sub_issues: true,
     only_active: filter.value?.only_active || false,
+    show_sub_issues: props.isCreateSprint ? true : null,
   });
   rows.value = [];
   rows.value = issues;

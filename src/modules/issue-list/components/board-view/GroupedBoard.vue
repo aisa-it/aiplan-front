@@ -4,6 +4,7 @@
       <BoardCardList
         :table="table"
         :group-by="groupBy"
+        :context-type="contextType"
         @refresh="
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table.entity)
@@ -19,9 +20,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
 
-import { useProjectStore } from 'src/stores/project-store';
+import { useIssueContext } from '../../composables/useIssueContext';
 
 import BoardCardList from './BoardCardList.vue';
 import { IGroupedResponse } from '../../types';
@@ -29,12 +29,12 @@ import { IGroupedResponse } from '../../types';
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
+  contextType: 'project' | 'sprint';
 }>();
 
 const emits = defineEmits(['refreshCard', 'refresh', 'openPreview']);
 
-const projectStore = useProjectStore();
-const { projectProps } = storeToRefs(projectStore);
+const { contextProps } = useIssueContext(props.contextType);
 
 const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
   const p = pagination;
@@ -44,7 +44,7 @@ const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
 };
 
 const defineIssues = computed(() => {
-  return !projectProps.value?.showEmptyGroups
+  return !contextProps.value?.showEmptyGroups
     ? props.issues.filter((table) => table.issues?.length)
     : props.issues;
 });

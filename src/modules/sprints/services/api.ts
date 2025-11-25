@@ -49,3 +49,20 @@ export const sprintWatchersUpdate = async (
     .sprintWatchersUpdate(workspaceSlug, sprintId, data)
     .then((res) => res.data);
 };
+
+export const sprintUpdate = async (
+  workspaceSlug: string,
+  sprintId: string,
+  data: AiplanRequestSprint,
+) => {
+  return api
+    .updateSprint(workspaceSlug, sprintId, data)
+    .then((res) => res.data);
+};
+
+export const deleteSprint = async (
+  workspaceSlug: string,
+  sprintId: string,
+): Promise<void> => {
+  return api.deleteSprint(workspaceSlug, sprintId).then((res) => res.data);
+};

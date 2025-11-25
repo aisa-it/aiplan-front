@@ -84,7 +84,7 @@ export const PROJECT_VIEWS = [
 
 export const SPRINT_VIEWS = [
   ...PROJECT_VIEWS,
-  { value: 'gantt_chart', label: 'Диаграмма Ганта' },
+  // { value: 'gantt_chart', label: 'Диаграмма Ганта' },
 ];
 
 export const GROUP_BY_OPTIONS = [

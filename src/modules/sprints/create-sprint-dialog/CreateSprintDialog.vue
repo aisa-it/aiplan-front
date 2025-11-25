@@ -43,8 +43,10 @@
         >
           <CreateSprintForm
             :issues="checkedIssues"
+            :default-props="sprint"
             @delete="deleteIssueById"
             @create="createSprintHandle"
+            @edit="updateSprintHandle"
             class="col no-wrap"
           />
         </q-drawer>
@@ -60,7 +62,10 @@ import { computed, ref, watch } from 'vue';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoSprint,
+  TypesIssuesListFilters,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import {
   getFilters,
   getMyFilters,
@@ -71,12 +76,19 @@ import { MyFilterList } from 'src/modules/search-issues/filter-list/ui';
 import IssuesTable from 'src/modules/search-issues/ui/IssuesTable.vue';
 
 import {
+  getSprint,
   createSprint,
+  sprintUpdate,
   sprintIssuesUpdate,
   sprintWatchersUpdate,
 } from '../services/api';
+import { useSprintStore } from '../stores/sprint-store';
 
 const emits = defineEmits<{ updateSprints: [] }>();
+
+const props = defineProps<{
+  sprintId?: string;
+}>();
 
 const filtersStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
@@ -120,8 +132,26 @@ const refreshMyFilters = async () => {
   filtersStore.myFilterList = await getMyFilters();
 };
 
+const sprint = ref<DtoSprint | null>();
+
 const handleOpen = async () => {
   checkedIssues.value = [];
+  sprint.value = null;
+  if (props.sprintId) {
+    sprint.value = await getSprint(
+      workspaceStore.workspaceInfo?.id ?? '',
+      props.sprintId,
+    );
+    checkedIssues.value = (
+      await useSprintStore().getIssueList(
+        workspaceStore.workspaceInfo?.id ?? '',
+        props.sprintId,
+        {},
+        { show_sub_issues: true },
+      )
+    ).data.issues;
+  }
+
   currentFilter.value = {
     workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
   };
@@ -138,23 +168,43 @@ const handleClose = () => {
   checkedIssues.value = [];
 };
 
+const updateIssueAndWatchers = async (id: string, data: any) => {
+  await Promise.all([
+    sprintIssuesUpdate(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      id ?? '',
+      data.issuesSprint,
+    ),
+    sprintWatchersUpdate(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      id ?? '',
+      data.membersSprint,
+    ),
+  ]);
+};
+
+const updateSprintHandle = async (data: any) => {
+  await sprintUpdate(
+    workspaceStore.currentWorkspaceSlug ?? '',
+    sprint.value?.id ?? '',
+    data.createSprintData,
+  );
+
+  await updateIssueAndWatchers(sprint.value?.id ?? '', data);
+
+  useSprintStore().triggerSprintRefresh();
+
+  emits('updateSprints');
+  dialogRef.value?.hide();
+};
+
 const createSprintHandle = async (data: any) => {
   const res = await createSprint(
     workspaceStore.currentWorkspaceSlug ?? '',
     data.createSprintData,
   );
-  await Promise.all([
-    sprintIssuesUpdate(
-      workspaceStore.currentWorkspaceSlug ?? '',
-      res.id ?? '',
-      data.issuesSprint,
-    ),
-    sprintWatchersUpdate(
-      workspaceStore.currentWorkspaceSlug ?? '',
-      res.id ?? '',
-      data.membersSprint,
-    ),
-  ]);
+
+  await updateIssueAndWatchers(res.id ?? '', data);
 
   emits('updateSprints');
   dialogRef.value?.hide();

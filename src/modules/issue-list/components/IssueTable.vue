@@ -166,7 +166,7 @@ interface QuasarPagination {
   descending: boolean;
   rowsPerPage: number;
 }
-const { updateCurrentTable } = useGroupedIssues();
+const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
 const columns = computed(() => {
   return props.columns ?? getTableColumns;

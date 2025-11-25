@@ -28,38 +28,45 @@
         </div>
       </div>
       <div
-        v-if="started()"
+        v-if="in_progress()"
         class="line-wrapper"
-        :style="`width: ${started()}%`"
+        :style="`width: ${in_progress()}%`"
       >
         <div class="primary-line" style="width: 100%">{{ '' }}</div>
+      </div>
+      <div
+        v-if="pending()"
+        class="line-wrapper"
+        :style="`width: ${pending()}%`"
+      >
+        <div class="base-line" style="width: 100%">{{ '' }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { TypesSprintStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  issues: any[];
-  stateDistribution: Record<string, number>;
+  stats: TypesSprintStats;
 }>();
 
 const done = computed(() => calculateSum(['completed', 'cancelled']));
 function calculateSum(keys: string[]) {
   return (
-    Object.entries(props.stateDistribution).reduce(function (acc, cur) {
+    Object.entries(props.stats).reduce(function (acc, cur) {
       const [key, value] = cur;
       if (keys.includes(key)) {
         return acc + value;
       }
       return acc;
-    }, 0) / props.issues.length
+    }, 0) / (props.stats.all_issues ?? 1)
   );
 }
-const started = () => {
-  return calculateSum(['started']) * 100;
+const in_progress = () => {
+  return calculateSum(['in_progress']) * 100;
 };
 
 const completed = () => {
@@ -68,6 +75,10 @@ const completed = () => {
 
 const cancelled = () => {
   return calculateSum(['cancelled']) * 100;
+};
+
+const pending = () => {
+  return calculateSum(['pending']) * 100;
 };
 </script>
 

@@ -68,7 +68,7 @@ const rows = ref([]);
 const table = ref();
 const rowsCount = ref<number | null>(null);
 
-const { onRequest } = useDefaultIssues();
+const { onRequest } = useDefaultIssues(props.contextType);
 
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
@@ -104,7 +104,7 @@ async function openIssue(id: string) {
 }
 
 async function openPreview(issue: DtoIssue) {
-  if (!route.params.workspace || !(issue.project || route.params.project))
+  if (!route.params.workspace || !(issue.project ?? route.params.project))
     return;
 
   const id = String(issue.sequence_id);
@@ -112,6 +112,7 @@ async function openPreview(issue: DtoIssue) {
     openIssue(id);
     return;
   }
+
   isPreview.value = false;
   issueCommentsData.value = undefined;
   issueActivitiesData.value = undefined;

@@ -39,13 +39,25 @@ const props = defineProps(['statesProps', 'statuses']);
 
 const states = computed<any[]>({
   get() {
-    return props.statesProps || [];
+    if (!props.statesProps) return [];
+
+    if (!Array.isArray(props.statuses[0]?.id)) return [...props.statesProps];
+
+    return props.statuses.filter((el) =>
+      el.id.some((id) => props.statesProps.includes(id)),
+    );
   },
   set(val) {
-    emits(
-      'update',
-      val?.length ? val.map((state: IState | any) => state.id ?? state) : [],
-    );
+    if (!val?.length) {
+      emits('update', []);
+      return;
+    }
+
+    const ids = Array.isArray(val[0].id)
+      ? val.flatMap((s) => s.id as string[])
+      : val.map((state) => state.id || state);
+
+    emits('update', ids);
   },
 });
 </script>

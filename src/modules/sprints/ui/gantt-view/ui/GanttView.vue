@@ -17,6 +17,11 @@ import { ISprintRow } from '../../sprint-table/types';
 import SprintTable from '../../sprint-table/ui/SprintTable.vue';
 import FrappeGantt from './components/gantt-chart/ui/frappe-gantt/ui/FrappeGantt.vue';
 import { ICustomGanttTask } from './components/gantt-chart/ui/frappe-gantt/types';
+import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const props = defineProps<{
+  sprint: DtoSprint;
+}>();
 
 const tableRows = ref<ISprintRow[]>([
   {

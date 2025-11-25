@@ -4,19 +4,21 @@
       v-if="!isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
       :group-by="issuesStore.groupByIssues"
+      :context-type="contextType"
       @refresh-table="
         (index, pagination, isFullUpdate, entity) =>
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (id, index, pagination, entity) =>
-          openPreview(id, index, pagination, entity)
+        (issue, index, pagination, entity) =>
+          openPreview(issue, index, pagination, entity)
       "
     />
     <GroupedBoard
       v-if="isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
       :group-by="issuesStore.groupByIssues"
+      :context-type="contextType"
       @refresh-card="
         (index, pagination, isFullUpdate, entity) =>
           refreshTable(index, pagination, isFullUpdate, entity)
@@ -74,7 +76,9 @@ const props = defineProps<{
 const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
   useIssueContext(props.contextType);
 
-const { getGroupedIssues, getCurrentTable } = useGroupedIssues();
+const { getGroupedIssues, getCurrentTable } = useGroupedIssues(
+  props.contextType,
+);
 
 const issuesStore = useIssuesStore();
 

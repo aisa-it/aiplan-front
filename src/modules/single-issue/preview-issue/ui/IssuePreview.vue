@@ -55,14 +55,24 @@
       <SelectChildren
         :projectid="issueData.project"
         :issueid="issueData.id"
-        :is-disabled="hasPermissionByIssue(issueData, project, 'add-sub-issue')"
+        :is-disabled="
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'add-sub-issue',
+          )
+        "
       />
       <LinkedIssuesPanel />
 
       <SelectAttachments
         entityType="issue"
         :is-edit="
-          hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'change-issue-secondary',
+          )
         "
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
@@ -156,7 +166,7 @@ const moving = ref(false);
 
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(
-    currentProjectID.value,
+    issueData.value.project ?? currentProjectID.value,
     currentIssueID.value,
   );
 };
@@ -175,7 +185,7 @@ const deleteAttachment = async (attachmentId: string) => {
 // заменить на сервис после обновления апи
 const downloadAllAttachments = async () => {
   const { data, headers } = await useAiplanStore().api.get(
-    ` /api/auth/workspaces/${currentWorkspaceSlug.value}/projects/${currentProjectID.value}/issues/${currentIssueID.value}/issue-attachments/all/`,
+    ` /api/auth/workspaces/${currentWorkspaceSlug.value}/projects/${issueData.value.project ?? currentProjectID.value}/issues/${currentIssueID.value}/issue-attachments/all/`,
     {
       responseType: 'blob',
     },
