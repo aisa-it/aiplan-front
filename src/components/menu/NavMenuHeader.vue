@@ -122,6 +122,24 @@
                 >
                 <HintTooltip v-else>Добавить в избранное</HintTooltip>
               </q-btn>
+              <q-btn
+               class="menu-link__settings-btn q-mr-sm"
+               data-id="workspace-settings-button-top"
+               :text-color="'dark'"
+               flat
+               dense
+               no-caps
+               :style="'min-height: 16px !important; padding: 0'"
+               notificationSettingsOpen
+               @click.prevent.stop
+               >
+               <BellIcon  :width="16" :height="16"
+               @click="{               ((selectedWorkspace = s),
+                (notificationSettingsOpen = !notificationSettingsOpen));
+                }"
+               />
+                <HintTooltip>Уведомления</HintTooltip>
+             </q-btn>
               <div class="flex" style="min-width: 16px">
                 <q-btn
                   v-if="hasPermissionByWorkspace(s, 'ws-settings')"
@@ -174,16 +192,18 @@
       <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
     <q-btn
+    v-if="hasPermissionByWorkspace(workspaceInfo, 'ws-settings')"
       class="nav-menu__top-nav-button"
-      data-id="workspace-settings-button-top"
-      :text-color="'dark'"
-      @click="notificationSettingsOpen = !notificationSettingsOpen"
-    >
-      <BellIcon :color="`${notificationSettingsOpen ? activeIconColor : ''}`" />
+      id="workspace-settings-button-top"
+      :to="`/${workspaceInfo.slug}/settings`"
+      >
+      <SettingsIcon :width="24" :height="24"
+       :color="`${router.currentRoute.value.path.includes(workspaceInfo.slug + '/settings') ? activeIconColor : ''}`"
+      />
     </q-btn>
   </q-btn-group>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
-  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" />
+  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" :workspace="selectedWorkspace"/>
 </template>
 
 <script setup lang="ts">
@@ -228,7 +248,8 @@ const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
 const gitStore = useGitStore();
-const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const { setNotificationView } = useNotificationStore();
 
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
@@ -240,7 +261,7 @@ const router = useRouter();
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
 const notificationSettingsOpen = ref(false);
-const { setNotificationView } = useNotificationStore();
+const selectedWorkspace = ref();
 
 const deleteFavoriteWorkspace = async (uuid: string | undefined) => {
   await userStore
