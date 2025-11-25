@@ -134,7 +134,7 @@ async function closePreview() {
 function parsePagination(pagination) {
   return {
     only_count: false,
-    show_sub_issue: contextProps.value.showSubIssues ?? true,
+    show_sub_issues: contextProps.value.showSubIssues ?? true,
     draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
