@@ -386,7 +386,7 @@ const onSave = async () => {
     emit('successCreate');
     setNotificationView({
       open: true,
-      type: 'true',
+      type: 'success',
       customMessage: 'Документ успешно создан',
     });
   } catch (error) {

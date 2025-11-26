@@ -299,6 +299,7 @@ const handleDownload = async (file: IAttachmentCard): Promise<void> => {
     a.href = url;
     a.download = file.asset.name;
     document.body.appendChild(a);
+    a.className = 'prevent-click-issue-outside';
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
@@ -338,13 +339,10 @@ const handleDownloadAll = async (): Promise<void> => {
   width: 100%;
   max-height: 90vh;
   border-radius: 16px;
+  overflow: hidden;
 
   @media screen and (width > 1900px) {
     max-width: 40%;
-  }
-
-  &::-webkit-scrollbar {
-    display: block;
   }
 
   &__heading {
@@ -353,6 +351,31 @@ const handleDownloadAll = async (): Promise<void> => {
 
   &__icon {
     flex-shrink: 0;
+  }
+
+  &__table {
+    max-height: 60vh;
+
+    &:deep(.q-table__middle::-webkit-scrollbar) {
+      display: block;
+    }
+
+    &:deep(thead tr th) {
+      position: sticky;
+      z-index: 1;
+    }
+
+    &:deep(thead tr:first-child th) {
+      top: 0;
+    }
+
+    &:deep(tbody) {
+      scroll-margin-top: 48px;
+    }
+
+    &:deep(.q-table--loading thead tr:last-child th) {
+      top: 48px;
+    }
   }
 
   &__column {
