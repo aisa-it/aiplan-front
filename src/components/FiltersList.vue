@@ -143,7 +143,6 @@
             :states-props="viewForm.filters.states || []"
             @update="
               (states) => {
-                console.log(states);
                 viewForm.filters.states = states;
                 onUpdate();
               }
