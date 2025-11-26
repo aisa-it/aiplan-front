@@ -10,11 +10,11 @@
         v-if="!props.unpin"
         clickable
         v-close-popup
-        @click="pinIssue(props.row)"
+        @click="pinIssue(props.row, workspaceSlug, projectId)"
       >
         <q-item-section>Закрепить</q-item-section>
       </q-item>
-      <q-item v-else clickable v-close-popup @click="unpinIssue(props.row)">
+      <q-item v-else clickable v-close-popup @click="unpinIssue(props.row, workspaceSlug, projectId)">
         <q-item-section>Открепить</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="copyIssueLink">
@@ -54,12 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { useIssuesStore } from 'src/stores/issues-store';
 
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
+import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   row: object | null;
@@ -71,6 +72,14 @@ const emit = defineEmits<{
 }>();
 
 const { pinIssue, unpinIssue } = useIssuesStore();
+
+const route = useRoute()
+const workspaceSlug = computed(() => {
+  return (route.params.workspace as string);
+});
+const projectId = computed(() => {
+  return route.params.project as string;
+});
 
 const issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);

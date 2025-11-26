@@ -62,6 +62,8 @@ const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
   storeToRefs(useProjectStore());
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
+const { fetchPinnedIssues } = useIssuesStore();
+
 const route = useRoute();
 
 const load = async () => {
@@ -79,6 +81,7 @@ onMounted(async () => {
   issuesLoader.value = true;
   await getAllProjectInfo();
   await load();
+  fetchPinnedIssues();
 });
 
 watch(

@@ -45,6 +45,7 @@ export interface IQuery {
   limit?: number;
   desc?: boolean;
   only_count?: boolean;
+  only_pinned?: boolean;
   group_by?: string;
 }
 
@@ -117,13 +118,39 @@ export const useIssuesStore = defineStore('issues-store', {
       } catch {}
     },
 
-    pinIssue(issue: any): void {
-      const isIssuePinned = this.pinnedIssues.some((pinned) =>  pinned.id === issue.id);
-      if (!isIssuePinned) this.pinnedIssues.push(issue);
+    async fetchPinnedIssues(): Promise<void> {
+      const response = await this.getIssueList(
+        {},
+        { only_pinned: true, limit: 10 },
+      );
+      this.pinnedIssues = response.data?.issues || [];
     },
 
-    unpinIssue(issue: any): void {
-      this.pinnedIssues = this.pinnedIssues.filter(pinned => pinned.id !== issue.id);
+    async pinIssue(
+      issue: any,
+      workspaceSlug: string,
+      projectID: string,
+    ): Promise<void> {
+      await api.post(
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectID}/issues/${issue.id}/pin`,
+        {},
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+      await this.fetchPinnedIssues();
+    },
+
+    async unpinIssue(
+      issue: any,
+      workspaceSlug: string,
+      projectID: string,
+    ): Promise<void> {
+      await api.post(
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectID}/issues/${issue.id}/unpin`,
+        {},
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+
+      await this.fetchPinnedIssues();
     },
   },
 });
