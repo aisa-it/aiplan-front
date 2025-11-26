@@ -7,18 +7,33 @@
   >
     <q-list class="context-menu__options-list" separator>
       <q-item clickable v-close-popup @click="copyIssueLink">
+        <q-item-section thumbnail class="q-px-md">
+          <CopyLinkIcon />
+        </q-item-section>
         <q-item-section>Скопировать ссылку</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="openInNewTab">
+        <q-item-section thumbnail class="q-px-md">
+          <OpenNewTabIcon :height="24" />
+        </q-item-section>
         <q-item-section>Открыть в новой вкладке</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="openInNewWindow">
+        <q-item-section thumbnail class="q-px-md">
+          <OpenNewWindowIcon />
+        </q-item-section>
         <q-item-section>Открыть в новом окне</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="copyIssueTitle">
+        <q-item-section thumbnail class="q-px-md">
+          <CopyNameIcon />
+        </q-item-section>
         <q-item-section>Скопировать название</q-item-section>
       </q-item>
       <q-item clickable @click="transferIssue">
+        <q-item-section thumbnail class="q-px-md">
+          <CopyTransferIcon />
+        </q-item-section>
         <q-item-section>Копировать/перенести</q-item-section>
       </q-item>
       <q-item
@@ -26,6 +41,9 @@
         clickable
         @click="deleteIssue"
       >
+        <q-item-section thumbnail class="q-px-md">
+          <BinIcon color="#cd5c5c" />
+        </q-item-section>
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
@@ -47,6 +65,12 @@ import { ref } from 'vue';
 
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
+import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
+import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
+import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
+import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
+import CopyTransferIcon from 'src/components/icons/CopyTransferIcon.vue';
+import BinIcon from 'src/components/icons/BinIcon.vue';
 
 const props = defineProps<{
   row: object | null;
@@ -104,11 +128,16 @@ const deleteIssue = (): void => {
     }
   }
 
-  &__options-item_red > .q-item__section {
-    color: #cd5c5c !important;
+  &__options-item_red {
+    > .q-item__section {
+      color: #cd5c5c !important;
+    }
 
-    &:hover {
+    &:hover > .q-item__section {
       color: red !important;
+      ::v-deep(svg path) {
+        fill: red !important;
+      }
     }
   }
 }
