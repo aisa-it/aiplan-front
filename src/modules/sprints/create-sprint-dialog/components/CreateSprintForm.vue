@@ -111,9 +111,7 @@ const { user } = storeToRefs(userStore);
 
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
-  props.defaultProps?.watchers?.map((el) => {
-    return { id: el.id, member: el };
-  }) ?? [],
+  props.defaultProps?.watchers?.map((el) => el.id) ?? [],
 );
 
 const dateRange = ref({
@@ -169,7 +167,7 @@ const removeAndAddArrayHelper = <T extends { id?: string }>(
 const removeAndAddWatcher = () => {
   if (!props.defaultProps?.watchers || !props.defaultProps?.watchers.length) {
     return {
-      add: watchers.value.map((el) => el.member.id),
+      add: watchers.value,
       remove: [],
     };
   }
@@ -178,17 +176,15 @@ const removeAndAddWatcher = () => {
 
   const remove =
     props.defaultProps?.watchers?.filter(
-      (el) => !watchers.value.some((i) => i.member.id === el.id),
+      (el) => !watchers.value.some((i) => i === el.id),
     ) ?? [];
 
   const add =
-    watchers.value.filter(
-      (el) => !remove?.some((del) => del.id === el.member.id),
-    ) ?? [];
+    watchers.value.filter((el) => !remove?.some((del) => del.id === el)) ?? [];
 
   return {
     remove: remove.map((el) => el.id),
-    add: add.map((el) => el.member.id),
+    add: add,
   };
 };
 
@@ -221,11 +217,10 @@ const pushData = () => {
 watch(
   () => props.defaultProps,
   () => {
+    if (!props.defaultProps) return;
+
     sprintName.value = props.defaultProps?.name ?? '';
-    watchers.value =
-      props.defaultProps?.watchers?.map((el) => {
-        return { id: el.id, member: el };
-      }) ?? [];
+    watchers.value = props.defaultProps?.watchers?.map((el) => el.id) ?? [];
 
     dateRange.value = {
       from: props.defaultProps?.start_date

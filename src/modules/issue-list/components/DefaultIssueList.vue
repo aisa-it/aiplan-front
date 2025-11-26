@@ -1,7 +1,7 @@
 <template>
   <div>
     <IssueTable
-      v-if="rows.length"
+      v-if="rows?.length"
       :rows="rows"
       :rows-count="rowsCount"
       :loading="loadingTable"

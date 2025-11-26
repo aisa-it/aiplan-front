@@ -93,7 +93,12 @@
                     no-caps
                     v-close-popup
                     :style="'font-size: 12px;'"
-                    @click="deleteSprintFromWs(sprint.id as string)"
+                    @click="
+                      () => {
+                        sprintForDelete = sprint ?? null;
+                        isDeleteDialogOpen = true;
+                      }
+                    "
                   >
                     <BinIcon :width="16" :height="16" class="q-mr-sm" />
                     <span>Удалить спринт</span>
@@ -109,6 +114,11 @@
         :sprint-id="sprintIdForEdit"
         @update-sprints="refreshSprints"
       />
+      <DeleteSprintDialog
+        v-model="isDeleteDialogOpen"
+        :sprint="sprintForDelete"
+        @success="successDeleteHandle"
+      />
     </template>
   </ExpansionItem>
 </template>
@@ -122,14 +132,16 @@ import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 import ExpansionItem from '../ExpansionItem.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 import StatusCircularProgressBar from '../progress-bars/StatusCircularProgressBar.vue';
 import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/components/CreateSprintDialogBtn.vue';
 import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
+import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue';
 
-import { getSprints, deleteSprint } from 'src/modules/sprints/services/api';
+import { getSprints } from 'src/modules/sprints/services/api';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import SettingsIcon from '../icons/SettingsIcon.vue';
@@ -138,6 +150,7 @@ import { getSprintDates } from 'src/modules/sprints/helpres';
 
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
+const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -146,7 +159,9 @@ const route = useRoute();
 const sprints = ref([] as DtoSprintLight[]);
 
 const openEditSprint = ref(false);
-const sprintIdForEdit = ref<string | undefined>();
+const sprintIdForEdit = ref<string>('');
+const sprintForDelete = ref<DtoSprintLight | null>(null);
+const isDeleteDialogOpen = ref(false);
 
 onMounted(async () => {
   refreshSprints();
@@ -156,8 +171,17 @@ const refreshSprints = async () => {
   sprints.value = await getSprints(route.params.workspace as string);
 };
 
-const deleteSprintFromWs = async (sprintId: string) => {
-  await deleteSprint(route.params.workspace as string, sprintId);
+const showNotification = (type: 'success' | 'error', msg?: string) => {
+  setNotificationView({
+    open: true,
+    type: type,
+    customMessage: msg,
+  });
+};
+
+const successDeleteHandle = async () => {
+  sprintForDelete.value = null;
+  showNotification('success', 'Спринт удален');
   await refreshSprints();
 };
 

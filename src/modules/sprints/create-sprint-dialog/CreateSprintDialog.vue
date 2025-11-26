@@ -5,7 +5,9 @@
         class="row items-center justify-between q-pb-lg"
         style="width: 100%"
       >
-        <span class="text-h6">Создание спринта</span>
+        <span class="text-h6"
+          >{{ sprintId ? 'Обновление данных' : 'Создание' }} спринта</span
+        >
         <q-btn flat dense @click="dialogRef?.hide()">
           <q-icon name="close" dense size="18px" /> </q-btn
       ></q-card-section>
@@ -61,6 +63,7 @@ import { computed, ref, watch } from 'vue';
 
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 import {
   DtoSprint,
@@ -92,6 +95,7 @@ const props = defineProps<{
 
 const filtersStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
+const { setNotificationView } = useNotificationStore();
 
 const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
   workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
@@ -183,6 +187,14 @@ const updateIssueAndWatchers = async (id: string, data: any) => {
   ]);
 };
 
+const showNotification = (type: 'success' | 'error', msg?: string) => {
+  setNotificationView({
+    open: true,
+    type: type,
+    customMessage: msg,
+  });
+};
+
 const updateSprintHandle = async (data: any) => {
   await sprintUpdate(
     workspaceStore.currentWorkspaceSlug ?? '',
@@ -193,6 +205,8 @@ const updateSprintHandle = async (data: any) => {
   await updateIssueAndWatchers(sprint.value?.id ?? '', data);
 
   useSprintStore().triggerSprintRefresh();
+
+  showNotification('success', 'Спринт обновлен');
 
   emits('updateSprints');
   dialogRef.value?.hide();
@@ -205,6 +219,8 @@ const createSprintHandle = async (data: any) => {
   );
 
   await updateIssueAndWatchers(res.id ?? '', data);
+
+  showNotification('success', 'Спринт создан');
 
   emits('updateSprints');
   dialogRef.value?.hide();
