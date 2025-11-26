@@ -359,6 +359,23 @@ const handleDownloadAll = async (): Promise<void> => {
     &:deep(.q-table__middle::-webkit-scrollbar) {
       display: block;
     }
+
+    &:deep(thead tr th) {
+      position: sticky;
+      z-index: 1;
+    }
+
+    &:deep(thead tr:first-child th) {
+      top: 0;
+    }
+
+    &:deep(tbody) {
+      scroll-margin-top: 48px;
+    }
+
+    &:deep(.q-table--loading thead tr:last-child th) {
+      top: 48px;
+    }
   }
 
   &__column {
