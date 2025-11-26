@@ -94,12 +94,13 @@ const load = async (pagination) => {
   loadingTable.value = false;
 };
 
-async function openIssue(id: string) {
+async function openIssue(id: string, project: string) {
   isPreview.value = false;
 
   singleIssueStore.openIssue(
     id,
     user.value.theme?.open_in_new ? '_blank' : '_self',
+    project,
   );
 }
 
@@ -108,8 +109,12 @@ async function openPreview(issue: DtoIssue) {
     return;
 
   const id = String(issue.sequence_id);
-  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
-    openIssue(id);
+  if (
+    (currentIssueID.value === id && isPreview.value) ||
+    isMobile.value ||
+    props.contextType === 'sprint'
+  ) {
+    openIssue(id, issue.project ?? (route.params.project as string));
     return;
   }
 

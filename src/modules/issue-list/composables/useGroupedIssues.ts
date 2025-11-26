@@ -68,8 +68,8 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     }
     const response = await getIssue(filters, parsePagination(quasarPagination));
 
-    issuesStore.groupedIssueList = await response?.data.issues;
-    issuesStore.groupByIssues = await response?.data.group_by;
+    issuesStore.groupedIssueList = response?.data.issues;
+    issuesStore.groupByIssues = response?.data.group_by;
   }
 
   function defineFiltersByEntity(entity) {

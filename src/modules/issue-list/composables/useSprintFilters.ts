@@ -52,7 +52,6 @@ export function useSprintFilters(emits?) {
       await sprintStore.getMyViewProps();
 
       viewForm.value = JSON.parse(JSON.stringify(sprintProps.value));
-      await nextTick();
       emits?.('update', sprintProps.value?.filters?.group_by);
     } finally {
       issuesLoader.value = false;

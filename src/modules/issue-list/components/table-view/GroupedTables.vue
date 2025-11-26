@@ -60,7 +60,7 @@ import IssueTable from '../IssueTable.vue';
 import GroupedHeader from '../ui/GroupedHeader.vue';
 
 import { IGroupedResponse } from '../../types';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { throttle } from 'quasar';
 
 const props = defineProps<{
@@ -103,12 +103,24 @@ function* chunkGenerator(sourceArray, chunkSize = 10) {
   }
 }
 
-onMounted(() => {
+const refresh = () => {
+  issueList.value = [];
   generator = chunkGenerator(props.issues);
   let chunk = generator.next().value;
   if (!chunk) return;
   issueList.value.push(...chunk);
+};
+
+onMounted(() => {
+  refresh();
 });
+
+watch(
+  () => props.issues,
+  () => {
+    refresh();
+  },
+);
 </script>
 
 <style scoped lang="scss">

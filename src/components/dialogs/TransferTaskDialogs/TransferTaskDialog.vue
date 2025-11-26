@@ -360,29 +360,32 @@ const clear = () => {
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   if (type === 'ok') {
-    const link = (transferData.value && transferData.value.id)
-      ? getIssueLink(
-          currentWorkspaceSlug.value,
-          selectedProject.value.identifier,
-          transferData.value.sequence_id || transferData.value.id,
-        )
-      : getProjectLink(
-          currentWorkspaceSlug.value,
-          selectedProject.value.identifier,
-        );
-    const copyMessage = (transferData.value && transferData.value.sequence_id)
-      ? getSuccessCopyIssueMessage(
-          link,
-          `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
-          `${selectedProject.value.identifier}-${transferData.value.sequence_id}`,
-        )
-      : getSuccessCopyIssueByLabelMessage(link);
-    const transferMessage = (transferData.value && transferData.value.id)
-      ? getSuccessTransferIssueMessage(
-          link,
-          `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
-        )
-      : getSuccessTransferIssueByLabelMessage(link);
+    const link =
+      transferData.value && transferData.value.id
+        ? getIssueLink(
+            currentWorkspaceSlug.value,
+            selectedProject.value.identifier,
+            transferData.value.sequence_id || transferData.value.id,
+          )
+        : getProjectLink(
+            currentWorkspaceSlug.value,
+            selectedProject.value.identifier,
+          );
+    const copyMessage =
+      transferData.value && transferData.value.sequence_id
+        ? getSuccessCopyIssueMessage(
+            link,
+            `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
+            `${selectedProject.value.identifier}-${transferData.value.sequence_id}`,
+          )
+        : getSuccessCopyIssueByLabelMessage(link);
+    const transferMessage =
+      transferData.value && transferData.value.id
+        ? getSuccessTransferIssueMessage(
+            link,
+            `${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`,
+          )
+        : getSuccessTransferIssueByLabelMessage(link);
 
     setNotificationView({
       open: true,
@@ -403,11 +406,20 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
   if (transferModel.value.delete_src) {
     if (isPreview.value) {
       emit('refresh');
-      isPreview.value = false
+      isPreview.value = false;
     }
-    router.push(
-      `/${route.params.workspace}/projects/${route.params.project}/issues`,
-    );
+
+    let path = `/${route.params.workspace}`;
+
+    if (route.params.project) {
+      path += `/projects/${route.params.project}/issues`;
+    }
+
+    if (route.params.sprint) {
+      path += `/sprints/${route.params.sprint}`;
+    }
+
+    router.push(path);
   }
 
   clear();
