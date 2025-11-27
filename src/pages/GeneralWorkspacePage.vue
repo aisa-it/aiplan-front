@@ -64,7 +64,7 @@
       <NewProjectDialog v-model="isProjectCreateOpen" />
     </div>
   </q-page>
-  <GuidedTour />
+  <GuidedTour v-if="user?.tutorial === 0" :steps="steps" />
 </template>
 
 <script setup lang="ts">
@@ -84,7 +84,8 @@ import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
 
 import NewProjectDialog from 'src/components/dialogs/NewProjectDialog.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
-import GuidedTour from 'src/components/GuidedTour.vue';
+import GuidedTour from 'src/modules/guided-tours/GuidedTour.vue';
+import { steps } from 'src/modules/guided-tours/tutorials/tutorial1';
 
 const $q = useQuasar();
 const route = useRoute();
