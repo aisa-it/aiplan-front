@@ -118,9 +118,9 @@ export const useIssuesStore = defineStore('issues-store', {
       } catch {}
     },
 
-    async fetchPinnedIssues(): Promise<void> {
+    async fetchPinnedIssues(projectID: string): Promise<void> {
       const response = await this.getIssueList(
-        {},
+        { projects: [projectID] },
         { only_pinned: true, limit: 10 },
       );
       this.pinnedIssues = response.data?.issues || [];
@@ -136,7 +136,7 @@ export const useIssuesStore = defineStore('issues-store', {
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
-      await this.fetchPinnedIssues();
+      await this.fetchPinnedIssues(projectID);
     },
 
     async unpinIssue(
@@ -150,7 +150,7 @@ export const useIssuesStore = defineStore('issues-store', {
         { headers: { 'Content-Type': 'application/json' } },
       );
 
-      await this.fetchPinnedIssues();
+      await this.fetchPinnedIssues(projectID);
     },
   },
 });

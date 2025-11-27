@@ -15,7 +15,7 @@
       />
     </q-card-section>
 
-    <q-card-section v-if="pinnedIssues.length">
+    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
       <PinnedIssueList :pinned-issues="pinnedIssues" />
     </q-card-section>
 
@@ -58,8 +58,13 @@ const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues();
 const { getGroupedIssues } = useGroupedIssues();
 
-const { isGroupingEnabled, isKanbanEnabled, issuesLoader, projectProps } =
-  storeToRefs(useProjectStore());
+const {
+  project,
+  isGroupingEnabled,
+  isKanbanEnabled,
+  issuesLoader,
+  projectProps,
+} = storeToRefs(useProjectStore());
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
@@ -78,10 +83,11 @@ const load = async () => {
 };
 
 onMounted(async () => {
+  pinnedIssues.value = [];
   issuesLoader.value = true;
   await getAllProjectInfo();
   await load();
-  fetchPinnedIssues();
+  fetchPinnedIssues(project.value.id);
 });
 
 watch(

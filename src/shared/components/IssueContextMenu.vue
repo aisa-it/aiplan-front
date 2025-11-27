@@ -12,9 +12,20 @@
         v-close-popup
         @click="pinIssue(props.row, workspaceSlug, projectId)"
       >
+        <q-item-section thumbnail class="q-px-md">
+          <PinIcon />
+        </q-item-section>
         <q-item-section>Закрепить</q-item-section>
       </q-item>
-      <q-item v-else clickable v-close-popup @click="unpinIssue(props.row, workspaceSlug, projectId)">
+      <q-item
+        v-else
+        clickable
+        v-close-popup
+        @click="unpinIssue(props.row, workspaceSlug, projectId)"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <UnpinIcon />
+        </q-item-section>
         <q-item-section>Открепить</q-item-section>
       </q-item>
       <q-item clickable v-close-popup @click="copyIssueLink">
@@ -85,6 +96,8 @@ import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
 import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
 import CopyTransferIcon from 'src/components/icons/CopyTransferIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
+import PinIcon from 'src/components/icons/PinIcon.vue';
+import UnpinIcon from 'src/components/icons/UnpinIcon.vue';
 
 const props = defineProps<{
   row: object | null;
@@ -97,9 +110,9 @@ const emit = defineEmits<{
 
 const { pinIssue, unpinIssue } = useIssuesStore();
 
-const route = useRoute()
+const route = useRoute();
 const workspaceSlug = computed(() => {
-  return (route.params.workspace as string);
+  return route.params.workspace as string;
 });
 const projectId = computed(() => {
   return route.params.project as string;
