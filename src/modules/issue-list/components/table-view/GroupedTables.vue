@@ -1,11 +1,5 @@
 <template>
-  <q-scroll-area
-    ref="scrollContainer"
-    class="scroll-container"
-    :horizontal-thumb-style="{ height: '0px' }"
-    @scroll="handleScroll"
-  >
-    <div v-for="(table, index) in issueList" :key="index">
+    <div v-for="(table, index) in issueList" :key="index" @scroll="handleScroll">
       <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
         <GroupedHeader
           :entity="table?.entity"
@@ -50,7 +44,6 @@
       </q-expansion-item>
     </div>
     <div ref="observerTarget" class="observer-target"></div>
-  </q-scroll-area>
 </template>
 
 <script lang="ts" setup>
@@ -82,7 +75,6 @@ const refreshTable = (index, pagination, isFullUpdate, entity) => {
 };
 
 const issueList = ref([]);
-const scrollContainer = ref(null);
 let generator;
 
 const handleScroll = throttle((info) => {
@@ -112,10 +104,3 @@ onMounted(() => {
   issueList.value.push(...chunk);
 });
 </script>
-
-<style scoped lang="scss">
-.scroll-container {
-  height: calc(100vh - 105px);
-  overflow-y: auto;
-}
-</style>
