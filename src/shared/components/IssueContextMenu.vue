@@ -10,7 +10,9 @@
         v-if="!props.unpin"
         clickable
         v-close-popup
-        @click="pinIssue(props.row, workspaceSlug, projectId)"
+        @click="
+          pinIssue(props.row, workspaceSlug, project.identifier, project.id)
+        "
       >
         <q-item-section thumbnail class="q-px-md">
           <PinIcon />
@@ -21,7 +23,9 @@
         v-else
         clickable
         v-close-popup
-        @click="unpinIssue(props.row, workspaceSlug, projectId)"
+        @click="
+          unpinIssue(props.row, workspaceSlug, project.identifier, project.id)
+        "
       >
         <q-item-section thumbnail class="q-px-md">
           <UnpinIcon />
@@ -84,12 +88,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
 
+import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
-import { useRoute } from 'vue-router';
+
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
@@ -108,14 +115,12 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
+const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = useIssuesStore();
 
 const route = useRoute();
 const workspaceSlug = computed(() => {
   return route.params.workspace as string;
-});
-const projectId = computed(() => {
-  return route.params.project as string;
 });
 
 const issueLink = props.row?.short_url;

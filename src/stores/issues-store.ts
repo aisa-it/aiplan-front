@@ -129,10 +129,11 @@ export const useIssuesStore = defineStore('issues-store', {
     async pinIssue(
       issue: any,
       workspaceSlug: string,
+      projectIdentifier: string,
       projectID: string,
     ): Promise<void> {
       await api.post(
-        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectID}/issues/${issue.id}/pin`,
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/pin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
@@ -142,10 +143,11 @@ export const useIssuesStore = defineStore('issues-store', {
     async unpinIssue(
       issue: any,
       workspaceSlug: string,
+      projectIdentifier: string,
       projectID: string,
     ): Promise<void> {
       await api.post(
-        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectID}/issues/${issue.id}/unpin`,
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/unpin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );

@@ -132,17 +132,6 @@ const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
   padding: 12px;
   border-radius: 16px;
   border: 1px solid var(--dark-border-color);
-  // box-shadow: 0px 1px 18px 0px var(--color-shadow);
-
-  // box-shadow: 0px 1px 18px 0px #aab6ca1f;
-  // box-shadow: 0px 6px 10px 0px #aab6ca24;
-  // box-shadow: 0px 3px 5px -1px #aab6ca33;
-  // box-shadow: 0px 0px 1px 0px #aab6ca33;
-
-  // box-shadow: 0px 1px 18px 0px #0607141f;
-  // box-shadow: 0px 6px 10px 0px #06071424;
-  // box-shadow: 0px 3px 5px -1px #06071433;
-  // box-shadow: 0px 0px 1px 0px #0a0d2433;
 
   &__header {
     display: flex;
