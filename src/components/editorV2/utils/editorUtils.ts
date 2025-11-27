@@ -58,6 +58,59 @@ export const cleanContent = (content: string): string => {
 };
 
 export const getEditorProps = (editorInstance, onCommentLink) => ({
+  // Подстановка шрифтов из оригинальной таблицы
+  handlePaste: (view, event, slice) => {
+    const html = event.clipboardData?.getData('text/html');
+
+    if (html?.includes('<table')) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const cells = Array.from(doc.querySelectorAll('td, th'));
+
+      // Конвертация шрифтов в формат TipTap
+      for (const cell of cells) {
+        const styleAttr = cell.getAttribute('style');
+        let fontSize: string | null = null;
+
+        if (styleAttr) {
+          const match = styleAttr.match(
+            /font-size\s*:\s*([\d.]+(?:px|pt|em|rem|%))/i,
+          );
+          if (match) {
+            fontSize = match[1];
+            if (fontSize.endsWith('pt')) {
+              fontSize = `${fontSize.slice(0, -2)}px`;
+            }
+          } else {
+            fontSize = '12px';
+          }
+        }
+
+        if (fontSize) {
+          const wrapper = doc.createElement('span');
+          wrapper.style.fontSize = fontSize;
+
+          if (cell.firstChild) {
+            wrapper.appendChild(cell.firstChild);
+          }
+          cell.appendChild(wrapper);
+        }
+      }
+
+      // Добавление новой таблицы с корректировкой
+      const table = doc.querySelector('table');
+      if (!table) return false;
+
+      event.preventDefault();
+      if (editorInstance.value) {
+        editorInstance.value.commands.insertContent(table.outerHTML);
+      }
+
+      return true; // отмена вставки изначальной таблицы без корректировки
+    }
+
+    return false;
+  },
   handleKeyDown(view, event) {
     const { state, dispatch } = view;
     const { from, to } = state.selection;
