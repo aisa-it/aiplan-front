@@ -53,6 +53,7 @@
           @openPreview="
             (id) => emits('openPreview', id, parsePagination(quasarPagination))
           "
+          @open-issue="(id) => emits('openIssue', id)"
         />
       </div>
     </div>
@@ -99,7 +100,7 @@ const projectStore = useProjectStore();
 
 const { projectProps } = storeToRefs(projectStore);
 
-const emits = defineEmits(['refresh', 'openPreview']);
+const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
 const props = defineProps<{ table: any; groupBy: string }>();
 
 const selectedPage = ref(1);

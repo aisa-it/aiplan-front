@@ -7,7 +7,8 @@
       :loading="loadingTable"
       @refresh="(pagination) => load(pagination)"
       @open-preview="(id) => openPreview(id)"
-    />
+      @open-issue="(id) => openIssue(id)"
+      />
     <div
       v-else
       class="column flex-center"
@@ -116,10 +117,10 @@ async function openIssue(id: string) {
 
 async function openPreview(id: string) {
   if (!route.params.workspace || !route.params.project) return;
-  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
+  if (isMobile.value) {
     openIssue(id);
     return;
-  }
+  } else if (currentIssueID.value === id && isPreview.value) return;
   isPreview.value = false;
   issueCommentsData.value = undefined;
   issueActivitiesData.value = undefined;

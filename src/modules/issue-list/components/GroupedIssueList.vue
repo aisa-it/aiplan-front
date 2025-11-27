@@ -12,6 +12,7 @@
         (id, index, pagination, entity) =>
           openPreview(id, index, pagination, entity)
       "
+      @open-issue="(id) => openIssue(id)"
     />
     <GroupedBoard
       v-if="isKanbanEnabled && issuesStore.groupedIssueList?.length"
@@ -25,6 +26,7 @@
         (id, index, pagination, entity) =>
           openPreview(id, index, pagination, entity)
       "
+      @open-issue="(id) => openIssue(id)"
     />
     <div
       v-if="!issuesStore.groupedIssueList.length"
@@ -146,10 +148,10 @@ async function openPreview(
   entity?: any,
 ) {
   if (!route.params.workspace || !route.params.project) return;
-  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
+  if (isMobile.value) {
     openIssue(id);
     return;
-  }
+  } else if (currentIssueID.value === id && isPreview.value) return;
   isPreview.value = false;
   issueCommentsData.value = undefined;
   issueActivitiesData.value = undefined;

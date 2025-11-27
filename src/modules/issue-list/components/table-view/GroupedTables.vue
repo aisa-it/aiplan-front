@@ -46,6 +46,7 @@
             (id, pagination) =>
               emits('openPreview', id, index, pagination, table?.entity)
           "
+          @open-issue="(id) => emits('openIssue', id)"
         />
       </q-expansion-item>
     </div>
@@ -72,7 +73,7 @@ const props = defineProps<{
   groupBy: string;
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
+const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview', 'openIssue']);
 
 const projectStore = useProjectStore();
 const { projectProps } = storeToRefs(projectStore);

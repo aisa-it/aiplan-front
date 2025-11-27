@@ -5,10 +5,8 @@
         no-caps
         flat
         style="padding: 0 4px"
-        :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${rowInfo.row.sequence_id}`"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
-        @click.prevent.stop="emits('openPreview')"
-      >
+        >
         <span class="abbriviated-text" style="text-align: left">
           {{ rowInfo.value }}
         </span>
@@ -34,7 +32,6 @@
 
 <script setup lang="ts">
 // core
-import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -48,9 +45,7 @@ const props = defineProps<{
   rowInfo: any;
 }>();
 
-const emits = defineEmits(['openPreview']);
 const { user } = storeToRefs(useUserStore());
-const route = useRoute();
 
 const isParent = computed((): boolean => {
   return (
