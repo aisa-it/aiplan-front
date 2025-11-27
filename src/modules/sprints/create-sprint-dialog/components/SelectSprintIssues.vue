@@ -1,5 +1,5 @@
 <template>
-  <q-list class="flex column no-wrap" style="">
+  <q-list class="flex column no-wrap" style="gap: 8px">
     <q-item
       v-for="issue in issues"
       :key="issue.id"
@@ -20,7 +20,7 @@
 
       <span> {{ issue?.project_detail?.name }}-{{ issue?.sequence_id }}</span>
 
-      <span>{{ issue.name }}</span>
+      <span class="name">{{ issue.name }}</span>
     </q-item>
   </q-list>
 </template>
@@ -36,3 +36,12 @@ const emit = defineEmits<{
   (e: 'delete', id: string): void;
 }>();
 </script>
+
+<style lang="scss" scoped>
+.name {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>

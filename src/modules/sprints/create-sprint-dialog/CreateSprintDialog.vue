@@ -87,7 +87,10 @@ import {
 } from '../services/api';
 import { useSprintStore } from '../stores/sprint-store';
 
-const emits = defineEmits<{ updateSprints: [] }>();
+const emits = defineEmits<{
+  updateSprints: [];
+  failedUpdateIssueAndWatcher: [id: string];
+}>();
 
 const props = defineProps<{
   sprintId?: string;
@@ -173,17 +176,23 @@ const handleClose = () => {
 };
 
 const updateIssueAndWatchers = async (id: string, data: any) => {
-  await Promise.all([
+  return Promise.all([
     sprintIssuesUpdate(
       workspaceStore.currentWorkspaceSlug ?? '',
       id ?? '',
       data.issuesSprint,
-    ),
+    ).catch((err) => {
+      showNotification('error', 'Ошибка при прекреплении задач');
+      throw err;
+    }),
     sprintWatchersUpdate(
       workspaceStore.currentWorkspaceSlug ?? '',
       id ?? '',
       data.membersSprint,
-    ),
+    ).catch((err) => {
+      showNotification('error', 'Ошибка при прекреплении наблюдателей');
+      throw err;
+    }),
   ]);
 };
 
@@ -196,13 +205,22 @@ const showNotification = (type: 'success' | 'error', msg?: string) => {
 };
 
 const updateSprintHandle = async (data: any) => {
-  await sprintUpdate(
-    workspaceStore.currentWorkspaceSlug ?? '',
-    sprint.value?.id ?? '',
-    data.createSprintData,
-  );
+  try {
+    await sprintUpdate(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      sprint.value?.id ?? '',
+      data.createSprintData,
+    );
+  } catch {
+    showNotification('error', 'Ошибка при обновлении данных спринта');
+    return;
+  }
 
-  await updateIssueAndWatchers(sprint.value?.id ?? '', data);
+  try {
+    await updateIssueAndWatchers(sprint.value?.id ?? '', data);
+  } catch {
+    return;
+  }
 
   useSprintStore().triggerSprintRefresh();
 
@@ -213,14 +231,26 @@ const updateSprintHandle = async (data: any) => {
 };
 
 const createSprintHandle = async (data: any) => {
-  const res = await createSprint(
-    workspaceStore.currentWorkspaceSlug ?? '',
-    data.createSprintData,
-  );
-
-  await updateIssueAndWatchers(res.id ?? '', data);
+  let res = {} as DtoSprint;
+  try {
+    res = await createSprint(
+      workspaceStore.currentWorkspaceSlug ?? '',
+      data.createSprintData,
+    );
+  } catch {
+    showNotification('error', 'Ошибка при создании спринта');
+    return;
+  }
 
   showNotification('success', 'Спринт создан');
+
+  try {
+    await updateIssueAndWatchers(res?.id ?? '', data);
+  } catch {
+    emits('failedUpdateIssueAndWatcher', res?.id ?? '');
+    dialogRef.value?.hide();
+    return;
+  }
 
   emits('updateSprints');
   dialogRef.value?.hide();

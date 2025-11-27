@@ -113,6 +113,7 @@
         v-model="openEditSprint"
         :sprint-id="sprintIdForEdit"
         @update-sprints="refreshSprints"
+        @failed-update-issue-and-watcher="reopen"
       />
       <DeleteSprintDialog
         v-model="isDeleteDialogOpen"
@@ -169,6 +170,12 @@ onMounted(async () => {
 
 const refreshSprints = async () => {
   sprints.value = await getSprints(route.params.workspace as string);
+};
+
+const reopen = async (id: string) => {
+  await refreshSprints();
+  sprintIdForEdit.value = id as string;
+  openEditSprint.value = true;
 };
 
 const showNotification = (type: 'success' | 'error', msg?: string) => {

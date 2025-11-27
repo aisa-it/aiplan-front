@@ -52,8 +52,8 @@
           v-if="issues && issues.length > 0"
           :issues="issues"
           @delete="(id) => emit('delete', id)"
-          class="q-pr-lg visible-scroll"
-          style="overflow-y: auto; max-height: 216px; scrollbar-width: auto"
+          class="visible-scroll"
+          style="overflow-y: auto; scrollbar-width: auto"
         />
       </div>
     </div>

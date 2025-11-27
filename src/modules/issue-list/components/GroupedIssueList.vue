@@ -29,7 +29,7 @@
       "
     />
     <div
-      v-if="!issuesStore.groupedIssueList.length"
+      v-if="!issuesStore.groupedIssueList?.length"
       class="column flex-center"
       style="width: 100%; height: calc(100vh - 200px)"
     >

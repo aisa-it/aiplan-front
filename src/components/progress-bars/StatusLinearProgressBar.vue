@@ -4,7 +4,7 @@
       <div class="row centered-horisontally justify-center">
         <q-badge
           class="progress-badge"
-          :label="`Выполнено ${Math.round(done * 100)}%`"
+          :label="`Выполнено ${Math.round((Number(done) || 0) * 100)}%`"
         />
       </div>
     </div>
