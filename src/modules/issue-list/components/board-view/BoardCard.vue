@@ -64,6 +64,7 @@
       <SelectDate
         v-if="projectProps?.columns_to_show?.includes('target_date')"
         style="width: inherit"
+        type="kanban"
         :workspace-id="card.workspace_detail?.slug"
         :project-id="card?.project"
         :issue-id="card?.id"

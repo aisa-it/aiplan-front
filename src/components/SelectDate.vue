@@ -14,7 +14,7 @@
         :height="24"
         style="margin-right: 6px"
       />
-      <span v-if="!currentIssueID && viewProps.props?.issueView === 'kanban'">{{
+      <span v-if="type === 'kanban'">{{
         date ? date.split('T')[0].split('-').reverse().join('.') : 'Срок'
       }}</span>
       <span v-else>{{ date ? formatDateTime(date) : placeholder }}</span>
@@ -131,18 +131,9 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
 import { Screen, useQuasar } from 'quasar';
-import { storeToRefs } from 'pinia';
-import {
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-} from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { useViewPropsStore } from 'src/stores/view-props-store';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 import CalendarIcon from './icons/CalendarIcon.vue';
@@ -163,6 +154,7 @@ const props = withDefaults(
     minYearMonth?: string;
     maxYearMonth?: string;
     placeholder?: string;
+    type?: 'kanban' | 'table' | 'issue';
   }>(),
   {
     minYearMonth: `${dayjs(new Date()).year()}/01`,
@@ -178,10 +170,7 @@ const emits = defineEmits<{
 
 const $q = useQuasar();
 const api = useAiplanStore();
-const viewProps = useViewPropsStore();
-const issueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
-const { currentIssueID } = storeToRefs(issueStore);
 
 const proxyDate = ref<string | null>(null);
 
