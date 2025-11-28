@@ -321,7 +321,7 @@ const onUpdate = async () => {
 };
 
 const refreshFilters = async () => {
-  viewForm.value = DEFAULT_VIEW_PROPS;
+  viewForm.value = defaultViewForm.value;
   await onUpdate();
 };
 
