@@ -10,13 +10,15 @@
     </div>
 
     <div class="name-row">
-      <q-btn
+      <q-item
         v-if="projectProps?.columns_to_show?.includes('name')"
         no-caps
         flat
+        clickable
         style="padding: 0 4px"
         @click="() => handleClick()"
-      >
+        @dblclick.stop="() => handleDblClick()"
+        >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
         </span>
@@ -28,7 +30,7 @@
           style="left: 2px; right: auto; top: -6px"
           >Черновик</q-badge
         >
-      </q-btn>
+      </q-item>
 
       <ParentIssueChip
         v-if="isParent"
@@ -200,19 +202,25 @@ const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;
 
 const handleClick = () => {
-  clickCount.value++;
+  // clickCount.value++;
 
-  if (clickCount.value === 1) {
-    clickTimeout = setTimeout(() => {
-      clickCount.value = 0;
+  // if (clickCount.value === 1) {
+  //   clickTimeout = setTimeout(() => {
+  //     clickCount.value = 0;
+      console.log('single click');
       emits('openPreview', props.card.sequence_id)
-    }, 250);
-  } else if (clickCount.value === 2) {
-    // Обработка двойного клика
-    clickCount.value = 0;
-    clearTimeout(clickTimeout);
-    emits('openIssue', props.card.sequence_id)
-  }
+  //   }, 250);
+  // } else if (clickCount.value === 2) {
+  //   // Обработка двойного клика
+  //   clickCount.value = 0;
+  //   clearTimeout(clickTimeout);
+    // emits('openIssue', props.card.sequence_id)
+  // }
+}
+
+const handleDblClick = () => {
+  console.log('dbl click')
+  emits('openIssue', props.card.sequence_id)
 }
 
 </script>
