@@ -130,7 +130,7 @@
                 flat
                 icon="more_horiz"
                 :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-                @click.prevent
+                @click.prevent.stop
               >
                 <q-menu>
                   <q-list :style="'min-width: 225px; !important'">
@@ -138,7 +138,6 @@
                       <q-btn
                         class="menu-link__settings-btn full-w"
                         data-id="workspace-settings-button-top"
-                        :text-color="'dark'"
                         flat
                         dense
                         no-caps

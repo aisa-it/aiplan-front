@@ -30,7 +30,7 @@ const props = defineProps<{
 const workspaceStore = useWorkspaceStore()
 
 const getUserSettings = async () => {
-  if (!props.workspace.id) return;
+  if (!props.workspace.slug) return;
 
   return workspaceStore.getWorkspaceNotifications(
     props.workspace.slug as string,
