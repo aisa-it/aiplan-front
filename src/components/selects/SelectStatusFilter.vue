@@ -12,7 +12,6 @@
     :options="getStatusesAsArray"
     :option-label="(state) => state.name"
     :option-value="(state) => state.id"
-    @update:model-value="onUpdate"
   >
     <template v-slot:option="scope">
       <q-item v-bind="scope.itemProps">
@@ -32,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { IState } from 'src/interfaces/states';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
@@ -42,12 +41,15 @@ const props = defineProps(['statesProps']);
 
 const { getStatusesAsArray } = storeToRefs(useProjectStore());
 
-const states = ref([...props.statesProps]);
-
-const onUpdate = (states: IState[] | undefined) => {
-  emits(
-    'update',
-    states?.length ? states.map((state) => state.id || state) : [],
-  );
-};
+const states = computed<any[]>({
+  get() {
+    return props.statesProps || [];
+  },
+  set(val) {
+    emits(
+      'update',
+      val?.length ? val.map((state: IState | any) => state.id ?? state) : [],
+    );
+  },
+});
 </script>
