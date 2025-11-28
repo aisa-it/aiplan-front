@@ -126,6 +126,7 @@ onMounted(() => {
 .scroll-container {
   height: calc(100vh - 105px);
   overflow-y: auto;
+  contain: inherit;
 }
 
 .pinned-issues {
