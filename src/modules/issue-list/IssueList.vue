@@ -15,7 +15,7 @@
       />
     </q-card-section>
 
-    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
+    <q-card-section v-if="!issuesLoader && !isGroupingEnabled && pinnedIssues.length">
       <PinnedIssueList :pinned-issues="pinnedIssues" />
     </q-card-section>
 
