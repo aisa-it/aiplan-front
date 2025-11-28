@@ -55,6 +55,7 @@ const props = defineProps<{
 
 const done = computed(() => calculateSum(['completed', 'cancelled']));
 function calculateSum(keys: string[]) {
+  if (!props.stats) return 0;
   return (
     Object.entries(props.stats).reduce(function (acc, cur) {
       const [key, value] = cur;
