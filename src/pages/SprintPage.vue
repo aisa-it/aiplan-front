@@ -86,6 +86,7 @@ const load = async () => {
 
 const updateSprint = async () => {
   sprintLoader.value = true;
+  issuesLoader.value = true;
   sprint.value = await getSprint(
     router.currentRoute.value.params.workspace as string,
     router.currentRoute.value.params.sprint as string,
@@ -95,6 +96,7 @@ const updateSprint = async () => {
 };
 
 onMounted(async () => {
+  issuesLoader.value = true;
   sprintLoader.value = true;
   sprintStore.refreshSprintData = false;
   await sprintStore.getMyViewProps();
@@ -105,6 +107,7 @@ watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
+      issuesLoader.value = true;
       sprintLoader.value = true;
       await updateSprint();
       sprintStore.refreshSprintData = false;
