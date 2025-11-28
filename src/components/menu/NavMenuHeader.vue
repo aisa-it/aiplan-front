@@ -100,7 +100,7 @@
             <q-space />
             <div style="display: flex; align-items: center">
               <q-btn
-                class="menu-link__btn q-mr-sm"
+                class="menu-link__btn"
                 :class="{ 'favorite-btn--inactive': !s.is_favorite }"
                 flat
                 :style="'min-height: 16px !important; min-width: 16px; padding: 0'"
@@ -122,21 +122,53 @@
                 >
                 <HintTooltip v-else>Добавить в избранное</HintTooltip>
               </q-btn>
-              <div class="flex" style="min-width: 16px">
-                <q-btn
-                  v-if="hasPermissionByWorkspace(s, 'ws-settings')"
-                  class="menu-link__settings-btn"
-                  flat
-                  dense
-                  no-caps
-                  id="workspace-settings-button"
-                  :style="'min-height: 16px !important; padding: 0'"
-                  :to="`/${s.slug}/settings`"
-                >
-                  <SettingsIcon :width="16" :height="16" />
-                  <HintTooltip>Настройки</HintTooltip>
-                </q-btn>
-              </div>
+              <q-btn
+                v-if="
+                  hasPermissionByWorkspace(s, 'ws-settings')
+                "
+                class="menu-link__btn q-ml-sm"
+                flat
+                icon="more_horiz"
+                :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
+                @click.prevent.stop
+              >
+                <q-menu>
+                  <q-list :style="'min-width: 225px; !important'">
+                    <q-item>
+                      <q-btn
+                        class="menu-link__settings-btn full-w"
+                        data-id="workspace-settings-button-top"
+                        flat
+                        dense
+                        no-caps
+                        :style="'font-size: 12px;'"
+                        notificationSettingsOpen
+                        @click="{((selectedWorkspace = s),
+                          (notificationSettingsOpen = !notificationSettingsOpen));
+                        }"
+                        >
+                        <BellIcon  :width="16" :height="16"  class="q-mr-sm"
+                        />
+                          <span>Уведомления</span>
+                      </q-btn>
+                    </q-item>
+                    <q-item>
+                      <q-btn
+                        class="menu-link__settings-btn full-w"
+                        flat
+                        dense
+                        no-caps
+                        id="workspace-settings-button"
+                        :style="'font-size: 12px;'"
+                        :to="`/${s.slug}/settings`"
+                      >
+                        <SettingsIcon :width="16" :height="16"  class="q-mr-sm"/>
+                        <span>Настройки</span>
+                      </q-btn>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </q-item>
           <q-separator />
@@ -174,16 +206,18 @@
       <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
     <q-btn
+    v-if="hasPermissionByWorkspace(workspaceInfo, 'ws-settings')"
       class="nav-menu__top-nav-button"
-      data-id="workspace-settings-button-top"
-      :text-color="'dark'"
-      @click="notificationSettingsOpen = !notificationSettingsOpen"
-    >
-      <BellIcon :color="`${notificationSettingsOpen ? activeIconColor : ''}`" />
+      id="workspace-settings-button-top"
+      :to="`/${workspaceInfo.slug}/settings`"
+      >
+      <SettingsIcon :width="24" :height="24"
+       :color="`${router.currentRoute.value.path.includes(workspaceInfo.slug + '/settings') ? activeIconColor : ''}`"
+      />
     </q-btn>
   </q-btn-group>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
-  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" />
+  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" :workspace="selectedWorkspace"/>
 </template>
 
 <script setup lang="ts">
@@ -228,7 +262,8 @@ const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
 const gitStore = useGitStore();
-const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const { setNotificationView } = useNotificationStore();
 
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
@@ -240,7 +275,7 @@ const router = useRouter();
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
 const notificationSettingsOpen = ref(false);
-const { setNotificationView } = useNotificationStore();
+const selectedWorkspace = ref();
 
 const deleteFavoriteWorkspace = async (uuid: string | undefined) => {
   await userStore
