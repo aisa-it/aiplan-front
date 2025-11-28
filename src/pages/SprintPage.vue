@@ -5,21 +5,8 @@
         class="row issue-list__header"
         :style="'padding: 12px 16px'"
       >
-        <div
-          class="q-table__title abbriviated-text"
-          style="max-width: calc(100% - 60px); display: flex; gap: 16px"
-        >
-          <span>
-            {{ sprint?.name }}
-            {{
-              getSprintDates(sprint?.start_date ?? '', sprint?.end_date ?? '')
-            }}
-          </span>
-          <StatusLinearProgressBar
-            style="max-width: 320px"
-            :stats="sprint.stats ?? {}"
-          />
-        </div>
+        <SprintHeaderSkeleton v-if="sprintLoader" />
+        <SprintHeader v-else :sprint="sprint" />
         <q-space />
 
         <SprintFiltersList
@@ -57,20 +44,21 @@ import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 
 import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersList.vue';
-import StatusLinearProgressBar from 'src/components/progress-bars/StatusLinearProgressBar.vue';
+import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
+import SprintHeaderSkeleton from 'src/modules/sprints/sceletons/SprintHeaderSkeleton.vue';
 
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
-import { getSprintDates } from 'src/modules/sprints/helpres';
 
 const { onRequest } = useDefaultIssues('sprint');
 const { getGroupedIssues } = useGroupedIssues('sprint');
 
 const router = useRouter();
 const sprint = ref({} as DtoSprint);
+const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
 
@@ -97,14 +85,17 @@ const load = async () => {
 };
 
 const updateSprint = async () => {
+  sprintLoader.value = true;
   sprint.value = await getSprint(
     router.currentRoute.value.params.workspace as string,
     router.currentRoute.value.params.sprint as string,
   );
+  sprintLoader.value = false;
   await load();
 };
 
 onMounted(async () => {
+  sprintLoader.value = true;
   sprintStore.refreshSprintData = false;
   await sprintStore.getMyViewProps();
   await updateSprint();
@@ -114,6 +105,7 @@ watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
+      sprintLoader.value = true;
       await updateSprint();
       sprintStore.refreshSprintData = false;
     }
