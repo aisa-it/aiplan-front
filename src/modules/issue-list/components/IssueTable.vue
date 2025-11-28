@@ -35,11 +35,7 @@
       <NameColumn
         :row-info="props"
         @open-preview="
-          emits(
-            'openPreview',
-            props.row.sequence_id,
-            parsePagination(quasarPagination),
-          )
+          (id) => emits('openPreview', id, parsePagination(quasarPagination))
         "
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
