@@ -163,8 +163,8 @@
         <SelectDate
           class="full-w"
           :workspace-id="issueData.workspace_detail.slug"
-          :projectid="issueData.project"
-          :issueid="issueData.id"
+          :project-id="issueData.project"
+          :issue-id="issueData.id"
           :date="issueData.target_date"
           :issue="issueData"
           :is-disabled="
