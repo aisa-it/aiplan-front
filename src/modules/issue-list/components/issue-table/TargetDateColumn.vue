@@ -3,8 +3,8 @@
     <div @click.stop>
       <SelectDate
         :workspace-id="rowInfo.row.workspace_detail.slug"
-        :projectid="rowInfo.row.project"
-        :issueid="rowInfo.row.id"
+        :project-id="rowInfo.row.project"
+        :issue-id="rowInfo.row.id"
         :date="rowInfo.row.target_date"
         :issue="rowInfo.row"
         :is-disabled="

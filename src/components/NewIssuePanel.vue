@@ -141,7 +141,7 @@
           <select-date
             v-model:date="date"
             :workspace-id="currentWorkspaceSlug"
-            :projectid="project.id"
+            :project-id="project.id"
             :new-issue="true"
             :auto-update="autoupdateDate"
             placeholder="Выберите дату"
