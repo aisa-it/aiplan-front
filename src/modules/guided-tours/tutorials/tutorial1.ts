@@ -1,5 +1,7 @@
 import { Step } from '../types/step';
 
+export const STEP_NUM = 1;
+
 export const steps: Step[] = [
   {
     el: '',

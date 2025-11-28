@@ -64,11 +64,14 @@
       <NewProjectDialog v-model="isProjectCreateOpen" />
     </div>
   </q-page>
-  <GuidedTour v-if="user?.tutorial === 0" :steps="steps" />
+  <GuidedTour
+    v-if="user?.tutorial === 0 && $q.platform.is.desktop"
+    :steps="steps"
+    @end-tutorial="useAiplanStore().setMeTutorial(STEP_NUM)"
+  />
 </template>
 
 <script setup lang="ts">
-// v-if="!user.is_onboarded && $q.platform.is.desktop"
 import { useQuasar } from 'quasar';
 import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -79,13 +82,14 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useLoaderStore } from 'src/stores/loader-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useAiplanStore } from 'src/stores/aiplan-store';
 
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
 
 import NewProjectDialog from 'src/components/dialogs/NewProjectDialog.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import GuidedTour from 'src/modules/guided-tours/GuidedTour.vue';
-import { steps } from 'src/modules/guided-tours/tutorials/tutorial1';
+import { steps, STEP_NUM } from 'src/modules/guided-tours/tutorials/tutorial1';
 
 const $q = useQuasar();
 const route = useRoute();
