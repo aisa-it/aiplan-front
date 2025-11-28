@@ -132,12 +132,10 @@ onMounted(() => {
 const bus = inject('bus') as EventBus;
 
 const updateTable = (field, row, entity) => {
-  console.log(field, row, entity);
   updateCurrentTable(field, row, entity);
 };
 
 bus.on('updateIssueTable', (field, entityId) => {
-  console.log(entityId);
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }
