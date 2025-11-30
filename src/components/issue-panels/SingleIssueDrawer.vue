@@ -383,6 +383,7 @@ const handleRefresh = async () => {
 };
 
 const refresh = async () => {
+  if (!currentIssueID.value) return;
   await singleIssueStore
     .getIssueDataById(
       currentWorkspaceSlug.value,
