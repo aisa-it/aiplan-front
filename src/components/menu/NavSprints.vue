@@ -165,6 +165,7 @@ const sprintForDelete = ref<DtoSprintLight | null>(null);
 const isDeleteDialogOpen = ref(false);
 
 onMounted(async () => {
+  if (!route.params.workspace) return;
   refreshSprints();
 });
 
@@ -195,6 +196,7 @@ const successDeleteHandle = async () => {
 watch(
   () => route.params.workspace,
   async (newValue) => {
+    if (!newValue) return;
     sprints.value = await getSprints(newValue as string);
   },
 );
