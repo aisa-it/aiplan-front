@@ -1,6 +1,9 @@
 <template>
   <div class="col q-pb-sm q-px-sm">
-    <SingleIssueButtons :preview="preview" @refresh="(v) => emits('refresh', v)" />
+    <SingleIssueButtons
+      :preview="preview"
+      @refresh="(v) => emits('refresh', v)"
+    />
     <q-separator class="issue-panel__separator" />
 
     <div class="row q-pt-md centered-horisontally">
@@ -19,7 +22,11 @@
           :issue="issueData"
           :status="issueData.state_detail"
           :isDisabled="
-            !hasPermissionByIssue(issueData, project, 'change-issue-status')
+            !hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-status',
+            )
           "
           :states-from-cache="statesCache[issueData?.project]"
           @set-status="(val) => (issueData.state_detail = val)"
@@ -78,7 +85,11 @@
           :issueid="issueData.id"
           :assigness="assignees"
           :isDisabled="
-            !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+            !hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-basic',
+            )
           "
           :current-member="user"
           @refresh="handleRefresh"
@@ -101,7 +112,11 @@
           :watchers="watchers"
           :current-member="user"
           :isDisabled="
-            !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+            !hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-basic',
+            )
           "
           @refresh="handleRefresh"
         ></SelectWatchers>
@@ -126,7 +141,11 @@
           :priority="issueData.priority"
           :issue="issueData"
           :is-disabled="
-            !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            !hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           @update:priority="(val) => (issueData.priority = val)"
           @refresh="handleRefresh"
@@ -160,12 +179,16 @@
         <SelectDate
           class="full-w"
           :workspace-id="issueData.workspace_detail.slug"
-          :projectid="issueData.project"
-          :issueid="issueData.id"
+          :project-id="issueData.project"
+          :issue-id="issueData.id"
           :date="issueData.target_date"
           :issue="issueData"
           :is-disabled="
-            !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            !hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           @refresh="handleRefresh"
         />
@@ -217,16 +240,24 @@
           :projectid="issueData.project"
           :issueid="issueData.id"
           :issue="issueData.parent_detail"
-          :project="project"
+          :project="issueData.project_detail ?? project"
           :isDisabled="
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           @refresh="handleRefresh"
         ></SelectParentIssue>
         <q-btn
           v-if="
             issueData.parent_detail &&
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           class="btn-only-icon-sm q-ml-xs"
           style="padding: 0 3px"
@@ -251,7 +282,11 @@
           :issues="issueData.blocker_issues"
           :target="user.theme?.open_in_new ? '_blank' : '_self'"
           :isDisabled="
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           @refresh="handleRefresh"
         />
@@ -273,7 +308,11 @@
           :issues="issueData.blocked_issues"
           :target="user.theme?.open_in_new ? '_blank' : '_self'"
           :isDisabled="
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           @refresh="handleRefresh"
         />
@@ -286,8 +325,13 @@
       :projectid="issueData.project"
       :issueid="issueData.id"
       :links="issueData.issue_link"
+      :project="issueData.project_detail"
       :isDisabled="
-        hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+        hasPermissionByIssue(
+          issueData,
+          issueData.project_detail ?? project,
+          'change-issue-secondary',
+        )
       "
       @refresh="handleRefresh"
     >
@@ -380,10 +424,11 @@ const handleRefresh = async () => {
 };
 
 const refresh = async () => {
+  if (!currentIssueID.value) return;
   await singleIssueStore
     .getIssueDataById(
       currentWorkspaceSlug.value,
-      currentProjectID.value,
+      issueData.value.project ?? currentProjectID.value,
       currentIssueID.value,
     )
     .then((res) => {
@@ -404,7 +449,7 @@ const handleRemoveParentIssue = async () => {
   await singleIssueStore
     .updateIssueData(
       currentWorkspaceSlug.value,
-      currentProjectID.value,
+      issueData.value.project ?? currentProjectID.value,
       currentIssueID.value,
       { parent: null },
     )
@@ -415,12 +460,20 @@ const handleRemoveParentIssue = async () => {
         customMessage: SUCCESS_UPDATE_DATA,
       });
       issueData.value.parent_detail = null;
-      handleRefresh()
+      handleRefresh();
     });
 };
 
 const getDate = (dateVal: string | null) => {
-  return dateVal ? new Date(dateVal).toLocaleDateString() : 'Нет даты';
+  return dateVal
+    ? new Date(dateVal).toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'Нет даты';
 };
 
 const getCompareDate = computed(() => {

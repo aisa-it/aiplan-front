@@ -31,7 +31,7 @@ export default configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['i18n', 'axios', 'mitt', 'bus', 'hint-tooltip', 'theme-color'],
+    boot: ['i18n', 'axios', 'mitt', 'bus', 'hint-tooltip', 'theme-color', 'git'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
@@ -70,10 +70,6 @@ export default configure(function (ctx) {
       chunkSizeWarningLimit: 1000,
 
       extendViteConf(viteConf) {
-        viteConf.esbuild = {
-          drop: ['console'],
-        };
-
         // Добавляем оптимизацию chunks
         if (viteConf.build && viteConf.build.rollupOptions) {
           viteConf.build.rollupOptions.output = {
@@ -131,10 +127,6 @@ export default configure(function (ctx) {
       // https: true
       open: true, // opens browser window automatically
       proxy: {
-        '/uploads': {
-          target: env.VITE_MINIO_URL,
-          changeOrigin: true,
-        },
         '/i': {
           target: env.VITE_API_URL,
           changeOrigin: true,
@@ -223,7 +215,6 @@ export default configure(function (ctx) {
         cfg.navigateFallbackDenylist.push(/^\/i\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/sf\/.*$/);
         cfg.navigateFallbackDenylist.push(/^\/d\/.*$/);
-        cfg.navigateFallbackDenylist.push(/^\/uploads\/.*$/);
       },
       // useFilenameHashes: true,
       // extendGenerateSWOptions (cfg) {}

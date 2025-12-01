@@ -2,11 +2,12 @@
   <q-td
     :props="rowInfo"
     :style="`font-size: 12px; padding: 7px 4px; cursor: pointer;`"
-    @click="
+    @click.stop="
       () =>
         singleIssueStore.openIssue(
           rowInfo.row.sequence_id,
           user.theme?.open_in_new ? '_blank' : '_self',
+          rowInfo.row.project,
         )
     "
   >

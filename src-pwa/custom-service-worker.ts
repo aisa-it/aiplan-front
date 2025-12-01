@@ -36,7 +36,6 @@ if (process.env.MODE !== 'ssr' || process.env.PROD) {
           /^\/api\/.*$/,
           /^\/i\/.*$/,
           /^\/d\/.*$/,
-          /^\/uploads\/.*$/,
         ],
       },
     ),

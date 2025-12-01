@@ -33,11 +33,10 @@
                   subIssue.state_detail.name
                 }}</HintTooltip></q-badge
               >
-              <span>
-                {{ subIssue.project_detail.identifier }}-{{
-                  subIssue.sequence_id
-                }}
-              </span>
+              {{ subIssue.project_detail.identifier }}-{{
+                subIssue.sequence_id
+              }}
+
               <span class="subissue-name">
                 {{ subIssue.name }}
               </span>
@@ -133,7 +132,7 @@ const moveChildDown = async (id: string) => {
 };
 
 const getUrl = (value: DtoIssue) => {
-  return `/${value.workspace_detail?.slug}/projects/${value.project_detail?.id}/issues/${value?.sequence_id}`;
+  return `/${value.workspace_detail?.slug}/projects/${value.project_detail?.identifier || value.project_detail?.id}/issues/${value?.sequence_id}`;
 };
 
 const removeChild = (id: string) => {

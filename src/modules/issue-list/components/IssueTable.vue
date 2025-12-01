@@ -1,13 +1,18 @@
 <template>
   <q-table
     v-model:pagination="quasarPagination"
+    binary-state-sort
     class="my-sticky-column-table table-bottom-reverse"
     row-key="sequence_id"
     flat
     :loading="loadingTable"
     :rows="rows"
-    :columns="projectStore.getTableColumns"
+    :columns="columns"
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
+    @row-click="
+      (_, row) =>
+        emits('openPreview', row.sequence_id, parsePagination(quasarPagination))
+    "
     @request="(e) => getIssues(e.pagination)"
   >
     <template #bottom>
@@ -27,14 +32,20 @@
     </template>
 
     <template v-slot:body-cell-name="props">
-      <NameColumn :row-info="props" @open-preview="emits('openPreview', props.row.sequence_id, parsePagination(quasarPagination))" />
+      <NameColumn
+        :row-info="props"
+        @open-preview="
+          (issue) =>
+            emits('openPreview', issue, parsePagination(quasarPagination))
+        "
+      />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
 
     <template v-slot:body-cell-priority="props">
       <PriorityColumn
         :row-info="props"
-        @refresh="updateCurrentTable('priority', props.row, entity)"
+        @refresh="updateIssueField('priority', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -45,7 +56,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateCurrentTable('state', props.row, entity);
+            updateIssueField('state', props.row, entity);
           }
         "
       />
@@ -55,7 +66,7 @@
     <template v-slot:body-cell-target_date="props">
       <TargetDateColumn
         :row-info="props"
-        @refresh="updateCurrentTable('targetDate', props.row, entity)"
+        @refresh="updateIssueField('targetDate', props.row, entity)"
       />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" />
     </template>
@@ -110,9 +121,9 @@
 <script lang="ts" setup>
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-import { inject, ref, watch, watchEffect } from 'vue';
+import { inject, ref, watch, watchEffect, computed } from 'vue';
 
-import { useProjectStore } from 'src/stores/project-store';
+import { useIssueContext } from '../composables/useIssueContext';
 
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import {
@@ -128,13 +139,25 @@ import {
   LabelsColumn,
   ChipCountColumn,
 } from './issue-table';
-import { storeToRefs } from 'pinia';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 import { EventBus } from 'quasar';
 
-const projectStore = useProjectStore();
+const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview']);
+const props = defineProps([
+  'entity',
+  'rows',
+  'rowsCount',
+  'loading',
+  'columns',
+  'contextType',
+]);
 
-const { projectProps } = storeToRefs(projectStore);
+const {
+  contextProps,
+  isGroupingEnabled,
+  getTableColumns,
+  store: contextStore,
+} = useIssueContext(props.contextType);
 
 interface QuasarPagination {
   page: number;
@@ -143,10 +166,11 @@ interface QuasarPagination {
   descending: boolean;
   rowsPerPage: number;
 }
-const { updateCurrentTable } = useGroupedIssues();
+const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
-const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview']);
-const props = defineProps(['entity', 'rows', 'rowsCount', 'loading']);
+const columns = computed(() => {
+  return props.columns ?? getTableColumns;
+});
 
 const bus = inject('bus') as EventBus;
 
@@ -155,17 +179,18 @@ const loadingTable = ref(false);
 const quasarPagination = ref<QuasarPagination>({
   page: 1,
   rowsNumber: props.rowsCount,
-  sortBy: projectProps.value?.filters?.order_by,
-  descending: projectProps.value?.filters?.orderDesc,
-  rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+  sortBy: contextProps.value?.filters?.order_by ?? 'sequence_id',
+  descending: contextProps.value?.filters?.orderDesc,
+  rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
 // преобразуем quasar пагинацию в пагинацию бека
 function parsePagination(pagination: QuasarPagination) {
   return {
     only_count: false,
-    show_sub_issue: projectProps.value.showSubIssues ?? true,
-    draft: projectProps.value?.draft ?? true,
+    only_active: contextProps.value?.showOnlyActive,
+    show_sub_issues: contextProps.value.showSubIssues ?? true,
+    draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
     offset:
@@ -195,6 +220,11 @@ bus.on('updateIssueTable', (field, entityId) => {
   }
 });
 
+const updateIssueField = (action?: string, row?: any, entity?: any) => {
+  if (isGroupingEnabled.value === true) {
+    updateCurrentTable(action, row, entity);
+  } else emits('refresh', parsePagination(quasarPagination.value));
+};
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });

@@ -9,10 +9,9 @@
     popup-content-class="fit-select-popup scrollable-content inh-popup"
     map-options
     v-model="states"
-    :options="getStatusesAsArray"
+    :options="statuses"
     :option-label="(state) => state.name"
     :option-value="(state) => state.id"
-    @update:model-value="onUpdate"
   >
     <template v-slot:option="scope">
       <q-item v-bind="scope.itemProps">
@@ -32,22 +31,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { IState } from 'src/interfaces/states';
-import { storeToRefs } from 'pinia';
-import { useProjectStore } from 'src/stores/project-store';
 
 const emits = defineEmits(['update']);
-const props = defineProps(['statesProps']);
+const props = defineProps(['statesProps', 'statuses']);
 
-const { getStatusesAsArray } = storeToRefs(useProjectStore());
+const states = computed<any[]>({
+  get() {
+    if (!props.statesProps) return [];
 
-const states = ref([...props.statesProps]);
+    if (!Array.isArray(props.statuses[0]?.id)) return [...props.statesProps];
 
-const onUpdate = (states: IState[] | undefined) => {
-  emits(
-    'update',
-    states?.length ? states.map((state) => state.id || state) : [],
-  );
-};
+    return props.statuses.filter((el) =>
+      el.id.some((id) => props.statesProps.includes(id)),
+    );
+  },
+  set(val) {
+    if (!val?.length) {
+      emits('update', []);
+      return;
+    }
+
+    const ids = Array.isArray(val[0].id)
+      ? val.flatMap((s) => s.id as string[])
+      : val.map((state) => state.id || state);
+
+    emits('update', ids);
+  },
+});
 </script>

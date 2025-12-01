@@ -141,8 +141,9 @@
           <select-date
             v-model:date="date"
             :workspace-id="currentWorkspaceSlug"
-            :projectid="project.id"
+            :project-id="project.id"
             :new-issue="true"
+            :auto-update="autoupdateDate"
             placeholder="Выберите дату"
             class="col centered-horisontally"
           ></select-date>
@@ -305,6 +306,7 @@ const draft = ref(false);
 const selectedIssueTemplate = ref<any>(null);
 const loading = ref(true);
 const editorInstance = ref<Editor>();
+const autoupdateDate = ref<boolean>(true);
 
 //computeds
 const workspaceSlug = computed(() => {
@@ -389,6 +391,7 @@ const create = async () => {
   loading.value = true;
   const content = await handleEditorValue(description.value);
   const descriptionJson = editorInstance.value?.getJSON();
+  autoupdateDate.value = false;
   await singleIssueStore
     .createIssue(
       currentWorkspaceSlug.value,

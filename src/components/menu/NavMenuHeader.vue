@@ -81,7 +81,7 @@
               s.slug === currentWorkspaceSlug ? 'q-router-link--active' : ''
             "
             @click="
-              $route.params.workspace !== s.slug ? useGlobalLoading() : ''
+              router.currentRoute.value.params.workspace !== s.slug ? useGlobalLoading() : ''
             "
           >
             <q-item-section avatar>
@@ -100,7 +100,7 @@
             <q-space />
             <div style="display: flex; align-items: center">
               <q-btn
-                class="menu-link__btn q-mr-sm"
+                class="menu-link__btn"
                 :class="{ 'favorite-btn--inactive': !s.is_favorite }"
                 flat
                 :style="'min-height: 16px !important; min-width: 16px; padding: 0'"
@@ -122,21 +122,53 @@
                 >
                 <HintTooltip v-else>Добавить в избранное</HintTooltip>
               </q-btn>
-              <div class="flex" style="min-width: 16px">
-                <q-btn
-                  v-if="hasPermissionByWorkspace(s, 'ws-settings')"
-                  class="menu-link__settings-btn"
-                  flat
-                  dense
-                  no-caps
-                  id="workspace-settings-button"
-                  :style="'min-height: 16px !important; padding: 0'"
-                  :to="`/${s.slug}/settings`"
-                >
-                  <SettingsIcon :width="16" :height="16" />
-                  <HintTooltip>Настройки</HintTooltip>
-                </q-btn>
-              </div>
+              <q-btn
+                v-if="
+                  hasPermissionByWorkspace(s, 'ws-settings')
+                "
+                class="menu-link__btn q-ml-sm"
+                flat
+                icon="more_horiz"
+                :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
+                @click.prevent.stop
+              >
+                <q-menu>
+                  <q-list :style="'min-width: 225px; !important'">
+                    <q-item>
+                      <q-btn
+                        class="menu-link__settings-btn full-w"
+                        data-id="workspace-settings-button-top"
+                        flat
+                        dense
+                        no-caps
+                        :style="'font-size: 12px;'"
+                        notificationSettingsOpen
+                        @click="{((selectedWorkspace = s),
+                          (notificationSettingsOpen = !notificationSettingsOpen));
+                        }"
+                        >
+                        <BellIcon  :width="16" :height="16"  class="q-mr-sm"
+                        />
+                          <span>Уведомления</span>
+                      </q-btn>
+                    </q-item>
+                    <q-item>
+                      <q-btn
+                        class="menu-link__settings-btn full-w"
+                        flat
+                        dense
+                        no-caps
+                        id="workspace-settings-button"
+                        :style="'font-size: 12px;'"
+                        :to="`/${s.slug}/settings`"
+                      >
+                        <SettingsIcon :width="16" :height="16"  class="q-mr-sm"/>
+                        <span>Настройки</span>
+                      </q-btn>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
             </div>
           </q-item>
           <q-separator />
@@ -147,7 +179,7 @@
     <q-btn class="nav-menu__top-nav-button" :to="`/${currentWorkspaceSlug}`">
       <HomeIcon
         :color="`${
-          router.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
+          router.currentRoute.value.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
         }`"
       />
     </q-btn>
@@ -158,32 +190,47 @@
       :to="`/${currentWorkspaceSlug}/aidoc`"
     >
       <AIDocIcon
-        :color="`${router.path.includes('aidoc') ? activeIconColor : ''}`"
+        :color="`${router.currentRoute.value.path.includes('aidoc') ? activeIconColor : ''}`"
       />
     </q-btn>
     <q-btn
+      v-if="gitStore.gitEnabled"
       class="nav-menu__top-nav-button"
-      data-id="workspace-settings-button-top"
+      data-id="git-repositories-button"
       :text-color="'dark'"
-      @click="notificationSettingsOpen = !notificationSettingsOpen"
+      @click="navigateToGit"
     >
-      <BellIcon :color="`${notificationSettingsOpen ? activeIconColor : ''}`" />
+      <GitIcon
+        :color="`${router.currentRoute.value.path.includes('/git') ? activeIconColor : ''}`"
+      />
+      <q-tooltip>Git Repositories</q-tooltip>
+    </q-btn>
+    <q-btn
+    v-if="hasPermissionByWorkspace(workspaceInfo, 'ws-settings')"
+      class="nav-menu__top-nav-button"
+      id="workspace-settings-button-top"
+      :to="`/${workspaceInfo.slug}/settings`"
+      >
+      <SettingsIcon :width="24" :height="24"
+       :color="`${router.currentRoute.value.path.includes(workspaceInfo.slug + '/settings') ? activeIconColor : ''}`"
+      />
     </q-btn>
   </q-btn-group>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
-  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" />
+  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" :workspace="selectedWorkspace"/>
 </template>
 
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 // store
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useGitStore } from 'src/stores/git-store';
 
 // utils
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
@@ -194,6 +241,7 @@ import AvatarImage from '../AvatarImage.vue';
 import HatXmasIcon from '../icons/HatXmasIcon.vue';
 import SettingsIcon from '../icons/SettingsIcon.vue';
 import BellIcon from '../icons/BellIcon.vue';
+import GitIcon from '../icons/GitIcon.vue';
 import NewWorkspaceDialog from '../dialogs/NewWorkspaceDialog.vue';
 import StarIcon from 'components/icons/StarIcon.vue';
 import {
@@ -213,18 +261,21 @@ const activeIconColor = '#3f75ff';
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
-const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
+const gitStore = useGitStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const { setNotificationView } = useNotificationStore();
+
 // store to refs
 const { user, userWorkspaces } = storeToRefs(userStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { ny, isDemo } = storeToRefs(utilsStore);
 // router
-const router = useRoute();
+const router = useRouter();
 
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
 const notificationSettingsOpen = ref(false);
-const { setNotificationView } = useNotificationStore();
+const selectedWorkspace = ref();
 
 const deleteFavoriteWorkspace = async (uuid: string | undefined) => {
   await userStore
@@ -262,6 +313,21 @@ const addFavoriteWorkspace = async (uuid: string | undefined) => {
         customMessage: BASE_ERROR,
       });
     });
+};
+
+/**
+ * Обработчик клика по иконке Git
+ *
+ * Переход на главную страницу Git расширения
+ * @see src/modules/git/pages/GitHomePage.vue
+ */
+const navigateToGit = () => {
+  router.push({
+    name: 'git-home',
+    params: {
+      workspace: currentWorkspaceSlug.value,
+    },
+  });
 };
 </script>
 <style lang="scss" scoped>

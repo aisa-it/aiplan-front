@@ -156,7 +156,6 @@ const handleStartImport = async () => {
     .then(() => {
       emits('next');
     })
-
     .finally(() => {
       loading.value = false;
     });

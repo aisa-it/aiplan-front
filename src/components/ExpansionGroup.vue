@@ -1,5 +1,6 @@
 <template>
   <div class="menu scrollable-content">
+    <NavSprints v-if="!isAIDoc" />
     <NavMenuProjects v-if="!isAIDoc" />
     <NavMenuForms v-if="!isAIDoc" />
     <NavMenuAIDocs
@@ -35,6 +36,7 @@ import NavMenuProjects from './menu/NavMenuProjects.vue';
 import NavMenuForms from './menu/NavMenuForms.vue';
 import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
 import NavMenuAIDocs from './menu/NavMenuAIDocs.vue';
+import NavSprints from './menu/NavSprints.vue';
 import { useRoute } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';

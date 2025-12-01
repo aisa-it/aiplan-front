@@ -1,20 +1,22 @@
 <template>
   <q-td :props="rowInfo">
-    <SelectDate
-      :workspace-id="rowInfo.row.workspace_detail.slug"
-      :projectid="rowInfo.row.project"
-      :issueid="rowInfo.row.id"
-      :date="rowInfo.row.target_date"
-      :issue="rowInfo.row"
-      :is-disabled="
-        !rolesStore.hasPermissionByIssue(
-          rowInfo.row,
-          project,
-          'change-issue-primary',
-        )
-      "
-      @refresh="emits('refresh')"
-    ></SelectDate>
+    <div @click.stop>
+      <SelectDate
+        :workspace-id="rowInfo.row.workspace_detail.slug"
+        :project-id="rowInfo.row.project"
+        :issue-id="rowInfo.row.id"
+        :date="rowInfo.row.target_date"
+        :issue="rowInfo.row"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            rowInfo.row,
+            rowInfo.row.project_detail ?? project,
+            'change-issue-primary',
+          )
+        "
+        @refresh="emits('refresh')"
+      ></SelectDate>
+    </div>
   </q-td>
 </template>
 

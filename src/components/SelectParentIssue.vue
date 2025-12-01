@@ -13,7 +13,7 @@
     </div>
     <SelectIssueDialog
       v-model="isParentOpen"
-      :projectIdentifier="project?.identifier"
+      :projectIdentifier="props.project?.identifier"
       :project="props.project"
       :issues="[issue].map((el) => el?.id)"
       :loading="loading"

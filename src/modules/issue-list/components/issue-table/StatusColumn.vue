@@ -1,20 +1,22 @@
 <template>
   <q-td :props="rowInfo">
-    <SelectStatus
-      :projectid="rowInfo.row.project"
-      :issueid="rowInfo.row.id"
-      :status="rowInfo.row.state_detail"
-      :issue="rowInfo.row"
-      :isDisabled="
-        !rolesStore.hasPermissionByIssue(
-          rowInfo.row,
-          project,
-          'change-issue-status',
-        )
-      "
-      :states-from-cache="statesCache[rowInfo.row.project]"
-      @set-status="(val: any) => emits('refresh', val)"
-    />
+    <div @click.stop>
+      <SelectStatus
+        :projectid="rowInfo.row.project"
+        :issueid="rowInfo.row.id"
+        :status="rowInfo.row.state_detail"
+        :issue="rowInfo.row"
+        :isDisabled="
+          !rolesStore.hasPermissionByIssue(
+            rowInfo.row,
+            rowInfo.row.project_detail ?? project,
+            'change-issue-status',
+          )
+        "
+        :states-from-cache="statesCache[rowInfo.row.project]"
+        @set-status="(val: any) => emits('refresh', val)"
+      />
+    </div>
   </q-td>
 </template>
 

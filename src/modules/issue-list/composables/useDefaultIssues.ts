@@ -1,49 +1,45 @@
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { storeToRefs } from 'pinia';
-import { IQuery, useIssuesStore } from 'src/stores/issues-store';
-import { useProjectStore } from 'src/stores/project-store';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { IQuery } from 'src/stores/issues-store';
 import { computed } from 'vue';
+import { useIssueContext } from './useIssueContext';
 
-export const useDefaultIssues = () => {
-  const { projectProps, project } = storeToRefs(useProjectStore());
+export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
+  const { contextProps, getIssue } = useIssueContext(contextType);
   const issuesStore = useIssuesStore();
-  const { currentWorkspaceSlug, workspaceInfo } =
-    storeToRefs(useWorkspaceStore());
 
   const defineIssuesPagination = computed(() => {
     return {
       only_count: false,
-      show_sub_issue: projectProps.value?.showSubIssues ?? true,
-      draft: projectProps.value?.draft ?? true,
-      order_by: projectProps.value?.filters?.order_by ?? 'sequence_id',
-      desc: projectProps.value?.filters?.orderDesc,
+      show_sub_issues: contextProps.value?.showSubIssues ?? true,
+      draft: contextProps.value?.draft ?? true,
+      order_by: contextProps.value?.filters?.order_by ?? 'sequence_id',
+      desc: contextProps.value?.filters?.orderDesc,
       offset: 0,
-      limit: projectProps.value?.page_size,
+      limit: contextProps.value?.page_size,
+      only_active: contextProps.value?.showOnlyActive ?? true,
     };
   });
 
-  async function onRequest(
-    pagination?: IQuery,
-    filters?: TypesIssuesListFilters,
-  ) {
-    const projectFilters = {
-      states: [] as string[],
-    };
+  async function onRequest(pagination?: IQuery) {
     if (pagination) {
       pagination.order_by = pagination.order_by ?? 'sequence_id';
     }
-    if (projectProps.value?.filters?.states?.length) {
-      projectFilters.states = projectProps?.value?.filters?.states;
+    const filters = {
+      states: [] as string[],
+      assigned_to_me: contextProps?.value?.filters?.assignedToMe,
+      authored_by_me: contextProps?.value?.filters?.authoredToMe,
+      watched_by_me: contextProps?.value?.filters?.watchedToMe,
+    };
+    if (contextProps.value?.filters?.states?.length) {
+      filters.states = contextProps?.value?.filters?.states;
     }
 
-    const response = await issuesStore.getIssuesTable(
-      currentWorkspaceSlug.value,
-      project.value.id,
-      filters || projectFilters,
+    const response = await getIssue(
+      filters,
       pagination || defineIssuesPagination.value,
     );
     issuesStore.ungroupedIssueList = response?.data;
+    return response;
   }
 
   return { onRequest };

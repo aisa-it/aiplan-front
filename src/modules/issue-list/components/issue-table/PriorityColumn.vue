@@ -1,20 +1,22 @@
 <template>
   <q-td :props="rowInfo" style="min-width: 200px">
-    <SelectPriority
-      :workspace-slug="rowInfo.row.workspace_detail.slug"
-      :projectid="rowInfo.row.project"
-      :issueid="rowInfo.row.id"
-      :priority="rowInfo.value"
-      :issue="rowInfo.row"
-      :is-disabled="
-        !rolesStore.hasPermissionByIssue(
-          rowInfo.row,
-          project,
-          'change-issue-primary',
-        )
-      "
-      @refresh="emits('refresh')"
-    ></SelectPriority>
+    <div @click.stop>
+      <SelectPriority
+        :workspace-slug="rowInfo.row.workspace_detail.slug"
+        :projectid="rowInfo.row.project"
+        :issueid="rowInfo.row.id"
+        :priority="rowInfo.value"
+        :issue="rowInfo.row"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            rowInfo.row,
+            rowInfo.row.project_detail ?? project,
+            'change-issue-primary',
+          )
+        "
+        @refresh="emits('refresh')"
+      ></SelectPriority>
+    </div>
   </q-td>
 </template>
 

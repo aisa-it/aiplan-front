@@ -107,6 +107,7 @@ import { storeToRefs } from 'pinia';
 const props = defineProps<{
   tags: ITag[];
   isDisabled?: boolean;
+  projectId?: string;
 }>();
 
 const emit = defineEmits<{
@@ -149,7 +150,11 @@ const handleSearchLabels = debounce(async (query: string) => {
 
   loading.value = true;
   await projectStore
-    .getProjectLabels(route.params.workspace, route.params.project, query)
+    .getProjectLabels(
+      route.params.workspace,
+      props.projectId ?? route.params.project,
+      query,
+    )
     .then((data) => {
       labels.value = data;
       loading.value = false;
@@ -162,7 +167,7 @@ const handleAddTag = (newTag: ITag) => {
     api
       .issuePartialUpdate(
         route.params.workspace,
-        route.params.project,
+        props.projectId ?? route.params.project,
         currentIssueID.value,
         {
           labels_list: [...currentTagsId.value, newTag.id],
@@ -185,7 +190,10 @@ const refresh = async (resetTags = true) => {
   }
 
   await projectStore
-    .getProjectLabels(route.params.workspace, route.params.project)
+    .getProjectLabels(
+      route.params.workspace,
+      props.projectId ?? route.params.project,
+    )
     .then((data) => {
       labels.value = data;
     });
@@ -209,7 +217,7 @@ const handleSaveTags = () => {
   api
     .issuePartialUpdate(
       route.params.workspace,
-      route.params.project,
+      props.projectId ?? route.params.project,
       currentIssueID.value,
       {
         labels_list: currentTagsId.value || [],

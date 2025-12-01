@@ -14,7 +14,7 @@
         :height="24"
         style="margin-right: 6px"
       />
-      <span v-if="!currentIssueID && viewProps.props?.issueView === 'kanban'">{{
+      <span v-if="type === 'kanban'">{{
         date ? date.split('T')[0].split('-').reverse().join('.') : 'Срок'
       }}</span>
       <span v-else>{{ date ? formatDateTime(date) : placeholder }}</span>
@@ -66,7 +66,7 @@
             class="primary-btn full-w q-ml-sm"
             style="font-size: 12px"
             flat
-            @click="save"
+            @click="save(true)"
             v-close-popup
           />
         </div>
@@ -119,7 +119,7 @@
             class="primary-btn full-w q-ml-sm"
             style="font-size: 12px"
             flat
-            @click="save"
+            @click="save(true)"
             v-close-popup
           />
         </div>
@@ -128,239 +128,206 @@
   </q-btn>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import dayjs from 'dayjs';
 import { Screen, useQuasar } from 'quasar';
-import { storeToRefs } from 'pinia';
-import { defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { useViewPropsStore } from 'src/stores/view-props-store';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 import CalendarIcon from './icons/CalendarIcon.vue';
 import { LOCALE_DATE } from 'src/constants/locale';
 import { formatDateTime } from '../utils/time';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'SelectDate',
-  props: {
-    workspaceId: {
-      type: String,
-      required: true,
-    },
-    projectid: {
-      type: String,
-      required: true,
-    },
-    issueid: {
-      type: String,
-      required: false,
-    },
-    date: {
-      type: String,
-      required: false,
-    },
-    issue: {
-      type: Object,
-      required: false,
-    },
-    newIssue: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    isDisabled: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    minYearMonth: {
-      type: String,
-      required: false,
-      default: `${dayjs(new Date()).year()}/01`,
-    },
-    maxYearMonth: {
-      type: String,
-      required: false,
-      default: `${dayjs(new Date()).year() + 10}/12`,
-    },
-    placeholder: {
-      type: String,
-      required: false,
-      default: 'Не установлен',
-    },
+const props = withDefaults(
+  defineProps<{
+    workspaceId: string;
+    projectId: string;
+    issueId?: string;
+    date?: string | null;
+    autoUpdate?: boolean;
+    issue?: DtoIssue;
+    newIssue?: boolean;
+    isDisabled?: boolean;
+    minYearMonth?: string;
+    maxYearMonth?: string;
+    placeholder?: string;
+    type?: 'kanban' | 'table' | 'issue';
+  }>(),
+  {
+    minYearMonth: `${dayjs(new Date()).year()}/01`,
+    maxYearMonth: `${dayjs(new Date()).year() + 10}/12`,
+    placeholder: 'Не установлен',
   },
-  emits: ['refresh', 'update:date'],
-  components: { CalendarIcon },
-  setup(props, { emit }) {
-    const $q = useQuasar();
-    const api = useAiplanStore();
-    const viewProps = useViewPropsStore();
-    const issueStore = useSingleIssueStore();
-    const { setNotificationView } = useNotificationStore();
-    const { currentIssueID } = storeToRefs(issueStore);
+);
 
-    const proxyDate = ref<string | null>(null);
-    const minutes = [...Array(60)].map((_, i) => i);
-    const hours = [...Array(24)].map((_, i) => i);
-    const selectedHour = ref<number>(12);
-    const selectedMinute = ref<number>(30);
+const emits = defineEmits<{
+  refresh: [date: string | null];
+  'update:date': [date: string | null];
+}>();
 
-    // Тикание часов
-    let tickTimeout: ReturnType<typeof setTimeout> | null = null;
-    let tickInterval: ReturnType<typeof setInterval> | null = null;
+const $q = useQuasar();
+const api = useAiplanStore();
+const { setNotificationView } = useNotificationStore();
 
-    function stopTick() {
-      if (tickTimeout) {
-        clearTimeout(tickTimeout);
-        tickTimeout = null;
-      }
-      if (tickInterval) {
-        clearInterval(tickInterval);
-        tickInterval = null;
-      }
-    }
+const proxyDate = ref<string | null>(null);
 
-    function scheduleTick() {
-      stopTick();
-      // Начало следующей минуты и время до ее наступления
-      const now = new Date();
-      const nextMinute = new Date(now.getTime());
-      nextMinute.setSeconds(0, 0);
-      nextMinute.setMinutes(nextMinute.getMinutes() + 1);
-      const delay = nextMinute.getTime() - now.getTime();
-      // Первая корректировка до начала следующей минуты, дальше корректировка времени по интервалу раз в минуту
-      tickTimeout = setTimeout(() => {
-        adjustTime();
-        tickInterval = setInterval(adjustTime, 60 * 1000);
-      }, delay);
-    }
+// Тикание часов
+interface ClockTimer {
+  timeout: ReturnType<typeof setTimeout> | null;
+  interval: ReturnType<typeof setInterval> | null;
+}
 
-    // Корректировка времени, если оно было раньше доминимально допустимого
-    const adjustTime = (): void => {
-      if (!proxyDate.value) return;
+const clockTimer = reactive<ClockTimer>({ timeout: null, interval: null });
+const fieldTimer = reactive<ClockTimer>({ timeout: null, interval: null });
 
-      const selectedDate = dayjs(proxyDate.value);
-      const today = dayjs().startOf('day');
+function stopTick(timer: ClockTimer): void {
+  if (timer.timeout) {
+    clearTimeout(timer.timeout);
+    timer.timeout = null;
+  }
+  if (timer.interval) {
+    clearInterval(timer.interval);
+    timer.interval = null;
+  }
+}
 
-      if (!selectedDate.isSame(today, 'day')) return;
+function scheduleTick(timer: ClockTimer, callback: () => void): void {
+  stopTick(timer);
+  const now = new Date();
+  const nextMinute = new Date(now);
+  nextMinute.setSeconds(0, 0);
+  nextMinute.setMinutes(nextMinute.getMinutes() + 1);
+  const delay = nextMinute.getTime() - now.getTime();
 
-      const expectedTime = dayjs().add(15, 'minute').startOf('minute');
-      if (selectedDate.isBefore(expectedTime)) {
-        proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
-      }
-    };
+  timer.timeout = setTimeout(() => {
+    callback();
+    timer.interval = setInterval(callback, 60_000);
+  }, delay);
+}
 
-    // Выбор допустимой даты
-    const optionsFn = (date: string): boolean => {
-      return date >= dayjs(new Date()).format('YYYY/MM/DD');
-    };
+// Корректировка времени, если оно было раньше доминимально допустимого
+const adjustTime = (): void => {
+  if (!proxyDate.value) return;
 
-    // Выбор допустимого времени
-    const timeOptionsFn = (hour: number, minute: number | null): boolean => {
-      const currentDate = proxyDate.value ? dayjs(proxyDate.value) : dayjs();
-      const today = dayjs().startOf('day');
-      const expectedDay = currentDate.startOf('day');
+  const selectedDate = dayjs(proxyDate.value);
+  const today = dayjs().startOf('day');
 
-      // Если день не сегодняшний - доступны все часы и минуты
-      if (!expectedDay.isSame(today, 'day')) {
-        return true;
-      }
+  if (!selectedDate.isSame(today, 'day')) return;
 
-      // Разрешенное время - не раньше чем через 15 минут после текущей минуты
-      const expectedTime = dayjs().add(15, 'minute');
-      // Проверка допустимого часа, если минута не указана пользователем
-      if (minute === null) {
-        // Час доступен для выбора, если его последняя минута позже или равна предполагаемой минуте выбираемого времени
-        const hourEnd = currentDate.hour(hour).minute(59).second(59);
-        return hourEnd.isAfter(expectedTime) || hourEnd.isSame(expectedTime);
-      }
+  const expectedTime = dayjs().add(15, 'minute').startOf('minute');
+  if (selectedDate.isBefore(expectedTime)) {
+    proxyDate.value = expectedTime.format('YYYY-MM-DDTHH:mm:ss');
+  }
+};
 
-      // Проверка для минуты, позже ли она разрешенного времени
-      const expectedMinute = currentDate.hour(hour).minute(minute).second(0);
-      return expectedMinute.isAfter(expectedTime);
-    };
+// Обновление даты в поле
+const fieldDateUpdate = (): void => {
+  adjustTime();
+  save();
+};
 
-    watch(
-      () => proxyDate.value,
-      () => {
-        adjustTime();
-      },
-    );
+// Выбор допустимой даты
+const optionsFn = (date: string): boolean => {
+  return date >= dayjs(new Date()).format('YYYY/MM/DD');
+};
 
-    watch(
-      () => $q.appVisible,
-      (visible) => {
-        if (visible) {
-          stopTick();
-          adjustTime();
-          scheduleTick()
-        }
-      },
-    );
+// Выбор допустимого времени
+const timeOptionsFn = (hour: number, minute: number | null): boolean => {
+  const currentDate = proxyDate.value ? dayjs(proxyDate.value) : dayjs();
+  const today = dayjs().startOf('day');
+  const expectedDay = currentDate.startOf('day');
 
-    onMounted(() => {
-      scheduleTick();
-    });
+  // Если день не сегодняшний - доступны все часы и минуты
+  if (!expectedDay.isSame(today, 'day')) {
+    return true;
+  }
 
-    onBeforeUnmount(() => {
-      stopTick();
-    });
+  // Разрешенное время - не раньше чем через 15 минут после текущей минуты
+  const expectedTime = dayjs().add(15, 'minute');
+  // Проверка допустимого часа, если минута не указана пользователем
+  if (minute === null) {
+    // Час доступен для выбора, если его последняя минута позже или равна предполагаемой минуте выбираемого времени
+    const hourEnd = currentDate.hour(hour).minute(59).second(59);
+    return hourEnd.isAfter(expectedTime) || hourEnd.isSame(expectedTime);
+  }
 
-    return {
-      api,
-      Screen,
-      viewProps,
-      proxyDate,
-      currentIssueID,
-      selectedHour,
-      selectedMinute,
-      minutes,
-      hours,
-      optionsFn,
-      timeOptionsFn,
-      formatDateTime,
-      updateProxy() {
-        // Инициализация. Если дата была задана - берем её, в противном случае сразу предлагаем новую допустимую со смещением
-        let initialDate = props.date
-          ? dayjs.utc(props.date).local()
-          : dayjs().add(15, 'minute');
+  // Проверка для минуты, позже ли она разрешенного времени
+  const expectedMinute = currentDate.hour(hour).minute(minute).second(0);
+  return expectedMinute.isAfter(expectedTime);
+};
 
-        // Если старая дата вне допустимого диапазона на текущий момент - меняем на допустимую
-        if (initialDate.isBefore(dayjs().add(15, 'minute'))) {
-          initialDate = dayjs().add(15, 'minute').startOf('minute');
-        }
+function save(notify: boolean = false): void {
+  const targetDateValue = proxyDate.value
+    ? dayjs(proxyDate.value).toISOString()
+    : null;
+  if (props.issueId) {
+    api
+      .issuePartialUpdate(props.workspaceId, props.projectId, props.issueId, {
+        target_date: targetDateValue,
+      })
+      .then(() => {
+        if (notify) setNotificationView({ type: 'success', open: true });
+        emits('refresh', proxyDate.value);
+      });
+  } else {
+    emits('update:date', targetDateValue);
+  }
+}
 
-        proxyDate.value = initialDate.format('YYYY-MM-DDTHH:mm:ss');
-      },
+const updateProxy = () => {
+  // Инициализация. Если дата была задана - берем её, в противном случае сразу предлагаем новую допустимую со смещением
+  let initialDate = props.date
+    ? dayjs.utc(props.date).local()
+    : dayjs().add(15, 'minute');
 
-      save() {
-        const targetDateValue = proxyDate.value
-          ? dayjs(proxyDate.value).toISOString()
-          : null;
-        if (props.issueid) {
-          api
-            .issuePartialUpdate(
-              props.workspaceId,
-              props.projectid,
-              props.issueid,
-              {
-                target_date: targetDateValue,
-              },
-            )
-            .then(() => {
-              setNotificationView({ type: 'success', open: true });
-              emit('refresh', proxyDate.value);
-            });
-        } else {
-          emit('update:date', targetDateValue);
-        }
-      },
-      LOCALE_DATE,
-    };
+  // Если старая дата вне допустимого диапазона на текущий момент - меняем на допустимую
+  if (initialDate.isBefore(dayjs().add(15, 'minute'))) {
+    initialDate = dayjs().add(15, 'minute').startOf('minute');
+  }
+
+  proxyDate.value = initialDate.format('YYYY-MM-DDTHH:mm:ss');
+};
+
+watch(
+  () => proxyDate.value,
+  () => {
+    adjustTime();
   },
+);
+
+watch(
+  () => $q.appVisible,
+  (visible) => {
+    if (visible) {
+      stopTick(clockTimer);
+      adjustTime();
+      scheduleTick(clockTimer, adjustTime);
+    }
+  },
+);
+
+watch(
+  () => props.autoUpdate,
+  (isEnabled) => {
+    if (isEnabled) {
+      scheduleTick(fieldTimer, fieldDateUpdate);
+    } else {
+      stopTick(fieldTimer);
+    }
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  scheduleTick(clockTimer, adjustTime);
+});
+
+onBeforeUnmount(() => {
+  stopTick(clockTimer);
+  stopTick(fieldTimer);
 });
 </script>
 
