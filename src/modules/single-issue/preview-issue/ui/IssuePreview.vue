@@ -10,8 +10,14 @@
     v-click-outside:prevent-preview-side-drawer="{
       isAutoSave: true,
       onClickOutside: () => emits('close'),
-      exclude: [...QUASAR_SELECTORS_CLASSES, 'prevent-click-issue-outside'],
+      exclude: [
+        ...QUASAR_SELECTORS_CLASSES,
+        'prevent-click-issue-outside',
+        'prevent-click-comments-create',
+        'main-toolbar',
+      ],
     }"
+    @before-show="updateClientWidth"
   >
     <div
       v-if="model"
@@ -49,14 +55,24 @@
       <SelectChildren
         :projectid="issueData.project"
         :issueid="issueData.id"
-        :is-disabled="hasPermissionByIssue(issueData, project, 'add-sub-issue')"
+        :is-disabled="
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'add-sub-issue',
+          )
+        "
       />
       <LinkedIssuesPanel />
 
       <SelectAttachments
         entityType="issue"
         :is-edit="
-          hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'change-issue-secondary',
+          )
         "
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
@@ -82,7 +98,7 @@
 
 <script setup lang="ts">
 // core
-import { LocalStorage, Screen } from 'quasar';
+import { LocalStorage } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
@@ -135,21 +151,22 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 let rafId: number | null = null;
 const leftbarWidth = 300;
 
-const minWidth = computed(() => Math.max(Screen.width / 2, 900));
-const maxWidth = computed(() => Screen.width - leftbarWidth);
+const clientWidth = ref(document.documentElement.clientWidth);
+const minWidth = computed(() => Math.max(clientWidth.value / 2, 900));
+const maxWidth = computed(() => clientWidth.value - leftbarWidth);
 const adaptiveWidth = computed(() =>
   Math.min(drawerWidth.value, maxWidth.value),
 );
 
-const drawerWidth = ref(Math.max(Screen.width / 2, 900));
-const targetWidth = ref(Math.max(Screen.width / 2, 900));
+const drawerWidth = ref(Math.max(clientWidth.value / 2, 900));
+const targetWidth = ref(Math.max(clientWidth.value / 2, 900));
 const startX = ref(0);
 const startW = ref(0);
 const moving = ref(false);
 
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(
-    currentProjectID.value,
+    issueData.value.project ?? currentProjectID.value,
     currentIssueID.value,
   );
 };
@@ -168,7 +185,7 @@ const deleteAttachment = async (attachmentId: string) => {
 // заменить на сервис после обновления апи
 const downloadAllAttachments = async () => {
   const { data, headers } = await useAiplanStore().api.get(
-    ` /api/auth/workspaces/${currentWorkspaceSlug.value}/projects/${currentProjectID.value}/issues/${currentIssueID.value}/issue-attachments/all/`,
+    ` /api/auth/workspaces/${currentWorkspaceSlug.value}/projects/${issueData.value.project ?? currentProjectID.value}/issues/${currentIssueID.value}/issue-attachments/all/`,
     {
       responseType: 'blob',
     },
@@ -234,6 +251,10 @@ const onPointerUp = () => {
   startRaf();
 };
 
+const updateClientWidth = () => {
+  clientWidth.value = document.documentElement.clientWidth;
+};
+
 watch(drawerWidth, (val) => {
   LocalStorage.set('drawerWidth', val);
 });
@@ -244,10 +265,12 @@ onMounted(() => {
     drawerWidth.value = Math.max(Number(saved), minWidth.value);
     targetWidth.value = Math.max(Number(saved), minWidth.value);
   }
+  window.addEventListener('resize', updateClientWidth);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('pointermove', onPointerMove);
+  window.removeEventListener('resize', updateClientWidth);
   stopRaf();
 });
 </script>

@@ -7,7 +7,7 @@
     <template #header>
       <h6 class="q-mb-sm q-mt-sm">
         Настройка уведомлений пространства "{{
-          workspaceStore?.workspaceInfo?.name
+          props.workspace.name
         }}"
       </h6>
     </template>
@@ -15,27 +15,31 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import BaseNotificationsSettingsDialog from './NotificationsSettings/BaseNotificationsSettingsDialog.vue';
 
 import { settingsList } from './NotificationsSettings/workspaceNotificationsConfig';
-const route = useRoute();
+import { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const workspaceStore = useWorkspaceStore();
+const props = defineProps<{
+  workspace: DtoWorkspaceWithCount;
+}>();
+
+
+const workspaceStore = useWorkspaceStore()
 
 const getUserSettings = async () => {
-  if (!workspaceStore?.workspaceInfo?.id) return;
+  if (!props.workspace.slug) return;
 
   return workspaceStore.getWorkspaceNotifications(
-    route.params.workspace as string,
+    props.workspace.slug as string,
   );
 };
 
 const saveUserSettings = async (settings: any) => {
   return workspaceStore.setAiDocNotificationSettings(
-    route.params.workspace as string,
+    props.workspace.slug as string,
     settings,
   );
 };

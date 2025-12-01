@@ -195,8 +195,8 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       );
     },
 
-    openIssue(issue: string, target?: string) {
-      const url = `/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${issue}`;
+    openIssue(issue: string, target?: string, project?: string) {
+      const url = `/${this.router.currentRoute.value.params.workspace}/projects/${project ?? this.router.currentRoute.value.params.project}/issues/${issue}`;
       if (target && target === '_blank') {
         window.open(url, target);
         return;

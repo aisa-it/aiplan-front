@@ -7,6 +7,7 @@
         singleIssueStore.openIssue(
           rowInfo.row.sequence_id,
           user.theme?.open_in_new ? '_blank' : '_self',
+          rowInfo.row.project,
         )
     "
   >

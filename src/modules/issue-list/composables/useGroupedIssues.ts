@@ -1,15 +1,9 @@
 import { useIssuesStore } from 'src/stores/issues-store';
-import { useProjectStore } from 'src/stores/project-store';
-import { storeToRefs } from 'pinia';
-import {
-  DEF_ROWS_PER_PAGE,
-  NEW_GROUP_BY_OPTIONS,
-  PARSED_GROUP,
-} from 'src/constants/constants';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { DEF_ROWS_PER_PAGE, PARSED_GROUP } from 'src/constants/constants';
 import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { inject } from 'vue';
 import { EventBus } from 'quasar';
+import { useIssueContext } from './useIssueContext';
 
 export interface QuasarPagination {
   page: number;
@@ -19,28 +13,27 @@ export interface QuasarPagination {
   rowsPerPage: number;
 }
 
-export const useGroupedIssues = () => {
+export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { project, projectProps, isKanbanEnabled } =
-    storeToRefs(useProjectStore());
-  const { workspaceInfo } = storeToRefs(useWorkspaceStore());
+  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS } =
+    useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
   function parsePagination(pagination: QuasarPagination) {
     return {
       only_count: false,
-      show_sub_issues: projectProps.value?.showSubIssues ?? true,
-      only_active: projectProps.value?.showOnlyActive ?? true,
+      show_sub_issues: contextProps.value?.showSubIssues ?? true,
+      only_active: contextProps.value?.showOnlyActive ?? true,
       group_by:
-        PARSED_GROUP[projectProps.value?.filters?.group_by]?.value ||
-        NEW_GROUP_BY_OPTIONS.find(
-          (option) => option.value === projectProps.value?.filters?.group_by,
+        PARSED_GROUP[contextProps.value?.filters?.group_by]?.value ||
+        GROUP_BY_OPTIONS.find(
+          (option) => option.value === contextProps.value?.filters?.group_by,
         )?.value,
       order_by: pagination.sortBy ?? 'sequence_id',
       desc: pagination.descending,
-      draft: projectProps.value?.draft,
+      draft: contextProps.value?.draft,
       offset:
         (pagination.page - 1) *
         (pagination.rowsPerPage == 0 ? 10 : pagination.rowsPerPage),
@@ -57,31 +50,26 @@ export const useGroupedIssues = () => {
       rowsNumber: 0,
       sortBy: isKanbanEnabled.value
         ? 'sequence_id'
-        : (projectProps.value?.filters?.order_by as string),
+        : (contextProps.value?.filters?.order_by as string),
       descending: isKanbanEnabled.value
         ? true
-        : (projectProps.value?.filters?.orderDesc as boolean),
-      rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+        : (contextProps.value?.filters?.orderDesc as boolean),
+      rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
 
     const filters = {
       states: [] as string[],
-      assigned_to_me: projectProps.value?.filters.assignedToMe,
-      authored_by_me: projectProps.value?.filters.authoredToMe,
-      watched_by_me: projectProps.value?.filters.watchedToMe,
+      assigned_to_me: contextProps.value?.filters.assignedToMe,
+      authored_by_me: contextProps.value?.filters.authoredToMe,
+      watched_by_me: contextProps.value?.filters.watchedToMe,
     };
-    if (projectProps.value?.filters?.states?.length) {
-      filters.states = projectProps?.value?.filters?.states;
+    if (contextProps.value?.filters?.states?.length) {
+      filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await issuesStore.getIssuesTable(
-      workspaceInfo?.value?.id as string,
-      project?.value.id,
-      filters,
-      parsePagination(quasarPagination),
-    );
+    const response = await getIssue(filters, parsePagination(quasarPagination));
 
-    issuesStore.groupedIssueList = await response?.data.issues;
-    issuesStore.groupByIssues = await response?.data.group_by;
+    issuesStore.groupedIssueList = response?.data.issues;
+    issuesStore.groupByIssues = response?.data.group_by;
   }
 
   function defineFiltersByEntity(entity) {
@@ -111,6 +99,10 @@ export const useGroupedIssues = () => {
         filters = { authors: [entity ? entity.id : ''] };
         return filters;
       }
+      case 'project': {
+        filters = { projects: [entity ? entity.id : ''] };
+        return filters;
+      }
     }
     return filters;
   }
@@ -118,12 +110,7 @@ export const useGroupedIssues = () => {
   async function getCurrentTable(index: number, pagination: any, entity: any) {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
     pagination.order_by = pagination.order_by ?? 'sequence_id';
-    const response = await issuesStore.getIssuesTable(
-      workspaceInfo?.value?.id as string,
-      project.value.id as string,
-      filters,
-      pagination,
-    );
+    const response = await getIssue(filters, pagination);
 
     issuesStore.groupedIssueList[index].issues = response?.data.issues;
     issuesStore.groupedIssueList[index].count = response?.data.count;
@@ -148,6 +135,10 @@ export const useGroupedIssues = () => {
         fieldValue.assignee_details.forEach((assignee) => {
           bus.emit('updateIssueTable', 'members', assignee.id);
         });
+        break;
+      }
+      case 'project': {
+        bus.emit('updateIssueTable', 'project', initialEntity.id);
         break;
       }
     }

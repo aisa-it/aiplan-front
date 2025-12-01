@@ -101,7 +101,8 @@
       }"
     >
       <p v-if="showAutoSaveTimer" class="issue-autosave-notice">
-    Задача будет автоматически сохранена через {{ formatTime(autoSaveTimer) }}
+        Задача будет автоматически сохранена через
+        {{ formatTime(autoSaveTimer) }}
       </p>
 
       <IssueDescriptionEditor
@@ -140,8 +141,13 @@
     <IssueTagsDialog
       v-model="showTagsDialog"
       :tags="issueData.label_details"
+      :project-id="issueData.project"
       :isDisabled="
-        !hasPermissionByIssue(issueData, project, 'change-issue-secondary')
+        !hasPermissionByIssue(
+          issueData,
+          issueData.project_detail ?? project,
+          'change-issue-secondary',
+        )
       "
       @close="showTagsDialog = !showTagsDialog"
       @refresh="refresh"
@@ -244,7 +250,7 @@ const avatarText = (user: DtoUserLight) => {
 const { lockedBy, isTimeExpire, handlWrapperForTryingToLock, stopLocking } =
   useLockIssueInfo(
     route.params.workspace as string,
-    route.params.project as string,
+    issueData.value.project ?? (route.params.project as string),
     currentIssueID.value,
   );
 
@@ -276,8 +282,8 @@ const stopAutoSaveTimer = () => {
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-}
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
 
 const handleUndoEdit = () => {
   stopAutoSaveTimer();
@@ -296,7 +302,7 @@ const handleUpdateTitleAndEditor = async () => {
     : initialIssueName.value.trim();
   await updateIssueInfo(
     route.params.workspace as string,
-    route.params.project as string,
+    issueData.value.project ?? (route.params.project as string),
     currentIssueID.value,
     {
       name: issueData.value.name,
@@ -374,7 +380,7 @@ const handleAutoSave = async () => {
 const isAdminOrAuthor = computed(() => {
   return hasPermissionByIssue(
     issueData.value,
-    project.value,
+    issueData.value.project_detail ?? project.value,
     'change-issue-primary',
   );
 });
@@ -414,7 +420,7 @@ const handleRemoveListener = () => {
 const refresh = async () => {
   await singleIssueStore.getIssueData(
     currentWorkspaceSlug.value as string,
-    currentProjectID.value,
+    issueData.value.project ?? currentProjectID.value,
   );
 };
 

@@ -77,15 +77,30 @@
           </q-card>
         </q-menu>
       </q-btn>
+
+      <q-btn
+        v-if="isCreateSprint"
+        flat
+        dense
+        round
+        aria-label="Menu"
+        style="height: 30px; width: 30px"
+        class="q-mr-sm q-ml-sm"
+        @click="emits('toggle-right')"
+      >
+        <MenuIcon />
+      </q-btn>
     </div>
     <q-table
       v-if="!loading && rows.length"
       v-model:pagination="pagination"
+      v-model:selected="checkedRows"
       flat
       row-key="id"
       class="my-sticky-column-table search-filters-table table-bottom-reverse"
       :hide-no-data="true"
       :rows="rows"
+      :selection="selection"
       :columns="allColumns"
       :rows-per-page-options="
         Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
@@ -214,8 +229,14 @@
       style="height: calc(90vh - 122px)"
       class="centered-horisontally justify-center"
     >
-      <h6 v-if="!loading && rows.length === 0">Нет задач</h6>
       <DefaultLoader v-if="loading" />
+      <h6 v-else-if="rows.length === 0">
+        {{
+          isCreateSprint
+            ? 'Не найдено задач в данном пространстве'
+            : 'Нет задач'
+        }}
+      </h6>
     </div>
   </div>
 </template>
@@ -234,6 +255,7 @@ import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store'
 // utils
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
+import { parseBoldText } from 'src/utils/helpers';
 
 // components
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
@@ -243,20 +265,29 @@ import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'components/pagination/PaginationDefault.vue';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
-import { parseBoldText } from 'src/utils/helpers';
 
 const props = defineProps<{
   currentFilter: any;
+  checkedRows?: any[];
+  selection?: 'single' | 'multiple' | 'none';
+  isCreateSprint?: boolean;
 }>();
 
 const emits = defineEmits<{
-  toggle: [];
+  (event: 'toggle'): void;
+  (event: 'toggle-right'): void;
+  (event: 'update:checkedRows', checkedRows: any[]): void;
 }>();
 
+//hooks
+const router = useRouter();
+
+//stores
 const { extendedSearchIssues } = useIssuesStore();
 const filtersStore = useFiltersStore();
 const { columnsToShow } = storeToRefs(filtersStore);
-const router = useRouter();
+
+//state
 const rows = ref([] as any);
 const loading = ref(true);
 const searchQuery = ref('');
@@ -269,6 +300,26 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
+//computeds
+const allColumns = computed(() => {
+  return (
+    columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+  );
+  // columns.filter((col) => {
+  //   if (!columnsToShow.value || columnsToShow.value.length == 0)
+  //     return true;
+  //   return columnsToShow.value.some((c: any) => c === col.name);
+  // });
+});
+
+const checkedRows = computed({
+  get: () => props.checkedRows,
+  set: (val) => {
+    if (val) emits('update:checkedRows', val);
+  },
+});
+
+//constants
 const p = {
   urgent: 'Критический',
   high: 'Высокий',
@@ -281,7 +332,9 @@ onMounted(() => {
   onRequest(pagination.value);
 });
 
+//methods
 const onRequest = async (p) => {
+  if (props.isCreateSprint && !filter.value) return;
   loading.value = true;
   // TODO: удалять only_active из req, так как он будет отправляться в query
   let req = Object.assign((filter.value as any) ?? {}, {
@@ -297,6 +350,7 @@ const onRequest = async (p) => {
     light: true,
     show_sub_issues: true,
     only_active: filter.value?.only_active || false,
+    show_sub_issues: props.isCreateSprint ? true : null,
   });
   rows.value = [];
   rows.value = issues;
@@ -329,16 +383,23 @@ watch(
   { deep: true },
 );
 
-const allColumns = computed(() => {
-  return (
-    columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+// const allColumns = computed(() => {
+//   return (
+//     columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+//   );
+// columns.filter((col) => {
+//   if (!columnsToShow.value || columnsToShow.value.length == 0)
+//     return true;
+//   return columnsToShow.value.some((c: any) => c === col.name);
+// });
+// });
+
+const route = (row) => {
+  const routeData = router.resolve(
+    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
   );
-  // columns.filter((col) => {
-  //   if (!columnsToShow.value || columnsToShow.value.length == 0)
-  //     return true;
-  //   return columnsToShow.value.some((c: any) => c === col.name);
-  // });
-});
+  window.open(routeData.href, '_blank');
+};
 
 const columns = [
   {
@@ -443,13 +504,6 @@ const columns = [
     sortable: true,
   },
 ];
-
-const route = (row) => {
-  const routeData = router.resolve(
-    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
-  );
-  window.open(routeData.href, '_blank');
-};
 </script>
 
 <style scoped lang="scss">
@@ -460,6 +514,24 @@ const route = (row) => {
   ::-webkit-scrollbar {
     display: block;
   }
+}
+
+.search-filters-table :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
+.search-filters-table :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
+  background: $primary !important;
+  border-color: $primary !important;
+}
+
+.search-filters-table
+  :deep(.q-checkbox__inner--truthy .q-checkbox__svg path.q-checkbox__truthy),
+.search-filters-table
+  :deep(.q-checkbox__inner--indet .q-checkbox__svg path.q-checkbox__indet) {
+  stroke: white !important;
+}
+
+.search-filters-table :deep(.q-checkbox__inner--truthy),
+.search-filters-table :deep(.q-checkbox__inner--indet) {
+  color: $primary !important;
 }
 </style>
 <style lang="scss">

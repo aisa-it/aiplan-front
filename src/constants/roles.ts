@@ -24,6 +24,8 @@ export const ROLES = {
       'change-issue-status',
       'delete-issue-comment',
       'edit-document',
+      'create-sprint',
+      'show-sprint-popup',
     ],
     admin: [
       'ws-settings',
@@ -47,6 +49,8 @@ export const ROLES = {
       'change-issue-status',
       'delete-issue-comment',
       'edit-document',
+      'create-sprint',
+      'show-sprint-popup',
     ],
     member: ['show-ws', 'edit-document'],
     guest: ['show-ws'],

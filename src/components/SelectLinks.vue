@@ -116,6 +116,7 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    project: { type: Object, required: false },
     issueid: {
       type: String,
       required: true,
@@ -160,7 +161,11 @@ export default defineComponent({
     const linkToUpdate = ref<object | undefined>();
 
     const isDemoUserValid = () => {
-      if (project.value?.current_user_membership?.role >= 15) return true;
+      if (
+        (props.project.value?.current_user_membership?.role ??
+          project.value?.current_user_membership?.role) >= 15
+      )
+        return true;
       return false;
     };
 
@@ -168,7 +173,7 @@ export default defineComponent({
       singleIssueStore
         .issueLinkDelete(
           currentWorkspaceSlug.value,
-          currentProjectID.value,
+          props.project.id ?? currentProjectID.value,
           props.issueid,
           linkID,
         )
@@ -186,7 +191,7 @@ export default defineComponent({
       singleIssueStore
         .issueLinkCreate(
           currentWorkspaceSlug.value,
-          currentProjectID.value,
+          props.project.id ?? currentProjectID.value,
           props.issueid,
           link.url,
           link.title,
@@ -205,7 +210,7 @@ export default defineComponent({
       singleIssueStore
         .issueLinkEdit(
           currentWorkspaceSlug.value,
-          currentProjectID.value,
+          props.project.id ?? currentProjectID.value,
           props.issueid,
           link.url,
           link.title,
