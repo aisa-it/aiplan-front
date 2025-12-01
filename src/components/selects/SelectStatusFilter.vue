@@ -9,7 +9,7 @@
     popup-content-class="fit-select-popup scrollable-content inh-popup"
     map-options
     v-model="states"
-    :options="getStatusesAsArray"
+    :options="statuses"
     :option-label="(state) => state.name"
     :option-value="(state) => state.id"
   >
@@ -33,23 +33,31 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { IState } from 'src/interfaces/states';
-import { storeToRefs } from 'pinia';
-import { useProjectStore } from 'src/stores/project-store';
 
 const emits = defineEmits(['update']);
-const props = defineProps(['statesProps']);
-
-const { getStatusesAsArray } = storeToRefs(useProjectStore());
+const props = defineProps(['statesProps', 'statuses']);
 
 const states = computed<any[]>({
   get() {
-    return props.statesProps || [];
+    if (!props.statesProps) return [];
+
+    if (!Array.isArray(props.statuses[0]?.id)) return [...props.statesProps];
+
+    return props.statuses.filter((el) =>
+      el.id.some((id) => props.statesProps.includes(id)),
+    );
   },
   set(val) {
-    emits(
-      'update',
-      val?.length ? val.map((state: IState | any) => state.id ?? state) : [],
-    );
+    if (!val?.length) {
+      emits('update', []);
+      return;
+    }
+
+    const ids = Array.isArray(val[0].id)
+      ? val.flatMap((s) => s.id as string[])
+      : val.map((state) => state.id || state);
+
+    emits('update', ids);
   },
 });
 </script>

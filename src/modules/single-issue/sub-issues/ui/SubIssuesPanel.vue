@@ -84,9 +84,9 @@ export default defineComponent({
     SubIssues,
     IssuesExpansionItem,
   },
-  setup() {
+  setup(props) {
     const userStore = useUserStore();
-    const singleIssueStore = useSingleIssueStore()
+    const singleIssueStore = useSingleIssueStore();
     const route = useRoute();
     const { user } = storeToRefs(userStore);
     const { currentIssueID } = storeToRefs(singleIssueStore);
@@ -98,7 +98,7 @@ export default defineComponent({
     const refresh = async () => {
       const { data } = await getSubIssues(
         route.params.workspace as string,
-        route.params.project as string,
+        props.projectid ?? (route.params.project as string),
         currentIssueID.value,
         manualSortMode.value,
       );
