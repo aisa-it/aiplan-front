@@ -97,7 +97,7 @@
       v-model:selected="checkedRows"
       flat
       row-key="id"
-      class="my-sticky-column-table search-filters-table table-bottom-reverse"
+      class="sprint-checkboxes my-sticky-column-table search-filters-table table-bottom-reverse"
       :hide-no-data="true"
       :rows="rows"
       :selection="selection"
