@@ -96,6 +96,7 @@ export default defineComponent({
     const isExpanded = ref(true);
 
     const refresh = async () => {
+      if (!currentIssueID.value) return;
       const { data } = await getSubIssues(
         route.params.workspace as string,
         props.projectid ?? (route.params.project as string),

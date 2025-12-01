@@ -320,6 +320,7 @@ const actionsType = [
   },
 ];
 const loading = ref(false);
+const openedtIssueID = ref('');
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
@@ -458,7 +459,10 @@ const sendDataById = async () => {
       console.error('Ошибка:', err);
       transferErrors.value = err.response?.data?.errors;
     })
-    .finally(() => (loading.value = false));
+    .finally(() => {
+      currentIssueID.value = openedtIssueID.value;
+      loading.value = false;
+    });
 };
 
 const sendDataByLabel = async () => {
@@ -480,11 +484,16 @@ const sendDataByLabel = async () => {
       console.error('Ошибка:', err);
       transferErrors.value = err.response?.data?.errors;
     })
-    .finally(() => (loading.value = false));
+    .finally(() => {
+      currentIssueID.value = openedtIssueID.value;
+      loading.value = false;
+    });
 };
 
 const transfer = async () => {
   loading.value = true;
+  openedtIssueID.value = currentIssueID.value;
+  currentIssueID.value = '';
   transferModel.value.target_project = selectedProject.value.id;
   transferModel.value.delete_src = selectedAction.value === ACTIONS.TRANSFER;
   transferModel.value.linked_issues = actionWithLinkedIssues.value.some(
