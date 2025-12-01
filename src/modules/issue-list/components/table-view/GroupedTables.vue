@@ -5,6 +5,8 @@
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
+    <PinnedIssueList v-if="pinnedIssues.length" :pinned-issues="pinnedIssues" class="pinned-issues"/>
+
     <div v-for="(table, index) in issueList" :key="index">
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
@@ -52,16 +54,20 @@
 </template>
 
 <script lang="ts" setup>
-import { useIssueContext } from '../../composables/useIssueContext';
-
-import { defineEntityName } from '../../utils/defineEntityName';
-
-import IssueTable from '../IssueTable.vue';
-import GroupedHeader from '../ui/GroupedHeader.vue';
-
-import { IGroupedResponse } from '../../types';
 import { onMounted, ref, watch } from 'vue';
 import { throttle } from 'quasar';
+import { storeToRefs } from 'pinia';
+
+import { useProjectStore } from 'src/stores/project-store';
+import { useIssuesStore } from 'src/stores/issues-store';
+
+import IssueTable from '../IssueTable.vue';
+import PinnedIssueList from '../PinnedIssueList.vue';
+import GroupedHeader from '../ui/GroupedHeader.vue';
+
+import { defineEntityName } from '../../utils/defineEntityName';
+import { IGroupedResponse } from '../../types';
+import { useIssueContext } from '../../composables/useIssueContext';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -71,6 +77,8 @@ const props = defineProps<{
 
 const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
 
+const projectStore = useProjectStore();
+const { project } = storeToRefs(projectStore);
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
@@ -78,6 +86,9 @@ const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
 };
+
+const { pinnedIssues } = storeToRefs(useIssuesStore());
+const { fetchPinnedIssues } = useIssuesStore();
 
 const issueList = ref([]);
 const scrollContainer = ref(null);
@@ -109,6 +120,8 @@ const refresh = () => {
   let chunk = generator.next().value;
   if (!chunk) return;
   issueList.value.push(...chunk);
+  pinnedIssues.value = [];
+  fetchPinnedIssues(project.value.id);
 };
 
 onMounted(() => {
@@ -127,5 +140,10 @@ watch(
 .scroll-container {
   height: calc(100vh - 105px);
   overflow-y: auto;
+  contain: inherit;
+}
+
+.pinned-issues {
+  padding: 16px;
 }
 </style>
