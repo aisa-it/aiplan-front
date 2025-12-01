@@ -7,9 +7,8 @@
       <IssuesListTitle />
       <q-space />
 
-      <FiltersList
+      <ProjectFiltersList
         v-if="is.object(projectProps)"
-        :projectId="route.params.project"
         :columns="allColumns"
         @update="load()"
       />
@@ -18,22 +17,22 @@
     <q-card-section v-if="!issuesLoader && !isGroupingEnabled && pinnedIssues.length">
       <PinnedIssueList :pinned-issues="pinnedIssues" />
     </q-card-section>
+    <q-separator />
 
     <transition name="fade" mode="out-in">
-      <component :is="currentIssueList" />
+      <component :is="currentIssueList" contextType="project"/>
     </transition>
   </q-card>
 </template>
 
 <script setup lang="ts">
 // core
-import { useRoute } from 'vue-router';
 import { is } from 'quasar';
 // stores
 import { useProjectStore } from 'src/stores/project-store';
 
 // components
-import FiltersList from 'src/components/FiltersList.vue';
+import ProjectFiltersList from './components/ProjectFiltersList.vue';
 import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 import PinnedIssueList from './components/PinnedIssueList.vue';
 
@@ -55,8 +54,8 @@ import { useGroupedIssues } from './composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
-const { onRequest } = useDefaultIssues();
-const { getGroupedIssues } = useGroupedIssues();
+const { onRequest } = useDefaultIssues('project');
+const { getGroupedIssues } = useGroupedIssues('project');
 
 const {
   project,
@@ -68,8 +67,6 @@ const {
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
-
-const route = useRoute();
 
 const load = async () => {
   issuesLoader.value = true;

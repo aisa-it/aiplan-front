@@ -805,6 +805,10 @@ thead th {
   overflow: hidden;
 }
 
+.base-line {
+  background-color: $progress-bg-base;
+}
+
 .success-line {
   background-color: $progress-bg-success;
 }

@@ -5,9 +5,9 @@
         no-caps
         flat
         style="padding: 0 4px"
-        :to="`/${$route.params.workspace}/projects/${$route.params.project}/issues/${rowInfo.row.sequence_id}`"
+        :to="`/${$route.params.workspace}/projects/${rowInfo.row?.project}/issues/${rowInfo.row.sequence_id}`"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
-        @click.prevent.stop="emits('openPreview')"
+        @click.prevent.stop="emits('openPreview', rowInfo.row)"
       >
         <span class="abbriviated-text" style="text-align: left">
           {{ rowInfo.value }}
@@ -27,6 +27,7 @@
         :row="rowInfo.row"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
+        @click.prevent.stop="emits('openPreview', rowInfo.row.parent_detail)"
       />
     </div>
   </q-td>
@@ -48,7 +49,9 @@ const props = defineProps<{
   rowInfo: any;
 }>();
 
-const emits = defineEmits(['openPreview']);
+const emits = defineEmits<{
+  openPreview: [value: any];
+}>();
 const { user } = storeToRefs(useUserStore());
 const route = useRoute();
 

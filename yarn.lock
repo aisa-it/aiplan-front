@@ -3,9 +3,9 @@
 
 
 "@aisa-it/aiplan-api-ts@^1.90.0":
-  version "1.101.0"
-  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.101.0.tgz#29d0af21130c0702dca9b997778f8a034c73b01e"
-  integrity sha512-qMS8liV17wrLl1IumM5J5bc5O29RLRrE7jSZy7P80VgZ/RaN9TkDuk9ZgrpAF8vfGpEPOlrxyk3+P+FcPDNdyw==
+  version "1.100.0"
+  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.100.0.tgz#82734030d8c8f2270c0a758e914a32e4cef41dc4"
+  integrity sha512-7SRZYWP33xKMX9oNqD6+FSKaaSBrS6mAJGMx4Q5gNe2xzS4qzSEEVsi3BZaRjAkN+jnvHPmvjINVxmn7ov2oig==
   dependencies:
     axios "^1.7.9"
 
@@ -1996,6 +1996,11 @@
   resolved "https://registry.npmjs.org/@types/filewriter/-/filewriter-0.0.33.tgz#d9d611db9d9cd99ae4e458de420eeb64ad604ea8"
   integrity sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==
 
+"@types/frappe-gantt@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@types/frappe-gantt/-/frappe-gantt-0.9.0.tgz#2884f9ba27e9313168a51898def866a8f49db833"
+  integrity sha512-n00ElvRvJ1/+HkJwt57yjnTtAM7FcH/pEV9LbRCy3+hR39TY6l0mQuy4o909uxvw97aCNhQjNh8J8xACKJ2G3w==
+
 "@types/har-format@*":
   version "1.2.16"
   resolved "https://registry.npmjs.org/@types/har-format/-/har-format-1.2.16.tgz#b71ede8681400cc08b3685f061c31e416cf94944"
@@ -3764,6 +3769,11 @@ fraction.js@^4.3.7:
   version "4.3.7"
   resolved "https://registry.npmjs.org/fraction.js/-/fraction.js-4.3.7.tgz#06ca0085157e42fda7f9e726e79fefc4068840f7"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
+
+frappe-gantt@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/frappe-gantt/-/frappe-gantt-1.0.4.tgz#efa40ceaa284fcf0ff3d4f9cf93d488d5000e37b"
+  integrity sha512-N94OP9ZiapaG5nzgCeZdxsKP8HD5aLVlH5sEHxSNZQnNKQ4BOn2l46HUD+KIE0LpYIterP7gIrFfkLNRuK0npQ==
 
 fresh@0.5.2:
   version "0.5.2"

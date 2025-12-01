@@ -8,24 +8,20 @@
     <PinnedIssueList :pinned-issues="pinnedIssues" class="pinned-issues"/>
 
     <div v-for="(table, index) in issueList" :key="index">
-      <q-item v-if="!table.issues?.length && projectProps?.showEmptyGroups">
+      <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
           :entity="table?.entity"
           :group-by="groupBy"
           :badge-name="defineEntityName(table.entity, groupBy)"
           :badge-color="table.entity?.color ?? undefined"
           :issues-count="table?.count"
-        />
-      </q-item>
+      /></q-item>
 
       <q-expansion-item
         v-if="table.issues?.length"
-        :default-opened="
-          !projectStore.isGroupHide(table?.entity?.id || table.entity)
-        "
+        :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
-          (value) =>
-            projectStore.setGroupHide(entity?.entity?.id || table.entity, value)
+          (value) => setGroupHide(entity?.entity?.id || table.entity, value)
         "
       >
         <template #header>
@@ -46,9 +42,10 @@
               refreshTable(index, pagination, isFullUpdate, table?.entity)
           "
           @open-preview="
-            (id, pagination) =>
-              emits('openPreview', id, index, pagination, table?.entity)
+            (issue, pagination) =>
+              emits('openPreview', issue, index, pagination, table?.entity)
           "
+          :context-type="contextType"
         />
       </q-expansion-item>
     </div>
@@ -57,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { throttle } from 'quasar';
 import { storeToRefs } from 'pinia';
 
@@ -70,16 +67,21 @@ import GroupedHeader from '../ui/GroupedHeader.vue';
 
 import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
+import { useIssueContext } from '../../composables/useIssueContext';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
+  contextType: 'project' | 'sprint';
 }>();
 
 const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
 
 const projectStore = useProjectStore();
-const { project, projectProps } = storeToRefs(projectStore);
+const { project } = storeToRefs(projectStore);
+const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
+  props.contextType,
+);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
@@ -112,14 +114,26 @@ function* chunkGenerator(sourceArray, chunkSize = 10) {
   }
 }
 
-onMounted(() => {
+const refresh = () => {
+  issueList.value = [];
   generator = chunkGenerator(props.issues);
   let chunk = generator.next().value;
   if (!chunk) return;
   issueList.value.push(...chunk);
   pinnedIssues.value = [];
   fetchPinnedIssues(project.value.id);
+};
+
+onMounted(() => {
+  refresh();
 });
+
+watch(
+  () => props.issues,
+  () => {
+    refresh();
+  },
+);
 </script>
 
 <style scoped lang="scss">

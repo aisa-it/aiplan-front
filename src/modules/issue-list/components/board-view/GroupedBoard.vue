@@ -5,13 +5,14 @@
       <BoardCardList
         :table="table"
         :group-by="groupBy"
+        :context-type="contextType"
         @refresh="
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table.entity)
         "
         @open-preview="
-          (id, pagination) =>
-            emits('openPreview', id, index, pagination, table?.entity)
+          (issue, pagination) =>
+            emits('openPreview', issue, index, pagination, table?.entity)
         "
       />
     </div>
@@ -27,20 +28,25 @@ import { useIssuesStore } from 'src/stores/issues-store';
 
 import BoardCardList from './BoardCardList.vue';
 import PinnedIssueList from '../PinnedIssueList.vue';
+
+import { useIssueContext } from '../../composables/useIssueContext';
 import { IGroupedResponse } from '../../types';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
+  contextType: 'project' | 'sprint';
 }>();
 
 const emits = defineEmits(['refreshCard', 'refresh', 'openPreview']);
 
 const projectStore = useProjectStore();
-const { project, projectProps } = storeToRefs(projectStore);
+const { project } = storeToRefs(projectStore);
 
 const { pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
+
+const { contextProps } = useIssueContext(props.contextType);
 
 const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
   const p = pagination;
@@ -50,7 +56,7 @@ const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
 };
 
 const defineIssues = computed(() => {
-  return !projectProps.value?.showEmptyGroups
+  return !contextProps.value?.showEmptyGroups
     ? props.issues.filter((table) => table.issues?.length)
     : props.issues;
 });

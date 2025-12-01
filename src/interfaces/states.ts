@@ -1,5 +1,5 @@
 export interface IState {
-  readonly id: string;
+  readonly id: string | string[];
   color: string;
   readonly created_at: Date;
   readonly created_by: string;
