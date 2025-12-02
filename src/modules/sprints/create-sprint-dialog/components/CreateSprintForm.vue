@@ -213,7 +213,6 @@ const pushData = () => {
     toISO(dateRange.value.to);
 
   if (!isValidName || !isValidDates) {
-    // вспыхивает ошибка у input
     return;
   }
 
