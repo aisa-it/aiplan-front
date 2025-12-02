@@ -1,6 +1,9 @@
 <template>
   <div style="height: 100%; padding: 10px 10px 10px 0">
-    <div class="row no-wrap items-center q-mb-sm">
+    <div
+      class="row no-wrap items-center q-mb-sm"
+      :class="{ 'sticky-fix top': isCreateSprint }"
+    >
       <q-btn
         flat
         dense
@@ -98,6 +101,7 @@
       flat
       row-key="id"
       class="sprint-checkboxes my-sticky-column-table search-filters-table table-bottom-reverse"
+      :class="{ 'table-scroll-off': isCreateSprint }"
       :hide-no-data="true"
       :rows="rows"
       :selection="selection"
@@ -108,18 +112,7 @@
       @request="(e) => onRequest(e.pagination)"
       @row-click="(evt, row) => route(row)"
     >
-      <template #bottom>
-        <PaginationDefault
-          v-model:selected-page="pagination.page"
-          v-model:rows-per-page="pagination.rowsPerPage"
-          :rows-number="pagination.rowsNumber"
-          :rows-per-page-options="
-            Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
-          "
-          show-rows-per-page
-          @request="onRequest(pagination)"
-        />
-      </template>
+      <template #bottom> </template>
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
@@ -221,8 +214,22 @@
         </q-td>
       </template>
     </q-table>
-    <div class="text-right q-mr-md" v-show="!loading">
-      Всего: {{ pagination.rowsNumber }}
+
+    <div :class="{ 'sticky-fix bottom': isCreateSprint }">
+      <PaginationDefault
+        v-model:selected-page="pagination.page"
+        v-model:rows-per-page="pagination.rowsPerPage"
+        :rows-number="pagination.rowsNumber"
+        :rows-per-page-options="
+          Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
+        "
+        show-rows-per-page
+        @request="onRequest(pagination)"
+        class="pagination"
+      />
+      <div class="text-right q-mr-md" v-show="!loading">
+        Всего: {{ pagination.rowsNumber }}
+      </div>
     </div>
     <div
       v-show="loading || rows.length === 0"
@@ -532,6 +539,35 @@ const columns = [
 .search-filters-table :deep(.q-checkbox__inner--truthy),
 .search-filters-table :deep(.q-checkbox__inner--indet) {
   color: $primary !important;
+}
+
+.sticky-fix {
+  position: sticky;
+  z-index: 110;
+  background-color: var(--bg-color);
+}
+
+.sticky-fix.top {
+  top: 0;
+}
+
+.sticky-fix.bottom {
+  bottom: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  padding-top: 10px;
+}
+
+:deep(.q-table__bottom) {
+  min-height: 0;
+}
+
+:deep(.table-scroll-off.search-filters-table) {
+  max-height: none;
 }
 </style>
 <style lang="scss">
