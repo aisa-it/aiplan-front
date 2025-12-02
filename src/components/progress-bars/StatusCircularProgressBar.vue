@@ -101,11 +101,11 @@ const donePercentage = computed(
 }
 
 .completed {
-  stroke: #05bd8d;
+  stroke: $progress-postive;
 }
 
 .started {
-  stroke: #3f76ff;
+  stroke: $progress-in-work;
 }
 
 .empty {
