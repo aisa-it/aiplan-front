@@ -121,7 +121,7 @@ export const useIssuesStore = defineStore('issues-store', {
     async fetchPinnedIssues(projectID: string): Promise<void> {
       const response = await this.getIssueList(
         { projects: [projectID] },
-        { only_pinned: true, limit: 10 },
+        { only_pinned: true, show_sub_issues: true },
       );
       this.pinnedIssues = response.data?.issues || [];
     },
