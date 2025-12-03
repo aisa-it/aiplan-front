@@ -139,7 +139,7 @@ import {
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 import { EventBus } from 'quasar';
 
-const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview']);
+const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview', 'openIssue']);
 const props = defineProps([
   'entity',
   'rows',
@@ -165,8 +165,6 @@ interface QuasarPagination {
 }
 const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
-const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview', 'openIssue']);
-const props = defineProps(['entity', 'rows', 'rowsCount', 'loading']);
 const columns = computed(() => {
   return props.columns ?? getTableColumns;
 });
@@ -211,7 +209,7 @@ const handleClick = (row) => {
   if (clickCount.value === 1) {
     clickTimeout = setTimeout(() => {
       clickCount.value = 0;
-      emits('openPreview', row.sequence_id,
+      emits('openPreview', row,
       parsePagination(quasarPagination.value)
     )
     }, 250)
@@ -219,7 +217,7 @@ const handleClick = (row) => {
     // Обработка двойного клика
     clickCount.value = 0;
     clearTimeout(clickTimeout);
-    emits('openIssue',  row.sequence_id)
+    emits('openIssue',  row.sequence_id, row.project)
   }
 }
 

@@ -14,7 +14,7 @@
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, table?.entity)
         "
-        @open-issue="(id) => emits('openIssue', id)"
+        @open-issue="(id, project) => emits('openIssue', id, project)"
       />
     </div>
   </div>

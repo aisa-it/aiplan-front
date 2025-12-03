@@ -209,7 +209,6 @@ const emits = defineEmits(['refresh', 'updateTable', 'openPreview', 'openIssue']
 const { statesCache } = storeToRefs(useStatesStore());
 const { contextProps } = useIssueContext(props.contextType);
 const { project } = storeToRefs(useProjectStore());
-const { projectProps, project } = storeToRefs(useProjectStore());
 
 const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;
@@ -221,7 +220,7 @@ const handleClick = () => {
   //   clickTimeout = setTimeout(() => {
   //     clickCount.value = 0;
       console.log('single click');
-      emits('openPreview', props.card.sequence_id)
+      emits('openPreview', props.card)
   //   }, 250);
   // } else if (clickCount.value === 2) {
   //   // Обработка двойного клика
@@ -233,7 +232,7 @@ const handleClick = () => {
 
 const handleDblClick = () => {
   console.log('dbl click')
-  emits('openIssue', props.card.sequence_id)
+  emits('openIssue', props.card.sequence_id, props.card.project)
 }
 
 </script>

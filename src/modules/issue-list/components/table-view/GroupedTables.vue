@@ -46,7 +46,7 @@
               emits('openPreview', issue, index, pagination, table?.entity)
           "
           :context-type="contextType"
-          @open-issue="(id) => emits('openIssue', id)"
+          @open-issue="(id, issue) => emits('openIssue', id, issue)"
         />
       </q-expansion-item>
     </div>

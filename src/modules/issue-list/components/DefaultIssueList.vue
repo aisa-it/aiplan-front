@@ -6,7 +6,7 @@
       :rows-count="rowsCount"
       :loading="loadingTable"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(issue) => openPreview(issue)"
+      @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
       @open-issue="(id) => openIssue(id)"
       />

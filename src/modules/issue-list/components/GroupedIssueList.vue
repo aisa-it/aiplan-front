@@ -13,7 +13,7 @@
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
       "
-      @open-issue="(id) => openIssue(id)"
+      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
     />
     <GroupedBoard
       v-if="isKanbanEnabled && issuesStore.groupedIssueList?.length"
@@ -28,7 +28,7 @@
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
       "
-      @open-issue="(id) => openIssue(id)"
+      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
     />
     <div
       v-if="!issuesStore.groupedIssueList?.length"

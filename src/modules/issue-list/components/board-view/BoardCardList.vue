@@ -52,7 +52,7 @@
           @openPreview="
             (id) => emits('openPreview', id, parsePagination(quasarPagination))
           "
-          @open-issue="(id) => emits('openIssue', id)"
+          @open-issue="(id, project) => emits('openIssue', id, project)"
         />
       </div>
     </div>
