@@ -8,11 +8,12 @@ function userName(user: DtoUser) {
 
 export function defineEntityName(entity: any, groupBy: string) {
   switch (groupBy) {
+    case 'project':
     case 'state': {
-      return entity.name;
+      return entity?.name;
     }
     case 'labels': {
-      return entity ? entity.name : 'Без тегов';
+      return entity ? entity?.name : 'Без тегов';
     }
     case 'priority': {
       return entity

@@ -3,9 +3,7 @@
     v-if="table.issues?.length"
     class="board-item"
     hide-expand-icon
-    :default-opened="
-      !projectStore.isGroupHide(table?.entity?.id || table.entity)
-    "
+    :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
     @update:model-value="
       (value) => toggleList(table?.entity?.id || table.entity, value)
     "
@@ -46,6 +44,7 @@
         <BoardCard
           :card="card"
           :entity="table.entity"
+          :context-type="contextType"
           @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"
           @update-table="
             (field, row, entity) => updateTable(field, row, entity)
@@ -74,9 +73,8 @@
 
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 
-import { useProjectStore } from 'src/stores/project-store';
+import { useIssueContext } from '../../composables/useIssueContext';
 
 import BoardCard from './BoardCard.vue';
 
@@ -94,23 +92,29 @@ import {
 import ArrowUp from 'src/components/icons/ArrowUp.vue';
 import { EventBus } from 'quasar';
 
-const { parsePagination, updateCurrentTable } = useGroupedIssues();
-
-const projectStore = useProjectStore();
-
-const { projectProps } = storeToRefs(projectStore);
-
+const props = defineProps<{
+  table: any;
+  groupBy: string;
+  contextType: 'project' | 'sprint';
+}>();
 const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
-const props = defineProps<{ table: any; groupBy: string }>();
+
+const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
+  props.contextType,
+);
+
+const { parsePagination, updateCurrentTable } = useGroupedIssues(
+  props.contextType,
+);
 
 const selectedPage = ref(1);
 const isExpanded = ref(false);
 const quasarPagination = ref<QuasarPagination>({
   page: 1,
   rowsNumber: props.table.count || 0,
-  sortBy: projectProps.value?.filters?.order_by || 'sequence_id',
-  descending: projectProps.value?.filters?.orderDesc || true,
-  rowsPerPage: projectProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+  sortBy: contextProps.value?.filters?.order_by || 'sequence_id',
+  descending: contextProps.value?.filters?.orderDesc || true,
+  rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
 const getIssues = async (p?: any, isFullUpdate = false) => {
@@ -121,11 +125,11 @@ const getIssues = async (p?: any, isFullUpdate = false) => {
 
 const toggleList = async (entity, value) => {
   isExpanded.value = !value;
-  await projectStore.setGroupHide(entity, value);
+  await setGroupHide(entity, value);
 };
 
 onMounted(() => {
-  isExpanded.value = projectStore.isGroupHide(
+  isExpanded.value = isGroupHide(
     props?.table?.entity?.id || props?.table?.entity,
   );
 });
@@ -133,12 +137,10 @@ onMounted(() => {
 const bus = inject('bus') as EventBus;
 
 const updateTable = (field, row, entity) => {
-  console.log(field, row, entity);
   updateCurrentTable(field, row, entity);
 };
 
 bus.on('updateIssueTable', (field, entityId) => {
-  console.log(entityId);
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }

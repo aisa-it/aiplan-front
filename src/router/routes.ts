@@ -89,6 +89,10 @@ const routes: RouteRecordRaw[] = [
             path: 'user-activities/:id',
             component: () => import('pages/UserActivitiesPage.vue'),
           },
+          {
+            path: 'sprints/:sprint',
+            component: () => import('src/pages/SprintPage.vue'),
+          },
         ],
       },
     ],

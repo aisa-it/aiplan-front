@@ -62,6 +62,7 @@ import { defineComponent, ref, watch, onMounted } from 'vue';
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useStatesStore } from 'src/stores/states-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -158,6 +159,7 @@ export default defineComponent({
             },
           )
           .then(() => {
+            useSprintStore().triggerSprintRefresh();
             showNotification('success');
             emit('setStatus', state);
             emit('refresh');

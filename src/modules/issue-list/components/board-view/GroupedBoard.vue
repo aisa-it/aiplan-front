@@ -1,16 +1,18 @@
 <template>
+  <PinnedIssueList v-if="pinnedIssues.length" :pinned-issues="pinnedIssues" class="pinned-issues"/>
   <div class="horizontal-scroll-enable board-wrapper">
     <div v-for="(table, index) in defineIssues" :key="index">
       <BoardCardList
         :table="table"
         :group-by="groupBy"
+        :context-type="contextType"
         @refresh="
           (pagination, isFullUpdate) =>
             refreshTable(index, pagination, isFullUpdate, table.entity)
         "
         @open-preview="
-          (id, pagination) =>
-            emits('openPreview', id, index, pagination, table?.entity)
+          (issue, pagination) =>
+            emits('openPreview', issue, index, pagination, table?.entity)
         "
         @open-issue="(id) => emits('openIssue', id)"
       />
@@ -19,23 +21,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 import BoardCardList from './BoardCardList.vue';
+import PinnedIssueList from '../PinnedIssueList.vue';
+
+import { useIssueContext } from '../../composables/useIssueContext';
 import { IGroupedResponse } from '../../types';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
+  contextType: 'project' | 'sprint';
 }>();
 
 const emits = defineEmits(['refreshCard', 'refresh', 'openPreview', 'openIssue']);
 
 const projectStore = useProjectStore();
-const { projectProps } = storeToRefs(projectStore);
+const { project } = storeToRefs(projectStore);
+
+const { pinnedIssues } = storeToRefs(useIssuesStore());
+const { fetchPinnedIssues } = useIssuesStore();
+
+const { contextProps } = useIssueContext(props.contextType);
 
 const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
   const p = pagination;
@@ -45,9 +57,14 @@ const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
 };
 
 const defineIssues = computed(() => {
-  return !projectProps.value?.showEmptyGroups
+  return !contextProps.value?.showEmptyGroups
     ? props.issues.filter((table) => table.issues?.length)
     : props.issues;
+});
+
+onMounted(() => {
+  pinnedIssues.value = [];
+  fetchPinnedIssues(project.value.id);
 });
 </script>
 
@@ -78,5 +95,9 @@ const defineIssues = computed(() => {
     flex-direction: row;
     justify-content: space-between;
   }
+}
+
+.pinned-issues {
+  padding: 16px;
 }
 </style>

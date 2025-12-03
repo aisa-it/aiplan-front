@@ -11,7 +11,7 @@
 
     <div class="name-row">
       <q-item
-        v-if="projectProps?.columns_to_show?.includes('name')"
+        v-if="contextProps?.columns_to_show?.includes('name')"
         no-caps
         flat
         clickable
@@ -37,12 +37,13 @@
         :row="card"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
+        @click.prevent.stop="emits('openPreview', card.parent_detail)"
       />
     </div>
 
     <div class="selectors">
       <SelectPriority
-        v-if="projectProps?.columns_to_show?.includes('priority')"
+        v-if="contextProps?.columns_to_show?.includes('priority')"
         style="width: inherit"
         :workspace-slug="card.workspace_detail?.slug"
         :projectid="card?.project"
@@ -52,7 +53,7 @@
         :is-disabled="
           !rolesStore.hasPermissionByIssue(
             card,
-            project,
+            card?.project_detail ?? project,
             'change-issue-primary',
           )
         "
@@ -63,17 +64,18 @@
         "
       />
       <SelectDate
-        v-if="projectProps?.columns_to_show?.includes('target_date')"
+        v-if="contextProps?.columns_to_show?.includes('target_date')"
         style="width: inherit"
+        type="kanban"
         :workspace-id="card.workspace_detail?.slug"
-        :projectid="card?.project"
-        :issueid="card?.id"
+        :project-id="card?.project"
+        :issue-id="card?.id"
         :date="card?.target_date"
         :issue="card"
         :is-disabled="
           !rolesStore.hasPermissionByIssue(
             card,
-            project,
+            card?.project_detail ?? project,
             'change-issue-primary',
           )
         "
@@ -83,7 +85,7 @@
 
     <div class="selectors">
       <SelectStatus
-        v-if="projectProps?.columns_to_show?.includes('state')"
+        v-if="contextProps?.columns_to_show?.includes('state')"
         style="width: auto !important"
         :projectid="card?.project"
         :issueid="card?.id"
@@ -91,7 +93,11 @@
         :issue="card"
         :states-from-cache="statesCache[card.project]"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(card, project, 'change-issue-status')
+          !rolesStore.hasPermissionByIssue(
+            card,
+            card?.project_detail ?? project,
+            'change-issue-status',
+          )
         "
         @refresh="
           (status) => {
@@ -107,7 +113,7 @@
 
       <div class="row">
         <AvatarImage
-          v-if="projectProps?.columns_to_show?.includes('author')"
+          v-if="contextProps?.columns_to_show?.includes('author')"
           class="q-mr-lg"
           :key="card.author_detail.id"
           :tooltip="avatarText(card.author_detail).join(' ')"
@@ -127,7 +133,7 @@
         />
 
         <div
-          v-if="projectProps?.columns_to_show?.includes('assignees')"
+          v-if="contextProps?.columns_to_show?.includes('assignees')"
           style="position: relative"
         >
           <AvatarImage
@@ -179,6 +185,7 @@ import aiplan from 'src/utils/aiplan';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import QuantityChip from 'src/components/QuantityChip.vue';
 import { useProjectStore } from 'src/stores/project-store';
+import { useIssueContext } from '../../composables/useIssueContext';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useGroupedIssues } from '../../composables/useGroupedIssues';
@@ -186,7 +193,11 @@ import { useGroupedIssues } from '../../composables/useGroupedIssues';
 const { user } = storeToRefs(useUserStore());
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 const route = useRoute();
-const props = defineProps<{ card: any; entity: any }>();
+const props = defineProps<{
+  card: any;
+  entity: any;
+  contextType: 'project' | 'sprint';
+}>();
 const rolesStore = useRolesStore();
 const avatarText = aiplan.UserName;
 
@@ -196,6 +207,8 @@ const isParent = computed((): boolean => {
 
 const emits = defineEmits(['refresh', 'updateTable', 'openPreview', 'openIssue']);
 const { statesCache } = storeToRefs(useStatesStore());
+const { contextProps } = useIssueContext(props.contextType);
+const { project } = storeToRefs(useProjectStore());
 const { projectProps, project } = storeToRefs(useProjectStore());
 
 const clickCount = ref(0);

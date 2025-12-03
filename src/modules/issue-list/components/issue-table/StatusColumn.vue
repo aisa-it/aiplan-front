@@ -9,7 +9,7 @@
         :isDisabled="
           !rolesStore.hasPermissionByIssue(
             rowInfo.row,
-            project,
+            rowInfo.row.project_detail ?? project,
             'change-issue-status',
           )
         "

@@ -135,7 +135,6 @@ import ArrowDown from '../icons/ArrowDown.vue';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
-import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -184,6 +183,7 @@ const curMember = toRef(props.currentMember);
 const defWatcher = toRef(props.defaultWatcher);
 const isSearch = ref(false);
 const isOpen = ref(false);
+let pendingRefresh: Promise<void> | null = null;
 const watcherid = ref(
   props.watchers && props.watchers?.length > 0
     ? props.watchers.map((e) => {
@@ -380,7 +380,13 @@ watch(
 );
 
 onMounted(() => {
-  refresh();
+  pendingRefresh = (async () => {
+    try {
+      await refresh();
+    } finally {
+      pendingRefresh = null;
+    }
+  })();
 });
 
 watch(
@@ -397,7 +403,7 @@ watch(
 
 watch(
   () => props.watchers,
-  (_) => {
+  async (_) => {
     if (!props.watchers) return;
 
     if (props.watchers.length > 0 && typeof props.watchers[0] !== 'string') {
@@ -405,20 +411,23 @@ watch(
       return;
     }
 
+    if (!members.value.length) {
+      await pendingRefresh;
+    }
+
     const watcherIds: string[] = [...props.watchers];
     let isMyEntityIncluded = false;
 
     const newWatchers = members.value.filter((member) => {
-      if(watcherIds.includes(member.member_id)) {
-          if (!isMyEntityIncluded && member.member_id === myEntity.value.id) {
-            isMyEntityIncluded = true;
-          }
-          return true;
+      if (watcherIds.includes(member.member_id)) {
+        if (!isMyEntityIncluded && member.member_id === myEntity.value?.id) {
+          isMyEntityIncluded = true;
         }
+        return true;
       }
-    )
+    });
 
-    if(!isMyEntityIncluded && watcherIds.includes(myEntity.value.id)) {
+    if (!isMyEntityIncluded && watcherIds.includes(myEntity.value?.id)) {
       watcherid.value = [myEntity.value, ...newWatchers];
       return;
     }

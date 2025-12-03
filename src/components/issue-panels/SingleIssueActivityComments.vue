@@ -52,7 +52,13 @@
         }"
       />
       <div
-        v-if="hasPermissionByIssue(issueData, project, 'add-comment')"
+        v-if="
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'add-comment',
+          )
+        "
         class="q-my-sm"
       >
         <q-btn
@@ -358,7 +364,7 @@ const getMembers = async () => {
   await projectStore
     .getProjectMembers(
       currentWorkspaceSlug.value as string,
-      currentProjectID.value,
+      issueData.value.project ?? currentProjectID.value,
     )
     .then((data) => {
       localProjectMembers.value = data.result || [];
@@ -371,7 +377,7 @@ const getProjectMembersForMention = async (
   return await projectStore.getProjectMembersForMention(
     issueData.value,
     currentWorkspaceSlug.value || '',
-    currentProjectID.value,
+    issueData.value.project ?? currentProjectID.value,
     { offset: 0, limit: 4, search_query: search },
   );
 };
@@ -511,7 +517,7 @@ onMounted(async () => {
     const data = {
       type: 'issue',
       slug: currentWorkspaceSlug.value,
-      projectIdentifier: currentProjectID.value,
+      projectIdentifier: issueData.value.project ?? currentProjectID.value,
       currentIssueId: currentIssueID.value,
       commentId: route.params.commentId,
     };

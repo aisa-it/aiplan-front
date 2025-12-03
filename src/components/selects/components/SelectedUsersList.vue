@@ -1,9 +1,9 @@
 <template>
   <div v-if="users" class="selected-users-list ellipsis">
     <span class="text-subtitle2">
-      <template v-for="(user, index) in sortedUsers" :key="user.member.id">
+      <template v-for="(user, index) in sortedUsers" :key="user.member?.id">
         <span
-          v-if="currentUser?.id === user.member.id"
+          v-if="currentUser?.id === user.member?.id"
           style="color: var(--primary); font-weight: 500"
           >Вы</span
         >
@@ -29,8 +29,8 @@ const props = defineProps<{
 const sortedUsers = computed(() => {
   if (!props.currentUser) return props.users;
   return [
-    ...props.users.filter((u) => u.member.id === props.currentUser.id),
-    ...props.users.filter((u) => u.member.id !== props.currentUser.id),
+    ...props.users.filter((u) => u.member?.id === props.currentUser?.id),
+    ...props.users.filter((u) => u.member?.id !== props.currentUser?.id),
   ];
 });
 //methods
