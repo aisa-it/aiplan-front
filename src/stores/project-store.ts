@@ -87,14 +87,27 @@ export const useProjectStore = defineStore('project-store', {
       }
       return statuses.flat();
     },
-    getTableColumns() {
-      return allColumns.filter((column) => {
-        if (column.name === 'sequence_id') return true;
 
-        return this.projectProps?.columns_to_show?.some(
-          (c) => c === column?.name,
-        );
-      });
+    getTableColumns() {
+      const order: string[] =
+        this.projectProps?.columns_to_show ?? ([] as string[]);
+
+      const sequenceColumn = allColumns.find((c) => c.name === 'sequence_id');
+
+      const orderedColumns = order
+        .map((name) => allColumns.find((c) => c.name === name))
+        .filter(Boolean);
+
+      return [sequenceColumn, ...orderedColumns].filter(Boolean);
+    },
+
+    sortAllColumns() {
+      const orderedColumns = this.getTableColumns;
+      const inactive = allColumns.filter(
+        (c) => !orderedColumns?.some((el) => el.name === c.name),
+      );
+
+      return [...orderedColumns, ...inactive];
     },
   },
 
