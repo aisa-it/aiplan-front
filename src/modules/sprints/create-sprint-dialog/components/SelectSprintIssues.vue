@@ -16,11 +16,17 @@
       <q-checkbox
         :model-value="!!issue.id"
         @update:model-value="() => emit('delete', issue.id ?? '')"
+        class="sprint-issue-checkbox"
       />
 
-      <span> {{ issue?.project_detail?.name }}-{{ issue?.sequence_id }}</span>
+      <span
+        class="identifier"
+        :title="issue?.project_detail?.identifier + '-' + issue?.sequence_id"
+      >
+        {{ issue?.project_detail?.identifier }}-{{ issue?.sequence_id }}
+      </span>
 
-      <span class="name">{{ issue.name }}</span>
+      <span class="name" :title="issue.name">{{ issue.name }}</span>
     </q-item>
   </q-list>
 </template>
@@ -38,8 +44,22 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
+.q-item {
+  min-width: 0;
+}
+
+.identifier {
+  flex-shrink: 0;
+  min-width: min-content;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .name {
-  max-width: 250px;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
