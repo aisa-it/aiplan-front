@@ -21,6 +21,7 @@ const api = aiplan.api;
 export const useSprintStore = defineStore('sprint-store', {
   state: () => {
     return {
+      sprint: {} as DtoSprint,
       sprintProps: null,
       issuesLoader: false,
       refreshSprintData: false,
@@ -53,21 +54,21 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     getStatusesAsArray() {
-      const allStatesWs = workspaceStore.allWorkspaceStates;
+      const result =
+        this.sprint?.issues?.reduce((acc, issue) => {
+          const st = issue.state_detail;
+          if (!st) return acc;
 
-      const result = Object.entries(allStatesWs ?? {}).reduce(
-        (acc, [id, items]) => {
-          items.forEach((item) => {
-            const key = `${item.name}_${item.color}`;
-            if (!acc[key]) {
-              acc[key] = { name: item.name, color: item.color, id: [] };
-            }
-            acc[key].id.push(item.id);
-          });
+          const key = `${st.name}_${st.color}`;
+
+          if (!acc[key]) {
+            acc[key] = { name: st.name, color: st.color, id: [] };
+          }
+
+          acc[key].id.push(st.id);
+
           return acc;
-        },
-        {},
-      );
+        }, {}) ?? [];
 
       return Object.values(result);
     },
