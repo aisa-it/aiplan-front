@@ -4,7 +4,7 @@
       <div class="row centered-horisontally justify-center">
         <q-badge
           class="progress-badge"
-          :label="`Выполнено ${Math.round((Number(done) || 0) * 100)}%`"
+          :label="`Выполнено ${Math.round((Number(done) || 0) * 100)}% ${progress_count}`"
         />
       </div>
     </div>
@@ -66,6 +66,12 @@ function calculateSum(keys: string[]) {
     }, 0) / (props.stats.all_issues ?? 1)
   );
 }
+
+const progress_count = computed(() => {
+  if (!props.stats?.completed || !props.stats?.all_issues) return '';
+  return `(${props.stats?.completed}/${props.stats?.all_issues})`;
+});
+
 const in_progress = () => {
   return calculateSum(['in_progress']) * 100;
 };

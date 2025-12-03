@@ -5,7 +5,11 @@
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
-    <PinnedIssueList v-if="pinnedIssues.length" :pinned-issues="pinnedIssues" class="pinned-issues"/>
+    <PinnedIssueList
+      v-if="pinnedIssues.length"
+      :pinned-issues="pinnedIssues"
+      class="pinned-issues"
+    />
 
     <div v-for="(table, index) in issueList" :key="index">
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
@@ -121,7 +125,7 @@ const refresh = () => {
   if (!chunk) return;
   issueList.value.push(...chunk);
   pinnedIssues.value = [];
-  fetchPinnedIssues(project.value.id);
+  if (project.value) fetchPinnedIssues(project.value.id);
 };
 
 onMounted(() => {
