@@ -8,6 +8,7 @@ import {
   DtoProjectLight,
   DtoStateLight,
   DtoWorkspace,
+  DtoWorkspaceLimitsInfo,
   DtoWorkspaceMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
@@ -249,5 +250,9 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         ...params,
       });
     },
+
+    async getTariffInfo(workspaceSlug: string): Promise<DtoWorkspaceLimitsInfo | void> {
+      return (await workspaceApi.getWorkspaceTariff(workspaceSlug)).data;
+    }
   },
 });

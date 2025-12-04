@@ -37,6 +37,13 @@ export const useProfileTabs = () => {
         () => import('../components/DesignProfileSettings.vue'),
       ),
     },
+    {
+      name: 3,
+      label: 'Тариф',
+      component: asyncImport(
+        () => import('../components/TariffSettings.vue'),
+      ),
+    },
   ] as ISettingsTab[];
 
   const profileSettingsTab = ref<number>(0);
