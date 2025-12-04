@@ -1,14 +1,17 @@
 <template>
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="24px"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
-    width="24px"
-    :fill="color"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M0 0h24v24H0V0z" fill="none" />
     <path
-      d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"
+      d="M5 19L12 12M12 12L16 8M12 12L15 15L11.5 18.5M16 8H11L9 11M16 8L19 11H22M11 4H8M6 8H3M7 13H4M20 5.5C20 6.32843 19.3284 7 18.5 7C17.6716 7 17 6.32843 17 5.5C17 4.67157 17.6716 4 18.5 4C19.3284 4 20 4.67157 20 5.5Z"
+      :stroke="color"
+      stroke-width="1.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
     />
   </svg>
 </template>
