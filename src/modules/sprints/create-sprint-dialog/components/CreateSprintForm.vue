@@ -10,7 +10,10 @@
         dense
       />
     </div>
-    <div class="col column no-wrap" style="overflow-y: scroll">
+    <div
+      class="col column no-wrap"
+      style="overflow-y: scroll; margin-bottom: 24px"
+    >
       <div class="col-auto">
         <div class="row q-mb-md centered-horisontally">
           <div class="col centered-horisontally">
@@ -52,7 +55,7 @@
         style="height: 312px"
       />
 
-      <div class="flex column no-wrap q-mb-lg">
+      <div class="tasks-wrapper column no-wrap">
         <div class="centered-horisontally q-mb-sm">
           <LinkIcon />
           <span class="q-ml-sm">Задачи</span>
@@ -62,8 +65,8 @@
           v-if="issues && issues.length > 0"
           :issues="issues"
           @delete="(id) => emit('delete', id)"
-          class="visible-scroll"
-          style="overflow-y: auto; scrollbar-width: auto"
+          class="visible-scroll issues-scroll"
+          style="min-height: 216px; height: 100%"
         />
       </div>
     </div>
@@ -297,5 +300,27 @@ watch(
 }
 .error-date :deep(.q-field__control--focused:before) {
   border-color: var(--q-negative) !important;
+}
+
+.content-container {
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+}
+
+.tasks-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.issues-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.root-scroll {
+  overflow-y: auto;
+  min-height: 0;
 }
 </style>
