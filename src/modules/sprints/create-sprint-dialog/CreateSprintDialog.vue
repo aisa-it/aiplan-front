@@ -89,7 +89,7 @@ import { useSprintStore } from '../stores/sprint-store';
 
 const emits = defineEmits<{
   updateSprints: [];
-  failedUpdateIssueAndWatcher: [id: string];
+  reopen: [id: string];
 }>();
 
 const props = defineProps<{
@@ -247,7 +247,7 @@ const createSprintHandle = async (data: any) => {
   try {
     await updateIssueAndWatchers(res?.id ?? '', data);
   } catch {
-    emits('failedUpdateIssueAndWatcher', res?.id ?? '');
+    emits('reopen', res?.id ?? '');
     dialogRef.value?.hide();
     return;
   }

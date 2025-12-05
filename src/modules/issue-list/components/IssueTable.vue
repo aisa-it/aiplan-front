@@ -11,7 +11,7 @@
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
     @row-click="
       (_, row) =>
-        emits('openPreview', row.sequence_id, parsePagination(quasarPagination))
+        emits('openPreview', row, parsePagination(quasarPagination))
     "
     @request="(e) => getIssues(e.pagination)"
   >

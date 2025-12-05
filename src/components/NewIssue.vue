@@ -6,6 +6,7 @@
     no-caps
     :disable="isDisabled"
     @click="addIssue"
+    data-tour="create-issue"
   >
     <AddIcon :color="'#fff'" />
     <span v-if="Screen.width > 720"> Создать </span>
