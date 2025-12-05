@@ -285,13 +285,13 @@ onBeforeUnmount(() => {
 .popover {
   position: absolute;
   width: 544px;
-  background: var(--darkest-border-color);
+  background: $bg-color;
   color: $text-color;
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
   z-index: 10000;
   pointer-events: auto;
+  border: 1px solid var(--darkest-border-color);
 }
 
 .base-title {
