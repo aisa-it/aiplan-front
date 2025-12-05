@@ -1,6 +1,6 @@
 <template>
   <q-input
-    label="Дата окончания"
+    label="Выберите интервал"
     class="base-input"
     dense
     :model-value="`${localRange.from}-${localRange.to}`"

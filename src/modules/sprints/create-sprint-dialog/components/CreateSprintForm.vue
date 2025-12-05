@@ -128,12 +128,6 @@ const { user } = storeToRefs(userStore);
 
 const nameRef = ref();
 
-const dateError = computed(() => {
-  if (!dateRange.value.from || !dateRange.value.to)
-    return 'Необходимо ввести даты начала и конца спринта';
-  return '';
-});
-
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
   props.defaultProps?.watchers?.map((el) => el.id) ?? [],
@@ -147,6 +141,24 @@ const dateRange = ref({
   to: props.defaultProps?.end_date
     ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
     : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
+});
+
+const dateError = computed(() => {
+  const from = toISO(dateRange.value.from);
+  const to = toISO(dateRange.value.to);
+
+  if (!dateRange.value.from || !dateRange.value.to || !from || !to) {
+    return 'Необходимо ввести корректные даты начала и конца спринта';
+  }
+
+  const start = dayjs(from);
+  const end = dayjs(to);
+
+  if (!start.isBefore(end)) {
+    return 'Дата начала должна быть раньше даты конца спринта';
+  }
+
+  return '';
 });
 
 const description = ref(props.defaultProps?.description ?? '');
@@ -209,13 +221,7 @@ const removeAndAddWatcher = () => {
 const pushData = () => {
   const isValidName = nameRef.value.validate();
 
-  const isValidDates =
-    !!dateRange.value.from &&
-    !!dateRange.value.to &&
-    toISO(dateRange.value.from) &&
-    toISO(dateRange.value.to);
-
-  if (!isValidName || !isValidDates) {
+  if (!isValidName || dateError.value) {
     return;
   }
 
