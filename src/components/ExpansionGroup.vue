@@ -1,6 +1,6 @@
 <template>
   <div class="menu scrollable-content">
-    <NavSprints v-if="!isAIDoc && route.params.workspace" />
+    <NavSprints v-if="!isAIDoc && currentWorkspaceSlug" />
     <NavMenuProjects v-if="!isAIDoc" />
     <NavMenuForms v-if="!isAIDoc" />
     <NavMenuAIDocs
