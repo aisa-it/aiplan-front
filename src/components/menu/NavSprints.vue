@@ -13,6 +13,7 @@
         <CreateSprintDialogBtn
           @update-sprints="refreshSprints"
           v-if="hasPermission('create-sprint')"
+          @reopen="reopen"
         />
       </div>
     </template>
@@ -112,7 +113,6 @@
         v-model="openEditSprint"
         :sprint-id="sprintIdForEdit"
         @update-sprints="refreshSprints"
-        @failed-update-issue-and-watcher="reopen"
       />
       <DeleteSprintDialog
         v-model="isDeleteDialogOpen"
