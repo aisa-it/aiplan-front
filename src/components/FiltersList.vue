@@ -95,7 +95,7 @@
                     'drag-before': dragOverItem === opt.name + '__before',
                     'drag-after': dragOverItem === opt.name + '__after',
                   }"
-                  draggable="true"
+                  :draggable="$q.platform.is.desktop === true"
                   @dragstart="(e) => onDragStart(e, opt)"
                   @dragenter.prevent="(e) => onDragEnter(e, opt)"
                   @dragend="onDragEnd"
@@ -113,7 +113,7 @@
                     </q-item-label>
                   </q-item-section>
 
-                  <q-item-section side>
+                  <q-item-section side v-if="$q.platform.is.desktop === true">
                     <q-icon name="drag_indicator" />
                   </q-item-section>
                 </q-item>
