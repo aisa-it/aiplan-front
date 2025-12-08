@@ -11,7 +11,7 @@
 
         <SprintFiltersList
           v-if="is.object(sprintProps)"
-          :columns="allSprintColumns"
+          :columns="sprintStore.sortAllColumns"
           @update="load()"
         />
       </q-card-section>
@@ -40,7 +40,6 @@ import {
 } from 'vue';
 
 import { getSprint } from 'src/modules/sprints/services/api';
-import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 
 import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersList.vue';
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';

@@ -44,13 +44,27 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     getTableColumns() {
-      return allSprintColumns.filter((column) => {
-        if (column.name === 'sequence_id') return true;
+      const order: string[] =
+        this.sprintProps?.columns_to_show ?? ([] as string[]);
 
-        return this.sprintProps?.columns_to_show?.some(
-          (c) => c === column?.name,
-        );
-      });
+      const sequenceColumn = allSprintColumns.find(
+        (c) => c.name === 'sequence_id',
+      );
+
+      const orderedColumns = order
+        .map((name) => allSprintColumns.find((c) => c.name === name))
+        .filter(Boolean);
+
+      return [sequenceColumn, ...orderedColumns].filter(Boolean);
+    },
+
+    sortAllColumns() {
+      const orderedColumns = this.getTableColumns;
+      const inactive = allSprintColumns.filter(
+        (c) => !orderedColumns?.some((el) => el.name === c.name),
+      );
+
+      return [...orderedColumns, ...inactive];
     },
 
     getStatusesAsArray() {
