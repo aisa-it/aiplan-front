@@ -122,6 +122,33 @@
               <span v-html="parseBoldText(props.value)"
             /></HintTooltip>
           </div>
+          <div
+            v-if="showDescHighlighted(props.row.desc_highlighted)"
+            class="q-mt-xs"
+          >
+            <span
+              style="
+                display: inline-block;
+                text-wrap: wrap;
+                line-height: 0.85rem;
+              "
+              v-html="
+                getDescHighlightedText(
+                  parseBoldText(props.row.desc_highlighted),
+                  undefined,
+                  true,
+                )
+              "
+            />
+            <HintTooltip>
+              <span
+                v-html="
+                  getDescHighlightedText(
+                    parseBoldText(props.row.desc_highlighted),
+                  )
+                "
+            /></HintTooltip>
+          </div>
         </q-td>
       </template>
 
@@ -410,7 +437,7 @@ const route = (row) => {
 
 const columns = [
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'sequence_id',
     label: 'ID',
     align: 'left',
@@ -451,7 +478,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'target_date',
     align: 'left',
     label: 'Срок исполнения',
@@ -461,7 +488,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'created_at',
     align: 'left',
     label: 'Дата создания',
@@ -471,7 +498,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'updated_at',
     align: 'left',
     label: 'Последнее изменение',
@@ -511,6 +538,59 @@ const columns = [
     sortable: true,
   },
 ];
+
+const showDescHighlighted = (text: string) => {
+  return text && parseBoldText(text)?.includes('<b>');
+};
+
+const getDescHighlightedText = (
+  text?: string,
+  maxLength = 110,
+  showMatchesCount = false,
+) => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+
+  let truncatedText = text.substring(0, maxLength);
+  const isLetterOrDigit = (char: string) => /^[\p{L}\p{N}]$/u.test(char);
+  let lastValidIndex = -1;
+
+  for (let i = truncatedText.length - 1; i >= 0; i--) {
+    if (!isLetterOrDigit(truncatedText[i])) {
+      lastValidIndex = i;
+      break;
+    }
+  }
+  truncatedText = truncatedText.substring(0, lastValidIndex + 1);
+
+  const remainingText = text.substring(maxLength);
+  const matches = remainingText.match(/<b>/g);
+
+  return matches && showMatchesCount
+    ? truncatedText +
+        `... и ещё ${matches.length} ${getWordForm(matches.length)}`
+    : truncatedText;
+};
+
+const getWordForm = (count: number) => {
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return 'совпадений';
+  } else {
+    switch (lastDigit) {
+      case 1:
+        return 'совпадение';
+      case 2:
+      case 3:
+      case 4:
+        return 'совпадения';
+      default:
+        return 'совпадений';
+    }
+  }
+};
 </script>
 
 <style scoped lang="scss">
