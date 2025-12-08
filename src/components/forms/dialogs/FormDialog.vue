@@ -80,6 +80,22 @@
               style="min-width: 200px"
             />
           </div>
+          <div>
+            <div class="q-mt-sm">Присылать уведомления о прохождении</div>
+            <div :class="!$q.screen.lt.sm ? 'row no-wrap' : 'column'">
+              <q-checkbox
+                v-model="notificationSettings.telegram"
+                label="Telegram"
+                class="q-mr-md"
+              />
+              <q-checkbox
+                v-model="notificationSettings.system"
+                label="Система"
+                class="q-mr-md"
+              />
+              <q-checkbox v-model="notificationSettings.email" label="Email" />
+            </div>
+          </div>
           <EditorTipTapV2
             v-model="form.description"
             editor-id="form-editor-id"
@@ -179,6 +195,11 @@ const visible = ref('all');
 const isAutoCreateProject = ref(false);
 const projects = ref([]);
 const isLoading = ref(false);
+const notificationSettings = ref({
+  telegram: false,
+  system: false,
+  email: false,
+});
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const clear = () => {
@@ -192,6 +213,11 @@ const clear = () => {
   };
   visible.value = 'all';
   isAutoCreateProject.value = false;
+  notificationSettings.value = {
+    telegram: false,
+    system: false,
+    email: false,
+  };
 };
 
 const save = async () => {
