@@ -9,18 +9,20 @@
 
       <ProjectFiltersList
         v-if="is.object(projectProps)"
-        :columns="allColumns"
+        :columns="projectStore.sortAllColumns"
         @update="load()"
       />
     </q-card-section>
 
-    <q-card-section v-if="!issuesLoader && !isGroupingEnabled && pinnedIssues.length">
+    <q-card-section
+      v-if="!issuesLoader && !isGroupingEnabled && pinnedIssues.length"
+    >
       <PinnedIssueList :pinned-issues="pinnedIssues" />
     </q-card-section>
     <q-separator />
 
     <transition name="fade" mode="out-in">
-      <component :is="currentIssueList" contextType="project"/>
+      <component :is="currentIssueList" contextType="project" />
     </transition>
   </q-card>
 </template>
@@ -37,7 +39,6 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 import PinnedIssueList from './components/PinnedIssueList.vue';
 
 // constants
-import { allColumns } from './constants/tableColumns';
 import {
   defineAsyncComponent,
   onMounted,
@@ -57,13 +58,15 @@ const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues('project');
 const { getGroupedIssues } = useGroupedIssues('project');
 
+const projectStore = useProjectStore();
+
 const {
   project,
   isGroupingEnabled,
   isKanbanEnabled,
   issuesLoader,
   projectProps,
-} = storeToRefs(useProjectStore());
+} = storeToRefs(projectStore);
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();

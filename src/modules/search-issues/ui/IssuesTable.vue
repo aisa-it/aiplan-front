@@ -1,6 +1,9 @@
 <template>
   <div style="height: 100%; padding: 10px 10px 10px 0">
-    <div class="row no-wrap items-center q-mb-sm">
+    <div
+      class="row no-wrap items-center q-mb-sm"
+      :class="{ 'sticky-fix top': isCreateSprint }"
+    >
       <q-btn
         flat
         dense
@@ -97,7 +100,8 @@
       v-model:selected="checkedRows"
       flat
       row-key="id"
-      class="my-sticky-column-table search-filters-table table-bottom-reverse"
+      class="sprint-checkboxes my-sticky-column-table search-filters-table table-bottom-reverse"
+      :class="{ 'table-scroll-off': isCreateSprint }"
       :hide-no-data="true"
       :rows="rows"
       :selection="selection"
@@ -108,18 +112,7 @@
       @request="(e) => onRequest(e.pagination)"
       @row-click="(evt, row) => route(row)"
     >
-      <template #bottom>
-        <PaginationDefault
-          v-model:selected-page="pagination.page"
-          v-model:rows-per-page="pagination.rowsPerPage"
-          :rows-number="pagination.rowsNumber"
-          :rows-per-page-options="
-            Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
-          "
-          show-rows-per-page
-          @request="onRequest(pagination)"
-        />
-      </template>
+      <template #bottom> </template>
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
@@ -127,6 +120,33 @@
             <span v-html="parseBoldText(props.value)" />
             <HintTooltip>
               <span v-html="parseBoldText(props.value)"
+            /></HintTooltip>
+          </div>
+          <div
+            v-if="showDescHighlighted(props.row.desc_highlighted)"
+            class="q-mt-xs"
+          >
+            <span
+              style="
+                display: inline-block;
+                text-wrap: wrap;
+                line-height: 0.85rem;
+              "
+              v-html="
+                getDescHighlightedText(
+                  parseBoldText(props.row.desc_highlighted),
+                  undefined,
+                  true,
+                )
+              "
+            />
+            <HintTooltip>
+              <span
+                v-html="
+                  getDescHighlightedText(
+                    parseBoldText(props.row.desc_highlighted),
+                  )
+                "
             /></HintTooltip>
           </div>
         </q-td>
@@ -221,8 +241,22 @@
         </q-td>
       </template>
     </q-table>
-    <div class="text-right q-mr-md" v-show="!loading">
-      Всего: {{ pagination.rowsNumber }}
+
+    <div :class="{ 'sticky-fix bottom': isCreateSprint }">
+      <PaginationDefault
+        v-model:selected-page="pagination.page"
+        v-model:rows-per-page="pagination.rowsPerPage"
+        :rows-number="pagination.rowsNumber"
+        :rows-per-page-options="
+          Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
+        "
+        show-rows-per-page
+        @request="onRequest(pagination)"
+        class="pagination"
+      />
+      <div class="text-right q-mr-md" v-show="!loading">
+        Всего: {{ pagination.rowsNumber }}
+      </div>
     </div>
     <div
       v-show="loading || rows.length === 0"
@@ -403,7 +437,7 @@ const route = (row) => {
 
 const columns = [
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'sequence_id',
     label: 'ID',
     align: 'left',
@@ -444,7 +478,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'target_date',
     align: 'left',
     label: 'Срок исполнения',
@@ -454,7 +488,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'created_at',
     align: 'left',
     label: 'Дата создания',
@@ -464,7 +498,7 @@ const columns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
+    style: 'width: 10px; white-space: nowrap',
     name: 'updated_at',
     align: 'left',
     label: 'Последнее изменение',
@@ -504,6 +538,59 @@ const columns = [
     sortable: true,
   },
 ];
+
+const showDescHighlighted = (text: string) => {
+  return text && parseBoldText(text)?.includes('<b>');
+};
+
+const getDescHighlightedText = (
+  text?: string,
+  maxLength = 110,
+  showMatchesCount = false,
+) => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+
+  let truncatedText = text.substring(0, maxLength);
+  const isLetterOrDigit = (char: string) => /^[\p{L}\p{N}]$/u.test(char);
+  let lastValidIndex = -1;
+
+  for (let i = truncatedText.length - 1; i >= 0; i--) {
+    if (!isLetterOrDigit(truncatedText[i])) {
+      lastValidIndex = i;
+      break;
+    }
+  }
+  truncatedText = truncatedText.substring(0, lastValidIndex + 1);
+
+  const remainingText = text.substring(maxLength);
+  const matches = remainingText.match(/<b>/g);
+
+  return matches && showMatchesCount
+    ? truncatedText +
+        `... и ещё ${matches.length} ${getWordForm(matches.length)}`
+    : truncatedText;
+};
+
+const getWordForm = (count: number) => {
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return 'совпадений';
+  } else {
+    switch (lastDigit) {
+      case 1:
+        return 'совпадение';
+      case 2:
+      case 3:
+      case 4:
+        return 'совпадения';
+      default:
+        return 'совпадений';
+    }
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -532,6 +619,35 @@ const columns = [
 .search-filters-table :deep(.q-checkbox__inner--truthy),
 .search-filters-table :deep(.q-checkbox__inner--indet) {
   color: $primary !important;
+}
+
+.sticky-fix {
+  position: sticky;
+  z-index: 110;
+  background-color: var(--bg-color);
+}
+
+.sticky-fix.top {
+  top: 0;
+}
+
+.sticky-fix.bottom {
+  bottom: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  padding-top: 10px;
+}
+
+:deep(.q-table__bottom) {
+  min-height: 0;
+}
+
+:deep(.table-scroll-off.search-filters-table) {
+  max-height: none;
 }
 </style>
 <style lang="scss">

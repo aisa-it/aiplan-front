@@ -105,3 +105,10 @@ export function getProjectLink(
 ) {
   return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues`;
 }
+
+export function getDocumentLink(
+  workspaceSlug: string,
+  docId: string,
+) {
+  return `${location.protocol}//${location.host}/${workspaceSlug}/aidoc/${docId}`;
+}

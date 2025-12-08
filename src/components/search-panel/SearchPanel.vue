@@ -6,13 +6,14 @@
       dense
       class="btn-only-icon-sm bordered"
       @click="() => openConference()"
+      data-tour="conference"
     >
       <ConferenceIcon /><q-tooltip>Конференция</q-tooltip></q-btn
     >
     <WorkspaceNotifications />
     <SearchButton />
     <NewIssue v-if="!route.path.includes('admin-panel')" />
-    <ProfileButton data-id="profile-button-search-panel" />
+    <ProfileButton data-id="profile-button-search-panel" data-tour="profile" />
   </div>
 </template>
 

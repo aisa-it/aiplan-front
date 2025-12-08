@@ -2,17 +2,21 @@
   <div class="column w-full h-full" style="max-height: 100%; overflow: hidden">
     <div class="col-auto q-mb-lg">
       <q-input
+        ref="nameRef"
         v-model="sprintName"
         class="q-mb-sm base-input q-pa-none"
         label="Название спринта"
-        :rules="[(val) => !!val || 'Введите название спринта']"
+        :rules="[(val) => !!val || 'Необходимо ввести название спринта']"
         dense
       />
     </div>
-    <div class="col column no-wrap" style="overflow-y: scroll">
+    <div
+      class="col column no-wrap"
+      style="overflow-y: scroll; margin-bottom: 24px"
+    >
       <div class="col-auto">
         <div class="row q-mb-md centered-horisontally">
-          <div class="col centered-horisontally issue-selector-label">
+          <div class="col centered-horisontally">
             <ObserveIcon />
             <span class="q-ml-sm"> Наблюдатели </span>
           </div>
@@ -25,12 +29,21 @@
           />
         </div>
 
-        <div class="row q-mb-md centered-horisontally">
-          <div class="col centered-horisontally issue-selector-label">
-            <WatchDashedIcon />
-            <span class="q-ml-sm"> Интервал </span>
+        <div class="q-mb-md">
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally">
+              <WatchDashedIcon />
+              <span class="q-ml-sm"> Интервал </span>
+            </div>
+            <CreateSprintDateRange
+              class="col"
+              v-model="dateRange"
+              :class="{ 'error-date': dateError }"
+            />
           </div>
-          <CreateSprintDateRange class="col" v-model="dateRange" />
+          <div v-if="dateError" class="text-negative text-caption q-mt-xs">
+            {{ dateError }}
+          </div>
         </div>
       </div>
 
@@ -38,11 +51,11 @@
       <EditorTipTapV2
         v-model="description"
         editor-id="create-sprint-editor"
-        class="col-auto q-mb-lg"
+        class="issue-panel__editor col-auto q-mb-lg"
         style="height: 312px"
       />
 
-      <div class="flex column no-wrap q-mb-lg">
+      <div class="tasks-wrapper column no-wrap">
         <div class="centered-horisontally q-mb-sm">
           <LinkIcon />
           <span class="q-ml-sm">Задачи</span>
@@ -52,8 +65,8 @@
           v-if="issues && issues.length > 0"
           :issues="issues"
           @delete="(id) => emit('delete', id)"
-          class="visible-scroll"
-          style="overflow-y: auto; scrollbar-width: auto"
+          class="visible-scroll issues-scroll"
+          style="min-height: 216px; height: 100%"
         />
       </div>
     </div>
@@ -71,12 +84,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import { storeToRefs } from 'pinia';
 import { useUserStore } from 'src/stores/user-store';
@@ -109,6 +126,8 @@ const userStore = useUserStore();
 
 const { user } = storeToRefs(userStore);
 
+const nameRef = ref();
+
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
   props.defaultProps?.watchers?.map((el) => el.id) ?? [],
@@ -117,27 +136,38 @@ const watchers = ref<any>(
 const dateRange = ref({
   from: props.defaultProps?.start_date
     ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
-    : dayjs().format('DD.MM.YYYY'),
+    : dayjs.utc().format('DD.MM.YYYY'),
 
   to: props.defaultProps?.end_date
     ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
-    : dayjs().add(7, 'day').format('DD.MM.YYYY'),
+    : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
+});
+
+const dateError = computed(() => {
+  const from = toISO(dateRange.value.from);
+  const to = toISO(dateRange.value.to);
+
+  if (!dateRange.value.from || !dateRange.value.to || !from || !to) {
+    return 'Необходимо ввести корректные даты начала и конца спринта';
+  }
+
+  const start = dayjs(from);
+  const end = dayjs(to);
+
+  if (!start.isBefore(end)) {
+    return 'Дата начала должна быть раньше даты конца спринта';
+  }
+
+  return '';
 });
 
 const description = ref(props.defaultProps?.description ?? '');
 
 const toISO = (data: string) => {
-  const parsed = dayjs(data, 'DD.MM.YYYY', true);
-
+  const parsed = dayjs.utc(data, 'DD.MM.YYYY', true);
   if (!parsed.isValid()) return null;
 
-  return dayjs
-    .utc()
-    .set('year', parsed.year())
-    .set('month', parsed.month())
-    .set('date', parsed.date())
-    .startOf('day')
-    .toISOString();
+  return parsed.startOf('day').toISOString();
 };
 
 const removeAndAddArrayHelper = <T extends { id?: string }>(
@@ -189,6 +219,12 @@ const removeAndAddWatcher = () => {
 };
 
 const pushData = () => {
+  const isValidName = nameRef.value.validate();
+
+  if (!isValidName || dateError.value) {
+    return;
+  }
+
   const { remove: removeIssues, add: addIssues } = removeAndAddArrayHelper(
     props.defaultProps?.issues,
     props.issues,
@@ -224,12 +260,12 @@ watch(
 
     dateRange.value = {
       from: props.defaultProps?.start_date
-        ? dayjs(props.defaultProps.start_date).format('DD.MM.YYYY')
-        : dayjs().format('DD.MM.YYYY'),
+        ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
+        : dayjs.utc().format('DD.MM.YYYY'),
 
       to: props.defaultProps?.end_date
-        ? dayjs(props.defaultProps.end_date).format('DD.MM.YYYY')
-        : dayjs().add(7, 'day').format('DD.MM.YYYY'),
+        ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
+        : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
     };
 
     description.value = props.defaultProps?.description ?? '';
@@ -237,7 +273,7 @@ watch(
 );
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .visible-scroll {
   scrollbar-width: auto !important;
   scrollbar-color: auto !important;
@@ -245,5 +281,52 @@ watch(
 
 .visible-scroll::-webkit-scrollbar {
   display: block !important;
+}
+
+.issue-panel__editor {
+  :deep(.html-editor__container) {
+    min-height: 259px;
+    height: 259px;
+
+    .tiptap {
+      min-height: 259px;
+    }
+  }
+}
+
+.text-caption {
+  font-size: 11px;
+}
+
+.error-date :deep(.q-field__control:before) {
+  border-color: var(--q-negative) !important;
+}
+.error-date :deep(.q-field__control:hover:before) {
+  border-color: var(--q-negative) !important;
+}
+.error-date :deep(.q-field__control--focused:before) {
+  border-color: var(--q-negative) !important;
+}
+
+.content-container {
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+}
+
+.tasks-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.issues-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.root-scroll {
+  overflow-y: auto;
+  min-height: 0;
 }
 </style>
