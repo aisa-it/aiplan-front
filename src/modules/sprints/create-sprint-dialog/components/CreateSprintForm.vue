@@ -1,6 +1,6 @@
 <template>
   <div class="column w-full h-full" style="max-height: 100%; overflow: hidden">
-    <div class="col-auto q-mb-lg">
+    <div class="col-auto q-mb-lg" style="max-width: 100%">
       <q-input
         ref="nameRef"
         v-model="sprintName"
@@ -12,7 +12,7 @@
     </div>
     <div
       class="col column no-wrap"
-      style="overflow-y: scroll; margin-bottom: 24px"
+      style="overflow-y: scroll; margin-bottom: 24px; max-width: 100%"
     >
       <div class="col-auto">
         <div class="row q-mb-md centered-horisontally">
@@ -52,7 +52,8 @@
         v-model="description"
         editor-id="create-sprint-editor"
         class="issue-panel__editor col-auto q-mb-lg"
-        style="height: 312px"
+        :class="{ 'is-mobile': isMobile }"
+        style="height: 312px; width: 100%"
       />
 
       <div class="tasks-wrapper column no-wrap">
@@ -114,6 +115,7 @@ import {
 const props = defineProps<{
   issues?: DtoIssueLight[];
   defaultProps?: DtoSprint | null;
+  isMobile?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -284,13 +286,22 @@ watch(
 }
 
 .issue-panel__editor {
+  width: 100%;
   :deep(.html-editor__container) {
     min-height: 259px;
     height: 259px;
+    width: 100%;
 
     .tiptap {
       min-height: 259px;
+      width: 100%;
     }
+  }
+}
+
+.is-mobile {
+  :deep(.html-editor__outer) {
+    max-width: calc(100% - 47px);
   }
 }
 
