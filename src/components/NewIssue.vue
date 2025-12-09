@@ -7,6 +7,7 @@
     :disable="isDisabled"
     @click="addIssue"
     data-tour="create-issue"
+    :style="activeGuid === 1 ? { opacity: '1 !important' } : {}"
   >
     <AddIcon :color="'#fff'" />
     <span v-if="Screen.width > 720"> Создать </span>
@@ -33,6 +34,7 @@ import { useRoute } from 'vue-router';
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useGuiderStore } from 'src/modules/guided-tours/guider-store';
 // components
 import AddIcon from 'src/components/icons/AddIcon.vue';
 import NewIssueDialog from './NewIssueDialog.vue';
@@ -49,6 +51,7 @@ const workspaceStore = useWorkspaceStore();
 // refs from stores
 const { refreshIssues } = storeToRefs(issuesStore);
 const { workspaceProjects, workspaceInfo } = storeToRefs(workspaceStore);
+const { activeGuid } = storeToRefs(useGuiderStore());
 
 // local state
 const isProjectCreateOpen = ref(false);
