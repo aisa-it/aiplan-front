@@ -10,8 +10,8 @@
     :options="states"
     :option-label="(v) => v.name"
     :option-value="(v) => v.id"
-    :class="`${issue ? 'base-selector-sm' : 'base-selector'}`"
-    :style="'width: 160px'"
+    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select': ''}`"
+    :style="{width: isAdaptiveSelect ? '' : '160px'}"
     dense
     @popup-show="() => refresh()"
   >
@@ -95,6 +95,11 @@ export default defineComponent({
     statesFromCache: {
       type: Object,
       required: false,
+    },
+    isAdaptiveSelect : {
+      type: Boolean,
+      required: false,
+      default: () => false,
     },
     isDisabled: { type: Boolean, required: false, default: () => false },
     label: { type: String, required: false, default: () => '' },

@@ -171,9 +171,7 @@ const emptyMemberListInput = ref();
 const isSearch = ref(false);
 const assignessid = ref(
   props.assigness && props.assigness?.length > 0
-    ? props.assigness.map((e) => {
-        return e?.id || e;
-      })
+    ? props.assigness
     : defAssignee.value && defAssignee.value.length
       ? defAssignee.value
       : null,
@@ -269,7 +267,7 @@ const handleUpdateAssignees = async (e) => {
   } else {
     emit(
       'update:assigness',
-      e ? e.map((d) => (d.member ? d.member.id || d.id : d)) : [],
+      e ? e.map((d) => (d)) : [],
     );
   }
 };

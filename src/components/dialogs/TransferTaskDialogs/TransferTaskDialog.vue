@@ -160,86 +160,21 @@
           </q-item-section>
         </q-item>
 
-        <q-markup-table v-if="!isMultipleIssuesTransfer" flat style="width: 100%;" class="params-table">
-          <caption class="q-ma-sm">Предпросмотр</caption>
-          <thead>
-            <tr>
-              <th class="text-left">Приоритет</th>
-              <th class="text-left">Статус</th>
-              <th class="text-left">Срок исполнения</th>
-              <th class="text-left">Исполнитель</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="vertical-align: bottom;">
-              <td  class="text-left">
-                <SelectPriority
-                  class="issue-selector"
-                  :workspace-slug="issueData.workspace_detail.slug"
-                  :projectid="issueData.project"
-                  editIssue
-                  :priority="newIssueSettings.priority"
-                  :issue="issueData"
-                  :is-disabled="!hasPermissionByIssue(issueData, project, 'change-issue-primary')"
-                  @refresh="handleRefresh"
-                  @update:priority="(val) => {
-                      editedIssueParams.priority = val;
-                      return newIssueSettings.priority = val;
-                    }"
-                  >
-                </SelectPriority>
-              </td>
-              <td  class="text-left">
-                <SelectStatus
-                  class="issue-selector full-w"
-                  :projectid="issueData.project"
-                  :issue="issueData"
-                  :status="newIssueSettings.state_detail"
-                  :isDisabled="!hasPermissionByIssue(issueData, project, 'change-issue-status')"
-                  :states-from-cache="statesCache[issueData?.project]"
-                  @refresh="handleRefresh"
-                  @update:status="(val) => {
-                    editedIssueParams.state_id = val.id;
-                    return newIssueSettings.state_detail = val;
-                  }"
-                />
-              </td>
-              <td  class="text-left">
-                <SelectDate
-                  class="full-w"
-                  :workspace-id="issueData.workspace_detail.slug"
-                  :projectid="issueData.project"
-                  :date="newIssueSettings.target_date"
-                  :issue="issueData"
-                  :is-disabled="!hasPermissionByIssue(issueData, project, 'change-issue-primary')"
-                  @refresh="handleRefresh"
-                  @update:date="(val) => {
-                    editedIssueParams.target_date = val;
-                    return newIssueSettings.target_date = val;
-                  }"
-                />
-              </td>
-              <td  class="text-left">
-                <SelectAssignee
-                  class="issue-selector"
-                  label=""
-                  :projectid="issueData.project"
-                  :assigness="newIssueSettings.assignees"
-                  :isDisabled="
-                    !hasPermissionByIssue(issueData, project, 'change-issue-basic')
-                  "
-                  :current-member="user"
-                  isIssueTransfer
-                  @refresh="handleRefresh"
-                  @update:assigness="(val) => {
-                    editedIssueParams.assigner_ids = val;
-                    return newIssueSettings.assignees = val;
-                  }"
-                ></SelectAssignee>
-              </td>
-            </tr>
-          </tbody>
-        </q-markup-table>
+        <q-item :disable="isMultipleIssuesTransfer ? true : false"
+          clickable
+          flat
+          dense
+          @click="settings = true"
+          >
+          <span>Настройка параметров задачи</span>
+          <TransferTaskParameters
+            v-model="settings"
+            :issue="props.issue"
+            :issue_settings="issueSettings"
+            @save="saveSettings"
+            @refresh="handleRefresh"
+            />
+        </q-item>
 
         <div v-if="transferErrors.length" class="full-w">
           <h6 style="margin: 12px 0 0 0 !important; color: #dc3e3e">Ошибки</h6>
@@ -303,23 +238,21 @@
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeMount, onBeforeUpdate } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { Screen } from 'quasar';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useProjectStore } from 'src/stores/project-store';
-import { useStatesStore } from 'src/stores/states-store';
-import { useUserStore } from 'src/stores/user-store';
 
 // components
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-import SelectStatus from 'src/components/SelectStatus.vue';
-import SelectAssignee from 'components/selects/SelectAssignee.vue';
-import SelectPriority from 'src/components/SelectPriority.vue';
-import SelectDate from 'src/components/SelectDate.vue';
+
+// components - icons
+import TransferTaskParameters from './TransferTaskParameters.vue';
 
 // interfaces
 import {
@@ -367,21 +300,16 @@ const emit = defineEmits<{
 }>();
 
 // store
-const userStore = useUserStore();
 const rolesStore = useRolesStore();
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermissionByIssue } = useRolesStore();
-const statesStore = useStatesStore();
-const { statesCache } = storeToRefs(statesStore);
 
 // store to refs
 const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { currentProjectID, project } = storeToRefs(projectStore);
-const { user } = storeToRefs(userStore);
+const { currentProjectID } = storeToRefs(projectStore);
 
 // vars
 const route = useRoute();
@@ -393,14 +321,15 @@ const transferData = ref();
 const transferLabel = ref();
 const dialogRef = ref();
 const issueData = ref(props.issue);
-const newIssueSettings = ref({
+const issueSettings = computed(() => ({
   state_detail: props.issue.state_detail,
   priority: props.issue.priority,
   target_date: props.issue.target_date,
   assignees: props.issue.assignee_details.map((assignee) => ({
     member: assignee,
-  }))
-});
+  })),
+}));
+const assignerIds =issueSettings.value.assignees ? issueSettings.value.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : [];
 let editedIssueParams = <IIssueTransferParams>{};
 const selectedProject = ref();
 const projects = ref<IProject[]>(workspaceProjects.value as IProject[]);
@@ -424,6 +353,7 @@ const actionsType = [
 ];
 const loading = ref(false);
 const openedtIssueID = ref('');
+const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
@@ -468,12 +398,12 @@ const clear = () => {
   selectedProject.value = null;
   selectedAction.value = null;
   transferData.value = null;
-  newIssueSettings.value.state_detail = props.issue.state_detail;
-  newIssueSettings.value.priority = props.issue.priority;
-  newIssueSettings.value.target_date = props.issue.target_date;
-  newIssueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
+  issueSettings.value.state_detail = props.issue.state_detail;
+  issueSettings.value.priority = props.issue.priority;
+  issueSettings.value.target_date = props.issue.target_date;
+  issueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
     member: assignee,
-  }))
+  }));
   editedIssueParams = {}
 };
 
@@ -672,6 +602,39 @@ const handleRefresh = async () => {
   emit('refresh');
 };
 
+const arraysEqual = (arr1: string[], arr2: string[]):boolean => {
+  if (arr1.length !== arr2.length) return false;
+  const sorterArr1 = [...arr1].sort();
+  const sorterArr2 = [...arr2].sort();
+
+  return sorterArr1.every((value, index) => value === sorterArr2[index])
+}
+
+const saveSettings = (data: typeof issueSettings) => {
+  const newSettings = data.value;
+  editedIssueParams = {};
+
+  if (newSettings.state_detail.id !== issueSettings.value.state_detail.id) {
+    editedIssueParams.state_id = newSettings.state_detail.id;
+  }
+
+  if (newSettings.priority !== issueSettings.value.priority) {
+    editedIssueParams.priority = newSettings.priority;
+  }
+
+  if (newSettings.target_date !== issueSettings.value.target_date) {
+    editedIssueParams.target_date = newSettings.target_date;
+  }
+
+  const newAssignerIds = newSettings.assignees ? newSettings.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : [];
+
+  if (!arraysEqual(newAssignerIds, assignerIds)) {
+    editedIssueParams.assigner_ids = newAssignerIds;
+  }
+  return;
+
+}
+
 const refresh = async () => {
   await singleIssueStore
     .getIssueDataById(
@@ -721,10 +684,10 @@ watch(
   isMultipleIssuesTransfer,
   (newVal) => {
     if(newVal) {
-      newIssueSettings.value.state_detail = props.issue.state_detail;
-      newIssueSettings.value.priority = props.issue.priority;
-      newIssueSettings.value.target_date = props.issue.target_date;
-      newIssueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
+      issueSettings.value.state_detail = props.issue.state_detail;
+      issueSettings.value.priority = props.issue.priority;
+      issueSettings.value.target_date = props.issue.target_date;
+      issueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
         member: assignee,
       }))
       editedIssueParams = {}
