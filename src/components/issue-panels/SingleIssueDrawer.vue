@@ -214,16 +214,17 @@
           <span class="q-ml-sm">Дата завершения</span>
         </div>
       </div>
-      <div class="col pseudo-btn">
+      <div class="col pseudo-btn column">
         {{ getDate(issueData.completed_at) }}
-        <span
+        <div
           v-if="issueData.target_date && issueData.completed_at"
           :class="[
-            'q-ml-xs',
+            'text-center',
             getCompareDate < 0 ? 'text-negative' : 'text-positive',
           ]"
-          >({{ getCompareText() }})</span
         >
+          ({{ getCompareText() }})
+        </div>
       </div>
     </div>
 
@@ -496,15 +497,12 @@ const watchers = computed(() =>
 
 const getCompareText = () => {
   const dateToDays = getCompareDate.value / 86400000;
-  if (dateToDays === 0 || dateToDays > 9) {
-    return 'в срок';
-  } else if (dateToDays < -9) {
-    return 'не в срок';
-  } else {
-    return `${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
-      Math.abs(getCompareDate.value),
-    )}`;
-  }
+  let captureTime = 'в срок';
+  if (dateToDays < 0) captureTime = 'не в срок';
+
+  return `${captureTime}, ${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
+    Math.abs(getCompareDate.value),
+  )}`;
 };
 
 onMounted(() => {
