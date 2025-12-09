@@ -327,7 +327,7 @@ const loading = ref(true);
 const searchQuery = ref('');
 const filter = ref();
 const pagination = ref({
-  sortBy: 'sequence_id',
+  sortBy: null,
   descending: true,
   page: 1,
   rowsPerPage: Screen.height > 720 ? 10 : 5,
@@ -374,10 +374,10 @@ const onRequest = async (p) => {
   let req = Object.assign((filter.value as any) ?? {}, {
     search_query: searchQuery.value,
   });
-
+  const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
   // заменить на общий метод поиск задач
   const { issues, count, limit } = await extendedSearchIssues(req as any, {
-    order_by: p.sortBy,
+    order_by: order_by,
     desc: p.descending,
     offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
@@ -398,7 +398,7 @@ const onRequest = async (p) => {
 
 const handleSearchIssues = debounce(() => {
   pagination.value = {
-    sortBy: 'sequence_id',
+    sortBy: null,
     descending: true,
     page: 1,
     rowsPerPage: pagination.value.rowsPerPage,
