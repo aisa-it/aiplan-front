@@ -1,157 +1,181 @@
 <template>
   <div class="q-px-sm full-width">
-    <div class="flex no-wrap q-py-sm">
-      <IssueNameInput :isReadonly="isReadOnlyEditor" />
-      <q-btn
-        v-if="isAdminOrAuthor && isReadOnlyEditor"
-        dense
-        flat
-        class="btn-only-icon-sm readonly-title-issue__edit"
-        :class="isAutoSave ? preventClickClass : ''"
-        title="Нажмите для редактирования"
-        @click="editTitle"
-      >
-        <EditIcon />
-      </q-btn>
-      <q-btn
-        v-if="!preview"
-        class="btn-only-icon-sm q-pa-sm issue-panel__right-drawer-open"
-        flat
-        @click.stop="toggleDrawer()"
-      >
-        <MenuIcon :width="18" :height="18" />
-      </q-btn>
-    </div>
-    <div class="q-mb-md">
-      <div class="flex items-center">
-        <q-chip
-          v-for="t in issueData.label_details"
-          class="issue-chip q-my-xs q-ml-none q-mr-sm"
-          :key="t.id"
-          :ripple="false"
-        >
-          <q-badge
-            rounded
-            :style="'background-color: ' + getCorrectColor(t.color)"
-            class="q-mr-sm"
-          />
-          <span class="abbriviated-text">
-            {{ t.name }}
-            <HintTooltip>
-              <span class="word-wrap" style="width: 95%">
-                {{ t.name }}
-              </span>
-            </HintTooltip>
-          </span>
-        </q-chip>
+    <template v-if="issueData">
+      <div class="flex no-wrap q-py-sm">
+        <IssueNameInput :isReadonly="isReadOnlyEditor" />
         <q-btn
+          v-if="isAdminOrAuthor && isReadOnlyEditor"
           dense
           flat
-          no-caps
-          :class="[
-            issueData?.label_details.length
-              ? 'btn-only-icon-sm'
-              : 'btn-sm issue-tags-edit-btn',
-          ]"
+          class="btn-only-icon-sm readonly-title-issue__edit"
+          :class="isAutoSave ? preventClickClass : ''"
           title="Нажмите для редактирования"
-          @click="showTagsDialog = !showTagsDialog"
+          @click="editTitle"
         >
-          <span v-if="!issueData?.label_details.length" class="q-mr-xs"
-            >Редактировать теги</span
-          >
           <EditIcon />
         </q-btn>
+        <q-btn
+          v-if="!preview"
+          class="btn-only-icon-sm q-pa-sm issue-panel__right-drawer-open"
+          flat
+          @click.stop="toggleDrawer()"
+        >
+          <MenuIcon :width="18" :height="18" />
+        </q-btn>
       </div>
-    </div>
-    <q-card
-      v-if="lockedBy"
-      class="row items-center q-mb-md q-pa-sm rounded-borders"
-    >
-      <q-icon name="lock" size="20px" class="q-mr-sm text-negative" />
-      <AvatarImage
-        :key="lockedBy.id"
-        size="35px"
-        prefix="Сейчас редактирует"
-        :tooltip="avatarText(lockedBy).join(' ')"
-        :text="
-          [avatarText(lockedBy)[0]?.at(0), avatarText(lockedBy)[1]?.at(0)].join(
-            ' ',
+      <div class="q-mb-md">
+        <div class="flex items-center">
+          <q-chip
+            v-for="t in issueData.label_details"
+            class="issue-chip q-my-xs q-ml-none q-mr-sm"
+            :key="t.id"
+            :ripple="false"
+          >
+            <q-badge
+              rounded
+              :style="'background-color: ' + getCorrectColor(t.color)"
+              class="q-mr-sm"
+            />
+            <span class="abbriviated-text">
+              {{ t.name }}
+              <HintTooltip>
+                <span class="word-wrap" style="width: 95%">
+                  {{ t.name }}
+                </span>
+              </HintTooltip>
+            </span>
+          </q-chip>
+          <q-btn
+            dense
+            flat
+            no-caps
+            :class="[
+              issueData?.label_details.length
+                ? 'btn-only-icon-sm'
+                : 'btn-sm issue-tags-edit-btn',
+            ]"
+            title="Нажмите для редактирования"
+            @click="showTagsDialog = !showTagsDialog"
+          >
+            <span v-if="!issueData?.label_details.length" class="q-mr-xs"
+              >Редактировать теги</span
+            >
+            <EditIcon />
+          </q-btn>
+        </div>
+      </div>
+      <q-card
+        v-if="lockedBy"
+        class="row items-center q-mb-md q-pa-sm rounded-borders"
+      >
+        <q-icon name="lock" size="20px" class="q-mr-sm text-negative" />
+        <AvatarImage
+          :key="lockedBy.id"
+          size="35px"
+          prefix="Сейчас редактирует"
+          :tooltip="avatarText(lockedBy).join(' ')"
+          :text="
+            [
+              avatarText(lockedBy)[0]?.at(0),
+              avatarText(lockedBy)[1]?.at(0),
+            ].join(' ')
+          "
+          :image="lockedBy.avatar_id ?? ''"
+          :member="lockedBy"
+          @click.stop="
+            $router.push({
+              path: `/${route.params.workspace}/user-activities/${lockedBy.id}`,
+            })
+          "
+        />
+        <span class="q-ml-sm text-body2 text-weight-medium">
+          {{ getFullName(lockedBy) }}
+        </span>
+        <span class="q-ml-xs text-body2 text-grey-6 text-weight-medium"
+          >сейчас редактирует</span
+        >
+      </q-card>
+      <div
+        class="full-w"
+        v-click-outside:prevent-click-issue-outside="{
+          isAutoSave,
+          onClickOutside: handleAutoSave,
+        }"
+      >
+        <p v-if="showAutoSaveTimer" class="issue-autosave-notice">
+          Задача будет автоматически сохранена через
+          {{ formatTime(autoSaveTimer) }}
+        </p>
+
+        <IssueDescriptionEditor
+          :isReadonly="isReadOnlyEditor"
+          :isAutosave="isAutoSave"
+          :isAllowedToEdit="isAdminOrAuthor"
+          @autoSave="handleAutoSave()"
+          @toggleEdit="handleEnableEdit()"
+          @get-editor="(editorInstance) => (editor = editorInstance)"
+          ref="editorContainer"
+          @drop.prevent="
+            (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
+          "
+          @dragover.prevent
+        />
+      </div>
+      <q-card-actions
+        v-if="isAdminOrAuthor && !isReadOnlyEditor"
+        align="right"
+      >
+        <q-btn
+          class="secondary-btn"
+          :class="isAutoSave ? preventClickClass : ''"
+          no-caps
+          @click="handleUndoEdit"
+        >
+          Отмена
+        </q-btn>
+        <q-btn
+          class="primary-btn"
+          :class="isAutoSave ? preventClickClass : ''"
+          no-caps
+          @click="handleUpdateTitleAndEditor"
+        >
+          Сохранить
+        </q-btn>
+      </q-card-actions>
+
+      <IssueTagsDialog
+        v-model="showTagsDialog"
+        :tags="issueData.label_details"
+        :project-id="issueData.project"
+        :isDisabled="
+          !hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'change-issue-secondary',
           )
         "
-        :image="lockedBy.avatar_id ?? ''"
-        :member="lockedBy"
-        @click.stop="
-          $router.push({
-            path: `/${route.params.workspace}/user-activities/${lockedBy.id}`,
-          })
-        "
+        @close="showTagsDialog = !showTagsDialog"
+        @refresh="refresh"
       />
-      <span class="q-ml-sm text-body2 text-weight-medium">
-        {{ getFullName(lockedBy) }}
-      </span>
-      <span class="q-ml-xs text-body2 text-grey-6 text-weight-medium"
-        >сейчас редактирует</span
-      >
-    </q-card>
-    <div
-      class="full-w"
-      v-click-outside:prevent-click-issue-outside="{
-        isAutoSave,
-        onClickOutside: handleAutoSave,
-      }"
-    >
-      <p v-if="showAutoSaveTimer" class="issue-autosave-notice">
-        Задача будет автоматически сохранена через
-        {{ formatTime(autoSaveTimer) }}
-      </p>
-
-      <IssueDescriptionEditor
-        :isReadonly="isReadOnlyEditor"
-        :isAutosave="isAutoSave"
-        :isAllowedToEdit="isAdminOrAuthor"
-        @autoSave="handleAutoSave()"
-        @toggleEdit="handleEnableEdit()"
-        @get-editor="(editorInstance) => (editor = editorInstance)"
-        ref="editorContainer"
-        @drop.prevent="
-          (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
-        "
-        @dragover.prevent
-      />
-    </div>
-    <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
-      <q-btn
-        class="secondary-btn"
-        :class="isAutoSave ? preventClickClass : ''"
-        no-caps
-        @click="handleUndoEdit"
-      >
-        Отмена
-      </q-btn>
-      <q-btn
-        class="primary-btn"
-        :class="isAutoSave ? preventClickClass : ''"
-        no-caps
-        @click="handleUpdateTitleAndEditor"
-      >
-        Сохранить
-      </q-btn>
-    </q-card-actions>
-
-    <IssueTagsDialog
-      v-model="showTagsDialog"
-      :tags="issueData.label_details"
-      :project-id="issueData.project"
-      :isDisabled="
-        !hasPermissionByIssue(
-          issueData,
-          issueData.project_detail ?? project,
-          'change-issue-secondary',
-        )
-      "
-      @close="showTagsDialog = !showTagsDialog"
-      @refresh="refresh"
-    />
+    </template>
+    <template v-else>
+      <div class="q-py-sm">
+        <q-skeleton type="rect" height="28px" class="q-mb-sm" />
+      </div>
+      <div class="q-mb-md">
+        <div class="flex items-center">
+          <q-skeleton type="QChip" class="q-mr-sm" />
+          <q-skeleton type="QChip" class="q-mr-sm" />
+          <q-skeleton type="QChip" class="q-mr-sm" />
+          <q-skeleton type="QBtn" class="q-ml-sm" width="120px" />
+        </div>
+      </div>
+      <q-card class="q-pa-md q-mb-md">
+        <q-skeleton type="text" class="q-mb-sm" />
+        <q-skeleton type="text" class="q-mb-sm" width="80%" />
+        <q-skeleton type="rect" height="200px" />
+      </q-card>
+    </template>
   </div>
 </template>
 
