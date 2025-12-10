@@ -68,14 +68,20 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { Step } from './types/step';
+import { useGuiderStore } from './guider-store';
 
 const props = defineProps<{
   steps: Step[];
+  stepNum: number;
 }>();
 
 const emits = defineEmits<{
   endTutorial: [];
 }>();
+
+const guiderStore = useGuiderStore();
+
+guiderStore.setActiveGuid(props.stepNum);
 
 const current = ref(0);
 const step = ref<Step | null>(null);
@@ -231,6 +237,7 @@ const nextStep = async () => {
 const endTour = () => {
   step.value = null;
   current.value = 0;
+  guiderStore.clear();
   emits('endTutorial');
 };
 

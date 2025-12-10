@@ -67,6 +67,7 @@
   <GuidedTour
     v-if="user?.tutorial === 0 && $q.platform.is.desktop"
     :steps="steps"
+    :step-num="STEP_NUM"
     @end-tutorial="useAiplanStore().setMeTutorial(STEP_NUM)"
   />
 </template>
