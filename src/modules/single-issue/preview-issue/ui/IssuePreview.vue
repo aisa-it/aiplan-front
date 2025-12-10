@@ -14,6 +14,7 @@
         ...QUASAR_SELECTORS_CLASSES,
         'prevent-click-issue-outside',
         'prevent-click-comments-create',
+        'prevent-click-comments-edit',
         'main-toolbar',
       ],
     }"
