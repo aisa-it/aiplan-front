@@ -82,7 +82,7 @@
       </q-btn>
 
       <q-btn
-        v-if="isCreateSprint"
+        v-if="isCreateSprint && !isMobile"
         flat
         dense
         round
@@ -254,7 +254,11 @@
         @request="onRequest(pagination)"
         class="pagination"
       />
-      <div class="text-right q-mr-md" v-show="!loading">
+      <div
+        class="q-mr-md"
+        :class="isMobile ? 'text-center' : 'text-right'"
+        v-show="!loading"
+      >
         Всего: {{ pagination.rowsNumber }}
       </div>
     </div>
@@ -305,6 +309,7 @@ const props = defineProps<{
   checkedRows?: any[];
   selection?: 'single' | 'multiple' | 'none';
   isCreateSprint?: boolean;
+  isMobile?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -384,7 +389,6 @@ const onRequest = async (p) => {
     light: true,
     show_sub_issues: true,
     only_active: filter.value?.only_active || false,
-    show_sub_issues: props.isCreateSprint ? true : null,
   });
   rows.value = [];
   rows.value = issues;
