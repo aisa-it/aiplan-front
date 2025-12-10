@@ -144,7 +144,7 @@
     v-model="isShowComment"
     :info="singleCommentInfo"
     :comment="singleComment"
-    :members="projectMembers"
+    :members="members ?? projectMembers"
     :getMembersForMentionFunc="getProjectMembersForMention"
     @clear="clearLink"
   />
@@ -195,9 +195,14 @@ import {
 import ClickOutside from 'src/directives/click-outside';
 import CommentShowDialog from '../dialogs/IssueDialogs/CommentShowDialog.vue';
 import { issueSingleComment } from 'src/modules/single-issue/services/api';
-import { DtoIssueComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssueComment,
+  DtoProjectMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IDatasetComment } from 'src/interfaces/dataset';
 import { isEditorEmpty } from '../editorV2/utils/editorUtils';
+
+const props = defineProps<{ members?: DtoProjectMember[] }>();
 
 const emits = defineEmits<{
   updateComponent: [];
@@ -252,7 +257,9 @@ const isFullscreen = ref(false);
 const isAfterFullscreen = ref(false);
 const isShowComment = ref(false);
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);
-const localProjectMembers = ref<Array<any>>(projectMembers.value);
+const localProjectMembers = ref<Array<any>>(
+  props.members ?? projectMembers.value,
+);
 const isMobile = computed(() => {
   return q.platform.is.mobile && Screen.lt.md;
 });
@@ -262,7 +269,11 @@ const singleCommentInfo = ref<IDatasetComment>();
 
 // function
 const refresh = async () => {
-  await singleIssueStore.issueCommentsList(page.value, pageSize.value);
+  await singleIssueStore.issueCommentsList(
+    page.value,
+    pageSize.value,
+    issueData.value.project,
+  );
   emits('updateComponent');
 };
 
@@ -282,7 +293,7 @@ const createComment = async () => {
 
   if (!isReplyComment.value) {
     await singleIssueStore
-      .issueCommentCreate(comment, editorText)
+      .issueCommentCreate(comment, editorText, issueData.value?.project)
       .then(() => {
         onSuccess();
       })

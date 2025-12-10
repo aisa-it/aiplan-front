@@ -80,6 +80,7 @@
         :upload-attachment-func="uploadAttachments"
         :download-all-func="downloadAllAttachments"
         :id="issueData.id"
+        :issue-data="issueData"
         ref="selectAttachments"
       />
 
@@ -260,12 +261,30 @@ watch(drawerWidth, (val) => {
   LocalStorage.set('drawerWidth', val);
 });
 
-onMounted(() => {
+watch(
+  () => issueData.value?.project,
+  async () => {
+    if (issueData.value?.project)
+      members.value =
+        (
+          await projectStore.getProjectMembers(
+            currentWorkspaceSlug.value ?? '',
+            issueData.value?.project,
+          )
+        )?.result ?? [];
+  },
+  { deep: true },
+);
+
+const members = ref([]);
+
+onMounted(async () => {
   const saved = LocalStorage.getItem('drawerWidth');
   if (saved) {
     drawerWidth.value = Math.max(Number(saved), minWidth.value);
     targetWidth.value = Math.max(Number(saved), minWidth.value);
   }
+
   window.addEventListener('resize', updateClientWidth);
 });
 
