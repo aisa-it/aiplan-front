@@ -160,13 +160,19 @@
           </q-item-section>
         </q-item>
 
-        <q-item :disable="isMultipleIssuesTransfer ? true : false"
-          clickable
+        <q-btn
+        :disable="isMultipleIssuesTransfer ? true : false"
           flat
           dense
-          @click="settings = true"
-          >
-          <span>Настройка параметров задачи</span>
+          no-caps
+          color="primary"
+          label="Настройка параметров задачи"
+          class="q-mt-sm no-hover-btn"
+          :style="{'align-self': 'flex-start'}"
+
+          @click="settings = true">
+        </q-btn>
+
           <TransferTaskParameters
             v-model="settings"
             :issue="props.issue"
@@ -174,7 +180,6 @@
             @save="saveSettings"
             @refresh="handleRefresh"
             />
-        </q-item>
 
         <div v-if="transferErrors.length" class="full-w">
           <h6 style="margin: 12px 0 0 0 !important; color: #dc3e3e">Ошибки</h6>
@@ -746,6 +751,12 @@ onMounted(() => {
     @media screen and (max-width: 900px) {
       padding: 7px 0;
     }
+  }
+}
+
+.q-btn.no-hover-btn {
+  :deep(.q-focus-helper:hover) {
+    opacity: 0;
   }
 }
 
