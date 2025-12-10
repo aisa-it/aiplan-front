@@ -31,7 +31,7 @@
         <q-btn
           class="secondary-btn-only-icon-sm"
           icon="open_in_full"
-          @click="emits('open', issueData.sequence_id)"
+          @click="emits('open', issueData.sequence_id, issueData.project)"
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
@@ -128,7 +128,7 @@ const model = defineModel<boolean>({ default: false });
 
 const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
-  open: [id: string];
+  open: [id: string, project: string];
   close: [];
 }>();
 

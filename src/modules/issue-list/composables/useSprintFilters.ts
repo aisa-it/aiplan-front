@@ -42,9 +42,11 @@ export function useSprintFilters(emits?) {
 
       const raw = toRaw(viewForm.value);
 
-      viewForm.value.columns_to_show = raw.columns_to_show.map(
-        (column) => column?.name || column,
-      );
+      if (viewForm.value.columns_to_show) {
+        viewForm.value.columns_to_show = raw.columns_to_show.map(
+          (column) => column?.name || column,
+        );
+      }
 
       const props = JSON.parse(JSON.stringify(raw));
       await sprintStore.setMyViewProps(props);

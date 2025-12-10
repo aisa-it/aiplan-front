@@ -39,7 +39,7 @@
       />
 
       <text x="18" y="20.35" class="percentage">
-        {{ Math.round(donePercentage) }}%
+        {{ Math.round(donePercentage) }}
       </text>
     </svg>
   </div>
@@ -113,8 +113,7 @@ const donePercentage = computed(
 }
 .percentage {
   fill: var(--text-color);
-  font-family: sans-serif;
-  font-size: 0.7em;
+  font-size: 14px;
   text-anchor: middle;
 }
 </style>
