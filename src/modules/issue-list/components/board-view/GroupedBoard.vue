@@ -14,6 +14,7 @@
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, table?.entity)
         "
+        @open-issue="(id, project) => emits('openIssue', id, project)"
       />
     </div>
   </div>
@@ -38,7 +39,7 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshCard', 'refresh', 'openPreview']);
+const emits = defineEmits(['refreshCard', 'refresh', 'openPreview', 'openIssue']);
 
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);

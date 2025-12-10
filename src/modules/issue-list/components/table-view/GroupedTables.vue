@@ -50,6 +50,7 @@
               emits('openPreview', issue, index, pagination, table?.entity)
           "
           :context-type="contextType"
+          @open-issue="(id, issue) => emits('openIssue', id, issue)"
         />
       </q-expansion-item>
     </div>
@@ -79,7 +80,7 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview']);
+const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview', 'openIssue']);
 
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);
