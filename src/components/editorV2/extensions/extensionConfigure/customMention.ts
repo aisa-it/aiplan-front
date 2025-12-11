@@ -30,7 +30,15 @@ export const useMention = (
   getMembers?: (search: string) => Promise<Array<DtoProjectMemberLight> | void>,
 ) => {
   const suggestion = {
-    items: async ({ query }) => {
+    items: async ({ query, editor }) => {
+      if (!query && editor?.getText?.() === '@') {
+        editor
+          .chain()
+          .setContent('<p><span style="font-size: 14px;">@</span></p>', false)
+          .focus('end')
+          .run();
+      }
+
       let items: Array<DtoProjectMemberLight> = [];
 
       if (getMembers) {
