@@ -86,27 +86,6 @@
       style="height: fit-content; position: relative"
     >
       <div
-        v-if="loading"
-        class="flex w-full h-full items-center justify-center absolute"
-        style="z-index: 2; width: 100%; padding-top: 8px; padding-bottom: 0"
-      >
-        <div
-          class="flex w-full h-full items-center justify-center"
-          style="
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-            background-color: color-mix(
-              in srgb,
-              var(--primary-light) 70%,
-              transparent
-            );
-          "
-        >
-          <DefaultLoader class="absolute" />
-        </div>
-      </div>
-      <div
         @scroll="scrollManager?.updateBtnVisible()"
         ref="scrollContainer"
         class="row scroll-attachments scrollable-content"
