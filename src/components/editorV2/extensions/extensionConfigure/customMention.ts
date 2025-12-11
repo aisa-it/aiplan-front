@@ -31,10 +31,9 @@ export const useMention = (
 ) => {
   const suggestion = {
     items: async ({ query, editor }) => {
-      const html = editor?.getHTML?.();
-      if (html === '<p>@</p>') {
+      if (!query && editor?.getText?.() === '@') {
         editor
-          ?.chain()
+          .chain()
           .setContent('<p><span style="font-size: 14px;">@</span></p>', false)
           .focus('end')
           .run();
