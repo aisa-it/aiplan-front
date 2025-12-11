@@ -267,6 +267,7 @@ import {
 //types
 import { useTusUploader } from 'src/composables/useTusUploader';
 import AttachmentsInfo from './AttachmentsInfo.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   id: string;
@@ -275,6 +276,7 @@ const props = defineProps<{
   deleteAttachmentFunc: (value: string) => Promise<void>;
   getAttachmentFunc: (projectID: Ref<string>, issueID: Ref<string>) => any; //getAttachmentFunc: () => Promise<void>;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
+  issueData?: DtoIssue;
 }>();
 
 const uploader = useTusUploader({
@@ -361,9 +363,18 @@ const scroll = (direction: number) => {
 
 const getAttachments = async () => {
   if (currentWorkspaceSlug.value && selectedDocId.value) {
-    rows.value = await props.getAttachmentFunc(currentWorkspaceSlug, selectedDocId);
-  } else if (currentProjectID.value && currentIssueID.value) {
-    rows.value = await props.getAttachmentFunc(currentProjectID, currentIssueID);
+    rows.value = await props.getAttachmentFunc(
+      currentWorkspaceSlug,
+      selectedDocId,
+    );
+  } else if (
+    (props.issueData?.project ?? currentProjectID.value) &&
+    currentIssueID.value
+  ) {
+    rows.value = await props.getAttachmentFunc(
+      currentProjectID,
+      currentIssueID,
+    );
   } else {
     return;
   }

@@ -13,7 +13,10 @@
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
       "
-      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
+      @open-issue="
+        (id, issue) =>
+          openIssue(id, issue.project ?? (route.params.project as string))
+      "
     />
     <GroupedBoard
       v-if="isKanbanEnabled && issuesStore.groupedIssueList?.length"
@@ -28,7 +31,10 @@
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
       "
-      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
+      @open-issue="
+        (id, issue) =>
+          openIssue(id, issue.project ?? (route.params.project as string))
+      "
     />
     <div
       v-if="!issuesStore.groupedIssueList?.length"
@@ -155,10 +161,7 @@ async function openPreview(
     return;
 
   const id = String(issue.sequence_id);
-  if (
-    isMobile.value ||
-    props.contextType === 'sprint'
-  ) {
+  if (isMobile.value) {
     openIssue(id, issue.project ?? (route.params.project as string));
     return;
   } else if (currentIssueID.value === id && isPreview.value) return;
