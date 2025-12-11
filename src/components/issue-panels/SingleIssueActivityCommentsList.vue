@@ -122,7 +122,10 @@ const handleUpdateComment = async (data: IIssueCommentUpdate) => {
 
 const handleDeleteComment = async () => {
   await singleIssueStore
-    .issueCommentDelete(issueComment.value.id)
+    .issueCommentDelete(
+      issueComment.value.id,
+      singleIssueStore.issueData?.project,
+    )
     .then(() => {
       emits('refresh');
     })
