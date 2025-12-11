@@ -27,7 +27,7 @@ export const useViewPropsStore = defineStore('view_props', {
         },
         issueView: 'list',
         showEmptyGroups: true,
-        showSubIssues: true,
+        hideSubIssues: false,
         draft: true,
         showOnlyActive: false,
         group_tables_hide: {},
@@ -72,7 +72,7 @@ export const useViewPropsStore = defineStore('view_props', {
             },
             issueView: 'list',
             showEmptyGroups: true,
-            showSubIssues: true,
+            hideSubIssues: false,
             draft: false,
             showOnlyActive: false,
             group_tables_hide: {},
@@ -93,7 +93,6 @@ export const useViewPropsStore = defineStore('view_props', {
       if (!this.props) return false;
 
       if (!this.props?.group_tables_hide) {
-        console.log(this.props);
         this.props['group_tables_hide'] = {};
         return false;
       }

@@ -330,6 +330,8 @@ export const useProjectStore = defineStore('project-store', {
             props.filters.group_by = NEW_GROUP_BY_OPTIONS[0].value;
           }
 
+          props.hideSubIssues = props.hideSubIssues ?? false;
+
           this.projectProps = props || null;
           return res.data;
         })

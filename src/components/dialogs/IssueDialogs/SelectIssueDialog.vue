@@ -80,7 +80,7 @@ const params = reactive<IIssueSelectRequest>({
   limit: 10,
   order_by: 'sequence_id',
   desc: true,
-  show_sub_issues: true,
+  hide_sub_issues: false,
   only_count: false,
   search_query: '',
 });

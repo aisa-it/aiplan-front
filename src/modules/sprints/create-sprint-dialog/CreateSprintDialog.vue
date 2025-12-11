@@ -229,7 +229,6 @@ const handleOpen = async () => {
         workspaceStore.workspaceInfo?.id ?? '',
         props.sprintId,
         {},
-        { show_sub_issues: true },
       )
     ).data.issues;
   }

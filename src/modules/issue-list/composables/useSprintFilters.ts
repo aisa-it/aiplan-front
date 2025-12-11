@@ -7,8 +7,10 @@ import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
+import { useRoute } from 'vue-router';
 
 export function useSprintFilters(emits?) {
+  const route = useRoute();
   const sprintStore = useSprintStore();
   const { sprintProps, issuesLoader, getStatusesAsArray } =
     storeToRefs(sprintStore);
@@ -21,12 +23,12 @@ export function useSprintFilters(emits?) {
     const isNoGroupNone =
       sprintProps?.value?.filters?.group_by !==
       SPRINT_GROUP_BY_OPTIONS[0].value;
-    const isShowSubIssues = !sprintProps?.value?.showSubIssues;
+    const isNotHideSubIssues = sprintProps?.value?.hideSubIssues;
     const isShowOnlyActive = sprintProps?.value?.showOnlyActive;
     const isStatusLength = !!sprintProps.value?.filters?.states?.length;
 
     if (
-      isShowSubIssues ||
+      isNotHideSubIssues ||
       isShowOnlyActive ||
       isNoGroupNone ||
       isStatusLength
@@ -49,11 +51,27 @@ export function useSprintFilters(emits?) {
       }
 
       const props = JSON.parse(JSON.stringify(raw));
-      await sprintStore.setMyViewProps(props);
 
-      await sprintStore.getMyViewProps();
+      const { showSubIssues, ...newProps } = props;
+
+      await sprintStore.setMyViewProps(
+        route.params.workspace as string,
+        route.params.sprint as string,
+        newProps,
+      );
+
+      await sprintStore.getMyViewProps(
+        route.params.workspace as string,
+        route.params.sprint as string,
+      );
+
+      sprintProps.value.issueView = sprintProps.value.issueView || 'list';
+
+      sprintProps.value.hideSubIssues =
+        sprintProps.value.hideSubIssues ?? false;
 
       viewForm.value = JSON.parse(JSON.stringify(sprintProps.value));
+
       emits?.('update', sprintProps.value?.filters?.group_by);
     } finally {
       issuesLoader.value = false;
@@ -108,13 +126,13 @@ export function useSprintFilters(emits?) {
         }
       }
     },
-    { immediate: true },
+    { immediate: true, deep: true },
   );
 
   const toggles = computed(() => [
     {
-      label: 'Показывать подзадачи',
-      model: 'showSubIssues',
+      label: 'Скрыть подзадачи',
+      model: 'hideSubIssues',
     },
     {
       label: 'Показывать черновики',
