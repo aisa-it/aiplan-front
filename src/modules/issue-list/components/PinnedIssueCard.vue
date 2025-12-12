@@ -10,7 +10,7 @@
         }}
       </span>
 
-      <p class="pinned-card__issue-name">
+      <div class="pinned-card__issue-name">
         <div class="abbriviated-text">
           {{ props.card?.name }}
         </div>
@@ -21,7 +21,7 @@
           style="left: 2px; right: auto; top: -6px"
           >Черновик</q-badge
         >
-      </p>
+      </div>
     </div>
 
     <div class="pinned-card__chips">
