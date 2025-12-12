@@ -73,7 +73,7 @@
 
 <script lang="ts">
 // core
-import { defineComponent, onMounted, toRef, ref, computed } from 'vue';
+import { defineComponent, onMounted, toRef, ref, computed, onBeforeMount, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Screen } from 'quasar';
 
@@ -168,6 +168,9 @@ export default defineComponent({
     // onUnmounted(() => {
     //   userActivityMap.$destroy();
     // })
+    onBeforeMount(() => {
+      userStore.clearUserActivityMap();
+    })
 
     onMounted(async () => {
       userInfo.value = await userStore
@@ -185,6 +188,10 @@ export default defineComponent({
       await userStore
         .getUserActivityDateById(userId.value as string, { from: from, to: to })
         .finally(() => (loadReq.value = false));
+    });
+
+    onUnmounted(() => {
+      userStore.clearUserActivityMap();
     });
 
     return {

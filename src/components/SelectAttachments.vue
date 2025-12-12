@@ -81,31 +81,10 @@
       @change="handleDrop"
     />
     <div
-      v-show="rows.length || uploadsStates.length"
+      v-if="rows.length || uploadsStates.length || loading"
       class="flex"
       style="height: fit-content; position: relative"
     >
-      <div
-        v-if="loading"
-        class="flex w-full h-full items-center justify-center absolute"
-        style="z-index: 2; width: 100%; padding-top: 8px; padding-bottom: 0"
-      >
-        <div
-          class="flex w-full h-full items-center justify-center"
-          style="
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-            background-color: color-mix(
-              in srgb,
-              var(--primary-light) 70%,
-              transparent
-            );
-          "
-        >
-          <DefaultLoader class="absolute" />
-        </div>
-      </div>
       <div
         @scroll="scrollManager?.updateBtnVisible()"
         ref="scrollContainer"
@@ -143,52 +122,64 @@
         </div>
 
         <div class="flex no-wrap">
-          <SelectAttachmentsCard
-            v-for="row in rows"
-            :key="row.id"
-            :isEdit="isEdit"
-            :row="row"
-            class="inline-block"
-            @delete="handleDeleteClick(row)"
-            @open="
-              () => {
-                openDoc = true;
-                file = row;
-              }
-            "
-          />
-          <SelectAttachmentsCard
-            v-for="file of uploadsStates"
-            :key="file.name"
-            :isEdit="isEdit"
-            :row="{
-              asset: {
-                name: file.name,
-                size: file.size || 0,
-                content_type: '',
+          <template v-if="rows.length || uploadsStates.length">
+            <SelectAttachmentsCard
+              v-for="row in rows"
+              :key="row.id"
+              :isEdit="isEdit"
+              :row="row"
+              class="inline-block"
+              @delete="handleDeleteClick(row)"
+              @open="
+                () => {
+                  openDoc = true;
+                  file = row;
+                }
+              "
+            />
+            <SelectAttachmentsCard
+              v-for="file of uploadsStates"
+              :key="file.name"
+              :isEdit="isEdit"
+              :row="{
+                asset: {
+                  name: file.name,
+                  size: file.size || 0,
+                  content_type: '',
+                  id: file.id || '',
+                },
+                created_at: new Date().toISOString(),
                 id: file.id || '',
-              },
-              created_at: new Date().toISOString(),
-              id: file.id || '',
-            }"
-            class="inline-block"
-            @cancel="cancelUpload(file.name)"
-            @delete="
-              (name) => {
-                handleDeleteClick({
-                  asset: { name, id: file.id, size: file.size },
-                  id: file.id,
-                });
-              }
-            "
-            @retry="retryUpload(file.name)"
-            :status="file.status"
-            :progress="
-              file.status === 'uploading' || file.status === 'pending'
-                ? file.progress
-                : null
-            "
-          />
+              }"
+              class="inline-block"
+              @cancel="cancelUpload(file.name)"
+              @delete="
+                (name) => {
+                  handleDeleteClick({
+                    asset: { name, id: file.id, size: file.size },
+                    id: file.id,
+                  });
+                }
+              "
+              @retry="retryUpload(file.name)"
+              :status="file.status"
+              :progress="
+                file.status === 'uploading' || file.status === 'pending'
+                  ? file.progress
+                  : null
+              "
+            />
+          </template>
+          <template v-else>
+            <q-skeleton
+              v-for="n in 3"
+              :key="n"
+              type="rect"
+              class="q-mr-sm"
+              width="180px"
+              height="130px"
+            />
+          </template>
         </div>
       </div>
     </div>
