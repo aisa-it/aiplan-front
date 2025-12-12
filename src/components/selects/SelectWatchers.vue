@@ -280,9 +280,6 @@ const loadMembersOnScroll = async (e?: any) => {
 
 const updateProjectWatchers = async (e: any) => {
   const currentIds = watcherid;
-  const watchersIds = e
-    ? e.map((d) => (d.member ? d.member?.id || d?.id : d))
-    : [];
   if (props.issueid) {
     singleIssueStore
       .updateIssueData(
@@ -290,7 +287,9 @@ const updateProjectWatchers = async (e: any) => {
         props.projectid,
         props.issueid,
         {
-          watchers_list: watchersIds,
+          watchers_list: e
+            ? e.map((d) => (d.member ? d.member.id || d.id : d))
+            : [],
         },
       )
       .then(() => {
@@ -299,7 +298,8 @@ const updateProjectWatchers = async (e: any) => {
       })
       .catch(() => (watcherid.value = currentIds));
   } else {
-    emit('update:watchers', watchersIds);
+    emit('update:watchers',
+    e ? e.map((d) => (d)) : []);
   }
 };
 
