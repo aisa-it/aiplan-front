@@ -78,6 +78,10 @@ export const useUserStore = defineStore('user-store', {
       this.userWorkspaces = [];
     },
 
+    async clearUserActivityMap() {
+      this.userActivityMap = {} as TypesActivityTable;
+    },
+
     async getUserInfo(): Promise<DtoUser> {
       await usersApi.getCurrentUser().then((res) => {
         this.user = res.data;
