@@ -11,9 +11,9 @@
       </span>
 
       <p class="pinned-card__issue-name">
-        <span class="abbriviated-text">
+        <div class="abbriviated-text">
           {{ props.card?.name }}
-        </span>
+        </div>
         <q-badge
           v-if="props.card?.draft"
           floating
