@@ -86,7 +86,7 @@
           </div>
           <UserIcon class="issue-selector-icon mr-12" />
 
-          <select-assignee
+          <SelectAssignee
             v-model:assigness="assigness"
             :projectid="project.id"
             :defaultAssignee="project.default_assignees_details"
@@ -94,7 +94,7 @@
             :new-issue="true"
             label="Выберите исполнителя"
             class="col centered-horisontally"
-          ></select-assignee>
+          ></SelectAssignee>
         </div>
         <div class="row q-mb-sm centered-horisontally">
           <div class="col centered-horisontally issue-selector-label">
@@ -103,14 +103,14 @@
           </div>
           <ObserveIcon class="issue-selector-icon mr-12" />
 
-          <select-watchers
+          <SelectWatchers
             v-model:watchers="watchers"
             :projectid="project.id"
             :current-member="user"
             :new-issue="true"
             label="Выберите наблюдателя"
             class="col centered-horisontally"
-          ></select-watchers>
+          ></SelectWatchers>
         </div>
       </div>
       <q-separator vertical class="q-mx-md" />

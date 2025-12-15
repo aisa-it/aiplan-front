@@ -269,7 +269,7 @@ const handleUpdateAssignees = async (e) => {
   } else {
     emit(
       'update:assigness',
-      e ? e.map((d) => (d.member ? d.member.id || d.id : d)) : [],
+      e ? e.map((d) => (d)) : []
     );
   }
 };
