@@ -3,14 +3,14 @@
     <q-card-section class="col q-pa-none q-mr-md" style="margin-top: 36px">
       <SprintTable :sprints="tableRows" />
     </q-card-section>
-    <q-card-section v-if="ganttTasks.length" class="col q-pa-none">
-      <FrappeGantt :tasks="ganttTasks" :view-mode="'Day'" />
+    <q-card-section v-if="issues.length" class="col q-pa-none">
+      <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
     </q-card-section>
   </q-card>
 </template>
 <script setup lang="ts">
 //cores
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, shallowRef } from 'vue';
 //types
 import { ISprintRow } from '../../sprint-table/types';
 //components
@@ -18,10 +18,15 @@ import SprintTable from '../../sprint-table/ui/SprintTable.vue';
 import FrappeGantt from './components/gantt-chart/ui/frappe-gantt/ui/FrappeGantt.vue';
 import { ICustomGanttTask } from './components/gantt-chart/ui/frappe-gantt/types';
 import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import { useRoute } from 'vue-router';
 
 const props = defineProps<{
   sprint: DtoSprint;
 }>();
+
+const sprintStore = useSprintStore();
+const route = useRoute();
 
 const tableRows = ref<ISprintRow[]>([
   {
@@ -120,6 +125,22 @@ const tableRows = ref<ISprintRow[]>([
     ],
   },
 ]);
+
+const issues = shallowRef<any>([]);
+
+const refresh = async () => {
+  issues.value = (
+    await sprintStore.getIssueList(
+      route.params.workspace as string,
+      route.params.sprint as string,
+    )
+  ).data.issues;
+  console.log(issues.value);
+};
+
+onMounted(async () => {
+  refresh();
+});
 
 const ganttTasks = computed<ICustomGanttTask[]>(() => {
   return tableRows.value.flatMap((sprint) => {

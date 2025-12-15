@@ -9,10 +9,13 @@ import { ref, onMounted, watch } from 'vue';
 //styles
 import '/node_modules/frappe-gantt/dist/frappe-gantt.css';
 import { ICustomGanttTask } from '../types';
+import { DtoIssue, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   tasks: ICustomGanttTask[];
   viewMode?: 'Day' | 'Week' | 'Month';
+  issues: DtoIssue;
+  sprint: DtoSprint;
 }>();
 
 const ganttContainer = ref<HTMLDivElement | null>(null);
