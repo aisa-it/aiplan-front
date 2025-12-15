@@ -1,6 +1,10 @@
 <template>
   <NavMenuHeader />
-  <div class="nav-menu-bottom-bar" :style="{ height: defineHeight }">
+  <div
+    class="nav-menu-bottom-bar"
+    data-tour="sidebar"
+    :style="{ height: defineHeight }"
+  >
     <ExpansionGroup></ExpansionGroup>
   </div>
   <q-banner v-if="isDev()" rounded class="bg-orange text-white">

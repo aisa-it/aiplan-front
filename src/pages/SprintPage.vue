@@ -11,7 +11,7 @@
 
         <SprintFiltersList
           v-if="is.object(sprintProps)"
-          :columns="allSprintColumns"
+          :columns="sprintStore.sortAllColumns"
           @update="load()"
         />
       </q-card-section>
@@ -40,8 +40,6 @@ import {
 } from 'vue';
 
 import { getSprint } from 'src/modules/sprints/services/api';
-import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 
 import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersList.vue';
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
@@ -57,12 +55,12 @@ const { onRequest } = useDefaultIssues('sprint');
 const { getGroupedIssues } = useGroupedIssues('sprint');
 
 const router = useRouter();
-const sprint = ref({} as DtoSprint);
 const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
 
 const {
+  sprint,
   isGroupingEnabled,
   isKanbanEnabled,
   isGanttDiagramm,

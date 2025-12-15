@@ -52,6 +52,7 @@
           @openPreview="
             (id) => emits('openPreview', id, parsePagination(quasarPagination))
           "
+          @open-issue="(id, project) => emits('openIssue', id, project)"
         />
       </div>
     </div>
@@ -91,12 +92,12 @@ import {
 import ArrowUp from 'src/components/icons/ArrowUp.vue';
 import { EventBus } from 'quasar';
 
-const emits = defineEmits(['refresh', 'openPreview']);
 const props = defineProps<{
   table: any;
   groupBy: string;
   contextType: 'project' | 'sprint';
 }>();
+const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
 
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,

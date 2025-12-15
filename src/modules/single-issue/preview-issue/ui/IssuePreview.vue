@@ -14,6 +14,7 @@
         ...QUASAR_SELECTORS_CLASSES,
         'prevent-click-issue-outside',
         'prevent-click-comments-create',
+        'prevent-click-comments-edit',
         'main-toolbar',
       ],
     }"
@@ -31,7 +32,7 @@
         <q-btn
           class="secondary-btn-only-icon-sm"
           icon="open_in_full"
-          @click="emits('open', issueData.sequence_id)"
+          @click="emits('open', issueData.sequence_id, issueData.project)"
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
@@ -79,6 +80,7 @@
         :upload-attachment-func="uploadAttachments"
         :download-all-func="downloadAllAttachments"
         :id="issueData.id"
+        :issue-data="issueData"
         ref="selectAttachments"
       />
 
@@ -128,7 +130,7 @@ const model = defineModel<boolean>({ default: false });
 
 const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
-  open: [id: string];
+  open: [id: string, project: string];
   close: [];
 }>();
 
@@ -259,12 +261,30 @@ watch(drawerWidth, (val) => {
   LocalStorage.set('drawerWidth', val);
 });
 
-onMounted(() => {
+watch(
+  () => issueData.value?.project,
+  async () => {
+    if (issueData.value?.project)
+      members.value =
+        (
+          await projectStore.getProjectMembers(
+            currentWorkspaceSlug.value ?? '',
+            issueData.value?.project,
+          )
+        )?.result ?? [];
+  },
+  { deep: true },
+);
+
+const members = ref([]);
+
+onMounted(async () => {
   const saved = LocalStorage.getItem('drawerWidth');
   if (saved) {
     drawerWidth.value = Math.max(Number(saved), minWidth.value);
     targetWidth.value = Math.max(Number(saved), minWidth.value);
   }
+
   window.addEventListener('resize', updateClientWidth);
 });
 

@@ -6,8 +6,9 @@
       :rows-count="rowsCount"
       :loading="loadingTable"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(issue) => openPreview(issue)"
+      @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
+      @open-issue="(id) => openIssue(id)"
     />
     <div
       v-else
@@ -109,14 +110,10 @@ async function openPreview(issue: DtoIssue) {
     return;
 
   const id = String(issue.sequence_id);
-  if (
-    (currentIssueID.value === id && isPreview.value) ||
-    isMobile.value ||
-    props.contextType === 'sprint'
-  ) {
+  if (isMobile.value) {
     openIssue(id, issue.project ?? (route.params.project as string));
     return;
-  }
+  } else if (currentIssueID.value === id && isPreview.value) return;
 
   isPreview.value = false;
   issueCommentsData.value = undefined;

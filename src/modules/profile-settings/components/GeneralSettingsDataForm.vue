@@ -113,7 +113,7 @@
           <q-btn
             class="secondary-btn form-userdata__btn"
             no-caps
-            @click="openChangeEmailDialog"
+            @click="changeEmail"
           >
             Изменить
           </q-btn>
@@ -252,12 +252,6 @@
       <DefaultLoader />
     </q-inner-loading>
   </q-form>
-
-  <ChangeEmailDialog
-    v-model="isOpenChangeEmailDialog"
-    :new-email="new_email"
-    @email-updated="userInfo.email = new_email"
-  />
 </template>
 
 <script setup lang="ts">
@@ -267,12 +261,12 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useUtilsStore } from 'src/stores/utils-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 // constants
 import { TIMEZONES } from 'src/constants/constants';
 // components
 import UploadUserAvatarDialog from 'src/components/dialogs/UploadUserAvatarDialog.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-import ChangeEmailDialog from './ChangeEmailDialog.vue';
 // validation
 import {
   isEmpty,
@@ -296,6 +290,7 @@ import { api } from '../services/api';
 // stores
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
+const { setNotificationView } = useNotificationStore();
 // storeToRefs
 const { user } = storeToRefs(userStore);
 const { botURL } = storeToRefs(utilsStore);
@@ -337,14 +332,16 @@ const {
   handleResetProfileToken,
 } = useFormToken();
 
-const isOpenChangeEmailDialog = ref(false);
-
-const openChangeEmailDialog = async () => {
+const changeEmail = async () => {
   if (!new_email.value) return;
   new_email.value = new_email.value.trim();
 
   await api.changeMyEmail({ new_email: new_email.value }).then(() => {
-    isOpenChangeEmailDialog.value = true;
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Ссылка для подтверждения отправлена на указанный email',
+    });
   });
 };
 

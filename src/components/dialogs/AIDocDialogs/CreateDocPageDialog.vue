@@ -213,6 +213,8 @@ import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 // utils
 import { mapDocNode } from 'src/utils/tree';
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
+import { getDocumentLink } from 'src/utils/links';
+import { getSuccessCreateDocMessage } from 'src/utils/notifications';
 //types
 import {
   AIDOC_ACCEPT_FILE_TYPES_STRING,
@@ -354,8 +356,9 @@ const onSave = async () => {
   const contents = await handleEditorValue(state.content);
   isLoading.value = true;
   try {
+    let resId;
     if (!folder.id) {
-      await docStore.createRootDoc(
+      resId = await docStore.createRootDoc(
         workspaceSlug.value,
         {
           doc: {
@@ -368,7 +371,7 @@ const onSave = async () => {
         attachments.value,
       );
     } else {
-      await docStore.createChildDoc(
+      resId = await docStore.createChildDoc(
         workspaceSlug.value,
         folder.id,
         {
@@ -384,10 +387,11 @@ const onSave = async () => {
     }
 
     emit('successCreate');
+    const link = getDocumentLink(workspaceSlug.value, resId);
     setNotificationView({
       open: true,
       type: 'success',
-      customMessage: 'Документ успешно создан',
+      customMessage: getSuccessCreateDocMessage(link),
     });
   } catch (error) {
     console.error('Ошибка при создании документа:', error);

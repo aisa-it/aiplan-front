@@ -86,6 +86,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
         this.newRootDoc?.id,
       );
       await this.getRootDocs(workspaceSlug);
+      return this.newRootDoc?.id
     },
 
     async createComment(data) {
@@ -141,6 +142,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
         this.newChildrenDoc?.id,
       );
       await this.getRootDocs(workspaceSlug);
+      return this.newChildrenDoc?.id
     },
 
     async moveDoc(

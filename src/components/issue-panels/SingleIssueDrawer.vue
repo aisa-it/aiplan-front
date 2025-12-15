@@ -6,7 +6,8 @@
     />
     <q-separator class="issue-panel__separator" />
 
-    <div class="row q-pt-md centered-horisontally">
+    <template v-if="issueData">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col q-mb-sm">
         <div class="row items-center">
           <CheckStatusIcon class="issue-icon" /><span class="q-ml-sm">
@@ -33,9 +34,9 @@
           @refresh="handleRefresh"
         />
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <UserIcon class="issue-icon" /><span class="q-ml-sm"> Автор </span>
@@ -67,9 +68,9 @@
           {{ aiplan.UserName(issueData.author_detail).join(' ') }}
         </div>
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <UsersIcon class="issue-icon" />
@@ -95,9 +96,9 @@
           @refresh="handleRefresh"
         ></SelectAssignee>
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <ObserveIcon class="issue-icon" />
@@ -152,11 +153,11 @@
         >
         </SelectPriority>
       </div>
-    </div>
+      </div>
 
-    <q-separator class="q-mt-md issue-panel__separator" />
+      <q-separator class="q-mt-md issue-panel__separator" />
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <CreateDateIcon :height="19" class="issue-icon" />
@@ -166,9 +167,9 @@
       <div class="col pseudo-btn">
         {{ formatDateTime(issueData.created_at) }}
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <ExecuteDateIcon :height="19" class="issue-icon" />
@@ -193,9 +194,9 @@
           @refresh="handleRefresh"
         />
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <StartDateIcon :height="19" class="issue-icon" />
@@ -205,29 +206,30 @@
       <div class="col pseudo-btn">
         {{ getDate(issueData.start_date) }}
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <EndDateIcon :height="19" class="issue-icon" />
           <span class="q-ml-sm">Дата завершения</span>
         </div>
       </div>
-      <div class="col pseudo-btn">
+      <div class="col pseudo-btn column">
         {{ getDate(issueData.completed_at) }}
-        <span
+        <div
           v-if="issueData.target_date && issueData.completed_at"
           :class="[
-            'q-ml-xs',
+            'text-center',
             getCompareDate < 0 ? 'text-negative' : 'text-positive',
           ]"
-          >({{ getCompareText() }})</span
         >
+          ({{ getCompareText() }})
+        </div>
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <ParentIcon class="issue-icon" />
@@ -265,9 +267,9 @@
           ><CloseIcon
         /></q-btn>
       </div>
-    </div>
+      </div>
 
-    <div class="row q-pt-md centered-horisontally">
+      <div class="row q-pt-md centered-horisontally">
       <div class="col">
         <div class="row items-center">
           <AlertIcon :color="'rgb(236, 177, 104)'" class="issue-icon" />
@@ -317,25 +319,56 @@
           @refresh="handleRefresh"
         />
       </div>
-    </div>
+      </div>
 
-    <q-separator class="q-mt-md issue-panel__separator" />
+      <q-separator class="q-mt-md issue-panel__separator" />
 
-    <SelectLinks
-      :projectid="issueData.project"
-      :issueid="issueData.id"
-      :links="issueData.issue_link"
-      :project="issueData.project_detail"
-      :isDisabled="
-        hasPermissionByIssue(
-          issueData,
-          issueData.project_detail ?? project,
-          'change-issue-secondary',
-        )
-      "
-      @refresh="handleRefresh"
-    >
-    </SelectLinks>
+      <SelectLinks
+        :projectid="issueData.project"
+        :issueid="issueData.id"
+        :links="issueData.issue_link"
+        :project="issueData.project_detail"
+        :isDisabled="
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'change-issue-secondary',
+          )
+        "
+        @refresh="handleRefresh"
+      >
+      </SelectLinks>
+    </template>
+    <template v-else>
+      <div class="q-pt-md">
+        <q-skeleton type="rect" height="32px" class="q-mb-md" />
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="row q-pt-sm centered-horisontally items-center"
+        >
+          <div class="col">
+            <q-skeleton type="text" width="70%" />
+          </div>
+          <div class="col">
+            <q-skeleton type="rect" height="32px" />
+          </div>
+        </div>
+        <q-separator class="q-mt-md issue-panel__separator" />
+        <div
+          v-for="n in 4"
+          :key="'bottom-' + n"
+          class="row q-pt-sm centered-horisontally items-center"
+        >
+          <div class="col">
+            <q-skeleton type="text" width="70%" />
+          </div>
+          <div class="col">
+            <q-skeleton type="rect" height="32px" />
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 <script setup lang="ts">
@@ -496,15 +529,12 @@ const watchers = computed(() =>
 
 const getCompareText = () => {
   const dateToDays = getCompareDate.value / 86400000;
-  if (dateToDays === 0 || dateToDays > 9) {
-    return 'в срок';
-  } else if (dateToDays < -9) {
-    return 'не в срок';
-  } else {
-    return `${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
-      Math.abs(getCompareDate.value),
-    )}`;
-  }
+  let captureTime = 'в срок';
+  if (dateToDays < 0) captureTime = 'не в срок';
+
+  return `${captureTime}, ${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
+    Math.abs(getCompareDate.value),
+  )}`;
 };
 
 onMounted(() => {

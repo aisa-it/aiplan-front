@@ -1,5 +1,8 @@
 <template>
-  <div class="pinned-card elevator-1">
+  <div
+    class="pinned-card elevator-1"
+    @click="emits('openPreview', card.sequence_id)"
+  >
     <div class="pinned-card__header">
       <span class="pinned-card__issue-id">
         {{
@@ -7,17 +10,10 @@
         }}
       </span>
 
-      <q-btn
-        class="pinned-card__issue-name"
-        no-caps
-        flat
-        style="padding: 0"
-        @click="emits('openPreview', card.sequence_id)"
-      >
-        <span class="abbriviated-text">
+      <div class="pinned-card__issue-name">
+        <div class="abbriviated-text">
           {{ props.card?.name }}
-        </span>
-        <HintTooltip>{{ card?.name }}</HintTooltip>
+        </div>
         <q-badge
           v-if="props.card?.draft"
           floating
@@ -25,7 +21,7 @@
           style="left: 2px; right: auto; top: -6px"
           >Черновик</q-badge
         >
-      </q-btn>
+      </div>
     </div>
 
     <div class="pinned-card__chips">
@@ -132,6 +128,7 @@ const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
   padding: 12px;
   border-radius: 16px;
   border: 1px solid var(--dark-border-color);
+  cursor: pointer;
 
   &__header {
     display: flex;
@@ -148,14 +145,8 @@ const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
   }
 
   &__issue-name {
-    &:deep(.q-btn__content) {
-      font-size: 16px;
-      font-weight: 400;
-      text-align: left;
-      color: var(--sub-text-color);
-      padding: 0 4px; // Отличается от макета. Добавлено, поскольку обводка при наведении будет в упор к тексту
-      letter-spacing: 0.5px;
-    }
+    padding-top: 4px;
+    color: var(--sub-text-color);
   }
 
   &__chips {

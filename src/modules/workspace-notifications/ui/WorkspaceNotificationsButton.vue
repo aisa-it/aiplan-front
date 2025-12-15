@@ -1,10 +1,10 @@
 <template>
-  <q-btn flat dense class="btn-only-icon-sm bordered">
+  <q-btn flat dense class="btn-only-icon-sm bordered" data-tour="notifications">
     <BellIcon />
     <q-badge v-if="count && isShow" color="red" floating rounded>
       {{ count }}
     </q-badge>
-    <slot/>
+    <slot />
   </q-btn>
 </template>
 
