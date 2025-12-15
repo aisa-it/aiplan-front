@@ -7,19 +7,14 @@
         </h4>
         <span class="tariff__expiration-date">До 31.12.26</span>
       </div>
-      <q-btn
-        class="primary-btn-sm tariff__upgrage-btn"
-        flat
-        dense
-        no-caps
-      >
+      <q-btn class="primary-btn-sm tariff__upgrage-btn" flat dense no-caps>
         Прокачать команду
       </q-btn>
     </div>
 
     <div class="tariff__specs">
       <div v-for="(value, spec, idx) of info" :key="idx" class="tariff__card">
-        <p class="tariff__parameter body-1">{{ spec }}</p>
+        <p class="tariff__parameter">{{ spec }}</p>
         <p v-if="value === false" class="tariff__parameter-value">
           <CloseRoundedIcon /> Нет
         </p>
@@ -47,7 +42,7 @@
         :options="workspacesUsedRows"
         emit-value
         map-options
-        class="tariff-table__select body-1"
+        class="tariff-table__select"
       />
     </template>
 
@@ -187,6 +182,18 @@ const tariffUsageData = [
     users: { currentValue: 800, maxValue: 1200 },
     attachments: { currentValue: 25, maxValue: 25 },
   },
+  {
+    name: 'Тариф Б',
+    projects: { currentValue: 5, maxValue: 5 },
+    users: { currentValue: 400, maxValue: 1200 },
+    attachments: { currentValue: 23, maxValue: 25 },
+  },
+  {
+    name: 'Тариф В',
+    projects: { currentValue: 3, maxValue: 5 },
+    users: { currentValue: 1200, maxValue: 1200 },
+    attachments: { currentValue: 10, maxValue: 25 },
+  },
 ];
 
 const tariffPurchasesData = [
@@ -229,23 +236,18 @@ onMounted(async () => {
   }
 
   &__heading {
-    font-weight: 500;
-    font-size: 24px;
-    line-height: 100%;
     letter-spacing: 0;
     color: var(--dark);
   }
 
   &__expiration-date {
     font-weight: 400;
-    font-size: 16px;
     line-height: 22px;
     letter-spacing: 0.5px;
   }
 
   &__upgrage-btn {
     padding: 11px 16px !important;
-    font-size: 16px;
   }
 
   &__specs {
@@ -261,7 +263,10 @@ onMounted(async () => {
   }
 
   &__parameter {
+    margin: 0;
+    padding-bottom: 8px;
     word-break: keep-all;
+    letter-spacing: 0.5px;
   }
 
   &__parameter-value {
@@ -270,18 +275,15 @@ onMounted(async () => {
     gap: 8px;
     min-height: 24px;
     margin: 0;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 100%;
-    letter-spacing: 0.15px;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.5px;
   }
 }
 
 .tariff-table {
   &:deep(.q-field__native) {
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 22px;
+    font-size: 14px;
     letter-spacing: 0.5px;
     color: var(--text-color);
   }
@@ -292,22 +294,27 @@ onMounted(async () => {
     overflow: hidden;
   }
 
+  &:deep(.q-table__title) {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+  }
+
   &:deep(.q-table__top) {
-    padding: 16px 0;
+    padding: 0;
   }
 
   &:deep(th) {
     font-weight: 500;
-    font-size: 20px;
-    line-height: 100%;
+    font-size: 16px;
     letter-spacing: 0.15px;
   }
 
   &:deep(td) {
-    font-weight: 400;
-    font-size: 16px !important;
-    line-height: 22px;
-    letter-spacing: 0.5px;
+    font-size: 14px !important;
+    letter-spacing: 0.15px;
   }
 }
 
@@ -316,16 +323,6 @@ onMounted(async () => {
     &__specs {
       display: flex;
       flex-direction: column;
-    }
-  }
-
-  .tariff-table {
-    &:deep(th) {
-      font-size: 16px;
-    }
-
-    &:deep(td) {
-      font-size: 14px !important;
     }
   }
 }
