@@ -9,52 +9,65 @@ import { ref, onMounted, watch } from 'vue';
 //styles
 import '/node_modules/frappe-gantt/dist/frappe-gantt.css';
 import { ICustomGanttTask } from '../types';
-import { DtoIssue, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoSprint,
+  DtoStateLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  tasks: ICustomGanttTask[];
+  tasks?: ICustomGanttTask[];
   viewMode?: 'Day' | 'Week' | 'Month';
-  issues: DtoIssue;
+  issues: DtoIssue[];
   sprint: DtoSprint;
 }>();
 
 const ganttContainer = ref<HTMLDivElement | null>(null);
 let ganttInstance: Gantt | null = null;
 
-const ganttTasks = ref<ICustomGanttTask[]>(
-  props.tasks.map((task) => ({
+const ganttTasks = ref<any[]>(
+  props.issues.map((task) => ({
     ...task,
-    name: `${task.name} ${getStatusIcon(task.status)}`,
-    custom_class: getStatusClass(task.status),
+    name: `${task.name} ${getStatusIcon(task.state_detail)}`,
+    custom_class: getStatusClass(task.state_detail),
+    start: task.created_at,
+    end: task.target_date ?? props.sprint.end_date,
+    progress: 100,
+    status: task.state_detail?.name,
+    parentId: task.parent,
   })),
 );
 
-function getStatusClass(status: string) {
-  switch (status) {
-    case 'Открыта':
+function getStatusClass(status: DtoStateLight | null | undefined) {
+  if (!status) return '';
+  switch (status.group) {
+    case 'unstarted': //'Открыта':
+    case 'backlog':
       return 'status-open';
-    case 'В работе':
+    case 'started': //'В работе':
       return 'status-in-progress';
-    case 'Выполнена':
+    case 'completed': //'Выполнена':
       return 'status-done';
-    case 'Отменена':
+    case 'cancelled': //'Отменена':
       return 'status-canceled';
-    case 'Просрочена':
+    case 'Просрочена': //???
       return 'status-overdue';
     default:
       return 'status-sprint';
   }
 }
 
-function getStatusIcon(status: string) {
-  switch (status) {
-    case 'Открыта':
+function getStatusIcon(status: DtoStateLight | null | undefined) {
+  if (!status) return '';
+  switch (status.group) {
+    case 'unstarted':
+    case 'backlog':
       return '⏳';
-    case 'В работе':
+    case 'started':
       return '🏃';
-    case 'Выполнена':
+    case 'completed':
       return '✅';
-    case 'Отменена':
+    case 'cancelled':
       return '❌';
     case 'Просрочена':
       return '⚠️';
@@ -70,6 +83,7 @@ const defaultFrappeGanttOptions: Gantt.Options = {
   container_height: 'auto',
   readonly_progress: true,
   today_button: false,
+  readonly: true,
 };
 
 const initGantt = () => {
@@ -82,36 +96,6 @@ const initGantt = () => {
       view_mode: props.viewMode || 'Day',
       ...defaultFrappeGanttOptions,
       on_click: (task: Gantt.Task) => console.log('Task clicked:', task),
-      on_date_change: (task: Gantt.Task, newStart: Date, newEnd: Date) => {
-        console.log('Date changed:', task, newStart, newEnd);
-
-        const currentTask = ganttTasks.value.find((t) => t.id === task.id);
-        if (!currentTask) return;
-
-        const oldStart = new Date(currentTask.start).getTime();
-        const delta = newStart.getTime() - oldStart;
-
-        // Обновляем выбранный таск
-        currentTask.start = newStart.toISOString();
-        currentTask.end = newEnd.toISOString();
-
-        // Если это спринт (нет parentId) — сдвигаем всех детей
-        const isSprint = !currentTask.parentId;
-        if (isSprint) {
-          ganttTasks.value.forEach((childTask) => {
-            if (childTask.parentId === currentTask.id) {
-              const childStart = new Date(childTask.start).getTime();
-              const childEnd = childTask.end
-                ? new Date(childTask.end).getTime()
-                : 0;
-              childTask.start = new Date(childStart + delta).toISOString();
-              childTask.end = new Date(childEnd + delta).toISOString();
-            }
-          });
-          ganttInstance?.setup_tasks(ganttTasks.value);
-          ganttInstance?.change_view_mode(undefined, true);
-        }
-      },
 
       on_progress_change: (task: Gantt.Task, progress: number) =>
         console.log('Progress changed:', task, progress),
@@ -129,10 +113,15 @@ onMounted(() => {
 watch(
   () => props.tasks,
   () => {
-    ganttTasks.value = props.tasks.map((task) => ({
+    ganttTasks.value = props.issues.map((task) => ({
       ...task,
-      name: `${task.name} ${getStatusIcon(task.status)}`,
-      custom_class: getStatusClass(task.status),
+      name: `${task.name} ${getStatusIcon(task.state_detail)}`,
+      custom_class: getStatusClass(task.state_detail),
+      start: task.created_at,
+      end: task.target_date ?? props.sprint.end_date,
+      progress: 100,
+      status: task.state_detail?.name,
+      parentId: task.parent,
     }));
     initGantt();
   },
@@ -143,20 +132,20 @@ watch(
 $statuses: ('open', 'in-progress', 'done', 'overdue', 'canceled', 'sprint');
 
 $status-colors-light: (
-  'open': #26b7f8,
-  'in-progress': #ff8b00,
-  'done': #43a047,
-  'overdue': #dc3e3e,
-  'canceled': #bac4d5,
+  'open': #26b7f83d,
+  'in-progress': #ff8b003d,
+  'done': #43a0473d,
+  'overdue': #dc3e3e3d,
+  'canceled': #bac4d53d,
   'sprint': $positive,
 );
 
 $status-colors-dark: (
-  'open': #0e7ece,
-  'in-progress': #31363f,
-  'done': #7cb342,
-  'overdue': #ff7a7a,
-  'canceled': #8b8b98,
+  'open': #0e7ece3d,
+  'in-progress': #ffab003d,
+  'done': #7cb3423d,
+  'overdue': #ff7a7a3d,
+  'canceled': #8b8b983d,
   'sprint': $positive,
 );
 
@@ -189,7 +178,7 @@ $status-colors-dark: (
 }
 
 .gantt .bar-progress {
-  fill: $positive;
+  // fill: $positive;
   border-radius: 3px;
   opacity: 0.7;
 }
@@ -202,12 +191,15 @@ $status-colors-dark: (
 .body--light {
   @each $color in $statuses {
     .bar-wrapper.status-#{$color} .bar {
-      fill: map-get($status-colors-light, $color);
+      fill: map-get($status-colors-light, $color) !important;
       outline: none;
       opacity: 0.3;
       @if ($color == 'open' or $color == 'canceled') {
         outline: 1px dashed map-get($status-colors-light, $color);
       }
+    }
+    .bar-wrapper.status-#{$color} .bar-progress {
+      fill: map-get($status-colors-light, $color) !important;
     }
   }
 }
@@ -215,12 +207,15 @@ $status-colors-dark: (
 .body--dark {
   @each $color in $statuses {
     .bar-wrapper.status-#{$color} .bar {
-      fill: map-get($status-colors-dark, $color);
+      fill: map-get($status-colors-dark, $color) !important;
       outline: none;
       opacity: 0.3;
       @if ($color == 'open' or $color == 'canceled') {
         outline: 1px dashed map-get($status-colors-dark, $color);
       }
+    }
+    .bar-wrapper.status-#{$color} .bar-progress {
+      fill: map-get($status-colors-dark, $color) !important;
     }
   }
 }

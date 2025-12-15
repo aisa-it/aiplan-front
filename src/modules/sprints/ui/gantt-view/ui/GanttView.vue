@@ -1,6 +1,10 @@
 <template>
   <q-card flat container class="q-pa-md row">
-    <q-card-section class="col q-pa-none q-mr-md" style="margin-top: 36px">
+    <q-card-section
+      v-if="false"
+      class="col q-pa-none q-mr-md"
+      style="margin-top: 36px"
+    >
       <SprintTable :sprints="tableRows" />
     </q-card-section>
     <q-card-section v-if="issues.length" class="col q-pa-none">
