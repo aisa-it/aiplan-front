@@ -18,12 +18,14 @@
 
 <script setup lang="ts">
 // core
-import { Screen, useQuasar } from 'quasar';
+import { LocalStorage, Screen, useQuasar } from 'quasar';
 import { computed, ref, toRefs, watch } from 'vue';
 
 // components
 import NavMenu from 'components/NavMenu.vue';
 import { useRoute } from 'vue-router';
+import { useUIStore } from 'src/stores/ui-store';
+import { storeToRefs } from 'pinia';
 
 const props = withDefaults(
   defineProps<{
@@ -42,7 +44,14 @@ const { drawerOpen: leftDrawerOpen } = toRefs(props);
 
 const $q = useQuasar();
 const route = useRoute();
+
+const uiStore = useUIStore();
+
+const { menuSidebarWidth } = storeToRefs(uiStore);
+
 const isOverlay = ref(false);
+
+const defaultWidth = 300;
 
 const isMobile = computed(() => {
   return $q.platform.is.mobile && Screen.lt.md;
@@ -79,6 +88,12 @@ watch(
       const scrollY = window.scrollY;
       documentBody.style.top = `-${scrollY}px`;
       documentBody.classList.add('q-body-scroll-y');
+    }
+    if (newValue) {
+      menuSidebarWidth.value =
+        LocalStorage.getItem('menuSidebarWidth') ?? defaultWidth;
+    } else {
+      menuSidebarWidth.value = 0;
     }
   },
   { immediate: true },
