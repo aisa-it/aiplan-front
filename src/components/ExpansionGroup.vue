@@ -59,7 +59,7 @@ const updateFavoriteState = (id: string, state: boolean) => {
   display: flex;
   justify-content: flex-end;
   flex-direction: column;
-  width: 300px;
+  width: 100%;
   height: 100%;
 }
 </style>

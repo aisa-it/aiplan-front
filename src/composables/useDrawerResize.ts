@@ -1,24 +1,23 @@
 import { LocalStorage } from 'quasar';
-import { computed, onMounted, onBeforeUnmount, ref, watch, Ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch, Ref, ComputedRef } from 'vue';
 
 export function useDrawerResize(
   oppositeSideWidth: Ref<number>,
-  defaultWidth: number,
+  minWidth: ComputedRef<number>,
+  maxWidth: ComputedRef<number>,
   name: string,
+  side: 'left' | 'right',
 ) {
   let rafId: number | null = null;
 
   const clientWidth = ref(document.documentElement.clientWidth);
-  const minWidth = computed(() =>
-    Math.max(clientWidth.value / 2, defaultWidth),
-  );
-  const maxWidth = computed(() => clientWidth.value - oppositeSideWidth.value);
+
   const adaptiveWidth = computed(() =>
     Math.min(drawerWidth.value, maxWidth.value),
   );
 
-  const drawerWidth = ref(Math.max(clientWidth.value / 2, defaultWidth));
-  const targetWidth = ref(Math.max(clientWidth.value / 2, defaultWidth));
+  const drawerWidth = ref(minWidth.value);
+  const targetWidth = ref(minWidth.value);
   const startX = ref(0);
   const startW = ref(0);
   const moving = ref(false);
@@ -64,7 +63,8 @@ export function useDrawerResize(
 
   const onPointerMove = (e: { clientX: number }) => {
     if (!moving.value) return;
-    const dx = startX.value - e.clientX;
+    const rawDx = e.clientX - startX.value;
+    const dx = side === 'left' ? rawDx : -rawDx;
     targetWidth.value = clamp(startW.value + dx);
     startRaf();
   };

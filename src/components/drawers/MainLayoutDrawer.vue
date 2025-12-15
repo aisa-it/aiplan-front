@@ -9,10 +9,13 @@
     :model-value="leftDrawerOpen"
     :behavior="isMobile ? 'mobile' : 'desktop'"
     :overlay="isOverlay"
-    class="sidebar scrollable-content disable-x-scroll"
+    :width="adaptiveWidth"
+    class="sidebar scrollable-content disable-x-scroll relative-position"
     @update:model-value="(value) => emits('update:drawer-open', value)"
+    @before-show="updateClientWidth"
   >
     <NavMenu></NavMenu>
+    <div class="handle-resize" @pointerdown="onPointerDown"></div>
   </q-drawer>
 </template>
 
@@ -26,6 +29,7 @@ import NavMenu from 'components/NavMenu.vue';
 import { useRoute } from 'vue-router';
 import { useUIStore } from 'src/stores/ui-store';
 import { storeToRefs } from 'pinia';
+import { useDrawerResize } from 'src/composables/useDrawerResize';
 
 const props = withDefaults(
   defineProps<{
@@ -47,11 +51,23 @@ const route = useRoute();
 
 const uiStore = useUIStore();
 
-const { menuSidebarWidth } = storeToRefs(uiStore);
-
-const isOverlay = ref(false);
+const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 300;
+
+const minWidth = computed(() => defaultWidth);
+const maxWidth = computed(() =>
+  isMobile.value ? defaultWidth : document.documentElement.clientWidth / 2,
+);
+const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
+  previewIssueWidth,
+  minWidth,
+  maxWidth,
+  'menuSidebarWidth',
+  'left',
+);
+
+const isOverlay = ref(false);
 
 const isMobile = computed(() => {
   return $q.platform.is.mobile && Screen.lt.md;
@@ -108,11 +124,26 @@ watch(
   },
   { immediate: true },
 );
+
+watch(adaptiveWidth, (width) => {
+  if (leftDrawerOpen.value) menuSidebarWidth.value = width;
+});
 </script>
 
 <style scoped>
 :deep(.disable-x-scroll) {
   overflow-x: hidden;
+}
+
+.handle-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
 }
 </style>
 

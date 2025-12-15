@@ -100,9 +100,8 @@
 
 <script setup lang="ts">
 // core
-import { LocalStorage } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -155,11 +154,18 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
-
+const minWidth = computed(() =>
+  Math.max(document.documentElement.clientWidth / 2, defaultWidth),
+);
+const maxWidth = computed(
+  () => document.documentElement.clientWidth - menuSidebarWidth.value,
+);
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   menuSidebarWidth,
-  defaultWidth,
+  minWidth,
+  maxWidth,
   'drawerWidth',
+  'right',
 );
 
 const getAttachmentsList = async () => {
