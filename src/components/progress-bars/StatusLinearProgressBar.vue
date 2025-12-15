@@ -68,7 +68,7 @@ function calculateSum(keys: string[]) {
 }
 
 const progress_count = computed(() => {
-  if (!props.stats?.completed || !props.stats?.all_issues) return '';
+  if (!props.stats?.all_issues) return '';
   return `(${props.stats?.completed}/${props.stats?.all_issues})`;
 });
 
