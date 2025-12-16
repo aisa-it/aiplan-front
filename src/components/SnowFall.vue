@@ -645,11 +645,25 @@ const restartSnow = () => {
   snowStorm.start();
 };
 
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    // Полностью останавливаем анимацию
+    snowStorm.stop();
+  } else {
+    // При возврате на вкладку перезапускаем
+    restartSnow();
+  }
+};
+
 onMounted(() => {
   restartSnow();
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 });
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+
   if (!snowStorm) return;
 
   try {
