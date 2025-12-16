@@ -1,5 +1,9 @@
 <template>
-  <PinnedIssueList v-if="pinnedIssues.length" :pinned-issues="pinnedIssues" class="pinned-issues"/>
+  <PinnedIssueList
+    v-if="pinnedIssues.length"
+    :pinned-issues="pinnedIssues"
+    class="pinned-issues"
+  />
   <div class="horizontal-scroll-enable board-wrapper">
     <div v-for="(table, index) in defineIssues" :key="index">
       <BoardCardList
@@ -14,6 +18,7 @@
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, table?.entity)
         "
+        @open-issue="(id, project) => emits('openIssue', id, project)"
       />
     </div>
   </div>
@@ -38,7 +43,7 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshCard', 'refresh', 'openPreview']);
+const emits = defineEmits(['refreshCard', 'refresh', 'openPreview', 'openIssue']);
 
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);
@@ -63,7 +68,7 @@ const defineIssues = computed(() => {
 
 onMounted(() => {
   pinnedIssues.value = [];
-  fetchPinnedIssues(project.value.id);
+  if (project.value?.id) fetchPinnedIssues(project.value?.id);
 });
 </script>
 

@@ -24,17 +24,24 @@
       <transition name="fade-slide" mode="out-in">
         <q-tab-panels v-model="tab" class="full-height" keep-alive>
           <q-tab-panel ref="tabComments" name="comments">
-            <SingleIssueActivityComments @updateComponent="updateHeight" />
+            <SingleIssueActivityComments
+              :members="props.members"
+              @updateComponent="updateHeight"
+            />
           </q-tab-panel>
           <q-tab-panel ref="tabActivity" name="activity">
-            <SelectActivity type="tasks"
+            <SelectActivity
+              type="tasks"
               :activitiesData="issueActivitiesData"
               @updateComponent="updateHeight"
               @refreshData="getActivityData"
             />
           </q-tab-panel>
           <q-tab-panel ref="tabStatuses" name="statuses">
-            <IssueStatusHistoryTab @updateComponent="updateHeight" />
+            <IssueStatusHistoryTab
+              :projectid="issueData?.project"
+              @updateComponent="updateHeight"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </transition>
@@ -53,11 +60,14 @@ import { useSingleIssueStore } from 'stores/single-issue-store';
 import SelectActivity from 'src/components/SelectActivity.vue';
 import IssueStatusHistoryTab from 'src/components/IssueStatusHistoryTab.vue';
 import SingleIssueActivityComments from 'components/issue-panels/SingleIssueActivityComments.vue';
+import { DtoProjectMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const singleIssueStore = useSingleIssueStore();
 // store to refs
-const { issueActivitiesData } = storeToRefs(singleIssueStore);
+const { issueActivitiesData, issueData } = storeToRefs(singleIssueStore);
+
+const props = defineProps<{ members?: DtoProjectMember[] }>();
 
 //vars
 const tab = ref('comments');
@@ -82,7 +92,12 @@ const updateHeight = async () => {
 };
 
 const getActivityData = async (page: number, pageSize: number) => {
-  await singleIssueStore.getIssueActivitiesList(page, pageSize);
+  await singleIssueStore.getIssueActivitiesList(
+    page,
+    pageSize,
+    undefined,
+    issueData.value?.project,
+  );
 };
 
 watch(

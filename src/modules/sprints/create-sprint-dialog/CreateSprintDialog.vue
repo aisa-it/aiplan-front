@@ -1,17 +1,23 @@
 <template>
   <q-dialog ref="dialogRef" @show="handleOpen" @hide="handleClose">
-    <q-card class="sprint-dialog-card q-pa-lg" container>
+    <q-card
+      class="sprint-dialog-card"
+      :class="isDesktop ? 'q-pa-lg' : 'q-pa-md'"
+      :style="{ 'overflow: auto;': !isDesktop }"
+      container
+    >
       <q-card-section
-        class="row items-center justify-between q-pb-lg"
+        class="row items-center justify-between"
+        :class="isDesktop ? 'q-pb-lg' : 'q-pb-md'"
         style="width: 100%"
       >
-        <span class="text-h6"
+        <span class="text-h6" :class="{ 'mobile-title': !isDesktop }"
           >{{ sprintId ? 'Обновление данных' : 'Создание' }} спринта</span
         >
         <q-btn flat dense @click="dialogRef?.hide()">
           <q-icon name="close" dense size="18px" /> </q-btn
       ></q-card-section>
-      <q-layout view="hHh LpR lff" container>
+      <q-layout v-if="isDesktop" view="hHh LpR lff" container>
         <q-drawer
           v-model="leftDrawerOpen"
           show-if-above
@@ -53,13 +59,76 @@
           />
         </q-drawer>
       </q-layout>
+
+      <div v-else class="mobile-view" style="height: calc(100% - 100px)">
+        <q-tabs
+          v-model="mobileTab"
+          dense
+          class="q-pb-md"
+          active-color="primary"
+          indicator-color="primary"
+          align="justify"
+        >
+          <q-tab name="issues" label="Задачи" />
+          <q-tab name="form" label="Параметры" />
+        </q-tabs>
+        <q-layout view="hHh LpR lff" container style="height: 100%">
+          <q-drawer v-model="leftDrawerOpen" side="left" bordered :width="280">
+            <div class="q-px-xs">
+              <div class="row items-center justify-between q-mb-xs">
+                <div class="text-h6">Фильтры</div>
+                <q-btn
+                  flat
+                  dense
+                  icon="close"
+                  @click="leftDrawerOpen = false"
+                />
+              </div>
+              <MyFilterList @update-filter="handleUpdateFilter" />
+            </div>
+          </q-drawer>
+          <q-page-container>
+            <q-tab-panels
+              v-model="mobileTab"
+              animated
+              class="mobile-panels"
+              keep-alive
+            >
+              <q-tab-panel name="issues" class="q-pa-none">
+                <IssuesTable
+                  v-model:checked-rows="checkedIssues"
+                  selection="multiple"
+                  :current-filter="currentFilter"
+                  is-create-sprint
+                  style="padding: 0; height: calc(100vh - 250px)"
+                  @toggle="toggleLeftDrawer()"
+                  is-mobile
+                />
+              </q-tab-panel>
+
+              <q-tab-panel name="form" class="q-pa-none">
+                <div style="height: calc(100vh - 250px); overflow-y: auto">
+                  <CreateSprintForm
+                    :issues="checkedIssues"
+                    :default-props="sprint"
+                    @delete="deleteIssueById"
+                    @create="createSprintHandle"
+                    @edit="updateSprintHandle"
+                    is-mobile
+                  />
+                </div>
+              </q-tab-panel>
+            </q-tab-panels>
+          </q-page-container>
+        </q-layout>
+      </div>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { QDialog, Screen } from 'quasar';
-import { computed, ref, watch } from 'vue';
+import { QDialog, Screen, useQuasar } from 'quasar';
+import { computed, nextTick, ref, watch } from 'vue';
 
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -89,12 +158,18 @@ import { useSprintStore } from '../stores/sprint-store';
 
 const emits = defineEmits<{
   updateSprints: [];
-  failedUpdateIssueAndWatcher: [id: string];
+  reopen: [id: string];
 }>();
 
 const props = defineProps<{
   sprintId?: string;
 }>();
+
+const q = useQuasar();
+
+const isDesktop = computed(() => q.platform.is?.desktop);
+
+const mobileTab = ref('issues');
 
 const filtersStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
@@ -104,7 +179,7 @@ const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
   workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
   search_query: '',
 });
-const leftDrawerOpen = ref(true);
+const leftDrawerOpen = ref(isDesktop.value);
 const rightDrawerOpen = ref(true);
 
 const dialogRef = ref<InstanceType<typeof QDialog> | null>(null);
@@ -247,7 +322,7 @@ const createSprintHandle = async (data: any) => {
   try {
     await updateIssueAndWatchers(res?.id ?? '', data);
   } catch {
-    emits('failedUpdateIssueAndWatcher', res?.id ?? '');
+    emits('reopen', res?.id ?? '');
     dialogRef.value?.hide();
     return;
   }
@@ -272,6 +347,20 @@ watch(
       workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
     };
     refresh();
+  },
+);
+
+watch(
+  () => mobileTab.value,
+  async (newTab, oldTab) => {
+    await nextTick();
+
+    if (newTab === 'issues' && oldTab === 'form') {
+      currentFilter.value = {
+        workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+      };
+      refresh();
+    }
   },
 );
 </script>
@@ -304,5 +393,41 @@ watch(
   padding-left: 0;
   padding-top: 0;
   padding-right: 0;
+}
+
+.mobile-title {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.mobile-view {
+  :deep(.q-tab) {
+    text-transform: none;
+    min-height: auto;
+    padding: 0;
+  }
+
+  :deep(.q-tabs__content--align-justify .q-tab) {
+    flex: 0 0 auto;
+  }
+
+  :deep(.q-tab__label) {
+    padding: 12px 14px;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.5px;
+  }
+
+  :deep(.q-tab__content) {
+    padding: 0;
+  }
+
+  :deep(.filters__list .q-item) {
+    padding: 8px 0;
+  }
+
+  :deep(.filters__buttons) {
+    padding: 8px 16px 8px 0;
+  }
 }
 </style>

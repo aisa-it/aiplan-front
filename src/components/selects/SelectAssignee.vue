@@ -267,7 +267,7 @@ const handleUpdateAssignees = async (e) => {
   } else {
     emit(
       'update:assigness',
-      e ? e.map((d) => (d)) : [],
+      e ? e.map((d) => (d)) : []
     );
   }
 };

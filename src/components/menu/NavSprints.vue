@@ -2,7 +2,6 @@
   <ExpansionItem
     full-open
     :is-expanding="sprints.length > 0"
-    :is-open-disable="sprints.length === 0"
     itemName="sprints"
   >
     <template v-slot:header>
@@ -14,6 +13,7 @@
         <CreateSprintDialogBtn
           @update-sprints="refreshSprints"
           v-if="hasPermission('create-sprint')"
+          @reopen="reopen"
         />
       </div>
     </template>
@@ -113,7 +113,6 @@
         v-model="openEditSprint"
         :sprint-id="sprintIdForEdit"
         @update-sprints="refreshSprints"
-        @failed-update-issue-and-watcher="reopen"
       />
       <DeleteSprintDialog
         v-model="isDeleteDialogOpen"
@@ -165,12 +164,12 @@ const sprintForDelete = ref<DtoSprintLight | null>(null);
 const isDeleteDialogOpen = ref(false);
 
 onMounted(async () => {
-  if (!route.params.workspace) return;
+  if (!currentWorkspaceSlug.value) return;
   refreshSprints();
 });
 
 const refreshSprints = async () => {
-  sprints.value = await getSprints(route.params.workspace as string);
+  sprints.value = await getSprints(currentWorkspaceSlug.value as string);
 };
 
 const reopen = async (id: string) => {
@@ -193,20 +192,17 @@ const successDeleteHandle = async () => {
   await refreshSprints();
 };
 
-watch(
-  () => route.params.workspace,
-  async (newValue) => {
-    if (!newValue) return;
-    sprints.value = await getSprints(newValue as string);
-  },
-);
+watch(currentWorkspaceSlug, async (newValue) => {
+  if (!newValue) return;
+  sprints.value = await getSprints(newValue as string);
+});
 
 watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
-      sprints.value = await getSprints(route.params.workspace as string);
-      sprintStore.refreshSprintData = false;
+      await refreshSprints();
+      sprintStore.clearSprintRefresh();
     }
   },
 );

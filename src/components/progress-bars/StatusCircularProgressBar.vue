@@ -38,8 +38,8 @@
            a 15.9155 15.9155 0 0 1 0 -31.831"
       />
 
-      <text x="18" y="20.35" class="percentage">
-        {{ Math.round(donePercentage) }}%
+      <text x="50%" y="50%" dy="0.3em" class="percentage">
+        {{ Math.round(donePercentage) }}
       </text>
     </svg>
   </div>
@@ -81,31 +81,35 @@ const donePercentage = computed(
 </script>
 
 <style scoped lang="scss">
+.progress-pie-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .circular-chart {
   display: block;
   margin: 10px auto;
-  max-width: 120px;
-  max-height: 120px;
 }
 
 .circle {
   fill: none;
-  stroke-width: 2.8;
+  stroke-width: 3.5;
   stroke-linecap: round;
   animation: progress 1s ease-out forwards;
   transform-origin: center;
 }
 
 .cancelled {
-  stroke: $progress-bg-error;
+  stroke: $negative;
 }
 
 .completed {
-  stroke: $progress-bg-success;
+  stroke: $progress-positive;
 }
 
 .started {
-  stroke: $progress-bg-primary;
+  stroke: $progress-in-work;
 }
 
 .empty {
@@ -113,8 +117,8 @@ const donePercentage = computed(
 }
 .percentage {
   fill: var(--text-color);
-  font-family: sans-serif;
-  font-size: 0.7em;
+  font-size: 14px;
   text-anchor: middle;
+  text-align: center;
 }
 </style>

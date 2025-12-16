@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div class="issue-list">
     <IssueTable
       v-if="rows?.length"
       :rows="rows"
       :rows-count="rowsCount"
       :loading="loadingTable"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(issue) => openPreview(issue)"
+      @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
+      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
     />
     <div
       v-else
@@ -79,6 +80,7 @@ const { user } = storeToRefs(useUserStore());
 const isMobile = computed(() => Screen.width <= 1200);
 const issuesStore = useIssuesStore();
 const load = async (pagination) => {
+  console.log('зашли');
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(contextProps.value));
   props.page_size = pagination.limit;
@@ -109,14 +111,10 @@ async function openPreview(issue: DtoIssue) {
     return;
 
   const id = String(issue.sequence_id);
-  if (
-    (currentIssueID.value === id && isPreview.value) ||
-    isMobile.value ||
-    props.contextType === 'sprint'
-  ) {
+  if (isMobile.value) {
     openIssue(id, issue.project ?? (route.params.project as string));
     return;
-  }
+  } else if (currentIssueID.value === id && isPreview.value) return;
 
   isPreview.value = false;
   issueCommentsData.value = undefined;

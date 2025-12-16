@@ -15,8 +15,8 @@
         no-caps
         flat
         style="padding: 0 4px"
-        @click="emits('openPreview', card)"
-      >
+        @click="() => handleClick()"
+        >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
         </span>
@@ -172,7 +172,7 @@ import ParentIssueChip from 'src/components/ParentIssueChip.vue';
 import { formatDateTime } from 'src/utils/time';
 import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import SelectDate from 'src/components/SelectDate.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
@@ -203,10 +203,30 @@ const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
+const emits = defineEmits(['refresh', 'updateTable', 'openPreview', 'openIssue']);
 const { statesCache } = storeToRefs(useStatesStore());
 const { contextProps } = useIssueContext(props.contextType);
 const { project } = storeToRefs(useProjectStore());
+
+const clickCount = ref(0);
+let clickTimeout: NodeJS.Timeout;
+
+const handleClick = () => {
+  clickCount.value++;
+
+  if (clickCount.value === 1) {
+    clickTimeout = setTimeout(() => {
+      clickCount.value = 0;
+      emits('openPreview', props.card)
+    }, 250);
+  } else if (clickCount.value === 2) {
+    // Обработка двойного клика
+    clickCount.value = 0;
+    clearTimeout(clickTimeout);
+    emits('openIssue', props.card.sequence_id, props.card.project)
+  }
+}
+
 </script>
 
 <style scoped lang="scss">

@@ -11,7 +11,7 @@
 
         <SprintFiltersList
           v-if="is.object(sprintProps)"
-          :columns="allSprintColumns"
+          :columns="sprintStore.sortAllColumns"
           @update="load()"
         />
       </q-card-section>
@@ -40,14 +40,15 @@ import {
 } from 'vue';
 
 import { getSprint } from 'src/modules/sprints/services/api';
-import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 
 import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersList.vue';
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
 import SprintHeaderSkeleton from 'src/modules/sprints/sceletons/SprintHeaderSkeleton.vue';
 
-import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import {
+  NotUpdated,
+  useSprintStore,
+} from 'src/modules/sprints/stores/sprint-store';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
@@ -57,12 +58,12 @@ const { onRequest } = useDefaultIssues('sprint');
 const { getGroupedIssues } = useGroupedIssues('sprint');
 
 const router = useRouter();
-const sprint = ref({} as DtoSprint);
 const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
 
 const {
+  sprint,
   isGroupingEnabled,
   isKanbanEnabled,
   isGanttDiagramm,
@@ -98,7 +99,7 @@ const updateSprint = async () => {
 onMounted(async () => {
   issuesLoader.value = true;
   sprintLoader.value = true;
-  sprintStore.refreshSprintData = false;
+  sprintStore.clearSprintRefresh();
   await sprintStore.getMyViewProps();
   await updateSprint();
 });
@@ -107,10 +108,17 @@ watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
+      if (sprintStore.notUpdated.includes(NotUpdated.SprintPage)) {
+        sprint.value = await getSprint(
+          router.currentRoute.value.params.workspace as string,
+          router.currentRoute.value.params.sprint as string,
+        );
+        return;
+      }
       issuesLoader.value = true;
       sprintLoader.value = true;
       await updateSprint();
-      sprintStore.refreshSprintData = false;
+      sprintStore.clearSprintRefresh();
     }
   },
 );

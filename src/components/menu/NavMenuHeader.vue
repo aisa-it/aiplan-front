@@ -6,7 +6,11 @@
     style="height: 50px; min-height: 50px"
     class="border-radius-inherit header"
   >
-    <q-btn class="nav-menu__top-nav-button w-full" no-caps>
+    <q-btn
+      class="nav-menu__top-nav-button w-full"
+      no-caps
+      data-tour="fast-navigation"
+    >
       <q-avatar
         data-id="workspace-avatar"
         :size="'32px'"
@@ -176,7 +180,11 @@
       </q-popup-proxy>
     </q-btn>
 
-    <q-btn class="nav-menu__top-nav-button" :to="`/${currentWorkspaceSlug}`">
+    <q-btn
+      class="nav-menu__top-nav-button"
+      :to="`/${currentWorkspaceSlug}`"
+      data-tour="fast-navigation"
+    >
       <HomeIcon
         :color="`${
           router.currentRoute.value.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
@@ -188,11 +196,13 @@
       :disable="isDemo"
       class="nav-menu__top-nav-button"
       :to="`/${currentWorkspaceSlug}/aidoc`"
+      data-tour="fast-navigation"
     >
       <AIDocIcon
         :color="`${router.currentRoute.value.path.includes('aidoc') ? activeIconColor : ''}`"
       />
     </q-btn>
+
     <q-btn
       v-if="gitStore.gitEnabled"
       class="nav-menu__top-nav-button"

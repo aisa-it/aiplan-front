@@ -82,6 +82,7 @@
 
     <FormTagNew
       v-model="isFormTagNewOpen"
+      :project-id="props.projectId"
       @refresh="refresh"
       @add="handleAddTag"
     />

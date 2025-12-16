@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="issue-list">
     <GroupedTables
       v-if="!isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
@@ -12,6 +12,10 @@
       @open-preview="
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
+      "
+      @open-issue="
+        (id, issue) =>
+          openIssue(id, issue.project ?? (route.params.project as string))
       "
     />
     <GroupedBoard
@@ -26,6 +30,10 @@
       @open-preview="
         (issue, index, pagination, entity) =>
           openPreview(issue, index, pagination, entity)
+      "
+      @open-issue="
+        (id, issue) =>
+          openIssue(id, issue.project ?? (route.params.project as string))
       "
     />
     <div
@@ -153,14 +161,10 @@ async function openPreview(
     return;
 
   const id = String(issue.sequence_id);
-  if (
-    (currentIssueID.value === id && isPreview.value) ||
-    isMobile.value ||
-    props.contextType === 'sprint'
-  ) {
+  if (isMobile.value) {
     openIssue(id, issue.project ?? (route.params.project as string));
     return;
-  }
+  } else if (currentIssueID.value === id && isPreview.value) return;
   isPreview.value = false;
   issueCommentsData.value = undefined;
   issueActivitiesData.value = undefined;
