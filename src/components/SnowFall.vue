@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 /* eslint-disable */
 
@@ -216,20 +217,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       return Math.random() * n + min;
     }
 
-    function plusMinus(n) {
-      return parseInt(rnd(2), 10) === 1 ? n * -1 : n;
-    }
-
     storm.randomizeWind = function () {
-      vRndX = plusMinus(rnd(storm.vMaxX, 0.2));
-      vRndY = rnd(storm.vMaxY, 0.2);
-      if (storm.flakes) {
-        for (let i = 0; i < storm.flakes.length; i++) {
-          if (storm.flakes[i].active) {
-            storm.flakes[i].setVelocities();
-          }
-        }
-      }
+      vRndX = 0;
+      vRndY = 1.5;
     };
 
     storm.scrollHandler = function () {
@@ -332,8 +322,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       this.y = !isNaN(y) ? y : -rnd(screenY) - 12;
       this.vX = null;
       this.vY = null;
-      this.vAmpTypes = [1, 1.2, 1.4, 1.6, 1.8];
-      this.vAmp = this.vAmpTypes[this.type] || 1;
+      this.vAmp = 1;
       this.melting = false;
       this.meltFrameCount = storm.meltFrameCount;
       this.meltFrames = storm.meltFrames;
@@ -399,9 +388,10 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       };
 
       this.move = function () {
-        const vX = s.vX * windOffset;
+        const vX = s.vX;
         s.x += vX;
-        s.y += s.vY * s.vAmp;
+        s.y += s.vY;
+
         if (s.x >= screenX || screenX - s.x < storm.flakeWidth) {
           s.x = 0;
         } else if (vX < 0 && s.x - storm.flakeLeftOffset < -storm.flakeWidth) {
@@ -453,8 +443,8 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       };
 
       this.setVelocities = function () {
-        s.vX = vRndX + rnd(storm.vMaxX * 0.12, 0.1);
-        s.vY = vRndY + rnd(storm.vMaxY * 0.12, 0.1);
+        s.vX = vRndX;
+        s.vY = vRndY;
       };
 
       this.setOpacity = function (o, opacity) {
@@ -640,14 +630,23 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   })(window, document);
 }
 
-onMounted(() => {
+const route = useRoute();
+
+const restartSnow = () => {
   if (!snowStorm) return;
 
-  try {
-    snowStorm.start();
-  } catch (e) {
-    // ignore
-  }
+  snowStorm.stop();
+  snowStorm.disabled = false;
+  snowStorm.flakes = [];
+  snowStorm.meltFrames = [];
+  snowStorm.timer = null;
+  snowStorm.active = false;
+
+  snowStorm.start();
+};
+
+onMounted(() => {
+  restartSnow();
 });
 
 onUnmounted(() => {
@@ -659,4 +658,11 @@ onUnmounted(() => {
     // ignore
   }
 });
+
+watch(
+  () => route.fullPath,
+  () => {
+    restartSnow();
+  },
+);
 </script>
