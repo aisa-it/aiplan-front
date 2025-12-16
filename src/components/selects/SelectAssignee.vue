@@ -130,7 +130,7 @@ const props = withDefaults(
   defineProps<{
     projectid: string;
     issueid?: string | null;
-    assigness?: [];
+    assigness?: DtoWorkspaceMember[];
     defaultAssignee?: [];
     isDisabled?: boolean;
     newIssue?: boolean;

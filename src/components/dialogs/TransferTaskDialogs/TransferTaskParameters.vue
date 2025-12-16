@@ -28,12 +28,11 @@
               :isDisabled="
                 !hasPermissionByIssue(issueData, project, 'change-issue-status')
               "
-              :states-from-cache="statesCache[issueData?.project]"
               isAdaptiveSelect
+              :states-from-cache="statesCache[issueData?.project]"
               @update:status="(val) => {
                 return issueSettings.state_detail = val;
               }"
-              @refresh="emit('refresh')"
               />
           </div>
         </div>
@@ -58,7 +57,6 @@
                 "
               :current-member="user"
               isAdaptiveSelect
-              @refresh="emit('refresh')"
               @update:assigness="(val) => {
                 return issueSettings.assignees = val;
               }"
@@ -90,7 +88,6 @@
               @update:priority="(val) => {
                 return issueSettings.priority = val;
               }"
-              @refresh="emit('refresh')"
             >
             </SelectPriority>
           </div>
@@ -117,10 +114,9 @@
                 !hasPermissionByIssue(issueData, project, 'change-issue-primary')
               "
               :style="{padding:0}"
-              @refresh="emit('refresh')"
               @update:date="(val) => {
-                  return issueSettings.target_date = val;
-                }"
+                return issueSettings.target_date = val;
+              }"
             />
           </div>
         </div>
@@ -175,7 +171,7 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useUserStore } from 'src/stores/user-store';
-import { DtoIssue, DtoStateLight, DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoIssue, DtoStateLight, DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 
   // store
@@ -193,25 +189,23 @@ const dynamicWidthDialog = computed(() =>
   Screen.width > 760 ? 400 : Screen.width * 0.9,
 );
 
-const dialogRef = ref()
-
+// props
 const props = defineProps<{
     issue: DtoIssue;
     issue_settings: {
       state_detail: DtoStateLight;
-      assignees: [];
+      assignees: DtoWorkspaceMember[];
       priority: string;
       target_date: string | null;
     }
   }>();
 
 // emits
-const emit = defineEmits(['refresh', 'save'])
+const emit = defineEmits(['save'])
 
+const dialogRef = ref()
 const issueData = ref<DtoIssue>(props.issue);
-const issueSettings = ref(props.issue_settings)
-
-const savedIsssueSettings =ref({
+const issueSettings = ref({
   state_detail: props.issue_settings.state_detail,
   priority: props.issue_settings.priority,
   target_date: props.issue_settings.target_date,
@@ -221,19 +215,21 @@ const savedIsssueSettings =ref({
 let isSave = ref(false);
 
 // function
+const resetSettings = () => {
+  issueSettings.value = {
+    state_detail: props.issue_settings.state_detail,
+    priority: props.issue_settings.priority,
+    target_date: props.issue_settings.target_date,
+    assignees: props.issue_settings.assignees,
+  };
+};
+
 const close = () => {
   if (isSave.value) {
     isSave.value = false;
     emit('save', issueSettings);
-    savedIsssueSettings.value.state_detail = issueSettings.value.state_detail;
-    savedIsssueSettings.value.priority = issueSettings.value.priority;
-    savedIsssueSettings.value.target_date = issueSettings.value.target_date;
-    savedIsssueSettings.value.assignees = issueSettings.value.assignees;
-    return;
-  };
-  issueSettings.value.state_detail = savedIsssueSettings.value.state_detail;
-  issueSettings.value.priority = savedIsssueSettings.value.priority;
-  issueSettings.value.target_date = savedIsssueSettings.value.target_date;
-  issueSettings.value.assignees = savedIsssueSettings.value.assignees;
+  } else {
+    resetSettings();
+  }
 }
 </script>

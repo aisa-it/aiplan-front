@@ -161,14 +161,14 @@
         </q-item>
 
         <q-btn
-        :disable="isMultipleIssuesTransfer ? true : false"
+        :disable="isMultipleIssuesTransfer"
           flat
           dense
           no-caps
           color="primary"
           label="Настройка параметров задачи"
           class="q-mt-sm no-hover-btn"
-          :style="{'align-self': 'flex-start'}"
+          style="align-self: flex-start"
 
           @click="settings = true">
         </q-btn>
@@ -178,7 +178,6 @@
             :issue="props.issue"
             :issue_settings="issueSettings"
             @save="saveSettings"
-            @refresh="handleRefresh"
             />
 
         <div v-if="transferErrors.length" class="full-w">
@@ -243,9 +242,8 @@
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { computed, ref, watch, onMounted, onBeforeMount, onBeforeUpdate } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
-import { Screen } from 'quasar';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -314,7 +312,6 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { currentIssueID, isPreview } = storeToRefs(singleIssueStore);
 const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { currentProjectID } = storeToRefs(projectStore);
 
 // vars
 const route = useRoute();
@@ -326,15 +323,15 @@ const transferData = ref();
 const transferLabel = ref();
 const dialogRef = ref();
 const issueData = ref(props.issue);
-const issueSettings = computed(() => ({
+const issueSettings = ref({
   state_detail: props.issue.state_detail,
   priority: props.issue.priority,
   target_date: props.issue.target_date,
   assignees: props.issue.assignee_details.map((assignee) => ({
     member: assignee,
   })),
-}));
-const assignerIds =issueSettings.value.assignees ? issueSettings.value.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : [];
+});
+
 let editedIssueParams = <IIssueTransferParams>{};
 const selectedProject = ref();
 const projects = ref<IProject[]>(workspaceProjects.value as IProject[]);
@@ -394,6 +391,8 @@ const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
   );
 });
 
+const assignerIds = computed(() => (issueSettings.value.assignees ? issueSettings.value.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : []));
+
 // function
 const clear = () => {
   transferLabel.value = null;
@@ -403,13 +402,15 @@ const clear = () => {
   selectedProject.value = null;
   selectedAction.value = null;
   transferData.value = null;
-  issueSettings.value.state_detail = props.issue.state_detail;
-  issueSettings.value.priority = props.issue.priority;
-  issueSettings.value.target_date = props.issue.target_date;
-  issueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
-    member: assignee,
-  }));
   editedIssueParams = {}
+  issueSettings.value = {
+    state_detail: props.issue.state_detail,
+    priority: props.issue.priority,
+    target_date: props.issue.target_date,
+    assignees: props.issue.assignee_details.map((assignee) => ({
+      member: assignee,
+    })),
+  }
 };
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
@@ -489,7 +490,7 @@ const sendDataById = async () => {
     .issueTransferById(
       transferDataById as IIssueTransferById,
       isCreateEntity.value,
-      editedIssueParams
+      isMultipleIssuesTransfer.value ? null: editedIssueParams
     )
     .then(async (res) => {
       const issueResponse = await singleIssueStore.getIssueDataById(
@@ -602,11 +603,6 @@ const resetActionOptions = () => {
   transferLabel.value = null;
 };
 
-const handleRefresh = async () => {
-  await refresh();
-  emit('refresh');
-};
-
 const arraysEqual = (arr1: string[], arr2: string[]):boolean => {
   if (arr1.length !== arr2.length) return false;
   const sorterArr1 = [...arr1].sort();
@@ -620,46 +616,28 @@ const saveSettings = (data: typeof issueSettings) => {
   editedIssueParams = {};
 
   if (newSettings.state_detail.id !== issueSettings.value.state_detail.id) {
+    issueSettings.value.state_detail = newSettings.state_detail;
     editedIssueParams.state_id = newSettings.state_detail.id;
   }
 
   if (newSettings.priority !== issueSettings.value.priority) {
+    issueSettings.value.priority = newSettings.priority;
     editedIssueParams.priority = newSettings.priority;
   }
 
   if (newSettings.target_date !== issueSettings.value.target_date) {
+    issueSettings.value.target_date = newSettings.target_date;
     editedIssueParams.target_date = newSettings.target_date;
   }
 
   const newAssignerIds = newSettings.assignees ? newSettings.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : [];
 
   if (!arraysEqual(newAssignerIds, assignerIds)) {
+    issueSettings.value.assignees = newSettings.assignees;
     editedIssueParams.assigner_ids = newAssignerIds;
   }
   return;
-
 }
-
-const refresh = async () => {
-  await singleIssueStore
-    .getIssueDataById(
-      currentWorkspaceSlug.value,
-      currentProjectID.value,
-      currentIssueID.value,
-    )
-    .then((res) => {
-      issueData.value.draft = res.data.draft;
-      issueData.value.state_detail = res.data.state_detail;
-      issueData.value.assignee_details = res.data.assignee_details;
-      issueData.value.watcher_details = res.data.watcher_details;
-      issueData.value.priority = res.data.priority;
-      issueData.value.target_date = res.data.target_date;
-      issueData.value.parent_detail = res.data.parent_detail;
-      issueData.value.blocker_issues = res.data.blocker_issues;
-      issueData.value.blocked_issues = res.data.blocked_issues;
-      issueData.value.issue_link = res.data.issue_link;
-    });
-};
 
 // hooks
 
@@ -685,21 +663,6 @@ watch(
   () => resetActionOptions(),
 );
 
-watch(
-  isMultipleIssuesTransfer,
-  (newVal) => {
-    if(newVal) {
-      issueSettings.value.state_detail = props.issue.state_detail;
-      issueSettings.value.priority = props.issue.priority;
-      issueSettings.value.target_date = props.issue.target_date;
-      issueSettings.value.assignees =  props.issue.assignee_details.map((assignee) => ({
-        member: assignee,
-      }))
-      editedIssueParams = {}
-    }
-  }
-)
-
 onMounted(() => {
   actionsType.forEach((item, index) => {
     actionWithLinkedIssues.value[index] = false;
@@ -709,7 +672,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-:deep(.q-item .q-focus-helper) {
+:deep(.q-btn .q-focus-helper) {
   display: none;
 }
 
