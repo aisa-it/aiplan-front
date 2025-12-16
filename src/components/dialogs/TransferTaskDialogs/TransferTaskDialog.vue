@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="() => clear()" persistent>
-    <q-card class="modal-card auto-width-dialog">
+    <q-card class="modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ma-md">Копировать или перенести задачу</h6>
         <q-select
@@ -330,6 +330,9 @@ const issueSettings = ref({
   assignees: props.issue.assignee_details.map((assignee) => ({
     member: assignee,
   })),
+  watchers: props.issue.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
 });
 
 let editedIssueParams = <IIssueTransferParams>{};
@@ -393,6 +396,8 @@ const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
 
 const assignerIds = computed(() => (issueSettings.value.assignees ? issueSettings.value.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : []));
 
+const watcherIds = computed(() => (issueSettings.value.watchers ? issueSettings.value.watchers.map((watcher) => (watcher.member ? watcher.member.id || watcher.id : watcher)): []));
+
 // function
 const clear = () => {
   transferLabel.value = null;
@@ -402,7 +407,7 @@ const clear = () => {
   selectedProject.value = null;
   selectedAction.value = null;
   transferData.value = null;
-  editedIssueParams = {}
+  editedIssueParams = {};
   issueSettings.value = {
     state_detail: props.issue.state_detail,
     priority: props.issue.priority,
@@ -410,7 +415,10 @@ const clear = () => {
     assignees: props.issue.assignee_details.map((assignee) => ({
       member: assignee,
     })),
-  }
+    watchers: props.issue.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+  };
 };
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
@@ -636,6 +644,15 @@ const saveSettings = (data: typeof issueSettings) => {
     issueSettings.value.assignees = newSettings.assignees;
     editedIssueParams.assigner_ids = newAssignerIds;
   }
+
+  const newWatcherIds = newSettings.watchers ? newSettings.watchers.map((watcher) => (watcher.member ? watcher.member.id || watcher.id : watcher)) : [];
+
+  if (!arraysEqual(newWatcherIds, watcherIds)) {
+    issueSettings.value.watchers = newSettings.watchers;
+    editedIssueParams.watcher_ids = newWatcherIds;
+  }
+
+
   return;
 }
 
@@ -675,52 +692,4 @@ onMounted(() => {
 :deep(.q-btn .q-focus-helper) {
   display: none;
 }
-
-.auto-width-dialog {
-    max-width: 90vw;
-    min-width: 692px;
-
-  :deep(.q-markup-table) {
-    overflow-x: hidden;
-
-    @media screen and (max-width: 900px) {
-      overflow-x: auto;
-    }
-  }
-
-  :deep(.q-table) {
-
-    @media screen and (max-width: 900px) {
-      table-layout: fixed;
-    }
-  }
-
-  :deep(.q-select) {
-    width: 100%;
-  }
-
-  :deep(.issue-selector) {
-    width: 100%;
-    min-width: 140px;
-  }
-}
-
-.params-table {
-  :deep(table) {
-    min-width: 660px;
-  }
-
-  th, td {
-    @media screen and (max-width: 900px) {
-      padding: 7px 0;
-    }
-  }
-}
-
-.q-btn.no-hover-btn {
-  :deep(.q-focus-helper:hover) {
-    opacity: 0;
-  }
-}
-
 </style>

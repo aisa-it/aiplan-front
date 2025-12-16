@@ -688,6 +688,10 @@ h4 {
   }
   -ms-overflow-style: none;
   scrollbar-width: none;
+
+  &__small {
+    min-width: fit-content !important;
+  }
 }
 
 .inner-modal-card {

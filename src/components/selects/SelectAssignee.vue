@@ -5,7 +5,7 @@
     multiple
     clearable
     map-options
-    :class="`${isIssueTransfer ? 'base-selector-sm' : 'base-selector'}  ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
+    :class="isAdaptiveSelect ? 'adaptive-select' : ''"
     popup-content-class="inh-popup scrollable-content"
     :popup-content-style="selectAssigneeWidth"
     :label="label"
@@ -347,11 +347,3 @@ watch(
   },
 );
 </script>
-
-<style lang="scss" scoped>
-  .base-selector-sm {
-    :deep(.q-field__control) {
-      align-items: flex-end;
-    }
-  }
-</style>

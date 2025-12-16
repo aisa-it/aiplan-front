@@ -1,12 +1,12 @@
 <template>
   <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm"  @hide="() => close()">
-    <q-card class="modal-card"
+    <q-card class="modal-card modal-card__small"
     :style="{width: dynamicWidthDialog +'px'}"
       >
       <q-card-section class="column
       q-pt-none col q-pb-sm q-px-md">
 
-        <div class="text-subtitle2 q-ma-md">Настройка параметров задачи</div>
+        <div class="text-subtitle1 q-ma-md font-semibold">Настройка параметров задачи</div>
 
         <q-separator class="issue-panel__separator" />
 
@@ -61,6 +61,35 @@
                 return issueSettings.assignees = val;
               }"
               ></SelectAssignee>
+          </div>
+        </div>
+
+        <!-- Наблюдатели -->
+         <div class="row q-pt-md centered-horisontally">
+          <div class="col">
+            <div class="row items-center">
+              <ObserveIcon class="issue-icon" />
+              <span class="q-ml-sm"> Наблюдатели </span>
+            </div>
+          </div>
+          <div class="col flex rounded-borders issue-panel__q-select-wrapper">
+            <SelectWatchers
+              class="issue-selector"
+              :projectid="issueData.project"
+              :watchers="issueSettings.watchers"
+              :current-member="user"
+              isAdaptiveSelect
+              :isDisabled="
+                !hasPermissionByIssue(
+                  issueData,
+                  issueData.project_detail ?? project,
+                  'change-issue-basic',
+                )
+              "
+              @update:watchers="(val) => {
+                return issueSettings.watchers = val;
+              }"
+            ></SelectWatchers>
           </div>
         </div>
 
@@ -157,11 +186,13 @@ import { Screen } from 'quasar';
 // components
 import SelectStatus from 'src/components/SelectStatus.vue';
 import SelectAssignee from 'components/selects/SelectAssignee.vue';
+import SelectWatchers from 'components/selects/SelectWatchers.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
 import SelectDate from 'src/components/SelectDate.vue';
 
 // components - icons
 import UsersIcon from 'src/components/icons/UsersIcon.vue';
+import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
 import PriorityIcon from 'src/components/icons/PriorityIcon.vue';
 import CheckStatusIcon from 'src/components/icons/CheckStatusIcon.vue';
 import ExecuteDateIcon from 'src/components/icons/ExecuteDateIcon.vue';
@@ -195,6 +226,7 @@ const props = defineProps<{
     issue_settings: {
       state_detail: DtoStateLight;
       assignees: DtoWorkspaceMember[];
+      watchers: DtoWorkspaceMember[];
       priority: string;
       target_date: string | null;
     }
@@ -210,6 +242,7 @@ const issueSettings = ref({
   priority: props.issue_settings.priority,
   target_date: props.issue_settings.target_date,
   assignees: props.issue_settings.assignees,
+  watchers: props.issue_settings.watchers,
 });
 
 let isSave = ref(false);
@@ -221,6 +254,7 @@ const resetSettings = () => {
     priority: props.issue_settings.priority,
     target_date: props.issue_settings.target_date,
     assignees: props.issue_settings.assignees,
+    watchers: props.issue_settings.watchers,
   };
 };
 
