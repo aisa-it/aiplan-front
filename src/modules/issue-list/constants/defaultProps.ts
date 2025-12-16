@@ -1,6 +1,6 @@
 export const DEFAULT_VIEW_PROPS = {
   showEmptyGroups: false,
-  showSubIssues: true,
+  hideSubIssues: false,
   showOnlyActive: false,
   autoSave: false,
   issueView: 'list',

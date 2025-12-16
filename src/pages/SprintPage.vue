@@ -53,6 +53,7 @@ import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useIssueContext } from 'src/modules/issue-list/composables/useIssueContext';
 
 const { onRequest } = useDefaultIssues('sprint');
 const { getGroupedIssues } = useGroupedIssues('sprint');
@@ -61,6 +62,8 @@ const router = useRouter();
 const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
+
+const { updateProps } = useIssueContext('sprint');
 
 const {
   sprint,
@@ -100,7 +103,7 @@ onMounted(async () => {
   issuesLoader.value = true;
   sprintLoader.value = true;
   sprintStore.clearSprintRefresh();
-  await sprintStore.getMyViewProps();
+  await updateProps();
   await updateSprint();
 });
 
