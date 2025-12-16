@@ -66,8 +66,9 @@ import { usePalette } from 'src/modules/project-settings/labels/composables/useP
 export default defineComponent({
   name: 'FormTagNew',
   emits: ['close', 'add'],
+  props: ['projectId'],
   components: { CloseIcon, AddIcon, ColorPicker },
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const { getRandomColorFromPalette } = usePalette();
     const api = useAiplanStore();
     const route = useRoute();
@@ -100,7 +101,7 @@ export default defineComponent({
         api
           .issueLabelCreate(
             route.params.workspace,
-            route.params.project,
+            props.projectId ?? route.params.project,
             name.value,
             color.value,
           )

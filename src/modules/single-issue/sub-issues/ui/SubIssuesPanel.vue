@@ -2,6 +2,8 @@
   <IssuesExpansionItem v-if="subIssues?.length > 0" v-model="isExpanded">
     <template v-slot:header>
       <SubIssuesHeader
+        :project="project"
+        :projectid="projectid"
         :sub-issues="subIssues"
         :state-distribution="stateDistribution"
         :is-disabled="isDisabled"
@@ -10,6 +12,7 @@
       />
     </template>
     <SubIssues
+      :project_detail="project"
       :subIssues="subIssues"
       :manual-sort-mode="manualSortMode"
       @refresh="refresh()"
@@ -29,6 +32,7 @@
       />
     </h6>
     <AddSubIssueButton
+      :project="project"
       :projectid="projectid"
       :issueid="issueid"
       :isDisabled="isDisabled"
@@ -37,7 +41,7 @@
   </q-item>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -58,81 +62,54 @@ import IssuesExpansionItem from 'src/modules/single-issue/ui/components/IssuesEx
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 import { setIntervalFunction } from 'src/utils/helpers';
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'SelectChildren',
-  props: {
-    projectid: {
-      type: String || null,
-      required: true,
-    },
-    issueid: {
-      type: String,
-      required: true,
-    },
-    isDisabled: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-  },
+const props = defineProps<{
+  project?: DtoProject;
+  projectid: string | null;
+  issueid: string;
+  isDisabled: {
+    type: Boolean;
+    required: false;
+    default: () => false;
+  };
+}>();
 
-  components: {
-    AddSubIssueButton,
-    IssuesColorCountTitle,
-    SubIssuesHeader,
-    SubIssues,
-    IssuesExpansionItem,
-  },
-  setup(props) {
-    const userStore = useUserStore();
-    const singleIssueStore = useSingleIssueStore();
-    const route = useRoute();
-    const { user } = storeToRefs(userStore);
-    const { currentIssueID } = storeToRefs(singleIssueStore);
-    const subIssues = ref();
-    const stateDistribution = ref();
-    const manualSortMode = ref(false);
-    const isExpanded = ref(true);
+const userStore = useUserStore();
+const singleIssueStore = useSingleIssueStore();
+const route = useRoute();
+const { user } = storeToRefs(userStore);
+const { currentIssueID } = storeToRefs(singleIssueStore);
+const subIssues = ref();
+const stateDistribution = ref();
+const manualSortMode = ref(false);
+const isExpanded = ref(true);
 
-    const refresh = async () => {
-      if (!currentIssueID.value) return;
-      const { data } = await getSubIssues(
-        route.params.workspace as string,
-        props.projectid ?? (route.params.project as string),
-        currentIssueID.value,
-        manualSortMode.value,
-      );
+const refresh = async () => {
+  if (!currentIssueID.value) return;
+  const { data } = await getSubIssues(
+    route.params.workspace as string,
+    props.projectid ?? (route.params.project as string),
+    currentIssueID.value,
+    manualSortMode.value,
+  );
 
-      subIssues.value = data?.sub_issues;
-      stateDistribution.value = data?.state_distribution;
-    };
+  subIssues.value = data?.sub_issues;
+  stateDistribution.value = data?.state_distribution;
+};
 
-    const toggleSort = async (value: boolean) => {
-      manualSortMode.value = value;
-      await refresh();
-    };
+const toggleSort = async (value: boolean) => {
+  manualSortMode.value = value;
+  await refresh();
+};
 
-    const refreshCycle = ref();
+const refreshCycle = ref();
 
-    onMounted(() => {
-      refresh();
-      refreshCycle.value = setIntervalFunction(refresh);
-    });
-    onBeforeUnmount(() => {
-      clearInterval(refreshCycle.value);
-    });
-    return {
-      user,
-      Screen,
-      manualSortMode,
-      refresh,
-      toggleSort,
-      subIssues,
-      stateDistribution,
-      isExpanded,
-      IssuesExpansionItem,
-    };
-  },
+onMounted(() => {
+  refresh();
+  refreshCycle.value = setIntervalFunction(refresh);
+});
+onBeforeUnmount(() => {
+  clearInterval(refreshCycle.value);
 });
 </script>

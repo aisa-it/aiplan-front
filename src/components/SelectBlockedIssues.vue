@@ -28,6 +28,8 @@
   </div>
   <SelectIssueDialog
     v-model="isBlockOpen"
+    :project="issueData.project_detail"
+    :project-identifier="issueData.project_detail?.identifier"
     :loading="loading"
     :issues="issuesIds"
     multi
@@ -126,8 +128,9 @@ const updateModelValue = (val: any) => {
 };
 
 const getLabel = (val: any) => {
-  return `${issueData.value.project_detail.identifier}-${val[nameDetail.value]
-    ?.sequence_id}`;
+  return `${issueData.value.project_detail.identifier}-${
+    val[nameDetail.value]?.sequence_id
+  }`;
 };
 
 const disableIssueItem = (val: any) => {

@@ -90,10 +90,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
 
   getters: {
     issueLink(): string {
-      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}`;
+      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.issueData.project ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}`;
     },
     issueExportPDFLink(): string {
-      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}/pdf`;
+      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.issueData.project ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}/pdf`;
     },
   },
 

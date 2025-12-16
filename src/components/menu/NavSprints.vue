@@ -202,7 +202,7 @@ watch(
   async (v) => {
     if (v) {
       await refreshSprints();
-      sprintStore.refreshSprintData = false;
+      sprintStore.clearSprintRefresh();
     }
   },
 );
