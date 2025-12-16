@@ -8,7 +8,7 @@
       @refresh="(pagination) => load(pagination)"
       @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
-      @open-issue="(id) => openIssue(id)"
+      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
     />
     <div
       v-else
