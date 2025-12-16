@@ -217,7 +217,7 @@ const handleClick = (row) => {
     // Обработка двойного клика
     clickCount.value = 0;
     clearTimeout(clickTimeout);
-    emits('openIssue',  row.sequence_id, row.project)
+    emits('openIssue', row.sequence_id, row)
   }
 }
 
