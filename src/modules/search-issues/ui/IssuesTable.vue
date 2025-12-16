@@ -1,8 +1,8 @@
 <template>
-  <div style="height: 100%; padding: 10px 10px 10px 0">
+  <div style="height: 100%; padding: 0 10px 0 0">
     <div
-      class="row no-wrap items-center q-mb-sm"
-      :class="{ 'sticky-fix top': isCreateSprint }"
+      class="row no-wrap items-center q-mb-sm sticky-fix top"
+      :style="!isCreateSprint ? { padding: '10px 0 0' } : {}"
     >
       <q-btn
         flat
@@ -116,7 +116,7 @@
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
-          <div style="text-overflow: ellipsis; overflow: hidden">
+          <div style="text-overflow: ellipsis; overflow: hidden; font-size: 0.813rem; line-height: 1.25rem;">
             <span v-html="parseBoldText(props.value)" />
             <HintTooltip>
               <span v-html="parseBoldText(props.value)"
@@ -124,13 +124,13 @@
           </div>
           <div
             v-if="showDescHighlighted(props.row.desc_highlighted)"
-            class="q-mt-xs"
           >
             <span
               style="
                 display: inline-block;
                 text-wrap: wrap;
                 line-height: 0.85rem;
+                color: var(--sub-text-color)
               "
               v-html="
                 getDescHighlightedText(
@@ -242,7 +242,7 @@
       </template>
     </q-table>
 
-    <div :class="{ 'sticky-fix bottom': isCreateSprint }">
+    <div class="sticky-fix bottom" :style="!isCreateSprint ? { padding: '0 0 10px' } : {}">
       <PaginationDefault
         v-model:selected-page="pagination.page"
         v-model:rows-per-page="pagination.rowsPerPage"
@@ -572,7 +572,7 @@ const getDescHighlightedText = (
 
   return matches && showMatchesCount
     ? truncatedText +
-        `... и ещё ${matches.length} ${getWordForm(matches.length)}`
+        `... и ещё <b>${matches.length}</b> ${getWordForm(matches.length)}`
     : truncatedText;
 };
 
@@ -656,12 +656,12 @@ const getWordForm = (count: number) => {
 </style>
 <style lang="scss">
 .search-filters-table {
-  max-height: 83vh;
-  @media (max-width: 1366px) {
-    max-height: 81vh;
-  }
+  max-height: 76vh;
   @media (max-width: 768px) {
-    max-height: 79vh;
+    max-height: 72vh;
+  }
+  @media (max-width: 500px) {
+    max-height: 66vh;
   }
 }
 @supports (-moz-appearance: none) {
