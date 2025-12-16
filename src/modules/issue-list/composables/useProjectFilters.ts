@@ -25,12 +25,12 @@ export function useProjectFilters(emits?) {
     let isShow = false;
     const isNoGroupNone =
       projectProps?.value?.filters?.group_by !== GROUP_BY_OPTIONS[0].value;
-    const isShowSubIssues = !projectProps?.value?.showSubIssues;
+    const isNotHideSubIssues = projectProps?.value?.hideSubIssues;
     const isShowOnlyActive = projectProps?.value?.showOnlyActive;
     const isStatusLength = !!projectProps.value?.filters?.states?.length;
 
     if (
-      isShowSubIssues ||
+      isNotHideSubIssues ||
       isShowOnlyActive ||
       isNoGroupNone ||
       isStatusLength
@@ -54,16 +54,22 @@ export function useProjectFilters(emits?) {
       }
 
       const props = JSON.parse(JSON.stringify(raw));
+
+      const { showSubIssues, ...newProps } = props;
+
       await projectStore.setProjectProps(
         route.params.workspace as string,
         route.params.project as string,
-        props,
+        newProps,
       );
 
       await projectStore.getMeInProject(
         route.params.workspace as string,
         route.params.project as string,
       );
+
+      projectProps.value.hideSubIssues =
+        projectProps.value.hideSubIssues ?? false;
 
       viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
       await nextTick();
@@ -125,13 +131,13 @@ export function useProjectFilters(emits?) {
         }
       }
     },
-    { immediate: true },
+    { immediate: true, deep: true },
   );
 
   const toggles = computed(() => [
     {
-      label: 'Показывать подзадачи',
-      model: 'showSubIssues',
+      label: 'Скрыть подзадачи',
+      model: 'hideSubIssues',
     },
     {
       label: 'Показывать черновики',

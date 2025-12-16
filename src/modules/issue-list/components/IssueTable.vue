@@ -11,7 +11,7 @@
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
     @row-click="(_, row) => handleClick(row)"
     @request="(e) => getIssues(e.pagination)"
-    >
+  >
     <template #bottom>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
@@ -139,7 +139,12 @@ import {
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 import { EventBus } from 'quasar';
 
-const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview', 'openIssue']);
+const emits = defineEmits([
+  'refresh',
+  'updateIssueField',
+  'openPreview',
+  'openIssue',
+]);
 const props = defineProps([
   'entity',
   'rows',
@@ -186,7 +191,7 @@ function parsePagination(pagination: QuasarPagination) {
   return {
     only_count: false,
     only_active: contextProps.value?.showOnlyActive,
-    show_sub_issues: contextProps.value.showSubIssues ?? true,
+    hide_sub_issues: contextProps.value.hideSubIssues ?? false,
     draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,
@@ -209,17 +214,15 @@ const handleClick = (row) => {
   if (clickCount.value === 1) {
     clickTimeout = setTimeout(() => {
       clickCount.value = 0;
-      emits('openPreview', row,
-      parsePagination(quasarPagination.value)
-    )
-    }, 250)
+      emits('openPreview', row, parsePagination(quasarPagination.value));
+    }, 250);
   } else if (clickCount.value === 2) {
     // Обработка двойного клика
     clickCount.value = 0;
     clearTimeout(clickTimeout);
-    emits('openIssue', row.sequence_id, row)
+    emits('openIssue', row.sequence_id, row);
   }
-}
+};
 
 const getIssues = async (p: any, action = 'sorting') => {
   let isFullUpdate = action !== 'selectedPage' ? true : false;

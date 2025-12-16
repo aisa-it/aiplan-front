@@ -11,6 +11,7 @@ import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { IQuery } from 'src/stores/issues-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
+import { sprintUpdate, getSprint, updateSprintView } from '../services/api';
 
 const usersApi = new (withInterceptors(Users))();
 const workspaceStore = useWorkspaceStore();
@@ -105,9 +106,11 @@ export const useSprintStore = defineStore('sprint-store', {
       this.notUpdated = [] as NotUpdated[];
       this.refreshSprintData = false;
     },
-    async getMyViewProps() {
-      return usersApi.getCurrentUser().then((res) => {
-        const props = res.data.view_props;
+
+    async getMyViewProps(workspaceSlug: string, sprintId: string) {
+      if (!workspaceSlug || !sprintId) return '';
+      return getSprint(workspaceSlug, sprintId).then((res) => {
+        const props = res.view_props;
 
         if (!props?.filters?.group_by) {
           props.filters.group_by = SPRINT_GROUP_BY_OPTIONS[0].value;
@@ -117,8 +120,15 @@ export const useSprintStore = defineStore('sprint-store', {
       });
     },
 
-    async setMyViewProps(props: TypesViewProps): Promise<void> {
-      return usersApi.updateUserViewProps(props).then((res) => res.data);
+    async setMyViewProps(
+      workspaceSlug: string,
+      sprintId: string,
+      props: TypesViewProps,
+    ): Promise<string> {
+      if (!workspaceSlug || !sprintId) return '';
+      return updateSprintView(workspaceSlug, sprintId, props).then(
+        (res) => res,
+      );
     },
 
     isGroupHide(groupId: string): boolean {
@@ -137,7 +147,11 @@ export const useSprintStore = defineStore('sprint-store', {
 
       props.group_tables_hide[groupToHide] = !hideValue;
       try {
-        await this.setMyViewProps(props);
+        await this.setMyViewProps(
+          this.router.currentRoute.value.params.workspace as string,
+          this.router.currentRoute.value.params.sprint as string,
+          props,
+        );
         this.sprintProps = props;
         return props;
       } catch (e) {}
