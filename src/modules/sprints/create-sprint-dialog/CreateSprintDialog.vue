@@ -12,7 +12,7 @@
         style="width: 100%"
       >
         <span class="text-h6" :class="{ 'mobile-title': !isDesktop }"
-          >{{ sprintId ? 'Обновление данных' : 'Создание' }} спринта</span
+          >{{ sprintId ? 'Обновление' : 'Создание' }} спринта</span
         >
         <q-btn flat dense @click="dialogRef?.hide()">
           <q-icon name="close" dense size="18px" /> </q-btn
@@ -60,7 +60,7 @@
         </q-drawer>
       </q-layout>
 
-      <div v-else class="mobile-view" style="height: calc(100% - 100px)">
+      <div v-else class="mobile-view" style="height: 100%">
         <q-tabs
           v-model="mobileTab"
           dense
@@ -100,7 +100,11 @@
                   selection="multiple"
                   :current-filter="currentFilter"
                   is-create-sprint
-                  style="padding: 0; height: calc(100vh - 250px)"
+                  style="
+                    padding: 0;
+                    height: calc(100vh - 250px);
+                    overflow-y: auto;
+                  "
                   @toggle="toggleLeftDrawer()"
                   is-mobile
                 />
@@ -396,7 +400,7 @@ watch(
 }
 
 .mobile-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
 }
 
