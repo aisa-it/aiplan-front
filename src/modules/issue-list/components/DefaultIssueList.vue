@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="issue-list">
     <IssueTable
       v-if="rows?.length"
       :rows="rows"

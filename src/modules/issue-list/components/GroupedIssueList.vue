@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="issue-list">
     <GroupedTables
       v-if="!isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
