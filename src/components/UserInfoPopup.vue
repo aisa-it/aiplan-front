@@ -32,6 +32,14 @@
         <div v-else class="text-avatar">
           {{ text }}
         </div>
+        <HatXmasIcon
+          v-if="ny"
+          :class="`hat-overlay ${
+            theme === 'light' ? 'hat-overlay_shadowed' : ''
+          }`"
+          :width="44"
+          :height="44"
+        />
       </q-avatar>
       <div
         class="column word-wrap"
@@ -97,6 +105,7 @@ import { getUrlFile } from 'src/utils/helpers';
 import { formatTime, getCityFromTimezone } from 'src/utils/time';
 //components
 import UserStatus from './selects/components/UserStatus.vue';
+import HatXmasIcon from './icons/HatXmasIcon.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -108,6 +117,8 @@ const props = withDefaults(
     image?: string;
     text?: string;
     error?: string;
+    theme: string;
+    ny: boolean;
   }>(),
   {
     isShowPopupMiddle: false,
@@ -141,6 +152,7 @@ defineExpose({
 <style lang="sass" scoped>
 @use "sass:map"
 .avatar
+  position: relative
   color: white
 
 .square
@@ -178,5 +190,22 @@ defineExpose({
   gap: 8px;
   align-items: center;
   justify-content: center;
+}
+
+.hat-overlay {
+  position: absolute;
+  top: -55%;
+  left: 40%;
+  transform: translate(-50%, -50%) scale(0.7);
+  width: 100%;
+  height: auto;
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 10;
+
+  &_shadowed {
+    filter: drop-shadow(-3px -1px 4px rgba(0, 0, 0, 0.7));
+  }
 }
 </style>
