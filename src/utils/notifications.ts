@@ -23,6 +23,9 @@ const getSuccessCopyIssueByLabelMessage = (href: string) =>
 const getSuccessTransferIssueByLabelMessage = (href: string) =>
   `<a target="_blank" href="${href}" class="primary-link">Задачи</a> перенесены`;
 
+const getSuccessCreateDocMessage = (href: string) =>
+  `<a target="_blank" href="${href}" class="primary-link">Документ</a> успешно создан`;
+
 export {
   getSuccessCreateSubissueMessage,
   getSuccessCreateIssueMessage,
@@ -31,4 +34,5 @@ export {
   getSuccessCopyIssueByLabelMessage,
   getSuccessTransferIssueByLabelMessage,
   getSuccessDeleteIssueMessage,
+  getSuccessCreateDocMessage,
 };

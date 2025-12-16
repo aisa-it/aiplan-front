@@ -4,6 +4,7 @@
     dense
     @click="isSearchOpened = true"
     class="btn-only-icon-sm bordered"
+    data-tour="search"
   >
     <SearchIcon />
   </q-btn>

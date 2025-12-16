@@ -1,6 +1,6 @@
 <template>
   <q-input
-    label="Дата окончания"
+    label="Выберите интервал"
     class="base-input"
     dense
     :model-value="`${localRange.from}-${localRange.to}`"
@@ -30,17 +30,37 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const props = defineProps<{
   modelValue: { from: string; to: string };
 }>();
 const emit = defineEmits(['update:modelValue']);
 
-const minDate = dayjs().format('DD.MM.YYYY');
-const maxDate = dayjs().add(10, 'year').endOf('year').format('DD.MM.YYYY');
+const minDate = dayjs().tz('UTC').format('DD.MM.YYYY');
+const maxDate = dayjs()
+  .tz('UTC')
+  .add(10, 'year')
+  .endOf('year')
+  .format('DD.MM.YYYY');
 
 const localRange = computed({
-  get: () => props.modelValue,
+  get: () => {
+    const val = props.modelValue;
+
+    if (typeof val === 'string') {
+      return { from: val, to: '' };
+    }
+
+    return {
+      from: val?.from ?? '',
+      to: val?.to ?? '',
+    };
+  },
   set: (val) => emit('update:modelValue', val),
 });
 

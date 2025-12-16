@@ -80,6 +80,22 @@
               style="min-width: 200px"
             />
           </div>
+          <div>
+            <div class="q-mt-sm">Присылать уведомления о прохождении</div>
+            <div :class="!$q.screen.lt.sm ? 'row no-wrap' : 'column'">
+              <q-checkbox
+                v-model="form.notification_channels.telegram"
+                label="Telegram"
+                class="q-mr-md"
+              />
+              <q-checkbox
+                v-model="form.notification_channels.app"
+                label="Система"
+                class="q-mr-md"
+              />
+              <q-checkbox v-model="form.notification_channels.email" label="Email" />
+            </div>
+          </div>
           <EditorTipTapV2
             v-model="form.description"
             editor-id="form-editor-id"
@@ -192,6 +208,11 @@ const clear = () => {
   };
   visible.value = 'all';
   isAutoCreateProject.value = false;
+  form.value.notification_channels = {
+    telegram: false,
+    app: false,
+    email: false,
+  };
 };
 
 const save = async () => {
@@ -213,6 +234,7 @@ const save = async () => {
       target_project_id: isAutoCreateProject.value
         ? form.value.target_project_id.id
         : null,
+      notification_channels: form.value.notification_channels,
     };
 
     try {

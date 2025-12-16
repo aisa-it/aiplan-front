@@ -362,7 +362,9 @@ const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () => selectedProject.value?.identifier !== (route.params.project as string),
+  () =>
+    selectedProject.value?.identifier !== (route.params.project as string) ||
+    selectedProject.value?.identifier !== issueData.value.project,
 );
 
 const isMultipleIssuesTransfer = computed<boolean>(

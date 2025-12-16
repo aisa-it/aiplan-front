@@ -1,12 +1,11 @@
 <template>
-  <div
-    class="q-table__title abbriviated-text"
-    style="max-width: calc(100% - 60px); display: flex; gap: 16px"
-  >
-    <span>
+  <div class="q-table__title abbriviated-text title">
+    <div>
       {{ sprint?.name }}
-      {{ getSprintDates(sprint?.start_date ?? '', sprint?.end_date ?? '') }}
-    </span>
+      <br class="mobile-space" />{{
+        getSprintDates(sprint?.start_date ?? '', sprint?.end_date ?? '')
+      }}
+    </div>
     <StatusLinearProgressBar
       style="max-width: 320px"
       :stats="sprint.stats ?? {}"
@@ -23,3 +22,25 @@ defineProps<{
   sprint: DtoSprint;
 }>();
 </script>
+
+<style scoped lang="scss">
+.mobile-space {
+  display: none;
+}
+.title {
+  max-width: calc(100% - 60px);
+  display: flex;
+  gap: 16px;
+}
+@media (max-width: 540px) {
+  .mobile-space {
+    display: block;
+  }
+  .title {
+    flex-direction: column;
+    gap: 8x;
+    align-items: center;
+    text-align: center;
+  }
+}
+</style>

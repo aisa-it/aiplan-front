@@ -9,12 +9,9 @@
     :rows="rows"
     :columns="columns"
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
-    @row-click="
-      (_, row) =>
-        emits('openPreview', row.sequence_id, parsePagination(quasarPagination))
-    "
+    @row-click="(_, row) => handleClick(row)"
     @request="(e) => getIssues(e.pagination)"
-  >
+    >
     <template #bottom>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
@@ -142,7 +139,7 @@ import {
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 import { EventBus } from 'quasar';
 
-const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview']);
+const emits = defineEmits(['refresh', 'updateIssueField', 'openPreview', 'openIssue']);
 const props = defineProps([
   'entity',
   'rows',
@@ -201,6 +198,27 @@ function parsePagination(pagination: QuasarPagination) {
         ? pagination.rowsNumber || 10
         : pagination.rowsPerPage,
   };
+}
+
+const clickCount = ref(0);
+let clickTimeout: NodeJS.Timeout;
+
+const handleClick = (row) => {
+  clickCount.value++;
+
+  if (clickCount.value === 1) {
+    clickTimeout = setTimeout(() => {
+      clickCount.value = 0;
+      emits('openPreview', row,
+      parsePagination(quasarPagination.value)
+    )
+    }, 250)
+  } else if (clickCount.value === 2) {
+    // Обработка двойного клика
+    clickCount.value = 0;
+    clearTimeout(clickTimeout);
+    emits('openIssue', row.sequence_id, row)
+  }
 }
 
 const getIssues = async (p: any, action = 'sorting') => {

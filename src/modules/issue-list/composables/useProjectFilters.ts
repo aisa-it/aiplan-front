@@ -45,10 +45,13 @@ export function useProjectFilters(emits?) {
       issuesLoader.value = true;
 
       const raw = toRaw(viewForm.value);
-      // приводим поле columns_to_show к формату string[], иногда туда залетает объект
-      viewForm.value.columns_to_show = raw.columns_to_show.map(
-        (column) => column?.name || column,
-      );
+
+      if (viewForm.value.columns_to_show) {
+        // приводим поле columns_to_show к формату string[], иногда туда залетает объект
+        viewForm.value.columns_to_show = raw.columns_to_show.map(
+          (column) => column?.name || column,
+        );
+      }
 
       const props = JSON.parse(JSON.stringify(raw));
       await projectStore.setProjectProps(

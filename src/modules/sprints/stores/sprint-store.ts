@@ -18,12 +18,19 @@ const workspaceStore = useWorkspaceStore();
 const aiplan = useAiplanStore();
 const api = aiplan.api;
 
+export enum NotUpdated {
+  SprintPage = 1,
+  Nav,
+}
+
 export const useSprintStore = defineStore('sprint-store', {
   state: () => {
     return {
+      sprint: {} as DtoSprint,
       sprintProps: null,
       issuesLoader: false,
       refreshSprintData: false,
+      notUpdated: [] as NotUpdated[],
     };
   },
 
@@ -43,39 +50,60 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     getTableColumns() {
-      return allSprintColumns.filter((column) => {
-        if (column.name === 'sequence_id') return true;
+      const order: string[] =
+        this.sprintProps?.columns_to_show ?? ([] as string[]);
 
-        return this.sprintProps?.columns_to_show?.some(
-          (c) => c === column?.name,
-        );
-      });
+      const sequenceColumn = allSprintColumns.find(
+        (c) => c.name === 'sequence_id',
+      );
+
+      const orderedColumns = order
+        .map((name) => allSprintColumns.find((c) => c.name === name))
+        .filter(Boolean);
+
+      return [sequenceColumn, ...orderedColumns].filter(Boolean);
+    },
+
+    sortAllColumns() {
+      const orderedColumns = this.getTableColumns;
+      const inactive = allSprintColumns.filter(
+        (c) => !orderedColumns?.some((el) => el.name === c.name),
+      );
+
+      return [...orderedColumns, ...inactive];
     },
 
     getStatusesAsArray() {
-      const allStatesWs = workspaceStore.allWorkspaceStates;
+      const result =
+        this.sprint?.issues?.reduce((acc, issue) => {
+          const st = issue.state_detail;
+          if (!st) return acc;
 
-      const result = Object.entries(allStatesWs ?? {}).reduce(
-        (acc, [id, items]) => {
-          items.forEach((item) => {
-            const key = `${item.name}_${item.color}`;
-            if (!acc[key]) {
-              acc[key] = { name: item.name, color: item.color, id: [] };
-            }
-            acc[key].id.push(item.id);
-          });
+          const key = `${st.name}_${st.color}`;
+
+          if (!acc[key]) {
+            acc[key] = { name: st.name, color: st.color, id: [] };
+          }
+
+          acc[key].id.push(st.id);
+
           return acc;
-        },
-        {},
-      );
+        }, {}) ?? [];
 
       return Object.values(result);
     },
   },
 
   actions: {
-    triggerSprintRefresh() {
+    triggerSprintRefresh(notUpdated?: NotUpdated) {
+      if (notUpdated) {
+        this.notUpdated.push(notUpdated);
+      }
       this.refreshSprintData = true;
+    },
+    clearSprintRefresh() {
+      this.notUpdated = [] as NotUpdated[];
+      this.refreshSprintData = false;
     },
     async getMyViewProps() {
       return usersApi.getCurrentUser().then((res) => {

@@ -91,10 +91,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
 
   getters: {
     issueLink(): string {
-      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}`;
+      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${this.issueData.project ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}`;
     },
     issueExportPDFLink(): string {
-      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}/pdf`;
+      return `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.issueData.project ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID ?? this.router.currentRoute.value.params.issue}/pdf`;
     },
   },
 
@@ -246,7 +246,11 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
     },
 
     // ------------- Exact issue comment -------------
-    async issueCommentCreate(content: any, stripped: string) {
+    async issueCommentCreate(
+      content: any,
+      stripped: string,
+      projectID?: string,
+    ) {
       const data = {
         comment_json: {},
         comment_html: trimEmptyTags(content.html),
@@ -257,7 +261,7 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       const formData = buildFormData(data, content.files, 'comment');
 
       await api.post(
-        `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/`,
+        `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${projectID ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/`,
         formData,
         {
           headers: {
@@ -267,17 +271,17 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       );
     },
 
-    async issueCommentsList(page: number, pageSize = 10) {
+    async issueCommentsList(page: number, pageSize = 10, projectID?: string) {
       if (
         !this.currentIssueID ||
         !this.router.currentRoute.value.params.workspace ||
-        !this.router.currentRoute.value.params.project
+        (!this.router.currentRoute.value.params.project && !projectID)
       )
         return;
 
       await shitApi
         .get(
-          `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/`,
+          `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${projectID ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/`,
           {
             params: {
               offset: getActivityOffset(page, pageSize),
@@ -292,9 +296,9 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
         });
     },
 
-    async issueCommentDelete(commentID: string) {
+    async issueCommentDelete(commentID: string, projectID?: string) {
       await api.delete(
-        `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/${commentID}/`,
+        `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${projectID ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/comments/${commentID}/`,
       );
     },
 
@@ -390,16 +394,21 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
 
     // ------------- Exact issue activities -------------
 
-    async getIssueActivitiesList(page: number, pageSize = 10, field?: string) {
+    async getIssueActivitiesList(
+      page: number,
+      pageSize = 10,
+      field?: string,
+      projectID?: string,
+    ) {
       if (
         !this.router.currentRoute.value.params.workspace ||
-        !this.router.currentRoute.value.params.project ||
+        (!this.router.currentRoute.value.params.project && !projectID) ||
         !this.currentIssueID
       )
         return;
       await api
         .get(
-          `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/activities/`,
+          `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/projects/${projectID ?? this.router.currentRoute.value.params.project}/issues/${this.currentIssueID}/activities/`,
           {
             params: {
               offset: getActivityOffset(page, pageSize),

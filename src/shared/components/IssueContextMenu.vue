@@ -7,7 +7,7 @@
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
-        v-if="!props.unpin"
+        v-if="!isPinned"
         clickable
         v-close-popup
         @click="
@@ -117,15 +117,20 @@ const emit = defineEmits<{
 
 const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = useIssuesStore();
+const { pinnedIssues } = storeToRefs(useIssuesStore());
 
 const route = useRoute();
-const workspaceSlug = computed(() => {
+const workspaceSlug = computed<string>(() => {
   return route.params.workspace as string;
 });
 
 const issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);
 const isTransferOpen = ref<boolean>(false);
+
+const isPinned = computed<boolean>(() => {
+  return pinnedIssues.value?.some(issue => issue.id === props.row?.id);
+});
 
 const copyIssueLink = (): void => {
   try {

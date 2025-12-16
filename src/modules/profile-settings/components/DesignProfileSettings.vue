@@ -80,7 +80,7 @@
         fill-input
         map-options
         dense
-        @update:model-value="(value: string) => setSnow(value)"
+        @update:model-value="({ value }) => setSnow(value)"
       />
     </div>
   </q-form>

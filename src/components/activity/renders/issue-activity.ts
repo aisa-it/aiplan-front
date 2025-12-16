@@ -63,6 +63,14 @@ export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspa
       return `<span>${action} "${value}" в задаче
                 ${link} ${workspaceSource}
                 <span/>`;
+    case 'status':
+      action = 'поменял(-а) статус на';
+      value = activity.new_entity_detail.name
+        ? addSpaceIfCamelCase(activity.new_value as string)
+        : 'Не выбрано';
+      return `<span>${action} "${value}" в задаче
+                ${link} ${workspaceSource}
+                <span/>`;
     case 'priority':
       action = translateAction('priority', Boolean(activity.new_value));
       const translate = translatePrioritets(activity.new_value as string);

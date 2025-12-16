@@ -67,12 +67,12 @@ const handleDeleteIssue = async () => {
   await issueStore
     .deleteIssue(
       currentWorkspaceSlug.value,
-      currentProjectID.value,
+      issueData.value.project ?? currentProjectID.value,
       props.issue ? props.issue.sequence_id : issueData.value.id,
     )
     .then(() => {
       router.push(
-        `/${currentWorkspaceSlug.value}/projects/${currentProjectID.value}/issues`,
+        `/${currentWorkspaceSlug.value}/projects/${issueData.value.project ?? currentProjectID.value}/issues`,
       );
       setNotificationView({
         open: true,
@@ -95,7 +95,7 @@ const handleDeleteIssue = async () => {
     .catch(() => {
       router.push(
         `/${currentWorkspaceSlug.value}/projects/${
-          currentProjectID.value
+          issueData.value.project ?? currentProjectID.value
         }/issues/${
           props.issue ? props.issue.sequence_id : issueData.value.sequence_id
         }`,
