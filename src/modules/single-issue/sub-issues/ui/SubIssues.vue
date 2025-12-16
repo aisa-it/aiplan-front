@@ -7,7 +7,11 @@
       label="Ручная сортировка"
       v-show="
         props.subIssues.length > 1 &&
-        hasPermissionByIssue(issueData, project, 'change-issue-primary')
+        hasPermissionByIssue(
+          issueData,
+          props.project_detail ?? project,
+          'change-issue-primary',
+        )
       "
     />
     <q-list class="issue-subtask__list" dense bordered separator>
@@ -103,7 +107,7 @@ const { user } = storeToRefs(userStore);
 const { project } = storeToRefs(projectStore);
 
 const route = useRoute();
-const props = defineProps(['subIssues', 'manualSortMode']);
+const props = defineProps(['subIssues', 'manualSortMode', 'project_detail']);
 const emits = defineEmits(['refresh', 'toggleSortMode']);
 
 const isManualSort = computed({
@@ -114,7 +118,7 @@ const isManualSort = computed({
 const moveChildUp = async (id: string) => {
   await moveSubIssueUp(
     route.params.workspace as string,
-    route.params.project as string,
+    props.project_detail.id ?? (route.params.project as string),
     currentIssueID.value as string,
     id,
   );
@@ -124,7 +128,7 @@ const moveChildUp = async (id: string) => {
 const moveChildDown = async (id: string) => {
   await moveSubIssueDown(
     route.params.workspace as string,
-    route.params.project as string,
+    props.project_detail.id ?? (route.params.project as string),
     currentIssueID.value as string,
     id,
   );
@@ -138,7 +142,7 @@ const getUrl = (value: DtoIssue) => {
 const removeChild = (id: string) => {
   updateIssueInfo(
     route.params.workspace as string,
-    route.params.project as string,
+    props.project_detail.id ?? (route.params.project as string),
     id,
     {
       parent: null,
@@ -157,7 +161,7 @@ const removeChild = (id: string) => {
 const canDelete = (subIssue: DtoIssue): boolean => {
   return !!hasPermissionByIssue(
     subIssue,
-    project.value,
+    props.project_detail ?? project.value,
     'change-issue-primary',
   );
 };

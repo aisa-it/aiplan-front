@@ -8,7 +8,7 @@
       @refresh="(pagination) => load(pagination)"
       @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
-      @open-issue="(id) => openIssue(id)"
+      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
     />
     <div
       v-else
@@ -80,6 +80,7 @@ const { user } = storeToRefs(useUserStore());
 const isMobile = computed(() => Screen.width <= 1200);
 const issuesStore = useIssuesStore();
 const load = async (pagination) => {
+  console.log('зашли');
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(contextProps.value));
   props.page_size = pagination.limit;

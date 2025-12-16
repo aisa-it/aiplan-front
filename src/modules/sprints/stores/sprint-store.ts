@@ -18,6 +18,11 @@ const workspaceStore = useWorkspaceStore();
 const aiplan = useAiplanStore();
 const api = aiplan.api;
 
+export enum NotUpdated {
+  SprintPage = 1,
+  Nav,
+}
+
 export const useSprintStore = defineStore('sprint-store', {
   state: () => {
     return {
@@ -25,6 +30,7 @@ export const useSprintStore = defineStore('sprint-store', {
       sprintProps: null,
       issuesLoader: false,
       refreshSprintData: false,
+      notUpdated: [] as NotUpdated[],
     };
   },
 
@@ -89,8 +95,15 @@ export const useSprintStore = defineStore('sprint-store', {
   },
 
   actions: {
-    triggerSprintRefresh() {
+    triggerSprintRefresh(notUpdated?: NotUpdated) {
+      if (notUpdated) {
+        this.notUpdated.push(notUpdated);
+      }
       this.refreshSprintData = true;
+    },
+    clearSprintRefresh() {
+      this.notUpdated = [] as NotUpdated[];
+      this.refreshSprintData = false;
     },
     async getMyViewProps() {
       return usersApi.getCurrentUser().then((res) => {

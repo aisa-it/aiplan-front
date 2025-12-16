@@ -45,7 +45,10 @@ import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersLi
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
 import SprintHeaderSkeleton from 'src/modules/sprints/sceletons/SprintHeaderSkeleton.vue';
 
-import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import {
+  NotUpdated,
+  useSprintStore,
+} from 'src/modules/sprints/stores/sprint-store';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
@@ -96,7 +99,7 @@ const updateSprint = async () => {
 onMounted(async () => {
   issuesLoader.value = true;
   sprintLoader.value = true;
-  sprintStore.refreshSprintData = false;
+  sprintStore.clearSprintRefresh();
   await sprintStore.getMyViewProps();
   await updateSprint();
 });
@@ -105,10 +108,17 @@ watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
+      if (sprintStore.notUpdated.includes(NotUpdated.SprintPage)) {
+        sprint.value = await getSprint(
+          router.currentRoute.value.params.workspace as string,
+          router.currentRoute.value.params.sprint as string,
+        );
+        return;
+      }
       issuesLoader.value = true;
       sprintLoader.value = true;
       await updateSprint();
-      sprintStore.refreshSprintData = false;
+      sprintStore.clearSprintRefresh();
     }
   },
 );

@@ -2,6 +2,7 @@
   <q-dialog ref="dialogRef" persistent>
     <NewIssuePanel
       v-if="workspaceProjects"
+      :project_detail="project"
       :parentissue="parent"
       class="q-dialog-plugin"
       style="min-width: 80vw"
@@ -35,7 +36,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 // core
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -49,76 +50,48 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import NewIssuePanel from './NewIssuePanel.vue';
 import NewProjectPanel from './NewProjectPanel.vue';
 import ConfirmLostEditionDialog from './ConfirmLostEditionDialog.vue';
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default {
-  props: {
-    parent: {
-      type: String,
-      required: false,
-    },
-  },
-  emits: [...useDialogPluginComponent.emits, 'update', 'onProjectCreated'],
-  setup(props, { emit }) {
-    // plugins
-    const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
-      useDialogPluginComponent();
+const props = defineProps<{ parent?: string; project?: DtoProject }>();
+const emit = defineEmits([
+  ...useDialogPluginComponent.emits,
+  'update',
+  'onProjectCreated',
+]);
 
-    // stores
-    const api = useAiplanStore();
-    const workspaceStore = useWorkspaceStore();
+// plugins
+const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
+  useDialogPluginComponent();
 
-    // store to ref
-    const { workspaceProjects, currentWorkspaceSlug } =
-      storeToRefs(workspaceStore);
+// stores
+const api = useAiplanStore();
+const workspaceStore = useWorkspaceStore();
 
-    const data = ref({});
-    const isUserTextData = ref(false);
-    const isConfirm = ref(false);
+// store to ref
+const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-    const handleTextStatus = (status) => {
-      isUserTextData.value = status;
-    };
+const data = ref({});
+const isUserTextData = ref(false);
+const isConfirm = ref(false);
 
-    const handleClose = () => {
-      if (isUserTextData.value) {
-        isConfirm.value = true;
-      } else {
-        onDialogCancel();
-      }
-    };
-    const closeBothDialog = () => {
-      isConfirm.value = false;
-      onDialogCancel();
-    };
+const handleTextStatus = (status) => {
+  isUserTextData.value = status;
+};
 
-    const createProject = () => {
-      onDialogCancel();
-      emit('onProjectCreated');
-    };
+const handleClose = () => {
+  if (isUserTextData.value) {
+    isConfirm.value = true;
+  } else {
+    onDialogCancel();
+  }
+};
+const closeBothDialog = () => {
+  isConfirm.value = false;
+  onDialogCancel();
+};
 
-    return {
-      data,
-      api,
-      dialogRef,
-      workspaceProjects,
-      onDialogHide,
-      onDialogOK,
-      onCancelClick: onDialogCancel,
-      props,
-      isUserTextData,
-      handleTextStatus,
-      handleClose,
-      isConfirm,
-      closeBothDialog,
-      createProject,
-      workspaceStore,
-      currentWorkspaceSlug,
-    };
-  },
-  components: {
-    NewIssuePanel,
-    NewProjectPanel,
-    ConfirmLostEditionDialog,
-  },
+const createProject = () => {
+  onDialogCancel();
+  emit('onProjectCreated');
 };
 </script>
