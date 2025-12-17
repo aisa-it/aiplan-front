@@ -3,7 +3,7 @@
     <q-card class="single-list relative" flat dense>
       <q-card-section
         class="row issue-list__header"
-        :style="'padding: 12px 16px'"
+        :style="!ny ? 'padding: 12px 16px' : 'padding: 32px 16px 12px 16px'"
       >
         <SprintHeaderSkeleton v-if="sprintLoader" />
         <SprintHeader v-else :sprint="sprint" />
@@ -53,6 +53,7 @@ import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 import { useIssueContext } from 'src/modules/issue-list/composables/useIssueContext';
 
 const { onRequest } = useDefaultIssues('sprint');
@@ -62,8 +63,7 @@ const router = useRouter();
 const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
-
-const { updateProps } = useIssueContext('sprint');
+const utilsStore = useUtilsStore();
 
 const {
   sprint,
@@ -73,6 +73,8 @@ const {
   issuesLoader,
   sprintProps,
 } = storeToRefs(sprintStore);
+
+const { ny } = storeToRefs(utilsStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
