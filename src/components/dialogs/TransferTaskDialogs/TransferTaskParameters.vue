@@ -1,12 +1,13 @@
 <template>
-  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm"  @hide="() => close()">
-    <q-card class="modal-card modal-card__small"
-    :style="{width: dynamicWidthDialog +'px'}"
-      >
-      <q-card-section class="column
-      q-pt-none col q-pb-sm q-px-md">
-
-        <div class="text-subtitle1 q-ma-md font-semibold">Настройка параметров задачи</div>
+  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()">
+    <q-card
+      class="modal-card modal-card__small"
+      :style="{ width: dynamicWidthDialog + 'px' }"
+    >
+      <q-card-section class="column q-pt-none col q-pb-sm q-px-md">
+        <h6 class="text-subtitle1 q-ma-md font-semibold">
+          Настройка параметров задачи
+        </h6>
 
         <q-separator class="issue-panel__separator" />
 
@@ -30,10 +31,12 @@
               "
               isAdaptiveSelect
               :states-from-cache="statesCache[issueData?.project]"
-              @update:status="(val) => {
-                return issueSettings.state_detail = val;
-              }"
-              />
+              @update:status="
+                (val) => {
+                  return (issueSettings.state_detail = val);
+                }
+              "
+            />
           </div>
         </div>
 
@@ -54,18 +57,20 @@
               :assigness="issueSettings.assignees"
               :isDisabled="
                 !hasPermissionByIssue(issueData, project, 'change-issue-basic')
-                "
+              "
               :current-member="user"
               isAdaptiveSelect
-              @update:assigness="(val) => {
-                return issueSettings.assignees = val;
-              }"
-              ></SelectAssignee>
+              @update:assigness="
+                (val) => {
+                  return (issueSettings.assignees = val);
+                }
+              "
+            ></SelectAssignee>
           </div>
         </div>
 
         <!-- Наблюдатели -->
-         <div class="row q-pt-md centered-horisontally">
+        <div class="row q-pt-md centered-horisontally">
           <div class="col">
             <div class="row items-center">
               <ObserveIcon class="issue-icon" />
@@ -86,9 +91,11 @@
                   'change-issue-basic',
                 )
               "
-              @update:watchers="(val) => {
-                return issueSettings.watchers = val;
-              }"
+              @update:watchers="
+                (val) => {
+                  return (issueSettings.watchers = val);
+                }
+              "
             ></SelectWatchers>
           </div>
         </div>
@@ -112,11 +119,17 @@
               :issue="issueData"
               isAdaptiveSelect
               :is-disabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+                !hasPermissionByIssue(
+                  issueData,
+                  project,
+                  'change-issue-primary',
+                )
               "
-              @update:priority="(val) => {
-                return issueSettings.priority = val;
-              }"
+              @update:priority="
+                (val) => {
+                  return (issueSettings.priority = val);
+                }
+              "
             >
             </SelectPriority>
           </div>
@@ -140,12 +153,18 @@
               :date="issueSettings.target_date"
               :issue="issueData"
               :is-disabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-primary')
+                !hasPermissionByIssue(
+                  issueData,
+                  project,
+                  'change-issue-primary',
+                )
               "
-              :style="{padding:0}"
-              @update:date="(val) => {
-                return issueSettings.target_date = val;
-              }"
+              :style="{ padding: 0 }"
+              @update:date="
+                (val) => {
+                  return (issueSettings.target_date = val);
+                }
+              "
             />
           </div>
         </div>
@@ -166,13 +185,12 @@
           class="primary-btn"
           @click="
             () => {
-                isSave = true;
-                dialogRef.hide();
-              }
+              isSave = true;
+              dialogRef.hide();
+            }
           "
         />
       </q-card-actions>
-
     </q-card>
   </q-dialog>
 </template>
@@ -202,10 +220,13 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useUserStore } from 'src/stores/user-store';
-import { DtoIssue, DtoStateLight, DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoStateLight,
+  DtoWorkspaceMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-
-  // store
+// store
 const userStore = useUserStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
@@ -222,20 +243,20 @@ const dynamicWidthDialog = computed(() =>
 
 // props
 const props = defineProps<{
-    issue: DtoIssue;
-    issue_settings: {
-      state_detail: DtoStateLight;
-      assignees: DtoWorkspaceMember[];
-      watchers: DtoWorkspaceMember[];
-      priority: string;
-      target_date: string | null;
-    }
-  }>();
+  issue: DtoIssue;
+  issue_settings: {
+    state_detail: DtoStateLight;
+    assignees: DtoWorkspaceMember[];
+    watchers: DtoWorkspaceMember[];
+    priority: string;
+    target_date: string | null;
+  };
+}>();
 
 // emits
-const emit = defineEmits(['save'])
+const emit = defineEmits(['save']);
 
-const dialogRef = ref()
+const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
 const issueSettings = ref({
   state_detail: props.issue_settings.state_detail,
@@ -265,5 +286,5 @@ const close = () => {
   } else {
     resetSettings();
   }
-}
+};
 </script>

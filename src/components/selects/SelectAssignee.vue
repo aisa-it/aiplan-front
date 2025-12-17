@@ -265,10 +265,7 @@ const handleUpdateAssignees = async (e) => {
       })
       .catch(() => (assignessid.value = currentIds));
   } else {
-    emit(
-      'update:assigness',
-      e ? e.map((d) => (d)) : []
-    );
+    emit('update:assigness', e ? e.map((d) => d) : []);
   }
 };
 

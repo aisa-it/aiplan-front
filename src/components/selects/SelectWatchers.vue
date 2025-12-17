@@ -297,8 +297,7 @@ const updateProjectWatchers = async (e: any) => {
       })
       .catch(() => (watcherid.value = currentIds));
   } else {
-    emit('update:watchers',
-    e ? e.map((d) => (d)) : []);
+    emit('update:watchers', e ? e.map((d) => d) : []);
   }
 };
 

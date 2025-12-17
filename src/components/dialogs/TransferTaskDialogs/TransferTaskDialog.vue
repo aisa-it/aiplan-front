@@ -161,7 +161,7 @@
         </q-item>
 
         <q-btn
-        :disable="isMultipleIssuesTransfer"
+          :disable="isMultipleIssuesTransfer"
           flat
           dense
           no-caps
@@ -169,16 +169,16 @@
           label="Настройка параметров задачи"
           class="q-mt-sm no-hover-btn"
           style="align-self: flex-start"
-
-          @click="settings = true">
+          @click="settings = true"
+        >
         </q-btn>
 
-          <TransferTaskParameters
-            v-model="settings"
-            :issue="props.issue"
-            :issue_settings="issueSettings"
-            @save="saveSettings"
-            />
+        <TransferTaskParameters
+          v-model="settings"
+          :issue="props.issue"
+          :issue_settings="issueSettings"
+          @save="saveSettings"
+        />
 
         <div v-if="transferErrors.length" class="full-w">
           <h6 style="margin: 12px 0 0 0 !important; color: #dc3e3e">Ошибки</h6>
@@ -261,7 +261,7 @@ import TransferTaskParameters from './TransferTaskParameters.vue';
 import {
   IIssueTransferById,
   IIssueTransferByLabel,
-  IIssueTransferParams
+  IIssueTransferParams,
 } from 'src/interfaces/issues';
 import { IProject } from 'src/interfaces/projects';
 import { IMigrationError } from 'src/interfaces/notifications';
@@ -368,12 +368,10 @@ const isDifferentProjectSelected = computed<boolean>(
 );
 
 const isMultipleIssuesTransfer = computed<boolean>(
-  () => actionWithLinkedIssues.value.some(
-    (el) => el === true,
-  ) || actionByLabel.value.some(
-    (el) => el === true,
-  )
-)
+  () =>
+    actionWithLinkedIssues.value.some((el) => el === true) ||
+    actionByLabel.value.some((el) => el === true),
+);
 
 const filterTransferErrorsByCurrentIssueIdOrType = computed(() => {
   return transferErrors.value.filter(
@@ -396,9 +394,21 @@ const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
   );
 });
 
-const assignerIds = computed(() => (issueSettings.value.assignees ? issueSettings.value.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : []));
+const assignerIds = computed(() =>
+  issueSettings.value.assignees
+    ? issueSettings.value.assignees.map((assignee) =>
+        assignee.member ? assignee.member.id || assignee.id : assignee,
+      )
+    : [],
+);
 
-const watcherIds = computed(() => (issueSettings.value.watchers ? issueSettings.value.watchers.map((watcher) => (watcher.member ? watcher.member.id || watcher.id : watcher)): []));
+const watcherIds = computed(() =>
+  issueSettings.value.watchers
+    ? issueSettings.value.watchers.map((watcher) =>
+        watcher.member ? watcher.member.id || watcher.id : watcher,
+      )
+    : [],
+);
 
 // function
 const clear = () => {
@@ -418,8 +428,8 @@ const clear = () => {
       member: assignee,
     })),
     watchers: props.issue.watcher_details.map((watcher) => ({
-    member: watcher,
-  })),
+      member: watcher,
+    })),
   };
 };
 
@@ -500,7 +510,7 @@ const sendDataById = async () => {
     .issueTransferById(
       transferDataById as IIssueTransferById,
       isCreateEntity.value,
-      isMultipleIssuesTransfer.value ? null: editedIssueParams
+      isMultipleIssuesTransfer.value ? null : editedIssueParams,
     )
     .then(async (res) => {
       const issueResponse = await singleIssueStore.getIssueDataById(
@@ -613,13 +623,13 @@ const resetActionOptions = () => {
   transferLabel.value = null;
 };
 
-const arraysEqual = (arr1: string[], arr2: string[]):boolean => {
+const arraysEqual = (arr1: string[], arr2: string[]): boolean => {
   if (arr1.length !== arr2.length) return false;
   const sorterArr1 = [...arr1].sort();
   const sorterArr2 = [...arr2].sort();
 
-  return sorterArr1.every((value, index) => value === sorterArr2[index])
-}
+  return sorterArr1.every((value, index) => value === sorterArr2[index]);
+};
 
 const saveSettings = (data: typeof issueSettings) => {
   const newSettings = data.value;
@@ -640,23 +650,30 @@ const saveSettings = (data: typeof issueSettings) => {
     editedIssueParams.target_date = newSettings.target_date;
   }
 
-  const newAssignerIds = newSettings.assignees ? newSettings.assignees.map((assignee) => (assignee.member ? assignee.member.id || assignee.id : assignee)) : [];
+  const newAssignerIds = newSettings.assignees
+    ? newSettings.assignees.map((assignee) =>
+        assignee.member ? assignee.member.id || assignee.id : assignee,
+      )
+    : [];
 
   if (!arraysEqual(newAssignerIds, assignerIds)) {
     issueSettings.value.assignees = newSettings.assignees;
     editedIssueParams.assigner_ids = newAssignerIds;
   }
 
-  const newWatcherIds = newSettings.watchers ? newSettings.watchers.map((watcher) => (watcher.member ? watcher.member.id || watcher.id : watcher)) : [];
+  const newWatcherIds = newSettings.watchers
+    ? newSettings.watchers.map((watcher) =>
+        watcher.member ? watcher.member.id || watcher.id : watcher,
+      )
+    : [];
 
   if (!arraysEqual(newWatcherIds, watcherIds)) {
     issueSettings.value.watchers = newSettings.watchers;
     editedIssueParams.watcher_ids = newWatcherIds;
   }
 
-
   return;
-}
+};
 
 // hooks
 
