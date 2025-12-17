@@ -79,7 +79,7 @@ export interface IIssueCommentUpdate {
 }
 
 export interface IIssueSelectRequest extends IPagination {
-  show_sub_issues: boolean;
+  hide_sub_issues: boolean;
   only_count: boolean;
   search_query: string;
 }

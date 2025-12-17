@@ -133,6 +133,7 @@ const refresh = async () => {
     page.value,
     pageSize.value,
     'state',
+    props.projectid,
   );
   emits('updateComponent');
 };
