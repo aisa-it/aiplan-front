@@ -1,7 +1,7 @@
 <template>
   <q-scroll-area
     ref="scrollContainer"
-    class="scroll-container"
+    :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
@@ -65,6 +65,7 @@ import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 import IssueTable from '../IssueTable.vue';
 import PinnedIssueList from '../PinnedIssueList.vue';
@@ -80,9 +81,15 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview', 'openIssue']);
+const emits = defineEmits([
+  'refreshTable',
+  'updateIssueField',
+  'openPreview',
+  'openIssue',
+]);
 
 const projectStore = useProjectStore();
+const { ny } = storeToRefs(useUtilsStore());
 const { project } = storeToRefs(projectStore);
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
@@ -144,6 +151,11 @@ watch(
 <style scoped lang="scss">
 .scroll-container {
   height: calc(100vh - 105px);
+  overflow-y: auto;
+  contain: inherit;
+}
+.new-year-scroll-container {
+  height: calc(100vh - 135px);
   overflow-y: auto;
   contain: inherit;
 }
