@@ -33,7 +33,9 @@
               }}</HintTooltip></q-badge
             >
 
-            {{ project?.identifier }}-{{ i?.sequence_id }}
+            {{ props.project_detail?.identifier ?? project?.identifier }}-{{
+              i?.sequence_id
+            }}
             {{ i.name }}
           </q-item-label>
         </router-link>
@@ -53,6 +55,7 @@
 
 <script setup lang="ts">
 //stores
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
@@ -62,6 +65,7 @@ import { useUserStore } from 'src/stores/user-store';
 import { computed } from 'vue';
 
 const props = defineProps<{
+  project_detail?: DtoProject;
   linkedIssues: any[];
   hasPermissionByIssue: boolean | 'author';
 }>();

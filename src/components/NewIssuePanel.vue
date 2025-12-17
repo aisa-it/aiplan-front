@@ -249,8 +249,10 @@ import CalendarIcon from './icons/CalendarIcon.vue';
 import ShareIcon from './icons/ShareIcon.vue';
 import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
+  project_detail?: DtoProject;
   parentissue?: string;
   isUserTextData?: boolean;
   isIssuesTemplate?: boolean;
@@ -313,7 +315,7 @@ const workspaceSlug = computed(() => {
   return (route.params.workspace as string) || currentWorkspaceSlug.value;
 });
 const projectId = computed(() => {
-  return route.params.project as string;
+  return props.project_detail?.id ?? (route.params.project as string);
 });
 
 //methods
@@ -326,12 +328,13 @@ const refresh = async () => {
         (project) => project?.current_user_membership?.role > 5,
       );
       if (project.value == null) {
-        if (route.params['project']) {
+        if (route.params?.project || props.project_detail?.id) {
           project.value =
             projects.value?.find(
               (project) =>
-                project?.id == route.params['project'] ||
-                project?.identifier === route.params['project'],
+                project?.id == route.params?.project ||
+                project?.identifier === route.params.project ||
+                project?.id === props.project_detail?.id,
             ) || projects.value[0];
         } else {
           project.value = projects.value[0];
@@ -454,9 +457,14 @@ onMounted(async () => {
   await fetchTemplates(workspaceSlug.value, project.value?.id, true);
   refreshIssues.value = false;
   props.parentissue &&
-    api.issueInfo(route.params['project'], props.parentissue).then((d) => {
-      parent.value = d;
-    });
+    api
+      .issueInfo(
+        props.project_detail?.id ?? (route.params.project as string),
+        props.parentissue,
+      )
+      .then((d) => {
+        parent.value = d;
+      });
 });
 
 watch(
@@ -507,9 +515,12 @@ watch(
   () => props.parentissue,
   () => {
     refresh();
-    if (route.params['project']) {
+    if (route.params.project || props.project_detail?.id) {
       api
-        .issueInfo(route.params['project'] as string, props.parentissue)
+        .issueInfo(
+          props.project_detail?.id ?? (route.params.project as string),
+          props.parentissue as string,
+        )
         .then((d) => {
           parent.value = d.data;
         });

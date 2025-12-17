@@ -39,6 +39,7 @@
       <q-item-section side>
         <q-item-label v-if="rows[index]" no-wrap>
           {{
+            projectIdentifier ??
             rows[index].project_detail?.identifier ??
             projectStore.project?.identifier
           }}-{{ rows[index]?.sequence_id }}

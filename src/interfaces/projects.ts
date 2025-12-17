@@ -87,7 +87,7 @@ export interface IProject {
 }
 
 export interface IProjectLeader {
-  member?: any,
+  member?: any;
   label: string;
   value: string;
 }
@@ -96,7 +96,7 @@ export interface IProjectView {
   issueView: 'list' | 'kanban' | 'calendar' | 'gantt_chart';
   filters: IProjectFilters;
   showEmptyGroups: boolean;
-  showSubIssues: boolean;
+  hideSubIssues: boolean;
   showOnlyActive: boolean;
   draft: boolean;
   group_tables_hide: any;

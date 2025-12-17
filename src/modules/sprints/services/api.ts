@@ -4,6 +4,7 @@ import {
   AiplanRequestUserIdList,
   DtoSprint,
   DtoSprintLight,
+  TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Sprint } from '@aisa-it/aiplan-api-ts/src/Sprint';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
@@ -65,4 +66,14 @@ export const deleteSprint = async (
   sprintId: string,
 ): Promise<void> => {
   return api.deleteSprint(workspaceSlug, sprintId).then((res) => res.data);
+};
+
+export const updateSprintView = async (
+  workspaceSlug: string,
+  sprintId: string,
+  view_props: TypesViewProps,
+) => {
+  return api
+    .updateSprintView(workspaceSlug, sprintId, view_props)
+    .then((res) => res.data);
 };

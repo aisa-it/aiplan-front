@@ -38,7 +38,10 @@
             />
           </q-tab-panel>
           <q-tab-panel ref="tabStatuses" name="statuses">
-            <IssueStatusHistoryTab @updateComponent="updateHeight" />
+            <IssueStatusHistoryTab
+              :projectid="issueData?.project"
+              @updateComponent="updateHeight"
+            />
           </q-tab-panel>
         </q-tab-panels>
       </transition>

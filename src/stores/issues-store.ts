@@ -39,7 +39,7 @@ export interface ISearchFilters {
 }
 
 export interface IQuery {
-  show_sub_issues?: boolean;
+  hide_sub_issues?: boolean;
   order_by?: string;
   offset?: number;
   limit?: number;
@@ -121,7 +121,7 @@ export const useIssuesStore = defineStore('issues-store', {
     async fetchPinnedIssues(projectID: string): Promise<void> {
       const response = await this.getIssueList(
         { projects: [projectID] },
-        { only_pinned: true, show_sub_issues: true },
+        { only_pinned: true },
       );
       this.pinnedIssues = response.data?.issues || [];
     },

@@ -17,7 +17,8 @@
       :stateDistribution="props.stateDistribution"
     />
     <AddSubIssueButton
-      :projectid="route.params.project"
+      :projectid="projectid ?? route.params.project"
+      :project="project"
       :issueid="currentIssueID"
       :isDisabled="props.isDisabled"
       @refresh="refresh()"
@@ -35,10 +36,13 @@ import IssuesHeaderWrapper from 'src/modules/single-issue/ui/components/IssuesHe
 import StatusLinearProgressBar from 'src/components/progress-bars/StatusLinearProgressBar.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { storeToRefs } from 'pinia';
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const route = useRoute();
 
 const props = defineProps<{
+  project?: DtoProject;
+  projectid?: string | null;
   subIssues: any[];
   stateDistribution: Record<string, number>;
   isDisabled: boolean;

@@ -116,22 +116,22 @@
 
       <template v-slot:body-cell-name="props">
         <q-td :props="props">
-          <div style="text-overflow: ellipsis; overflow: hidden; font-size: 0.813rem; line-height: 1.25rem;">
+          <div
+            style="
+              text-overflow: ellipsis;
+              overflow: hidden;
+              font-size: 0.813rem;
+              line-height: 1.25rem;
+            "
+          >
             <span v-html="parseBoldText(props.value)" />
             <HintTooltip>
               <span v-html="parseBoldText(props.value)"
             /></HintTooltip>
           </div>
-          <div
-            v-if="showDescHighlighted(props.row.desc_highlighted)"
-          >
+          <div v-if="showDescHighlighted(props.row.desc_highlighted)">
             <span
-              style="
-                display: inline-block;
-                text-wrap: wrap;
-                line-height: 0.85rem;
-                color: var(--sub-text-color)
-              "
+              class="desc-highlighted"
               v-html="
                 getDescHighlightedText(
                   parseBoldText(props.row.desc_highlighted),
@@ -242,7 +242,10 @@
       </template>
     </q-table>
 
-    <div class="sticky-fix bottom" :style="!isCreateSprint ? { padding: '0 0 10px' } : {}">
+    <div
+      class="sticky-fix bottom"
+      :style="!isCreateSprint ? { padding: '0 0 10px' } : {}"
+    >
       <PaginationDefault
         v-model:selected-page="pagination.page"
         v-model:rows-per-page="pagination.rowsPerPage"
@@ -387,7 +390,6 @@ const onRequest = async (p) => {
     offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
     light: true,
-    show_sub_issues: true,
     only_active: filter.value?.only_active || false,
   });
   rows.value = [];
@@ -652,6 +654,17 @@ const getWordForm = (count: number) => {
 
 :deep(.table-scroll-off.search-filters-table) {
   max-height: none;
+}
+
+.desc-highlighted {
+  display: inline-block;
+  text-wrap: wrap;
+  line-height: 0.85rem;
+  color: $sub-text-color;
+}
+
+:deep(.desc-highlighted b) {
+  color: $text-color;
 }
 </style>
 <style lang="scss">
