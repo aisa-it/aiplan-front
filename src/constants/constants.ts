@@ -26,6 +26,7 @@ export const RESTRICTED_URLS = [
   'admin-panel',
   'profile',
   'conference',
+  'mcp'
 ];
 
 export const STATES_TYPES = [
