@@ -51,7 +51,7 @@
       class="flex flex-col full-width full-height no-wrap"
       style="padding-right: 400px; padding-top: 50px"
     >
-      <MainIssueInfo preview @update:issue-page="emits('refresh')" />
+      <MainIssueInfo preview @update:issue-page="refreshData" />
 
       <SelectChildren
         :projectid="issueData.project"
@@ -111,6 +111,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 // directives
 import clickOutside from 'src/directives/click-outside';
@@ -150,6 +151,7 @@ const { hasPermissionByIssue } = useRolesStore();
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { fetchPinnedIssues } = useIssuesStore();
 
 let rafId: number | null = null;
 const leftbarWidth = 300;
@@ -166,6 +168,11 @@ const targetWidth = ref(Math.max(clientWidth.value / 2, 900));
 const startX = ref(0);
 const startW = ref(0);
 const moving = ref(false);
+
+const refreshData = (): void => {
+  fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
+  emits('refresh');
+};
 
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(

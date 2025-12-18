@@ -112,8 +112,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     pagination.order_by = pagination.order_by ?? 'sequence_id';
     const response = await getIssue(filters, pagination);
 
-    issuesStore.groupedIssueList[index].issues = response?.data.issues;
-    issuesStore.groupedIssueList[index].count = response?.data.count;
+    const data = response?.data?.issues;
+    issuesStore.groupedIssueList[index].issues =
+      Array.isArray(data) && data[0]?.issues
+        ? data[0].issues
+        : (data ?? []);
+    issuesStore.groupedIssueList[index].count = response?.data?.count ?? 0;
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {

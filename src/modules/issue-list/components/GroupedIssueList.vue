@@ -76,6 +76,7 @@ import { useUserStore } from 'src/stores/user-store';
 
 import { useIssueContext } from '../composables/useIssueContext';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 const props = defineProps<{
   contextType: 'project' | 'sprint';
@@ -84,7 +85,7 @@ const props = defineProps<{
 const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
   useIssueContext(props.contextType);
 
-const { getGroupedIssues, getCurrentTable } = useGroupedIssues(
+const { getGroupedIssues, getCurrentTable, parsePagination } = useGroupedIssues(
   props.contextType,
 );
 
@@ -186,11 +187,56 @@ async function closePreview() {
   currentIssueID.value = '';
 }
 
-async function refreshByPreview(isFullUpdate?: boolean) {
-  const { index, pagination, entity } = refreshReviewInfo.value;
-  if (index === null) return;
-  if (isKanbanEnabled.value) delete pagination.group_by;
-  refreshTable(index, pagination, !!isFullUpdate, entity);
+function buildQuasarPagination() {
+  return {
+    page: 1,
+    rowsNumber: 0,
+    sortBy: isKanbanEnabled.value
+      ? 'sequence_id'
+      : (contextProps.value?.filters?.order_by as string) ?? 'sequence_id',
+    descending: isKanbanEnabled.value
+      ? true
+      : (contextProps.value?.filters?.orderDesc as boolean) ?? false,
+    rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+  };
+}
+
+function findIssueLocation(sequenceIdStr: string) {
+  const groups = issuesStore.groupedIssueList;
+  if (!groups) return null;
+
+  const targetSequenceId = Number(sequenceIdStr);
+  if (isNaN(targetSequenceId)) return null;
+
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+    const group = groups[groupIndex];
+    if (!group.issues || group.issues.length === 0) continue;
+
+    const issueExists = group.issues.some(issue => issue.sequence_id === targetSequenceId);
+    if (issueExists) {
+      return {
+        index: groupIndex,
+        entity: group.entity,
+      };
+    }
+  }
+  return null;
+}
+
+async function refreshByPreview(isFullUpdate = false) {
+  if (currentIssueID.value) {
+    const location = findIssueLocation(currentIssueID.value);
+    if (location) {
+      const quasarPagination = buildQuasarPagination();
+      const backendPagination = parsePagination(quasarPagination);
+
+      if (isKanbanEnabled.value) {
+        delete backendPagination.group_by;
+      }
+
+      await refreshTable(location.index, backendPagination, isFullUpdate, location.entity);
+    }
+  }
 }
 
 watch(isMobile, () => {
