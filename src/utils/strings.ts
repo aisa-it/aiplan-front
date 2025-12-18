@@ -318,7 +318,16 @@ export const getHistoryText = (m: any, wsProjects: IProject[]) => {
           return `перенес(-ла) документ в директорию "${m.new_value}"`;
         }
       }
-
+    case 'sprint':
+      if (m.verb === 'updated') {
+        return `изменил(-а) спринт с "${m.old_value}" на "${m.new_value}"`;
+      }
+      if (m.verb === 'added') {
+        return `добавил(-а) спринт "${m.new_value}"`;
+      }
+      if (m.verb === 'removed') {
+        return `убрал(-а) спринт "${m.old_value}"`;
+      }
     case 'description':
       if (m.verb === 'updated') {
         return 'изменил(-а) описание';
