@@ -65,6 +65,8 @@ const sprintLoader = ref(false);
 const sprintStore = useSprintStore();
 const utilsStore = useUtilsStore();
 
+const { updateProps } = useIssueContext('sprint');
+
 const {
   sprint,
   isGroupingEnabled,
