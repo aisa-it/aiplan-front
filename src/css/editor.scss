@@ -29,6 +29,11 @@
       justify-content: flex-end;
     }
 
+    &-secondary {
+      position: sticky;
+      left: 0;
+    }
+
     .html-editor__formats {
       display: flex;
       flex-wrap: nowrap;
@@ -614,6 +619,11 @@
       }
     }
 
+    &-secondary {
+      position: relative;
+      left: auto;
+    }
+
     .html-editor__formats {
       flex-direction: column;
       align-items: center;
@@ -667,7 +677,6 @@
 
   .table-toolbar {
     flex-direction: column;
-    position: relative;
     &::before {
       content: '';
       display: block;
