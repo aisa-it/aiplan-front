@@ -34,15 +34,10 @@
           label="Выберите цвет"
         >
           <template v-slot:append>
-            <q-icon name="colorize" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
-                <q-color v-model="form.color" />
-              </q-popup-proxy>
-            </q-icon>
+            <ColorPicker
+              :currentColor="form.color"
+              @set-color="(value: string) => (form.color = value)"
+            />
           </template>
         </q-input>
       </q-card-section>
@@ -73,6 +68,9 @@
 // core
 import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+
+// components
+import ColorPicker from 'src/modules/project-settings/labels/components/ColorPicker.vue';
 
 // stores
 import { useProjectStore } from 'src/stores/project-store';

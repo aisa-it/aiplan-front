@@ -10,29 +10,38 @@
     >
       <q-color
         class="color-picker"
+        :class="{ 'palette-only': !customColorEnabled }"
         v-model="color"
         :palette="palette.flat()"
-        default-view="palette"
+        :default-view="customColorEnabled ? 'spectrum' : 'palette'"
       />
 
       <teleport to=".color-picker .q-color-picker__footer" v-if="isOpen">
-        <div class="buttons row justify-center items-center">
-          <q-btn
-            flat
-            dense
-            icon="check"
-            color="white"
-            class="button bg-positive"
-            @click="handleConfirm"
-          />
-          <q-btn
-            flat
-            dense
-            icon="close"
-            color="white"
-            class="button bg-negative"
-            @click="handleCancel"
-          />
+        <div class="custom-controls">
+          <div class="checkbox-container">
+            <q-checkbox
+              v-model="customColorEnabled"
+              label="Свой цвет"
+            />
+          </div>
+          <div class="buttons-row">
+            <q-btn
+              flat
+              dense
+              icon="check"
+              color="white"
+              class="button bg-positive"
+              @click="handleConfirm"
+            />
+            <q-btn
+              flat
+              dense
+              icon="close"
+              color="white"
+              class="button bg-negative"
+              @click="handleCancel"
+            />
+          </div>
         </div>
       </teleport>
     </q-popup-proxy>
@@ -40,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { usePalette } from '../composables/usePalette';
 
 const props = defineProps<{ currentColor?: string }>();
@@ -52,6 +61,17 @@ const color = ref(props.currentColor ?? getRandomColorFromPalette());
 
 const popupRef = ref();
 const isOpen = ref(false);
+const customColorEnabled = ref(false);
+
+watch(customColorEnabled, async (val) => {
+  if (!val && isOpen.value) {
+    await nextTick();
+    const footer = document.querySelector('.color-picker .q-color-picker__footer');
+    const tabs = footer?.querySelectorAll('.q-tab');
+    const paletteTab = tabs?.[2]
+    paletteTab?.click();
+  }
+});
 
 const handleConfirm = () => {
   emits('setColor', color.value);
@@ -65,13 +85,31 @@ const handleCancel = () => {
 </script>
 
 <style scoped lang="scss">
-.buttons {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 72px;
+.custom-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 32px 0 8px;
   width: 100%;
+  height: 100%;
+}
+
+.checkbox-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 16px;
+}
+
+.buttons-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .button {
@@ -86,7 +124,6 @@ const handleCancel = () => {
 
 .color-picker {
   width: 320px;
-  height: 400px;
 }
 :deep(.q-color-picker__cube) {
   width: 44px !important;
@@ -103,7 +140,8 @@ const handleCancel = () => {
 }
 
 :deep(.q-color-picker__footer) {
-  height: 120px !important;
+  height: 150px !important;
+  padding-bottom: 0 !important;
 }
 
 :deep(.q-color-picker__footer .q-tab) {
@@ -123,7 +161,7 @@ const handleCancel = () => {
   text-transform: uppercase !important;
 }
 
-.q-color-picker :deep(.q-color-picker__footer .q-tab[tabindex='-1']) {
+.color-picker.palette-only :deep(.q-color-picker__footer .q-tab[tabindex='-1']) {
   pointer-events: none !important;
   opacity: 0.5 !important;
   cursor: not-allowed !important;
