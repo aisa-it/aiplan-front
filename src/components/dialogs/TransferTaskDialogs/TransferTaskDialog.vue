@@ -656,7 +656,7 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!arraysEqual(newAssignerIds, assignerIds)) {
+  if (!arraysEqual(newAssignerIds, assignerIds.value)) {
     issueSettings.value.assignees = newSettings.assignees;
     editedIssueParams.assigner_ids = newAssignerIds;
   }
@@ -667,7 +667,7 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!arraysEqual(newWatcherIds, watcherIds)) {
+  if (!arraysEqual(newWatcherIds, watcherIds.value)) {
     issueSettings.value.watchers = newSettings.watchers;
     editedIssueParams.watcher_ids = newWatcherIds;
   }

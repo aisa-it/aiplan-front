@@ -185,9 +185,7 @@ const isOpen = ref(false);
 let pendingRefresh: Promise<void> | null = null;
 const watcherid = ref(
   props.watchers && props.watchers?.length > 0
-    ? props.watchers.map((e) => {
-        return e?.id || e;
-      })
+    ? props.watchers
     : defWatcher.value && defWatcher.value.length
       ? defWatcher.value
       : null,
