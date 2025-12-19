@@ -1,5 +1,5 @@
 <template>
-  <div class="snow">
+  <div class="snow" :class="{ 'snow-hidden': !isVisible }">
     <span
       v-for="flake in flakes"
       :key="flake.id"
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useDesignSettings } from 'src/modules/profile-settings/composables/design-profile-settings/useDesignSettings';
 
 const { setSnowDensity } = useDesignSettings();
@@ -27,6 +27,7 @@ const { setSnowDensity } = useDesignSettings();
 const flakeCount = ref(170);
 const flakes = ref([]);
 const globalWind = ref(0);
+const isVisible = ref(!document.hidden);
 
 const rnd = (min, max) =>
   Number((Math.random() * (max - min) + min).toFixed(1));
@@ -50,11 +51,25 @@ const reseedFlakes = () => {
   }));
 };
 
+const handleVisibilityChange = () => {
+  isVisible.value = !document.hidden;
+  if (isVisible.value) {
+    reseedFlakes();
+  } else {
+    flakes.value = [];
+  }
+};
+
 onMounted(() => {
   const storedDensity = Number(localStorage.getItem('snowDensity'));
   if (!storedDensity) setSnowDensity(170);
   flakeCount.value = storedDensity
   reseedFlakes();
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 </script>
 
@@ -65,6 +80,10 @@ onMounted(() => {
   pointer-events: none;
   overflow: hidden;
   z-index: 1000000;
+}
+
+.snow-hidden {
+  display: none;
 }
 
 .snow-flake {
