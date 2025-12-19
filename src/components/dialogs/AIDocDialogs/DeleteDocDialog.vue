@@ -21,6 +21,7 @@
           flat
           no-caps
           label="Удалить"
+          style="width: 96px"
           class="delete-btn"
           @click="deleteDocument"
           v-close-popup

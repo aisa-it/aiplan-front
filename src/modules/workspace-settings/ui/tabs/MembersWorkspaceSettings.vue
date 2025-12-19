@@ -41,6 +41,7 @@
           computedWorkspaceInfo?.current_user_membership?.member_id === user.id
         "
         no-caps
+        style="width: 95px"
         class="delete-btn q-mr-sm"
         @click="isLeaveWorkspace = true"
       >

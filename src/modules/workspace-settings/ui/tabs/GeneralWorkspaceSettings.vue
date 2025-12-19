@@ -44,6 +44,7 @@
             no-caps
             class="delete-btn q-mx-xs"
             @click="handleDeleteWorkspaceAvatar"
+            style="width: 99px"
           >
             Удалить
           </q-btn>
@@ -413,7 +414,6 @@ const EditorTipTapV2 = defineAsyncComponent(
   () => import('src/components/editorV2/EditorTipTapV2.vue'),
 );
 
-import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
 

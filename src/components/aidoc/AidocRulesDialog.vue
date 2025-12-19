@@ -106,6 +106,7 @@
           flat
           no-caps
           label="Отмена"
+          style="width: 103px"
           class="secondary-btn"
           v-close-popup
         />

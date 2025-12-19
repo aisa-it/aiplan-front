@@ -31,6 +31,7 @@
           class="secondary-btn"
           :class="isAutoSave ? preventClickClass : ''"
           label="Отмена"
+          style="width: 103px"
           v-close-popup
           @click="isCancel = true"
         />

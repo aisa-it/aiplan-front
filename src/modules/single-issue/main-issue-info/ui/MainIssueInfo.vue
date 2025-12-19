@@ -121,14 +121,12 @@
           @dragover.prevent
         />
       </div>
-      <q-card-actions
-        v-if="isAdminOrAuthor && !isReadOnlyEditor"
-        align="right"
-      >
+      <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
         <q-btn
           class="secondary-btn"
           :class="isAutoSave ? preventClickClass : ''"
           no-caps
+          style="width: 103px"
           @click="handleUndoEdit"
         >
           Отмена
