@@ -5,7 +5,8 @@
     multiple
     clearable
     map-options
-    :class="isAdaptiveSelect ? 'adaptive-select' : ''"
+    class="base-selector"
+    :class="{ 'adaptive-select': isAdaptiveSelect }"
     popup-content-class="inh-popup scrollable-content"
     :popup-content-style="selectAssigneeWidth"
     :label="label"

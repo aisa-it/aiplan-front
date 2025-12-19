@@ -5,9 +5,10 @@
     multiple
     clearable
     map-options
+    class="base-selector"
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
-    :class="isAdaptiveSelect ? 'adaptive-select' : ''"
+    :class="{ 'adaptive-select': isAdaptiveSelect }"
     :popup-content-style="selectWatcherWidth"
     :label="label"
     :disable="isDisabled"
