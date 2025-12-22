@@ -101,8 +101,6 @@ export default defineComponent({
 
     const tryToAuth = async () => {
       userStore.getUserInfo().then(async () => {
-        // api.auth.access_token = LocalStorage.getItem('access_token');
-        // api.auth.refresh_token = LocalStorage.getItem('refresh_token');
         router.push('/');
         await userStore.getUserWorkspaces();
         await workspaceStore.getWorkspaceInfo(currentWorkspaceSlug.value);
