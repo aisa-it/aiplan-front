@@ -145,8 +145,13 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
         }
       });
 
+      // Добавляем класс для сохранения стилей
       const table = fragment.querySelector('table');
-      if (!table) return false;
+      if (table) {
+        table.classList.add('table-striped');
+      } else {
+        return false;
+      }
 
       event.preventDefault();
       if (editorInstance.value) {
