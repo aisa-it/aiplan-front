@@ -43,6 +43,14 @@ export interface IIssueTransfer {
   delete_src: boolean;
 }
 
+export interface IIssueTransferParams {
+  priority?: string | null;
+  target_date?: string | null;
+  assigner_ids?: string[] | null;
+  watcher_ids?: string[] | null;
+  state_id?: string;
+}
+
 export interface IIssueTransferById extends IIssueTransfer {
   src_issue?: string;
 }
