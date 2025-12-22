@@ -6,6 +6,7 @@ import {
   IIssueData,
   IIssueTransferById,
   IIssueTransferByLabel,
+  IIssueTransferParams,
 } from 'src/interfaces/issues';
 import {
   buildFormData,
@@ -215,10 +216,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
     },
 
     // ------------- Exact issue transfer -------------
-    async issueTransferById(data: IIssueTransferById, create_entities = false) {
+    async issueTransferById(data: IIssueTransferById, create_entities = false, new_issue_params: IIssueTransferParams | null = null) {
       return await api.post(
         `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/issues/migrate/`,
-        {},
+        new_issue_params ? new_issue_params : {},
         {
           params: {
             ...data,

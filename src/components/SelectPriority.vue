@@ -4,13 +4,13 @@
     :clearable="priority !== 'Нет'"
     dense
     :label="label ? label : undefined"
-    :class="`${label ? 'base-selector' : 'base-selector-sm'}`"
+    :class="`${label ? 'base-selector' : 'base-selector-sm'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     popup-content-class="scrollable-content"
     :modelValue="priority"
     :disable="isDisabled"
     :options="options"
     :option-label="(v) => options_label[v] || 'Не Выбран'"
-    :style="'width: 160px'"
+    :style="{ width: isAdaptiveSelect ? '' : '160px' }"
     @update:modelValue="handleUpdateModelValue"
   >
     <template v-slot:no-option>
@@ -91,6 +91,11 @@ export default defineComponent({
       default: () => false,
     },
     isDisabled: {
+      type: Boolean,
+      required: false,
+      default: () => false,
+    },
+    isAdaptiveSelect: {
       type: Boolean,
       required: false,
       default: () => false,
