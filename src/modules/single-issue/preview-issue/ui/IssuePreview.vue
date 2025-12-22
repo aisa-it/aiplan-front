@@ -92,7 +92,7 @@
       preview
       class="fixed-right hide-scrollbar issue-drawer-preview"
       style="top: 62px"
-      @refresh="(v) => emits('refresh', v)"
+      @refresh="(v) => refreshData(v)"
     />
 
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
@@ -169,9 +169,9 @@ const startX = ref(0);
 const startW = ref(0);
 const moving = ref(false);
 
-const refreshData = (): void => {
+const refreshData = (args?: any): void => {
   fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
-  emits('refresh');
+  emits('refresh', args);
 };
 
 const getAttachmentsList = async () => {

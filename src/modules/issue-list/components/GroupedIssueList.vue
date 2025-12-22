@@ -187,55 +187,56 @@ async function closePreview() {
   currentIssueID.value = '';
 }
 
-function buildQuasarPagination() {
-  return {
-    page: 1,
-    rowsNumber: 0,
-    sortBy: isKanbanEnabled.value
-      ? 'sequence_id'
-      : (contextProps.value?.filters?.order_by as string) ?? 'sequence_id',
-    descending: isKanbanEnabled.value
-      ? true
-      : (contextProps.value?.filters?.orderDesc as boolean) ?? false,
-    rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
-  };
-}
-
-function findIssueLocation(sequenceIdStr: string) {
+function getRefreshReviewInfo(sequenceIdStr: string): void {
   const groups = issuesStore.groupedIssueList;
-  if (!groups) return null;
+  if (!groups) return;
 
   const targetSequenceId = Number(sequenceIdStr);
-  if (isNaN(targetSequenceId)) return null;
+  if (isNaN(targetSequenceId)) return;
 
   for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
     const group = groups[groupIndex];
     if (!group.issues || group.issues.length === 0) continue;
 
-    const issueExists = group.issues.some(issue => issue.sequence_id === targetSequenceId);
+    const issueExists = group.issues.some(
+      (issue) => issue.sequence_id === targetSequenceId,
+    );
     if (issueExists) {
-      return {
+      refreshReviewInfo.value = {
         index: groupIndex,
+        pagination: parsePagination({
+          page: 1,
+          rowsNumber: 0,
+          sortBy: isKanbanEnabled.value
+            ? 'sequence_id'
+            : ((contextProps.value?.filters?.order_by as string) ??
+              'sequence_id'),
+          descending: isKanbanEnabled.value
+            ? true
+            : ((contextProps.value?.filters?.orderDesc as boolean) ?? false),
+          rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+        }),
         entity: group.entity,
       };
+      break;
     }
   }
-  return null;
 }
 
 async function refreshByPreview(isFullUpdate = false) {
   if (currentIssueID.value) {
-    const location = findIssueLocation(currentIssueID.value);
-    if (location) {
-      const quasarPagination = buildQuasarPagination();
-      const backendPagination = parsePagination(quasarPagination);
+    getRefreshReviewInfo(currentIssueID.value);
 
-      if (isKanbanEnabled.value) {
-        delete backendPagination.group_by;
-      }
-
-      await refreshTable(location.index, backendPagination, isFullUpdate, location.entity);
+    if (isKanbanEnabled.value) {
+      delete refreshReviewInfo.value.pagination.group_by;
     }
+
+    await refreshTable(
+      refreshReviewInfo.value.index,
+      refreshReviewInfo.value.pagination,
+      isFullUpdate,
+      refreshReviewInfo.value.entity,
+    );
   }
 }
 
