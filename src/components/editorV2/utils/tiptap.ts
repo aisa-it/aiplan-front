@@ -281,17 +281,6 @@ export const CustomImagePlugin = ResizeImage.extend({
               isImage = false;
             },
             paste(view, event) {
-              const html = event.clipboardData?.getData('text/html') || '';
-
-              if (html.includes('<table')) {
-                const tableWithClass = html.replace(
-                  '<table',
-                  '<table class="table-striped">',
-                );
-                event.clipboardData?.setData('text/html', tableWithClass);
-                return true;
-              }
-
               const hasFiles =
                 event.clipboardData &&
                 event.clipboardData.files &&
