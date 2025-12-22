@@ -107,6 +107,12 @@ export const useSprintStore = defineStore('sprint-store', {
       this.refreshSprintData = false;
     },
 
+    sprintLinkToClipboard(sprint_id: string) {
+      navigator.clipboard.writeText(
+        `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/sprints/${sprint_id}`,
+      );
+    },
+
     async getMyViewProps(workspaceSlug: string, sprintId: string) {
       if (!workspaceSlug || !sprintId) return '';
       return getSprint(workspaceSlug, sprintId).then((res) => {
