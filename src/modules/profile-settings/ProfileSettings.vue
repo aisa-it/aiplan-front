@@ -1,8 +1,16 @@
 <template>
   <q-page class="q-pa-md">
     <h3 class="q-mb-none q-mt-sm">Настройки профиля</h3>
-    <div class="row items-center q-mt-md q-gutter-md justify-between">
-      <ProfilePreview />
+    <div class="profile-header-section">
+      <div class="row items-center q-mt-md q-gutter-md justify-between">
+        <ProfilePreview />
+      </div>
+      <SettingsTabs
+        :current-tab="profileSettingsTab"
+        :list-tabs="listTabs"
+        @set="(val: number) => setTab(val)"
+      />
+
       <div v-if="ny" class="profile-tree-wrapper">
         <q-img
           style="width: 150px;"
@@ -11,11 +19,6 @@
         />
       </div>
     </div>
-    <SettingsTabs
-      :current-tab="profileSettingsTab"
-      :list-tabs="listTabs"
-      @set="(val: number) => setTab(val)"
-    />
 
     <div
       class="column flex-center"
@@ -56,12 +59,28 @@ const { ny } = storeToRefs(utilsStore);
 </script>
 
 <style scoped lang="scss">
-.profile-tree-wrapper {
-  width: 25%;
+.profile-header-section {
+  position: relative;
 }
-@media (max-width: 720px) {
+
+.profile-tree-wrapper {
+  position: absolute;
+  right: 17.5%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
   .profile-tree-wrapper {
     display: none;
+  }
+}
+@media (max-width: 1250px) {
+  .profile-tree-wrapper {
+    right: 0%;
   }
 }
 </style>
