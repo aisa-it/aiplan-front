@@ -17,7 +17,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS } =
+  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS, store } =
     useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
@@ -76,6 +76,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     let filters;
     switch (issuesStore.groupByIssues) {
       case 'state': {
+        if (contextType === 'sprint') {
+          const key = `${entity.name}_${entity.color}`;
+          if (store.getStatusesAsArray[key]) {
+            return { states: store.getStatusesAsArray[key].id };
+          }
+        }
         filters = { states: [entity.id] };
         return filters;
       }
