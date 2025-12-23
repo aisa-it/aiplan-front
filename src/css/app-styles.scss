@@ -1017,6 +1017,10 @@ select:-ms-autofill {
   flex: 1 1 auto;
 }
 
+.menu-item--expanded.menu-item:first-child  {
+  margin-bottom: auto;
+}
+
 .menu-item--open {
   background-color: inherit;
   height: 250px;

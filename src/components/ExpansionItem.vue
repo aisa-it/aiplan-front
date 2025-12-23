@@ -35,10 +35,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, inject, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, watch, inject, onMounted, computed } from 'vue';
 import ArrowUp from './icons/ArrowUp.vue';
 import { EventBus, Screen } from 'quasar';
-import { MenuItem, MenuLayout } from 'src/interfaces/ui';
+import { useExpansionItemResize } from 'src/composables/useExpansionItemResize';
 
 const props = defineProps<{
   fullOpen?: boolean;
@@ -50,70 +50,32 @@ const props = defineProps<{
 }>();
 
 const bus = inject('bus') as EventBus;
-const menuItems = inject<{
-  resizeBy: (id: string, deltaPx: number, withSave?: boolean) => void;
-  getHeight: (id: string) => number | undefined;
-  registerItem: (item: Omit<MenuItem, 'weight'>) => void;
-  unregisterItem: (id: string) => void;
-  updateItem: (
-    id: string,
-    patch: { minHeight?: number; open?: boolean },
-  ) => void;
-  loadLayout: () => MenuLayout;
-}>('menuItems');
+
+const MIN_HEIGHT = 40;
+const MIN_HEIGHT_EXPANDED = 136;
 
 const id = props.itemName;
 const menuItemRef = ref<HTMLElement | null>(null);
 const resizerRef = ref<HTMLElement | null>(null);
 const isMobile = computed(() => Screen.width <= 650);
 
-const isExpanded = ref(
-  isMobile.value
-    ? (props.isDefaultOpen ?? false)
-    : (menuItems?.loadLayout().open[id] ?? props.isDefaultOpen ?? false),
-);
+const isExpanded = ref(props.isDefaultOpen ?? false);
 
 const minHeight = computed(() =>
   isExpanded.value ? MIN_HEIGHT_EXPANDED : MIN_HEIGHT,
 );
-const height = computed(() => menuItems?.getHeight(id));
 
 const isResizable = computed(
   () => props.fullOpen && !isMobile.value && isExpanded.value,
 );
 
-const MIN_HEIGHT = 40;
-const MIN_HEIGHT_EXPANDED = 136;
-let startY = 0;
-let dragging = false;
-
-function onPointerDown(e: PointerEvent) {
-  if (!menuItems || !menuItemRef.value || !isExpanded.value) return;
-
-  dragging = true;
-  startY = e.clientY;
-
-  (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-}
-
-function onPointerMove(e: PointerEvent) {
-  if (!dragging || !menuItems || !isExpanded.value) return;
-
-  const dy = e.clientY - startY;
-  const delta = -dy;
-  startY = e.clientY;
-
-  menuItems.resizeBy(id, delta);
-}
-
-function onPointerUp(e: PointerEvent) {
-  if (!dragging) return;
-  dragging = false;
-
-  try {
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-  } catch {}
-}
+const { height, isOpen } = useExpansionItemResize(
+  id,
+  menuItemRef,
+  resizerRef,
+  isExpanded,
+  minHeight,
+);
 
 const toggleDropdown = () => {
   if (props.isOpenDisable) return;
@@ -128,34 +90,6 @@ onMounted(() => {
   bus.on('open', (name) => {
     if (name !== props.itemName) isExpanded.value = false;
   });
-
-  const resizer = resizerRef.value;
-  if (resizer) {
-    resizer.addEventListener('pointerdown', onPointerDown);
-    resizer.addEventListener('pointermove', onPointerMove);
-    resizer.addEventListener('pointerup', onPointerUp);
-    resizer.addEventListener('pointercancel', onPointerUp);
-  }
-
-  if (!menuItemRef.value || !menuItems) return;
-  menuItems.registerItem({
-    id,
-    el: menuItemRef.value,
-    minHeight: minHeight.value,
-    open: isExpanded.value,
-  });
-});
-
-onBeforeUnmount(() => {
-  const resizer = resizerRef.value;
-  if (resizer) {
-    resizer.removeEventListener('pointerdown', onPointerDown);
-    resizer.removeEventListener('pointermove', onPointerMove);
-    resizer.removeEventListener('pointerup', onPointerUp);
-    resizer.removeEventListener('pointercancel', onPointerUp);
-  }
-
-  menuItems?.unregisterItem(id);
 });
 
 const defineClass = () => {
@@ -173,10 +107,15 @@ watch(
     isExpanded.value = props.isExpanding;
   },
 );
-
-watch(minHeight, (mh) => menuItems?.updateItem(id, { minHeight: mh }));
-
-watch(isExpanded, (open) => menuItems?.updateItem(id, { open }));
+watch(
+  isOpen,
+  (open) => {
+    if (!isMobile.value) {
+      isExpanded.value = open ?? false;
+    }
+  },
+  { immediate: true },
+);
 
 defineExpose({
   isExpanded,
