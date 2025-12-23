@@ -543,7 +543,6 @@ defineExpose({
 }
 
 .tree-custom-header {
-  max-width: 250px;
   cursor: default;
 
   &__name {

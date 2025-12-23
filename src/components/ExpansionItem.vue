@@ -11,13 +11,15 @@
         : 'menu-item--closed',
       defineClass(),
     ]"
-    :style="{
-      minHeight: minHeight + 'px',
-      height: isExpanded ? heightStyle : minHeight + 'px',
-      maxHeight: isExpanded ? heightStyle : minHeight + 'px',
-    }"
+    :style="
+      isResizable && {
+        minHeight: minHeight + 'px',
+        height: (height ?? minHeight) + 'px',
+        maxHeight: (height ?? minHeight) + 'px',
+      }
+    "
   >
-    <div v-show="fullOpen" ref="resizerRef" class="resizer"></div>
+    <div v-show="isResizable" ref="resizerRef" class="resizer"></div>
     <div class="menu-item-header" @click="toggleDropdown()">
       <slot name="header" style="cursor: pointer"></slot>
       <ArrowUp
@@ -35,8 +37,8 @@
 <script setup lang="ts">
 import { ref, watch, inject, onMounted, onBeforeUnmount, computed } from 'vue';
 import ArrowUp from './icons/ArrowUp.vue';
-import { EventBus, useQuasar } from 'quasar';
-import { MenuItem } from './ExpansionGroup.vue';
+import { EventBus, Screen } from 'quasar';
+import { MenuItem, MenuLayout } from 'src/interfaces/ui';
 
 const props = defineProps<{
   fullOpen?: boolean;
@@ -47,38 +49,46 @@ const props = defineProps<{
   isOpenDisable?: boolean;
 }>();
 
-const $q = useQuasar();
 const bus = inject('bus') as EventBus;
 const menuItems = inject<{
-  resizeBy: (id: string, deltaPx: number) => void;
+  resizeBy: (id: string, deltaPx: number, withSave?: boolean) => void;
   getHeight: (id: string) => number | undefined;
-  setHeight: (id: string, height: number) => void;
-  clearHeight: (id: string) => void;
-  registerItem: (item: MenuItem) => () => void;
+  registerItem: (item: Omit<MenuItem, 'weight'>) => void;
+  unregisterItem: (id: string) => void;
+  updateItem: (
+    id: string,
+    patch: { minHeight?: number; open?: boolean },
+  ) => void;
+  loadLayout: () => MenuLayout;
 }>('menuItems');
 
 const id = props.itemName;
 const menuItemRef = ref<HTMLElement | null>(null);
 const resizerRef = ref<HTMLElement | null>(null);
+const isMobile = computed(() => Screen.width <= 650);
 
-const isExpanded = ref(props.isDefaultOpen ?? false);
+const isExpanded = ref(
+  isMobile.value
+    ? (props.isDefaultOpen ?? false)
+    : (menuItems?.loadLayout().open[id] ?? props.isDefaultOpen ?? false),
+);
+
 const minHeight = computed(() =>
   isExpanded.value ? MIN_HEIGHT_EXPANDED : MIN_HEIGHT,
 );
-
-let regItem: null | (() => void) = null;
-
 const height = computed(() => menuItems?.getHeight(id));
-const heightStyle = computed(() => (height.value ? `${height.value}px` : '100%'));
+
+const isResizable = computed(
+  () => props.fullOpen && !isMobile.value && isExpanded.value,
+);
 
 const MIN_HEIGHT = 40;
-const MIN_HEIGHT_EXPANDED = 80;
+const MIN_HEIGHT_EXPANDED = 136;
 let startY = 0;
 let dragging = false;
 
 function onPointerDown(e: PointerEvent) {
-  if (!menuItems) return;
-  if (!menuItemRef.value) return;
+  if (!menuItems || !menuItemRef.value || !isExpanded.value) return;
 
   dragging = true;
   startY = e.clientY;
@@ -87,11 +97,10 @@ function onPointerDown(e: PointerEvent) {
 }
 
 function onPointerMove(e: PointerEvent) {
-  if (!dragging || !menuItems) return;
+  if (!dragging || !menuItems || !isExpanded.value) return;
 
   const dy = e.clientY - startY;
   const delta = -dy;
-
   startY = e.clientY;
 
   menuItems.resizeBy(id, delta);
@@ -108,12 +117,11 @@ function onPointerUp(e: PointerEvent) {
 
 const toggleDropdown = () => {
   if (props.isOpenDisable) return;
-  if ($q.platform.is?.mobile === true) {
+  if (isMobile.value) {
     bus.emit('open', props.itemName);
   }
 
   isExpanded.value = !isExpanded.value;
-  menuItems?.clearHeight?.(id);
 };
 
 onMounted(() => {
@@ -130,10 +138,11 @@ onMounted(() => {
   }
 
   if (!menuItemRef.value || !menuItems) return;
-  regItem = menuItems.registerItem({
+  menuItems.registerItem({
     id,
     el: menuItemRef.value,
     minHeight: minHeight.value,
+    open: isExpanded.value,
   });
 });
 
@@ -146,7 +155,7 @@ onBeforeUnmount(() => {
     resizer.removeEventListener('pointercancel', onPointerUp);
   }
 
-  regItem?.();
+  menuItems?.unregisterItem(id);
 });
 
 const defineClass = () => {
@@ -165,26 +174,15 @@ watch(
   },
 );
 
-watch(minHeight, (mh) => {
-  regItem?.();
-  if (menuItemRef.value && menuItems) {
-    regItem = menuItems.registerItem({
-      id,
-      el: menuItemRef.value,
-      minHeight: mh,
-    });
-  }
-});
+watch(minHeight, (mh) => menuItems?.updateItem(id, { minHeight: mh }));
+
+watch(isExpanded, (open) => menuItems?.updateItem(id, { open }));
 
 defineExpose({
   isExpanded,
 });
 </script>
 <style scoped>
-.menu-item--expanded {
-  overflow: scroll;
-  flex: 1 1 auto;
-}
 .resizer {
   position: absolute;
   top: 0;
