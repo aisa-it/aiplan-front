@@ -1,7 +1,7 @@
 <template>
   <q-scroll-area
     ref="scrollContainer"
-    class="scroll-container"
+    class="scroll-container groupped-table"
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
@@ -25,7 +25,7 @@
         v-if="table.issues?.length"
         :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
-          (value) => setGroupHide(entity?.entity?.id || table.entity, value)
+          (value) => setGroupHide(table?.entity?.id || table.entity, value)
         "
       >
         <template #header>
@@ -80,7 +80,12 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshTable', 'updateIssueField', 'openPreview', 'openIssue']);
+const emits = defineEmits([
+  'refreshTable',
+  'updateIssueField',
+  'openPreview',
+  'openIssue',
+]);
 
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);

@@ -80,12 +80,10 @@ export const NETWORK_CHOICES = [
 export const PROJECT_VIEWS = [
   { value: 'list', label: 'Список' },
   { value: 'kanban', label: 'Доска' },
+  { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
 ];
 
-export const SPRINT_VIEWS = [
-  ...PROJECT_VIEWS,
-  { value: 'gantt_chart', label: 'Диаграмма Ганта' },
-];
+export const SPRINT_VIEWS = [...PROJECT_VIEWS];
 
 export const GROUP_BY_OPTIONS = [
   { value: 'None', label: 'Нет' },

@@ -1,0 +1,19 @@
+export function scrollToTarget(
+  container: HTMLElement,
+  selector: '.current-highlight' | '.sprint',
+) {
+  const target = container.querySelector(selector) as HTMLElement | null;
+  if (!target) return;
+
+  const cRect = container.getBoundingClientRect();
+  const tRect = target.getBoundingClientRect();
+
+  container.scrollTo({
+    left:
+      tRect.left -
+      cRect.left +
+      container.scrollLeft -
+      (selector === '.current-highlight' ? container.clientWidth / 2 : 100),
+    behavior: 'smooth',
+  });
+}

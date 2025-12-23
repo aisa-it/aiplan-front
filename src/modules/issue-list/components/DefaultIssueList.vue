@@ -62,6 +62,8 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
+const emits = defineEmits<{ refreshIssue: [issues: DtoIssue[]] }>();
+
 const { contextProps, updateProps } = useIssueContext(props.contextType);
 
 const route = useRoute();
@@ -154,6 +156,7 @@ watch(
   () => {
     rows.value = issuesStore.ungroupedIssueList?.issues;
     rowsCount.value = issuesStore.ungroupedIssueList?.count;
+    emits('refreshIssue', rows.value);
   },
   { immediate: true },
 );

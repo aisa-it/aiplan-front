@@ -56,7 +56,7 @@
               map-options
               class="base-selector full-w"
               popup-content-class="fit-select-popup scrollable-content selector-option__wrapper"
-              :options="viewsOptions"
+              :options="viewsOptionsFiltered"
               @update:model-value="updateIssueView"
             >
               <template v-slot:option="{ itemProps, opt }">
@@ -113,7 +113,7 @@
                     </q-item-label>
                   </q-item-section>
 
-                  <q-item-section side v-if="$q.platform.is.desktop === true">
+                  <q-item-section side v-if="!isMobile">
                     <q-icon name="drag_indicator" />
                   </q-item-section>
                 </q-item>
@@ -197,7 +197,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 
 import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
@@ -218,6 +219,16 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits(['update']);
+
+const q = useQuasar();
+
+const isMobile = computed(() => q.platform.is.mobile);
+
+const viewsOptionsFiltered = computed(() =>
+  isMobile.value
+    ? props.viewsOptions.filter((el) => !el.hideInMobile)
+    : props.viewsOptions,
+);
 
 let draggedItem: any = null;
 const dragOverItem = ref<string | null>(null);
@@ -299,6 +310,18 @@ const onConfirmRefresh = async () => {
   await props.refreshFilters();
   isConfirmResetDialogOpen.value = false;
 };
+
+onMounted(() => {
+  if (
+    isMobile.value &&
+    !viewsOptionsFiltered.value.find(
+      (el) => el.label === props.viewForm.issueView,
+    )
+  ) {
+    props.viewForm.issueView = viewsOptionsFiltered.value[0];
+    props.updateIssueView();
+  }
+});
 </script>
 
 <style lang="scss" scoped>

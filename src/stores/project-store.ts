@@ -74,6 +74,9 @@ export const useProjectStore = defineStore('project-store', {
         this.projectProps?.filters?.group_by?.toLowerCase() !== 'none' || false
       );
     },
+    isGanttDiagramm(): boolean | undefined {
+      return this.projectProps?.issueView === 'gantt_chart';
+    },
 
     isKanbanEnabled(): boolean | undefined {
       return this.projectProps?.issueView === 'kanban';

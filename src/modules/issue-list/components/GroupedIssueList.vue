@@ -81,6 +81,10 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
+const emits = defineEmits<{
+  refreshIssues: [issues: DtoIssue[]];
+}>();
+
 const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
   useIssueContext(props.contextType);
 
@@ -139,6 +143,8 @@ async function load() {
   await getGroupedIssues();
 
   issuesLoader.value = false;
+
+  emits('refreshIssues', issuesStore.groupedIssueList);
 }
 
 async function openIssue(id: string, project: string) {

@@ -58,7 +58,7 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       updateProps,
       getIssue,
       isGroupHide: store.isGroupHide,
-      setGroupHide: store.isGroupHide,
+      setGroupHide: store.setGroupHide,
     };
   }
 
@@ -86,6 +86,16 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       return response;
     };
 
+    const setGroupHide = (groupToHide: string, hideValue: boolean) => {
+      const props = JSON.parse(JSON.stringify(sprintProps.value));
+
+      if (!props.group_tables_hide) props.group_tables_hide = {};
+
+      props.group_tables_hide[groupToHide] = !hideValue;
+
+      updateProps(props);
+    };
+
     return {
       contextProps: sprintProps,
       isGroupingEnabled,
@@ -97,7 +107,7 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       updateProps,
       getIssue,
       isGroupHide: store.isGroupHide,
-      setGroupHide: store.isGroupHide,
+      setGroupHide: setGroupHide,
     };
   }
 }
