@@ -9,7 +9,7 @@
     :model-value="leftDrawerOpen"
     :behavior="isMobile ? 'mobile' : 'desktop'"
     :overlay="isOverlay"
-    :width="adaptiveWidth"
+    :width="isMobile ? defaultWidth : adaptiveWidth"
     class="sidebar scrollable-content disable-x-scroll relative-position"
     @update:model-value="(value) => emits('update:drawer-open', value)"
     @before-show="updateClientWidth"
