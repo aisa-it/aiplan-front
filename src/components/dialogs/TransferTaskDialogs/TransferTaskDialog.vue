@@ -160,6 +160,26 @@
           </q-item-section>
         </q-item>
 
+        <q-btn
+          :disable="isMultipleIssuesTransfer"
+          flat
+          dense
+          no-caps
+          color="primary"
+          label="Настройка параметров задачи"
+          class="q-mt-sm no-hover-btn"
+          style="align-self: flex-start"
+          @click="settings = true"
+        >
+        </q-btn>
+
+        <TransferTaskParameters
+          v-model="settings"
+          :issue="props.issue"
+          :issue_settings="issueSettings"
+          @save="saveSettings"
+        />
+
         <div v-if="transferErrors.length" class="full-w">
           <h6 style="margin: 12px 0 0 0 !important; color: #dc3e3e">Ошибки</h6>
 
@@ -234,10 +254,14 @@ import { useProjectStore } from 'src/stores/project-store';
 // components
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 
+// components - icons
+import TransferTaskParameters from './TransferTaskParameters.vue';
+
 // interfaces
 import {
   IIssueTransferById,
   IIssueTransferByLabel,
+  IIssueTransferParams,
 } from 'src/interfaces/issues';
 import { IProject } from 'src/interfaces/projects';
 import { IMigrationError } from 'src/interfaces/notifications';
@@ -299,6 +323,19 @@ const transferData = ref();
 const transferLabel = ref();
 const dialogRef = ref();
 const issueData = ref(props.issue);
+const issueSettings = ref({
+  state_detail: props.issue.state_detail,
+  priority: props.issue.priority,
+  target_date: props.issue.target_date,
+  assignees: props.issue.assignee_details.map((assignee) => ({
+    member: assignee,
+  })),
+  watchers: props.issue.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+});
+
+let editedIssueParams = <IIssueTransferParams>{};
 const selectedProject = ref();
 const projects = ref<IProject[]>(workspaceProjects.value as IProject[]);
 const transferErrors = ref([]);
@@ -321,10 +358,19 @@ const actionsType = [
 ];
 const loading = ref(false);
 const openedtIssueID = ref('');
+const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () => selectedProject.value?.identifier !== (route.params.project as string),
+  () =>
+    selectedProject.value?.identifier !== (route.params.project as string) ||
+    selectedProject.value?.identifier !== issueData.value.project,
+);
+
+const isMultipleIssuesTransfer = computed<boolean>(
+  () =>
+    actionWithLinkedIssues.value.some((el) => el === true) ||
+    actionByLabel.value.some((el) => el === true),
 );
 
 const filterTransferErrorsByCurrentIssueIdOrType = computed(() => {
@@ -348,6 +394,22 @@ const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
   );
 });
 
+const assignerIds = computed(() =>
+  issueSettings.value.assignees
+    ? issueSettings.value.assignees.map((assignee) =>
+        assignee.member ? assignee.member.id || assignee.id : assignee,
+      )
+    : [],
+);
+
+const watcherIds = computed(() =>
+  issueSettings.value.watchers
+    ? issueSettings.value.watchers.map((watcher) =>
+        watcher.member ? watcher.member.id || watcher.id : watcher,
+      )
+    : [],
+);
+
 // function
 const clear = () => {
   transferLabel.value = null;
@@ -357,6 +419,18 @@ const clear = () => {
   selectedProject.value = null;
   selectedAction.value = null;
   transferData.value = null;
+  editedIssueParams = {};
+  issueSettings.value = {
+    state_detail: props.issue.state_detail,
+    priority: props.issue.priority,
+    target_date: props.issue.target_date,
+    assignees: props.issue.assignee_details.map((assignee) => ({
+      member: assignee,
+    })),
+    watchers: props.issue.watcher_details.map((watcher) => ({
+      member: watcher,
+    })),
+  };
 };
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
@@ -436,6 +510,7 @@ const sendDataById = async () => {
     .issueTransferById(
       transferDataById as IIssueTransferById,
       isCreateEntity.value,
+      isMultipleIssuesTransfer.value ? null : editedIssueParams,
     )
     .then(async (res) => {
       const issueResponse = await singleIssueStore.getIssueDataById(
@@ -548,6 +623,58 @@ const resetActionOptions = () => {
   transferLabel.value = null;
 };
 
+const arraysEqual = (arr1: string[], arr2: string[]): boolean => {
+  if (arr1.length !== arr2.length) return false;
+  const sorterArr1 = [...arr1].sort();
+  const sorterArr2 = [...arr2].sort();
+
+  return sorterArr1.every((value, index) => value === sorterArr2[index]);
+};
+
+const saveSettings = (data: typeof issueSettings) => {
+  const newSettings = data.value;
+  editedIssueParams = {};
+
+  if (newSettings.state_detail.id !== issueSettings.value.state_detail.id) {
+    issueSettings.value.state_detail = newSettings.state_detail;
+    editedIssueParams.state_id = newSettings.state_detail.id;
+  }
+
+  if (newSettings.priority !== issueSettings.value.priority) {
+    issueSettings.value.priority = newSettings.priority;
+    editedIssueParams.priority = newSettings.priority;
+  }
+
+  if (newSettings.target_date !== issueSettings.value.target_date) {
+    issueSettings.value.target_date = newSettings.target_date;
+    editedIssueParams.target_date = newSettings.target_date;
+  }
+
+  const newAssignerIds = newSettings.assignees
+    ? newSettings.assignees.map((assignee) =>
+        assignee.member ? assignee.member.id || assignee.id : assignee,
+      )
+    : [];
+
+  if (!arraysEqual(newAssignerIds, assignerIds.value)) {
+    issueSettings.value.assignees = newSettings.assignees;
+    editedIssueParams.assigner_ids = newAssignerIds;
+  }
+
+  const newWatcherIds = newSettings.watchers
+    ? newSettings.watchers.map((watcher) =>
+        watcher.member ? watcher.member.id || watcher.id : watcher,
+      )
+    : [];
+
+  if (!arraysEqual(newWatcherIds, watcherIds.value)) {
+    issueSettings.value.watchers = newSettings.watchers;
+    editedIssueParams.watcher_ids = newWatcherIds;
+  }
+
+  return;
+};
+
 // hooks
 
 watch(
@@ -581,7 +708,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-:deep(.q-item .q-focus-helper) {
+:deep(.q-btn .q-focus-helper) {
   display: none;
 }
 </style>

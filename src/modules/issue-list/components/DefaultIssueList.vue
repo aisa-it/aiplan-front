@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="issue-list">
     <IssueTable
       v-if="rows?.length"
       :rows="rows"
@@ -8,7 +8,14 @@
       @refresh="(pagination) => load(pagination)"
       @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
-      @open-issue="(id) => openIssue(id)"
+      @open-issue="
+        (id, issue) =>
+          openIssue(
+            id,
+            issue.project_detail?.identifier ??
+              (route.params.project as string),
+          )
+      "
     />
     <div
       v-else
@@ -82,6 +89,7 @@ const { user } = storeToRefs(useUserStore());
 const isMobile = computed(() => Screen.width <= 1200);
 const issuesStore = useIssuesStore();
 const load = async (pagination) => {
+  console.log('зашли');
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(contextProps.value));
   props.page_size = pagination.limit;
@@ -113,7 +121,10 @@ async function openPreview(issue: DtoIssue) {
 
   const id = String(issue.sequence_id);
   if (isMobile.value) {
-    openIssue(id, issue.project ?? (route.params.project as string));
+    openIssue(
+      id,
+      issue.project_detail?.identifier ?? (route.params.project as string),
+    );
     return;
   } else if (currentIssueID.value === id && isPreview.value) return;
 
@@ -124,7 +135,7 @@ async function openPreview(issue: DtoIssue) {
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
-    issue.project ?? (route.params.project as string),
+    issue.project_detail?.identifier ?? (route.params.project as string),
   );
   isPreview.value = true;
 }
@@ -138,7 +149,7 @@ async function closePreview() {
 function parsePagination(pagination) {
   return {
     only_count: false,
-    show_sub_issues: contextProps.value.showSubIssues ?? true,
+    hide_sub_issues: contextProps.value.hideSubIssues ?? false,
     draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
     desc: pagination.descending,

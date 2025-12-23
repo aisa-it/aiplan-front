@@ -3,7 +3,7 @@
     <q-card class="single-list relative" flat dense>
       <q-card-section
         class="row issue-list__header"
-        :style="'padding: 12px 16px'"
+        :style="!ny ? 'padding: 12px 16px' : 'padding: 32px 16px 12px 16px'"
       >
         <SprintHeaderSkeleton v-if="sprintLoader" />
         <SprintHeader v-else :sprint="sprint" />
@@ -45,11 +45,16 @@ import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersLi
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
 import SprintHeaderSkeleton from 'src/modules/sprints/sceletons/SprintHeaderSkeleton.vue';
 
-import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import {
+  NotUpdated,
+  useSprintStore,
+} from 'src/modules/sprints/stores/sprint-store';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
 import { useGroupedIssues } from 'src/modules/issue-list//composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useUtilsStore } from 'src/stores/utils-store';
+import { useIssueContext } from 'src/modules/issue-list/composables/useIssueContext';
 
 const { onRequest } = useDefaultIssues('sprint');
 const { getGroupedIssues } = useGroupedIssues('sprint');
@@ -58,6 +63,9 @@ const router = useRouter();
 const sprintLoader = ref(false);
 
 const sprintStore = useSprintStore();
+const utilsStore = useUtilsStore();
+
+const { updateProps } = useIssueContext('sprint');
 
 const {
   sprint,
@@ -67,6 +75,8 @@ const {
   issuesLoader,
   sprintProps,
 } = storeToRefs(sprintStore);
+
+const { ny } = storeToRefs(utilsStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
@@ -96,8 +106,8 @@ const updateSprint = async () => {
 onMounted(async () => {
   issuesLoader.value = true;
   sprintLoader.value = true;
-  sprintStore.refreshSprintData = false;
-  await sprintStore.getMyViewProps();
+  sprintStore.clearSprintRefresh();
+  await updateProps();
   await updateSprint();
 });
 
@@ -105,10 +115,17 @@ watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
     if (v) {
+      if (sprintStore.notUpdated.includes(NotUpdated.SprintPage)) {
+        sprint.value = await getSprint(
+          router.currentRoute.value.params.workspace as string,
+          router.currentRoute.value.params.sprint as string,
+        );
+        return;
+      }
       issuesLoader.value = true;
       sprintLoader.value = true;
       await updateSprint();
-      sprintStore.refreshSprintData = false;
+      sprintStore.clearSprintRefresh();
     }
   },
 );

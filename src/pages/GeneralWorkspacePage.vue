@@ -26,6 +26,13 @@
       >
         {{ workspaceInfo?.name }}
       </h5>
+      <div v-if="ny" class="workspace-tree-wrapper">
+        <q-img
+          fit="contain"
+          :src="newYearTree"
+          style="width: 250px"
+        />
+      </div>
       <q-separator style="width: 100%" />
 
       <EditorTipTapV2
@@ -84,6 +91,7 @@ import { useLoaderStore } from 'src/stores/loader-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
 
@@ -91,6 +99,7 @@ import NewProjectDialog from 'src/components/dialogs/NewProjectDialog.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import GuidedTour from 'src/modules/guided-tours/GuidedTour.vue';
 import { steps, STEP_NUM } from 'src/modules/guided-tours/tutorials/tutorial1';
+import newYearTree from 'src/assets/newYearTree.svg';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -109,7 +118,10 @@ const loaderStore = useLoaderStore();
 const workspaceStore = useWorkspaceStore();
 const userStore = useUserStore();
 const { hasPermissionByWorkspace } = useRolesStore();
+const utilsStore = useUtilsStore();
 
+//storesToRefs
+const { ny } = storeToRefs(utilsStore);
 const { generalLoader } = storeToRefs(loaderStore);
 const { workspaceInfo, workspaceProjects } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
@@ -142,5 +154,10 @@ watch(
 }
 :deep(.html-editor .tiptap) {
   min-height: auto;
+}
+.workspace-tree-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0px 20px 15px;
 }
 </style>

@@ -475,6 +475,8 @@ const refresh = async () => {
       issueData.value.blocker_issues = res.data.blocker_issues;
       issueData.value.blocked_issues = res.data.blocked_issues;
       issueData.value.issue_link = res.data.issue_link;
+      issueData.value.start_date = res.data.start_date
+      issueData.value.completed_at = res.data.completed_at
     });
 };
 

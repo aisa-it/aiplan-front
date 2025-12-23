@@ -1,6 +1,12 @@
 <template>
   <div class="menu scrollable-content">
-    <NavSprints v-if="!isAIDoc && currentWorkspaceSlug" />
+    <NavSprints
+      v-if="
+        !isAIDoc &&
+        currentWorkspaceSlug &&
+        hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')
+      "
+    />
     <NavMenuProjects v-if="!isAIDoc" />
     <NavMenuForms v-if="!isAIDoc" />
     <NavMenuAIDocs
@@ -28,6 +34,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 import UsersIcon from 'src/components/icons/UsersIcon.vue';
 
@@ -44,8 +51,9 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 const route = useRoute();
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 const { isDemo, isEnabledJitsi } = storeToRefs(utilsStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const docsMenu = ref();
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 

@@ -10,7 +10,7 @@ export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
   const defineIssuesPagination = computed(() => {
     return {
       only_count: false,
-      show_sub_issues: contextProps.value?.showSubIssues ?? true,
+      hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
       draft: contextProps.value?.draft ?? true,
       order_by: contextProps.value?.filters?.order_by ?? 'sequence_id',
       desc: contextProps.value?.filters?.orderDesc,

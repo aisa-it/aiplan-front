@@ -6,8 +6,8 @@
     clearable
     map-options
     class="base-selector"
-    popup-content-class="inh-popup scrollable-content"
     :class="{ 'adaptive-select': isAdaptiveSelect }"
+    popup-content-class="inh-popup scrollable-content"
     :popup-content-style="selectAssigneeWidth"
     :label="label"
     :disable="isDisabled"
@@ -131,13 +131,14 @@ const props = withDefaults(
   defineProps<{
     projectid: string;
     issueid?: string | null;
-    assigness?: [];
+    assigness?: DtoWorkspaceMember[];
     defaultAssignee?: [];
     isDisabled?: boolean;
     newIssue?: boolean;
     label?: string;
     isAdaptiveSelect?: boolean;
     currentMember: any;
+    isIssueTransfer?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -171,9 +172,7 @@ const emptyMemberListInput = ref();
 const isSearch = ref(false);
 const assignessid = ref(
   props.assigness && props.assigness?.length > 0
-    ? props.assigness.map((e) => {
-        return e?.id || e;
-      })
+    ? props.assigness
     : defAssignee.value && defAssignee.value.length
       ? defAssignee.value
       : null,
@@ -267,10 +266,7 @@ const handleUpdateAssignees = async (e) => {
       })
       .catch(() => (assignessid.value = currentIds));
   } else {
-    emit(
-      'update:assigness',
-      e ? e.map((d) => (d.member ? d.member.id || d.id : d)) : [],
-    );
+    emit('update:assigness', e ? e.map((d) => d) : []);
   }
 };
 

@@ -102,6 +102,8 @@ import { setIntervalFunction } from 'src/utils/helpers';
 import AvatarImage from './AvatarImage.vue';
 import ArrowRight2 from './icons/ArrowRight2.vue';
 
+const props = defineProps<{ projectid?: string }>();
+
 const emits = defineEmits<{
   updateComponent: [];
 }>();
@@ -131,6 +133,7 @@ const refresh = async () => {
     page.value,
     pageSize.value,
     'state',
+    props.projectid,
   );
   emits('updateComponent');
 };
@@ -160,7 +163,10 @@ const handleRefresh = () => {
 
 onMounted(async () => {
   await statesStore
-    .getStatesByProject(currentWorkspaceSlug.value, currentProjectID.value)
+    .getStatesByProject(
+      currentWorkspaceSlug.value,
+      props.projectid ?? currentProjectID.value,
+    )
     .then(({ data }) => {
       for (let state in data) {
         states.value = states.value.concat(data[state]);

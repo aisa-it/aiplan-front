@@ -24,7 +24,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   function parsePagination(pagination: QuasarPagination) {
     return {
       only_count: false,
-      show_sub_issues: contextProps.value?.showSubIssues ?? true,
+      hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
       only_active: contextProps.value?.showOnlyActive ?? true,
       group_by:
         PARSED_GROUP[contextProps.value?.filters?.group_by]?.value ||

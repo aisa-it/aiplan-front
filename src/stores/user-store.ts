@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
-import { Notifications } from '@aisa-it/aiplan-api-ts/src/Notifications';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import {
   DtoUser,
@@ -15,7 +14,6 @@ import {
   DtoUserLight,
   DtoProjectLight,
   DtoProjectFavorites,
-  DtoWorkspaceFavorites,
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
@@ -23,7 +21,6 @@ import {
 
 const usersApi = new (withInterceptors(Users))();
 const workspaceApi = new (withInterceptors(Workspace))();
-const notificationsApi = new (withInterceptors(Notifications))();
 const projectsApi = new (withInterceptors(Projects))();
 
 interface IUserState {
@@ -33,7 +30,6 @@ interface IUserState {
   userActivityMap: TypesActivityTable;
   userProjects: DtoProjectLight[];
   userFavouriteProjets: DtoProjectFavorites[];
-  userFavoriteWorkspace: DtoWorkspaceFavorites[];
   authToken: string;
 }
 
@@ -46,7 +42,6 @@ export const useUserStore = defineStore('user-store', {
       userActivityMap: {} as TypesActivityTable,
       userProjects: [] as DtoProjectLight[],
       userFavouriteProjets: [] as DtoProjectFavorites[],
-      userFavoriteWorkspace: [] as DtoWorkspaceFavorites[], //TODO нигде не используется
       authToken: undefined as unknown as string,
     };
   },
@@ -89,35 +84,6 @@ export const useUserStore = defineStore('user-store', {
         if (this.router.currentRoute.value.path.includes('not-found')) return;
 
         if (!res.data.is_onboarded) return this.router.replace('/onboarding');
-
-        // if (
-        //   this.router.currentRoute.value.params['workspace'] == undefined &&
-        //   !this.router.currentRoute.value.fullPath.includes('profile') &&
-        //   !this.router.currentRoute.value.fullPath.includes('admin-panel') &&
-        //   !this.router.currentRoute.value.fullPath.includes('access-denied') &&
-        //   !this.router.currentRoute.value.fullPath.includes('not-found')
-        // ) {
-        //   this.router.replace('/');
-        // }
-        // to another place as function
-        // if (this.router.currentRoute.value.params['workspace'] == undefined) {
-        //   if (
-        //     res.data.last_workspace_slug != undefined &&
-        //     this.userWorkspaces.length > 0
-        //   ) {
-        //     this.router.replace(`/${res.data.last_workspace_slug}`);
-        //   }
-        // }
-        // это для приколов
-        // dbd67d71-54c8-45b5-8137-a61a47aab7a6
-        // if (res.data.id === 'dbd67d71-54c8-45b5-8137-a61a47aab7a6') {
-        //   LocalStorage.set('special-version', 'yes');
-        //   document.documentElement.style.setProperty('--primary', '#c92bbc');
-        //   document.documentElement.style.setProperty(
-        //     '--primary-light',
-        //     '#facdf8',
-        //   );
-        // }
       });
 
       if (this.user.theme?.open_in_new === undefined)
@@ -252,13 +218,6 @@ export const useUserStore = defineStore('user-store', {
       return usersApi.deleteCurrentUserAvatar();
     },
 
-    //TODO не используется
-    async getFavoriteWorkspace(): Promise<DtoWorkspaceFavorites[]> {
-      return workspaceApi
-        .getFavoriteWorkspaceList()
-        .then((res) => (this.userFavoriteWorkspace = res.data));
-    },
-
     async deleteFavoriteWorkspace(uuid: string | undefined): Promise<void> {
       if (!uuid || uuid === 'undefined') return;
 
@@ -310,11 +269,6 @@ export const useUserStore = defineStore('user-store', {
       return usersApi
         .getUserActivityList(id, data)
         .then((res) => (this.userActivity = res.data));
-    },
-
-    //TODO не используется
-    async deleteUserNotifications(): Promise<any> {
-      return notificationsApi.deleteMyNotifications();
     },
   },
 });

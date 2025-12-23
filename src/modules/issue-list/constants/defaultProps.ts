@@ -1,6 +1,6 @@
 export const DEFAULT_VIEW_PROPS = {
   showEmptyGroups: false,
-  showSubIssues: true,
+  hideSubIssues: false,
   showOnlyActive: false,
   autoSave: false,
   issueView: 'list',
@@ -17,6 +17,7 @@ export const DEFAULT_VIEW_PROPS = {
   },
   group_tables_hide: {},
   columns_to_show: [
+    'name',
     'priority',
     'state',
     'target_date',
@@ -29,7 +30,6 @@ export const DEFAULT_VIEW_PROPS = {
     'linked_issues_count',
     'link_count',
     'attachment_count',
-    'name',
   ],
   page_size: 25,
   draft: true,

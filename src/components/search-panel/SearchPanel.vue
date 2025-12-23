@@ -1,5 +1,11 @@
 <template>
   <div class="extended-search-wrapper">
+    <q-img
+      v-if="ny"
+      fit="contain"
+      :src="newYearTree"
+      style="width: 38px; height: 32px;"
+    />
     <q-btn
       v-if="isEnabledJitsi"
       flat
@@ -29,10 +35,16 @@ import SearchButton from 'src/components/search-panel/SearchButton.vue';
 import ConferenceIcon from '../icons/ConferenceIcon.vue';
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
+//icons
+import newYearTree from 'src/assets/newYearTree.svg';
 
 const route = useRoute();
 
-const { isEnabledJitsi } = storeToRefs(useUtilsStore());
+const utilsStore = useUtilsStore();
+
+//storesToRefs
+const { isEnabledJitsi } = storeToRefs(utilsStore);
+const { ny } = storeToRefs(utilsStore);
 
 function openConference() {
   window.open(`/conf/`);

@@ -10,8 +10,8 @@
     :options="states"
     :option-label="(v) => v.name"
     :option-value="(v) => v.id"
-    :class="`${issue ? 'base-selector-sm' : 'base-selector'}`"
-    :style="'width: 160px'"
+    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select': ''}`"
+    :style="{width: isAdaptiveSelect ? '' : '160px'}"
     dense
     @popup-show="() => refresh()"
   >
@@ -62,7 +62,10 @@ import { defineComponent, ref, watch, onMounted } from 'vue';
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useStatesStore } from 'src/stores/states-store';
-import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import {
+  NotUpdated,
+  useSprintStore,
+} from 'src/modules/sprints/stores/sprint-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -95,6 +98,11 @@ export default defineComponent({
     statesFromCache: {
       type: Object,
       required: false,
+    },
+    isAdaptiveSelect : {
+      type: Boolean,
+      required: false,
+      default: () => false,
     },
     isDisabled: { type: Boolean, required: false, default: () => false },
     label: { type: String, required: false, default: () => '' },
@@ -159,7 +167,7 @@ export default defineComponent({
             },
           )
           .then(() => {
-            useSprintStore().triggerSprintRefresh();
+            useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
             showNotification('success');
             emit('setStatus', state);
             emit('refresh');

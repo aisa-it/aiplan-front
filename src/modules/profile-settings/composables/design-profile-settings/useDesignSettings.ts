@@ -51,6 +51,16 @@ export const useDesignSettings = () => {
       (el) => el.value === user.value?.view_props?.autoSave,
     ) ?? false,
   );
+  const SNOW_DENSITY = [
+    { label: 'Мало', value: 100 },
+    { label: 'Средне', value: 170 },
+    { label: 'Много', value: 250 },
+  ];
+  const currentSnowDensity = ref(
+    SNOW_DENSITY.find(
+      (opt) => opt.value === Number(localStorage.getItem('snowDensity')),
+    ) ?? SNOW_DENSITY[1],
+  );
   const currentSnowEnable = ref<string | null>(localStorage.getItem('snow'));
 
   // functions
@@ -83,6 +93,13 @@ export const useDesignSettings = () => {
 
   const setSnow = (value: string): void => {
     localStorage.setItem('snow', value);
+    location.reload();
+  };
+
+  const setSnowDensity = (value: number): void => {
+    const target =
+      SNOW_DENSITY.find((opt) => opt.value === value) ?? SNOW_DENSITY[1];
+    localStorage.setItem('snowDensity', String(target.value));
     location.reload();
   };
 
@@ -125,5 +142,8 @@ export const useDesignSettings = () => {
     currentSnowEnable,
     TURN_ON_OFF,
     setSnow,
+    SNOW_DENSITY,
+    currentSnowDensity,
+    setSnowDensity,
   };
 };
