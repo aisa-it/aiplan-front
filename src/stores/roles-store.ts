@@ -70,8 +70,6 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     hasPermission(action: string) {
-      // if (user.value.is_superuser) return true;
-
       if (!(this.roles.issue || this.roles.project || this.roles.workspace))
         return;
 
@@ -80,9 +78,6 @@ export const useRolesStore = defineStore('roles-store', {
     // set types
     hasPermissionByWorkspace(ws: any, action: string) {
       let role = '';
-
-      // if (user.value?.is_superuser) return true;
-      // if (user.value?.is_superuser && action === 'ws-settings') return true;
       if (ws?.owner_id === user.value?.id) role = 'owner';
       else role = defineRole(ws?.current_user_membership?.role);
 
@@ -90,8 +85,6 @@ export const useRolesStore = defineStore('roles-store', {
     },
     hasPermissionByFavoriteWorkspace(ws: any, allws: any, action: string) {
       let role = '';
-
-      // if (user.value?.is_superuser) return true;
 
       if (ws?.owner_id === user.value?.id) role = 'owner';
       const currentInAllWs = allws.find((el: any) => el.id === ws?.id);
@@ -102,17 +95,12 @@ export const useRolesStore = defineStore('roles-store', {
     // set types
     hasPermissionByProject(project: any, action: string) {
       let role = '';
-      // if (user.value?.is_superuser) return true;
-
-      // if (!project?.current_user_membership) return false;
       if (project.project_lead === user.value?.id) role = 'owner';
       else role = defineRole(project?.current_user_membership?.role);
 
       return checkPermissionByProject(role, action);
     },
     hasPermissionByIssue(issue: any, project: any, action: string) {
-      // if (user.value.is_superuser) return true;
-
       const ws = userWorkspaces.value.find(
         (ws) => ws.slug === issue.workspace_detail?.slug,
       );
@@ -145,8 +133,6 @@ export const useRolesStore = defineStore('roles-store', {
         memberToEdit?.member_id === memberToEdit.project?.project_lead
       )
         return false;
-
-      // if (user.value.is_superuser) return true;
 
       if (this.roles.project === 'owner' || this.roles.project === 'admin')
         return true;
