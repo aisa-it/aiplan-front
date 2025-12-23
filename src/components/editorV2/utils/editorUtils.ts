@@ -63,54 +63,105 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
     const html = event.clipboardData?.getData('text/html');
 
     if (html?.includes('<table')) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const cells = Array.from(doc.querySelectorAll('td, th'));
+      const temp = document.createElement('template');
+      temp.innerHTML = html;
+      const fragment = temp.content;
 
-      // Конвертация шрифтов в формат TipTap
-      for (const cell of cells) {
-        const styleAttr = cell.getAttribute('style');
-        let fontSize: string | null = null;
+      // Обработка всех элементов, которые могут содержать font-size
+      const elementsToProcess = Array.from(
+        fragment.querySelectorAll('td, th, [style], font'),
+      );
 
-        if (styleAttr) {
-          const match = styleAttr.match(
-            /font-size\s*:\s*([\d.]+(?:px|pt|em|rem|%))/i,
-          );
-          if (match) {
-            fontSize = match[1];
-            if (fontSize.endsWith('pt')) {
-              fontSize = `${fontSize.slice(0, -2)}px`;
+      for (const el of elementsToProcess) {
+        let targetFontSize: string | null = null;
+        const tagName = el.tagName.toLowerCase();
+
+        // Обработка <font size="...">
+        if (tagName === 'font') {
+          const sizeAttr = el.getAttribute('size');
+          if (sizeAttr) {
+            targetFontSize = `${Math.round((Number(sizeAttr) * 4) / 3)}px`;
+          }
+        }
+        // Обработка style="font-size: ..."
+        else {
+          const styleAttr = el.getAttribute('style');
+          if (styleAttr) {
+            const match = styleAttr.match(
+              /font-size\s*:\s*([\d.]+)\s*(pt|px)\b/i,
+            );
+            if (match) {
+              const value = parseFloat(match[1]);
+              const unit = match[2].toLowerCase();
+              if (unit === 'pt') {
+                targetFontSize = `${Math.round((value * 4) / 3)}px`;
+              } else if (unit === 'px') {
+                targetFontSize = `${value}px`;
+              }
             }
-          } else {
-            fontSize = '12px';
           }
         }
 
-        if (fontSize) {
-          const wrapper = doc.createElement('span');
-          wrapper.style.fontSize = fontSize;
+        // Если font-size найден — оборачиваем содержимое
+        if (targetFontSize) {
+          const wrapper = document.createElement('span');
+          wrapper.style.fontSize = targetFontSize;
 
-          if (cell.firstChild) {
+          // Переносим всё содержимое
+          while (el.firstChild) {
+            wrapper.appendChild(el.firstChild);
+          }
+
+          // Заменяем <font> на span, или вставляем span внутрь другого тега
+          if (tagName === 'font') {
+            el.replaceWith(wrapper);
+          } else {
+            el.appendChild(wrapper);
+            // Удаляем font-size из оригинального style
+            const newStyle = el
+              .getAttribute('style')
+              ?.replace(/font-size\s*:[^;]*;?/gi, '')
+              .replace(/;;/g, ';')
+              .trim();
+            if (newStyle) {
+              el.setAttribute('style', newStyle);
+            } else {
+              el.removeAttribute('style');
+            }
+          }
+        }
+      }
+
+      // Если в ячейке нет font-size — ставим шрифт по умолчанию
+      fragment.querySelectorAll('td, th').forEach((cell) => {
+        const hasFontSize = cell.querySelector('[style*="font-size"]');
+        if (!hasFontSize) {
+          const wrapper = document.createElement('span');
+          wrapper.style.fontSize = '14px';
+          while (cell.firstChild) {
             wrapper.appendChild(cell.firstChild);
           }
           cell.appendChild(wrapper);
         }
-      }
+      });
 
-      // Добавление новой таблицы с корректировкой
-      const table = doc.querySelector('table');
-      if (!table) return false;
+      // Добавляем класс для сохранения стилей
+      const table = fragment.querySelector('table');
+      if (table) {
+        table.classList.add('table-striped');
+      } else {
+        return false;
+      }
 
       event.preventDefault();
       if (editorInstance.value) {
         editorInstance.value.commands.insertContent(table.outerHTML);
       }
-
-      return true; // отмена вставки изначальной таблицы без корректировки
+      return true;
     }
-
     return false;
   },
+
   handleKeyDown(view, event) {
     const { state, dispatch } = view;
     const { from, to } = state.selection;

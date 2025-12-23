@@ -50,7 +50,7 @@ export const useProjectStore = defineStore('project-store', {
       projectMembers: [] as DtoProjectMemberLight[],
       currentProjectID: '', // TODO нигде не обновляется, хотя используется в setProjectInfo
       meInProject: {} as DtoProjectMember,
-      isLoadProjectInfo: false, // TODO не используется
+      isLoadProjectInfo: false,
       errorLoadProjects: false,
       projectProps: null,
       projectStatuses: {},
@@ -65,10 +65,7 @@ export const useProjectStore = defineStore('project-store', {
         (e: any) => e.id == projectID || e.identifier === projectID,
       );
     },
-    // TODO нигде не используется, поля notification_author_settings_telegram нет в DtoProjectMember
-    getAuthorEmailNotification(): any {
-      return this.meInProject.notification_author_settings_tg;
-    },
+
     isGroupingEnabled(): boolean | undefined {
       return (
         this.projectProps?.filters?.group_by?.toLowerCase() !== 'none' || false
@@ -162,17 +159,6 @@ export const useProjectStore = defineStore('project-store', {
       return projectsApi
         .createProject(workspaceSlug, data)
         .then((res) => res.data);
-    },
-
-    // TODO удалить после переноса в модуль
-    async updateProject(
-      workspaceSlug: string,
-      projectID: string,
-      data: DtoProject,
-    ): Promise<void> {
-      await projectsApi
-        .updateProject(workspaceSlug, projectID, data)
-        .then(async () => await this.getProjectInfo(workspaceSlug, projectID));
     },
 
     // ----------------------------- PROJECT LABELS -----------------------------

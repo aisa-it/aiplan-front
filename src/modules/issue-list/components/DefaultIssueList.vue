@@ -8,7 +8,14 @@
       @refresh="(pagination) => load(pagination)"
       @open-preview="(row) => openPreview(row)"
       :context-type="contextType"
-      @open-issue="(id, issue) => openIssue(id, issue.project ?? (route.params.project as string))"
+      @open-issue="
+        (id, issue) =>
+          openIssue(
+            id,
+            issue.project_detail?.identifier ??
+              (route.params.project as string),
+          )
+      "
     />
     <div
       v-else
@@ -112,7 +119,10 @@ async function openPreview(issue: DtoIssue) {
 
   const id = String(issue.sequence_id);
   if (isMobile.value) {
-    openIssue(id, issue.project ?? (route.params.project as string));
+    openIssue(
+      id,
+      issue.project_detail?.identifier ?? (route.params.project as string),
+    );
     return;
   } else if (currentIssueID.value === id && isPreview.value) return;
 
@@ -123,7 +133,7 @@ async function openPreview(issue: DtoIssue) {
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
-    issue.project ?? (route.params.project as string),
+    issue.project_detail?.identifier ?? (route.params.project as string),
   );
   isPreview.value = true;
 }

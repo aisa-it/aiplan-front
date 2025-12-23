@@ -17,9 +17,6 @@ export const useStatesStore = defineStore('states', {
   },
   actions: {
     async getStates(projectId: string) {
-      // if (projectId === this.projectId && this.states !== undefined) {
-      //   return this.states;
-      // }
       this.projectId = projectId;
       return await this.refresh();
     },
