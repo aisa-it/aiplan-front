@@ -58,69 +58,10 @@
               {{ sprint.name }}
             </HintTooltip>
           </q-item-section>
-          <q-btn
+          <MenuActions
             v-if="hasPermission('show-sprint-popup')"
-            class="menu-link__btn"
-            flat
-            icon="more_horiz"
-            :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-            @click.prevent
-          >
-            <q-menu>
-              <q-list :style="'min-width: 225px; !important;'">
-                <q-item>
-                  <q-btn
-                    class="menu-link__settings-btn full-w"
-                    flat
-                    dense
-                    no-caps
-                    v-close-popup
-                    :style="'font-size: 12px;'"
-                    @click="
-                      sprintIdForEdit = sprint.id as string;
-                      openEditSprint = true;
-                    "
-                  >
-                    <SettingsIcon :width="16" :height="16" class="q-mr-sm" />
-                    <span>Настройки</span>
-                  </q-btn>
-                </q-item>
-                <q-item>
-                  <q-btn
-                    class="menu-link__settings-btn full-w"
-                    flat
-                    dense
-                    no-caps
-                    v-close-popup
-                    :style="'font-size: 12px;'"
-                    @click="
-                      () => {
-                        sprintForDelete = sprint ?? null;
-                        isDeleteDialogOpen = true;
-                      }
-                    "
-                  >
-                    <BinIcon :width="16" :height="16" class="q-mr-sm" />
-                    <span>Удалить спринт</span>
-                  </q-btn>
-                </q-item>
-                <q-item>
-                  <q-btn
-                    class="menu-link__settings-btn full-w"
-                    flat
-                    dense
-                    no-caps
-                    v-close-popup
-                    :style="'font-size: 12px;'"
-                    @click="sprintStore.sprintLinkToClipboard(String(sprint.id))"
-                  >
-                    <LinkIcon :width="16" :height="16" class="q-mr-sm" />
-                    <span>Скопировать ссылку</span>
-                  </q-btn>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
+            :items="getSprintMenuItems(sprint)"
+          />
         </q-item>
       </q-list>
       <CreateSprintDialog
@@ -140,6 +81,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useQuasar } from 'quasar';
 
 import { storeToRefs } from 'pinia';
 
@@ -162,7 +104,9 @@ import SettingsIcon from '../icons/SettingsIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
 import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
+import MenuActions from './MenuActions.vue';
 
+const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
@@ -205,6 +149,32 @@ const successDeleteHandle = async () => {
   sprintForDelete.value = null;
   showNotification('success', 'Спринт удален');
   await refreshSprints();
+};
+
+const getSprintMenuItems = (sprint: DtoSprintLight) => {
+  return [
+    {
+      text: 'Настройки',
+      icon: SettingsIcon,
+      onClick: () => {
+        sprintIdForEdit.value = sprint.id as string;
+        openEditSprint.value = true;
+      },
+    },
+    {
+      text: 'Скопировать ссылку',
+      icon: LinkIcon,
+      onClick: () => sprintStore.sprintLinkToClipboard(String(sprint.id)),
+    },
+    {
+      text: 'Удалить спринт',
+      icon: BinIcon,
+      onClick: () => {
+        sprintForDelete.value = sprint ?? null;
+        isDeleteDialogOpen.value = true;
+      },
+    },
+  ];
 };
 
 watch(currentWorkspaceSlug, async (newValue) => {
