@@ -471,6 +471,11 @@ watch(
   justify-content: flex-end;
   gap: 1rem;
   width: 99%;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding-bottom: 1rem;
+  margin-top: auto;
 }
 
 .issue-panel__wrapper {

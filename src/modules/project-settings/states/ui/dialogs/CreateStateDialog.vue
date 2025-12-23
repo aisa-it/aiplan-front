@@ -35,15 +35,10 @@
           class="base-input"
         >
           <template v-slot:append>
-            <q-icon name="colorize" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
-                <q-color v-model="form.color" />
-              </q-popup-proxy>
-            </q-icon>
+            <color-picker
+              :currentColor="form.color"
+              @set-color="(value: string) => (form.color = value)"
+            />
           </template>
         </q-input>
       </q-card-section>
@@ -83,6 +78,9 @@ import { ISelect } from 'src/interfaces/ui';
 // services
 import { createState } from '../../services/api';
 import { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+// components
+import ColorPicker from 'src/modules/project-settings/labels/components/ColorPicker.vue';
 
 const props = defineProps<{
   stateType?: ISelect;
