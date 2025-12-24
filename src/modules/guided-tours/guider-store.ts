@@ -2,12 +2,14 @@ import { defineStore } from 'pinia';
 
 interface GuiderStore {
   activeGuid: number | null;
+  filtersListPopap: boolean;
 }
 
 export const useGuiderStore = defineStore('guider-store', {
   state: (): GuiderStore => {
     return {
       activeGuid: null,
+      filtersListPopap: false,
     };
   },
 
@@ -17,6 +19,12 @@ export const useGuiderStore = defineStore('guider-store', {
     },
     setActiveGuid(step_num: number) {
       this.activeGuid = step_num;
+    },
+    openFiltersList() {
+      this.filtersListPopap = true;
+    },
+    closeFiltersList() {
+      this.filtersListPopap = false;
     },
   },
 });
