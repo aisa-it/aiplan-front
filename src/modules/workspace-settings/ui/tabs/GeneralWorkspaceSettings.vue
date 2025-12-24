@@ -1,4 +1,14 @@
 <template>
+  <div class="limits row mobile-block q-mb-md">
+    <h4 class="limits__heading text-lg font-semibold text-brand-base">
+      Лимиты
+    </h4>
+    <div class="limits__list">
+      <LimitCard />
+      <LimitCard />
+      <LimitCard />
+    </div>
+  </div>
   <div class="row mobile-block">
     <div class="col">
       <h4 class="text-lg font-semibold text-brand-base">Аватар</h4>
@@ -407,6 +417,7 @@ import {
 } from 'src/modules/workspace-settings/ui/dialogs';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
+import LimitCard from 'src/shared/components/LimitCard.vue';
 // import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
 const EditorTipTapV2 = defineAsyncComponent(
@@ -715,5 +726,23 @@ const updateEditorValue = (): void => {
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+
+.limits {
+  &__heading {
+    margin: 0 0 16px;
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    width: 100%;
+    gap: 16px;
+
+    @media screen and (width < 600px) {
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 </style>
