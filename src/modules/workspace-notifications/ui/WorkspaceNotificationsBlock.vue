@@ -141,6 +141,23 @@ function transform() {
     if (props.notificationRow?.data?.field === 'completed_at') {
       return 'завершил(-а) задачу';
     }
+    if (props.notificationRow?.data?.field === 'form_answers') {
+      return `
+      <span> 
+        прошёл(-ла) форму 
+        <a
+          target="_blank"
+          style="
+            color: #3F76FF;
+            text-decoration: none;
+            font-weight: 400;
+          "
+          href="${props.notificationRow?.detail?.form?.url}"
+        >
+          "${props.notificationRow?.detail?.form?.title}"
+        </a>
+      <span/>`;
+    }
     if (
       props.notificationRow?.data?.entity_type === 'issue' ||
       props.notificationRow?.type === 'comment'

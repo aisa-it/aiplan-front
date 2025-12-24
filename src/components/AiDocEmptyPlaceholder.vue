@@ -1,6 +1,13 @@
 <template>
-  <q-page class="flex justify-center items-center">
+  <q-page class="flex justify-center" :class="!ny ? 'items-center' : 'items-start'">
     <div class="flex flex-col items-center">
+      <div v-if="ny" style="padding: 40px 0px;">
+        <q-img
+          fit="contain"
+          :src="newYearTree"
+          style="width: 250px"
+        />
+      </div>
       <AIDocIcon :width="120" :height="120" />
       <span style="font-size: 25px">{{
         aidocStore.rootDocs.length > 0
@@ -36,6 +43,8 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import HierarchyDocDialog from './dialogs/AIDocDialogs/HierarchyDocDialog.vue';
 //icons
 import AIDocIcon from './icons/AIDocIcon.vue';
+import newYearTree from 'src/assets/newYearTree.svg';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 defineProps<{
   isAdminOrAuthor: boolean;
@@ -44,9 +53,11 @@ defineProps<{
 //stores
 const aidocStore = useAiDocStore();
 const workspaceStore = useWorkspaceStore();
+const utilsStore = useUtilsStore();
 
 //storesToRefs
 const { workspaceInfo } = storeToRefs(workspaceStore);
+const { ny } = storeToRefs(utilsStore);
 
 //variables
 const showHierarchyDialog = ref(false);

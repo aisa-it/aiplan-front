@@ -4,6 +4,7 @@ import { workspaceActivityRender } from './workspace-activity';
 import { formActivityRender } from './form-activity';
 import { docActivityRender } from './doc-activity';
 import { rootActivityRender } from './root-activity';
+import { sprintActivityRender } from './sprint-activity';
 
 import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -25,5 +26,7 @@ export function activityRender(
       return docActivityRender(activity);
     case 'root':
       return rootActivityRender(activity);
+    case 'sprint':
+      return sprintActivityRender(activity);
   }
 }

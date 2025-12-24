@@ -26,6 +26,7 @@ export const ROLES = {
       'edit-document',
       'create-sprint',
       'show-sprint-popup',
+      'show-sprints-nav',
     ],
     admin: [
       'ws-settings',
@@ -51,8 +52,9 @@ export const ROLES = {
       'edit-document',
       'create-sprint',
       'show-sprint-popup',
+      'show-sprints-nav',
     ],
-    member: ['show-ws', 'edit-document'],
+    member: ['show-ws', 'edit-document', 'show-sprints-nav'],
     guest: ['show-ws'],
   },
   project: {

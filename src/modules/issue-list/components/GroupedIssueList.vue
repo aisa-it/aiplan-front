@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="issue-list">
     <GroupedTables
       v-if="!isKanbanEnabled && issuesStore.groupedIssueList?.length"
       :issues="issuesStore.groupedIssueList"
@@ -15,7 +15,11 @@
       "
       @open-issue="
         (id, issue) =>
-          openIssue(id, issue.project ?? (route.params.project as string))
+          openIssue(
+            id,
+            issue.project_detail?.identifier ??
+              (route.params.project as string),
+          )
       "
     />
     <GroupedBoard
@@ -33,7 +37,11 @@
       "
       @open-issue="
         (id, issue) =>
-          openIssue(id, issue.project ?? (route.params.project as string))
+          openIssue(
+            id,
+            issue.project_detail?.identifier ??
+              (route.params.project as string),
+          )
       "
     />
     <div
@@ -162,7 +170,10 @@ async function openPreview(
 
   const id = String(issue.sequence_id);
   if (isMobile.value) {
-    openIssue(id, issue.project ?? (route.params.project as string));
+    openIssue(
+      id,
+      issue.project_detail?.identifier ?? (route.params.project as string),
+    );
     return;
   } else if (currentIssueID.value === id && isPreview.value) return;
   isPreview.value = false;
@@ -172,7 +183,7 @@ async function openPreview(
 
   await singleIssueStore.getIssueData(
     route.params.workspace as string,
-    issue.project ?? (route.params.project as string),
+    issue.project_detail?.identifier ?? (route.params.project as string),
   );
 
   Object.assign(refreshReviewInfo.value, { index, pagination, entity });

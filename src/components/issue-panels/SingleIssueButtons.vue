@@ -10,7 +10,11 @@
       >
         <q-btn
           v-if="
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           :class="
             issueData.draft ? 'orange-btn-only-icon' : 'secondary-btn-only-icon'
@@ -24,7 +28,11 @@
         </q-btn>
         <q-btn
           v-if="
-            hasPermissionByIssue(issueData, project, 'change-issue-primary')
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'change-issue-primary',
+            )
           "
           class="secondary-btn-only-icon"
           icon="move_up"
@@ -49,7 +57,13 @@
           <HintTooltip>Экспортировать в PDF</HintTooltip>
         </q-btn>
         <q-btn
-          v-if="hasPermissionByIssue(issueData, project, 'delete-issue')"
+          v-if="
+            hasPermissionByIssue(
+              issueData,
+              issueData.project_detail ?? project,
+              'delete-issue',
+            )
+          "
           class="delete-btn-only-icon"
           no-caps
           @click="isDeletingOpen = true"
@@ -125,7 +139,7 @@ const switchDraft = async () => {
   await api
     .issuePartialUpdate(
       workspaceInfo.value.slug,
-      currentProjectID.value,
+      issueData.value.project ?? currentProjectID.value,
       currentIssueID.value,
       { draft: !issueData.value.draft },
     )

@@ -20,7 +20,8 @@
   <SelectIssueDialog
     v-model="isChildrenOpen"
     :loading="loading"
-    :project="project"
+    :project="props.project ?? project"
+    :project-identifier="props.project?.identifier"
     multi
     @refresh="onLoad"
     @multi-select="addIssue"
@@ -50,8 +51,10 @@ import { IIssueSelectRequest } from 'src/interfaces/issues';
 import { useLoad } from 'src/composables/useLoad';
 import { getAvailableSubIssues, updateSubIssues } from '../services/api';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
+  project?: DtoProject;
   projectid: string | null;
   issueid: string;
   isDisabled?: boolean;
@@ -65,7 +68,7 @@ const singleIssueStore = useSingleIssueStore();
 const route = useRoute();
 const bus = inject('bus') as EventBus;
 const { currentIssueID } = storeToRefs(singleIssueStore);
-const { project} = storeToRefs(projectStore)
+const { project } = storeToRefs(projectStore);
 const { issueid: parentId } = toRefs(props);
 const isChildrenOpen = ref(false);
 
@@ -74,7 +77,7 @@ const addIssue = (items: Array<string>) => {
 
   updateSubIssues(
     route.params.workspace as string,
-    route.params.project as string,
+    props.projectid,
     currentIssueID.value as string,
     items,
   ).then(() => {
@@ -93,14 +96,18 @@ const addNewIssue = () => {
     componentProps: {
       parent: parentId.value,
       projectid: props.projectid,
+      project: props.project,
     },
   }).onOk(() => emits('refresh'));
 };
 
 const onRequest = async (params: IIssueSelectRequest) => {
+  console.log(props.project);
+  console.log(props.projectid);
+  if (!props.projectid) return;
   getAvailableSubIssues(
     route.params.workspace as string,
-    route.params.project as string,
+    props.projectid,
     currentIssueID.value as string,
     params,
   ).then(({ data }) => bus.emit('updateSelectIssue', data));

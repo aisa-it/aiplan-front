@@ -268,6 +268,13 @@ export const getHistoryText = (m: any, wsProjects: IProject[]) => {
       if (m.verb === 'removed') {
         return `удалил(-а) тег ${m.old_value}`;
       }
+    case 'label':
+      if (m.verb === 'added') {
+        return `добавил(-а) тег ${m.new_value}`;
+      }
+      if (m.verb === 'removed') {
+        return `удалил(-а) тег ${m.old_value}`;
+      }
     case 'link':
       if (m.verb === 'created' && !m.old_value && m.new_value) {
         return `добавил(-а) ссылку "${
@@ -311,10 +318,19 @@ export const getHistoryText = (m: any, wsProjects: IProject[]) => {
           return `перенес(-ла) документ в директорию "${m.new_value}"`;
         }
       }
-
+    case 'sprint':
+      if (m.verb === 'updated') {
+        return `изменил(-а) спринт с "${m.old_value}" на "${m.new_value}"`;
+      }
+      if (m.verb === 'added') {
+        return `добавил(-а) спринт "${m.new_value}"`;
+      }
+      if (m.verb === 'removed') {
+        return `убрал(-а) спринт "${m.old_value}"`;
+      }
     case 'description':
       if (m.verb === 'updated') {
-        return 'изменил(-а) описание'
+        return 'изменил(-а) описание';
       }
       if (m.entity_type === 'doc') {
         return 'изменил(-а) описание';

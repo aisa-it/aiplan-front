@@ -5,7 +5,7 @@ import { LocalStorage } from 'quasar';
 
 // interfaces
 import { IProject, IProjectView } from 'src/interfaces/projects';
-import { IIssueFilters, IIssueLabel } from 'src/interfaces/issues';
+import { IIssueLabel } from 'src/interfaces/issues';
 import { IPassword, IUser, IUserActivityResponse } from 'src/interfaces/users';
 
 // notifications
@@ -29,8 +29,6 @@ export const useAiplanStore = defineStore('aiplan', {
   state: () => ({
     auth: {
       user: undefined,
-      // access_token: LocalStorage.getItem('access_token'),
-      // refresh_token: LocalStorage.getItem('refresh_token'),
     },
 
     myWorkspaces: [] as unknown as any[],
@@ -53,7 +51,6 @@ export const useAiplanStore = defineStore('aiplan', {
 
     isRefreshing: false,
     refreshingCall: null as unknown as Promise<any>,
-    //baseURL: baseURL,
     api: api,
     isServerUnavailable: false,
   }),
@@ -90,9 +87,6 @@ export const useAiplanStore = defineStore('aiplan', {
         const data = d.data;
         this.auth = { ...data };
 
-        // LocalStorage.set('access_token', data.access_token);
-        // LocalStorage.set('refresh_token', data?.refresh_token);
-
         await this.getMyWorkspaces();
         await this.usersMe();
 
@@ -109,74 +103,18 @@ export const useAiplanStore = defineStore('aiplan', {
       });
     },
 
-    prolongToken() {
-      if (this.isRefreshing) return this.refreshingCall;
-
-      this.isRefreshing = true;
-
-      const body = new FormData();
-      const item = LocalStorage.getItem('refresh_token');
-      LocalStorage.remove('refresh_token');
-      if (item === null) {
-        this.isRefreshing = false;
-        // this.auth.access_token = null;
-        // this.auth.refresh_token = null;
-        // this.router.replace('/signin');
-        return Promise.reject();
-      }
-
-      body.append('refresh_token', String(item));
-
-      const axiosClean = axios.create();
-      this.refreshingCall = axiosClean
-        .post(this.baseURL + '/api/token-prolong/', body, { headers: {} })
-        .then((response) => {
-          if (!response?.data?.access_token && !response?.data?.refresh_token) {
-            this.isRefreshing = false;
-            return Promise.reject();
-          }
-
-          LocalStorage.set('access_token', response?.data?.access_token);
-          LocalStorage.set('refresh_token', response?.data?.refresh_token);
-          this.isRefreshing = false;
-          return Promise.resolve(true);
-        })
-        .catch((error) => {
-          this.isRefreshing = false;
-          return Promise.reject(error);
-        });
-      return this.refreshingCall;
-    },
-
-    resetTokens() {
-      LocalStorage.remove('access_token');
-      LocalStorage.remove('refresh_token');
-      // this.auth.access_token = null;
-      // this.auth.refresh_token = null;
-    },
-
     async signOut() {
-      // LocalStorage.remove('next_url');
       return await api
-        .post(`${API_AUTH_PREFIX}/sign-out/`, {
-          refresh_token: LocalStorage.getItem('refresh_token'),
-        })
+        .post(`${API_AUTH_PREFIX}/sign-out/`)
         .then((response) => {
           document.documentElement.style.setProperty('--primary', '#3f75ff');
           document.documentElement.style.setProperty(
             '--primary-light',
             '#ccdbff',
           );
-          LocalStorage.remove('special-version');
-          LocalStorage.remove('access_token');
-          LocalStorage.remove('refresh_token');
-          // this.auth.access_token = '';
           return response?.data;
         })
         .catch((error) => {
-          LocalStorage.remove('access_token');
-          LocalStorage.remove('refresh_token');
-          // this.auth.access_token = '';
           throw error?.response?.data;
         });
     },
@@ -387,41 +325,6 @@ export const useAiplanStore = defineStore('aiplan', {
         });
     },
 
-    // ------------- All issues -------------
-    //не используется
-    issuesListSearch(
-      offset?: any,
-      limit?: any,
-      sortBy?: any,
-      descending = true,
-      show_sub_issues?: boolean,
-      draft?: boolean,
-      onlyCount?: boolean,
-      filters?: IIssueFilters,
-      projectId?: string,
-    ) {
-      if (!this.router.currentRoute.value.params['workspace']) return;
-      return api.post(
-        `${API_WORKSPACES_PREFIX}/${
-          this.router.currentRoute.value.params['workspace']
-        }/projects/${
-          projectId ?? this.router.currentRoute.value.params['project']
-        }/issues/search/`,
-        filters,
-        {
-          params: {
-            offset: offset,
-            limit: limit,
-            order_by: sortBy || 'sequence_id',
-            desc: descending == true,
-            show_sub_issues: show_sub_issues ?? true,
-            only_count: onlyCount ?? false,
-            draft: draft ?? false,
-          },
-        },
-      );
-    },
-
     // ------------- Exact issue -------------
 
     async issueInfo(projectid: string, issuenum: string | number) {
@@ -552,39 +455,6 @@ export const useAiplanStore = defineStore('aiplan', {
       ev.preventDefault();
       ev.stopPropagation();
 
-      /* const uploadFile = (file: File) => {
-        return new Promise<void>((resolve, reject) => {
-          const metadata = {
-            file_name: file.name,
-            file_type: file.type,
-            file_size: file.size.toString(),
-            ...(id ? { [`${type}_id`]: id } : {}),
-            ...(type ? { entity_type: type } : {}),
-          };
-
-          const upload = new tus.Upload(file, {
-            endpoint: uploadUrl,
-            metadata,
-            storeFingerprintForResuming: false,
-            removeFingerprintOnSuccess: true,
-
-            onError(error) {
-              console.error('TUS upload failed:', error);
-              reject(error);
-            },
-            onProgress: function (bytesUploaded, bytesTotal) {
-              if (onProgress) onProgress(file.name, bytesUploaded, bytesTotal);
-            },
-            onSuccess() {
-              console.log('Upload finished:', upload.url);
-              resolve();
-            },
-          });
-
-          upload.start();
-        });
-      }; */
-
       const files: File[] = [];
 
       if (ev.target?.files) {
@@ -627,8 +497,6 @@ export const useAiplanStore = defineStore('aiplan', {
       for (const file of files) {
         await simulateUpload(file);
       }
-      /*
-      await Promise.all(files.map(uploadFile)); */
     },
 
     async uploadUserFile(file: FormData): Promise<any> {
@@ -677,70 +545,28 @@ export const useAiplanStore = defineStore('aiplan', {
 
     async signOutEverywhere() {
       return api
-        .post(`${API_AUTH_PREFIX}/sign-out-everywhere/`, {
-          refresh_token: LocalStorage.getItem('refresh_token'),
-        })
+        .post(`${API_AUTH_PREFIX}/sign-out-everywhere/`)
         .then((response) => {
           document.documentElement.style.setProperty('--primary', '#3f75ff');
           document.documentElement.style.setProperty(
             '--primary-light',
             '#ccdbff',
           );
-          LocalStorage.remove('special-version');
-          LocalStorage.remove('access_token');
-          LocalStorage.remove('refresh_token');
-          // this.auth.access_token = '';
           return response?.data;
         })
         .catch((error) => {
-          LocalStorage.remove('access_token');
-          LocalStorage.remove('refresh_token');
-          // this.auth.access_token = '';
           throw error?.response?.data;
         });
     },
   },
 });
 
-// const store = useAiplanStore();
 const validateRouteCheck = (route: string): boolean => {
   return (
     NON_VALIDATED_ROUTES.find((_route: string) => _route === route) !==
     undefined
   );
 };
-
-api.interceptors.request.use(
-  async (config) => {
-    return new Promise(async (resolve) => {
-      //config.baseURL = store.baseURL;
-
-      // if (!LocalStorage.has('access_token')) return resolve(config);
-      // let token = LocalStorage.getItem('access_token') as string;
-      // try {
-      //   if (token) {
-      //     const payload = jwtDecode(token);
-      //     const expTime = payload.exp * 1000;
-      //     const currentTime = new Date().getTime();
-
-      //     if (expTime - currentTime < 1000) {
-      //       // await store.prolongToken();
-      //       token = LocalStorage.getItem('access_token') as string;
-      //     }
-      //   }
-
-      //   // config.headers.Authorization = 'Bearer ' + token;
-
-      //   resolve(config);
-      // } catch (err) {
-      // }
-      resolve(config);
-    });
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
 
 api.interceptors.response.use(
   (response) => response,
@@ -755,9 +581,6 @@ api.interceptors.response.use(
     }
     const { status, data } = res ?? {};
     switch (status) {
-      // case 500:
-      //   window.location.href = '/service-unavailable';
-      //   break;
       case 401:
         if (
           !validateRouteCheck(window.location.hash) &&

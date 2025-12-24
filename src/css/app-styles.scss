@@ -1484,3 +1484,9 @@ select:-ms-autofill {
     width: inherit;
   }
 }
+
+.issue-list {
+  .q-drawer {
+    top: 50px !important;
+  }
+}

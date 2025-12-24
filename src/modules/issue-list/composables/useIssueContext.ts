@@ -22,16 +22,20 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       storeToRefs(store);
 
     const updateProps = async (props: TypesViewProps) => {
+      const { showSubIssues, ...newProps } = props;
       await store.setProjectProps(
         route.params.workspace as string,
         route.params.project as string,
-        props,
+        newProps,
       );
 
       await store.getMeInProject(
         route.params.workspace as string,
         route.params.project as string,
       );
+
+      projectProps.value.hideSubIssues =
+        projectProps.value.hideSubIssues ?? false;
     };
 
     const getIssue = async (
@@ -67,10 +71,24 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
     const { sprintProps, isGroupingEnabled, isKanbanEnabled, issuesLoader } =
       storeToRefs(store);
 
-    const updateProps = async (props: TypesViewProps) => {
-      await store.setMyViewProps(props);
+    const updateProps = async (props?: TypesViewProps) => {
+      if (props) {
+        const { showSubIssues, ...newProps } = props;
+        await store.setMyViewProps(
+          route.params.workspace as string,
+          route.params.sprint as string,
+          newProps,
+        );
+      }
 
-      await store.getMyViewProps();
+      await store.getMyViewProps(
+        route.params.workspace as string,
+        route.params.sprint as string,
+      );
+
+      sprintProps.value.issueView = sprintProps.value.issueView || 'list';
+      sprintProps.value.hideSubIssues =
+        sprintProps.value.hideSubIssues ?? false;
     };
 
     const getIssue = async (

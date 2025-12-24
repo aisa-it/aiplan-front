@@ -55,6 +55,7 @@
 
       <SelectChildren
         :projectid="issueData.project"
+        :project="issueData.project_detail"
         :issueid="issueData.id"
         :is-disabled="
           hasPermissionByIssue(
@@ -64,7 +65,7 @@
           )
         "
       />
-      <LinkedIssuesPanel />
+      <LinkedIssuesPanel :project_detail="issueData.project_detail" />
 
       <SelectAttachments
         entityType="issue"

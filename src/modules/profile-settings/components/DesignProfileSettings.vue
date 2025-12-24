@@ -18,6 +18,7 @@
           :options="themes"
           :disable="isSystemTheme"
           class="base-selector design-form__col"
+          :style="{ 'min-width': ny ? '48%' : '50%' }"
           label="Тема"
           input-debounce="300"
           fill-input
@@ -71,17 +72,32 @@
         <h4 class="text-lg font-semibold text-brand-base">Осадки</h4>
         <p class="text-sm text-brand-secondary">Осадки в новогодней теме</p>
       </div>
-      <q-select
-        v-model="currentSnowEnable"
-        :options="TURN_ON_OFF"
-        class="base-selector design-form__col"
-        label="Осадки"
-        input-debounce="300"
-        fill-input
-        map-options
-        dense
-        @update:model-value="(value: string) => setSnow(value)"
-      />
+      <div class="design-form__col design-form__inputs">
+        <q-select
+          v-model="currentSnowEnable"
+          :options="TURN_ON_OFF"
+          class="base-selector design-form__col"
+          style="min-width: 48%;"
+          label="Осадки"
+          input-debounce="300"
+          fill-input
+          map-options
+          dense
+          @update:model-value="({ value }) => setSnow(value)"
+        />
+        <q-select
+          v-model="currentSnowDensity"
+          :options="SNOW_DENSITY"
+          class="base-selector design-form__col"
+          style="min-width: 48%;"
+          label="Плотность осадков"
+          input-debounce="300"
+          fill-input
+          map-options
+          dense
+          @update:model-value="({ value }) => setSnowDensity(value)"
+        />
+      </div>
     </div>
   </q-form>
 </template>
@@ -102,6 +118,9 @@ const {
   currentSnowEnable,
   TURN_ON_OFF,
   setSnow,
+  SNOW_DENSITY,
+  currentSnowDensity,
+  setSnowDensity,
 } = useDesignSettings();
 </script>
 

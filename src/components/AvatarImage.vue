@@ -20,6 +20,8 @@
       :text="text"
       :error="error"
       :image="image"
+      :theme="userStore.getTheme"
+      :ny="ny"
       ref="userPopup"
       @mouseenter="cancelCloseMenu"
       @mouseleave="closeMenu"

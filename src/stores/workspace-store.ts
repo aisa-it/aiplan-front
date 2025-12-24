@@ -2,7 +2,6 @@ import { defineStore, storeToRefs } from 'pinia';
 import { useRolesStore } from './roles-store';
 import { useUserStore } from './user-store';
 import {
-  AiplanActivityTable,
   AiplanCreateWorkspaceRequest,
   DaoPaginationResponse,
   DtoProjectLight,
@@ -34,7 +33,6 @@ interface RootStore {
   workspaceInfo?: DtoWorkspace;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
-  WorkspaceActivityMap: Record<string, AiplanActivityTable> | []; // не используется
   workspaceUsers: DtoWorkspaceMember[];
   foundUsers: DtoWorkspaceMember[];
   allWorkspaceStates?: Record<string, DtoStateLight[]>;
@@ -47,7 +45,6 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       workspaceInfo: undefined,
       workspaceToken: '',
       workspaceProjects: [],
-      WorkspaceActivityMap: [], // не используется
       workspaceUsers: [],
       foundUsers: [],
       allWorkspaceStates: undefined,

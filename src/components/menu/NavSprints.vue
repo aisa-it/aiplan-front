@@ -104,6 +104,20 @@
                     <span>Удалить спринт</span>
                   </q-btn>
                 </q-item>
+                <q-item>
+                  <q-btn
+                    class="menu-link__settings-btn full-w"
+                    flat
+                    dense
+                    no-caps
+                    v-close-popup
+                    :style="'font-size: 12px;'"
+                    @click="sprintStore.sprintLinkToClipboard(String(sprint.id))"
+                  >
+                    <LinkIcon :width="16" :height="16" class="q-mr-sm" />
+                    <span>Скопировать ссылку</span>
+                  </q-btn>
+                </q-item>
               </q-list>
             </q-menu>
           </q-btn>
@@ -147,6 +161,7 @@ import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import SettingsIcon from '../icons/SettingsIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
 import { getSprintDates } from 'src/modules/sprints/helpres';
+import LinkIcon from '../icons/LinkIcon.vue';
 
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
@@ -202,7 +217,7 @@ watch(
   async (v) => {
     if (v) {
       await refreshSprints();
-      sprintStore.refreshSprintData = false;
+      sprintStore.clearSprintRefresh();
     }
   },
 );

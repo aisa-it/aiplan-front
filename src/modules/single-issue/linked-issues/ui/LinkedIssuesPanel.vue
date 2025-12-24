@@ -6,14 +6,23 @@
         v-model:is-expanded="isExpanded"
         :linked-issues-count="linkedIssues.length"
         :has-permission-by-issue="
-          hasPermissionByIssue(issueData, project, 'add-linked-issue')
+          hasPermissionByIssue(
+            issueData,
+            props.project_detail ?? project,
+            'add-linked-issue',
+          )
         "
       />
     </template>
     <LinkedIssuesList
+      :project_detail="props.project_detail"
       v-model:linked-issues="linkedIssues"
       :has-permission-by-issue="
-        hasPermissionByIssue(issueData, project, 'add-linked-issue')
+        hasPermissionByIssue(
+          issueData,
+          props.project_detail ?? project,
+          'add-linked-issue',
+        )
       "
       @remove-issue="removeIssue"
     />
@@ -43,7 +52,8 @@
   </q-item>
   <SelectIssueDialog
     v-model="isOpenAdditionLinkedIssue"
-    :projectIdentifier="project?.identifier"
+    :projectIdentifier="props.project_detail?.identifier ?? project?.identifier"
+    :project="props.project_detail"
     :issues="linkedIssuesIds"
     :loading="loading"
     :allAllowed="true"
@@ -73,7 +83,10 @@ import IssuesExpansionItem from 'src/modules/single-issue/ui/components/IssuesEx
 
 // interfaces
 import { IIssueSelectRequest } from 'src/interfaces/issues';
-import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoProject,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // composables
 import { useLoad } from 'src/composables/useLoad';
@@ -88,6 +101,8 @@ import {
   addIssueLinkedIssueList,
 } from '../services/api';
 import { setIntervalFunction } from 'src/utils/helpers';
+
+const props = defineProps<{ project_detail?: DtoProject }>();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -116,7 +131,7 @@ const handleSaveLinkedIssues = async (ids: string[], type?: string) => {
   if (!currentWorkspaceSlug.value) return;
   await addIssueLinkedIssueList(
     currentWorkspaceSlug.value,
-    currentProjectID.value,
+    props.project_detail?.id ?? currentProjectID.value,
     currentIssueID.value,
     { issue_ids: ids },
   ).then(() => {
@@ -131,10 +146,15 @@ const handleSaveLinkedIssues = async (ids: string[], type?: string) => {
 };
 
 const refresh = async () => {
-  if (!currentWorkspaceSlug.value || !currentProjectID.value || !currentIssueID.value) return;
+  if (
+    !currentWorkspaceSlug.value ||
+    !(currentProjectID.value || props.project_detail?.id) ||
+    !currentIssueID.value
+  )
+    return;
   const data = await getLinkedIssues(
     currentWorkspaceSlug.value,
-    currentProjectID.value,
+    props.project_detail?.id ?? currentProjectID.value,
     currentIssueID.value,
   );
   if (data) linkedIssues.value = data;
@@ -151,7 +171,7 @@ const onRequest = async (params: IIssueSelectRequest) => {
   if (!workspaceStore.currentWorkspaceSlug) return;
   const data = await getAvailableLinkedIssues(
     workspaceStore.currentWorkspaceSlug,
-    projectStore.currentProjectID,
+    props.project_detail?.id ?? projectStore.currentProjectID,
     singleIssueStore.currentIssueID,
     params,
   );

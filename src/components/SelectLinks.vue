@@ -23,7 +23,13 @@
       <LinkIcon class="q-mt-xs"></LinkIcon>
       <q-item-section>
         <q-item-label>
-          <q-btn flat dense no-caps @click="goToLink(l.url)" style="width: 90%">
+          <q-btn
+            flat
+            dense
+            no-caps
+            @click.stop="goToLink(l.url)"
+            style="width: 90%"
+          >
             <span class="abbriviated-text" style="text-align: start">
               {{ l.title }}
             </span>
@@ -227,11 +233,7 @@ export default defineComponent({
     };
 
     const goToLink = (url: string) => {
-      let fileLink = document.createElement('a');
-      fileLink.href = url;
-      fileLink.target = '_blank';
-      document.body.appendChild(fileLink);
-      fileLink.click();
+      window.open(url, '_blank', 'noopener,noreferrer');
     };
 
     watch(
