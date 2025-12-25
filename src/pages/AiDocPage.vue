@@ -47,6 +47,7 @@
               :read-only-editor="isReadOnlyEditor"
               :canEdit="canEdit"
               class="issue-panel__editor"
+              :class="{ 'ny-theme': ny }"
               :class-prevent="isAutoSave ? preventClickClass : ''"
               can-resize
               is-mention
@@ -129,6 +130,7 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'stores/notification-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 
 // interfaces
 import {
@@ -152,6 +154,7 @@ import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
 import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
+import { useStickyState } from 'src/composables/useStickyState';
 
 //composables
 const route = useRoute();
@@ -159,6 +162,7 @@ const route = useRoute();
 //stores
 const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
+const utilsStore = useUtilsStore();
 const aidocStore = useAiDocStore();
 const { hasPermission } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
@@ -166,6 +170,7 @@ const { setNotificationView } = useNotificationStore();
 //storesToRefs
 const { workspaceInfo, workspaceUsers } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
+const { ny } = storeToRefs(utilsStore);
 
 //states
 const aidocEditor = ref();
@@ -400,6 +405,10 @@ watch(
       metadata.value.title = `АИДок ${workspaceInfo?.value?.name}`;
   },
 );
+
+watch(ny, (newVal) => {
+  if (newVal) useStickyState('.issue-panel__editor .html-editor__toolbar');
+}, { immediate: true });
 </script>
 
 <style lang="scss" scoped>
@@ -514,5 +523,18 @@ watch(
   top: 50px;
   z-index: 10;
   background-color: $bg-color;
+
+  &.is-sticky {
+    padding-top: 80px;
+    transition: padding-top 0.3s ease-in;
+  }
+
+  &:not(.is-sticky) {
+    transition: padding-top 0.1s ease-out;
+  }
+}
+
+.ny-theme :deep(.html-editor__toolbar) {
+  top: 0;
 }
 </style>
