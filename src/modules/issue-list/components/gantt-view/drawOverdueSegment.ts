@@ -1,6 +1,10 @@
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getXByDate } from './ganttCoords';
 
+/*
+  Функция для отрисовки красного сегмента, обозначающего просрочку задачи
+  Сегмент рисуется от даты срока задачи, до текущего дня либо даты выполнения задачи, если она есть
+*/
 export function drawOverdueSegment(
   container: HTMLElement,
   svg: SVGSVGElement,

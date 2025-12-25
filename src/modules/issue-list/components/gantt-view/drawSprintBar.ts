@@ -1,3 +1,7 @@
+/*
+  Функция для стилизации бара спринта
+*/
+
 export function drawSprintBar(bar: SVGGElement) {
   const barRect = bar.querySelector('rect.bar');
   if (!barRect) return;

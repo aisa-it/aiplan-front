@@ -1,3 +1,7 @@
+/*
+  функция получения x координаты заданной даты
+  возвращает x координату линии между текущим и следующим днем
+*/
 export function getXByDate(container: HTMLElement, date: Date): number {
   const el = container?.querySelector(
     `.date_${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
@@ -7,6 +11,12 @@ export function getXByDate(container: HTMLElement, date: Date): number {
 
   return el.getBoundingClientRect().right;
 }
+
+/*
+  Линия текушего дня по-умолчанию в frappe gantt ставится в центр дня
+  здесь она сдвигается на линию между текущим и следующим днем
+  а для обозначения текущего дня используется небольшой блок с надписью "сегодня"
+*/
 
 export function fixTodayLine(container: HTMLElement, svg: SVGSVGElement) {
   const highlight = container.querySelector(

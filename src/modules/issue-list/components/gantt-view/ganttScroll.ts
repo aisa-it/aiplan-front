@@ -1,3 +1,8 @@
+/*
+  Функция для автоскрола при появлении диаграммы
+  В зависимости от контекста диаграммы, она перемещает либо на спринт,
+  либо к линии текущего дня
+*/
 export function scrollToTarget(
   container: HTMLElement,
   selector: '.current-highlight' | '.sprint',

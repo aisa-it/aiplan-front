@@ -1,6 +1,10 @@
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getXByDate } from './ganttCoords';
 
+/*
+  Функция для отрисовки пунктирной линии, обозначающей срок задачи
+  Если задача не имеет срока или она отменена, линия не рисуется
+*/
 export function drawTargetDateLine(
   container: HTMLElement,
   svg: SVGSVGElement,

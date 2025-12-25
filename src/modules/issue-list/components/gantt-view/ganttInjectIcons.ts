@@ -4,6 +4,11 @@ import { STATUS_ICONS } from './ganttIcons';
 const ICON_SIZE = 24;
 const ICON_GAP = 8;
 
+/*
+  Функция для вставки иконок статусов в бар задачи
+  Иконка подбирается по группе статуса задачи
+  Вставка происходит в бар задачи справа от названия статуса
+*/
 export function injectIcons(bar: SVGGElement, task: DtoIssue) {
   if (bar.classList.contains('sprint')) return;
 
@@ -38,6 +43,10 @@ export function injectIcons(bar: SVGGElement, task: DtoIssue) {
   text.parentElement?.insertBefore(image, text);
 }
 
+/*
+  Функция для вставки иконоки alert в бар для просроченной задачи
+  Вставка происходит в бар задачи слева от названия статуса
+*/
 export function injectDangerIcon(bar: SVGGElement) {
   if (bar.querySelector('image.danger-icon')) return;
 

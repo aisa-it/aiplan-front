@@ -6,6 +6,12 @@ import { drawOverdueSegment } from './drawOverdueSegment';
 import { highlightWeekendInHeader } from './highlightWeekendInHeader';
 import { fixTodayLine } from './ganttCoords';
 
+/*
+  Основная функция для отрисовки всех кастомных элементов
+  настраивает выходные дни, линию текущего дня,
+  проходит по всем барам и настраивает их
+*/
+
 export function decorateBars(container: HTMLElement, tasks: any[]) {
   highlightWeekendInHeader(container);
 
@@ -38,6 +44,11 @@ export function decorateBars(container: HTMLElement, tasks: any[]) {
   });
 }
 
+/*
+  бары в frappe gantt имеют небольшую погрешность относительно линий дней
+  поэтому их все нужно немного сдвигать
+  dataset.shifted нужен для того, чтобы не было повторных сдвигов при перерендере
+*/
 function shiftBars(bar: SVGGElement, shift: number) {
   if (bar.dataset.shifted === '1') return;
   bar.dataset.shifted = '1';

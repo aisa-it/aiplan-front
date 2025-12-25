@@ -1,3 +1,7 @@
+/*
+  Простой обсервер для выполнения перерисовки кастомных элементов,
+  которая выполняется автоматически после перерисовки svg внутри frappe gantt
+*/
 export function observeGanttRedraw(
   container: HTMLElement,
   onRedraw: () => void,

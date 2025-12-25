@@ -1,3 +1,6 @@
+/*
+  Функция для драг-скрола внутри диаграммы
+*/
 export function enableDragScroll(container: HTMLElement) {
   let isDragging = false;
   let startX = 0;

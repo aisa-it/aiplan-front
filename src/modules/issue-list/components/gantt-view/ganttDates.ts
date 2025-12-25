@@ -3,6 +3,9 @@ import {
   DtoStateLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
+/*
+  Функция прибавляет к заданной дате dateString количество дней days
+*/
 export function getNextDayDateOnly(dateString: string, days = 1): string {
   const [y, m, d] = dateString.split('T')[0].split('-').map(Number);
   const date = new Date(y, m - 1, d);
@@ -14,6 +17,11 @@ export function getNextDayDateOnly(dateString: string, days = 1): string {
   return `${nextYear}-${nextMonth}-${nextDay}`;
 }
 
+/*
+  Функция определяет, является ли задача просроченной
+  Если задача не имеет срока или была отменена, то задача не просрочена
+  Если дата выполнения задачи или текущая дата больше даты срока задачи, то она просрочена
+*/
 export function isOverdue(task: DtoIssue): boolean {
   if (!task.target_date || task.state_detail?.group === 'cancelled')
     return false;
@@ -22,6 +30,13 @@ export function isOverdue(task: DtoIssue): boolean {
   return compare > target;
 }
 
+/*
+  Вспомогательные функции для подбора конечной даты бара задачи
+  Если задача отменена, то берем дату создания задачи
+  Если задача выполнена, берем дату выполнения
+  Если задача просрочена, берем дату срока задачи
+  Если ничего из выше перечисленного, то берем текущую дату
+*/
 export function getEndDateType(task: DtoIssue) {
   if (task.state_detail?.group === 'cancelled') return 'cancelled';
   if (isOverdue(task)) return 'overdue';
@@ -42,6 +57,9 @@ export function getEndDate(task: DtoIssue, type: string): string {
   }
 }
 
+/*
+  По группе статуса назначается класс, который потом прицепится к бару
+*/
 export function getStatusClass(status?: DtoStateLight | null) {
   if (!status) return '';
   switch (status.group) {
