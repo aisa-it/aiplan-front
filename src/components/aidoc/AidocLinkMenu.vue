@@ -1,4 +1,5 @@
 <template>
+  <!-- Удалить, заменено на MenuActions -->
   <q-btn
     class="menu-link__btn menu-link__btn--hiding1 q-ml-sm"
     flat
