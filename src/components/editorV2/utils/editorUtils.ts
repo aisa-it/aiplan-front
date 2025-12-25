@@ -4,6 +4,7 @@ import { EventBus } from 'quasar';
 import { bgColorMap, colorMap } from 'src/utils/editorColorMap';
 import { Ref, inject } from 'vue';
 import { DOMParser } from '@tiptap/pm/model';
+import { convertFontSizeToPx } from 'src/utils/convertFontSizeToPx';
 
 const bus = inject('bus') as EventBus;
 
@@ -59,81 +60,163 @@ export const cleanContent = (content: string): string => {
 };
 
 export const getEditorProps = (editorInstance, onCommentLink) => ({
-  // Подстановка шрифтов из оригинальной таблицы
   handlePaste: (view, event, slice) => {
     const html = event.clipboardData?.getData('text/html');
-
+    // Обработка и подстановка стилей текста из оригинальной таблицы
     if (html?.includes('<table')) {
       const temp = document.createElement('template');
       temp.innerHTML = html;
       const fragment = temp.content;
 
-      // Обработка всех элементов, которые могут содержать font-size
-      const elementsToProcess = Array.from(
-        fragment.querySelectorAll('td, th, [style], font'),
-      );
+      // Парсинг классов из <style> (Excel)
+      const classStyles: Record<string, CSSStyleDeclaration> = {};
+      const styleElements = Array.from(fragment.querySelectorAll('style'));
 
-      for (const el of elementsToProcess) {
+      for (const styleEl of styleElements) {
+        const cssText = styleEl.textContent || '';
+        const tempStyle = document.createElement('style');
+        tempStyle.textContent = cssText;
+        document.head.appendChild(tempStyle);
+
+        try {
+          const sheet = tempStyle.sheet as CSSStyleSheet | null;
+          if (sheet?.cssRules) {
+            for (const rule of sheet.cssRules) {
+              if (
+                rule instanceof CSSStyleRule &&
+                rule.selectorText.startsWith('.')
+              ) {
+                const className = rule.selectorText.slice(1).trim();
+                classStyles[className] = rule.style;
+              }
+            }
+          }
+        } finally {
+          document.head.removeChild(tempStyle);
+        }
+        styleEl.remove();
+      }
+
+      // Обработка всех элементов внутри таблицы
+      const table = fragment.querySelector('table');
+      if (!table) return false;
+
+      const allElements = Array.from(table.querySelectorAll('*'));
+      for (const el of allElements) {
         let targetFontSize: string | null = null;
+        let targetFontWeight: string | null = null;
+        let targetFontStyle: string | null = null;
         const tagName = el.tagName.toLowerCase();
 
-        // Обработка <font size="...">
-        if (tagName === 'font') {
-          const sizeAttr = el.getAttribute('size');
-          if (sizeAttr) {
-            targetFontSize = `${Math.round((Number(sizeAttr) * 4) / 3)}px`;
-          }
-        }
-        // Обработка style="font-size: ..."
-        else {
-          const styleAttr = el.getAttribute('style');
-          if (styleAttr) {
-            const match = styleAttr.match(
-              /font-size\s*:\s*([\d.]+)\s*(pt|px)\b/i,
-            );
-            if (match) {
-              const value = parseFloat(match[1]);
-              const unit = match[2].toLowerCase();
-              if (unit === 'pt') {
-                targetFontSize = `${Math.round((value * 4) / 3)}px`;
-              } else if (unit === 'px') {
-                targetFontSize = `${value}px`;
-              }
+        // Обработка классов Excel
+        for (const cls of el.classList) {
+          const styles = classStyles[cls];
+          if (styles) {
+            if (styles.fontSize && !targetFontSize) {
+              targetFontSize = convertFontSizeToPx(styles.fontSize);
+            }
+            if (styles.fontWeight && !targetFontWeight) {
+              targetFontWeight = styles.fontWeight;
+            }
+            if (styles.fontStyle && !targetFontStyle) {
+              targetFontStyle = styles.fontStyle;
             }
           }
         }
 
-        // Если font-size найден — оборачиваем содержимое
-        if (targetFontSize) {
-          const wrapper = document.createElement('span');
-          wrapper.style.fontSize = targetFontSize;
+        // Обработка инлайн стилей
+        if (el.hasAttribute('style')) {
+          const inlineStyle = el.getAttribute('style')!;
+          const fontSizeMatch = inlineStyle.match(
+            /font-size\s*:\s*([\d.]+)\s*(pt|px)\b/i,
+          );
+          if (fontSizeMatch && !targetFontSize) {
+            const raw = `${fontSizeMatch[1]}${fontSizeMatch[2]}`;
+            targetFontSize = convertFontSizeToPx(raw);
+          }
 
-          // Переносим всё содержимое
+          const fontWeightMatch = inlineStyle.match(
+            /font-weight\s*:\s*(\w+|\d+)/i,
+          );
+          if (fontWeightMatch && !targetFontWeight) {
+            targetFontWeight = fontWeightMatch[1];
+          }
+
+          const fontStyleMatch = inlineStyle.match(/font-style\s*:\s*(\w+)/i);
+          if (fontStyleMatch && !targetFontStyle) {
+            targetFontStyle = fontStyleMatch[1];
+          }
+        }
+
+        // Обработка шрифтов формата <font size="...">
+        if (tagName === 'font' && !targetFontSize) {
+          const sizeAttr = el.getAttribute('size');
+          if (sizeAttr) {
+            const sizeNum = Number(sizeAttr);
+            const ptMap: Record<number, number> = {
+              1: 8,
+              2: 10,
+              3: 12,
+              4: 14,
+              5: 18,
+              6: 24,
+              7: 36,
+            };
+            const pt = ptMap[sizeNum] || 12;
+            targetFontSize = `${Math.round((pt * 4) / 3)}px`;
+          }
+        }
+
+        // Дефолтные стили для элементов в семантических тегах
+        if (
+          !targetFontWeight &&
+          (el.matches('b, strong') || el.querySelector('b, strong'))
+        ) {
+          targetFontWeight = '700';
+        }
+        if (
+          !targetFontStyle &&
+          (el.matches('i, em') || el.querySelector('i, em'))
+        ) {
+          targetFontStyle = 'italic';
+        }
+
+        // Перенос стилей
+        if (targetFontSize || targetFontWeight || targetFontStyle) {
+          const wrapper = document.createElement('span');
+          if (targetFontSize) wrapper.style.fontSize = targetFontSize;
+          if (targetFontWeight) wrapper.style.fontWeight = targetFontWeight;
+          if (targetFontStyle) wrapper.style.fontStyle = targetFontStyle;
+
           while (el.firstChild) {
             wrapper.appendChild(el.firstChild);
           }
 
-          // Заменяем <font> на span, или вставляем span внутрь другого тега
           if (tagName === 'font') {
             el.replaceWith(wrapper);
           } else {
             el.appendChild(wrapper);
-            // Удаляем font-size из оригинального style
-            const newStyle = el
-              .getAttribute('style')
-              ?.replace(/font-size\s*:[^;]*;?/gi, '')
-              .replace(/;;/g, ';')
-              .trim();
-            if (newStyle) {
-              el.setAttribute('style', newStyle);
-            } else {
-              el.removeAttribute('style');
+            // Чистка родительского style, чтобы избежать дублирования
+            if (el.hasAttribute('style')) {
+              let newStyle = el
+                .getAttribute('style')!
+                .replace(/font-size\s*:[^;]*;?/gi, '')
+                .replace(/font-weight\s*:[^;]*;?/gi, '')
+                .replace(/font-style\s*:[^;]*;?/gi, '')
+                .replace(/;;/g, ';')
+                .trim()
+                .replace(/;$/, '');
+              if (newStyle) {
+                el.setAttribute('style', newStyle);
+              } else {
+                el.removeAttribute('style');
+              }
             }
           }
         }
       }
 
-      // Если в ячейке нет font-size — ставим шрифт по умолчанию
+      // Обход ячеек, простановка дефолтного размера шрифта
       fragment.querySelectorAll('td, th').forEach((cell) => {
         const hasFontSize = cell.querySelector('[style*="font-size"]');
         if (!hasFontSize) {
@@ -146,18 +229,11 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
         }
       });
 
-      // Добавляем класс для сохранения стилей
-      const table = fragment.querySelector('table');
-      if (table) {
-        table.classList.add('table-striped');
-      } else {
-        return false;
-      }
-
+      // Вставка таблицы
+      table.classList.add('table-striped');
       event.preventDefault();
-
       const parser = DOMParser.fromSchema(editorInstance.value.schema);
-      const nodes = parser.parse(fragment);
+      const nodes = parser.parse(table);
       editorInstance.value.view.dispatch(
         editorInstance.value.view.state.tr.replaceSelectionWith(nodes, false),
       );
