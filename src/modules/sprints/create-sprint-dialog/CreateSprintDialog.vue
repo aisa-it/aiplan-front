@@ -220,21 +220,63 @@ const refreshMyFilters = async () => {
 
 const sprint = ref<DtoSprint | null>();
 
+const loadSprintIssues = async (sprintId: string) => {
+  const workspaceId = workspaceStore.workspaceInfo?.id;
+  if (!workspaceId) {
+    console.warn('Workspace ID не найден при загрузке issues');
+    return [];
+  }
+
+  const allIssues: any[] = [];
+  let offset = 0;
+  let totalCount = 0;
+  const ISSUES_LIMIT = 100;
+
+  while (true) {
+    const response = await useSprintStore().getIssueList(
+      workspaceId,
+      sprintId,
+      {},
+      {
+        limit: ISSUES_LIMIT,
+        offset,
+      },
+    );
+
+    const loadedIssues = response.data.issues ?? [];
+
+    allIssues.push(...loadedIssues);
+
+    if (offset === 0) totalCount = response.data.count ?? 0;
+
+    const hasMoreData =
+      loadedIssues.length === ISSUES_LIMIT && allIssues.length < totalCount;
+
+    if (!hasMoreData) {
+      break;
+    }
+
+    offset += ISSUES_LIMIT;
+  }
+
+  return allIssues;
+};
+
 const handleOpen = async () => {
   checkedIssues.value = [];
   sprint.value = null;
+
   if (props.sprintId) {
-    sprint.value = await getSprint(
-      workspaceStore.workspaceInfo?.id ?? '',
-      props.sprintId,
-    );
-    checkedIssues.value = (
-      await useSprintStore().getIssueList(
+    try {
+      sprint.value = await getSprint(
         workspaceStore.workspaceInfo?.id ?? '',
         props.sprintId,
-        {},
-      )
-    ).data.issues;
+      );
+
+      checkedIssues.value = await loadSprintIssues(props.sprintId);
+    } catch (error) {
+      showNotification('error', 'Ошибка при загрузке данных спринта');
+    }
   }
 
   currentFilter.value = {
