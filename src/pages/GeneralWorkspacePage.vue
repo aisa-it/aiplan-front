@@ -131,8 +131,6 @@ watch(
     if (newVal?.name) metadata.value.title = `Пространство ${newVal.name}`;
   },
 );
-
-userStore.setMeTutorial(0);
 </script>
 
 <style scoped lang="scss">
