@@ -1022,12 +1022,6 @@ select:-ms-autofill {
   margin-bottom: auto;
 }
 
-@media screen and (max-height: 800px) {
-  .menu-item--open {
-    height: 50%;
-  }
-}
-
 .menu-item--help {
   background-color: inherit;
   height: 234px;

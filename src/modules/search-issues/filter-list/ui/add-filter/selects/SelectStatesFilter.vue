@@ -20,46 +20,12 @@
   >
     <template #option="scope">
       <div @click.stop v-bind="scope.itemProps" style="padding: 0px">
-        <q-item-section @click.stop>
-          <ExpansionItem
-            item-name="filter-states"
-            full-open
-            isDefaultOpen
-            isOpenDisable
-          >
-            <template #header>
-              <q-item-section>
-                <span style="font-weight: 800">{{ scope.opt.label }}</span>
-              </q-item-section>
-            </template>
-            <template #content>
-              <q-item
-                v-for="(option, index) in scope.opt.options"
-                :key="index"
-                @click="updateSelected(option)"
-                clickable
-              >
-                <div style="display: flex; align-items: center">
-                  <q-badge
-                    rounded
-                    class="q-mr-sm"
-                    style="height: 12px; width: 12px"
-                    :style="'background-color: ' + option.value.color"
-                  />
-                  <span
-                    class="word-wrap"
-                    style="width: 95%"
-                    :class="{
-                      'item-selected': modelValue.includes(option.value.id),
-                    }"
-                  >
-                    {{ option.label }}
-                  </span>
-                </div>
-              </q-item>
-            </template>
-          </ExpansionItem>
-        </q-item-section>
+        <GroupList
+          :label="scope.opt.label"
+          :options="scope.opt.options"
+          :selected="modelValue"
+          @select="updateSelected"
+        />
       </div>
     </template>
 
@@ -125,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import ExpansionItem from 'src/components/ExpansionItem.vue';
+import GroupList from 'src/components/selects/components/GroupList.vue';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -153,8 +119,8 @@ const model = computed(() =>
   props.modelValue.length
     ? [...props.modelValue]
     : props.onlyActive
-    ? 'Только активные'
-    : [],
+      ? 'Только активные'
+      : [],
 );
 
 const source = computed(() => props.searchedOptions ?? props.options);
