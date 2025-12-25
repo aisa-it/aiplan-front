@@ -3,6 +3,7 @@ import { Editor } from '@tiptap/vue-3';
 import { EventBus } from 'quasar';
 import { bgColorMap, colorMap } from 'src/utils/editorColorMap';
 import { Ref, inject } from 'vue';
+import { DOMParser } from '@tiptap/pm/model';
 
 const bus = inject('bus') as EventBus;
 
@@ -154,9 +155,12 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
       }
 
       event.preventDefault();
-      if (editorInstance.value) {
-        editorInstance.value.commands.insertContent(table.outerHTML);
-      }
+
+      const parser = DOMParser.fromSchema(editorInstance.value.schema);
+      const nodes = parser.parse(fragment);
+      editorInstance.value.view.dispatch(
+        editorInstance.value.view.state.tr.replaceSelectionWith(nodes, false),
+      );
       return true;
     }
     return false;
