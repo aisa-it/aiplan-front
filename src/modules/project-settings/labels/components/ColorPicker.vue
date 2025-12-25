@@ -139,6 +139,14 @@ const handleCancel = () => {
   justify-content: space-evenly;
 }
 
+:deep(.q-color-picker__spectrum) {
+  height: 184px !important;
+}
+
+:deep(.q-color-picker__spectrum-content) {
+  height: 184px !important;
+}
+
 :deep(.q-color-picker__footer) {
   height: 150px !important;
   padding-bottom: 0 !important;
