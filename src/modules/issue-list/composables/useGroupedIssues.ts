@@ -17,7 +17,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS } =
+  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS, store } =
     useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
@@ -73,34 +73,54 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   }
 
   function defineFiltersByEntity(entity) {
-    let filters;
+    let filters: TypesIssuesListFilters = {};
     switch (issuesStore.groupByIssues) {
       case 'state': {
-        filters = { states: [entity.id] };
+        if (contextType === 'sprint') {
+          const key = `${entity?.name}_${entity?.color}`;
+          if (store.getStatusesAsArray[key]) {
+            return { states: [store.getStatusesAsArray[key].id] };
+          }
+        }
+        if (entity?.id) {
+          filters = { states: [entity.id] };
+        }
         return filters;
       }
       case 'labels': {
-        filters = { labels: [entity ? entity.id : ''] };
+        if (entity?.id) {
+          filters = { labels: [entity.id] };
+        }
         return filters;
       }
       case 'priority': {
-        filters = { priorities: [entity || ''] };
+        if (entity) {
+          filters = { priorities: [entity] };
+        }
         return filters;
       }
       case 'watchers': {
-        filters = { watchers: [entity ? entity.id : ''] };
+        if (entity?.id) {
+          filters = { watchers: [entity.id] };
+        }
         return filters;
       }
       case 'assignees': {
-        filters = { assignees: [entity ? entity.id : ''] };
+        if (entity?.id) {
+          filters = { assignees: [entity.id] };
+        }
         return filters;
       }
       case 'author': {
-        filters = { authors: [entity ? entity.id : ''] };
+        if (entity?.id) {
+          filters = { authors: [entity.id] };
+        }
         return filters;
       }
       case 'project': {
-        filters = { projects: [entity ? entity.id : ''] };
+        if (entity?.id) {
+          filters = { projects: [entity.id] };
+        }
         return filters;
       }
     }
@@ -109,11 +129,16 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
 
   async function getCurrentTable(index: number, pagination: any, entity: any) {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
+
     pagination.order_by = pagination.order_by ?? 'sequence_id';
     const response = await getIssue(filters, pagination);
 
-    issuesStore.groupedIssueList[index].issues = response?.data.issues;
-    issuesStore.groupedIssueList[index].count = response?.data.count;
+    const data = response?.data?.issues;
+    issuesStore.groupedIssueList[index].issues =
+      Array.isArray(data) && data[0]?.issues
+        ? data[0].issues
+        : (data ?? []);
+    issuesStore.groupedIssueList[index].count = response?.data?.count ?? 0;
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {

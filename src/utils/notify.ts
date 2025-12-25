@@ -24,7 +24,10 @@ export function handleNotify(notify: INotificationParams) {
             color: 'black',
             round: true,
             handler: () => {
-              /* ... */
+              const element = document.querySelector('.q-notification:last-of-type') as HTMLElement;
+              if (element) {
+                element.style.transitionDuration = '0.12s';
+              }
             },
           },
         ],
@@ -50,7 +53,10 @@ export function handleNotify(notify: INotificationParams) {
             color: 'black',
             round: true,
             handler: () => {
-              /* ... */
+              const element = document.querySelector('.q-notification:last-of-type') as HTMLElement;
+              if (element) {
+                element.style.transitionDuration = '0.12s';
+              }
             },
           },
         ],
@@ -77,7 +83,10 @@ export function handleNotify(notify: INotificationParams) {
             color: 'black',
             round: true,
             handler: () => {
-              /* ... */
+              const element = document.querySelector('.q-notification:last-of-type') as HTMLElement;
+              if (element) {
+                element.style.transitionDuration = '0.12s';
+              }
             },
           },
         ],

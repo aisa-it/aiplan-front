@@ -51,7 +51,7 @@
       class="flex flex-col full-width full-height no-wrap"
       style="padding-right: 400px; padding-top: 50px"
     >
-      <MainIssueInfo preview @update:issue-page="emits('refresh')" />
+      <MainIssueInfo preview @update:issue-page="refreshData" />
 
       <SelectChildren
         :projectid="issueData.project"
@@ -92,7 +92,7 @@
       preview
       class="fixed-right hide-scrollbar issue-drawer-preview"
       style="top: 62px"
-      @refresh="(v) => emits('refresh', v)"
+      @refresh="(v) => refreshData(v)"
     />
 
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
@@ -110,6 +110,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 // directives
 import clickOutside from 'src/directives/click-outside';
@@ -152,6 +153,7 @@ const { hasPermissionByIssue } = useRolesStore();
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { fetchPinnedIssues } = useIssuesStore();
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
@@ -168,6 +170,11 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   'drawerWidth',
   'right',
 );
+
+const refreshData = (args?: any): void => {
+  fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
+  emits('refresh', args);
+};
 
 const getAttachmentsList = async () => {
   return await aiplanStore.issueAttachmentsList(

@@ -126,14 +126,14 @@ function* chunkGenerator(sourceArray, chunkSize = 10) {
   }
 }
 
-const refresh = () => {
+const refresh = (newIssues = false) => {
   issueList.value = [];
   generator = chunkGenerator(props.issues);
   let chunk = generator.next().value;
   if (!chunk) return;
   issueList.value.push(...chunk);
   pinnedIssues.value = [];
-  if (project.value) fetchPinnedIssues(project.value.id);
+  if (project.value && newIssues) fetchPinnedIssues(project.value.id);
 };
 
 onMounted(() => {
@@ -143,7 +143,7 @@ onMounted(() => {
 watch(
   () => props.issues,
   () => {
-    refresh();
+    refresh(true);
   },
 );
 </script>

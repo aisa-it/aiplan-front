@@ -90,11 +90,9 @@
                     />
                     <HintTooltip>Убрать из избранного</HintTooltip>
                   </q-btn>
-                  <AidocLinkMenu
-                    :id="item.doc_id"
-                    @openRulesDialog="openRulesDialog"
-                    @openWatchersDialog="openWatchersDialog"
-                    @copyLink="copyLink(item.doc?.short_url, item.doc)"
+                  <MenuActions
+                    :items="getAidocMenuItems(item.doc_id, item.doc?.short_url, item.doc)"
+                    @click.stop
                   />
                 </div>
               </q-item>
@@ -147,11 +145,9 @@
                     >
                     <HintTooltip v-else>Добавить в избранное</HintTooltip>
                   </q-btn>
-                  <AidocLinkMenu
-                    :id="prop.node.id"
-                    @openRulesDialog="openRulesDialog"
-                    @openWatchersDialog="openWatchersDialog"
-                    @copyLink="copyLink(prop.node.doc?.short_url, prop.node)"
+                  <MenuActions
+                    :items="getAidocMenuItems(prop.node.id, prop.node.doc?.short_url, prop.node)"
+                    @click.stop
                   />
                 </div>
               </q-item>
@@ -217,8 +213,11 @@ import DocumentIcon from '../icons/DocumentIcon.vue';
 import AidocRulesDialog from 'src/components/aidoc/AidocRulesDialog.vue';
 import AidocWatchersDialog from 'src/components/aidoc/AidocWatchersDialog.vue';
 import NotificationsSettingsDialog from '../dialogs/NotificationsSettingsDialog.vue';
-import AidocLinkMenu from 'src/components/aidoc/AidocLinkMenu.vue';
+import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
+import LinkIcon from '../icons/LinkIcon.vue';
+import ManageAccountsIcon from '../icons/ManageAccountsIcon.vue';
+import VisibilityIcon from '../icons/VisibilityIcon.vue';
 
 const emits = defineEmits<{
   updateFavoriteState: [id: string, state: boolean];
@@ -451,6 +450,37 @@ const copyLink = async (short_url: string | undefined, document: any) => {
       customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
     });
   }
+};
+
+const getAidocMenuItems = (
+  docId: string | undefined,
+  shortUrl: string | undefined,
+  document: any,
+) => {
+  if (!docId) return [];
+  return [
+    {
+      text: 'Права доступа',
+      icon: ManageAccountsIcon,
+      onClick: () => {
+        openRulesDialog(docId);
+      },
+    },
+    {
+      text: 'Наблюдатели',
+      icon: VisibilityIcon,
+      onClick: () => {
+        openWatchersDialog(docId);
+      },
+    },
+    {
+      text: 'Скопировать ссылку',
+      icon: LinkIcon,
+      onClick: () => {
+        copyLink(shortUrl, document);
+      },
+    },
+  ];
 };
 
 watch(
