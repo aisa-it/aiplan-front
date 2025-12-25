@@ -4,15 +4,11 @@
     class="scrollable-content relative-position"
     :class="[
       'menu-item',
-      isExpanded
-        ? props.fullOpen
-          ? 'menu-item--expanded'
-          : 'menu-item--open'
-        : 'menu-item--closed',
+      isExpanded ? 'menu-item--open' : 'menu-item--closed',
       defineClass(),
     ]"
     :style="
-      isResizable && {
+      !isMobile && {
         minHeight: minHeight + 'px',
         height: (height ?? minHeight) + 'px',
         maxHeight: (height ?? minHeight) + 'px',
@@ -61,9 +57,20 @@ const isMobile = computed(() => Screen.width <= 650);
 
 const isExpanded = ref(props.isDefaultOpen ?? false);
 
-const minHeight = computed(() =>
-  isExpanded.value ? MIN_HEIGHT_EXPANDED : MIN_HEIGHT,
-);
+const minHeight = computed(() => {
+  let height;
+  switch (props.type) {
+    case 'help':
+      height = 234;
+      break;
+    case 'jitsi':
+      height = Screen.height > 700 ? 450 : 300;
+      break;
+    default:
+      height = MIN_HEIGHT_EXPANDED;
+  }
+  return isExpanded.value ? height : MIN_HEIGHT;
+});
 
 const isResizable = computed(
   () => props.fullOpen && !isMobile.value && isExpanded.value,

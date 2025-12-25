@@ -63,8 +63,9 @@ const updateFavoriteState = (id: string, state: boolean) => {
   docsMenu.value.setFavoriteState(id, state);
 };
 const menuRef = ref<HTMLElement | null>(null);
-useExpansionGroupResize(menuRef, 'menuItemsLayout');
+const fixedHeightItems = ['help', 'jitsi'];
 
+useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
 </script>
 <style scoped>
 .menu {

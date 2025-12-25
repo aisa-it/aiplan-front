@@ -1012,18 +1012,14 @@ select:-ms-autofill {
   transition: height 0.4s ease;
 }
 
-.menu-item--expanded {
+.menu-item--open {
+  background-color: inherit;
   overflow: scroll;
   flex: 1 1 auto;
 }
 
-.menu-item--expanded.menu-item:first-child  {
+.menu-item--open.menu-item:first-child {
   margin-bottom: auto;
-}
-
-.menu-item--open {
-  background-color: inherit;
-  height: 250px;
 }
 
 @media screen and (max-height: 800px) {
