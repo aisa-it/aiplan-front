@@ -82,7 +82,7 @@
       </q-btn>
 
       <q-btn
-        v-if="isCreateSprint && !isMobile"
+        v-if="(isCreateSprint || isTableIssues) && !isMobile"
         flat
         dense
         round
@@ -313,6 +313,7 @@ const props = defineProps<{
   selection?: 'single' | 'multiple' | 'none';
   isCreateSprint?: boolean;
   isMobile?: boolean;
+  isTableIssues?: boolean;
 }>();
 
 const emits = defineEmits<{

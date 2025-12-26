@@ -34,6 +34,7 @@
         :class-prevent="classPrevent"
         :isMobile="isMobile"
       />
+      <EditorTableIssueButton />
     </div>
   </transition>
 </template>
@@ -47,6 +48,7 @@ import { computed } from 'vue';
 import { ICONS } from 'src/utils/icons';
 import EditorSelectTable from './EditorSelectTable.vue';
 import EditorTableFillButton from './EditorTableFillButton.vue';
+import EditorTableIssueButton from './EditorTableIssueButton.vue';
 
 const props = defineProps<{
   editorInstance: Editor;
