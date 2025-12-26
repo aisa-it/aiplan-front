@@ -47,6 +47,7 @@
               :read-only-editor="isReadOnlyEditor"
               :canEdit="canEdit"
               class="issue-panel__editor"
+              :class="{ 'ny-theme': ny }"
               :class-prevent="isAutoSave ? preventClickClass : ''"
               can-resize
               is-mention
@@ -127,8 +128,10 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+import { useUtilsStore } from 'src/stores/utils-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'stores/notification-store';
+
 
 // interfaces
 import {
@@ -160,12 +163,14 @@ const route = useRoute();
 const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
 const aidocStore = useAiDocStore();
+const utilsStore = useUtilsStore();
 const { hasPermission } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
 const { workspaceInfo, workspaceUsers } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
+const { ny } = storeToRefs(utilsStore);
 
 //states
 const aidocEditor = ref();
@@ -514,5 +519,20 @@ watch(
   top: 50px;
   z-index: 10;
   background-color: $bg-color;
+  border-radius: 0;
+}
+
+.ny-theme :deep(.html-editor__toolbar) {
+  top: 80px;
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background-color: $bg-color;
+  }
 }
 </style>
