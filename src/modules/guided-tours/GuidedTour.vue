@@ -39,7 +39,7 @@
       }"
     />
 
-    <div class="popover" :style="popoverStyle">
+    <div ref="popoverEl" class="popover" :style="popoverStyle">
       <p class="base-title text-bold full-w">{{ step.title }}</p>
       <p class="popover__text" v-html="step.text"></p>
       <ul class="popover__list">
@@ -100,6 +100,11 @@ const hole = reactive({ x: 0, y: 0, w: 0, h: 0, radius: 8 });
 
 const popoverStyle = ref<Record<string, any>>({});
 
+const popoverEl = ref<HTMLElement | null>(null);
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
 const updatePosition = () => {
   if (!step.value) return;
 
@@ -109,12 +114,15 @@ const updatePosition = () => {
     align: 'center',
   };
 
-  const gap = 12;
-  const popoverWidth = 544;
-  const popoverHeight = 200;
+  if (!popoverEl.value) return;
 
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(Math.max(value, min), max);
+  const popoverSize = popoverEl.value.getBoundingClientRect();
+  if (!popoverSize) return;
+
+  const popoverWidth = popoverSize.width;
+  const popoverHeight = popoverSize.height;
+
+  const gap = 12;
 
   if (!step.value.el || placement.mode === 'screen') {
     hole.x = 0;
@@ -237,8 +245,8 @@ const updatePosition = () => {
   left += placement.offset?.x ?? 0;
   top += placement.offset?.y ?? 0;
 
-  left = clamp(left, 0, window.innerWidth - popoverWidth - 8);
-  top = clamp(top, 0, window.innerHeight - popoverHeight - 8);
+  left = clamp(left, 0, window.innerWidth - popoverWidth);
+  top = clamp(top, 0, window.innerHeight - popoverHeight);
 
   popoverStyle.value = {
     left: `${left}px`,
@@ -267,7 +275,6 @@ const attemptFindAndPosition = async () => {
 const nextStep = async () => {
   if (step.value?.onLeave) {
     step.value?.onLeave?.();
-    await nextTick();
   }
 
   if (current.value < props.steps.length) {
@@ -275,8 +282,9 @@ const nextStep = async () => {
     current.value++;
     if (step.value?.onEnter) {
       step.value?.onEnter?.();
-      await nextTick();
     }
+
+    await nextTick();
 
     attemptFindAndPosition();
   } else {
