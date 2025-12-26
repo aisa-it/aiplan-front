@@ -46,11 +46,7 @@
           :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
           :image="l?.avatar_id"
           :member="l"
-          @click.stop="
-            router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${props.card.assignee_details[n]?.id}`,
-            })
-          "
+          @click.stop="navigateToActivityPage(props.card.assignee_details[n]?.id)"
         />
       </div>
 
@@ -66,11 +62,7 @@
         "
         :image="props.card.author_detail.avatar_id"
         :member="props.card.author_detail"
-        @click.stop="
-          router.push({
-            path: `/${currentWorkspaceSlug}/user-activities/${props.card.author_detail.id}`,
-          })
-        "
+        @click.stop="navigateToActivityPage(props.card.author_detail.id)"
       />
       <ParentIssueChip
         v-if="isParent"
@@ -95,14 +87,11 @@ import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 import QuantityChip from 'src/components/QuantityChip.vue';
-import { useRouter } from 'vue-router';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
-const router = useRouter();
 const { user } = storeToRefs(useUserStore());
-const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 
 const props = defineProps<{ card: any }>();
 const avatarText = aiplan.UserName;
@@ -112,6 +101,8 @@ const isParent = computed((): boolean => {
 });
 
 const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 </script>
 
 <style scoped lang="scss">

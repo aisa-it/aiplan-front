@@ -192,11 +192,7 @@
         >Создал(а)
         <UserLink
           :member="getAuthor"
-          @click="
-            $router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${getAuthor?.id}`,
-            })
-          "
+          @click="navigateToActivityPage(getAuthor?.id)"
         />
         {{ createDate }}
       </span>
@@ -204,11 +200,7 @@
         >, редактировал(а)
         <UserLink
           :member="getLastUpdateBy"
-          @click="
-            $router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${getLastUpdateBy?.id}`,
-            })
-          "
+          @click="navigateToActivityPage(getLastUpdateBy?.id)"
         />
         {{ updateDate }}</span
       >
@@ -239,8 +231,6 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 import EditIcon from './icons/EditIcon.vue';
 import CheckIcon from './icons/CheckIcon.vue';
 import CloseIcon from './icons/CloseIcon.vue';
@@ -261,6 +251,7 @@ import AidocVersionSelect from './aidoc/AidocVersionSelect.vue';
 import BinIcon from './icons/BinIcon.vue';
 import AidocWatchersDialog from './aidoc/AidocWatchersDialog.vue';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
 const props = defineProps<{
   modelValue: string;
@@ -288,9 +279,7 @@ const emit = defineEmits([
 const $q = useQuasar();
 const { screen } = $q;
 
-const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const readOnly = ref(true);
 const documentTitle = ref('');
 const popup = ref();
@@ -298,6 +287,8 @@ const isRulesDialogOpen = ref(false);
 const isWatchersDialogOpen = ref(false);
 const getAuthor = computed(() => props.document.author);
 const getLastUpdateBy = computed(() => props.document.update_by);
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const editTitle = () => {
   if (readOnly.value) {

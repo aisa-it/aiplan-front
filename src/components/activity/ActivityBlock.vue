@@ -21,11 +21,7 @@
                   @click="
                     activity.actor_detail.id === user.id
                       ? undefined
-                      : $router.push({
-                          path: `/${
-                            currentWorkspaceSlug ?? ''
-                          }/user-activities/${activity.actor_detail.id}`,
-                        })
+                      : navigateToActivityPage(activity.actor_detail.id)
                   "
                 />
               </div>
@@ -68,20 +64,21 @@ import { storeToRefs } from 'pinia';
 import { timeAgo, formatDate, formatDateTime } from 'src/utils/time';
 
 import { useUserStore } from 'src/stores/user-store';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import { activityRender } from './renders';
 import AvatarImage from '../AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
 
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 const props = defineProps<{ activityRow: any; onlyProject?: boolean; onlyWorkspace?: boolean }>();
 const userStore = useUserStore();
-const workspaceStore = useWorkspaceStore();
 const { user } = storeToRefs(userStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const activity = ref(props.activityRow);
 const activityComponents = ref(transform());
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 function transform() {
   return activityRender(activity.value, props.onlyProject, props.onlyWorkspace);
