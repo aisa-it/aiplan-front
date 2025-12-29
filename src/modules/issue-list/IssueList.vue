@@ -83,6 +83,7 @@ const projectStore = useProjectStore();
 const {
   project,
   isGroupingEnabled,
+  isGanttDiagramm,
   isKanbanEnabled,
   issuesLoader,
   projectProps,
@@ -130,6 +131,9 @@ const components = {
   GroupedIssueList: defineAsyncComponent(
     () => import('./components/GroupedIssueList.vue'),
   ),
+  GanttView: defineAsyncComponent(
+    () => import('src/modules/issue-list/components/gantt-view/GanttView.vue'),
+  ),
   TableListSkeleton: defineAsyncComponent(
     () => import('./components/skeletons/TableListSkeleton.vue'),
   ),
@@ -154,9 +158,17 @@ const onIssueTableReady = () => {
 watchEffect(() => {
   tableReader.value = false;
   if (issuesLoader.value === false) {
-    currentIssueList.value = isGroupingEnabled.value
-      ? components.GroupedIssueList
-      : components.DefaultIssueList;
+    if (isGanttDiagramm.value) {
+      currentIssueList.value = components.GanttView;
+      return;
+    }
+
+    if (isGroupingEnabled.value) {
+      currentIssueList.value = components.GroupedIssueList;
+      return;
+    }
+
+    currentIssueList.value = components.DefaultIssueList;
   } else {
     currentIssueList.value = isKanbanEnabled.value
       ? components.BoardListSkeleton
