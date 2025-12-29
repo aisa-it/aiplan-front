@@ -300,6 +300,7 @@ const filterStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
 // store to refs
 const { userWorkspaces, userProjects, user } = storeToRefs(userStore);
+const { workspaceInfo } = storeToRefs(workspaceStore);
 // loaders
 const loading = ref(false);
 const globalLoading = ref(false);
@@ -664,6 +665,13 @@ const handleSearchStates = debounce(async (search?: string) => {
 
 const prepareFilterOptions = async () => {
   if (!props.currentFilter) {
+    if (
+      filter.value.filter.workspaces.length === 0 &&
+      workspaceInfo.value?.id
+    ) {
+      filter.value.filter.workspaces = [workspaceInfo.value.id];
+      await updateProjectList([workspaceInfo.value.id]);
+    }
     await getMembers().then(({ data }) => {
       members.value.authors = fixCurrentUserInList(data.result);
       members.value.assignees = fixCurrentUserInList(data.result);
