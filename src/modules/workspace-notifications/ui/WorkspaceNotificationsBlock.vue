@@ -103,11 +103,12 @@ const isMessage = computed(
 
 const title = computed(() => {
   if (isMessage.value) return props.notificationRow?.data?.title;
-  if (
+  if ( 
     props.notificationRow?.data.entity_type === 'doc' ||
     props.notificationRow?.data.field === 'doc'
   )
     return 'АИДок';
+  if (props.notificationRow?.data.entity_type === 'workspace') return 'Настройки пространства';
 
   return props.notificationRow?.detail?.project?.name;
 });

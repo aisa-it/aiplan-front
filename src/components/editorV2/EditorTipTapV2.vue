@@ -40,7 +40,7 @@
       </transition>
 
       <div class="html-editor__wrapper">
-        <div v-if="loading" class="html-editor__loading-overlay"></div>
+        <div v-if="loading" class="html-editor__loading-overlay" />
         <DefaultLoader v-if="loading" class="html-editor__loader" />
         <EditorContent
           :id="editorId"
@@ -412,6 +412,25 @@ defineExpose({
   &__wrapper {
     overflow-y: hidden;
     flex-grow: 1;
+    position: relative;
+  }
+
+  &__loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &__loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
   }
 }
 
