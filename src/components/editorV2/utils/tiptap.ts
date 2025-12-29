@@ -281,6 +281,10 @@ export const CustomImagePlugin = ResizeImage.extend({
               isImage = false;
             },
             paste(view, event) {
+              const html = event.clipboardData?.getData('text/html') || '';
+              if (html.includes('<table')) {
+                return false;
+              }
               const hasFiles =
                 event.clipboardData &&
                 event.clipboardData.files &&
@@ -304,8 +308,7 @@ export const CustomImagePlugin = ResizeImage.extend({
 
               images.forEach((image) => {
                 processImageFile(image, schema, (node) => {
-                  const transaction =
-                    view.state.tr.replaceSelectionWith(node);
+                  const transaction = view.state.tr.replaceSelectionWith(node);
                   view.dispatch(transaction);
                 });
               });

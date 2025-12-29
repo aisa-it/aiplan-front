@@ -8,7 +8,7 @@
       tag="a"
       target="_self"
       :active="
-        $route.params.project === identifier || $route.params.project === id
+        route.params.project === identifier || route.params.project === id
       "
       :to="hasPermissionByProject(project, 'show-project') ? link : ''"
     >
@@ -74,92 +74,10 @@
           <HintTooltip v-if="favorite">Убрать из избранного</HintTooltip>
           <HintTooltip v-else>Добавить в избранное</HintTooltip>
         </q-btn>
-        <q-btn
-          v-if="
-            project && hasPermissionByProject(project, 'show-project-popup')
-          "
-          class="menu-link__btn"
-          flat
-          icon="more_horiz"
-          :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-          @click.prevent
-        >
-          <q-menu>
-            <q-list :style="'min-width: 225px; !important'">
-              <q-item
-                v-if="hasPermissionByProject(project, 'project-settings')"
-              >
-                <q-btn
-                  class="menu-link__settings-btn full-w"
-                  flat
-                  dense
-                  no-caps
-                  v-close-popup
-                  :style="'font-size: 12px;'"
-                  :to="`/${currentWorkspaceSlug}/projects/${
-                    identifier || id
-                  }/settings`"
-                >
-                  <SettingsIcon :width="16" :height="16" class="q-mr-sm" />
-                  <span>Настройки</span>
-                </q-btn>
-              </q-item>
-              <q-item>
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  v-close-popup
-                  class="menu-link__settings-btn full-w"
-                  :style="'font-size: 12px;'"
-                  @click="
-                    {
-                      ((selectedProject = project),
-                        (isNotificationsSettingsOpen = true));
-                    }
-                  "
-                >
-                  <UnmutedIcon :width="16" :height="16" class="q-mr-sm" />
-                  <span class="row justify-start"> Уведомления задач </span>
-                </q-btn>
-              </q-item>
-              <q-item v-if="props.project?.current_user_membership.role === 15">
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  v-close-popup
-                  class="menu-link__settings-btn full-w"
-                  :style="'font-size: 12px;'"
-                  @click="
-                    {
-                      ((selectedProject = project),
-                        (isNotificationsAdminSettingsOpen = true));
-                    }
-                  "
-                >
-                  <UnmutedIcon :width="16" :height="16" class="q-mr-sm" />
-                  <span class="row justify-start"> Уведомления проекта </span>
-                </q-btn>
-              </q-item>
-              <q-item>
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  class="menu-link__settings-btn full-w"
-                  v-close-popup
-                  :style="'font-size: 12px;'"
-                  @click="projectStore.projectLinkToClipboard(identifier || id)"
-                >
-                  <LinkIcon :width="16" :height="16" class="q-mr-sm" /><span>
-                    Скопировать ссылку
-                  </span>
-                </q-btn>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        <MenuActions
+          v-if="project && hasPermissionByProject(project, 'show-project-popup')"
+          :items="getProjectMenuItems()"
+        />
       </div>
     </q-item>
   </div>
@@ -177,6 +95,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -194,6 +113,7 @@ import MutedIcon from './icons/MutedIcon.vue';
 import SettingsIcon from './icons/SettingsIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
 import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
+import MenuActions from './menu/MenuActions.vue';
 
 // constants
 import {
@@ -236,6 +156,9 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { currentWorkspaceSlug, workspaceProjects } = storeToRefs(workspaceStore);
 
+const router = useRouter();
+const route = useRoute();
+
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
 const selectedProject = ref();
@@ -275,8 +198,54 @@ const removeFromFavorites = async (projectID: string) => {
         type: 'success',
         customMessage: SUCCESS_REMOVE_FROM_FAVORITE,
       });
-      workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
+      workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string);
     });
+};
+
+const getProjectMenuItems = () => {
+  const items = [];
+
+  if (hasPermissionByProject(props.project, 'project-settings')) {
+    items.push({
+      text: 'Настройки',
+      icon: SettingsIcon,
+      onClick: () => {
+        router.push(
+          `/${currentWorkspaceSlug.value}/projects/${props.identifier || props.id}/settings`,
+        );
+      },
+    });
+  }
+
+  items.push({
+    text: 'Уведомления задач',
+    icon: UnmutedIcon,
+    onClick: () => {
+      selectedProject.value = props.project;
+      isNotificationsSettingsOpen.value = true;
+    },
+  });
+
+  if (props.project?.current_user_membership.role === 15) {
+    items.push({
+      text: 'Уведомления проекта',
+      icon: UnmutedIcon,
+      onClick: () => {
+        selectedProject.value = props.project;
+        isNotificationsAdminSettingsOpen.value = true;
+      },
+    });
+  }
+
+  items.push({
+    text: 'Скопировать ссылку',
+    icon: LinkIcon,
+    onClick: () => {
+      projectStore.projectLinkToClipboard(props.identifier || props.id);
+    },
+  });
+
+  return items;
 };
 </script>
 <style lang="scss">

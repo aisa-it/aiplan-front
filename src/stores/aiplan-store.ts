@@ -156,14 +156,6 @@ export const useAiplanStore = defineStore('aiplan', {
       });
     },
 
-    async setMeTutorial(numStep: number) {
-      await api
-        .post(`${API_USERS_ME_PREFIX}/tutorial/?step=${numStep}`)
-        .then((_) => {
-          this.usersMe();
-        });
-    },
-
     async setNameFromOnboard(data: any): Promise<any> {
       return await api.post(`${API_USERS_ME_PREFIX}/onboard/`, data);
     },

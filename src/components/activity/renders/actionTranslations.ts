@@ -57,6 +57,10 @@ export const ACTION_TRANSLATIONS: ActionTranslations = {
     1: 'добавил(-а) ',
     0: 'убрал(-а)',
   },
+  issues: {
+    1: 'добавил(-а) задачу',
+    0: 'убрал(-а) задачу',
+  },
 };
 
 export function translateAction(type: string, field: boolean) {

@@ -33,7 +33,7 @@
             class="notification-username"
           >
             {{
-              getFullName(props.notificationRow?.detail?.user) +
+              getFullName(props.notificationRow?.detail?.user, props.notificationRow?.data?.entity_type) +
               (props.notificationRow?.type === 'activity' ? ' ' : ': ')
             }}
           </span>
@@ -103,11 +103,12 @@ const isMessage = computed(
 
 const title = computed(() => {
   if (isMessage.value) return props.notificationRow?.data?.title;
-  if (
+  if ( 
     props.notificationRow?.data.entity_type === 'doc' ||
     props.notificationRow?.data.field === 'doc'
   )
     return 'АИДок';
+  if (props.notificationRow?.data.entity_type === 'workspace') return 'Настройки пространства';
 
   return props.notificationRow?.detail?.project?.name;
 });
@@ -137,6 +138,25 @@ function transform() {
   ) {
     if (props.notificationRow?.data?.field === 'start_date') {
       return 'начал(-а) выполнение задачи';
+    }
+    if (props.notificationRow?.data?.field === 'status') {
+      return `
+      поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 
+      <span>
+      <a
+        target="_blank"
+        style="
+          color: #3F76FF;
+          text-decoration: none;
+          font-weight: 400;
+        "
+        href="${props.notificationRow?.detail?.issue?.url}"
+      >
+        ${props.notificationRow?.detail?.project?.identifier}-${props.notificationRow?.detail?.issue?.sequence_id}
+        "${props.notificationRow?.detail?.issue?.name}"
+      </a>
+      <span/>
+      `;
     }
     if (props.notificationRow?.data?.field === 'completed_at') {
       return 'завершил(-а) задачу';

@@ -61,29 +61,34 @@ const refresh = async () => {
     if (e?.response.status === 403) return router.push('/access-denied');
   }
 
-  await Promise.all([
-    workspaceStore.getWorkspaceMembers(slug),
-    workspaceStore.getWorkspaceProjects(slug),
-  ]);
+  try {
+    await Promise.allSettled([
+      workspaceStore.getWorkspaceMembers(slug),
+      workspaceStore.getWorkspaceProjects(slug),
+    ]);
 
-  if (
-    workspaceInfo.value.current_user_membership &&
-    workspaceInfo.value.current_user_membership?.role === 15
-  ) {
-    await formStore.getFormList(slug);
-  } else formStore.resetForms();
+    if (
+      workspaceInfo.value.current_user_membership &&
+      workspaceInfo.value.current_user_membership?.role === 15
+    ) {
+      await formStore.getFormList(slug).catch(() => formStore.resetForms());
+    } else formStore.resetForms();
 
-  await workspaceStore
-    .getAllWorkspaceStates(currentWorkspaceSlug.value)
-    .then(() => {
-      let obj = {};
-      for (let o in workspaceStore.allWorkspaceStates) {
-        obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
-      }
-      statesStore.statesCache = obj;
-    });
-  stopGlobalLoading();
+    await workspaceStore
+      .getAllWorkspaceStates(currentWorkspaceSlug.value)
+      .then(() => {
+        let obj = {};
+        for (let o in workspaceStore.allWorkspaceStates) {
+          obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
+        }
+        statesStore.statesCache = obj;
+      })
+      .catch(() => null);
+  } finally {
+    stopGlobalLoading();
+  }
 };
+
 const refreshAfterVisible = async () => {
   startLoader.value = true;
   if (router.currentRoute.value.fullPath.includes('settings')) {

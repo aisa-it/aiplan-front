@@ -27,11 +27,7 @@
         {{ workspaceInfo?.name }}
       </h5>
       <div v-if="ny" class="workspace-tree-wrapper">
-        <q-img
-          fit="contain"
-          :src="newYearTree"
-          style="width: 250px"
-        />
+        <q-img fit="contain" :src="newYearTree" style="width: 250px" />
       </div>
       <q-separator style="width: 100%" />
 
@@ -72,10 +68,10 @@
     </div>
   </q-page>
   <GuidedTour
-    v-if="user?.tutorial === 0 && $q.platform.is.desktop"
+    v-if="user?.tutorial === STEP_NUM - 1 && $q.platform.is.desktop"
     :steps="steps"
     :step-num="STEP_NUM"
-    @end-tutorial="useAiplanStore().setMeTutorial(STEP_NUM)"
+    @end-tutorial="userStore.setMeTutorial(STEP_NUM)"
   />
 </template>
 
@@ -90,7 +86,6 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useLoaderStore } from 'src/stores/loader-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
-import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 
 import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
@@ -128,7 +123,7 @@ const { user } = storeToRefs(userStore);
 
 const isProjectCreateOpen = ref(false);
 
-const defineDescription = computed(() => workspaceInfo.value?.description);
+const defineDescription = computed(() => workspaceInfo?.value?.description);
 
 watch(
   () => workspaceInfo?.value,

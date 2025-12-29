@@ -13,7 +13,10 @@ function setValue(activity: DtoEntityActivityFull) {
   if (activity.old_value) return activity.old_value;
   else return '';
 }
-export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspace = false) {
+export function issueActivityRender(
+  activity: DtoEntityActivityFull,
+  onlyWorkspace = false,
+) {
   const route = useRoute();
   let action = '';
   let value = '';
@@ -23,9 +26,9 @@ export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspa
                       activity?.entity_url ??
                       `/${activity.workspace_detail?.slug}/projects/${activity?.project_detail?.identifier}/issues/${activity.issue_detail?.sequence_id}`
                     }>
-                    ${activity?.project_detail?.identifier}-${activity
-                      .issue_detail?.sequence_id} "${activity.issue_detail
-                      ?.name}"<a/>`;
+                    ${activity?.project_detail?.identifier}-${
+                      activity.issue_detail?.sequence_id
+                    } "${activity.issue_detail?.name}"<a/>`;
   const workspaceSource = onlyWorkspace
     ? ''
     : `в пространстве <a target="_blank"
@@ -96,12 +99,29 @@ export function issueActivityRender(activity: DtoEntityActivityFull, onlyWorkspa
       return `<span>${action} ${value} для задачи ${link} ${workspaceSource}
                 <span/>`;
 
+    case 'sprint':
+      action = translateAction('issues', Boolean(activity.new_value));
+      value = setValue(activity);
+
+      return `<span>${action} ${link} ${activity.verb === 'added' ? 'к спринту' : 'из спринта'} ${`<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
+                    href=${`/${activity.workspace_detail?.slug}/sprints/${entityDetail.id}`}>
+                    "${entityDetail.name}"<a/>`}<span/>`;
+
+      break;
+
     case 'target_date':
       if (activity.verb === 'updated') {
-        const newDate = activity.new_value ?? ''
-        const oldDate = activity.old_value ? activity.old_value.replace(/"/g, '') : '';
-        const newValidDate = dayjs(newDate).isValid() ? formatDateTime(newDate) : newDate;
-        const oldValidDate = dayjs(oldDate).isValid() ? formatDateTime(oldDate) : oldDate;
+        const newDate = activity.new_value ?? '';
+        const oldDate = activity.old_value
+          ? activity.old_value.replace(/"/g, '')
+          : '';
+        const newValidDate = dayjs(newDate).isValid()
+          ? formatDateTime(newDate)
+          : newDate;
+        const oldValidDate = dayjs(oldDate).isValid()
+          ? formatDateTime(oldDate)
+          : oldDate;
 
         if (activity.old_value === '<nil>' || !activity.old_value) {
           return `установил(-а) срок исполнения ${newValidDate} для задачи ${link} ${workspaceSource}`;

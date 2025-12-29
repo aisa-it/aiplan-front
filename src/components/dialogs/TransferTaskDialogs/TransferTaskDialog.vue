@@ -242,7 +242,7 @@
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUpdate } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 // stores
@@ -698,6 +698,20 @@ watch(
   () => selectedAction.value,
   () => resetActionOptions(),
 );
+
+onBeforeUpdate(() => {
+  issueSettings.value = {
+      state_detail: props.issue.state_detail,
+      priority: props.issue.priority,
+      target_date: props.issue.target_date,
+      assignees: props.issue.assignee_details.map((assignee) => ({
+        member: assignee,
+      })),
+      watchers: props.issue.watcher_details.map((watcher) => ({
+        member: watcher,
+      })),
+    };
+})
 
 onMounted(() => {
   actionsType.forEach((item, index) => {
