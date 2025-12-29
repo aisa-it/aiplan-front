@@ -138,19 +138,23 @@ export function useProjectFilters(emits?) {
     {
       label: 'Скрыть подзадачи',
       model: 'hideSubIssues',
+      dataTour: 'task-general-settings',
     },
     {
       label: 'Показывать черновики',
       model: 'draft',
+      dataTour: 'task-general-settings',
     },
     {
       label: 'Показывать пустые группы',
       notShow: projectProps.value?.filters?.group_by === 'none',
       model: 'showEmptyGroups',
+      dataTour: 'task-general-settings',
     },
     {
       label: 'Только активные',
       model: 'showOnlyActive',
+      dataTour: 'task-personal-settings',
     },
   ]);
 
@@ -158,14 +162,17 @@ export function useProjectFilters(emits?) {
     {
       label: 'Я исполнитель',
       model: 'assignedToMe',
+      dataTour: 'task-personal-settings',
     },
     {
       label: 'Я наблюдатель',
       model: 'watchedToMe',
+      dataTour: 'task-personal-settings',
     },
     {
       label: 'Я автор',
       model: 'authoredToMe',
+      dataTour: 'task-personal-settings',
     },
   ]);
 

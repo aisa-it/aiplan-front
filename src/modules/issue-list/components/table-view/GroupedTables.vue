@@ -1,6 +1,7 @@
 <template>
   <q-scroll-area
     ref="scrollContainer"
+    class="groupped-table"
     :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
@@ -25,7 +26,7 @@
         v-if="table.issues?.length"
         :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
-          (value) => setGroupHide(entity?.entity?.id || table.entity, value)
+          (value) => setGroupHide(table?.entity?.id || table.entity, value)
         "
       >
         <template #header>

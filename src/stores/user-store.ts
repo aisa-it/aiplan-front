@@ -98,6 +98,12 @@ export const useUserStore = defineStore('user-store', {
       return this.user;
     },
 
+    async setMeTutorial(numStep: number) {
+      await usersApi.updateUserTutorial({ step: numStep }).then((res) => {
+        this.user.tutorial = res.data.tutorial;
+      });
+    },
+
     async getUserById(id: string): Promise<DtoUserLight | any> {
       if (!id) return;
 

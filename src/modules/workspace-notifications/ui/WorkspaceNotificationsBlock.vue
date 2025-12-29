@@ -33,7 +33,7 @@
             class="notification-username"
           >
             {{
-              getFullName(props.notificationRow?.detail?.user) +
+              getFullName(props.notificationRow?.detail?.user, props.notificationRow?.data?.entity_type) +
               (props.notificationRow?.type === 'activity' ? ' ' : ': ')
             }}
           </span>

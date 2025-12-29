@@ -4,9 +4,20 @@
       v-if="!(isShowIndicators || isColumnsToShow)"
       :width="20"
       :height="20"
+      data-tour="filter-list"
     />
-    <DotListSelectIcon v-else :width="20" :height="20" />
-    <q-popup-proxy class="hide-scrollbar" @hide="isPopupOpen = false">
+    <DotListSelectIcon
+      v-else
+      :width="20"
+      :height="20"
+      data-tour="filter-list"
+    />
+    <q-popup-proxy
+      ref="popupRef"
+      class="hide-scrollbar"
+      :persistent="guiderStore.activeGuid === 2"
+      @hide="isPopupOpen = false"
+    >
       <q-list style="width: 320px; background: white">
         <div>
           <div class="row items-center justify-between">
@@ -17,6 +28,7 @@
               class="q-mr-md btn-refresh"
               icon="refresh"
               @click="isConfirmResetDialogOpen = true"
+              data-tour="refresh-filters"
             >
               <q-tooltip anchor="bottom middle" self="top middle"
                 >Сбросить</q-tooltip
@@ -48,7 +60,7 @@
             </q-dialog>
           </div>
 
-          <q-item class="row">
+          <q-item class="row" data-tour="view-options">
             <q-select
               dense
               label="Вид"
@@ -56,7 +68,7 @@
               map-options
               class="base-selector full-w"
               popup-content-class="fit-select-popup scrollable-content selector-option__wrapper"
-              :options="viewsOptions"
+              :options="viewsOptionsFiltered"
               @update:model-value="updateIssueView"
             >
               <template v-slot:option="{ itemProps, opt }">
@@ -71,7 +83,7 @@
             </q-select>
           </q-item>
 
-          <q-item class="row">
+          <q-item class="row" data-tour="columns-options">
             <q-select
               v-model="viewForm.columns_to_show"
               dense
@@ -113,7 +125,7 @@
                     </q-item-label>
                   </q-item-section>
 
-                  <q-item-section side v-if="$q.platform.is.desktop === true">
+                  <q-item-section side v-if="!isMobile">
                     <q-icon name="drag_indicator" />
                   </q-item-section>
                 </q-item>
@@ -122,7 +134,7 @@
           </q-item>
         </div>
 
-        <q-item class="row">
+        <q-item class="row" data-tour="group-options">
           <q-select
             dense
             label="Группировка"
@@ -150,7 +162,7 @@
           </q-select>
         </q-item>
 
-        <q-item class="row">
+        <q-item class="row" data-tour="status-options">
           <SelectStatusFilter
             :statuses="statuses"
             :states-props="viewForm.filters.states || []"
@@ -166,8 +178,9 @@
 
         <template v-for="toggle in toggles" :key="toggle.label">
           <q-item
-            v-show="!toggle.notShow"
+            v-if="!toggle.notShow"
             class="centered-horisontally justify-between"
+            :data-tour="toggle?.dataTour"
           >
             {{ toggle.label }}
             <q-toggle
@@ -182,6 +195,7 @@
           <q-item
             v-show="!toggle.notShow"
             class="centered-horisontally justify-between"
+            :data-tour="toggle?.dataTour"
           >
             {{ toggle.label }}
             <q-toggle
@@ -197,11 +211,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import type { QPopupProxy } from 'quasar';
 
 import DotListIcon from './icons/DotListIcon.vue';
 import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
+
+import { useGuiderStore } from 'src/modules/guided-tours/guider-store';
 
 const props = defineProps<{
   columns: any[];
@@ -218,6 +236,18 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits(['update']);
+
+const q = useQuasar();
+
+const isMobile = computed(() => q.platform.is.mobile);
+
+const viewsOptionsFiltered = computed(() =>
+  isMobile.value
+    ? props.viewsOptions.filter((el) => !el.hideInMobile)
+    : props.viewsOptions,
+);
+
+const popupRef = ref<QPopupProxy | null>(null);
 
 let draggedItem: any = null;
 const dragOverItem = ref<string | null>(null);
@@ -299,6 +329,33 @@ const onConfirmRefresh = async () => {
   await props.refreshFilters();
   isConfirmResetDialogOpen.value = false;
 };
+
+onMounted(() => {
+  if (
+    isMobile.value &&
+    !viewsOptionsFiltered.value.find(
+      (el) => el.label === props.viewForm.issueView,
+    )
+  ) {
+    props.viewForm.issueView = viewsOptionsFiltered.value[0];
+    props.updateIssueView();
+  }
+});
+
+const guiderStore = useGuiderStore();
+
+watch(
+  () => guiderStore.filtersListPopap,
+  (val) => {
+    if (val) {
+      popupRef.value?.show();
+      isPopupOpen.value = true;
+    } else {
+      popupRef.value?.hide();
+      isPopupOpen.value = false;
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>
