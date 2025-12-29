@@ -177,7 +177,7 @@ import SearchIcon from 'src/components/icons/SearchIcon.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 
 // utils
-import { valToRole } from 'src/utils/strings';
+import { valToRole } from 'src/utils/translator';
 
 // constants
 import {

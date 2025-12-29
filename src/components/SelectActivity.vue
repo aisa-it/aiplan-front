@@ -35,7 +35,8 @@
                 <strong>
                   {{ aiplan.UserName(m.actor_detail).join(' ') + ' ' }}
                 </strong>
-                <span v-html="getHistoryText(m, workspaceProjects)"> </span>
+                <span v-html="entityActivityRenderer(m, workspaceProjects)">
+                </span>
               </q-item-label>
 
               <q-item-label caption class="sub-text">{{
@@ -57,8 +58,12 @@
       </q-btn>
     </q-list>
     <div v-else class="q-mt-lg q-mb-md q-px-sm">
-      <span v-if="type === 'tasks'" class="body-1 header-title-text">У этой задачи пока нет активностей</span>
-      <span v-if="type === 'docs'" class="body-1 header-title-text">Для этого документа еще нет активности</span>
+      <span v-if="type === 'tasks'" class="body-1 header-title-text"
+        >У этой задачи пока нет активностей</span
+      >
+      <span v-if="type === 'docs'" class="body-1 header-title-text"
+        >Для этого документа еще нет активности</span
+      >
     </div>
   </div>
 </template>
@@ -76,7 +81,10 @@ import { useWorkspaceStore } from 'stores/workspace-store';
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
 import { setIntervalFunction } from 'src/utils/helpers';
-import { getIcon, getHistoryText } from 'src/utils/strings';
+import {
+  getIcon,
+  entityActivityRenderer,
+} from 'src/components/activity/entityActivity';
 
 //components - icon
 import AvatarImage from './AvatarImage.vue';
@@ -86,10 +94,10 @@ defineProps({
     type: Object,
     required: true,
   },
-    type: {
-      type: String,
-      required: true,
-    }
+  type: {
+    type: String,
+    required: true,
+  },
 });
 
 const emits = defineEmits<{
