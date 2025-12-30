@@ -53,7 +53,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateIssueField('state', props.row, entity);
+            updateIssueField('state', props.row, entity, status);
           }
         "
       />
@@ -144,6 +144,7 @@ const emits = defineEmits([
   'updateIssueField',
   'openPreview',
   'openIssue',
+  'updateGroupedIssues',
 ]);
 const props = defineProps([
   'entity',
@@ -241,8 +242,9 @@ bus.on('updateIssueTable', (field, entityId) => {
   }
 });
 
-const updateIssueField = (action?: string, row?: any, entity?: any) => {
+const updateIssueField = (action?: string, row?: any, entity?: any, status?: any) => {
   if (isGroupingEnabled.value === true) {
+    emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
   } else emits('refresh', parsePagination(quasarPagination.value));
 };

@@ -42,6 +42,7 @@
           :rows="table?.issues"
           :rowsCount="table?.count"
           :entity="table.entity"
+          @updateGroupedIssues="updateGroupedIssues"
           @refresh="
             (pagination, isFullUpdate) =>
               refreshTable(index, pagination, isFullUpdate, table?.entity)
@@ -67,6 +68,7 @@ import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useUtilsStore } from 'src/stores/utils-store';
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
 import PinnedIssueList from '../PinnedIssueList.vue';
@@ -120,6 +122,27 @@ const handleScroll = throttle((info) => {
 
   issueList.value.push(...chunk);
 }, 100);
+
+const updateGroupedIssues = async (status: any) => {
+  const group = (props.issues as any[]).find((item: any) => 
+    item.entity?.id === status.id
+  );
+
+  if (group && group.issues.length === 0) {
+    const groupIndex = (props.issues as any[]).indexOf(group);
+    const pagination = {
+      only_count: false,
+      hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
+      only_active: contextProps.value?.showOnlyActive ?? true,
+      order_by: contextProps.value?.filters?.order_by ?? 'sequence_id',
+      desc: contextProps.value?.filters?.orderDesc ?? false,
+      offset: 0,
+      limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+    };
+    
+    await refreshTable(groupIndex, pagination, false, group.entity);
+  }
+};
 
 function* chunkGenerator(sourceArray, chunkSize = 10) {
   for (let i = 0; i < sourceArray.length; i += chunkSize) {
