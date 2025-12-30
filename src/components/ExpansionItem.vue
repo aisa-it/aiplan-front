@@ -54,7 +54,6 @@ const id = props.itemName;
 const menuItemRef = ref<HTMLElement | null>(null);
 const resizerRef = ref<HTMLElement | null>(null);
 const isMobile = computed(() => Screen.width <= 650);
-
 const isExpanded = ref(props.isDefaultOpen ?? false);
 
 const minHeight = computed(() => {
@@ -73,7 +72,11 @@ const minHeight = computed(() => {
 });
 
 const isResizable = computed(
-  () => props.fullOpen && !isMobile.value && isExpanded.value,
+  () =>
+    props.fullOpen &&
+    !isMobile.value &&
+    isExpanded.value &&
+    menuItemRef?.value?.previousElementSibling,
 );
 
 const { height, isOpen } = useExpansionItemResize(

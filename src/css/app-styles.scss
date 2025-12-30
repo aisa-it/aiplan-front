@@ -1009,17 +1009,19 @@ select:-ms-autofill {
 .menu-item {
   border-bottom: 1px solid $darkest-border-color;
   cursor: pointer;
-  transition: height 0.4s ease;
+  transition:
+    height 0.4s ease,
+    max-height 0.4s ease;
+}
+
+.menu-item--dragging {
+  transition: none;
 }
 
 .menu-item--open {
   background-color: inherit;
   overflow: scroll;
   flex: 1 1 auto;
-}
-
-.menu-item--open.menu-item:first-child {
-  margin-bottom: auto;
 }
 
 .menu-item--help {

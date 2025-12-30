@@ -99,6 +99,7 @@ export function useExpansionGroupResize(
 
   const getMenuHeight = () =>
     menuRef.value?.getBoundingClientRect().height ?? 0;
+  
   const findPrevOpenIndex = (from: number) => {
     for (let i = from - 1; i >= 0; i--) {
       if (items[i].open) return i;
@@ -144,7 +145,7 @@ export function useExpansionGroupResize(
     }
   };
 
-  const resizeBy = (id: string, deltaPx: number, withSave = true) => {
+  const resizeBy = (id: string, deltaPx: number) => {
     sortItems();
     const i = items.findIndex((p) => p.id === id);
     if (i <= 0) return;
@@ -189,7 +190,7 @@ export function useExpansionGroupResize(
     cur.weight = Math.max(0, cur.weight + (nextCurWeight - curWeight));
     prev.weight = Math.max(0, prev.weight + (nextPrevWeight - prevWeight));
     updateHeight();
-    if (withSave) saveWeights();
+    saveWeights();
   };
 
   onMounted(() => {

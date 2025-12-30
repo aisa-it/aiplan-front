@@ -164,7 +164,6 @@ const maxWidth = computed(
   () => document.documentElement.clientWidth - menuSidebarWidth.value,
 );
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
-  menuSidebarWidth,
   minWidth,
   maxWidth,
   'drawerWidth',

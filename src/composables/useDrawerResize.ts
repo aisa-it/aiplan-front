@@ -1,8 +1,7 @@
 import { LocalStorage } from 'quasar';
-import { computed, onMounted, onBeforeUnmount, ref, watch, Ref, ComputedRef } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch, ComputedRef } from 'vue';
 
 export function useDrawerResize(
-  oppositeSideWidth: Ref<number>,
   minWidth: ComputedRef<number>,
   maxWidth: ComputedRef<number>,
   name: string,

@@ -22,7 +22,7 @@ export function useExpansionItemResize(
 
   let startY = 0;
   let dragging = false;
-
+  const draggingClass = 'menu-item--dragging';
   const height = computed(() => menuItems?.getHeight(id));
   const isOpen = computed(() => menuItems?.loadLayout().open[id]);
   function onPointerDown(e: PointerEvent) {
@@ -30,6 +30,8 @@ export function useExpansionItemResize(
 
     dragging = true;
     startY = e.clientY;
+    menuItemRef?.value?.previousElementSibling?.classList.add(draggingClass);
+    menuItemRef?.value?.classList.add(draggingClass);
 
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
@@ -47,7 +49,8 @@ export function useExpansionItemResize(
   function onPointerUp(e: PointerEvent) {
     if (!dragging) return;
     dragging = false;
-
+    menuItemRef?.value?.previousElementSibling?.classList.remove(draggingClass);
+    menuItemRef?.value?.classList.remove(draggingClass);
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
@@ -90,6 +93,6 @@ export function useExpansionItemResize(
 
   return {
     height,
-    isOpen
+    isOpen,
   };
 }

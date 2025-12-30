@@ -51,7 +51,7 @@ const route = useRoute();
 
 const uiStore = useUIStore();
 
-const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
+const { menuSidebarWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 300;
 
@@ -60,7 +60,6 @@ const maxWidth = computed(() =>
   isMobile.value ? defaultWidth : document.documentElement.clientWidth / 2,
 );
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
-  previewIssueWidth,
   minWidth,
   maxWidth,
   'menuSidebarWidth',
