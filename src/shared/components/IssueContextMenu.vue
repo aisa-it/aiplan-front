@@ -1,7 +1,7 @@
 <template>
   <q-menu
     class="context-menu"
-    :style="`z-index: ${isTransferOpen || isDeletingOpen ? 6000 : 9001}`"
+    :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
     context-menu
     touch-position
   >
@@ -56,6 +56,12 @@
         </q-item-section>
         <q-item-section>Скопировать название</q-item-section>
       </q-item>
+      <q-item v-if="isAdmin" clickable @click="manageIssueSprints">
+        <q-item-section thumbnail class="q-px-md">
+          <SprintIcon />
+        </q-item-section>
+        <q-item-section>Добавить в спринт</q-item-section>
+      </q-item>
       <q-item clickable @click="transferIssue">
         <q-item-section thumbnail class="q-px-md">
           <CopyTransferIcon />
@@ -83,6 +89,11 @@
       :issue="props.row"
       @refresh="emit('refresh')"
     />
+    <ManageIssueSprintsDialog
+      v-model="isManageSprintsOpen"
+      :issue="props.row"
+      @refresh="emit('refresh')"
+    />
   </q-menu>
 </template>
 
@@ -93,9 +104,13 @@ import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
+import { useRolesStore } from 'src/stores/roles-store';
+import { useNotificationStore } from 'src/stores/notification-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
+import ManageIssueSprintsDialog from 'src/components/dialogs/IssueDialogs/ManageIssueSprintsDialog.vue';
 
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
@@ -105,6 +120,7 @@ import CopyTransferIcon from 'src/components/icons/CopyTransferIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import PinIcon from 'src/components/icons/PinIcon.vue';
 import UnpinIcon from 'src/components/icons/UnpinIcon.vue';
+import SprintIcon from 'src/components/icons/SprintIcon.vue';
 
 const props = defineProps<{
   row: object | null;
@@ -115,9 +131,12 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
+const { sprintsList } = storeToRefs(useSprintStore());
 const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = useIssuesStore();
 const { pinnedIssues } = storeToRefs(useIssuesStore());
+const { setNotificationView } = useNotificationStore();
+const { hasPermission } = useRolesStore();
 
 const route = useRoute();
 const workspaceSlug = computed<string>(() => {
@@ -127,9 +146,14 @@ const workspaceSlug = computed<string>(() => {
 const issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);
 const isTransferOpen = ref<boolean>(false);
+const isManageSprintsOpen = ref<boolean>(false);
 
 const isPinned = computed<boolean>(() => {
-  return pinnedIssues.value?.some(issue => issue.id === props.row?.id);
+  return pinnedIssues.value?.some((issue) => issue.id === props.row?.id);
+});
+
+const isAdmin = computed(() => {
+  return hasPermission('create-sprint');
 });
 
 const copyIssueLink = (): void => {
@@ -164,6 +188,19 @@ const transferIssue = (): void => {
 
 const deleteIssue = (): void => {
   isDeletingOpen.value = true;
+};
+
+const manageIssueSprints = (): void => {
+  if (!sprintsList.value.length) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage:
+        'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
+    });
+    return;
+  }
+  isManageSprintsOpen.value = true;
 };
 </script>
 
