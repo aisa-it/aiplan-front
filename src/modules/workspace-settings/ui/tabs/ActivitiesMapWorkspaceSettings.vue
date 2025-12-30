@@ -39,11 +39,7 @@
           :text="names[name]?.symbols"
           :image="names[name]?.member.avatar_id"
           :size="isMobile ? '32px' : '60px'"
-          @click.stop="
-            $router.push({
-              path: `/${currentWsSlug}/user-activities/${name}`,
-            })
-          "
+          @click.stop="navigateToActivityPage(name)"
         />
         <div
           :class="isMobile ? 'q-pa-sm' : 'q-pa-sm text-center column'"
@@ -86,6 +82,7 @@ import { useSettingsStore } from 'src/modules/workspace-settings/stores/settings
 import { useUserStore } from 'src/stores/user-store';
 import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
 const props = defineProps({
   currentWsInfo: { type: Object, required: true },
@@ -112,6 +109,8 @@ const tomorrow = new Date().setDate(today.getDate() + 1);
 const isMobile = computed(() => quasar.screen.width <= 650);
 
 const computedWorkspaceInfo = computed(() => props.currentWsInfo);
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const handleMembers = (members) => {
   return aiplan

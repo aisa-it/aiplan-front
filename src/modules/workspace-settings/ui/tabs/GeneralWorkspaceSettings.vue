@@ -77,11 +77,7 @@
         "
         :image="computedWorkspaceInfo.owner.avatar_id"
         :member="computedWorkspaceInfo.owner"
-        @click.stop="
-          $router.push({
-            path: `/${computedWorkspaceInfo.slug}/user-activities/${computedWorkspaceInfo.owner.id}`,
-          })
-        "
+        @click.stop="navigateToActivityPage(computedWorkspaceInfo.owner.id)"
       />
       <span class="q-ml-sm owner-name self-middle">
         {{ aiplan.UserName(computedWorkspaceInfo.owner).join(' ') }}
@@ -387,6 +383,9 @@ import {
 } from 'src/modules/workspace-settings/services/api';
 import aiplan from 'src/utils/aiplan';
 
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 // constants
 import {
   BASE_ERROR,
@@ -429,6 +428,7 @@ const props = defineProps({
 
 //composables
 const q = useQuasar();
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 // for utils
 const route = useRoute();
