@@ -4,7 +4,7 @@
       <h6 class="flex items-center">
         Вложения
         <IssuesColorCountTitle
-          :count="rows.length"
+          :count="attachments.length"
           :badgeClass="'circle-badge-issue'"
         />
         <div v-if="uploader.activeCount.value > 0">
@@ -24,7 +24,7 @@
         </div>
 
         <q-btn
-          v-show="rows.length || uploadsStates.length"
+          v-show="attachments.length || uploadsStates.length"
           class="btn-only-icon-sm q-ml-sm"
           icon="more_horiz"
           flat
@@ -65,13 +65,13 @@
       @dragleave.prevent="isDragIn = false"
     >
       <div
-        v-if="(!loading && !rows.length) || rows.length"
+        v-if="(!loading && !attachments.length) || attachments.length"
         class="flex items-center"
       >
         <LinkIcon color="var(--primary)" />
         <span> Нажмите или перетяните файл сюда </span>
       </div>
-      <DefaultLoader v-if="loading && !rows.length" />
+      <DefaultLoader v-if="loading && !attachments.length" />
     </q-btn>
     <input
       type="file"
@@ -81,7 +81,7 @@
       @change="handleDrop"
     />
     <div
-      v-if="rows.length || uploadsStates.length || loading"
+      v-if="attachments.length || uploadsStates.length || loading"
       class="flex"
       style="height: fit-content; position: relative"
     >
@@ -122,9 +122,9 @@
         </div>
 
         <div class="flex no-wrap">
-          <template v-if="rows.length || uploadsStates.length">
+          <template v-if="attachments.length || uploadsStates.length">
             <SelectAttachmentsCard
-              v-for="row in rows"
+              v-for="row in attachments"
               :key="row.id"
               :isEdit="isEdit"
               :row="row"
@@ -185,9 +185,9 @@
     </div>
     <AttachmentsInfo class="q-mt-sm" />
     <AttachmentsListDialog
-      v-if="rows.length || uploadsStates.length"
+      v-if="attachments.length || uploadsStates.length"
       v-model="isOpenAttachmentsList"
-      :attachments="rows"
+      :attachments="attachments"
       :loading="loading"
       :download-all-func="downloadAllFunc"
       @open="
@@ -261,13 +261,14 @@ import AttachmentsInfo from './AttachmentsInfo.vue';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  id: string;
+  id?: string;
   entityType: 'doc' | 'issue';
   isEdit?: boolean;
-  deleteAttachmentFunc: (value: string) => Promise<void>;
-  getAttachmentFunc: (projectID: Ref<string>, issueID: Ref<string>) => any; //getAttachmentFunc: () => Promise<void>;
+  deleteAttachmentFunc?: (value: string) => Promise<void>;
+  getAttachmentFunc?: (projectID: Ref<string>, issueID: Ref<string>) => any; //getAttachmentFunc: () => Promise<void>;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
   issueData?: DtoIssue;
+  draftMode?: boolean;
 }>();
 
 const uploader = useTusUploader({
@@ -315,6 +316,36 @@ const showDeleteAttachmentDialog = ref<boolean>(false);
 
 const abortController = new AbortController();
 
+interface DraftAttachment {
+  id: string; // uuid
+  file: File;
+  name: string;
+  size: number;
+  createdAt: string;
+}
+
+const draftFiles = ref<DraftAttachment[]>([]);
+
+const attachments = computed(() => {
+  if (props.draftMode) {
+    return draftFiles.value.map((f) => ({
+      id: f.id,
+      asset: {
+        name: f.name,
+        size: f.size,
+        id: f.id,
+        content_type: f.file.type,
+      },
+      created_at: f.createdAt,
+      draft: true,
+      status: 'pending',
+      progress: 0,
+    }));
+  }
+
+  return rows.value;
+});
+
 //computeds
 const uploadsStates = computed(() => uploader.uploadsState.value.map((e) => e));
 const showDownloadAll = computed(
@@ -322,6 +353,32 @@ const showDownloadAll = computed(
 );
 
 //methods
+const uploadDraftAttachments = async (entityId: string) => {
+  if (!props.draftMode || !draftFiles.value.length) return;
+
+  const uploader = useTusUploader({
+    type: 'tus',
+    uploadUrl: '/api/auth/attachments/tus/',
+    concurrency: 5,
+    entityId: entityId,
+    entityType: props.entityType,
+    onNotify({ type, file, message }) {
+      setNotificationView({
+        open: true,
+        type,
+        customMessage: ` ${
+          message ? message : `${file.name}: ${getCustomMessageOnNotify(type)}`
+        } `,
+      });
+    },
+  });
+  for (const draft of draftFiles.value) {
+    uploader.enqueue(draft.file);
+  }
+
+  return uploader.waitAll();
+};
+
 const handleFiles = async (files: FileList) => {
   for (const file of Array.from(files)) {
     await uploader.enqueue(file);
@@ -353,7 +410,10 @@ const scroll = (direction: number) => {
 };
 
 const getAttachments = async () => {
+  if (props.draftMode) return;
+
   if (currentWorkspaceSlug.value && selectedDocId.value) {
+    if (!props.getAttachmentFunc) return;
     rows.value = await props.getAttachmentFunc(
       currentWorkspaceSlug,
       selectedDocId,
@@ -362,6 +422,7 @@ const getAttachments = async () => {
     (props.issueData?.project ?? currentProjectID.value) &&
     currentIssueID.value
   ) {
+    if (!props.getAttachmentFunc) return;
     rows.value = await props.getAttachmentFunc(
       currentProjectID,
       currentIssueID,
@@ -387,7 +448,7 @@ const refresh = async () => {
   }
 };
 
-defineExpose({ refresh });
+defineExpose({ refresh, uploadDraftAttachments });
 
 const getCustomMessageOnNotify = (type: 'success' | 'error' | 'cancelled') => {
   switch (type) {
@@ -429,9 +490,33 @@ const handleFileList = (ev: Event) => {
   return validFiles;
 };
 
+const addFilesToDraft = (files: File[]) => {
+  files.forEach((file) => {
+    draftFiles.value.push({
+      id: crypto.randomUUID(),
+      file,
+      name: file.name,
+      size: file.size,
+      createdAt: new Date().toISOString(),
+    });
+  });
+};
+
+const deleteDraftFile = (id: string) => {
+  draftFiles.value = draftFiles.value.filter((f) => f.id !== id);
+};
+
 const handleDrop = async (ev: Event) => {
   isDragIn.value = false;
   const validFiles = handleFileList(ev);
+
+  if (!validFiles.length) return;
+
+  if (props.draftMode) {
+    addFilesToDraft(validFiles);
+    return;
+  }
+
   try {
     if (validFiles.length > 0) {
       const dataTransfer = new DataTransfer();
@@ -453,6 +538,10 @@ const handleDrop = async (ev: Event) => {
 };
 
 const handleDeleteClick = (value: any) => {
+  if (props.draftMode) {
+    deleteDraftFile(value.id);
+    return;
+  }
   currentAttachmentDelete.value = value;
   showDeleteAttachmentDialog.value = true;
 };
@@ -463,6 +552,7 @@ const handleDelete = async () => {
     return;
   }
   try {
+    if (!props.deleteAttachmentFunc) return;
     await props.deleteAttachmentFunc(currentAttachmentDelete.value.id);
     setNotificationView({
       open: true,

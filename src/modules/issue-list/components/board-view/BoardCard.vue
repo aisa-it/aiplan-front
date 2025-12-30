@@ -123,11 +123,7 @@
           "
           :image="card.author_detail.avatar_id"
           :member="card.author_detail"
-          @click.stop="
-            $router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${card.author_detail.id}`,
-            })
-          "
+          @click.stop="navigateToActivityPage(card.author_detail.id)"
         />
 
         <div
@@ -143,11 +139,7 @@
             :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
             :image="l?.avatar_id"
             :member="l"
-            @click.stop="
-              $router.push({
-                path: `/${currentWorkspaceSlug}/user-activities/${card.assignee_details[n]?.id}`,
-              })
-            "
+            @click.stop="navigateToActivityPage(card.assignee_details[n]?.id)"
           >
           </AvatarImage>
         </div>
@@ -173,24 +165,21 @@ import { formatDateTime } from 'src/utils/time';
 import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
 import SelectDate from 'src/components/SelectDate.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
 import { useStatesStore } from 'src/stores/states-store';
 import SelectStatus from 'src/components/SelectStatus.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 import QuantityChip from 'src/components/QuantityChip.vue';
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssueContext } from '../../composables/useIssueContext';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useGroupedIssues } from '../../composables/useGroupedIssues';
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
 const { user } = storeToRefs(useUserStore());
-const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
-const route = useRoute();
+
 const props = defineProps<{
   card: any;
   entity: any;
@@ -198,6 +187,8 @@ const props = defineProps<{
 }>();
 const rolesStore = useRolesStore();
 const avatarText = aiplan.UserName;
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;

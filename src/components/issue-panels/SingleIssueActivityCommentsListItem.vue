@@ -18,11 +18,7 @@
         :text="handleTooltipText(comment.actor_detail)"
         :image="comment.actor_detail.avatar_id"
         :member="comment.actor_detail"
-        @click="
-          $router.push({
-            path: `/${currentWorkspaceSlug}/user-activities/${comment.actor_detail.id}`,
-          })
-        "
+        @click="navigateToActivityPage(comment.actor_detail.id)"
       />
     </template>
 
@@ -168,6 +164,9 @@ import ReactionSelectEmoji from 'components/issue-panels/reaction/ReactionSelect
 import LinkIcon from '../icons/LinkIcon.vue';
 import EditorTipTapV2 from '../editorV2/EditorTipTapV2.vue';
 
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 const props = defineProps<{
   comment: any;
   members: any[];
@@ -183,13 +182,11 @@ const emits = defineEmits<{
 
 // store
 const userStore = useUserStore();
-const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const projectStore = useProjectStore();
 
 // store to vars
 const { user } = userStore;
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { project } = storeToRefs(projectStore);
 const { issueData } = storeToRefs(singleIssueStore);
 const { hasPermissionByIssue, hasPermission } = useRolesStore();
@@ -200,6 +197,8 @@ const closeTimer = ref();
 const isHoverMessageText = ref(false);
 const isTouchStart = ref<boolean>(false);
 const isTouchReaction = ref<boolean>(false);
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const isAuthor = computed(() => {
   return user.id === props.comment.actor_id;

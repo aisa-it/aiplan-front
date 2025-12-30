@@ -55,14 +55,14 @@ const props = defineProps<{
 
 const radius = 15.9155;
 const circumference = 2 * Math.PI * radius;
-const issuesCount = props.stats.all_issues ?? 0;
+const issuesCount = computed(() => props.stats.all_issues ?? 0);
 
 function calculateFraction(keys: string[]) {
   const sum = Object.entries(props.stats).reduce(
     (acc, [key, value]) => (keys.includes(key) ? acc + value : acc),
     0,
   );
-  return issuesCount > 0 ? sum / issuesCount : 0;
+  return issuesCount.value > 0 ? sum / issuesCount.value : 0;
 }
 
 const cancelledArc = computed(

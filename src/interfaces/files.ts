@@ -7,6 +7,7 @@ export interface IAttachmentCard {
     size: number;
     content_type: string;
   };
+  draft?: boolean;
 }
 
 export type FileAttUploadProgressFunc = (

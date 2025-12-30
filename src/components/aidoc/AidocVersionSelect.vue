@@ -68,11 +68,7 @@
               :image="currentVersion?.Author.avatar_id"
               :show-avatar-popup="true"
               :member="currentVersion?.Author"
-              @click.stop="
-                $router.push(
-                  `/${currentWorkspaceSlug}/user-activities/${currentVersion?.Author.id}`,
-                )
-              "
+              @click.stop="navigateToActivityPage(currentVersion?.Author.id)"
               size="22px"
             />
             {{ currentVersion?.Author.last_name }}
@@ -142,6 +138,7 @@ import {
   DtoWorkspaceMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
 interface Version {
   Id: string;
@@ -167,7 +164,6 @@ const route = useRoute();
 const aidocStore = useAiDocStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const currentVersion = ref<Version | null>(null);
 const oldValueVersion = ref<Version | null>(null);
 const isShowVersion = ref(false);
@@ -177,6 +173,9 @@ const popup = ref();
 
 // storetorefs
 const { workspaceUsers } = storeToRefs(workspaceStore);
+
+// composables
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const setVersion = async () => {
   if (!currentVersion.value) return;
