@@ -66,6 +66,7 @@
                 size="sm"
                 class="rounded-btn"
                 @click="handleCopyLink(props.row)"
+                v-if="!props.row.draft"
               >
                 <LinkIcon :width="20" :height="20" />
                 <HintTooltip>Скопировать ссылку</HintTooltip>
@@ -76,6 +77,7 @@
                 size="sm"
                 class="rounded-btn"
                 @click="handleDownload(props.row)"
+                v-if="!props.row.draft"
               >
                 <LoadIcon :width="20" :height="20" />
                 <HintTooltip>Скачать</HintTooltip>
@@ -86,6 +88,7 @@
                 size="sm"
                 class="rounded-btn"
                 @click="emit('open', props.row)"
+                v-if="!props.row.draft"
               >
                 <ZoomIcon :width="20" :height="20" />
                 <HintTooltip>Предпросмотр</HintTooltip>
@@ -108,6 +111,7 @@
                     clickable
                     v-close-popup
                     @click="handleCopyLink(props.row)"
+                    v-if="!props.row.draft"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <LinkIcon :width="20" :height="20" />
@@ -118,6 +122,7 @@
                     clickable
                     v-close-popup
                     @click="handleDownload(props.row)"
+                    v-if="!props.row.draft"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <LoadIcon :width="20" :height="20" />
@@ -128,6 +133,7 @@
                     clickable
                     v-close-popup
                     @click="emit('open', props.row)"
+                    v-if="!props.row.draft"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <ZoomIcon :width="20" :height="20" />
@@ -157,7 +163,11 @@
 
       <q-card-actions align="center" class="q-py-md">
         <q-btn
-          v-if="props.downloadAllFunc && props.attachments.length > 0"
+          v-if="
+            props.downloadAllFunc &&
+            props.attachments.length > 0 &&
+            !props.attachments[0]?.draft
+          "
           :loading="loading"
           unelevated
           flat

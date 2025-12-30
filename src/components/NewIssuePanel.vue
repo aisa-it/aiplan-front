@@ -174,6 +174,13 @@
       </select-tags>
     </q-card-section>
 
+    <SelectAttachments
+      ref="selectAttachments"
+      draft-mode
+      entity-type="issue"
+      is-edit
+    />
+
     <q-card-actions class="new-issue-buttons q-px-md">
       <div class="centered-horisontally">
         Сохранить как черновик
@@ -240,6 +247,7 @@ import DefaultLoader from './loaders/DefaultLoader.vue';
 import SelectParentIssue from './SelectParentIssue.vue';
 import PriorityIcon from './icons/PriorityIcon.vue';
 import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-template/ui/SelectSingleIssueTemplate.vue';
+import SelectAttachments from './SelectAttachments.vue';
 //types
 import { QCard } from 'quasar';
 //icons
@@ -309,6 +317,8 @@ const selectedIssueTemplate = ref<any>(null);
 const loading = ref(true);
 const editorInstance = ref<Editor>();
 const autoupdateDate = ref<boolean>(true);
+
+const selectAttachments = ref();
 
 //computeds
 const workspaceSlug = computed(() => {
@@ -439,6 +449,7 @@ const create = async () => {
               `${issue.project_detail.identifier}-${issue.sequence_id}`,
             ),
       });
+      await selectAttachments.value.uploadDraftAttachments(res.data.id);
       emits('ok');
     })
     .catch(() => {
