@@ -128,7 +128,7 @@ const updateGroupedIssues = async (status: any) => {
     item.entity?.id === status.id
   );
 
-  if (group && group.issues.length === 0) {
+  if (group && !group.issues || group.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
