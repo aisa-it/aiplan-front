@@ -15,33 +15,11 @@
           {{ filterBy === 'docs' ? 'Документы' : 'Избранное' }}
         </q-item-section>
 
-        <q-btn
+        <MenuActions
           class="q-ml-sm q-mr-sm"
-          flat
-          icon="more_horiz"
-          :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-          @click.prevent.stop
-        >
-          <q-menu>
-            <q-list>
-              <q-item>
-                <q-btn
-                  v-close-popup
-                  :style="'font-size: 12px;'"
-                  class="full-w"
-                  dense
-                  flat
-                  no-caps
-                  @click="isNotificationsSettingsOpen = true"
-                >
-                  <BellIcon :width="16" :height="16" class="q-mr-sm" /><span>
-                    Настроить уведомления
-                  </span>
-                </q-btn>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+          :items="getHeaderMenuItems()"
+          @click.stop
+        />
       </div>
     </template>
     <template v-slot:content>
@@ -450,6 +428,18 @@ const copyLink = async (short_url: string | undefined, document: any) => {
       customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
     });
   }
+};
+
+const getHeaderMenuItems = () => {
+  return [
+    {
+      text: 'Настроить уведомления',
+      icon: BellIcon,
+      onClick: () => {
+        isNotificationsSettingsOpen.value = true;
+      },
+    },
+  ];
 };
 
 const getAidocMenuItems = (
