@@ -77,9 +77,11 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     switch (issuesStore.groupByIssues) {
       case 'state': {
         if (contextType === 'sprint') {
-          const key = `${entity?.name}_${entity?.color}`;
-          if (store.getStatusesAsArray[key]) {
-            return { states: [store.getStatusesAsArray[key].id] };
+          const targetState = store.getStatusesAsArray.find(
+            (el) => el.name === entity?.name && el.color === entity?.color,
+          );
+          if (targetState) {
+            return { states: targetState.id };
           }
         }
         if (entity?.id) {
@@ -135,9 +137,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
 
     const data = response?.data?.issues;
     issuesStore.groupedIssueList[index].issues =
-      Array.isArray(data) && data[0]?.issues
-        ? data[0].issues
-        : (data ?? []);
+      Array.isArray(data) && data[0]?.issues ? data[0].issues : (data ?? []);
     issuesStore.groupedIssueList[index].count = response?.data?.count ?? 0;
   }
 

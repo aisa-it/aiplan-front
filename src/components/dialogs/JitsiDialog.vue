@@ -33,8 +33,8 @@
           >
             <div :class="isConfOpen ? 'fullscreen' : 'compact'">
               <JitsiMeeting
-                v-if="shouldMount"
-                :key="workspace + key"
+                v-if="isInitialized"
+                :key="String(workspace) + key"
                 :domain="jitsiDomain"
                 :room-name="workspace"
                 lang="ru"
@@ -61,12 +61,23 @@
                 <template v-slot:spinner>
                   <div
                     style="width: 100%; height: 100%"
-                    class="row justify-center items-center jitsi-spiner"
-                  >
-                    <DefaultLoader />
-                  </div>
+                    class="row justify-center items-center jitsi-spinner"
+                  ></div>
                 </template>
               </JitsiMeeting>
+              <div
+                v-if="!shouldMount"
+                class="absolute-full flex flex-center"
+                style="
+                  background: rgba(0, 0, 0, 0.6);
+                  z-index: 100;
+                  height: 90vh;
+                "
+              >
+                <div class="column flex-center text-white">
+                  <DefaultLoader />
+                </div>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -77,7 +88,7 @@
 
 <script lang="ts" setup>
 //core
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onUnmounted } from 'vue';
 import { JitsiMeeting } from '@jitsi/vue-sdk';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -114,18 +125,25 @@ const unreadCountRef = ref(0);
 const isConfOpen = ref(false);
 const isExpanded = ref(false);
 const isJoined = ref(false);
+const isInitialized = ref(false);
+const isRefreshing = ref(false);
+let tokenRefreshInterval: ReturnType<typeof setInterval> | null = null;
+const TOKEN_REFRESH_INTERVAL = 50 * 1000;
 
 const jitsiExpansion = ref<InstanceType<typeof ExpansionItem> | null>(null);
 
 //computeds
 const workspace = computed(() => {
-  return workspaceInfo.value?.slug || route.params.slug;
+  return workspaceInfo?.value?.slug || route.params.slug;
 });
 
 const shouldMount = computed(() => {
   const hasAddress = !!token.value && !!jitsiDomain.value;
   const isExpanded = jitsiExpansion.value?.isExpanded;
-  return hasAddress && (isExpanded || isJoined.value);
+
+  if (isJoined.value) return hasAddress;
+
+  return hasAddress && !isRefreshing.value && isExpanded;
 });
 
 //methods
@@ -144,7 +162,7 @@ const handleApiReady = (apiObj) => {
   apiRef.value.on('participantJoined', (payload) => {
     notificationStore.setNotificationView({
       open: true,
-      type: 'info',
+      type: 'message',
       customTitle: 'Конференция',
       customMessage: `${payload.displayName} подключился к конференции`,
     });
@@ -153,7 +171,7 @@ const handleApiReady = (apiObj) => {
     if (!!payload.displayName) {
       notificationStore.setNotificationView({
         open: true,
-        type: 'info',
+        type: 'message',
         customTitle: 'Конференция',
         customMessage: `${payload.displayName} покинул конференцию`,
       });
@@ -162,13 +180,30 @@ const handleApiReady = (apiObj) => {
   apiRef.value.on('incomingMessage', (payload) => {
     notificationStore.setNotificationView({
       open: true,
-      type: 'info',
+      type: 'message',
       customTitle: 'Сообщение в конференции',
       customMessage: `${payload.nick}: ${payload.message}`,
     });
   });
   apiRef.value.on('chatUpdated', (payload) => {
     unreadCountRef.value = payload.unreadCount;
+  });
+  apiRef.value.on('errorOccurred', async (error) => {
+    if (
+      error?.error?.type === 'CONNECTION' &&
+      error?.error?.name === 'connection.passwordRequired'
+    ) {
+      await refreshJitsiToken();
+      notificationStore.setNotificationView({
+        open: true,
+        type: 'message',
+        customTitle: 'Обновление токена',
+        customMessage:
+          'Токен обновлен, попробуйте подключиться к конференции снова',
+      });
+
+      key.value++;
+    }
   });
 };
 
@@ -195,6 +230,24 @@ const handleUpdateUserStatus = async (isCalling: boolean) => {
   });
 };
 
+const refreshJitsiToken = async () => {
+  const slug = workspaceStore.currentWorkspaceSlug;
+  if (slug && slug !== 'undefined') {
+    isRefreshing.value = true;
+    try {
+      const resp = await workspaceStore.getJitsiToken(slug);
+
+      if (resp?.jitsi_token) {
+        token.value = resp.jitsi_token;
+      }
+    } catch (e) {
+      console.error('Failed to refresh Jitsi token:', e);
+    } finally {
+      isRefreshing.value = false;
+    }
+  }
+};
+
 //lifecycle hooks
 watch(
   () => workspaceStore.currentWorkspaceSlug,
@@ -204,9 +257,11 @@ watch(
         .get('/api/auth/jitsi-url/')
         .then(({ data }) => (jitsiDomain.value = data.url));
 
-      await workspaceStore.getJitsiToken(newVal).then((resp) => {
-        token.value = resp?.jitsi_token;
-      });
+      await refreshJitsiToken();
+
+      if (token.value && jitsiDomain.value && !isInitialized.value) {
+        isInitialized.value = true;
+      }
     }
   },
   { immediate: true },
@@ -225,6 +280,33 @@ watch(
     }
   },
 );
+
+watch(
+  [() => jitsiExpansion.value?.isExpanded, isJoined],
+  ([expanded, joined]) => {
+    if (expanded && !joined) {
+      if (!tokenRefreshInterval) {
+        refreshJitsiToken();
+        tokenRefreshInterval = setInterval(
+          refreshJitsiToken,
+          TOKEN_REFRESH_INTERVAL,
+        );
+      }
+    } else {
+      if (tokenRefreshInterval) {
+        clearInterval(tokenRefreshInterval);
+        tokenRefreshInterval = null;
+      }
+    }
+  },
+);
+
+onUnmounted(() => {
+  if (tokenRefreshInterval) {
+    clearInterval(tokenRefreshInterval);
+    tokenRefreshInterval = null;
+  }
+});
 </script>
 <style scoped>
 .fullscreen-bg {
@@ -262,7 +344,7 @@ watch(
   position: relative;
 }
 
-.compact:has(.jitsi-spiner) {
+.compact:has(.jitsi-spinner) {
   display: block;
 }
 </style>
