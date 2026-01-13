@@ -1,9 +1,4 @@
 <template>
-  <PinnedIssueList
-    v-if="pinnedIssues.length"
-    :pinned-issues="pinnedIssues"
-    class="pinned-issues"
-  />
   <div class="horizontal-scroll-enable board-wrapper">
     <div v-for="(table, index) in defineIssues" :key="index">
       <BoardCardList
@@ -25,14 +20,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-
-import { useProjectStore } from 'src/stores/project-store';
-import { useIssuesStore } from 'src/stores/issues-store';
+import { computed } from 'vue';
 
 import BoardCardList from './BoardCardList.vue';
-import PinnedIssueList from '../PinnedIssueList.vue';
 
 import { useIssueContext } from '../../composables/useIssueContext';
 import { IGroupedResponse } from '../../types';
@@ -43,13 +33,12 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refreshCard', 'refresh', 'openPreview', 'openIssue']);
-
-const projectStore = useProjectStore();
-const { project } = storeToRefs(projectStore);
-
-const { pinnedIssues } = storeToRefs(useIssuesStore());
-const { fetchPinnedIssues } = useIssuesStore();
+const emits = defineEmits([
+  'refreshCard',
+  'refresh',
+  'openPreview',
+  'openIssue',
+]);
 
 const { contextProps } = useIssueContext(props.contextType);
 
@@ -64,11 +53,6 @@ const defineIssues = computed(() => {
   return !contextProps.value?.showEmptyGroups
     ? props.issues.filter((table) => table.issues?.length)
     : props.issues;
-});
-
-onMounted(() => {
-  pinnedIssues.value = [];
-  if (project.value?.id) fetchPinnedIssues(project.value?.id);
 });
 </script>
 
@@ -99,9 +83,5 @@ onMounted(() => {
     flex-direction: row;
     justify-content: space-between;
   }
-}
-
-.pinned-issues {
-  padding: 16px;
 }
 </style>

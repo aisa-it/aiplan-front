@@ -14,10 +14,11 @@
       />
     </q-card-section>
 
-    <q-card-section
-      v-if="!issuesLoader && !isGroupingEnabled && pinnedIssues.length"
-    >
-      <PinnedIssueList :pinned-issues="pinnedIssues" />
+    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
+      <PinnedIssueList
+        :pinned-issues="pinnedIssues"
+        :style="{ 'padding: 16px;': isGroupingEnabled }"
+      />
     </q-card-section>
     <q-separator />
 

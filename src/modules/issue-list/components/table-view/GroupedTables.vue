@@ -6,12 +6,6 @@
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
-    <PinnedIssueList
-      v-if="pinnedIssues.length"
-      :pinned-issues="pinnedIssues"
-      class="pinned-issues"
-    />
-
     <div v-for="(table, index) in issueList" :key="index">
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
@@ -28,6 +22,7 @@
         @update:model-value="
           (value) => setGroupHide(table?.entity?.id || table.entity, value)
         "
+        class="gantt-margin"
       >
         <template #header>
           <GroupedHeader
@@ -65,13 +60,10 @@ import { onMounted, ref, watch } from 'vue';
 import { throttle } from 'quasar';
 import { storeToRefs } from 'pinia';
 
-import { useProjectStore } from 'src/stores/project-store';
-import { useIssuesStore } from 'src/stores/issues-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
-import PinnedIssueList from '../PinnedIssueList.vue';
 import GroupedHeader from '../ui/GroupedHeader.vue';
 
 import { defineEntityName } from '../../utils/defineEntityName';
@@ -91,9 +83,7 @@ const emits = defineEmits([
   'openIssue',
 ]);
 
-const projectStore = useProjectStore();
 const { ny } = storeToRefs(useUtilsStore());
-const { project } = storeToRefs(projectStore);
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
@@ -101,9 +91,6 @@ const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
 };
-
-const { pinnedIssues } = storeToRefs(useIssuesStore());
-const { fetchPinnedIssues } = useIssuesStore();
 
 const issueList = ref([]);
 const scrollContainer = ref(null);
@@ -124,8 +111,8 @@ const handleScroll = throttle((info) => {
 }, 100);
 
 const updateGroupedIssues = async (status: any) => {
-  const group = (props.issues as any[]).find((item: any) => 
-    item.entity?.id === status.id
+  const group = (props.issues as any[]).find(
+    (item: any) => item.entity?.id === status.id,
   );
 
   if (group && group.issues.length === 0) {
@@ -139,7 +126,7 @@ const updateGroupedIssues = async (status: any) => {
       offset: 0,
       limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
-    
+
     await refreshTable(groupIndex, pagination, false, group.entity);
   }
 };
@@ -156,8 +143,6 @@ const refresh = () => {
   let chunk = generator.next().value;
   if (!chunk) return;
   issueList.value.push(...chunk);
-  pinnedIssues.value = [];
-  if (project.value) fetchPinnedIssues(project.value.id);
 };
 
 onMounted(() => {
@@ -182,9 +167,5 @@ watch(
   height: calc(100vh - 135px);
   overflow-y: auto;
   contain: inherit;
-}
-
-.pinned-issues {
-  padding: 16px;
 }
 </style>
