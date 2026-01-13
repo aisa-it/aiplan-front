@@ -19,6 +19,5 @@ export function scrollToTarget(
       cRect.left +
       container.scrollLeft -
       (selector === '.current-highlight' ? container.clientWidth / 2 : 100),
-    behavior: 'smooth',
   });
 }

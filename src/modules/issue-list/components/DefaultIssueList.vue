@@ -69,7 +69,11 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits<{ refreshIssue: [issues: DtoIssue[]] }>();
+const emits = defineEmits<{
+  refreshIssue: [issues: DtoIssue[]];
+  openPreview: [];
+  closePreview: [];
+}>();
 
 const { contextProps, updateProps } = useIssueContext(props.contextType);
 
@@ -136,10 +140,12 @@ async function openPreview(issue: DtoIssue) {
     route.params.workspace as string,
     issue.project_detail?.identifier ?? (route.params.project as string),
   );
+  emits('openPreview');
   isPreview.value = true;
 }
 
 async function closePreview() {
+  emits('closePreview');
   if (!isPreview.value) return;
   isPreview.value = false;
   currentIssueID.value = '';
