@@ -34,7 +34,7 @@
         :class-prevent="classPrevent"
         :isMobile="isMobile"
       />
-      <EditorTableIssueButton />
+      <EditorTableIssueButton :editor-instance="editorInstance" />
     </div>
   </transition>
 </template>

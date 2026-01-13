@@ -53,7 +53,9 @@
           <div class="table-issue__parameters">
             <q-select
               v-model="chosenTableColumns"
-              :options="tableColumns"
+              :options="columnOptionsMap"
+              option-label="label"
+              option-value="key"
               class="base-selector"
               label="Колонки"
               use-input
@@ -92,7 +94,13 @@
               />
             </div>
 
-            <q-btn class="primary-btn full-w q-mb-sm" flat dense no-caps>
+            <q-btn
+              class="primary-btn full-w q-mb-sm"
+              flat
+              dense
+              no-caps
+              @click="createIssueTable"
+            >
               Создать/обновить таблицу задач
             </q-btn>
           </div>
@@ -118,14 +126,25 @@ import IssuesTable from 'src/modules/search-issues/ui/IssuesTable.vue';
 import SelectSprintIssues from 'src/modules/sprints/create-sprint-dialog/components/SelectSprintIssues.vue';
 import LinkIcon from '../icons/LinkIcon.vue';
 
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { formatDateTime } from 'src/utils/time';
+
+import {
+  DtoIssue,
+  TypesIssuesListFilters,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Editor } from '@tiptap/core';
 
 const workspaceStore = useWorkspaceStore();
 const filtersStore = useFiltersStore();
 
 const $q = useQuasar();
-const isDesktop = computed(() => $q.platform.is?.desktop);
+const isDesktop = computed<boolean>(() => $q.platform.is?.desktop);
 const dialogRef = ref<QDialog | null>();
+
+const props = defineProps<{
+  editorInstance: Editor;
+  classPrevent?: string;
+}>();
 
 // 1 столбец
 const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
@@ -161,7 +180,7 @@ const refresh = async () => {
 };
 
 // 2 столбец
-const checkedIssues = ref<any[]>([]);
+const checkedIssues = ref<DtoIssue[]>([]);
 
 // Сворачивание боковинок
 const leftDrawerOpen = ref(isDesktop.value);
@@ -182,53 +201,189 @@ const deleteIssueById = (id: string) => {
 // 3 столбец
 const additionalColumnsNumber = ref<number | undefined>(2);
 
-const chosenTableColumns = ref<string[] | null>(null);
-const tableColumns: string[] = ['Название', 'Приоритет', 'Статус']; // TODO Полный список колонок получать
-const restTableColumns = ref<string[]>(tableColumns);
+// Взято с IssuesTable, тоже в constants
+const priorities = {
+  urgent: 'Критический',
+  high: 'Высокий',
+  medium: 'Средний',
+  low: 'Низкий',
+  null: 'Нет',
+};
 
-function addChosenColumns(val, done): void {
-  if (val.length > 0) {
-    const modelValue: string[] = (chosenTableColumns.value || []).slice();
+// TODO вынести в constants, для всех фильтров подойдет
+const columnOptionsMap: { label: string; key: string }[] = [
+  { label: 'Название', key: 'name' },
+  { label: 'Приоритет', key: 'priority' },
+  { label: 'Статус', key: 'state' },
+  { label: 'Срок исполнения', key: 'target_date' },
+  { label: 'Дата создания', key: 'created_at' },
+  { label: 'Последнее изменение', key: 'updated_at' },
+  { label: 'Автор', key: 'author' },
+  { label: 'Исполнитель', key: 'assignees' },
+  { label: 'Теги', key: 'labels' },
+];
+const chosenTableColumns = ref<typeof columnOptionsMap>([]);
+const restTableColumns = ref<typeof columnOptionsMap>([]);
 
-    val
-      .split(/[,;|]+/)
-      .map((v: string) => v.trim())
-      .filter((v: string) => v.length > 0)
-      .forEach((v: string) => {
-        if (tableColumns.includes(v) === false) {
-          tableColumns.push(v);
-        }
-        if (modelValue.includes(v) === false) {
-          modelValue.push(v);
-        }
-      });
-
+function addChosenColumns(
+  val: string,
+  done: (val?: string | null) => void,
+): void {
+  if (!val?.trim()) {
     done(null);
-    chosenTableColumns.value = modelValue;
+    return;
   }
+
+  const labels = val
+    .split(/[,;|]+/)
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0);
+
+  const currentKeys = new Set(chosenTableColumns.value.map((col) => col.key));
+  const newSelection = [...chosenTableColumns.value];
+
+  labels.forEach((label) => {
+    const found = columnOptionsMap.find((col) => col.label === label);
+    if (found && !currentKeys.has(found.key)) {
+      newSelection.push(found);
+      currentKeys.add(found.key);
+    }
+  });
+
+  chosenTableColumns.value = newSelection;
+  done(null);
 }
 
-function filterFn(val, update): void {
+function filterFn(val: string, update: (fn: () => void) => void): void {
   update(() => {
-    if (val === '') {
-      restTableColumns.value = tableColumns;
+    if (!val) {
+      restTableColumns.value = columnOptionsMap;
     } else {
-      const needle = val.toLowerCase();
-      restTableColumns.value = tableColumns.filter(
-        (v) => v.toLowerCase().indexOf(needle) > -1,
+      restTableColumns.value = columnOptionsMap.filter((col) =>
+        col.label.toLowerCase().includes(val.toLowerCase()),
       );
     }
   });
 }
 
-// Диалоговое окно
 function closeDialog(): void {
   dialogRef.value?.hide();
 }
-
-function createTableIssue(): void {
-  closeDialog();
+// TODO в helpers
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
+
+const createIssueTable = (): void => {
+  const cols = chosenTableColumns.value;
+  const extraCols = Math.max(0, additionalColumnsNumber.value || 0);
+
+  // Заголовки
+  const headerCells = cols.map((col) => {
+    const text = col.label.trim();
+    const safeText = text === '' ? '&nbsp;' : escapeHtml(text);
+    return `<th>${safeText}</th>`;
+  });
+  for (let i = 0; i < extraCols; i++) {
+    headerCells.push('<th>&nbsp;</th>');
+  }
+  const thead = `<thead><tr>${headerCells.join('')}</tr></thead>`;
+
+  // Строки данных
+  const bodyRows = checkedIssues.value
+    .map((issue) => {
+      const cells = cols.map((col) => {
+        let displayValue: string;
+
+        switch (col.key) {
+          case 'name':
+            displayValue = issue.name || '-';
+            break;
+
+          case 'sequence_id':
+            displayValue = String(issue.sequence_id || '-');
+            break;
+
+          case 'priority':
+            displayValue =
+              priorities[issue.priority as keyof typeof priorities] ||
+              issue.priority ||
+              '-';
+            break;
+
+          case 'state':
+            displayValue = issue.state_detail?.name || '-';
+            break;
+
+          case 'author':
+            displayValue =
+              issue.author_detail?.username ||
+              issue.author_detail?.email ||
+              '-';
+            break;
+
+          case 'assignees':
+            if (Array.isArray(issue.assignee_details)) {
+              displayValue =
+                issue.assignee_details
+                  .map((a: any) => a.username || a.email || '')
+                  .filter(Boolean)
+                  .join(', ') || '-';
+            } else {
+              displayValue = '-';
+            }
+            break;
+
+          case 'labels':
+            if (Array.isArray(issue.label_details)) {
+              displayValue =
+                issue.label_details
+                  .map((l: any) => l.name || '')
+                  .filter(Boolean)
+                  .join(', ') || '-';
+            } else {
+              displayValue = '-';
+            }
+            break;
+
+          case 'target_date':
+          case 'created_at':
+          case 'updated_at':
+            displayValue = issue[col.key]
+              ? formatDateTime(issue[col.key])
+              : '-';
+            break;
+
+          default:
+            displayValue =
+              issue[col.key] !== null ? String(issue[col.key]) : '-';
+        }
+
+        let text = String(displayValue).trim();
+        // text = text === '-' || text === '' ? '&nbsp;' : escapeHtml(text); - убирать прочерки
+        text = text === '' ? '&nbsp;' : escapeHtml(text);
+        return `<td>${text}</td>`;
+      });
+
+      for (let i = 0; i < extraCols; i++) {
+        cells.push('<td>&nbsp;</td>');
+      }
+
+      return `<tr>${cells.join('')}</tr>`;
+    })
+    .join('');
+
+  const tbody = bodyRows ? `<tbody>${bodyRows}</tbody>` : '';
+  const tableHtml = `<table>${thead}${tbody}</table>`.trim();
+
+  props.editorInstance.chain().focus().insertContent(tableHtml).run();
+  closeDialog();
+};
 
 watch(
   () => workspaceStore.currentWorkspaceSlug,
