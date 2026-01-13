@@ -1014,16 +1014,25 @@ select:-ms-autofill {
     max-height 0.4s ease;
 }
 
-.menu-item--dragging {
-  transition: none;
-}
-
 .menu-item--open {
   background-color: inherit;
-  overflow: scroll;
-  flex: 1 1 auto;
+  height: 250px;
 }
 
+@media screen and (max-height: 800px) {
+  .menu-item--open {
+    height: 50%;
+  }
+}
+// WIP FRO-786
+// .menu-item--open {
+//   background-color: inherit;
+//   overflow: scroll;
+//   flex: 1 1 auto;
+// }
+// .menu-item--dragging {
+//   transition: none;
+// }
 .menu-item--help {
   background-color: inherit;
   height: 234px;
