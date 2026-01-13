@@ -47,7 +47,7 @@ import NavSprints from './menu/NavSprints.vue';
 import { useRoute } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-// import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
+import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
 
 const route = useRoute();
 const utilsStore = useUtilsStore();
@@ -64,9 +64,8 @@ const updateFavoriteState = (id: string, state: boolean) => {
 };
 const menuRef = ref<HTMLElement | null>(null);
   
-// WIP FRO-786
-// const fixedHeightItems = ['help', 'jitsi'];
-// useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
+const fixedHeightItems = ['help', 'jitsi'];
+useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
 </script>
 <style scoped>
 .menu {
