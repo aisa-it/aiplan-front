@@ -97,7 +97,6 @@ import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/comp
 import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue';
 
-import { getSprints } from 'src/modules/sprints/services/api';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import SettingsIcon from '../icons/SettingsIcon.vue';
@@ -128,7 +127,7 @@ onMounted(async () => {
 });
 
 const refreshSprints = async () => {
-  sprints.value = await getSprints(currentWorkspaceSlug.value as string);
+  sprints.value = await sprintStore.getSprintsList(currentWorkspaceSlug.value as string)
 };
 
 const reopen = async (id: string) => {
@@ -179,7 +178,7 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
 
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;
-  sprints.value = await getSprints(newValue as string);
+  sprints.value = await sprintStore.getSprintsList(newValue as string);
 });
 
 watch(

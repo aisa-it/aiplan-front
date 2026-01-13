@@ -1,20 +1,15 @@
 import { defineStore } from 'pinia';
-import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
-import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import {
   DtoSprint,
+  DtoSprintLight,
   TypesIssuesListFilters,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { allSprintColumns } from 'src/modules/issue-list/constants/sprintTableColumns';
 import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { IQuery } from 'src/stores/issues-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { sprintUpdate, getSprint, updateSprintView } from '../services/api';
-
-const usersApi = new (withInterceptors(Users))();
-const workspaceStore = useWorkspaceStore();
+import { getSprints, getSprint, updateSprintView } from '../services/api';
 
 const aiplan = useAiplanStore();
 const api = aiplan.api;
@@ -32,6 +27,7 @@ export const useSprintStore = defineStore('sprint-store', {
       issuesLoader: false,
       refreshSprintData: false,
       notUpdated: [] as NotUpdated[],
+      sprintsList: [] as DtoSprintLight[],
     };
   },
 
@@ -175,5 +171,9 @@ export const useSprintStore = defineStore('sprint-store', {
         { params: query },
       );
     },
+
+    async getSprintsList(wsSlug: string) {
+      return this.sprintsList = await getSprints(wsSlug)
+    }
   },
 });

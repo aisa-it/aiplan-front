@@ -5,9 +5,9 @@
       :rows="rows"
       :rows-count="rowsCount"
       :loading="loadingTable"
+      :context-type="contextType"
       @refresh="(pagination) => load(pagination)"
       @open-preview="(row) => openPreview(row)"
-      :context-type="contextType"
       @open-issue="
         (id, issue) =>
           openIssue(
@@ -45,31 +45,34 @@
 </template>
 
 <script setup lang="ts">
-// core
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
-// constants
-import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-
-// components
-import IssueTable from './IssueTable.vue';
-import { useDefaultIssues } from '../composables/useDefaultIssues';
-import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
-import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
+
+import IssueTable from './IssueTable.vue';
+import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
+import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
+
 import { useIssueContext } from '../composables/useIssueContext';
+import { useDefaultIssues } from '../composables/useDefaultIssues';
+
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits<{ refreshIssue: [issues: DtoIssue[]] }>();
+const emits = defineEmits<{
+  refreshIssue: [issues: DtoIssue[]];
+  openPreview: [];
+  closePreview: [];
+}>();
 
 const { contextProps, updateProps } = useIssueContext(props.contextType);
 
@@ -136,10 +139,12 @@ async function openPreview(issue: DtoIssue) {
     route.params.workspace as string,
     issue.project_detail?.identifier ?? (route.params.project as string),
   );
+  emits('openPreview');
   isPreview.value = true;
 }
 
 async function closePreview() {
+  emits('closePreview');
   if (!isPreview.value) return;
   isPreview.value = false;
   currentIssueID.value = '';

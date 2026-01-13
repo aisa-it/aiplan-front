@@ -185,11 +185,19 @@ const uploadAttachments = async (
   ev: object,
   onProgress?: FileAttUploadProgressFunc,
 ) => {
-  await aiplanStore.issueAttachmentsUpload(ev, issueData.value.id, onProgress);
+  await aiplanStore
+    .issueAttachmentsUpload(ev, issueData.value.id, onProgress)
+    ?.then(() =>
+      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
+    );
 };
 
 const deleteAttachment = async (attachmentId: string) => {
-  await aiplanStore.issueAttachmentDelete(currentIssueID.value, attachmentId);
+  await aiplanStore
+    .issueAttachmentDelete(currentIssueID.value, attachmentId)
+    ?.then(() =>
+      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
+    );
 };
 
 // заменить на сервис после обновления апи

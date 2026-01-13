@@ -48,6 +48,7 @@ export function decorateBars(container: HTMLElement, tasks: any[]) {
   бары в frappe gantt имеют небольшую погрешность относительно линий дней
   поэтому их все нужно немного сдвигать
   dataset.shifted нужен для того, чтобы не было повторных сдвигов при перерендере
+  также тут происходит выравнивание текста по концу бара (по умолчанию ставится в центр)
 */
 function shiftBars(bar: SVGGElement, shift: number) {
   if (bar.dataset.shifted === '1') return;
@@ -61,4 +62,15 @@ function shiftBars(bar: SVGGElement, shift: number) {
     const x = Number(el.getAttribute('x'));
     el.setAttribute('x', String(x + shift));
   });
+
+  const textElem = bar.querySelector<SVGTextElement>('text.bar-label');
+  if (!textElem) return;
+
+  const textWidth = textElem.getBBox().width;
+  const barWidth = Number(barOverlay?.getAttribute('width'));
+  if (barWidth < textWidth) return;
+  textElem.setAttribute(
+    'x',
+    String(Number(barOverlay?.getAttribute('x')) + barWidth - textWidth - 40),
+  );
 }
