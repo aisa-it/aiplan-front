@@ -1009,7 +1009,9 @@ select:-ms-autofill {
 .menu-item {
   border-bottom: 1px solid $darkest-border-color;
   cursor: pointer;
-  transition: height 0.4s ease;
+  transition:
+    height 0.4s ease,
+    max-height 0.4s ease;
 }
 
 .menu-item--open {
@@ -1022,7 +1024,15 @@ select:-ms-autofill {
     height: 50%;
   }
 }
-
+// WIP FRO-786
+// .menu-item--open {
+//   background-color: inherit;
+//   overflow: scroll;
+//   flex: 1 1 auto;
+// }
+// .menu-item--dragging {
+//   transition: none;
+// }
 .menu-item--help {
   background-color: inherit;
   height: 234px;
