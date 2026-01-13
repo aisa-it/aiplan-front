@@ -46,7 +46,7 @@ const onItemClick = (link) => {
 
     if (targetLink) {
       const element = props.editor.view.dom.querySelector(
-        `[data-toc-id="${targetLink.id}"`,
+        `[data-toc-id="${targetLink.id}"]`,
       );
       const pos = props.editor.view.posAtDOM(element, 0);
       const tr = props.editor.view.state.tr;
