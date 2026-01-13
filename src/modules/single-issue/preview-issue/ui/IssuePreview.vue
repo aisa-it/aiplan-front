@@ -101,9 +101,8 @@
 
 <script setup lang="ts">
 // core
-import { LocalStorage } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -127,6 +126,8 @@ import MainIssueInfo from '../../main-issue-info/ui/MainIssueInfo.vue';
 
 // constants
 import { QUASAR_SELECTORS_CLASSES } from 'src/constants/quasarSelectorsClasses';
+import { useDrawerResize } from 'src/composables/useDrawerResize';
+import { useUIStore } from 'src/stores/ui-store';
 
 const model = defineModel<boolean>({ default: false });
 
@@ -146,28 +147,28 @@ const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 const aiplanStore = useAiplanStore();
 const workspaceStore = useWorkspaceStore();
+const uiStore = useUIStore();
 const { hasPermissionByIssue } = useRolesStore();
 
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { fetchPinnedIssues } = useIssuesStore();
+const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
-let rafId: number | null = null;
-const leftbarWidth = 300;
-
-const clientWidth = ref(document.documentElement.clientWidth);
-const minWidth = computed(() => Math.max(clientWidth.value / 2, 900));
-const maxWidth = computed(() => clientWidth.value - leftbarWidth);
-const adaptiveWidth = computed(() =>
-  Math.min(drawerWidth.value, maxWidth.value),
+const defaultWidth = 900;
+const minWidth = computed(() =>
+  Math.max(document.documentElement.clientWidth / 2, defaultWidth),
 );
-
-const drawerWidth = ref(Math.max(clientWidth.value / 2, 900));
-const targetWidth = ref(Math.max(clientWidth.value / 2, 900));
-const startX = ref(0);
-const startW = ref(0);
-const moving = ref(false);
+const maxWidth = computed(
+  () => document.documentElement.clientWidth - menuSidebarWidth.value,
+);
+const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
+  minWidth,
+  maxWidth,
+  'drawerWidth',
+  'right',
+);
 
 const refreshData = (args?: any): void => {
   fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
@@ -217,66 +218,6 @@ const downloadAllAttachments = async () => {
   return { url, fileName };
 };
 
-const clamp = (w: number) => {
-  return Math.min(maxWidth.value, Math.max(minWidth.value, Math.round(w)));
-};
-
-const startRaf = () => {
-  if (rafId != null) return;
-  const tick = () => {
-    const cur = drawerWidth.value;
-    const tgt = targetWidth.value;
-    const diff = tgt - cur;
-    const step = diff * 0.22;
-
-    if (Math.abs(diff) < 0.5) {
-      drawerWidth.value = tgt;
-      rafId = null;
-      return;
-    }
-
-    drawerWidth.value = cur + step;
-    rafId = requestAnimationFrame(tick);
-  };
-  rafId = requestAnimationFrame(tick);
-};
-
-const stopRaf = () => {
-  if (rafId != null) {
-    cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-};
-
-const onPointerDown = (e: { clientX: number }) => {
-  moving.value = true;
-  startX.value = e.clientX;
-  startW.value = drawerWidth.value;
-  window.addEventListener('pointermove', onPointerMove);
-  window.addEventListener('pointerup', onPointerUp, { once: true });
-};
-
-const onPointerMove = (e: { clientX: number }) => {
-  if (!moving.value) return;
-  const dx = startX.value - e.clientX;
-  targetWidth.value = clamp(startW.value + dx);
-  startRaf();
-};
-
-const onPointerUp = () => {
-  moving.value = false;
-  window.removeEventListener('pointermove', onPointerMove);
-  startRaf();
-};
-
-const updateClientWidth = () => {
-  clientWidth.value = document.documentElement.clientWidth;
-};
-
-watch(drawerWidth, (val) => {
-  LocalStorage.set('drawerWidth', val);
-});
-
 watch(
   () => issueData.value?.project,
   async () => {
@@ -292,23 +233,9 @@ watch(
   { deep: true },
 );
 
+watch(adaptiveWidth, (width) => (previewIssueWidth.value = width));
+
 const members = ref([]);
-
-onMounted(async () => {
-  const saved = LocalStorage.getItem('drawerWidth');
-  if (saved) {
-    drawerWidth.value = Math.max(Number(saved), minWidth.value);
-    targetWidth.value = Math.max(Number(saved), minWidth.value);
-  }
-
-  window.addEventListener('resize', updateClientWidth);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('pointermove', onPointerMove);
-  window.removeEventListener('resize', updateClientWidth);
-  stopRaf();
-});
 </script>
 <style scoped lang="scss">
 .handle-resize {
