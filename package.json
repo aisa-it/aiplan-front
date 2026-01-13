@@ -13,7 +13,7 @@
     "build": "quasar mode add pwa && quasar build --mode pwa"
   },
   "dependencies": {
-    "@aisa-it/aiplan-api-ts": "^1.90.0",
+    "@aisa-it/aiplan-api-ts": "^1.114.0",
     "@headlessui/vue": "^1.7.17",
     "@jitsi/vue-sdk": "^1.0.4",
     "@quasar/extras": "^1.16.4",
