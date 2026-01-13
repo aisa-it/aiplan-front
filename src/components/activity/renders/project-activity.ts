@@ -1,6 +1,10 @@
 import { computed } from 'vue';
-import { valToNet, valToRole } from 'src/utils/strings';
-import { stateRUS, translateVerb } from 'src/utils/translator';
+import {
+  valToNet,
+  valToRole,
+  stateRUS,
+  translateVerb,
+} from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
 import aiplan from 'src/utils/aiplan';
 import { translateAction } from './actionTranslations';
