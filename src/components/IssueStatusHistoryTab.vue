@@ -22,11 +22,7 @@
           "
           :image="m.actor_detail.avatar_id"
           :member="m.actor_detail"
-          @click.stop="
-            $router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${m.actor_detail.id}`,
-            })
-          "
+          @click.stop="navigateToActivityPage(m.actor_detail.id)"
         />
         <q-item dense class="base-card q-mt-sm q-mb-sm q-pa-sm bg-base">
           <q-item-section>
@@ -98,6 +94,9 @@ import aiplan from 'src/utils/aiplan';
 import { msToRussianTime, formatDateTime } from 'src/utils/time';
 import { setIntervalFunction } from 'src/utils/helpers';
 
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 //components
 import AvatarImage from './AvatarImage.vue';
 import ArrowRight2 from './icons/ArrowRight2.vue';
@@ -118,6 +117,8 @@ const workspaceStore = useWorkspaceStore();
 const { currentProjectID } = storeToRefs(projectStore);
 const { issueStatusesData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 // vars
 const q = useQuasar();

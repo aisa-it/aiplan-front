@@ -53,7 +53,7 @@
         @refresh="
           (status) => {
             props.row.state_detail = status;
-            updateIssueField('state', props.row, entity);
+            updateIssueField('state', props.row, entity, status);
           }
         "
       />
@@ -116,12 +116,14 @@
 </template>
 
 <script lang="ts" setup>
-import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
-import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { inject, ref, watch, watchEffect, computed } from 'vue';
+import { EventBus } from 'quasar';
+import { storeToRefs } from 'pinia';
 
-import { useIssueContext } from '../composables/useIssueContext';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { useProjectStore } from 'src/stores/project-store';
 
+import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import {
   CreatedAtColumn,
@@ -136,14 +138,26 @@ import {
   LabelsColumn,
   ChipCountColumn,
 } from './issue-table';
+
+import { useIssueContext } from '../composables/useIssueContext';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
-import { EventBus } from 'quasar';
+
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+
+interface QuasarPagination {
+  page: number;
+  rowsNumber: number;
+  sortBy: string;
+  descending: boolean;
+  rowsPerPage: number;
+}
 
 const emits = defineEmits([
   'refresh',
   'updateIssueField',
   'openPreview',
   'openIssue',
+  'updateGroupedIssues',
 ]);
 const props = defineProps([
   'entity',
@@ -154,6 +168,9 @@ const props = defineProps([
   'contextType',
 ]);
 
+const { fetchPinnedIssues } = useIssuesStore();
+const { project } = storeToRefs(useProjectStore());
+
 const {
   contextProps,
   isGroupingEnabled,
@@ -161,13 +178,6 @@ const {
   store: contextStore,
 } = useIssueContext(props.contextType);
 
-interface QuasarPagination {
-  page: number;
-  rowsNumber: number;
-  sortBy: string;
-  descending: boolean;
-  rowsPerPage: number;
-}
 const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
 const columns = computed(() => {
@@ -245,11 +255,21 @@ bus.on('updateIssueTable', (field, entityId) => {
   }
 });
 
-const updateIssueField = (action?: string, row?: any, entity?: any) => {
+const updateIssueField = (
+  action?: string,
+  row?: any,
+  entity?: any,
+  status?: any,
+) => {
+  if (props.contextType === 'project' && project.value.id)
+    fetchPinnedIssues(project.value.id);
+
   if (isGroupingEnabled.value === true) {
+    emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
   } else refreshTable()
 };
+
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
 });

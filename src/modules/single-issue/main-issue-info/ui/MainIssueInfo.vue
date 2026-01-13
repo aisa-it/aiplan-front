@@ -82,11 +82,7 @@
           "
           :image="lockedBy.avatar_id ?? ''"
           :member="lockedBy"
-          @click.stop="
-            $router.push({
-              path: `/${route.params.workspace}/user-activities/${lockedBy.id}`,
-            })
-          "
+          @click.stop="navigateToActivityPage(lockedBy.id)"
         />
         <span class="q-ml-sm text-body2 text-weight-medium">
           {{ getFullName(lockedBy) }}
@@ -203,6 +199,9 @@ import { usePalette } from 'src/modules/project-settings/labels/composables/useP
 
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 // components
 import IssueTagsDialog from 'src/modules/single-issue/main-issue-info/ui/IssueTagsDialog.vue';
 import MenuIcon from 'components/icons/MenuIcon.vue';
@@ -270,6 +269,8 @@ const { getCorrectColor } = usePalette();
 const avatarText = (user: DtoUserLight) => {
   return aiplan.UserName(user);
 };
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 const { lockedBy, isTimeExpire, handlWrapperForTryingToLock, stopLocking } =
   useLockIssueInfo(

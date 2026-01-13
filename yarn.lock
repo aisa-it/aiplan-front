@@ -3,9 +3,9 @@
 
 
 "@aisa-it/aiplan-api-ts@^1.90.0":
-  version "1.109.0"
-  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.109.0.tgz#ea6d6a775594daf5c37c7c11d54799ae93bf8cd0"
-  integrity sha512-1fZrVl34RFnlXkDWNMFUUmxNDChRlut3AkAj78aqKIDiKGOGFSmZPeKMfDhHP20FXxRG9YgwBnv/BIhXDuXvEg==
+  version "1.110.0"
+  resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.110.0.tgz#9246b661edc5075accbc0df3aac6a99a8a0a8f40"
+  integrity sha512-jFoNpnguhCXN18/aOL3w4wCv4SAFB47FcmC1eWh+TBVlepY87yCjPuPXBZVKYEJnOlV++HM6eS3g1g1/vJsmlQ==
   dependencies:
     axios "^1.7.9"
 

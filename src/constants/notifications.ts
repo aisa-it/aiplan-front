@@ -6,6 +6,7 @@ const DOWNLOAD_FILE_DEMO =
 const SUCCESS_UPDATE_DATA = 'Данные обновлены';
 const BASE_ERROR = 'Пожалуйста, попробуйте еще раз';
 const BASE_ERROR_RULES = 'Недостаточно прав для совершения действия ';
+const BASE_ERROR_MESSAGE = 'Что-то пошло не так';
 
 // регистрация / авторизация
 const ERROR_AUTH = 'Ошибка авторизации';
@@ -251,4 +252,5 @@ export {
   SUCCESS_SETUP_VERSION,
   ERROR_SETUP_VERSION,
   BASE_ERROR_RULES,
+  BASE_ERROR_MESSAGE,
 };

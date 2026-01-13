@@ -90,6 +90,12 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
+const emits = defineEmits<{
+  refreshIssues: [issues: DtoIssue[]];
+  openPreview: [];
+  closePreview: [];
+}>();
+
 const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
   useIssueContext(props.contextType);
 
@@ -148,6 +154,8 @@ async function load() {
   await getGroupedIssues();
 
   issuesLoader.value = false;
+
+  emits('refreshIssues', issuesStore.groupedIssueList);
 }
 
 async function openIssue(id: string, project: string) {
@@ -189,10 +197,12 @@ async function openPreview(
 
   Object.assign(refreshReviewInfo.value, { index, pagination, entity });
 
+  emits('openPreview');
   isPreview.value = true;
 }
 
 async function closePreview() {
+  emits('closePreview');
   if (!isPreview.value) return;
   isPreview.value = false;
   currentIssueID.value = '';

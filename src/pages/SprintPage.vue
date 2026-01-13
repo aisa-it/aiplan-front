@@ -149,7 +149,7 @@ const components = {
   ),
 
   GanttView: defineAsyncComponent(
-    () => import('src/modules/sprints/ui/gantt-view/ui/GanttView.vue'),
+    () => import('src/modules/issue-list/components/gantt-view/GanttView.vue'),
   ),
 
   TableListSkeleton: defineAsyncComponent(

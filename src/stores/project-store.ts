@@ -2,7 +2,7 @@ import { defineStore, storeToRefs } from 'pinia';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
-import { valToNet } from 'src/utils/strings';
+import { valToNet } from 'src/utils/translator';
 import { getProjectEmojiViaCode } from 'src/utils/helpers';
 import { useWorkspaceStore } from './workspace-store';
 import { useRolesStore } from './roles-store';
@@ -70,6 +70,9 @@ export const useProjectStore = defineStore('project-store', {
       return (
         this.projectProps?.filters?.group_by?.toLowerCase() !== 'none' || false
       );
+    },
+    isGanttDiagramm(): boolean | undefined {
+      return this.projectProps?.issueView === 'gantt_chart';
     },
 
     isKanbanEnabled(): boolean | undefined {

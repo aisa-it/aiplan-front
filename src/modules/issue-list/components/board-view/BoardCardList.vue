@@ -73,31 +73,37 @@
 
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue';
+import { EventBus } from 'quasar';
+import { storeToRefs } from 'pinia';
 
-import { useIssueContext } from '../../composables/useIssueContext';
-
-import BoardCard from './BoardCard.vue';
-
-import { defineEntityName } from '../../utils/defineEntityName';
-
-import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { useProjectStore } from 'src/stores/project-store';
 
 import GroupedHeader from '../ui/GroupedHeader.vue';
+import BoardCard from './BoardCard.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
+import ArrowUp from 'src/components/icons/ArrowUp.vue';
 
 import {
   QuasarPagination,
   useGroupedIssues,
 } from '../../composables/useGroupedIssues';
-import ArrowUp from 'src/components/icons/ArrowUp.vue';
-import { EventBus } from 'quasar';
+import { useIssueContext } from '../../composables/useIssueContext';
+
+import { defineEntityName } from '../../utils/defineEntityName';
+
+import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 const props = defineProps<{
   table: any;
   groupBy: string;
   contextType: 'project' | 'sprint';
 }>();
+
 const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
+
+const { fetchPinnedIssues } = useIssuesStore();
+const { project } = storeToRefs(useProjectStore());
 
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
@@ -106,6 +112,8 @@ const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
 const { parsePagination, updateCurrentTable } = useGroupedIssues(
   props.contextType,
 );
+
+const bus = inject('bus') as EventBus;
 
 const selectedPage = ref(1);
 const isExpanded = ref(false);
@@ -128,15 +136,9 @@ const toggleList = async (entity, value) => {
   await setGroupHide(entity, value);
 };
 
-onMounted(() => {
-  isExpanded.value = isGroupHide(
-    props?.table?.entity?.id || props?.table?.entity,
-  );
-});
-
-const bus = inject('bus') as EventBus;
-
 const updateTable = (field, row, entity) => {
+  if (props.contextType === 'project' && project.value.id)
+    fetchPinnedIssues(project.value.id);
   updateCurrentTable(field, row, entity);
 };
 
@@ -144,6 +146,12 @@ bus.on('updateIssueTable', (field, entityId) => {
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }
+});
+
+onMounted(() => {
+  isExpanded.value = isGroupHide(
+    props?.table?.entity?.id || props?.table?.entity,
+  );
 });
 </script>
 

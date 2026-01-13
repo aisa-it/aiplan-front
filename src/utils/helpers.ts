@@ -141,8 +141,10 @@ export function getEmojiFromHexCode(code: string) {
   }
 }
 
-export function getFullName(member?: DtoUserLight) {
+export function getFullName(member?: DtoUserLight, type?: string) {
   if (!member) return 'Пользователь удалён';
+
+  if (!member.is_onboarded && type === 'form') return member.last_name + ' ' + member.first_name;
 
   if (!member.is_onboarded) return member.email;
 

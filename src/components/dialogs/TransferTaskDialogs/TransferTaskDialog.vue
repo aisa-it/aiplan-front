@@ -175,6 +175,7 @@
 
         <TransferTaskParameters
           v-model="settings"
+          :project_id="projectId"
           :issue="props.issue"
           :issue_settings="issueSettings"
           @save="saveSettings"
@@ -363,10 +364,14 @@ const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () =>
-    selectedProject.value?.identifier !== (route.params.project as string) ||
-    selectedProject.value?.identifier !== issueData.value.project,
+  () => selectedProject.value?.identifier !== (route.params.project as string),
 );
+
+const projectId = computed(() => {
+  return selectedProject.value
+    ? selectedProject.value.identifier || selectedProject.value.id
+    : props.issue.project_detail.identifier || props.issue.project_detail.id;
+});
 
 const isMultipleIssuesTransfer = computed<boolean>(
   () =>
@@ -412,14 +417,7 @@ const watcherIds = computed(() =>
 );
 
 // function
-const clear = () => {
-  transferLabel.value = null;
-  transferErrors.value = [];
-  transferModel.value.delete_src = false;
-  transferModel.value.linked_issues = false;
-  selectedProject.value = null;
-  selectedAction.value = null;
-  transferData.value = null;
+const resetSettings = () => {
   editedIssueParams = {};
   issueSettings.value = {
     state_detail: props.issue.state_detail,
@@ -432,6 +430,17 @@ const clear = () => {
       member: watcher,
     })),
   };
+};
+
+const clear = () => {
+  transferLabel.value = null;
+  transferErrors.value = [];
+  transferModel.value.delete_src = false;
+  transferModel.value.linked_issues = false;
+  selectedProject.value = null;
+  selectedAction.value = null;
+  transferData.value = null;
+  resetSettings();
 };
 
 const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
@@ -604,6 +613,7 @@ const filterProject = (val: string, update: any) => {
 
 const updateSelectedProject = () => {
   transferErrors.value = [];
+  resetSettings();
 };
 
 const updateIsLabelTransferOn = (newVal: boolean) => {
@@ -694,17 +704,17 @@ watch(
 
 onBeforeUpdate(() => {
   issueSettings.value = {
-      state_detail: props.issue.state_detail,
-      priority: props.issue.priority,
-      target_date: props.issue.target_date,
-      assignees: props.issue.assignee_details.map((assignee) => ({
-        member: assignee,
-      })),
-      watchers: props.issue.watcher_details.map((watcher) => ({
-        member: watcher,
-      })),
-    };
-})
+    state_detail: props.issue.state_detail,
+    priority: props.issue.priority,
+    target_date: props.issue.target_date,
+    assignees: props.issue.assignee_details.map((assignee) => ({
+      member: assignee,
+    })),
+    watchers: props.issue.watcher_details.map((watcher) => ({
+      member: watcher,
+    })),
+  };
+});
 
 onMounted(() => {
   actionsType.forEach((item, index) => {
