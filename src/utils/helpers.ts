@@ -228,3 +228,11 @@ export const parseBoldText = (html: string) => {
     ?.replace(/&lt;b&gt;/gi, '<b>')
     ?.replace(/&lt;\/b&gt;/gi, '</b>');
 };
+
+export const isArraysEqual = (arr1: string[], arr2: string[]): boolean =>{
+  if (arr1.length !== arr2.length) return false;
+  const sorterArr1 = [...arr1].sort();
+  const sorterArr2 = [...arr2].sort();
+
+  return sorterArr1.every((value, index) => value === sorterArr2[index]);
+}

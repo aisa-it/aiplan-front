@@ -277,6 +277,7 @@ import {
   getSuccessTransferIssueByLabelMessage,
   getSuccessTransferIssueMessage,
 } from 'src/utils/notifications';
+import { isArraysEqual } from 'src/utils/helpers';
 
 // constants
 import { DEFAULT_TRANSFER_MODEL } from 'src/constants/constants';
@@ -633,14 +634,6 @@ const resetActionOptions = () => {
   transferLabel.value = null;
 };
 
-const arraysEqual = (arr1: string[], arr2: string[]): boolean => {
-  if (arr1.length !== arr2.length) return false;
-  const sorterArr1 = [...arr1].sort();
-  const sorterArr2 = [...arr2].sort();
-
-  return sorterArr1.every((value, index) => value === sorterArr2[index]);
-};
-
 const saveSettings = (data: typeof issueSettings) => {
   const newSettings = data.value;
   editedIssueParams = {};
@@ -666,7 +659,7 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!arraysEqual(newAssignerIds, assignerIds.value)) {
+  if (!isArraysEqual(newAssignerIds, assignerIds.value)) {
     issueSettings.value.assignees = newSettings.assignees;
     editedIssueParams.assigner_ids = newAssignerIds;
   }
@@ -677,7 +670,7 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!arraysEqual(newWatcherIds, watcherIds.value)) {
+  if (!isArraysEqual(newWatcherIds, watcherIds.value)) {
     issueSettings.value.watchers = newSettings.watchers;
     editedIssueParams.watcher_ids = newWatcherIds;
   }
