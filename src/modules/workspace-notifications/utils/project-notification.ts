@@ -1,5 +1,10 @@
-import { capitalizeFirstLetter, valToNet, valToRole } from 'src/utils/strings';
-import { stateRUS, translatePrioritets, translateVerb } from 'src/utils/translator';
+import { capitalizeFirstLetter } from 'src/utils/strings';
+import { valToNet, valToRole } from 'src/utils/translator';
+import {
+  stateRUS,
+  translatePrioritets,
+  translateVerb,
+} from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
 import { NotificationsNotificationDetailResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getProjectLink } from 'src/utils/links';

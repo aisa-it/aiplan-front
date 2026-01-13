@@ -1,4 +1,4 @@
-import { valToRole } from 'src/utils/strings';
+import { valToRole } from 'src/utils/translator';
 import { translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
 import { getURLDoc } from './doc-activity';

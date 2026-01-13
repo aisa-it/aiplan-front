@@ -23,8 +23,7 @@
           <div class="col flex rounded-borders">
             <SelectStatus
               class="issue-selector full-w"
-              :projectid="issueData.project as string"
-              :issue="issueData"
+              :projectid="props.project_id"
               :status="issueSettings.state_detail"
               :isDisabled="
                 !hasPermissionByIssue(issueData, project, 'change-issue-status')
@@ -32,6 +31,11 @@
               isAdaptiveSelect
               :states-from-cache="statesCache[issueData?.project]"
               @update:status="
+                (val) => {
+                  return (issueSettings.state_detail = val);
+                }
+              "
+              @updateInitialStatus="
                 (val) => {
                   return (issueSettings.state_detail = val);
                 }
@@ -53,7 +57,7 @@
           >
             <SelectAssignee
               class="issue-selector"
-              :projectid="issueData.project as string"
+              :projectid="props.project_id"
               :assigness="issueSettings.assignees"
               :isDisabled="
                 !hasPermissionByIssue(issueData, project, 'change-issue-basic')
@@ -80,7 +84,7 @@
           <div class="col flex rounded-borders issue-panel__q-select-wrapper">
             <SelectWatchers
               class="issue-selector"
-              :projectid="issueData.project"
+              :projectid="props.project_id"
               :watchers="issueSettings.watchers"
               :current-member="user"
               isAdaptiveSelect
@@ -113,10 +117,9 @@
               label="Приоритет"
               class="issue-selector"
               :workspace-slug="issueData.workspace_detail?.slug as string"
-              :projectid="issueData.project as string"
+              :projectid="props.project_id"
               editIssue
               :priority="issueSettings.priority"
-              :issue="issueData"
               isAdaptiveSelect
               :is-disabled="
                 !hasPermissionByIssue(
@@ -198,7 +201,7 @@
 <script lang="ts" setup>
 // core
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Screen } from 'quasar';
 
 // components
@@ -243,6 +246,7 @@ const dynamicWidthDialog = computed(() =>
 
 // props
 const props = defineProps<{
+  project_id: string;
   issue: DtoIssue;
   issue_settings: {
     state_detail: DtoStateLight;
@@ -287,4 +291,9 @@ const close = () => {
     resetSettings();
   }
 };
+
+watch(
+  () => props.issue_settings,
+  () => resetSettings(),
+);
 </script>

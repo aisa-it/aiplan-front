@@ -1,4 +1,4 @@
-import { valToRole } from 'src/utils/strings';
+import { valToRole } from 'src/utils/translator';
 import { translateVerb } from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
 import { getDocLink } from '../helpers/getDocLink';

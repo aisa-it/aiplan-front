@@ -34,7 +34,7 @@ import { onUpdated, ref, watch } from 'vue';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 // utils
-import { valToRole } from 'src/utils/strings';
+import { valToRole } from 'src/utils/translator';
 
 // constants
 import { ROLES } from 'src/constants/constants';

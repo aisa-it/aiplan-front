@@ -71,7 +71,7 @@
             "
             :member="props.row.member"
             :image="props.row.member?.avatar_id"
-            @click.stop="handleRedirectToProfile(props.row.member.id)"
+            @click.stop="navigateToActivityPage(props.row.member.id)"
             size="40px"
           />
           <span class="q-mr-sm">
@@ -177,7 +177,10 @@ import SearchIcon from 'src/components/icons/SearchIcon.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 
 // utils
-import { valToRole } from 'src/utils/strings';
+import { valToRole } from 'src/utils/translator';
+
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
 // constants
 import {
@@ -194,12 +197,8 @@ import {
   DtoWorkspaceMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IQuasarPaginationValues } from 'src/interfaces/issues';
-import { useRouter } from 'vue-router';
 
 const emits = defineEmits<{ update: [] }>();
-
-//core
-const router = useRouter();
 
 // stores
 const userStore = useUserStore();
@@ -283,6 +282,8 @@ useMeta(() => {
     title: metadata.value.title,
   };
 });
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 function setAnotherTitle(title: string) {
   metadata.value.title = `Настройки ${title}`;
@@ -376,18 +377,6 @@ const editUser = (row: DtoProjectMemberLight) => {
 const confirmDelUser = (row: DtoProjectMemberLight) => {
   memberToEdit.value = { ...row };
   isDeleteOpen.value = true;
-};
-
-const handleRedirectToProfile = (id: string) => {
-  if (id === me?.value?.member_id) {
-    router.push({
-      path: '/profile',
-    });
-  } else if (currentWorkspaceSlug.value) {
-    router.push({
-      path: `/${currentWorkspaceSlug.value}/user-activities/${id}`,
-    });
-  }
 };
 </script>
 

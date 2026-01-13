@@ -113,6 +113,7 @@ import {
   computed,
 } from 'vue';
 import { debounce } from 'quasar';
+import { useRoute } from 'vue-router';
 //stores
 import { useProjectStore } from 'stores/project-store';
 import { useWorkspaceStore } from 'stores/workspace-store';
@@ -160,6 +161,7 @@ const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
+const route = useRoute();
 const searchQuery = ref('');
 const myEntity = ref();
 const members = ref([]);
@@ -227,6 +229,30 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
       countMembers.value = d.count;
       members.value = [...members.value, ...d.result];
       myEntity.value = d.my_entity;
+
+      if (!isSearch && props.projectid !== (route.params.project as string)) {
+        const membersIds =
+          d?.count && d?.count > 0
+            ? d.result.map((item) => item.member_id || item.member?.id)
+            : [];
+
+        if (props.assigness && props.assigness.length) {
+          const assigness = props.assigness?.filter((el) =>
+            membersIds.includes(el.member_id || el.member?.id),
+          );
+
+          if (assigness?.length !== props.assigness?.length) {
+            if (assigness?.length > 0) {
+              emit('update:assigness', assigness);
+            } else {
+              emit(
+                'update:assigness',
+                props.defaultAssignee ? props.defaultAssignee : [],
+              );
+            }
+          }
+        }
+      }
     })
     .finally(() => {
       loading.value = false;

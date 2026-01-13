@@ -40,7 +40,7 @@
 
           <div class="file-actions">
             <q-btn
-              v-if="!status && !progress"
+              v-if="!status && !progress && !row.draft"
               flat
               dense
               @click="handleCopyLink(row)"
@@ -61,7 +61,7 @@
               <CloseIcon :width="35" :height="35" />
             </q-btn>
             <q-btn
-              v-if="!progress && !status"
+              v-if="!progress && !status && !row.draft"
               unelevated
               dense
               @click="handleDownload(row)"

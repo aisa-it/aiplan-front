@@ -58,11 +58,7 @@
           "
           :image="issueData.author_detail.avatar_id"
           :member="issueData.author_detail"
-          @click="
-            $router.push({
-              path: `/${currentWorkspaceSlug}/user-activities/${issueData.author_detail.id}`,
-            })
-          "
+          @click="navigateToActivityPage(issueData.author_detail.id)"
         />
         <div class="q-ml-sm wrapped-string">
           {{ aiplan.UserName(issueData.author_detail).join(' ') }}
@@ -389,6 +385,9 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime, msToRussianTime } from 'src/utils/time';
 
+// composables
+import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+
 // components - core
 import AvatarImage from 'src/components/AvatarImage.vue';
 import SingleIssueButtons from 'src/components/issue-panels/SingleIssueButtons.vue';
@@ -448,6 +447,8 @@ const emits = defineEmits<{
 }>();
 
 const refreshCycle = ref();
+
+const { navigateToActivityPage } = useUserActivityNavigation();
 
 // functions
 

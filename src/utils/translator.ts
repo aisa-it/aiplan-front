@@ -36,6 +36,30 @@ export const translatePrioritets = (priority: string) => {
   }
 };
 
+export const valToRole = (val: number) => {
+  switch (val) {
+    case 5:
+      return { value: 5, label: 'Гость' };
+    case 10:
+      return { value: 10, label: 'Участник' };
+    case 15:
+      return { value: 15, label: 'Администратор' };
+    default:
+      return { value: 5, label: 'Гость' };
+  }
+};
+
+export const valToNet = (val: boolean) => {
+  switch (val) {
+    case false:
+      return { value: false, label: 'Скрытый' };
+    case true:
+      return { value: true, label: 'Публичный' };
+    default:
+      return { value: false, label: 'Скрытый' };
+  }
+};
+
 export const translateFirstCharUpperCasePriority = (priority: string) => {
   switch (priority) {
     case 'urgent':

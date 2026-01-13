@@ -120,6 +120,7 @@ import {
   computed,
 } from 'vue';
 import { debounce } from 'quasar';
+import { useRoute } from 'vue-router';
 //utils
 import aiplan from 'src/utils/aiplan';
 import { filterAvailableMembers } from 'src/utils/filters';
@@ -135,13 +136,14 @@ import ArrowDown from '../icons/ArrowDown.vue';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
     projectid?: string;
     issueid?: string | null;
     docId?: string;
-    watchers?: [];
+    watchers?: DtoWorkspaceMember[];
     defaultWatcher?: [];
     isDisabled?: boolean;
     newIssue?: boolean;
@@ -173,6 +175,7 @@ const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
+const route = useRoute();
 const searchQuery = ref('');
 const myEntity = ref();
 const members = ref([]);
@@ -258,6 +261,34 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
     if (isSearch) members.value = [];
     countMembers.value = data.count;
     members.value = [...members.value, ...data.result];
+
+    if (
+      !isSearch &&
+      props.projectid &&
+      props.projectid !== (route.params.project as string)
+    ) {
+      const membersIds =
+        data?.count && data?.count > 0
+          ? data.result.map((item) => item.member_id || item.member?.id)
+          : [];
+
+      if (props.watchers && props.watchers.length) {
+        const watchers = props.watchers?.filter((el) =>
+          membersIds.includes(el.member_id || el.member?.id),
+        );
+
+        if (watchers?.length !== props.watchers?.length) {
+          if (watchers?.length > 0) {
+            emit('update:watchers', watchers);
+          } else {
+            emit(
+              'update:watchers',
+              props.defaultWatcher ? props.defaultWatcher : [],
+            );
+          }
+        }
+      }
+    }
   } catch (e) {
   } finally {
     loading.value = false;
