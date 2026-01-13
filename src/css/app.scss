@@ -1692,3 +1692,27 @@ body .q-table th {
     @extend .sprint-issue-checkbox;
   }
 }
+
+.hint-overlay {
+  opacity: 0.32;
+  transition: opacity 0.3s;
+  cursor: pointer;
+  &__text {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(-12px);
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+}
+
+.hint-overlay:hover {
+  opacity: 1;
+  .hint-overlay__text {
+    position: static;
+    margin-left: 10px;
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
