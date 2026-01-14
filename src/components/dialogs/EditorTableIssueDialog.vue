@@ -58,7 +58,6 @@
               option-value="key"
               class="base-selector"
               label="Колонки"
-              use-input
               multiple
               dense
               @new-value="addChosenColumns"
@@ -222,7 +221,12 @@ const columnOptionsMap: { label: string; key: string }[] = [
   { label: 'Исполнитель', key: 'assignees' },
   { label: 'Теги', key: 'labels' },
 ];
-const chosenTableColumns = ref<typeof columnOptionsMap>([]);
+const chosenTableColumns = ref<typeof columnOptionsMap>([
+  { label: 'Название', key: 'name' },
+  { label: 'Приоритет', key: 'priority' },
+  { label: 'Статус', key: 'state' },
+  { label: 'Исполнитель', key: 'assignees' },
+]);
 const restTableColumns = ref<typeof columnOptionsMap>([]);
 
 function addChosenColumns(
@@ -287,7 +291,7 @@ const createIssueTable = (): void => {
   const headerCells = cols.map((col) => {
     const text = col.label.trim();
     const safeText = text === '' ? '&nbsp;' : escapeHtml(text);
-    return `<th>${safeText}</th>`;
+    return `<th contenteditable="false">${safeText}</th>`;
   });
   for (let i = 0; i < extraCols; i++) {
     headerCells.push('<th>&nbsp;</th>');
@@ -303,7 +307,11 @@ const createIssueTable = (): void => {
         switch (col.key) {
           case 'name':
             displayValue = issue.name || '-';
-            break;
+            const issueLink =
+              issue.short_url ||
+              issue.url ||
+              `/${issue.workspace_detail?.slug}/projects/${issue.project_detail?.id}/issues/${issue.id}`;
+            return `<td contenteditable="false"><a target="_blank" rel="nofollow" href="${issueLink}"><span style="font-size: 14px;">${escapeHtml(String(displayValue).trim())}</span></a></td>`;
 
           case 'sequence_id':
             displayValue = String(issue.sequence_id || '-');
@@ -367,11 +375,11 @@ const createIssueTable = (): void => {
         let text = String(displayValue).trim();
         // text = text === '-' || text === '' ? '&nbsp;' : escapeHtml(text); - убирать прочерки
         text = text === '' ? '&nbsp;' : escapeHtml(text);
-        return `<td>${text}</td>`;
+        return `<td contenteditable="false"><span style="font-size: 14px;">${text}</span></td>`;
       });
 
       for (let i = 0; i < extraCols; i++) {
-        cells.push('<td>&nbsp;</td>');
+        cells.push('<td><span style="font-size: 14px;">&nbsp;</span></td>');
       }
 
       return `<tr>${cells.join('')}</tr>`;

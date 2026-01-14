@@ -432,6 +432,12 @@ defineExpose({
     transform: translate(-50%, -50%);
     z-index: 2;
   }
+
+  &:deep(th[contenteditable='false']),
+  &:deep(td[contenteditable='false']) {
+    caret-color: transparent;
+    cursor: default;
+  }
 }
 
 .html-editor ::-webkit-scrollbar {
