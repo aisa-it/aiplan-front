@@ -1010,29 +1010,28 @@ select:-ms-autofill {
   border-bottom: 1px solid $darkest-border-color;
   cursor: pointer;
   transition:
+    min-height 0.4s ease,
     height 0.4s ease,
     max-height 0.4s ease;
 }
 
 .menu-item--open {
   background-color: inherit;
-  height: 250px;
-}
+  overflow: scroll;
+  flex: 1 1 auto;
 
-@media screen and (max-height: 800px) {
-  .menu-item--open {
-    height: 50%;
+  @media screen and (max-width: 650px) {
+    height: 250px;
+    flex: none;
+
+    @media screen and (max-height: 800px) {
+      height: 50%;
+    }
   }
 }
-// WIP FRO-786
-// .menu-item--open {
-//   background-color: inherit;
-//   overflow: scroll;
-//   flex: 1 1 auto;
-// }
-// .menu-item--dragging {
-//   transition: none;
-// }
+.menu-item--dragging {
+  transition: none;
+}
 .menu-item--help {
   background-color: inherit;
   height: 234px;
