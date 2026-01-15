@@ -157,15 +157,17 @@ const { fetchPinnedIssues } = useIssuesStore();
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
+const clientWidth = ref(document.documentElement.clientWidth)
 const minWidth = computed(() =>
-  Math.max(document.documentElement.clientWidth / 2, defaultWidth),
+  Math.max(clientWidth.value / 2, defaultWidth),
 );
 const maxWidth = computed(
-  () => document.documentElement.clientWidth - menuSidebarWidth.value,
+  () => clientWidth.value - menuSidebarWidth.value,
 );
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   minWidth,
   maxWidth,
+  clientWidth,
   'drawerWidth',
   'right',
 );

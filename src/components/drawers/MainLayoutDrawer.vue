@@ -54,14 +54,15 @@ const uiStore = useUIStore();
 const { menuSidebarWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 300;
-
+const clientWidth = ref(document.documentElement.clientWidth)
 const minWidth = computed(() => defaultWidth);
 const maxWidth = computed(() =>
-  isMobile.value ? defaultWidth : document.documentElement.clientWidth / 2,
+  isMobile.value ? defaultWidth : clientWidth.value / 2,
 );
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   minWidth,
   maxWidth,
+  clientWidth,
   'menuSidebarWidth',
   'left',
 );
