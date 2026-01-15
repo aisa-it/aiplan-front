@@ -32,7 +32,7 @@
         <q-btn
           class="secondary-btn-only-icon-sm"
           icon="open_in_full"
-          @click="emits('open', issueData.sequence_id, issueData.project)"
+          @click="emits('open', issueData.sequence_id, issueData.project_detail.identifier)"
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
