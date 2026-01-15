@@ -218,7 +218,7 @@ export function useTusUploader(options: UseUploaderOptions) {
     uploading.value = false;
 
     if (queue.value.length > 0) {
-      processQueue();
+      setTimeout(processQueue, 0);
     }
   };
 
