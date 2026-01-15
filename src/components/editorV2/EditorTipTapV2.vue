@@ -25,6 +25,7 @@
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
       @enable-editing="$emit('enableEditing')"
       @toggle-fullscreen="$emit('toggle-fullscreen')"
+      @create-issue-table="isIssueTableDialogOpen = !isIssueTableDialogOpen"
     />
 
     <div class="html-editor__outer">
@@ -57,6 +58,22 @@
           ]"
           @click="handleClickEditor"
         />
+        <!-- TODO Вынести в отдельный компонент кнопки-всплывашки -->
+        <q-btn
+          v-if="hoveredTable && tableButtonPosition"
+          :style="{
+            top: tableButtonPosition.top + 'px',
+            left: tableButtonPosition.left + 'px',
+          }"
+          class="html-editor__table-hover-button primary-btn"
+          dense
+          no-caps
+          @mouseenter="onButtonMouseEnter"
+          @mouseleave="onButtonMouseLeave"
+          @click="isIssueTableDialogOpen = !isIssueTableDialogOpen"
+        >
+          Изменить
+        </q-btn>
         <EditorTooltipMention
           :content="tooltipContentMention"
           :anchor="tooltipAnchorMention"
@@ -76,6 +93,10 @@
     />
     <EditorAnchorDialog
       v-model="editAnchor"
+      :editor-instance="editorInstance"
+    />
+    <EditorTableIssueDialog
+      v-model="isIssueTableDialogOpen"
       :editor-instance="editorInstance"
     />
   </div>
@@ -112,6 +133,7 @@ import {
 } from './utils/editorUtils';
 import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
+import EditorTableIssueDialog from '../dialogs/EditorTableIssueDialog.vue';
 import aiplan from 'src/utils/aiplan';
 
 // Interfaces
@@ -198,8 +220,57 @@ provide('isEditorReadOnly', isReadOnly);
 
 const editorExtensions = computed(() => getEditorExtensions(props));
 
+// Наведение на таблицу
+const hoveredTable = ref<HTMLElement | null>(null);
+const issueTableData = ref<any>(null);
+const isIssueTableDialogOpen = ref<boolean>(false);
+
+const tableButtonPosition = ref<{ top: number; left: number } | null>(null);
+const isHoveringButton = ref(false);
+const isHoveringTable = ref(false);
+let hideButtonTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleHideButton() {
+  if (hideButtonTimeout) clearTimeout(hideButtonTimeout);
+  hideButtonTimeout = setTimeout(() => {
+    if (!isHoveringTable.value && !isHoveringButton.value) {
+      hoveredTable.value = null;
+      issueTableData.value = null;
+    }
+  }, 350);
+}
+
+function onButtonMouseEnter() {
+  isHoveringButton.value = true;
+  if (hideButtonTimeout) {
+    clearTimeout(hideButtonTimeout);
+    hideButtonTimeout = null;
+  }
+}
+
+function onButtonMouseLeave() {
+  isHoveringButton.value = false;
+  // Если ушли с кнопки и не на таблице — скрыть
+  if (!isHoveringTable.value) {
+    scheduleHideButton();
+  }
+}
+
+function updateTableButtonPosition(tableEl: HTMLElement) {
+  const rect = tableEl.getBoundingClientRect();
+  const containerRect = document
+    .querySelector('.html-editor__wrapper')
+    ?.getBoundingClientRect();
+
+  if (!containerRect) return;
+
+  const top = rect.bottom - containerRect.top + 8;
+  const left = rect.left - containerRect.left;
+  tableButtonPosition.value = { top, left };
+}
+
 // Попап с информацией о пользователе при наведении
-const handleMouseMove = (e: any) => {
+const handleMouseMove = (e: MouseEvent) => {
   const isMention = e.target.dataset.type === 'mention' && props.isMention;
   if (isMention) {
     handleMouseEnter(e);
@@ -212,9 +283,36 @@ const handleMouseMove = (e: any) => {
   if (props.canEdit && props.readOnlyEditor) {
     isShowEdit.value = true;
   }
+
+  // Таблица задач
+  const target = e.target as HTMLElement;
+  const tableEl = target.closest('.issue-table');
+
+  if (tableEl && editorInstance.value) {
+    // Парсинг зашитых данных
+    const rawParams = tableEl.getAttribute('data-issue-table-params');
+    issueTableData.value = rawParams
+      ? JSON.parse(decodeURIComponent(rawParams))
+      : null;
+
+    // Отображение кнопки "Изменить"
+    hoveredTable.value = tableEl;
+    isHoveringTable.value = true;
+
+    if (hideButtonTimeout) {
+      clearTimeout(hideButtonTimeout);
+      hideButtonTimeout = null;
+    }
+    updateTableButtonPosition(tableEl);
+  } else {
+    if (isHoveringTable.value) {
+      isHoveringTable.value = false;
+      scheduleHideButton();
+    }
+  }
 };
 
-const handleMouseLeave = (e: any) => {
+const handleMouseLeave = (e: MouseEvent) => {
   if (e?.toElement?.className !== 'mention-popup') {
     isTooltipMention.value = false;
   }
@@ -374,6 +472,11 @@ defineExpose({
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+
+  &__table-hover-button {
+    position: absolute;
+  }
 
   &__toolbar {
     overflow: hidden;

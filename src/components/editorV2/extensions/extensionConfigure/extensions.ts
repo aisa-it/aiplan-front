@@ -69,6 +69,30 @@ export const getEditorExtensions = (props) => {
     Table.configure({
       resizable: true,
       cellMinWidth: 25,
+    }).extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          class: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('class'),
+            renderHTML: (attributes) => {
+              return { class: attributes.class };
+            },
+          },
+          'data-issue-table-params': {
+            default: null,
+            parseHTML: (element) =>
+              element.getAttribute('data-issue-table-params'),
+            renderHTML: (attributes) => {
+              return {
+                'data-issue-table-params':
+                  attributes['data-issue-table-params'],
+              };
+            },
+          },
+        };
+      },
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],

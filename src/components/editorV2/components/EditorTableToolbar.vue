@@ -34,7 +34,7 @@
         :class-prevent="classPrevent"
         :isMobile="isMobile"
       />
-      <EditorTableIssueButton :editor-instance="editorInstance" />
+      <EditorTableIssueButton :editor-instance="editorInstance" @create-issue-table="$emit('create-issue-table')"/>
     </div>
   </transition>
 </template>
@@ -56,6 +56,8 @@ const props = defineProps<{
   classPrevent?: string;
   isMobile?: boolean;
 }>();
+
+const emit = defineEmits(['create-issue-table']);
 
 const operationMenuTable = computed(() => {
   return {

@@ -133,6 +133,13 @@ import {
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Editor } from '@tiptap/core';
 
+interface IssueTableParams {
+  currentFilter: TypesIssuesListFilters | null;
+  chosenTableColumns: { label: string; key: string }[];
+  additionalColumnsNumber: number;
+  checkedIssues: string[];
+}
+
 const workspaceStore = useWorkspaceStore();
 const filtersStore = useFiltersStore();
 
@@ -283,6 +290,15 @@ function escapeHtml(unsafe: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function encodeTableParams(params: IssueTableParams): string {
+  return encodeURIComponent(JSON.stringify(params));
+}
+
+function decodeTableParams(encoded: string | null): IssueTableParams | null {
+  if (!encoded) return null;
+  return JSON.parse(decodeURIComponent(encoded));
+}
+
 const createIssueTable = (): void => {
   const cols = chosenTableColumns.value;
   const extraCols = Math.max(0, additionalColumnsNumber.value || 0);
@@ -387,7 +403,17 @@ const createIssueTable = (): void => {
     .join('');
 
   const tbody = bodyRows ? `<tbody>${bodyRows}</tbody>` : '';
-  const tableHtml = `<table>${thead}${tbody}</table>`.trim();
+
+  // Запись данных в data-атрибуты для возможности редактирования таблицы
+  const tableParams: IssueTableParams = {
+    currentFilter: currentFilter.value ?? null,
+    chosenTableColumns: chosenTableColumns.value,
+    additionalColumnsNumber: additionalColumnsNumber.value ?? 0,
+    checkedIssues: checkedIssues.value.map((issue) => issue.id),
+  };
+  const encodedParams = encodeTableParams(tableParams);
+
+  const tableHtml = `<table class="issue-table" ${encodedParams ? `data-issue-table-params="${encodedParams}"` : ''}>${thead}${tbody}</table>`.trim();
 
   props.editorInstance.chain().focus().insertContent(tableHtml).run();
   closeDialog();
