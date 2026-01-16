@@ -7,10 +7,10 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
   let value = '';
 
   function createSprintLink(sprintName: string) {
-    if (activity.id) {
+    if (activity.sprint_detail?.id) {
       return `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${`/${activity.workspace_detail?.slug}/sprints/${activity.id}`}>
+                    href=${`/${activity.workspace_detail?.slug}/sprints/${activity.sprint_detail.id}`}>
                     "${sprintName}"<a/>`;
     }
     return `"${sprintName}"`;
