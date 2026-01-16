@@ -10,8 +10,8 @@
     :options="states"
     :option-label="(v) => v.name"
     :option-value="(v) => v.id"
-    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select': ''}`"
-    :style="{width: isAdaptiveSelect ? '' : '160px'}"
+    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
+    :style="{ width: isAdaptiveSelect ? '' : '160px' }"
     dense
     @popup-show="() => refresh()"
   >
@@ -99,7 +99,7 @@ export default defineComponent({
       type: Object,
       required: false,
     },
-    isAdaptiveSelect : {
+    isAdaptiveSelect: {
       type: Boolean,
       required: false,
       default: () => false,
@@ -136,11 +136,37 @@ export default defineComponent({
         arr = arr.concat(data[n]);
       }
       states.value = arr;
-      if (arr.every((el) => el.id !== props.status?.id))
+
+      // При создании задачи
+      if (!props.status) {
         emit(
           'update-initial-status',
           arr.find((status) => status.default === true) || arr[0],
         );
+      } else if (
+        // Если выбран другой проект
+        singleIssueStore.issueData &&
+        props.projectid !== singleIssueStore.issueData.project &&
+        props.projectid !==
+          singleIssueStore.issueData.project_detail?.identifier
+      ) {
+        const newStatus = arr.find(
+          (status) =>
+            status.name === props.status?.name &&
+            status.group === props.status?.group,
+        );
+        // Если соответствующий статус отсутствует:
+        if (!newStatus) {
+          emit(
+            'update-initial-status',
+            arr.find((status) => status.default === true) || arr[0],
+          );
+        }
+        // Если в др. проекте есть соответствующий статус:
+        else if (newStatus && newStatus.id !== props.status.id) {
+          emit('update-initial-status', newStatus);
+        }
+      }
     };
 
     const showNotification = (type: 'success' | 'error', msg?: string) => {

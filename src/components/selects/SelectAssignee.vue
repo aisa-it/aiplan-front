@@ -126,13 +126,13 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
-import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
     projectid: string;
     issueid?: string | null;
-    assigness?: DtoWorkspaceMember[];
+    assigness?: DtoProjectMemberLight[];
     defaultAssignee?: [];
     isDisabled?: boolean;
     newIssue?: boolean;
@@ -161,7 +161,6 @@ const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
-const route = useRoute();
 const searchQuery = ref('');
 const myEntity = ref();
 const members = ref([]);
@@ -213,6 +212,33 @@ const options = computed(() => {
 });
 
 //methods
+const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
+  const memberChecks = membersArr.map(async (el: DtoProjectMemberLight) => {
+    // Для каждого пользователя выполняем поисковый запрос
+    let data = await projectStore.getProjectMembers(
+      currentWorkspaceSlug.value as string,
+      props.projectid as string,
+      {
+        search_query: el.member?.email,
+        find_by: ['email'],
+      },
+    );
+
+    let result = data?.result;
+
+    const isFound = result?.find(
+      (item) =>
+        (item.member_id || item.member?.id) === (el.member_id || el.member?.id),
+    );
+
+    return isFound ? el : null;
+  });
+
+  const checkedMembers = await Promise.all(memberChecks);
+
+  return checkedMembers.filter((el) => el !== null);
+};
+
 const refresh = async (searchQuery?: string, isSearch?: boolean) => {
   loading.value = true;
   await projectStore
@@ -223,25 +249,48 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
       order_by: pagination.order_by,
       desc: pagination.desc,
     })
-    .then((d) => {
+    .then(async (d) => {
       if (isSearch) members.value = [];
 
       countMembers.value = d.count;
       members.value = [...members.value, ...d.result];
       myEntity.value = d.my_entity;
 
-      if (!isSearch && props.projectid !== (route.params.project as string)) {
+    // Если выбран другой проект
+      if (
+        !isSearch &&
+        singleIssueStore.issueData &&
+        props.projectid !== singleIssueStore.issueData.project &&
+        props.projectid !==
+          singleIssueStore.issueData.project_detail?.identifier
+      ) {
         const membersIds =
           d?.count && d?.count > 0
             ? d.result.map((item) => item.member_id || item.member?.id)
             : [];
 
         if (props.assigness && props.assigness.length) {
-          const assigness = props.assigness?.filter((el) =>
-            membersIds.includes(el.member_id || el.member?.id),
-          );
+          let notInMembers: DtoProjectMemberLight[] = [];
+          let assigness: DtoProjectMemberLight[] = [];
+
+          props.assigness?.forEach((el) => {
+            if (membersIds.includes(el.member_id || el.member?.id)) {
+              assigness.push(el);
+            } else {
+              notInMembers.push(el);
+            }
+          });
 
           if (assigness?.length !== props.assigness?.length) {
+            // Если пользователь не нашелся, ищем через поисковый запрос, т.к. мог не попасть из-за лимита
+            if (notInMembers.length) {
+              const additionalAssigness =
+                await getFilteredMembers(notInMembers);
+              if (additionalAssigness.length) {
+                assigness.push(...additionalAssigness);
+              }
+            }
+
             if (assigness?.length > 0) {
               emit('update:assigness', assigness);
             } else {

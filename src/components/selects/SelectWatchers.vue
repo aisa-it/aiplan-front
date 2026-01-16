@@ -136,14 +136,14 @@ import ArrowDown from '../icons/ArrowDown.vue';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
-import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
     projectid?: string;
     issueid?: string | null;
     docId?: string;
-    watchers?: DtoWorkspaceMember[];
+    watchers?: DtoProjectMemberLight[];
     defaultWatcher?: [];
     isDisabled?: boolean;
     newIssue?: boolean;
@@ -225,6 +225,33 @@ const { getWidthStyle: selectWatcherWidth } =
   useResizeObserverSelect(selectWatcherRef);
 
 //methods
+const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
+  const memberChecks = membersArr.map(async (el: DtoProjectMemberLight) => {
+    // Для каждого пользователя выполняем поисковый запрос
+    let data = await projectStore.getProjectMembers(
+      currentWorkspaceSlug.value as string,
+      props.projectid as string,
+      {
+        search_query: el.member?.email,
+        find_by: ['email'],
+      },
+    );
+
+    let result = data?.result;
+
+    const isFound = result?.find(
+      (item) =>
+        (item.member_id || item.member?.id) === (el.member_id || el.member?.id),
+    );
+
+    return isFound ? el : null;
+  });
+
+  const checkedMembers = await Promise.all(memberChecks);
+
+  return checkedMembers.filter((el) => el !== null);
+};
+
 const refresh = async (searchQuery?: string, isSearch?: boolean) => {
   loading.value = true;
   let data;
@@ -262,10 +289,12 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
     countMembers.value = data.count;
     members.value = [...members.value, ...data.result];
 
+    // Если выбран другой проект
     if (
       !isSearch &&
-      props.projectid &&
-      props.projectid !== (route.params.project as string)
+      singleIssueStore.issueData &&
+      props.projectid !== singleIssueStore.issueData.project &&
+      props.projectid !== singleIssueStore.issueData.project_detail?.identifier
     ) {
       const membersIds =
         data?.count && data?.count > 0
@@ -273,11 +302,27 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
           : [];
 
       if (props.watchers && props.watchers.length) {
-        const watchers = props.watchers?.filter((el) =>
-          membersIds.includes(el.member_id || el.member?.id),
-        );
+        let notInMembers: DtoProjectMemberLight[] = [];
+        let watchers: DtoProjectMemberLight[] = [];
+
+        props.watchers?.forEach((el) => {
+          if (membersIds.includes(el.member_id || el.member?.id)) {
+            watchers.push(el);
+          } else {
+            notInMembers.push(el);
+          }
+        });
 
         if (watchers?.length !== props.watchers?.length) {
+          // Если пользователь не нашелся, ищем через поисковый запрос, т.к. мог не попасть из-за лимита
+
+          if (notInMembers.length) {
+            const additionalWatchers = await getFilteredMembers(notInMembers);
+            if (additionalWatchers.length) {
+              watchers.push(...additionalWatchers);
+            }
+          }
+
           if (watchers?.length > 0) {
             emit('update:watchers', watchers);
           } else {
