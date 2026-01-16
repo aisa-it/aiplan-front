@@ -135,6 +135,16 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
         return `<span>удалил(-а) интеграцию ${activity.old_value} ${onlyWorkspace ? '' : fromWorkspace}<span/>`;
       }
 
+    case 'sprint':
+      if (activity.verb === 'created') {
+        return `<span>создал(-а) спринт  <a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
+                    href=${`/${activity.workspace_detail?.slug}/sprints/${activity.new_entity_detail.id}`}>
+                    "${activity.new_value}"<a/><span/>`;
+      } else if (activity.verb === 'deleted') {
+        return `<span>удалил(-а) спринт ${activity.old_value}<span/>`;
+      }
+
     default:
       break;
   }

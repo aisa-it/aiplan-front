@@ -4,6 +4,7 @@ import TableOfContentsNodeView from 'src/components/TableOfContentsNodeView.vue'
 
 export const generateHeadingLinks = (items: []) => {
   const mappedItems = items.map((link: any) => ({
+    id: link.id,
     text: link.textContent,
     index: link.itemIndex,
     level: link.level,

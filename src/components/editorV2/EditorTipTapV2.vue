@@ -31,11 +31,57 @@
       <transition name="fade">
         <span
           v-if="canEdit && isReadOnly"
-          :class="`html-editor__btn-edit ${classPrevent}`"
+          :class="[
+            'html-editor__btn-edit',
+            classPrevent,
+            { 'html-editor__btn-edit--force': isShowEdit || isTocPopupOpen },
+          ]"
           title="Нажмите для редактирования"
           @click="$emit('enableEditing')"
         >
           <EditIcon />
+
+          <q-btn
+            v-if="props.showHeadings && tocLinks.length"
+            dense
+            flat
+            padding="0"
+            :class="`html-editor__btn-toc ${classPrevent}`"
+            title="Оглавление"
+            @click.stop
+          >
+            <component :is="ICONS.headingsIcon" />
+            <q-popup-proxy
+              ref="tocPopupRef"
+              v-model="isTocPopupOpen"
+              class="hide-scrollbar"
+              :offset="[-10, 0]"
+            >
+              <q-card style="max-width: 360px; max-height: 300px">
+                <q-card-section class="text-subtitle2 q-pb-sm">
+                  Оглавление
+                </q-card-section>
+
+                <q-separator />
+
+                <q-card-section class="q-pt-sm q-pb-sm">
+                  <div v-for="link in tocLinks" :key="link.id">
+                    <a
+                      v-close-popup
+                      href="#"
+                      :style="
+                        'padding-left:' + `${30 * (link.originalLevel - 1)}px`
+                      "
+                      class="html-editor__toc-link"
+                      @click.prevent="onTocItemClick(link)"
+                    >
+                      {{ link.index }} {{ link.text }}
+                    </a>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </q-popup-proxy>
+          </q-btn>
         </span>
       </transition>
 
@@ -97,6 +143,7 @@ import { useQuasar, Screen, EventBus } from 'quasar';
 
 // TipTap
 import { Editor, EditorContent } from '@tiptap/vue-3';
+import { TextSelection } from '@tiptap/pm/state';
 import { generateHeadingLinks } from 'src/utils/tableOfContents';
 
 // Components
@@ -113,6 +160,8 @@ import {
 import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import aiplan from 'src/utils/aiplan';
+import { ICONS } from 'src/utils/icons';
+import { useMenuHandler } from 'src/composables/useMenuHandler';
 
 // Interfaces
 interface IEditorV2Props {
@@ -184,6 +233,7 @@ const editAnchor = ref<boolean>(false);
 const editorKey = ref<string>(
   props.editorId + props.readOnlyEditor ? 'readonly' : '',
 );
+const tocLinks = ref([]);
 
 // mentions
 const isTooltipMention = ref<boolean>(false);
@@ -191,6 +241,10 @@ const tooltipAnchorMention = ref<HTMLElement>();
 const tooltipContentMention = ref<ContentMention>({});
 const isShowEdit = ref<boolean>(false);
 const isOpenDiagram = ref<boolean>(false);
+const isTocPopupOpen = ref<boolean>(false);
+const tocPopupRef = ref();
+
+useMenuHandler(tocPopupRef);
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -219,7 +273,9 @@ const handleMouseLeave = (e: any) => {
     isTooltipMention.value = false;
   }
 
-  isShowEdit.value = false;
+  if (!isTocPopupOpen.value) {
+    isShowEdit.value = false;
+  }
 };
 
 const handleMember = (member: any, isUserName?: boolean): string => {
@@ -261,24 +317,63 @@ function createEditor() {
   editorInstance.value = new Editor({
     content: props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
     editable: !isReadOnly.value,
-    extensions: editorExtensions.value,
+    extensions: editorExtensions.value as any,
     onUpdate: () => {
       emit('update:modelValue', editorInstance.value?.getHTML());
       emit('updateEditorDOM', editorInstance.value?.state.doc);
+      refreshTocLinks();
     },
     onCreate: () => {
       emit('updateEditorDOM', editorInstance.value?.state.doc);
+      refreshTocLinks();
     },
     editorProps: getEditorProps(editorInstance, onCommentLink),
     classPrevent: props.classPrevent,
-  });
+  } as any);
   const { addMouseUpListener } = useHandleMouseUp(
-    editorInstance,
+    editorInstance as any,
     isFormatSampleActive,
   );
   addMouseUpListener();
   emit('getEditor', editorInstance.value);
 }
+
+const refreshTocLinks = () => {
+  if (!props.showHeadings || !editorInstance.value) {
+    tocLinks.value = [];
+    return;
+  }
+
+  const items =
+    editorInstance.value.extensionStorage?.tableOfContents?.content || [];
+  tocLinks.value = generateHeadingLinks(items);
+};
+
+const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
+  if (!editorInstance.value) return;
+  const editor = editorInstance.value;
+
+  const element = editor.view.dom.querySelector(
+    `[data-toc-id="${link.id}"]`,
+  )
+
+  if (!element) return;
+
+  try {
+    const pos = editor.view.posAtDOM(element, 0);
+    const tr = editor.view.state.tr;
+    tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
+    editor.view.dispatch(tr);
+    editor.view.focus();
+  } catch (e) {
+    // ignore
+  }
+
+  window.scrollTo({
+    top: element.getBoundingClientRect().top + window.scrollY - 60,
+    behavior: 'smooth',
+  });
+};
 
 function handleClickEditor(e: MouseEvent | TouchEvent) {
   const target = e.target as HTMLElement;
@@ -352,7 +447,8 @@ watch(
     newVal = newVal.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;');
     if (editorInstance.value && newVal !== editorInstance.value.getHTML()) {
       let content = replaceColor(newVal, $q.dark.isActive ? 'dark' : 'light');
-      editorInstance.value.commands.setContent(content, false);
+      editorInstance.value.commands.setContent(content, { emitUpdate: false });
+      refreshTocLinks();
     }
   },
 );
@@ -392,10 +488,41 @@ defineExpose({
 
   &__btn-edit {
     display: none;
+    width: 34px;
+    box-sizing: border-box;
+    padding: 6px 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
     cursor: pointer;
     background-color: $bg-color;
     border-radius: 0 8px 8px 0;
     border-left: 1px solid $dark-border-color;
+    position: sticky;
+    top: 50px;
+    z-index: 10;
+  }
+
+  &__btn-edit--force {
+    display: flex !important;
+  }
+
+  &__btn-toc {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 6px;
+    position: sticky;
+    top: 86px;
+    z-index: 10;
+  }
+
+  &__btn-toc :deep(.q-btn__content) {
+    padding: 0;
   }
 
   &__btn-edit svg {
@@ -407,6 +534,11 @@ defineExpose({
     flex-shrink: 0;
     height: 30px;
     z-index: 10;
+  }
+
+  &__btn-toc svg {
+    width: 22px;
+    height: 22px;
   }
 
   &__wrapper {
@@ -436,6 +568,20 @@ defineExpose({
 
 .html-editor ::-webkit-scrollbar {
   display: block !important;
+}
+
+.html-editor__toc-link {
+  display: block;
+  text-decoration: none;
+  color: var(--q-primary);
+  padding: 2px 0;
+
+  &::before {
+    content: '• ';
+    display: inline-block;
+    width: 1em;
+    color: var(--text-color);
+  }
 }
 
 @media screen and (width < 1024px) {

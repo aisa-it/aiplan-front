@@ -28,6 +28,10 @@
       </HintTooltip>
     </q-item>
     <NavMenuBottomBarHelpAndSupport />
+    <q-banner v-if="isDev()" rounded class="bg-orange text-white flex-shrink-0">
+      <b>Внимание!</b> Вы находитесь на активно разрабатываемой версии АИПлана.
+      Сохранность данных не гарантируется.
+    </q-banner>
   </div>
 </template>
 
@@ -47,7 +51,9 @@ import NavSprints from './menu/NavSprints.vue';
 import { useRoute } from 'vue-router';
 import { computed, ref } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-// import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
+import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
+
+import { isDev } from 'src/utils/helpers';
 
 const route = useRoute();
 const utilsStore = useUtilsStore();
@@ -63,10 +69,8 @@ const updateFavoriteState = (id: string, state: boolean) => {
   docsMenu.value.setFavoriteState(id, state);
 };
 const menuRef = ref<HTMLElement | null>(null);
-  
-// WIP FRO-786
-// const fixedHeightItems = ['help', 'jitsi'];
-// useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
+const fixedHeightItems = ['help', 'jitsi'];
+useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
 </script>
 <style scoped>
 .menu {

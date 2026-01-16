@@ -27,21 +27,22 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { deleteSprint } from '../services/api';
-import { useRoute } from 'vue-router';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import CancelButton from 'src/components/buttons/CancelButton.vue';
 
 import { getSprintDates } from '../helpres';
 
-const route = useRoute();
-
 const props = defineProps<{ sprint: DtoSprint | null }>();
 const emits = defineEmits<{ success: []; error: [] }>();
 
+const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+
 const handleDelete = async (): Promise<void> => {
-  deleteSprint(route.params.workspace as string, props.sprint?.id ?? '')
+  deleteSprint(currentWorkspaceSlug.value as string, props.sprint?.id ?? '')
     .then(() => emits('success'))
     .catch(() => emits('error'));
 };

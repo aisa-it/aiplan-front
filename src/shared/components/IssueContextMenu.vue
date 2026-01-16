@@ -68,6 +68,12 @@
         </q-item-section>
         <q-item-section>Копировать/перенести</q-item-section>
       </q-item>
+      <q-item clickable v-close-popup @click="addNewIssue">
+        <q-item-section thumbnail class="q-px-md">
+          <ParentIcon />
+        </q-item-section>
+        <q-item-section>Создать подзадачу</q-item-section>
+      </q-item>
       <q-item
         class="context-menu__options-item_red"
         clickable
@@ -101,6 +107,7 @@
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
 
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -111,6 +118,7 @@ import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 import DeleteIssueDialog from 'src/components/dialogs/IssueDialogs/DeleteIssueDialog.vue';
 import TransferTaskDialog from 'src/components/dialogs/TransferTaskDialogs/TransferTaskDialog.vue';
 import ManageIssueSprintsDialog from 'src/components/dialogs/IssueDialogs/ManageIssueSprintsDialog.vue';
+import NewIssueDialog from 'src/components/NewIssueDialog.vue';
 
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
@@ -121,6 +129,7 @@ import BinIcon from 'src/components/icons/BinIcon.vue';
 import PinIcon from 'src/components/icons/PinIcon.vue';
 import UnpinIcon from 'src/components/icons/UnpinIcon.vue';
 import SprintIcon from 'src/components/icons/SprintIcon.vue';
+import ParentIcon from 'src/components/icons/ParentIcon.vue';
 
 const props = defineProps<{
   row: object | null;
@@ -137,6 +146,8 @@ const { pinIssue, unpinIssue } = useIssuesStore();
 const { pinnedIssues } = storeToRefs(useIssuesStore());
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
+
+const $q = useQuasar();
 
 const route = useRoute();
 const workspaceSlug = computed<string>(() => {
@@ -201,6 +212,17 @@ const manageIssueSprints = (): void => {
     return;
   }
   isManageSprintsOpen.value = true;
+};
+
+const addNewIssue = () => {
+  $q.dialog({
+    component: NewIssueDialog,
+    componentProps: {
+      parent: props.row?.id,
+      projectid: props.row?.project_detail?.id,
+      project: props.row?.project,
+    },
+  }).onOk(() => emit('refresh'));
 };
 </script>
 
