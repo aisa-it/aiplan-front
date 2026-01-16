@@ -9,7 +9,7 @@
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
     :class="{ 'adaptive-select': isAdaptiveSelect }"
-    :popup-content-style="selectWatcherWidth"
+    :popup-content-style="selectSprintWidth"
     :label="label"
     :disable="isDisabled"
     :modelValue="currentSprints"
@@ -87,7 +87,6 @@ const ACTIONS = {
 
 const props = withDefaults(
   defineProps<{
-    projectid?: string;
     issueid?: string | null;
     currentSprints?: DtoSprintLight[];
     isDisabled?: boolean;
@@ -99,8 +98,6 @@ const props = withDefaults(
   {
     isDisabled: () => false,
     label: () => 'Спринт',
-    newIssue: () => false,
-    currentMember: () => null,
     hideDropdownIcon: () => false,
   },
 );
@@ -114,7 +111,7 @@ const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { sprintsList } = sprintStore;
+const { sprintsList } = storeToRefs(sprintStore);
 
 //variables
 const selectSprintRef = ref();
@@ -122,7 +119,7 @@ const loading = ref(false);
 const isOpen = ref(false);
 
 //composibles
-const { getWidthStyle: selectWatcherWidth } =
+const { getWidthStyle: selectSprintWidth } =
   useResizeObserverSelect(selectSprintRef);
 
 //methods

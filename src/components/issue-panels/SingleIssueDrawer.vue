@@ -327,8 +327,6 @@
         <div class="col flex rounded-borders column">
           <SelectSprints
             class="issue-selector"
-            :workspace-id="issueData.workspace"
-            :projectid="issueData.project"
             :issueid="issueData.id"
             :currentSprints="issueData.sprints"
             :isDisabled="
