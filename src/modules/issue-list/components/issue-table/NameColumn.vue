@@ -45,7 +45,9 @@ import { computed } from 'vue';
 const props = defineProps<{
   rowInfo: any;
 }>();
-
+const emits = defineEmits<{
+  openPreview: [value: any];
+}>();
 const { user } = storeToRefs(useUserStore());
 
 const isParent = computed((): boolean => {

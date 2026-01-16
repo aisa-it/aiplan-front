@@ -1,15 +1,14 @@
 import { LocalStorage } from 'quasar';
-import { computed, onMounted, onBeforeUnmount, ref, watch, ComputedRef } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch, ComputedRef, Ref } from 'vue';
 
 export function useDrawerResize(
   minWidth: ComputedRef<number>,
   maxWidth: ComputedRef<number>,
+  clientWidth: Ref<number>,
   name: string,
   side: 'left' | 'right',
 ) {
   let rafId: number | null = null;
-
-  const clientWidth = ref(document.documentElement.clientWidth);
 
   const adaptiveWidth = computed(() =>
     Math.min(drawerWidth.value, maxWidth.value),
