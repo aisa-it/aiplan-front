@@ -317,6 +317,26 @@
       </div>
       </div>
 
+      <div class="row q-pt-md centered-horisontally">
+        <div class="col">
+          <div class="row items-center">
+            <SprintIcon :is-dark="$q.dark.isActive" />
+            <span class="q-ml-sm"> Спринт </span>
+          </div>
+        </div>
+        <div class="col flex rounded-borders column">
+          <SelectSprints
+            class="issue-selector"
+            :issueid="issueData.id"
+            :currentSprints="issueData.sprints"
+            :isDisabled="
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+            "
+            @refresh="handleRefresh"
+            />
+        </div>
+      </div>
+
       <q-separator class="q-mt-md issue-panel__separator" />
 
       <SelectLinks
@@ -402,6 +422,7 @@ import SelectPriority from 'src/components/SelectPriority.vue';
 import SelectParentIssue from 'src/components/SelectParentIssue.vue';
 import SelectBlockIssues from 'src/components/SelectBlockIssues.vue';
 import SelectBlockedIssues from '../SelectBlockedIssues.vue';
+import SelectSprints from 'src/components/SelectSprints.vue';
 
 // components - icons
 import UserIcon from 'src/components/icons/UserIcon.vue';
@@ -416,6 +437,7 @@ import CreateDateIcon from 'src/components/icons/CreateDateIcon.vue';
 import ExecuteDateIcon from 'src/components/icons/ExecuteDateIcon.vue';
 import StartDateIcon from 'src/components/icons/StartDateIcon.vue';
 import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
+import SprintIcon from '../icons/SprintIcon.vue';
 
 // constants
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
@@ -426,17 +448,17 @@ import { setIntervalFunction } from 'src/utils/helpers';
 const userStore = useUserStore();
 const statesStore = useStatesStore();
 const projectStore = useProjectStore();
-const { hasPermissionByIssue } = useRolesStore();
+const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
+
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { statesCache } = storeToRefs(statesStore);
-
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 defineProps<{
   preview?: boolean;
@@ -476,8 +498,9 @@ const refresh = async () => {
       issueData.value.blocker_issues = res.data.blocker_issues;
       issueData.value.blocked_issues = res.data.blocked_issues;
       issueData.value.issue_link = res.data.issue_link;
-      issueData.value.start_date = res.data.start_date
-      issueData.value.completed_at = res.data.completed_at
+      issueData.value.start_date = res.data.start_date;
+      issueData.value.completed_at = res.data.completed_at;
+      issueData.value.sprints = res.data.sprints;
     });
 };
 
