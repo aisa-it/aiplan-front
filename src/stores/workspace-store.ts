@@ -51,7 +51,24 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       stopRefresh: false,
     };
   },
-
+  getters: {
+    workspaceRole(): number {
+      if (!this.workspaceInfo?.id) {
+        return 0;
+      } else {
+        return Number(
+          userStore.workspaceMemberships.find(
+            (membership) => membership.workspace_id === this.workspaceInfo?.id,
+          )?.role,
+        );
+      }
+    },
+    isOwnerWorkspace(): boolean {
+      if (this.workspaceInfo)
+        return this.workspaceInfo?.owner_id === userStore.user.id;
+      else return false;
+    },
+  },
   actions: {
     async getWorkspaceInfo(
       workspaceSlug: string,

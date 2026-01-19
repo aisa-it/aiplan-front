@@ -12,7 +12,11 @@
         <q-item-section>Спринты</q-item-section>
         <CreateSprintDialogBtn
           @update-sprints="refreshSprints"
-          v-if="hasPermission('create-sprint')"
+          v-if="
+            checkPermission({
+              action: 'create-sprint',
+            })
+          "
           @reopen="reopen"
         />
       </div>
@@ -59,7 +63,11 @@
             </HintTooltip>
           </q-item-section>
           <MenuActions
-            v-if="hasPermission('show-sprint-popup')"
+            v-if="
+              checkPermission({
+                action: 'show-sprint-popup',
+              })
+            "
             :items="getSprintMenuItems(sprint)"
           />
         </q-item>
@@ -86,7 +94,6 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useRolesStore } from 'src/stores/roles-store';
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
@@ -105,13 +112,14 @@ import BinIcon from '../icons/BinIcon.vue';
 import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
+import { usePermission } from 'src/composables/usePermission';
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermission } = useRolesStore();
 
+const { checkPermission } = usePermission();
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const route = useRoute();

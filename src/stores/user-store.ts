@@ -17,6 +17,8 @@ import {
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
+  DtoWorkspaceMember,
+  DtoProjectMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const usersApi = new (withInterceptors(Users))();
@@ -31,6 +33,8 @@ interface IUserState {
   userProjects: DtoProjectLight[];
   userFavouriteProjets: DtoProjectFavorites[];
   authToken: string;
+  workspaceMemberships: DtoWorkspaceMember[];
+  projectMemberships: DtoProjectMember[];
 }
 
 export const useUserStore = defineStore('user-store', {
@@ -43,6 +47,8 @@ export const useUserStore = defineStore('user-store', {
       userProjects: [] as DtoProjectLight[],
       userFavouriteProjets: [] as DtoProjectFavorites[],
       authToken: undefined as unknown as string,
+      workspaceMemberships: [],
+      projectMemberships: [],
     };
   },
   getters: {
@@ -133,6 +139,7 @@ export const useUserStore = defineStore('user-store', {
         }
         this.userWorkspaces = filters ? this.userWorkspaces : res.data;
         this.setLastWorkspaceSlug();
+        this.getWorkspaceMemberships();
         return res.data;
       });
     },
@@ -140,10 +147,13 @@ export const useUserStore = defineStore('user-store', {
     async getUserProjects(filters?: {
       search_query: string;
     }): Promise<DtoProjectLight[]> {
-      return usersApi.getCurrentUserAllProjectList(filters).then((res) => {
-        this.userProjects = filters ? this.userProjects : res.data;
-        return res.data;
-      });
+      return usersApi
+        .getCurrentUserAllProjectList(filters)
+        .then(async (res) => {
+          this.userProjects = filters ? this.userProjects : res.data;
+          await this.getProjectMemberships();
+          return res.data;
+        });
     },
 
     async getFavouriteProjects(workspaceSlug: string): Promise<void> {
@@ -275,6 +285,28 @@ export const useUserStore = defineStore('user-store', {
       return usersApi
         .getUserActivityList(id, data)
         .then((res) => (this.userActivity = res.data));
+    },
+
+    async getWorkspaceMemberships(workspaceIds: string[] = []) {
+      try {
+        const { data } =
+          await usersApi.getCurrentUserWorkspaceMemberships(workspaceIds);
+
+        this.workspaceMemberships = data;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
+    async getProjectMemberships(projectIds: string[] = []) {
+      try {
+        const { data } =
+          await usersApi.getCurrentUserProjectMemberships(projectIds);
+
+        this.projectMemberships = data;
+      } catch (e) {
+        console.log(e);
+      }
     },
   },
 });

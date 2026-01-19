@@ -73,7 +73,6 @@ import { useRouter } from 'vue-router';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
-import { useRolesStore } from 'src/stores/roles-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useProjectStore } from 'src/stores/project-store';
@@ -84,9 +83,7 @@ import aiplan from 'src/utils/aiplan';
 
 // components
 import AvatarImage from './AvatarImage.vue';
-import {
-  useGlobalLoading,
-} from 'src/composables/useGlobalLoader';
+import { useGlobalLoading } from 'src/composables/useGlobalLoader';
 
 export default defineComponent({
   name: 'ProfileButton',
@@ -102,7 +99,6 @@ export default defineComponent({
     const projectStore = useProjectStore();
     const workspaceStore = useWorkspaceStore();
     const singleIssueStore = useSingleIssueStore();
-    const { hasPermission } = useRolesStore();
 
     // store to ref
     const { user } = storeToRefs(userStore);
@@ -151,7 +147,6 @@ export default defineComponent({
     return {
       user,
       router,
-      hasPermission,
       handleSignOut,
       handleSignOutEverywhere,
       avatarText: aiplan.UserName,
