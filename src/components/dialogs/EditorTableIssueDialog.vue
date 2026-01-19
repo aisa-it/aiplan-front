@@ -137,7 +137,7 @@ interface IssueTableParams {
   currentFilter: TypesIssuesListFilters | null;
   chosenTableColumns: { label: string; key: string }[];
   additionalColumnsNumber: number;
-  checkedIssues: string[];
+  checkedIssues: DtoIssue[];
 }
 
 const workspaceStore = useWorkspaceStore();
@@ -149,6 +149,7 @@ const dialogRef = ref<QDialog | null>();
 
 const props = defineProps<{
   editorInstance: Editor;
+  savedTableData: { element: HTMLElement; params: IssueTableParams } | null;
   classPrevent?: string;
 }>();
 
@@ -227,6 +228,7 @@ const columnOptionsMap: { label: string; key: string }[] = [
   { label: 'Автор', key: 'author' },
   { label: 'Исполнитель', key: 'assignees' },
   { label: 'Теги', key: 'labels' },
+  { label: 'Спринт', key: 'sprints' },
 ];
 const chosenTableColumns = ref<typeof columnOptionsMap>([
   { label: 'Название', key: 'name' },
@@ -278,8 +280,17 @@ function filterFn(val: string, update: (fn: () => void) => void): void {
 }
 
 function closeDialog(): void {
+  chosenTableColumns.value = [
+    { label: 'Название', key: 'name' },
+    { label: 'Приоритет', key: 'priority' },
+    { label: 'Статус', key: 'state' },
+    { label: 'Исполнитель', key: 'assignees' },
+  ];
+  additionalColumnsNumber.value = 2;
+  checkedIssues.value = [];
   dialogRef.value?.hide();
 }
+
 // TODO в helpers
 function escapeHtml(unsafe: string): string {
   return unsafe
@@ -288,15 +299,6 @@ function escapeHtml(unsafe: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-function encodeTableParams(params: IssueTableParams): string {
-  return encodeURIComponent(JSON.stringify(params));
-}
-
-function decodeTableParams(encoded: string | null): IssueTableParams | null {
-  if (!encoded) return null;
-  return JSON.parse(decodeURIComponent(encoded));
 }
 
 const createIssueTable = (): void => {
@@ -364,9 +366,10 @@ const createIssueTable = (): void => {
             break;
 
           case 'labels':
-            if (Array.isArray(issue.label_details)) {
+          case 'sprints':
+            if (Array.isArray(issue[col.key])) {
               displayValue =
-                issue.label_details
+                issue[col.key]
                   .map((l: any) => l.name || '')
                   .filter(Boolean)
                   .join(', ') || '-';
@@ -409,13 +412,32 @@ const createIssueTable = (): void => {
     currentFilter: currentFilter.value ?? null,
     chosenTableColumns: chosenTableColumns.value,
     additionalColumnsNumber: additionalColumnsNumber.value ?? 0,
-    checkedIssues: checkedIssues.value.map((issue) => issue.id),
+    checkedIssues: checkedIssues.value,
   };
-  const encodedParams = encodeTableParams(tableParams);
+  const encodedParams = encodeURIComponent(JSON.stringify(tableParams));
+  const tableHtml =
+    `<table class="issue-table" ${encodedParams ? `data-issue-table-params="${encodedParams}"` : ''}>${thead}${tbody}</table>`.trim();
 
-  const tableHtml = `<table class="issue-table" ${encodedParams ? `data-issue-table-params="${encodedParams}"` : ''}>${thead}${tbody}</table>`.trim();
+  if (props.savedTableData) {
+    const { element } = props.savedTableData;
+    const pos = props.editorInstance.view.posAtDOM(element, 0);
+    const $pos = props.editorInstance.state.doc.resolve(pos);
+    const depth = $pos.depth;
 
-  props.editorInstance.chain().focus().insertContent(tableHtml).run();
+    if ($pos.node(depth).type.name === 'table') {
+      const from = $pos.before(depth);
+      const to = $pos.after(depth);
+
+      props.editorInstance
+        .chain()
+        .focus(from)
+        .deleteRange({ from, to })
+        .insertContentAt(from, tableHtml)
+        .run();
+    }
+  } else {
+    props.editorInstance.chain().focus().insertContent(tableHtml).run();
+  }
   closeDialog();
 };
 
@@ -426,6 +448,16 @@ watch(
       workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
     };
     refresh();
+  },
+);
+
+watch(
+  () => props.savedTableData,
+  (data) => {
+    if (!data) return;
+    chosenTableColumns.value = data.params.chosenTableColumns;
+    additionalColumnsNumber.value = data.params.additionalColumnsNumber;
+    checkedIssues.value = data.params.checkedIssues;
   },
 );
 </script>

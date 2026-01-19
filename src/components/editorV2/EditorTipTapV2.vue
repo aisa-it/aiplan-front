@@ -25,7 +25,7 @@
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
       @enable-editing="$emit('enableEditing')"
       @toggle-fullscreen="$emit('toggle-fullscreen')"
-      @create-issue-table="isIssueTableDialogOpen = !isIssueTableDialogOpen"
+      @create-issue-table="openNewTableDialog"
     />
 
     <div class="html-editor__outer">
@@ -70,7 +70,7 @@
           no-caps
           @mouseenter="onButtonMouseEnter"
           @mouseleave="onButtonMouseLeave"
-          @click="isIssueTableDialogOpen = !isIssueTableDialogOpen"
+          @click="openTableDialog"
         >
           Изменить
         </q-btn>
@@ -98,6 +98,7 @@
     <EditorTableIssueDialog
       v-model="isIssueTableDialogOpen"
       :editor-instance="editorInstance"
+      :saved-table-data="currentEditingTableData"
     />
   </div>
 </template>
@@ -135,6 +136,7 @@ import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import EditorTableIssueDialog from '../dialogs/EditorTableIssueDialog.vue';
 import aiplan from 'src/utils/aiplan';
+import { DtoIssue, TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // Interfaces
 interface IEditorV2Props {
@@ -163,6 +165,13 @@ interface ContentMention {
   email?: string;
   avatarText?: string;
   title?: string;
+}
+
+interface IssueTableParams {
+  currentFilter: TypesIssuesListFilters | null;
+  chosenTableColumns: { label: string; key: string }[];
+  additionalColumnsNumber: number;
+  checkedIssues: DtoIssue[];
 }
 
 // Props
@@ -222,15 +231,19 @@ const editorExtensions = computed(() => getEditorExtensions(props));
 
 // Наведение на таблицу
 const hoveredTable = ref<HTMLElement | null>(null);
+const currentEditingTableData = ref<{
+  element: HTMLElement;
+  params: IssueTableParams;
+} | null>(null);
 const issueTableData = ref<any>(null);
 const isIssueTableDialogOpen = ref<boolean>(false);
 
 const tableButtonPosition = ref<{ top: number; left: number } | null>(null);
-const isHoveringButton = ref(false);
-const isHoveringTable = ref(false);
+const isHoveringButton = ref<boolean>(false);
+const isHoveringTable = ref<boolean>(false);
 let hideButtonTimeout: ReturnType<typeof setTimeout> | null = null;
 
-function scheduleHideButton() {
+function scheduleHideButton(): void  {
   if (hideButtonTimeout) clearTimeout(hideButtonTimeout);
   hideButtonTimeout = setTimeout(() => {
     if (!isHoveringTable.value && !isHoveringButton.value) {
@@ -240,7 +253,7 @@ function scheduleHideButton() {
   }, 350);
 }
 
-function onButtonMouseEnter() {
+function onButtonMouseEnter(): void  {
   isHoveringButton.value = true;
   if (hideButtonTimeout) {
     clearTimeout(hideButtonTimeout);
@@ -248,7 +261,7 @@ function onButtonMouseEnter() {
   }
 }
 
-function onButtonMouseLeave() {
+function onButtonMouseLeave(): void  {
   isHoveringButton.value = false;
   // Если ушли с кнопки и не на таблице — скрыть
   if (!isHoveringTable.value) {
@@ -256,7 +269,7 @@ function onButtonMouseLeave() {
   }
 }
 
-function updateTableButtonPosition(tableEl: HTMLElement) {
+function updateTableButtonPosition(tableEl: HTMLElement): void  {
   const rect = tableEl.getBoundingClientRect();
   const containerRect = document
     .querySelector('.html-editor__wrapper')
@@ -268,6 +281,24 @@ function updateTableButtonPosition(tableEl: HTMLElement) {
   const left = rect.left - containerRect.left;
   tableButtonPosition.value = { top, left };
 }
+
+const openNewTableDialog = (): void  => {
+  currentEditingTableData.value = null;
+  isIssueTableDialogOpen.value = true;
+};
+
+const openTableDialog = (): void => {
+  if (hoveredTable.value && issueTableData.value) {
+    currentEditingTableData.value = {
+      element: hoveredTable.value,
+      params: issueTableData.value,
+    };
+  } else {
+    currentEditingTableData.value = null;
+  }
+
+  isIssueTableDialogOpen.value = true;
+};
 
 // Попап с информацией о пользователе при наведении
 const handleMouseMove = (e: MouseEvent) => {
@@ -285,6 +316,8 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 
   // Таблица задач
+  if (!props.canEdit || props.readOnlyEditor) return;
+
   const target = e.target as HTMLElement;
   const tableEl = target.closest('.issue-table');
 
