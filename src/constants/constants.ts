@@ -26,7 +26,7 @@ export const RESTRICTED_URLS = [
   'admin-panel',
   'profile',
   'conference',
-  'mcp'
+  'mcp',
 ];
 
 export const STATES_TYPES = [
@@ -82,9 +82,14 @@ export const PROJECT_VIEWS = [
   { value: 'list', label: 'Список' },
   { value: 'kanban', label: 'Доска' },
   { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
+  { value: 'calendar', label: 'Календарь' },
 ];
 
-export const SPRINT_VIEWS = [...PROJECT_VIEWS];
+export const SPRINT_VIEWS = [
+  { value: 'list', label: 'Список' },
+  { value: 'kanban', label: 'Доска' },
+  { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
+];
 
 export const GROUP_BY_OPTIONS = [
   { value: 'None', label: 'Нет' },

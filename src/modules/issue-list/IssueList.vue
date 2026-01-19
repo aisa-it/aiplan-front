@@ -84,6 +84,7 @@ const projectStore = useProjectStore();
 const {
   project,
   isGroupingEnabled,
+  isCalendar,
   isGanttDiagramm,
   isKanbanEnabled,
   issuesLoader,
@@ -135,6 +136,12 @@ const components = {
   GanttView: defineAsyncComponent(
     () => import('src/modules/issue-list/components/gantt-view/GanttView.vue'),
   ),
+  CalendarView: defineAsyncComponent(
+    () =>
+      import(
+        'src/modules/issue-list/components/calendar-view/CalendarView.vue'
+      ),
+  ),
   TableListSkeleton: defineAsyncComponent(
     () => import('./components/skeletons/TableListSkeleton.vue'),
   ),
@@ -161,6 +168,11 @@ watchEffect(() => {
   if (issuesLoader.value === false) {
     if (isGanttDiagramm.value) {
       currentIssueList.value = components.GanttView;
+      return;
+    }
+
+    if (isCalendar.value) {
+      currentIssueList.value = components.CalendarView;
       return;
     }
 
