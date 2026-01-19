@@ -15,6 +15,7 @@
             dense
             no-caps
             v-close-popup
+            :to="item.to"
             :style="'font-size: 12px;'"
             @click="item.onClick"
           >
@@ -40,6 +41,7 @@ export interface MenuActionItem {
   text: string;
   icon?: DefineComponent;
   onClick: () => void;
+  to: string;
 }
 
 defineProps<{

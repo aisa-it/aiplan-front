@@ -126,53 +126,12 @@
                 >
                 <HintTooltip v-else>Добавить в избранное</HintTooltip>
               </q-btn>
-              <q-btn
-                v-if="
-                  hasPermissionByWorkspace(s, 'ws-settings')
-                "
-                class="menu-link__btn q-ml-sm"
-                flat
-                icon="more_horiz"
-                :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-                @click.prevent.stop
-              >
-                <q-menu>
-                  <q-list :style="'min-width: 225px; !important'">
-                    <q-item>
-                      <q-btn
-                        class="menu-link__settings-btn full-w"
-                        data-id="workspace-settings-button-top"
-                        flat
-                        dense
-                        no-caps
-                        :style="'font-size: 12px;'"
-                        notificationSettingsOpen
-                        @click="{((selectedWorkspace = s),
-                          (notificationSettingsOpen = !notificationSettingsOpen));
-                        }"
-                        >
-                        <BellIcon  :width="16" :height="16"  class="q-mr-sm"
-                        />
-                          <span>Уведомления</span>
-                      </q-btn>
-                    </q-item>
-                    <q-item>
-                      <q-btn
-                        class="menu-link__settings-btn full-w"
-                        flat
-                        dense
-                        no-caps
-                        id="workspace-settings-button"
-                        :style="'font-size: 12px;'"
-                        :to="`/${s.slug}/settings`"
-                      >
-                        <SettingsIcon :width="16" :height="16"  class="q-mr-sm"/>
-                        <span>Настройки</span>
-                      </q-btn>
-                    </q-item>
-                  </q-list>
-                </q-menu>
-              </q-btn>
+              <MenuActions
+                v-if="hasPermissionByWorkspace(s, 'ws-settings')"
+                class="q-ml-sm"
+                :items="getWorkspaceMenuItems(s)"
+                @click.stop
+              />
             </div>
           </q-item>
           <q-separator />
@@ -254,6 +213,7 @@ import BellIcon from '../icons/BellIcon.vue';
 import GitIcon from '../icons/GitIcon.vue';
 import NewWorkspaceDialog from '../dialogs/NewWorkspaceDialog.vue';
 import StarIcon from 'components/icons/StarIcon.vue';
+import MenuActions from './MenuActions.vue';
 import {
   BASE_ERROR,
   SUCCESS_ADD_WORKSPACE_TO_FAVORITE,
@@ -285,7 +245,32 @@ const router = useRouter();
 // dialogs vars
 const isNewSpaceModalOpen = ref(false);
 const notificationSettingsOpen = ref(false);
+
 const selectedWorkspace = ref();
+
+const getWorkspaceMenuItems = (s) => {
+  return [
+    {
+      text: 'Уведомления',
+      icon: BellIcon,
+      btnAttrs: {
+        'data-id': 'workspace-settings-button-top',
+      },
+      onClick: () => {
+        selectedWorkspace.value = s;
+        notificationSettingsOpen.value = !notificationSettingsOpen.value;
+      },
+    },
+    {
+      text: 'Настройки',
+      icon: SettingsIcon,
+      btnAttrs: {
+        id: 'workspace-settings-button',
+      },
+      to: s.slug ? `/${s.slug}/settings` : undefined,
+    },
+  ];
+};
 
 const deleteFavoriteWorkspace = async (uuid: string | undefined) => {
   await userStore
