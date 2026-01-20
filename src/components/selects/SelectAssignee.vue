@@ -113,7 +113,6 @@ import {
   computed,
 } from 'vue';
 import { debounce } from 'quasar';
-import { useRoute } from 'vue-router';
 //stores
 import { useProjectStore } from 'stores/project-store';
 import { useWorkspaceStore } from 'stores/workspace-store';
@@ -212,33 +211,6 @@ const options = computed(() => {
 });
 
 //methods
-const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
-  const memberChecks = membersArr.map(async (el: DtoProjectMemberLight) => {
-    // Для каждого пользователя выполняем поисковый запрос
-    let data = await projectStore.getProjectMembers(
-      currentWorkspaceSlug.value as string,
-      props.projectid as string,
-      {
-        search_query: el.member?.email,
-        find_by: ['email'],
-      },
-    );
-
-    let result = data?.result;
-
-    const isFound = result?.find(
-      (item) =>
-        (item.member_id || item.member?.id) === (el.member_id || el.member?.id),
-    );
-
-    return isFound ? el : null;
-  });
-
-  const checkedMembers = await Promise.all(memberChecks);
-
-  return checkedMembers.filter((el) => el !== null);
-};
-
 const refresh = async (searchQuery?: string, isSearch?: boolean) => {
   loading.value = true;
   await projectStore
@@ -249,59 +221,13 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
       order_by: pagination.order_by,
       desc: pagination.desc,
     })
-    .then(async (d) => {
+    .then((d) => {
       if (isSearch) members.value = [];
 
       countMembers.value = d.count;
       members.value = [...members.value, ...d.result];
       myEntity.value = d.my_entity;
 
-    // Если выбран другой проект
-      if (
-        !isSearch &&
-        singleIssueStore.issueData &&
-        props.projectid !== singleIssueStore.issueData.project &&
-        props.projectid !==
-          singleIssueStore.issueData.project_detail?.identifier
-      ) {
-        const membersIds =
-          d?.count && d?.count > 0
-            ? d.result.map((item) => item.member_id || item.member?.id)
-            : [];
-
-        if (props.assigness && props.assigness.length) {
-          let notInMembers: DtoProjectMemberLight[] = [];
-          let assigness: DtoProjectMemberLight[] = [];
-
-          props.assigness?.forEach((el) => {
-            if (membersIds.includes(el.member_id || el.member?.id)) {
-              assigness.push(el);
-            } else {
-              notInMembers.push(el);
-            }
-          });
-
-          if (assigness?.length !== props.assigness?.length) {
-            // Если пользователь не нашелся, ищем через поисковый запрос, т.к. мог не попасть из-за лимита
-            if (notInMembers.length) {
-              const additionalAssigness =
-                await getFilteredMembers(notInMembers);
-              if (additionalAssigness.length) {
-                assigness.push(...additionalAssigness);
-              }
-            }
-
-            if (assigness?.length > 0) {
-              emit('update:assigness', assigness);
-            } else {
-              emit(
-                'update:assigness',
-                props.defaultAssignee ? props.defaultAssignee : [],
-              );
-            }
-          }
-        }
-      }
     })
     .finally(() => {
       loading.value = false;

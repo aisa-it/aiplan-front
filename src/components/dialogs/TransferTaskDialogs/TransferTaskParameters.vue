@@ -222,23 +222,27 @@ import ExecuteDateIcon from 'src/components/icons/ExecuteDateIcon.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
 import {
   DtoIssue,
+  DtoProjectMemberLight,
   DtoStateLight,
-  DtoWorkspaceMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { IState } from 'src/interfaces/states';
 
 // store
 const userStore = useUserStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
 const statesStore = useStatesStore();
+const workspaceStore = useWorkspaceStore();
 const { statesCache } = storeToRefs(statesStore);
 
 // store to refs
 const { project } = storeToRefs(projectStore);
 const { user } = storeToRefs(userStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const dynamicWidthDialog = computed(() =>
   Screen.width > 760 ? 400 : Screen.width * 0.9,
@@ -247,11 +251,12 @@ const dynamicWidthDialog = computed(() =>
 // props
 const props = defineProps<{
   project_id: string;
+  isDifferentProject: boolean;
   issue: DtoIssue;
   issue_settings: {
     state_detail: DtoStateLight;
-    assignees: DtoWorkspaceMember[];
-    watchers: DtoWorkspaceMember[];
+    assignees: DtoProjectMemberLight[];
+    watchers: DtoProjectMemberLight[];
     priority: string;
     target_date: string | null;
   };
@@ -262,6 +267,7 @@ const emit = defineEmits(['save']);
 
 const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
+const states = ref<IState[]>([]);
 const issueSettings = ref({
   state_detail: props.issue_settings.state_detail,
   priority: props.issue_settings.priority,
@@ -273,6 +279,61 @@ const issueSettings = ref({
 let isSave = ref(false);
 
 // function
+const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
+  const memberChecks = membersArr.map(async (el: DtoProjectMemberLight) => {
+    // Для каждого пользователя выполняем поисковый запрос
+    let data = await projectStore.getProjectMembers(
+      currentWorkspaceSlug.value as string,
+      props.project_id as string,
+      {
+        search_query: el.member?.email,
+        find_by: ['email'],
+      },
+    );
+
+    let result = data?.result;
+
+    const isFound = result?.find(
+      (item) =>
+        (item.member_id || item.member?.id) === (el.member_id || el.member?.id),
+    );
+
+    return isFound ? el : null;
+  });
+
+  const checkedMembers = await Promise.all(memberChecks);
+
+  return checkedMembers.filter((el) => el !== null);
+};
+
+const checkStatus = async () => {
+  const { data } = await statesStore.getStatesByProject(
+    currentWorkspaceSlug.value,
+    props.project_id,
+  );
+  let arr: any = [];
+  for (const n in data) {
+    arr = arr.concat(data[n]);
+  }
+  states.value = arr;
+
+  issueSettings.value.state_detail = arr.find(
+    (status) =>
+      status.name === props.issue_settings.state_detail?.name &&
+      status.group === props.issue_settings.state_detail?.group,
+  );
+};
+
+const checkWatchers = async () => {
+  let checkedWatchers = await getFilteredMembers(props.issue_settings.watchers);
+  issueSettings.value.watchers = checkedWatchers;
+}
+
+const checkAssignees = async () => {
+  let checkedAssignees = await getFilteredMembers(props.issue_settings.assignees);
+  issueSettings.value.assignees = checkedAssignees;
+}
+
 const resetSettings = () => {
   issueSettings.value = {
     state_detail: props.issue_settings.state_detail,
@@ -291,6 +352,22 @@ const close = () => {
     resetSettings();
   }
 };
+
+watch(
+  () => props.project_id,
+  () => {
+    if (props.isDifferentProject) {
+      if (props.issue_settings.state_detail) {
+        checkStatus();
+      }
+      if (props.issue_settings.assignees && props.issue_settings.assignees.length){
+        checkAssignees();
+      }
+      if (props.issue_settings.watchers && props.issue_settings.watchers.length) {
+        checkWatchers();
+      }
+    }
+})
 
 watch(
   () => props.issue_settings,

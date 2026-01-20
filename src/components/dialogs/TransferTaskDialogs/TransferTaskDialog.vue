@@ -178,6 +178,7 @@
           :project_id="projectId"
           :issue="props.issue"
           :issue_settings="issueSettings"
+          :is-different-project="isDifferentProjectSelected"
           @save="saveSettings"
         />
 
@@ -364,7 +365,7 @@ const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () => selectedProject.value?.identifier !== (route.params.project as string),
+  () => selectedProject.value?.identifier !== projectStore.currentProject.identifier,
 );
 
 const projectId = computed(() => {
