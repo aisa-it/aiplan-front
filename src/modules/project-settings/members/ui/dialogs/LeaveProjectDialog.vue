@@ -31,6 +31,7 @@
           flat
           no-caps
           label="Выйти"
+          style="width: 79px"
           class="delete-btn"
           @click="leaveWorkspace"
           v-close-popup

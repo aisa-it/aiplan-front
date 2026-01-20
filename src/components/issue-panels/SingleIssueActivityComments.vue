@@ -74,6 +74,7 @@
               class="secondary-btn"
               :class="isAutoSave ? preventClickClass : ''"
               no-caps
+              style="width: 94px"
               @click.prevent.stop="handleVisibleEditor"
             >
               Отмена
