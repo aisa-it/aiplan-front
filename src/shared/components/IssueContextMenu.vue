@@ -219,8 +219,7 @@ const addNewIssue = () => {
     component: NewIssueDialog,
     componentProps: {
       parent: props.row?.id,
-      projectid: props.row?.project_detail?.id,
-      project: props.row?.project,
+      project: props.row?.project_detail,
     },
   }).onOk(() => emit('refresh'));
 };
