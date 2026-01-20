@@ -4,6 +4,7 @@
     flat
     dense
     no-caps
+    no-wrap
     :disable="isDisabled"
     @click="addIssue"
     data-tour="create-issue"
