@@ -25,11 +25,8 @@
     <template v-slot:default>
       <div
         :class="`chat-message-wrapper ${
-          canDeleteComment && project?.current_user_membership?.role > 5
-            ? 'include-delete-btn'
-            : ''
-        }
-          `"
+          canDeleteComment ? 'include-delete-btn' : ''
+        }`"
       >
         <ReplyCard
           v-if="comment.reply_to_comment_id && comment.original_comment"
@@ -46,7 +43,7 @@
           is-mention
         />
         <q-btn
-          v-if="canDeleteComment && project?.current_user_membership?.role > 5"
+          v-if="canDeleteComment"
           dense
           flat
           size="8px"
@@ -204,9 +201,13 @@ const isAuthor = computed(() => {
   return user.id === props.comment.actor_id;
 });
 
+const roleInProject = computed(() => project.value
+    ? project.value?.current_user_membership?.role : issueData.value.project_detail?.current_user_membership?.role)
+
 const canDeleteComment = computed(
-  () => isAuthor.value || hasPermission('delete-issue-comment'),
+  () => isAuthor.value || hasPermission('delete-issue-comment') && roleInProject.value > 5,
 );
+
 const reactionList = computed(() => {
   const reactions = [];
 
