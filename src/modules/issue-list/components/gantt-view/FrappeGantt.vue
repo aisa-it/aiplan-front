@@ -1,5 +1,16 @@
 <template>
-  <div class="gantt-chart" ref="ganttContainer"></div>
+  <div class="gantt-chart" ref="ganttContainer">
+    <q-menu
+      v-model="sprintTooltip.show"
+      no-parent-event
+      no-refocus
+      anchor="top middle"
+      self="bottom middle"
+      :target="sprintTooltip.anchorEl"
+    >
+      <div class="q-pa-sm text-body2">{{ sprintTooltip.text }}</div>
+    </q-menu>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +36,25 @@ const ganttContainer = ref<HTMLDivElement | null>(null);
 let ganttInstance: Gantt | null = null;
 let ganttObserver: MutationObserver | undefined = undefined;
 let destroyDragScroll: (() => void) | null = null;
+
+const sprintTooltip = ref({
+  show: false,
+  text: '',
+  anchorEl: undefined as HTMLElement | undefined,
+});
+
+const tooltipHandlers = {
+  show({ text, anchorEl }: { text: string; anchorEl: HTMLElement }) {
+    sprintTooltip.value = {
+      show: true,
+      text,
+      anchorEl,
+    };
+  },
+  hide() {
+    sprintTooltip.value.show = false;
+  },
+};
 
 const ganttTasks = ref<any[]>(buildGanttTasks(props.issues, props.sprint));
 
@@ -71,7 +101,7 @@ const initGantt = async () => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (!ganttContainer.value) return;
-        decorateBars(ganttContainer.value, ganttTasks.value);
+        decorateBars(ganttContainer.value, ganttTasks.value, tooltipHandlers);
         scrollInContainer();
 
         const scrollContainer = ganttContainer.value.querySelector(
@@ -84,7 +114,11 @@ const initGantt = async () => {
 
         if (!ganttObserver) {
           ganttObserver = observeGanttRedraw(ganttContainer.value, () => {
-            decorateBars(ganttContainer.value!, ganttTasks.value);
+            decorateBars(
+              ganttContainer.value!,
+              ganttTasks.value,
+              tooltipHandlers,
+            );
           });
         }
       });

@@ -39,6 +39,7 @@ export function buildGanttTasks(issues: DtoIssue[], sprint?: DtoSprint) {
       custom_class: 'sprint',
       start: sprint.start_date?.split('T')[0],
       end: getNextDayDateOnly(sprint.end_date as string),
+      sprintStats: sprint.stats,
       progress: 100,
       readonly: true,
     });
