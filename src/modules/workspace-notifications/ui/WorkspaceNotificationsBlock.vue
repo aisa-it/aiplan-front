@@ -81,6 +81,7 @@ import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/da
 import { checkedUserNotifications } from 'src/modules/workspace-notifications/services/api';
 import { docNotificationRender } from '../utils/doc-notification';
 import { workspaceNotificationRender } from '../utils/workspace-notification';
+import { sprintNotificationRender } from '../utils/sprint-notification';
 
 const props = defineProps<{
   notificationRow: NotificationsNotificationResponse;
@@ -185,6 +186,14 @@ function transform() {
       return issueNotificationRender(
         props.notificationRow?.data,
         props.notificationRow?.detail,
+      );
+    }
+
+    if (
+      props.notificationRow?.data?.entity_type === 'sprint'
+    ) {
+      return sprintNotificationRender(
+        props.notificationRow?.data,
       );
     }
 

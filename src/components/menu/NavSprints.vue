@@ -10,10 +10,12 @@
           <SprintIcon :is-dark="$q.dark.isActive" />
         </q-item-section>
         <q-item-section>Спринты</q-item-section>
-        <CreateSprintDialogBtn
-          @update-sprints="refreshSprints"
-          v-if="hasPermission('create-sprint')"
-          @reopen="reopen"
+        <MenuActions
+          v-if="headerMenuItems.length"
+          :items="headerMenuItems"
+          :flat="true"
+          :dense="true"
+          btnStyle="margin-right: 5px; padding: 4px 4px;"
         />
       </div>
     </template>
@@ -65,6 +67,11 @@
         </q-item>
       </q-list>
       <CreateSprintDialog
+        v-model="openCreateSprint"
+        @update-sprints="refreshSprints"
+        @reopen="reopen"
+      />
+      <CreateSprintDialog
         v-model="openEditSprint"
         :sprint-id="sprintIdForEdit"
         @update-sprints="refreshSprints"
@@ -74,6 +81,7 @@
         :sprint="sprintForDelete"
         @success="successDeleteHandle"
       />
+      <SprintNotificationsSettingsDialog v-model="openSprintNotifications" />
     </template>
   </ExpansionItem>
 </template>
@@ -96,6 +104,7 @@ import StatusCircularProgressBar from '../progress-bars/StatusCircularProgressBa
 import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/components/CreateSprintDialogBtn.vue';
 import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue';
+import SprintNotificationsSettingsDialog from 'src/modules/sprints/notifications-dialog/SprintNotificationsSettingsDialog.vue';
 
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -104,6 +113,8 @@ import BinIcon from '../icons/BinIcon.vue';
 import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
+import BellIcon from '../icons/BellIcon.vue';
+import AddIcon from '../icons/AddIcon.vue';
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
@@ -116,10 +127,12 @@ const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const route = useRoute();
 const sprints = ref([] as DtoSprintLight[]);
 
+const openCreateSprint = ref(false);
 const openEditSprint = ref(false);
 const sprintIdForEdit = ref<string>('');
 const sprintForDelete = ref<DtoSprintLight | null>(null);
 const isDeleteDialogOpen = ref(false);
+const openSprintNotifications = ref(false);
 
 onMounted(async () => {
   if (!currentWorkspaceSlug.value) return;
@@ -175,6 +188,25 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
     },
   ];
 };
+
+const headerMenuItems = [
+  ...(hasPermission('create-sprint')
+    ? [
+        {
+          text: 'Создать спринт',
+          icon: AddIcon,
+          to: '',
+          onClick: () => (openCreateSprint.value = true),
+        },
+      ]
+    : []),
+  {
+    text: 'Настроить уведомления',
+    icon: BellIcon,
+    to: '',
+    onClick: () => (openSprintNotifications.value = true),
+  },
+];
 
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;

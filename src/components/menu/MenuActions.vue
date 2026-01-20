@@ -1,10 +1,14 @@
 <template>
   <q-btn
-    class="menu-link__btn"
-    flat
-    icon="more_horiz"
-    :style="'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'"
-    @click.prevent
+    :class="['menu-link__btn', btnClass]"
+    :flat="flat"
+    :dense="dense"
+    :icon="icon"
+    :style="
+      btnStyle ||
+      'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'
+    "
+    @click.stop.prevent
   >
     <q-menu>
       <q-list :style="'min-width: 225px; !important;'">
@@ -35,17 +39,29 @@
 </template>
 
 <script setup lang="ts">
-import type { DefineComponent } from 'vue';
-
 export interface MenuActionItem {
   text: string;
-  icon?: DefineComponent;
+  icon?: any;
   onClick: () => void;
-  to: string;
+  to?: string;
 }
 
-defineProps<{
-  items: MenuActionItem[];
-}>();
+withDefaults(
+  defineProps<{
+    items: MenuActionItem[];
+    icon?: string;
+    btnStyle?: string;
+    btnClass?: string;
+    flat?: boolean;
+    dense?: boolean;
+  }>(),
+  {
+    icon: 'more_horiz',
+    btnStyle: '',
+    btnClass: '',
+    flat: true,
+    dense: false,
+  },
+);
 </script>
 
