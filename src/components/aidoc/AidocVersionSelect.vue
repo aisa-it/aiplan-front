@@ -105,6 +105,7 @@
           no-caps
           class="secondary-btn q-mr-sm"
           label="Отмена"
+          style="width: 128px"
           v-close-popup
         />
         <q-btn
