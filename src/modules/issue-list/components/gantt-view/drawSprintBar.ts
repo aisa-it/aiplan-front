@@ -85,8 +85,6 @@ export function drawSprintBar(
     bar.appendChild(group);
   }
 
-  centerSprintLabel(bar, x, width);
-
   handleSprintLabelOverflow(bar, (barEl) => {
     barEl.style.cursor = 'pointer';
 
@@ -101,6 +99,8 @@ export function drawSprintBar(
       tooltip?.hide();
     });
   });
+
+  centerSprintLabel(bar, x, width);
 
   return;
 }
@@ -146,7 +146,7 @@ function centerSprintLabel(bar: SVGGElement, x: number, width: number) {
   const text = bar.querySelector('text.bar-label') as SVGTextElement | null;
   if (!text) return;
 
-  const centerX = x + width / 2;
+  const centerX = x + width / 2 - text.getComputedTextLength() / 2;
 
   text.setAttribute('x', `${centerX}`);
   text.setAttribute('text-anchor', 'middle');
@@ -173,7 +173,13 @@ function handleSprintLabelOverflow(
   const barWidth = Number(barRect.getAttribute('width'));
 
   if (textLength > barWidth) {
-    text.textContent = '';
+    const fullText = text.textContent ?? '';
+    const availableWidth = barWidth - 80;
+    const avgCharWidth = textLength / fullText.length;
+    const availableForText = availableWidth - 11; //11 - ширина текста, если бы там было только "..."
+    const maxChars = Math.floor(availableForText / avgCharWidth);
+    text.textContent = fullText.slice(0, maxChars) + '...';
+
     onOverflow(bar);
   }
 }
