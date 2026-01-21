@@ -173,10 +173,13 @@ function handleSprintLabelOverflow(
   const barWidth = Number(barRect.getAttribute('width'));
 
   if (textLength > barWidth) {
+    const padding = 80;
+    const ellipsisWidth = 11;
+
     const fullText = text.textContent ?? '';
-    const availableWidth = barWidth - 80;
+    const availableWidth = barWidth - padding;
     const avgCharWidth = textLength / fullText.length;
-    const availableForText = availableWidth - 11;
+    const availableForText = availableWidth - ellipsisWidth;
     const maxChars = Math.floor(availableForText / avgCharWidth);
     text.textContent = fullText.slice(0, maxChars) + '...';
 
