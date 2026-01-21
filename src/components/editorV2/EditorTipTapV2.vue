@@ -162,6 +162,7 @@ import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import aiplan from 'src/utils/aiplan';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
+import { useFloatScroll } from './composables/useFloatScroll';
 
 // Interfaces
 interface IEditorV2Props {
@@ -245,6 +246,8 @@ const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
 
 useMenuHandler(tocPopupRef);
+const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
+
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -322,10 +325,12 @@ function createEditor() {
       emit('update:modelValue', editorInstance.value?.getHTML());
       emit('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
+      floatScroll();
     },
     onCreate: () => {
       emit('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
+      floatScroll();
     },
     editorProps: getEditorProps(editorInstance, onCommentLink),
     classPrevent: props.classPrevent,
@@ -456,6 +461,7 @@ watch(
 onMounted(() => createEditor());
 
 onBeforeUnmount(() => {
+  clearFloatScroll();
   editorInstance.value?.destroy();
 });
 
