@@ -12,27 +12,29 @@
   >
     <q-menu>
       <q-list :style="'min-width: 225px; !important;'">
-        <q-item v-for="(item, index) in items" :key="index">
-          <q-btn
-            class="menu-link__settings-btn full-w"
-            flat
-            dense
-            no-caps
-            v-close-popup
-            :to="item.to"
-            :style="'font-size: 12px;'"
-            @click="item.onClick"
-          >
-            <component
-              :is="item.icon"
-              v-if="item.icon"
-              :width="16"
-              :height="16"
-              class="q-mr-sm"
-            />
-            <span>{{ item.text }}</span>
-          </q-btn>
-        </q-item>
+        <template v-for="(item, index) in items" :key="index">
+          <q-item v-if="item.show !== false">
+            <q-btn
+              class="menu-link__settings-btn full-w"
+              flat
+              dense
+              no-caps
+              v-close-popup
+              :to="item.to"
+              :style="'font-size: 12px;'"
+              @click="item.onClick"
+            >
+              <component
+                :is="item.icon"
+                v-if="item.icon"
+                :width="16"
+                :height="16"
+                class="q-mr-sm"
+              />
+              <span>{{ item.text }}</span>
+            </q-btn>
+          </q-item>
+        </template>
       </q-list>
     </q-menu>
   </q-btn>
@@ -44,6 +46,7 @@ export interface MenuActionItem {
   icon?: any;
   onClick: () => void;
   to?: string;
+  show?: boolean;
 }
 
 withDefaults(

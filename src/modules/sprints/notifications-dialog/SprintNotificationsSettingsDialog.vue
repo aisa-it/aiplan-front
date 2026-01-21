@@ -94,10 +94,6 @@ const { setNotificationView } = useNotificationStore();
 const dialogRef = ref();
 
 const sprintSettingsList: any[] = [
-  {
-    title: 'Создание/удаление спринта (уровень пространства)',
-    field: 'disable_workspace_sprint',
-  },
   { title: 'Изменение дат спринта', field: 'disable_sprint_date' },
   { title: 'Изменилось название', field: 'disable_sprint_name' },
   { title: 'Изменение списка задач', field: 'disable_sprint_issue_list' },

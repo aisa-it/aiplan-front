@@ -190,20 +190,15 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
 };
 
 const headerMenuItems = [
-  ...(hasPermission('create-sprint')
-    ? [
-        {
-          text: 'Создать спринт',
-          icon: AddIcon,
-          to: '',
-          onClick: () => (openCreateSprint.value = true),
-        },
-      ]
-    : []),
+  {
+    text: 'Создать спринт',
+    icon: AddIcon,
+    onClick: () => (openCreateSprint.value = true),
+    show: hasPermission('create-sprint'),
+  },
   {
     text: 'Настроить уведомления',
     icon: BellIcon,
-    to: '',
     onClick: () => (openSprintNotifications.value = true),
   },
 ];

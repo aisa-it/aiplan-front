@@ -15,7 +15,15 @@
     <div class="full-width">
       <div class="q-mx-sm flex justify-between full-width no-wrap">
         <p class="text-bold q-mb-none body-1-medium">
-          {{ title }}
+          <template v-if="props.notificationRow?.data?.entity_type === 'sprint'">
+            {{ props.notificationRow?.detail?.sprint?.name }}
+            <span style="font-weight: 400">
+              {{ ' ' + (props.notificationRow?.detail?.workspace?.name ?? '') }}
+            </span>
+          </template>
+          <template v-else>
+            {{ title }}
+          </template>
         </p>
         <p class="q-mb-none body-2">
           {{
@@ -194,6 +202,7 @@ function transform() {
     ) {
       return sprintNotificationRender(
         props.notificationRow?.data,
+        props.notificationRow?.detail
       );
     }
 

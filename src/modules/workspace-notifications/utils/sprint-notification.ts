@@ -5,9 +5,9 @@ const link = (href: string, text: string) => `<a target="_blank"
                     href=${href}>
                     ${text}<a/>`;
 
-export function sprintNotificationRender(data: any) {
-  const sprintDetail = data?.sprint_activity_detail || data?.sprint_detail || null;
-  const sprintName = sprintDetail?.name || data?.sprint_name || data?.sprint || data?.sprint_id || '';
+export function sprintNotificationRender(data: any, detail: any) {
+  const sprintDetail = detail?.sprint || null;
+  const sprintName = sprintDetail?.name || '';
   const sprintLink = sprintDetail?.url
     ? link(sprintDetail.url, `${sprintName}`)
     : sprintName
