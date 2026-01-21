@@ -176,7 +176,7 @@ function handleSprintLabelOverflow(
     const fullText = text.textContent ?? '';
     const availableWidth = barWidth - 80;
     const avgCharWidth = textLength / fullText.length;
-    const availableForText = availableWidth - 11; //11 - ширина текста, если бы там было только "..."
+    const availableForText = availableWidth - 11;
     const maxChars = Math.floor(availableForText / avgCharWidth);
     text.textContent = fullText.slice(0, maxChars) + '...';
 
