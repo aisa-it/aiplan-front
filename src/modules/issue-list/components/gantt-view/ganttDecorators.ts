@@ -12,7 +12,11 @@ import { fixTodayLine } from './ganttCoords';
   проходит по всем барам и настраивает их
 */
 
-export function decorateBars(container: HTMLElement, tasks: any[]) {
+export function decorateBars(
+  container: HTMLElement,
+  tasks: any[],
+  tooltip?: any,
+) {
   highlightWeekendInHeader(container);
 
   const svg = container.querySelector('svg');
@@ -26,9 +30,11 @@ export function decorateBars(container: HTMLElement, tasks: any[]) {
     shiftBars(bar, -6);
 
     if (bar.classList.contains('sprint')) {
-      drawSprintBar(bar);
+      drawSprintBar(bar, tasks[0], tooltip);
       return;
     }
+
+    textElemUpdate(bar);
 
     const id = bar.getAttribute('data-id');
     const task = tasks.find((t) => t.id === id);
@@ -62,15 +68,37 @@ function shiftBars(bar: SVGGElement, shift: number) {
     const x = Number(el.getAttribute('x'));
     el.setAttribute('x', String(x + shift));
   });
+}
+
+function textElemUpdate(bar: SVGGElement) {
+  if (bar.dataset.textUpdate === '1') return;
+  bar.dataset.textUpdate = '1';
 
   const textElem = bar.querySelector<SVGTextElement>('text.bar-label');
   if (!textElem) return;
 
-  const textWidth = textElem.getBBox().width;
+  const barOverlay = bar.querySelector('.bar');
+
+  const textWidth = textElem.getBBox().width + 40;
+
   const barWidth = Number(barOverlay?.getAttribute('width'));
-  if (barWidth < textWidth) return;
-  textElem.setAttribute(
-    'x',
-    String(Number(barOverlay?.getAttribute('x')) + barWidth - textWidth - 40),
-  );
+  if (barWidth < textWidth) {
+    textElem.textContent = '';
+
+    if (barWidth <= 40 * 4) {
+      textElem.setAttribute(
+        'x',
+        String(Number(barOverlay?.getAttribute('x')) + 40),
+      );
+    }
+
+    return;
+  }
+
+  if (barWidth > 40 * 4) {
+    textElem.setAttribute(
+      'x',
+      String(Number(barOverlay?.getAttribute('x')) + barWidth - textWidth),
+    );
+  }
 }
