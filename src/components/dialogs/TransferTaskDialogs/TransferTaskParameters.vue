@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()">
+  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()" @before-show="() => checkParameters()">
     <q-card
       class="modal-card modal-card__small"
       :style="{ width: dynamicWidthDialog + 'px' }"
@@ -229,7 +229,6 @@ import {
   DtoProjectMemberLight,
   DtoStateLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { IState } from 'src/interfaces/states';
 
 // store
 const userStore = useUserStore();
@@ -267,7 +266,7 @@ const emit = defineEmits(['save']);
 
 const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
-const states = ref<IState[]>([]);
+const states = ref<DtoStateLight[]>([]);
 const issueSettings = ref({
   state_detail: props.issue_settings.state_detail,
   priority: props.issue_settings.priority,
@@ -311,17 +310,18 @@ const checkStatus = async () => {
     currentWorkspaceSlug.value,
     props.project_id,
   );
-  let arr: any = [];
+  let arr: DtoStateLight[] = [];
   for (const n in data) {
     arr = arr.concat(data[n]);
   }
   states.value = arr;
 
-  issueSettings.value.state_detail = arr.find(
+  const newStatus = arr.find(
     (status) =>
       status.name === props.issue_settings.state_detail?.name &&
       status.group === props.issue_settings.state_detail?.group,
   );
+  issueSettings.value.state_detail = newStatus || arr.find((status) => status.default === true) || arr[0];
 };
 
 const checkWatchers = async () => {
@@ -332,6 +332,24 @@ const checkWatchers = async () => {
 const checkAssignees = async () => {
   let checkedAssignees = await getFilteredMembers(props.issue_settings.assignees);
   issueSettings.value.assignees = checkedAssignees;
+}
+
+const checkParameters = async () => {
+  if (props.isDifferentProject) {
+    try {
+      if (props.issue_settings.state_detail) {
+        await checkStatus();
+      }
+      if (props.issue_settings.assignees && props.issue_settings.assignees.length){
+        await checkAssignees();
+      }
+      if (props.issue_settings.watchers && props.issue_settings.watchers.length) {
+        await checkWatchers();
+      }
+    } finally{
+      emit('save', issueSettings.value);
+    }
+  }
 }
 
 const resetSettings = () => {
@@ -347,27 +365,11 @@ const resetSettings = () => {
 const close = () => {
   if (isSave.value) {
     isSave.value = false;
-    emit('save', issueSettings);
+    emit('save', issueSettings.value);
   } else {
     resetSettings();
   }
 };
-
-watch(
-  () => props.project_id,
-  () => {
-    if (props.isDifferentProject) {
-      if (props.issue_settings.state_detail) {
-        checkStatus();
-      }
-      if (props.issue_settings.assignees && props.issue_settings.assignees.length){
-        checkAssignees();
-      }
-      if (props.issue_settings.watchers && props.issue_settings.watchers.length) {
-        checkWatchers();
-      }
-    }
-})
 
 watch(
   () => props.issue_settings,
