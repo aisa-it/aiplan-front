@@ -1,6 +1,6 @@
 <template>
   <q-btn
-    :class="['menu-link__btn', btnClass]"
+    class="menu-link__btn"
     :flat="flat"
     :dense="dense"
     :icon="icon"
@@ -41,9 +41,11 @@
 </template>
 
 <script setup lang="ts">
+import { DefineComponent } from 'vue';
+
 export interface MenuActionItem {
   text: string;
-  icon?: any;
+  icon?: DefineComponent;
   onClick: () => void;
   to?: string;
   show?: boolean;
@@ -54,14 +56,12 @@ withDefaults(
     items: MenuActionItem[];
     icon?: string;
     btnStyle?: string;
-    btnClass?: string;
     flat?: boolean;
     dense?: boolean;
   }>(),
   {
     icon: 'more_horiz',
     btnStyle: '',
-    btnClass: '',
     flat: true,
     dense: false,
   },

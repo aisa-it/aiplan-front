@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 
@@ -101,7 +101,6 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import ExpansionItem from '../ExpansionItem.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 import StatusCircularProgressBar from '../progress-bars/StatusCircularProgressBar.vue';
-import CreateSprintDialogBtn from 'src/modules/sprints/create-sprint-dialog/components/CreateSprintDialogBtn.vue';
 import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue';
 import SprintNotificationsSettingsDialog from 'src/modules/sprints/notifications-dialog/SprintNotificationsSettingsDialog.vue';
@@ -133,6 +132,7 @@ const sprintIdForEdit = ref<string>('');
 const sprintForDelete = ref<DtoSprintLight | null>(null);
 const isDeleteDialogOpen = ref(false);
 const openSprintNotifications = ref(false);
+const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
 onMounted(async () => {
   if (!currentWorkspaceSlug.value) return;
@@ -194,7 +194,7 @@ const headerMenuItems = [
     text: 'Создать спринт',
     icon: AddIcon,
     onClick: () => (openCreateSprint.value = true),
-    show: hasPermission('create-sprint'),
+    show: canCreateSprint,
   },
   {
     text: 'Настроить уведомления',
