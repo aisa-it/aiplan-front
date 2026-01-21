@@ -87,9 +87,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, h, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuasar } from 'quasar';
+import { QIcon, useQuasar } from 'quasar';
 
 import { storeToRefs } from 'pinia';
 
@@ -140,7 +140,9 @@ onMounted(async () => {
 });
 
 const refreshSprints = async () => {
-  sprints.value = await sprintStore.getSprintsList(currentWorkspaceSlug.value as string)
+  sprints.value = await sprintStore.getSprintsList(
+    currentWorkspaceSlug.value as string,
+  );
 };
 
 const reopen = async (id: string) => {
@@ -192,7 +194,7 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
 const headerMenuItems = [
   {
     text: 'Создать спринт',
-    icon: AddIcon,
+    icon: h(QIcon, { name: 'add' }),
     onClick: () => (openCreateSprint.value = true),
     show: canCreateSprint,
   },
