@@ -31,7 +31,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
 
     let raf = 0;
     let lock = false;
-    let scrollContainer = getScrollContainer(parent);
+    let scrollContainer: HTMLElement | null = null;
     const OFFSET = 16;
 
     function getScrollContainer(el: HTMLElement): HTMLElement | null {
@@ -78,7 +78,24 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
       });
     };
 
+    const setScrollContainer = (container: HTMLElement | null) => {
+      if (scrollContainer === container) return;
+
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', rafUpdatePos);
+      }
+
+      scrollContainer = container;
+
+      if (scrollContainer) {
+        scrollContainer.addEventListener('scroll', rafUpdatePos, {
+          passive: true,
+        });
+      }
+    };
+
     const updatePos = () => {
+      setScrollContainer(getScrollContainer(parent));
       const parentRect = parent.getBoundingClientRect();
       const scrollbarOH = scrollbar.offsetHeight || 0;
 
@@ -88,7 +105,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
         window.innerWidth,
         window.innerHeight,
       );
-      
+      const scrollContainerRect = scrollContainer?.getBoundingClientRect();
       const viewRect = scrollContainer
         ? intersect(windowRect, scrollContainer.getBoundingClientRect())
         : {
@@ -100,8 +117,13 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
             height: window.innerHeight,
           };
 
-      const isVisible =
-        parentRect.bottom > viewRect.top && parentRect.top < viewRect.bottom;
+      const isVisible = scrollContainer
+        ? parentRect.bottom > scrollContainerRect!.top &&
+          parentRect.top < scrollContainerRect!.bottom &&
+          scrollContainerRect!.bottom > 0 &&
+          scrollContainerRect!.top < window.innerHeight
+        : parentRect.bottom > 0 && parentRect.top < window.innerHeight;
+
       scrollbar.style.display = isVisible ? '' : 'none';
       if (!isVisible) return;
 
@@ -112,14 +134,34 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
       const min = parentRect.top + scrollbarOH;
       const max = parentRect.bottom;
       const clamp = Math.min(Math.max(base, min), max);
-
       const fixed = window.innerHeight - OFFSET;
       const translateY = clamp - fixed;
-
-      scrollbar.style.bottom = `${OFFSET}px`;
-      scrollbar.style.transform = translateY
-        ? `translateY(${translateY}px)`
-        : '';
+      const reachedBottom = clamp >= max - 1;
+      const reachedTop = clamp <= min + 1;
+      if (reachedBottom) {
+        scrollbar.style.position = 'absolute';
+        scrollbar.style.top = '';
+        scrollbar.style.bottom = '0px';
+        scrollbar.style.transform = '';
+        scrollbar.style.left = '0';
+        scrollbar.style.right = '0';
+      } else if (reachedTop) {
+        scrollbar.style.position = 'absolute';
+        scrollbar.style.bottom = '';
+        scrollbar.style.top = '0px';
+        scrollbar.style.transform = '';
+        scrollbar.style.left = '0';
+        scrollbar.style.right = '0';
+      } else {
+        scrollbar.style.position = 'fixed';
+        scrollbar.style.top = '';
+        scrollbar.style.left = '';
+        scrollbar.style.right = '';
+        scrollbar.style.bottom = `${OFFSET}px`;
+        scrollbar.style.transform = translateY
+          ? `translateY(${translateY}px)`
+          : '';
+      }
     };
 
     const updateWidth = () => {
@@ -159,13 +201,6 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
     });
 
     resizeObserver.observe(container);
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener('scroll', rafUpdatePos, {
-        passive: true,
-      });
-      resizeObserver.observe(scrollContainer);
-    }
 
     updateWidth();
     rafUpdatePos();
