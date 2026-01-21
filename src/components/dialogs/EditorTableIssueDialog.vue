@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef">
+  <q-dialog ref="dialogRef" @show="handleOpenDialog">
     <q-card :class="`dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`">
       <header class="dialog__header">
         <h5 class="dialog__heading">Настройка таблицы задач</h5>
@@ -9,7 +9,7 @@
           dense
           rounded
           icon="close"
-          @click="closeDialog"
+          @click="handleCloseDialog"
         />
       </header>
 
@@ -279,7 +279,19 @@ function filterFn(val: string, update: (fn: () => void) => void): void {
   });
 }
 
-function closeDialog(): void {
+async function handleOpenDialog() {
+  currentFilter.value = {
+    workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+  };
+
+  if (!workspaceStore.workspaceInfo?.id) {
+    console.warn('Workspace ID не найден при загрузке issues');
+    checkedIssues.value = [];
+  }
+  await refresh();
+}
+
+function handleCloseDialog(): void {
   chosenTableColumns.value = [
     { label: 'Название', key: 'name' },
     { label: 'Приоритет', key: 'priority' },
@@ -438,7 +450,7 @@ const createIssueTable = (): void => {
   } else {
     props.editorInstance.chain().focus().insertContent(tableHtml).run();
   }
-  closeDialog();
+  handleCloseDialog();
 };
 
 watch(
