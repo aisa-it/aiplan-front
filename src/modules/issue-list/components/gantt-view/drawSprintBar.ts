@@ -100,7 +100,6 @@ export function drawSprintBar(
     });
   });
 
-  console.log(isTextTrunc);
   centerSprintLabel(bar, x, width, isTextTrunc);
 
   return;
