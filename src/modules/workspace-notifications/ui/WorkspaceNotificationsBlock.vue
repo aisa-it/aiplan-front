@@ -145,9 +145,9 @@ function transform() {
     props.notificationRow?.type === 'activity' ||
     props.notificationRow?.type === 'comment'
   ) {
-    if (props.notificationRow?.data?.field === 'start_date') {
-      return 'начал(-а) выполнение задачи';
-    }
+    // if (props.notificationRow?.data?.field === 'start_date') {
+    //   return 'начал(-а) выполнение задачи';
+    // }
     if (props.notificationRow?.data?.field === 'status') {
       return `
       поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 

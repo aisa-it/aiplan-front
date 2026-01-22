@@ -86,6 +86,13 @@ export function workspaceNotificationRender(activity: any, detail: any) {
         }`;
       }
 
+    case 'sprint':
+      if (activity.verb === 'created')
+        return `создал(-а) спринт "${activity.new_value}"`;
+
+      if (activity.verb === 'deleted')
+        return `удалил(-а) спринт "${activity.old_value}"`;
+
     default:
       break;
   }
