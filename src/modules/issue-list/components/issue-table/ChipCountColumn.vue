@@ -1,6 +1,8 @@
 <template>
-  <q-td :props="rowInfo">
-    <div class="table-chip-wrap">
+  <q-td :props="rowInfo"
+  >
+    <div class="table-chip-wrap flex flex-center"
+    >
       <QuantityChip :type="chipName" :value="rowInfo.value" />
     </div>
   </q-td>

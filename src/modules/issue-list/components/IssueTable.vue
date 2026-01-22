@@ -12,6 +12,19 @@
     @row-click="(_, row) => handleClick(row)"
     @request="(e) => getIssues(e.pagination)"
   >
+    <template v-slot:header="props">
+      <q-tr :props="props">
+        <q-th
+          v-for="col in columns"
+          :key="col.name"
+          :props="props"
+          :class="`${col.name.includes('count') ? 'count-column': ''}`"
+          >
+          {{ col.label }}
+        </q-th>
+      </q-tr>
+    </template>
+
     <template #bottom>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
@@ -283,6 +296,12 @@ watch(
 </script>
 
 <style lang="scss">
+  th.count-column {
+    min-width: 89px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
 .my-sticky-column-table {
   thead tr:first-child th:first-child {
     background: $bg-surface;
