@@ -14,3 +14,17 @@ export interface CalendarEventFilter {
   label: string;
   color: string;
 }
+
+export interface CalendarEvent {
+  id: string;
+  issueId: string;
+  type: CalendarEventType;
+
+  title: string;
+  date: Date;
+
+  color: string;
+  isAllDay: boolean;
+
+  issueUrl?: string;
+}
