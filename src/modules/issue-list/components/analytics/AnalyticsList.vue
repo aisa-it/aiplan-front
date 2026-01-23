@@ -4,7 +4,7 @@
       class="flex gap-x-4 cursor-pointer select-none"
       @click="isExpanded = !isExpanded"
     >
-      <ArrowUp class="arrow-up" :class="{ 'rotate-180': isExpanded }" />
+      <ArrowUp class="arrow-up" :class="{ 'rotate-180': !isExpanded }" />
       <h6 class="body-1-medium" style="margin: 0 !important">Аналитика</h6>
     </div>
     <div v-show="isExpanded">
