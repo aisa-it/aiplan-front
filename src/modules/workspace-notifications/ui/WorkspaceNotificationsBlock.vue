@@ -15,7 +15,15 @@
     <div class="full-width">
       <div class="q-mx-sm flex justify-between full-width no-wrap">
         <p class="text-bold q-mb-none body-1-medium">
-          {{ title }}
+          <template v-if="props.notificationRow?.data?.entity_type === 'sprint'">
+            {{ props.notificationRow?.detail?.sprint?.name }}
+            <span style="font-weight: 400">
+              {{ ' ' + (props.notificationRow?.detail?.workspace?.name ?? '') }}
+            </span>
+          </template>
+          <template v-else>
+            {{ title }}
+          </template>
         </p>
         <p class="q-mb-none body-2">
           {{
@@ -81,6 +89,7 @@ import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/da
 import { checkedUserNotifications } from 'src/modules/workspace-notifications/services/api';
 import { docNotificationRender } from '../utils/doc-notification';
 import { workspaceNotificationRender } from '../utils/workspace-notification';
+import { sprintNotificationRender } from '../utils/sprint-notification';
 
 const props = defineProps<{
   notificationRow: NotificationsNotificationResponse;
@@ -136,9 +145,9 @@ function transform() {
     props.notificationRow?.type === 'activity' ||
     props.notificationRow?.type === 'comment'
   ) {
-    if (props.notificationRow?.data?.field === 'start_date') {
-      return 'начал(-а) выполнение задачи';
-    }
+    // if (props.notificationRow?.data?.field === 'start_date') {
+    //   return 'начал(-а) выполнение задачи';
+    // }
     if (props.notificationRow?.data?.field === 'status') {
       return `
       поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 
@@ -185,6 +194,15 @@ function transform() {
       return issueNotificationRender(
         props.notificationRow?.data,
         props.notificationRow?.detail,
+      );
+    }
+
+    if (
+      props.notificationRow?.data?.entity_type === 'sprint'
+    ) {
+      return sprintNotificationRender(
+        props.notificationRow?.data,
+        props.notificationRow?.detail
       );
     }
 
