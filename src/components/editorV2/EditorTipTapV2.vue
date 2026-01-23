@@ -75,7 +75,8 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                      {{ link.index }} {{ link.text }}
+                        {{ !hasOwnNumeration(link.text) ? link.index : '' }}
+                       {{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -252,6 +253,11 @@ const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
 provide('isEditorReadOnly', isReadOnly);
+
+const hasOwnNumeration = (heading: string) => {
+  const firstChar = heading[0];
+  return /\d/.test(firstChar);
+}
 
 const editorExtensions = computed(() => getEditorExtensions(props));
 
