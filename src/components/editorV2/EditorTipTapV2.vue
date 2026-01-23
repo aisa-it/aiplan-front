@@ -185,7 +185,7 @@ import EditorTableIssueDialog from '../dialogs/EditorTableIssueDialog.vue';
 import aiplan from 'src/utils/aiplan';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
-import { DtoIssue, TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useFloatScroll } from './composables/useFloatScroll';
 
 // Interfaces
@@ -221,7 +221,11 @@ interface IssueTableParams {
   currentFilter: TypesIssuesListFilters | null;
   chosenTableColumns: { label: string; key: string }[];
   additionalColumnsNumber: number;
-  checkedIssues: DtoIssue[];
+  checkedIssuesInfo: {
+    id: string;
+    workspaceSlug: string;
+    projectId: string;
+  }[];
 }
 
 // Props
@@ -277,8 +281,7 @@ const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
 
 useMenuHandler(tocPopupRef);
-const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
-
+const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -300,7 +303,7 @@ const isHoveringButton = ref<boolean>(false);
 const isHoveringTable = ref<boolean>(false);
 let hideButtonTimeout: ReturnType<typeof setTimeout> | null = null;
 
-function scheduleHideButton(): void  {
+function scheduleHideButton(): void {
   if (hideButtonTimeout) clearTimeout(hideButtonTimeout);
   hideButtonTimeout = setTimeout(() => {
     if (!isHoveringTable.value && !isHoveringButton.value) {
@@ -310,7 +313,7 @@ function scheduleHideButton(): void  {
   }, 350);
 }
 
-function onButtonMouseEnter(): void  {
+function onButtonMouseEnter(): void {
   isHoveringButton.value = true;
   if (hideButtonTimeout) {
     clearTimeout(hideButtonTimeout);
@@ -318,7 +321,7 @@ function onButtonMouseEnter(): void  {
   }
 }
 
-function onButtonMouseLeave(): void  {
+function onButtonMouseLeave(): void {
   isHoveringButton.value = false;
   // Если ушли с кнопки и не на таблице — скрыть
   if (!isHoveringTable.value) {
@@ -326,7 +329,7 @@ function onButtonMouseLeave(): void  {
   }
 }
 
-function updateTableButtonPosition(tableEl: HTMLElement): void  {
+function updateTableButtonPosition(tableEl: HTMLElement): void {
   const rect = tableEl.getBoundingClientRect();
   const containerRect = document
     .querySelector('.html-editor__wrapper')
@@ -339,7 +342,7 @@ function updateTableButtonPosition(tableEl: HTMLElement): void  {
   tableButtonPosition.value = { top, left };
 }
 
-const openNewTableDialog = (): void  => {
+const openNewTableDialog = (): void => {
   currentEditingTableData.value = null;
   isIssueTableDialogOpen.value = true;
 };
@@ -489,9 +492,7 @@ const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
   if (!editorInstance.value) return;
   const editor = editorInstance.value;
 
-  const element = editor.view.dom.querySelector(
-    `[data-toc-id="${link.id}"]`,
-  )
+  const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
 
   if (!element) return;
 

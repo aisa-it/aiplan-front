@@ -112,9 +112,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { QDialog, useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
 
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 import {
   getFilters,
@@ -137,11 +139,18 @@ interface IssueTableParams {
   currentFilter: TypesIssuesListFilters | null;
   chosenTableColumns: { label: string; key: string }[];
   additionalColumnsNumber: number;
-  checkedIssues: DtoIssue[];
+  checkedIssuesInfo: {
+    id: string;
+    workspaceSlug: string;
+    projectId: string;
+  }[];
 }
 
-const workspaceStore = useWorkspaceStore();
 const filtersStore = useFiltersStore();
+
+const { currentWorkspaceSlug, workspaceInfo } =
+  storeToRefs(useWorkspaceStore());
+const { getIssueDataById } = useSingleIssueStore();
 
 const $q = useQuasar();
 const isDesktop = computed<boolean>(() => $q.platform.is?.desktop);
@@ -155,7 +164,7 @@ const props = defineProps<{
 
 // 1 столбец
 const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
-  workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+  workspaces: [workspaceInfo?.value.id ?? ''],
   search_query: '',
 });
 
@@ -164,7 +173,7 @@ const handleUpdateFilter = async (
 ) => {
   currentFilter.value = {
     ...filter,
-    workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+    workspaces: [workspaceInfo?.value.id ?? ''],
   };
   await refresh();
 };
@@ -281,10 +290,10 @@ function filterFn(val: string, update: (fn: () => void) => void): void {
 
 async function handleOpenDialog() {
   currentFilter.value = {
-    workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+    workspaces: [workspaceInfo?.value.id ?? ''],
   };
 
-  if (!workspaceStore.workspaceInfo?.id) {
+  if (!workspaceInfo?.value.id) {
     console.warn('Workspace ID не найден при загрузке issues');
     checkedIssues.value = [];
   }
@@ -404,7 +413,6 @@ const createIssueTable = (): void => {
         }
 
         let text = String(displayValue).trim();
-        // text = text === '-' || text === '' ? '&nbsp;' : escapeHtml(text); - убирать прочерки
         text = text === '' ? '&nbsp;' : escapeHtml(text);
         return `<td contenteditable="false"><span style="font-size: 14px;">${text}</span></td>`;
       });
@@ -418,13 +426,18 @@ const createIssueTable = (): void => {
     .join('');
 
   const tbody = bodyRows ? `<tbody>${bodyRows}</tbody>` : '';
+  console.log(checkedIssues.value)
 
   // Запись данных в data-атрибуты для возможности редактирования таблицы
   const tableParams: IssueTableParams = {
     currentFilter: currentFilter.value ?? null,
     chosenTableColumns: chosenTableColumns.value,
     additionalColumnsNumber: additionalColumnsNumber.value ?? 0,
-    checkedIssues: checkedIssues.value,
+    checkedIssuesInfo: checkedIssues.value.map((issue) => ({
+      id: issue.id,
+      workspaceSlug: issue.workspace_detail?.slug,
+      projectId: issue.project,
+    })),
   };
   const encodedParams = encodeURIComponent(JSON.stringify(tableParams));
   const tableHtml =
@@ -454,10 +467,10 @@ const createIssueTable = (): void => {
 };
 
 watch(
-  () => workspaceStore.currentWorkspaceSlug,
+  () => currentWorkspaceSlug.value,
   () => {
     currentFilter.value = {
-      workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
+      workspaces: [workspaceInfo?.value.id ?? ''],
     };
     refresh();
   },
@@ -465,11 +478,22 @@ watch(
 
 watch(
   () => props.savedTableData,
-  (data) => {
+  async (data) => {
     if (!data) return;
     chosenTableColumns.value = data.params.chosenTableColumns;
     additionalColumnsNumber.value = data.params.additionalColumnsNumber;
-    checkedIssues.value = data.params.checkedIssues;
+
+    // Подгрузка задач
+    try {
+      const promises = data.params.checkedIssuesInfo.map((issue) =>
+        getIssueDataById(issue.workspaceSlug, issue.projectId, issue.id),
+      );
+      const responses = await Promise.all(promises);
+      checkedIssues.value = responses.map((res) => res.data);
+    } catch (error) {
+      console.error('Ошибка при загрузке задач:', error);
+      checkedIssues.value = [];
+    }
   },
 );
 </script>
