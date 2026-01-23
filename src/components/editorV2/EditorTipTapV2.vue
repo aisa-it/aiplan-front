@@ -181,12 +181,12 @@ import {
 } from './utils/editorUtils';
 import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
-import EditorTableIssueDialog from '../dialogs/EditorTableIssueDialog.vue';
+import EditorTableIssueDialog from './dialogs/EditorTableIssueDialog.vue';
 import aiplan from 'src/utils/aiplan';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useFloatScroll } from './composables/useFloatScroll';
+import { IIssueTableParams } from 'src/interfaces/tableIssue';
 
 // Interfaces
 interface IEditorV2Props {
@@ -215,17 +215,6 @@ interface ContentMention {
   email?: string;
   avatarText?: string;
   title?: string;
-}
-
-interface IssueTableParams {
-  currentFilter: TypesIssuesListFilters | null;
-  chosenTableColumns: { label: string; key: string }[];
-  additionalColumnsNumber: number;
-  checkedIssuesInfo: {
-    id: string;
-    workspaceSlug: string;
-    projectId: string;
-  }[];
 }
 
 // Props
@@ -293,7 +282,7 @@ const editorExtensions = computed(() => getEditorExtensions(props));
 const hoveredTable = ref<HTMLElement | null>(null);
 const currentEditingTableData = ref<{
   element: HTMLElement;
-  params: IssueTableParams;
+  params: IIssueTableParams;
 } | null>(null);
 const issueTableData = ref<any>(null);
 const isIssueTableDialogOpen = ref<boolean>(false);
