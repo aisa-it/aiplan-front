@@ -61,94 +61,167 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { useIssuesStore } from 'src/stores/issues-store';
+import { DtoProjectStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useProjectStore } from 'src/stores/project-store';
 import { ScrollManager } from 'src/utils/scrollBtnManager';
 import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
 import AnalyticsCard from './AnalyticsCard.vue';
 import ArrowUp from 'src/components/icons/ArrowUp.vue';
+import { getStringMonthYear } from 'src/utils/time';
 
 const route = useRoute();
-const issuesStore = useIssuesStore();
+const projectStore = useProjectStore();
 
 const analyticsOptions = [
   {
-    value: 'common',
+    value: 'issues',
     label: 'Общий счётчик задач',
   },
   {
-    value: 'status',
+    value: 'by_state',
     label: 'По статусу',
   },
   {
-    value: 'priority',
+    value: 'by_priority',
     label: 'По приоритету',
   },
   {
-    value: 'group_status',
+    value: 'by_state_group',
     label: 'По группам статусов',
   },
   {
-    value: 'expired',
+    value: 'overdue',
     label: 'Просроченные задачи',
   },
   {
-    value: 'assigness',
+    value: 'assignee_stats',
     label: 'По исполнителям',
   },
   {
-    value: 'tags',
+    value: 'label_stats',
     label: 'По тегам',
   },
   {
-    value: 'sprints',
+    value: 'sprint_stats',
     label: 'По спринтам',
   },
   {
-    value: 'periods',
+    value: 'timeline',
     label: 'За период',
   },
 ];
 
 const isExpanded = ref(false);
 
-const mode = ref('common');
-
-const issues = ref<DtoIssueWithCount[]>([]);
+const mode = ref('issues');
+const stats = ref<DtoProjectStats | null>(null);
 
 const scrollManager = ref<ScrollManager | null>(null);
 const scrollContainer = ref();
 
-const analyticsList = computed<IAnalyticsCard[]>(() => {
-  switch (mode.value) {
-    case 'common': {
-      const total = issues.value.length;
-      const cancelled = issues.value.filter(
-        (item) => item.state_detail?.group === 'cancelled',
-      ).length;
-      const completed = issues.value.filter(
-        (item) => item.state_detail?.group === 'completed',
-      ).length;
-      const active = total - cancelled - completed;
+const cards = (rows: [label: string, count: number][]): IAnalyticsCard[] =>
+  rows.map(([label, count]) => ({
+    data: [{ label, count }],
+  }));
 
-      return [
-        {
-          data: [{ label: 'Всего', count: total }],
-        },
-        {
-          data: [{ label: 'Активные', count: active }],
-        },
-        {
-          data: [{ label: 'Завершённые', count: completed }],
-        },
-        {
-          data: [{ label: 'Отменённые', count: cancelled }],
-        },
-      ];
+const formCard = (
+  rows: [label: string, count: number][],
+  title?: string,
+): IAnalyticsCard => ({
+  ...(title ? { title } : {}),
+  data: rows.map(([label, count]) => ({ label, count })),
+});
+
+const analyticsList = computed<IAnalyticsCard[]>(() => {
+  if (!stats.value) return [];
+
+  switch (mode.value) {
+    case 'issues':
+      return cards([
+        ['Всего', stats.value.issues?.total ?? 0],
+        ['Активные', stats.value.issues?.active ?? 0],
+        ['Завершённые', stats.value.issues?.completed ?? 0],
+        ['Отменённые', stats.value.issues?.cancelled ?? 0],
+      ]);
+
+    case 'by_priority':
+      return cards([
+        ['Низкий', stats.value.by_priority?.low ?? 0],
+        ['Средний', stats.value.by_priority?.medium ?? 0],
+        ['Высокий', stats.value.by_priority?.high ?? 0],
+        ['Критический', stats.value.by_priority?.urgent ?? 0],
+        ['Не выбран', stats.value.by_priority?.none ?? 0],
+      ]);
+
+    case 'by_state_group':
+      return cards([
+        ['Создано', stats.value.by_state_group?.backlog ?? 0],
+        ['Не начато', stats.value.by_state_group?.unstarted ?? 0],
+        ['Начато', stats.value.by_state_group?.started ?? 0],
+        ['Завершено', stats.value.by_state_group?.completed ?? 0],
+        ['Отменено', stats.value.by_state_group?.cancelled ?? 0],
+      ]);
+
+    case 'overdue':
+      return cards([['Просрочено', stats.value.overdue?.count ?? 0]]);
+
+    case 'by_state':
+      return (stats.value.by_state ?? []).map(({ name, count }) =>
+        formCard([[name ?? '', count ?? 0]]),
+      );
+
+    case 'label_stats':
+      return (stats.value.label_stats ?? []).map(({ name, count }) =>
+        formCard([[name ?? '', count ?? 0]]),
+      );
+
+    case 'sprint_stats':
+      return (stats.value.sprint_stats ?? []).map(
+        ({ total, completed, name }) =>
+          formCard(
+            [
+              ['Создано', total ?? 0],
+              ['Завершено', completed ?? 0],
+            ],
+            name,
+          ),
+      );
+
+    case 'assignee_stats':
+      return (stats.value.assignee_stats ?? []).map(
+        ({ active, completed, display_name }) =>
+          formCard(
+            [
+              ['Активные', active ?? 0],
+              ['Завершённые', completed ?? 0],
+            ],
+            display_name,
+          ),
+      );
+
+    case 'timeline': {
+      const created = (stats.value.timeline?.created_by_month ?? [])
+        .slice()
+        .reverse();
+      const completedMap = new Map(
+        (stats.value.timeline?.completed_by_month ?? []).map(
+          ({ month, count }) => [month, count ?? 0],
+        ),
+      );
+
+      return created.map(({ count, month }) =>
+        formCard(
+          [
+            ['Создано', count ?? 0],
+            ['Завершено', completedMap.get(month) ?? 0],
+          ],
+          getStringMonthYear(month!),
+        ),
+      );
     }
-    default: {
+
+    default:
       return [];
-    }
   }
 });
 
@@ -156,40 +229,14 @@ const scroll = (direction: number): void => {
   scrollManager.value?.scroll(direction);
 };
 
-const loadSprintIssues = async () => {
-  const allIssues: DtoIssueWithCount[] = [];
-  let offset = 0;
-  let totalCount = 0;
-  const ISSUES_LIMIT = 100;
-
-  while (true) {
-    const response = await issuesStore.getIssuesTable(
-      route.params.workspace as string,
-      route.params.project as string,
-      {},
-      { limit: ISSUES_LIMIT, offset },
-    );
-
-    const loadedIssues = response?.data.issues ?? [];
-
-    allIssues.push(...loadedIssues);
-
-    if (offset === 0) totalCount = response?.data.count ?? 0;
-
-    const hasMoreData =
-      loadedIssues.length === ISSUES_LIMIT && allIssues.length < totalCount;
-
-    if (!hasMoreData) {
-      break;
-    }
-
-    offset += ISSUES_LIMIT;
-  }
-  return allIssues;
+const refreshStats = async () => {
+  stats.value = await projectStore.getProjectStats(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
 };
 
-onMounted(async () => {
-  issues.value = await loadSprintIssues();
+onMounted(() => {
   scrollManager.value = new ScrollManager(scrollContainer.value, false);
   scrollManager.value?.setResize();
   if (
@@ -198,6 +245,7 @@ onMounted(async () => {
   ) {
     mouseWheelScrollHandler(scrollContainer.value, false);
   }
+  refreshStats();
 });
 
 watch(

@@ -1,8 +1,8 @@
 <template>
-  <div class="analytics-card">
-    <div v-if="card.title" class="analytics-card__head">{{ card.title }}</div>
+  <div class="analytics-card sub-text">
+    <div v-if="card.title" class="analytics-card__head abbriviated-text">{{ card.title }}</div>
     <div class="analytics-card__info">
-      <div v-for="item in card.data" class="sub-text">
+      <div v-for="item in card.data">
         <span class="analytics-card__info-count">{{ item.count }}</span>
         <span>{{ item.label }}</span>
       </div>
@@ -34,7 +34,6 @@ const props = defineProps<{ card: IAnalyticsCard }>();
 
   &__info {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
 
     &-count {
