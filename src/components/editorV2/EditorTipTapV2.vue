@@ -493,7 +493,7 @@ defineExpose({
   }
 
   &__btn-edit {
-    display: none;
+    display: flex;
     width: 34px;
     box-sizing: border-box;
     padding: 6px 0;
@@ -508,10 +508,11 @@ defineExpose({
     position: sticky;
     top: 50px;
     z-index: 10;
+    visibility: hidden;
   }
 
   &__btn-edit--force {
-    display: flex !important;
+    visibility: visible;
   }
 
   &__btn-toc {
