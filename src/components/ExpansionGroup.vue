@@ -37,7 +37,6 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { isDev } from 'src/utils/helpers';
 
 // components
-import JitsiDialog from './dialogs/JitsiDialog.vue';
 import NavMenuProjects from './menu/NavMenuProjects.vue';
 import NavMenuForms from './menu/NavMenuForms.vue';
 import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
@@ -155,11 +154,6 @@ const itemsMap: Record<
     component: markRaw(NavMenuAIDocs),
     props: { filterBy: 'docs' },
     condition: () => !!(isAIDoc.value && currentWorkspaceSlug.value),
-  },
-  jitsi: {
-    id: 'jitsi',
-    component: markRaw(JitsiDialog),
-    condition: () => !isDemo.value && isEnabledJitsi.value,
   },
   conferences: {
     id: 'conferences',
