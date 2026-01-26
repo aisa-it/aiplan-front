@@ -10,8 +10,8 @@
     :options="states"
     :option-label="(v) => v.name"
     :option-value="(v) => v.id"
-    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select': ''}`"
-    :style="{width: isAdaptiveSelect ? '' : '160px'}"
+    :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
+    :style="{ width: isAdaptiveSelect ? '' : '160px' }"
     dense
     @popup-show="() => refresh()"
   >
@@ -99,7 +99,7 @@ export default defineComponent({
       type: Object,
       required: false,
     },
-    isAdaptiveSelect : {
+    isAdaptiveSelect: {
       type: Boolean,
       required: false,
       default: () => false,
@@ -136,11 +136,13 @@ export default defineComponent({
         arr = arr.concat(data[n]);
       }
       states.value = arr;
-      if (arr.every((el) => el.id !== props.status?.id))
+
+      if (!props.status) {
         emit(
           'update-initial-status',
           arr.find((status) => status.default === true) || arr[0],
         );
+      }
     };
 
     const showNotification = (type: 'success' | 'error', msg?: string) => {
