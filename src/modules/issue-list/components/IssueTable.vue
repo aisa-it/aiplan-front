@@ -93,6 +93,11 @@
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
     </template>
 
+    <template v-slot:body-cell-sprint="props">
+      <SprintColumn :row-info="props" />
+      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+    </template>
+
     <template v-slot:body-cell-sub_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
@@ -137,6 +142,7 @@ import {
   UpdatedAtColumn,
   LabelsColumn,
   ChipCountColumn,
+  SprintColumn,
 } from './issue-table';
 
 import { useIssueContext } from '../composables/useIssueContext';
