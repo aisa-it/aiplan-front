@@ -297,8 +297,8 @@ watch(
 
 <style lang="scss">
   th.count-column {
-    min-width: 89px;
-    padding-left: 0;
+    min-width: 95px;
+    max-width: 95px;
     padding-right: 0;
   }
 
