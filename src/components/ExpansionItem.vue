@@ -130,7 +130,7 @@ watch(
   isOpen,
   (open) => {
     if (!isMobile.value) {
-      isExpanded.value = open ?? false;
+      isExpanded.value = open ?? props.isDefaultOpen ?? false;
     }
   },
   { immediate: true },

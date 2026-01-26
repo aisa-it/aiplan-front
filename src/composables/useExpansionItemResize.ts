@@ -75,7 +75,7 @@ export function useExpansionItemResize(
       id,
       el: menuItemRef.value,
       minHeight: minHeight.value,
-      open: isOpen.value ?? false,
+      open: isOpen.value ?? isExpanded.value,
     });
   });
 
