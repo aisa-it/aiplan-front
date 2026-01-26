@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()">
+  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()" @before-show="() => checkParameters()">
     <q-card
       class="modal-card modal-card__small"
       :style="{ width: dynamicWidthDialog + 'px' }"
@@ -222,11 +222,12 @@ import ExecuteDateIcon from 'src/components/icons/ExecuteDateIcon.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
 import {
   DtoIssue,
+  DtoProjectMemberLight,
   DtoStateLight,
-  DtoWorkspaceMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // store
@@ -234,11 +235,13 @@ const userStore = useUserStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
 const statesStore = useStatesStore();
+const workspaceStore = useWorkspaceStore();
 const { statesCache } = storeToRefs(statesStore);
 
 // store to refs
 const { project } = storeToRefs(projectStore);
 const { user } = storeToRefs(userStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const dynamicWidthDialog = computed(() =>
   Screen.width > 760 ? 400 : Screen.width * 0.9,
@@ -247,11 +250,12 @@ const dynamicWidthDialog = computed(() =>
 // props
 const props = defineProps<{
   project_id: string;
+  isDifferentProject: boolean;
   issue: DtoIssue;
   issue_settings: {
     state_detail: DtoStateLight;
-    assignees: DtoWorkspaceMember[];
-    watchers: DtoWorkspaceMember[];
+    assignees: DtoProjectMemberLight[];
+    watchers: DtoProjectMemberLight[];
     priority: string;
     target_date: string | null;
   };
@@ -262,6 +266,7 @@ const emit = defineEmits(['save']);
 
 const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
+const states = ref<DtoStateLight[]>([]);
 const issueSettings = ref({
   state_detail: props.issue_settings.state_detail,
   priority: props.issue_settings.priority,
@@ -273,6 +278,80 @@ const issueSettings = ref({
 let isSave = ref(false);
 
 // function
+const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
+  const memberChecks = membersArr.map(async (el: DtoProjectMemberLight) => {
+    // Для каждого пользователя выполняем поисковый запрос
+    let data = await projectStore.getProjectMembers(
+      currentWorkspaceSlug.value as string,
+      props.project_id as string,
+      {
+        search_query: el.member?.email,
+        find_by: ['email'],
+      },
+    );
+
+    let result = data?.result;
+
+    const isFound = result?.find(
+      (item) =>
+        (item.member_id || item.member?.id) === (el.member_id || el.member?.id),
+    );
+
+    return isFound ? el : null;
+  });
+
+  const checkedMembers = await Promise.all(memberChecks);
+
+  return checkedMembers.filter((el) => el !== null);
+};
+
+const checkStatus = async () => {
+  const { data } = await statesStore.getStatesByProject(
+    currentWorkspaceSlug.value,
+    props.project_id,
+  );
+  let arr: DtoStateLight[] = [];
+  for (const n in data) {
+    arr = arr.concat(data[n]);
+  }
+  states.value = arr;
+
+  const newStatus = arr.find(
+    (status) =>
+      status.name === props.issue_settings.state_detail?.name &&
+      status.group === props.issue_settings.state_detail?.group,
+  );
+  issueSettings.value.state_detail = newStatus || arr.find((status) => status.default === true) || arr[0];
+};
+
+const checkWatchers = async () => {
+  let checkedWatchers = await getFilteredMembers(props.issue_settings.watchers);
+  issueSettings.value.watchers = checkedWatchers;
+}
+
+const checkAssignees = async () => {
+  let checkedAssignees = await getFilteredMembers(props.issue_settings.assignees);
+  issueSettings.value.assignees = checkedAssignees;
+}
+
+const checkParameters = async () => {
+  if (props.isDifferentProject) {
+    try {
+      if (props.issue_settings.state_detail) {
+        await checkStatus();
+      }
+      if (props.issue_settings.assignees && props.issue_settings.assignees.length){
+        await checkAssignees();
+      }
+      if (props.issue_settings.watchers && props.issue_settings.watchers.length) {
+        await checkWatchers();
+      }
+    } finally{
+      emit('save', issueSettings.value);
+    }
+  }
+}
+
 const resetSettings = () => {
   issueSettings.value = {
     state_detail: props.issue_settings.state_detail,
@@ -286,7 +365,7 @@ const resetSettings = () => {
 const close = () => {
   if (isSave.value) {
     isSave.value = false;
-    emit('save', issueSettings);
+    emit('save', issueSettings.value);
   } else {
     resetSettings();
   }
