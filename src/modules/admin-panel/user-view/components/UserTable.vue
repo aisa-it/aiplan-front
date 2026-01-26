@@ -27,6 +27,18 @@
         />
       </q-td>
     </template>
+
+    <template v-slot:body-cell="props">
+      <q-td :props="props">
+        <router-link
+          class="user-row-link"
+          :to="`${props.row.id}/user-settings`"
+          @click.stop
+        >
+          {{ props.value }}
+        </router-link>
+      </q-td>
+    </template>
     
     <template v-slot:body-cell-block="props">
       <q-td :props="props">
@@ -96,3 +108,13 @@ watch(searchQuery, (newVal) => {
   refresh({ pagination: pagination.value }, newVal);
 });
 </script>
+
+<style scoped>
+.user-row-link {
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
