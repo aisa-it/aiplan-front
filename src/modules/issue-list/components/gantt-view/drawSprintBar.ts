@@ -85,7 +85,7 @@ export function drawSprintBar(
     bar.appendChild(group);
   }
 
-  handleSprintLabelOverflow(bar, (barEl) => {
+  const isTextTrunc = handleSprintLabelOverflow(bar, (barEl) => {
     barEl.style.cursor = 'pointer';
 
     barEl.addEventListener('mouseenter', () => {
@@ -100,7 +100,7 @@ export function drawSprintBar(
     });
   });
 
-  centerSprintLabel(bar, x, width);
+  centerSprintLabel(bar, x, width, isTextTrunc);
 
   return;
 }
@@ -142,11 +142,18 @@ function ensureSprintClipPath(
   return id;
 }
 
-function centerSprintLabel(bar: SVGGElement, x: number, width: number) {
+function centerSprintLabel(
+  bar: SVGGElement,
+  x: number,
+  width: number,
+  isTextTrunc: boolean,
+) {
   const text = bar.querySelector('text.bar-label') as SVGTextElement | null;
   if (!text) return;
 
-  const centerX = x + width / 2 - text.getComputedTextLength() / 2;
+  let centerX = x + width / 2;
+
+  if (isTextTrunc) centerX -= text.getComputedTextLength() / 2;
 
   text.setAttribute('x', `${centerX}`);
   text.setAttribute('text-anchor', 'middle');
@@ -164,25 +171,34 @@ function centerSprintLabel(bar: SVGGElement, x: number, width: number) {
 function handleSprintLabelOverflow(
   bar: SVGGElement,
   onOverflow: (bar: SVGGElement) => void,
-) {
+): boolean {
   const text = bar.querySelector('text.bar-label') as SVGTextElement | null;
   const barRect = bar.querySelector('rect.bar');
-  if (!text || !barRect) return;
+  if (!text || !barRect) return false;
 
   const textLength = text.getComputedTextLength();
   const barWidth = Number(barRect.getAttribute('width'));
+
+  const fullText = text.textContent ?? '';
 
   if (textLength > barWidth) {
     const padding = 80;
     const ellipsisWidth = 11;
 
-    const fullText = text.textContent ?? '';
     const availableWidth = barWidth - padding;
     const avgCharWidth = textLength / fullText.length;
     const availableForText = availableWidth - ellipsisWidth;
-    const maxChars = Math.floor(availableForText / avgCharWidth);
+    let maxChars = Math.floor(availableForText / avgCharWidth);
+
+    if (maxChars < 0) maxChars *= -1;
+
     text.textContent = fullText.slice(0, maxChars) + '...';
 
     onOverflow(bar);
+    return true;
   }
+
+  if (fullText.endsWith('...')) return true;
+
+  return false;
 }
