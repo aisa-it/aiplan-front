@@ -17,7 +17,7 @@
       /></q-item>
 
       <q-expansion-item
-        v-if="table.issues?.length"
+        v-if="table?.count > 0"
         :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
           (value) => setGroupHide(table?.entity?.id || table.entity, value)
