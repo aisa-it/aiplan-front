@@ -17,7 +17,12 @@
       />
       <DefaultImage v-else class="q-mr-md" />
       <div class="row gap-md items-center">
-        <q-btn class="secondary-btn" no-caps @click="toggleUploaderState">
+        <q-btn
+          class="secondary-btn"
+          style="width: 110px"
+          no-caps
+          @click="toggleUploaderState"
+        >
           Загрузить
         </q-btn>
         <p class="q-mb-none" v-if="!projectForm.logo">или</p>
@@ -38,6 +43,7 @@
         <q-btn
           v-if="projectForm.logo"
           class="delete-btn"
+          style="width: 110px"
           no-caps
           @click="deleteAvatar"
         >

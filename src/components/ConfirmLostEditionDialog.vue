@@ -15,6 +15,7 @@
           no-caps
           class="secondary-btn"
           label="Вернуться в задачу"
+          style="width: 170px"
           @click="closeConfirm"
         />
         <q-btn
@@ -23,6 +24,7 @@
           no-caps
           class="primary-btn"
           label="Закрыть"
+          style="width: 170px"
           @click="handleConfirm"
         />
       </q-card-actions>

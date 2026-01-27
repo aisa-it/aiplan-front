@@ -63,6 +63,7 @@
           no-caps
           label="Отменить"
           class="secondary-btn"
+          style="width: 100px"
           v-close-popup
           @click="deleteDialog = false"
         />
@@ -70,6 +71,7 @@
           flat
           no-caps
           class="delete-btn"
+          style="width: 100px"
           label="Удалить"
           @click="handleDelete"
         />

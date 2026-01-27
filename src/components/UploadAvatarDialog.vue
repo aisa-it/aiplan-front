@@ -32,8 +32,14 @@
           </div>
         </q-btn>
       </q-card-section>
-      <q-card-actions class="q-pt-none" align="right">
-        <q-btn flat no-caps class="secondary-btn" v-close-popup>
+      <q-card-actions class="q-pt-none container-class" align="right">
+        <q-btn
+          flat
+          no-caps
+          class="secondary-btn"
+          style="width: 110px"
+          v-close-popup
+        >
           Отменить
         </q-btn>
         <q-btn
@@ -41,6 +47,7 @@
           no-caps
           class="primary-btn"
           :disable="!image"
+          style="width: 110px"
           @click="onUpload"
           v-close-popup
         >
