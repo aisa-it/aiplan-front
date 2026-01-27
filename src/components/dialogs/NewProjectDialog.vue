@@ -63,6 +63,7 @@
           label="Отменить"
           class="secondary-btn"
           @click="handleClose"
+          style="width: 100px"
         />
         <q-btn
           flat
@@ -71,6 +72,7 @@
           class="primary-btn"
           :disable="!isValidName || !isValidIdentifier"
           @click="createNewProject"
+          style="width: 100px"
         />
       </q-card-actions>
     </q-card>

@@ -33,6 +33,7 @@
             outline
             data-id="workspace-cancel-add"
             label="Отменить"
+            style="width: 100px"
             @click="handleClose"
             class="secondary-btn"
           />
@@ -43,6 +44,7 @@
             type="sumbit"
             label="Создать"
             class="primary-btn"
+            style="width: 100px"
             :disable="!isValidName || !isValidSlug || loading"
             @click.stop.prevent="handleCreateWorkspace"
           />
