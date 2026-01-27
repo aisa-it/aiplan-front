@@ -84,6 +84,8 @@ const { initSortable } = useSortable(menuRef, {
   forceFallback: true,
   fallbackOnBody: true,
   fallbackTolerance: 5,
+  filter: '.resizer',
+  preventOnFilter: true,
   onEnd: async ({ oldIndex, newIndex }) => {
     if (oldIndex == null || newIndex == null || oldIndex === newIndex) return;
 

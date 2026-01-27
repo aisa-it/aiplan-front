@@ -34,8 +34,6 @@ export function useSortable(
       forceFallback: options.forceFallback ?? true,
       fallbackOnBody: options.fallbackOnBody ?? true,
       fallbackTolerance: options.fallbackTolerance ?? 5,
-      filter: '.resizer',
-      preventOnFilter: true,
       onEnd: async (evt: Sortable.SortableEvent) => {
         const { oldIndex, newIndex, item } = evt;
         if (oldIndex == null || newIndex == null) return;
