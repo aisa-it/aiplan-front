@@ -265,24 +265,30 @@ async function refreshByPreview(isFullUpdate = false) {
       const currentEntity = refreshReviewInfo.value.entity;
       const isSame = (entity: any) => {
         if (!entity || !nextStateDetail) return false;
-        if (entity?.id && nextStateDetail?.id) return entity.id === nextStateDetail.id;
-        return (
-          entity?.name === nextStateDetail?.name
-        );
+        if (entity?.id != null && nextStateDetail?.id != null) {
+          return entity.id === nextStateDetail.id;
+        }
+        if (entity?.name && nextStateDetail?.name) {
+          if (entity.name !== nextStateDetail.name) return false;
+          if (entity?.color && nextStateDetail?.color) {
+            return entity.color === nextStateDetail.color;
+          }
+          return true;
+        }
+        return entity === nextStateDetail;
       };
 
       if (nextStateDetail && !isSame(currentEntity)) {
         const groups = issuesStore.groupedIssueList as any[];
         const targetGroup = groups.find((g) => isSame(g?.entity));
-        if (targetGroup) {
-          const targetIndex = groups.indexOf(targetGroup);
-          await refreshTable(
-            targetIndex,
-            refreshReviewInfo.value.pagination,
-            false,
-            targetGroup.entity,
-          );
-        }
+        const targetIndex = targetGroup ? groups.indexOf(targetGroup) : -1;
+
+        await refreshTable(
+          targetIndex,
+          refreshReviewInfo.value.pagination,
+          false,
+          targetGroup?.entity ?? nextStateDetail,
+        );
       }
     }
   }
