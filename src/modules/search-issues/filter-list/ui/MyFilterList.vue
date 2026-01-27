@@ -201,7 +201,6 @@ onMounted(async () => {
 <style scoped lang="scss">
 .filters {
   position: relative;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
