@@ -35,9 +35,17 @@
           no-caps
           class="secondary-btn"
           label="Отменить"
+          style="width: 110px"
           v-close-popup
         />
-        <q-btn flat dense no-caps class="primary-btn" @click="submitForm">
+        <q-btn
+          flat
+          dense
+          no-caps
+          class="primary-btn"
+          style="width: 110px"
+          @click="submitForm"
+        >
           {{ isEditLink ? 'Сохранить' : 'Добавить' }}
         </q-btn>
       </q-card-actions>

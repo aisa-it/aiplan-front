@@ -194,6 +194,7 @@
             dense
             no-caps
             class="secondary-btn q-mr-sm"
+            style="width: 100px"
             label="Отмена"
             @click="emits('onCancel')"
           />
@@ -202,6 +203,7 @@
             dense
             no-caps
             class="primary-btn"
+            style="width: 100px"
             label="Добавить"
             @click="create"
           >
