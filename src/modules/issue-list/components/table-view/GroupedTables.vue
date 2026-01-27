@@ -6,6 +6,9 @@
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
+    <q-card-section v-if="!isGanttDiagramm">
+      <AnalyticsList />
+    </q-card-section>
     <div v-for="(table, index) in issueList" :key="index">
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
@@ -61,6 +64,7 @@ import { throttle } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useUtilsStore } from 'src/stores/utils-store';
+import { useProjectStore } from 'src/stores/project-store';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
@@ -69,6 +73,7 @@ import GroupedHeader from '../ui/GroupedHeader.vue';
 import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
 import { useIssueContext } from '../../composables/useIssueContext';
+import AnalyticsList from '../analytics/AnalyticsList.vue';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -83,7 +88,9 @@ const emits = defineEmits([
   'openIssue',
 ]);
 
+const projectStore = useProjectStore();
 const { ny } = storeToRefs(useUtilsStore());
+const { isGanttDiagramm } = storeToRefs(projectStore);
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
@@ -115,7 +122,7 @@ const updateGroupedIssues = async (status: any) => {
     (item: any) => item.entity?.id === status.id,
   );
 
-  if (group && !group.issues || group.issues.length === 0) {
+  if ((group && !group.issues) || group.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,

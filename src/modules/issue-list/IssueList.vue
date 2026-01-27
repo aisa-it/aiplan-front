@@ -13,10 +13,8 @@
         @update="load()"
       />
     </q-card-section>
-    <q-card-section v-if="!issuesLoader">
-      <AnalyticsList
-        :style="{ 'padding: 16px;': isGroupingEnabled }"
-      />
+    <q-card-section v-if="!(isGroupingEnabled && !isKanbanEnabled && !isGanttDiagramm)">
+      <AnalyticsList :style="{ 'padding: 16px;': isGroupingEnabled }" />
     </q-card-section>
     <q-card-section v-if="!issuesLoader && pinnedIssues.length">
       <PinnedIssueList
