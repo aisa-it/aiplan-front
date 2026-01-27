@@ -3,14 +3,17 @@
     ref="selectSprintRef"
     dense
     multiple
-    clearable
+    :clearable="isClearable"
     map-options
     class="base-selector"
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
-    :class="{ 'adaptive-select': isAdaptiveSelect }"
+    :class="{
+      'adaptive-select': isAdaptiveSelect,
+      select_borderless: isInTable,
+    }"
     :popup-content-style="selectSprintWidth"
-    :label="label"
+    :label="computedLabel"
     :disable="isDisabled"
     :modelValue="currentSprints"
     :option-label="(v) => v.name"
@@ -58,7 +61,7 @@
 <script lang="ts" setup>
 //core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 //utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
@@ -94,8 +97,10 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
+    isInTable?: boolean;
   }>(),
   {
+    isInTable: false,
     isDisabled: () => false,
     label: () => 'Спринт',
     hideDropdownIcon: () => false,
@@ -117,6 +122,20 @@ const { sprintsList } = storeToRefs(sprintStore);
 const selectSprintRef = ref();
 const loading = ref(false);
 const isOpen = ref(false);
+
+const isClearable = computed<boolean>(() => {
+  return Boolean(props.currentSprints?.length);
+});
+
+const computedLabel = computed<string | undefined>(() => {
+  if (!props.isInTable) {
+    return props.label;
+  } else if (!props.currentSprints || props.currentSprints.length === 0) {
+    return 'Не выбран';
+  } else {
+    return undefined;
+  }
+});
 
 //composibles
 const { getWidthStyle: selectSprintWidth } =
@@ -154,3 +173,10 @@ const handleUpdateSprints = async (
   }
 };
 </script>
+
+<style scoped lang="scss">
+.select_borderless:deep(.q-field__inner) {
+  background-color: inherit;
+  border: none;
+}
+</style>

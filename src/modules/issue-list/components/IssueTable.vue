@@ -94,7 +94,7 @@
     </template>
 
     <template v-slot:body-cell-sprint="props">
-      <SprintColumn :row-info="props" />
+      <SprintColumn :row-info="props" @refresh="updateIssueField('sprint', props.row, entity)"/>
       <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
     </template>
 

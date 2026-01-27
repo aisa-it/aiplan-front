@@ -1,21 +1,36 @@
 <template>
-  <q-td :props="rowInfo">
-    <span class="body-2" style="width: 150px; max-width: 150px">
-      {{ sprintNames }}
-    </span>
+  <q-td :props="rowInfo" style="min-width: 150px; max-width: 200px">
+    <div @click.stop>
+      <SelectSprints
+        :workspace-slug="rowInfo.row.workspace_detail?.slug"
+        :issueid="rowInfo.row.id"
+        :currentSprints="rowInfo.row.sprints ?? []"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            rowInfo.row,
+            rowInfo.row.project_detail ?? project,
+            'change-issue-primary'
+          )
+        "
+        isInTable
+        @refresh="emits('refresh')"
+      />
+    </div>
   </q-td>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useRolesStore } from 'src/stores/roles-store';
+import { useProjectStore } from 'src/stores/project-store';
+import SelectSprints from 'src/components/SelectSprints.vue';
 
-const props = defineProps<{
+defineProps<{
   rowInfo: any;
 }>();
 
-const sprintNames = computed<string>(() => {
-  return props.rowInfo.value
-    ? props.rowInfo.value.map((sprint: any) => sprint.name).join(', ')
-    : '';
-});
+const emits = defineEmits(['refresh']);
+
+const rolesStore = useRolesStore();
+const { project } = storeToRefs(useProjectStore());
 </script>
