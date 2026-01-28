@@ -17,7 +17,7 @@
       /></q-item>
 
       <q-expansion-item
-        v-if="table.issues?.length"
+        v-if="table?.count > 0"
         :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
           (value) => setGroupHide(table?.entity?.id || table.entity, value)
@@ -111,11 +111,11 @@ const handleScroll = throttle((info) => {
 }, 100);
 
 const updateGroupedIssues = async (status: any) => {
-  const group = (props.issues as any[]).find(
-    (item: any) => item.entity?.id === status.id,
+  const group = (props?.issues as any[]).find(
+    (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group.issues || group.issues.length === 0) {
+  if (group && !group?.issues || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -127,7 +127,7 @@ const updateGroupedIssues = async (status: any) => {
       limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
 
-    await refreshTable(groupIndex, pagination, false, group.entity);
+    await refreshTable(groupIndex, pagination, false, status);
   }
 };
 
@@ -150,7 +150,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.issues,
+  () => [props.issues,props.issues?.length],
   () => {
     refresh();
   },

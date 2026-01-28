@@ -107,7 +107,7 @@ const issuesStore = useIssuesStore();
 
 const singleIssueStore = useSingleIssueStore();
 
-const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
+const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData, issueData } =
   storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
@@ -258,6 +258,39 @@ async function refreshByPreview(isFullUpdate = false) {
       isFullUpdate,
       refreshReviewInfo.value.entity,
     );
+
+    // Обновление новой группы статуса (иначе задача не появится в таблице до перезагрузки).
+    if (issuesStore.groupByIssues === 'state' && !isFullUpdate) {
+      const nextStateDetail = issueData.value?.state_detail;
+      const currentEntity = refreshReviewInfo.value.entity;
+      const isSame = (entity: any) => {
+        if (!entity || !nextStateDetail) return false;
+        if (entity?.id != null && nextStateDetail?.id != null) {
+          return entity.id === nextStateDetail.id;
+        }
+        if (entity?.name && nextStateDetail?.name) {
+          if (entity.name !== nextStateDetail.name) return false;
+          if (entity?.color && nextStateDetail?.color) {
+            return entity.color === nextStateDetail.color;
+          }
+          return true;
+        }
+        return entity === nextStateDetail;
+      };
+
+      if (nextStateDetail && !isSame(currentEntity)) {
+        const groups = issuesStore.groupedIssueList as any[];
+        const targetGroup = groups.find((g) => isSame(g?.entity));
+        const targetIndex = targetGroup ? groups.indexOf(targetGroup) : -1;
+
+        await refreshTable(
+          targetIndex,
+          refreshReviewInfo.value.pagination,
+          false,
+          targetGroup?.entity ?? nextStateDetail,
+        );
+      }
+    }
   }
 }
 
