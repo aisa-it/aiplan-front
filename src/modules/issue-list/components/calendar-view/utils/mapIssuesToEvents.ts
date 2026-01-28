@@ -40,8 +40,17 @@ function createEvent(
     date: new Date(dateString),
 
     color: config.color,
-    isAllDay: true,
 
-    issueUrl: issue.url,
+    issueData: {
+      id: issue.id ?? '',
+      issueUrl: issue.url,
+      title: issue.name ?? '',
+      indentifier: issue.project_detail?.identifier ?? '',
+      sequence_id: issue.sequence_id ?? 0,
+      state_detail: issue.state_detail ?? {},
+      completed_at: issue.completed_at ?? null,
+      created_at: issue.created_at ?? '',
+      target_date: issue.target_date ?? null,
+    },
   };
 }

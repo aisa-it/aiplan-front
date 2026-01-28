@@ -1,21 +1,36 @@
 <template>
   <div
     class="calendar-period-nav row items-center"
-    :class="{ 'justify-between': fullSize }"
+    :class="{
+      'justify-center': offNavigation,
+      'justify-between': fullSize && !offNavigation,
+    }"
   >
-    <q-btn flat dense icon="chevron_left" @click="emit('prev')" />
+    <q-btn
+      v-if="!offNavigation"
+      flat
+      dense
+      icon="chevron_left"
+      @click="emit('prev')"
+    />
 
     <div class="calendar-period-nav__label q-px-md">
       {{ label }}
     </div>
 
-    <q-btn flat dense icon="chevron_right" @click="emit('next')" />
+    <q-btn
+      v-if="!offNavigation"
+      flat
+      dense
+      icon="chevron_right"
+      @click="emit('next')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useCalendarStore } from '../store/calendar-store';
+import { useCalendarStore } from '../../store/calendar-store';
 
 type ViewMode = 'week' | 'month' | 'year';
 
@@ -23,6 +38,7 @@ const props = defineProps<{
   currentDate: Date;
   viewMode: ViewMode;
   fullSize?: boolean;
+  offNavigation?: boolean;
 }>();
 
 const emit = defineEmits<{

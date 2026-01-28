@@ -6,6 +6,6 @@
 </template>
 
 <script setup lang="ts">
-import CalendarPeriodNav from '../components/CalendarPeriodNav.vue';
-import CalendarViewModeSelect from '../components/CalendarViewModeSelect.vue';
+import CalendarPeriodNav from '../components/navigation/CalendarPeriodNav.vue';
+import CalendarViewModeSelect from '../components/controls/CalendarViewModeSelect.vue';
 </script>

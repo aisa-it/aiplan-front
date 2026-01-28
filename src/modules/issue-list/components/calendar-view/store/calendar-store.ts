@@ -1,5 +1,11 @@
 import { defineStore } from 'pinia';
-import { addDays, buildDateRange, getWeekStart } from '../utils/dateRange';
+import {
+  addDays,
+  buildDateRange,
+  getMonthStart,
+  getWeekStart,
+} from '../utils/dateRange';
+import { CalendarTransitionDirection } from '../types/calendar';
 
 export type CalendarViewMode = 'week' | 'month' | 'year';
 
@@ -7,6 +13,7 @@ export const useCalendarStore = defineStore('calendar', {
   state: () => ({
     currentDate: new Date(),
     viewMode: 'week' as CalendarViewMode,
+    transitionDirection: 'forward' as CalendarTransitionDirection,
   }),
 
   getters: {
@@ -20,8 +27,8 @@ export const useCalendarStore = defineStore('calendar', {
       }
 
       if (state.viewMode === 'month') {
-        const from = new Date(base.getFullYear(), base.getMonth(), 1);
-        const to = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+        const from = getMonthStart(base);
+        const to = addDays(from, 41);
         return { from, to };
       }
 
@@ -31,8 +38,17 @@ export const useCalendarStore = defineStore('calendar', {
     },
 
     visibleDates(): Date[] {
+      if (this.viewMode === 'year') return [];
+
       const { from, to } = this.visibleRange;
       return buildDateRange(from, to);
+    },
+
+    visibleMonths(): Date[] {
+      if (this.viewMode !== 'year') return [];
+
+      const year = this.currentDate.getFullYear();
+      return Array.from({ length: 12 }, (_, month) => new Date(year, month, 1));
     },
   },
 
@@ -46,10 +62,12 @@ export const useCalendarStore = defineStore('calendar', {
     },
 
     next(forView?: CalendarViewMode) {
+      this.transitionDirection = 'forward';
       this.currentDate = this.shiftDate(1, forView);
     },
 
     prev(forView?: CalendarViewMode) {
+      this.transitionDirection = 'backward';
       this.currentDate = this.shiftDate(-1, forView);
     },
 

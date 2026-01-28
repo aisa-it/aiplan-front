@@ -6,6 +6,19 @@ export function getWeekStart(date: Date) {
   return d;
 }
 
+export function getMonthStart(baseDate: Date) {
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+
+  const firstOfMonth = new Date(year, month, 1);
+  const dayOfWeek = firstOfMonth.getDay() || 7;
+
+  const startDate = new Date(firstOfMonth);
+  startDate.setDate(firstOfMonth.getDate() - (dayOfWeek - 1));
+
+  return startDate;
+}
+
 export function addDays(date: Date, days: number) {
   const d = new Date(date);
   d.setDate(d.getDate() + days);

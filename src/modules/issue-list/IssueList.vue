@@ -3,6 +3,7 @@
     <q-card-section
       class="row issue-list__header"
       :style="'padding: 12px 16px'"
+      v-if="!isCalendar"
     >
       <IssuesListTitle />
       <q-space />
@@ -27,6 +28,7 @@
         :is="currentIssueList"
         contextType="project"
         data-tour="issue-table"
+        @update="load()"
       />
     </transition>
   </q-card>
@@ -99,6 +101,11 @@ const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
 
 const load = async () => {
+  if (isCalendar.value) {
+    issuesLoader.value = false;
+    return;
+  }
+
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
@@ -187,6 +194,10 @@ watchEffect(() => {
       ? components.BoardListSkeleton
       : components.TableListSkeleton;
   }
+});
+
+watch(isCalendar, (newState, oldState) => {
+  if (!newState && oldState) load();
 });
 </script>
 

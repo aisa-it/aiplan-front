@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import PeriodNav from '../ui/PeriodNav.vue';
-import { useCalendarStore } from '../store/calendar-store';
+import PeriodNav from './PeriodNav.vue';
+import { useCalendarStore } from '../../store/calendar-store';
 
 const calendarStore = useCalendarStore();
 </script>

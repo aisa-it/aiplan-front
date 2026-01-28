@@ -1,12 +1,6 @@
 import { defineStore } from 'pinia';
-import { CalendarEvent } from '../types/calendar';
-
-function formatDayKey(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+import { CalendarEvent, CalendarEventType } from '../types/calendar';
+import { formatDayKey } from '../utils/calendarDates';
 
 export const useCalendarEventStore = defineStore('calendar-events', {
   state: () => ({
@@ -25,6 +19,19 @@ export const useCalendarEventStore = defineStore('calendar-events', {
 
       return map;
     },
+
+    eventsForYear: (state) => {
+      const map = new Map<string, Set<CalendarEventType>>();
+
+      for (const event of state.events) {
+        const key = formatDayKey(event.date);
+        if (!map.has(key)) map.set(key, new Set<CalendarEventType>());
+        map.get(key)!.add(event.type);
+      }
+
+      return map;
+    },
+
     eventsByIssueId: (state) => {
       const map = new Map<string, CalendarEvent[]>();
 

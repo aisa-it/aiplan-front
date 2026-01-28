@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useCalendarStore } from '../store/calendar-store';
+import { useCalendarStore } from '../../store/calendar-store';
 
 const calendarStore = useCalendarStore();
 const { viewMode } = storeToRefs(calendarStore);

@@ -109,7 +109,7 @@
 
 <script setup lang="ts">
 import { debounce, useQuasar } from 'quasar';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { PROJECT_VIEWS } from 'src/constants/constants';
 import { useProjectFilters } from 'src/modules/issue-list/composables/useProjectFilters';
 import { IFilter } from 'src/interfaces/filters';
@@ -315,6 +315,14 @@ onMounted(async () => {
   userLabels.value = await searchLabels();
   userStates.value = await searchStates();
 });
+
+watch(
+  () => filter.value.filter,
+  (newVal) => {
+    console.log(newVal);
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped lang="scss">

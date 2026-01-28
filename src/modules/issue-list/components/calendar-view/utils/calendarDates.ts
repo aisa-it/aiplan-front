@@ -1,4 +1,5 @@
 import { MiniCalendarDay } from '../types/calendar';
+import { getMonthStart } from './dateRange';
 
 export function getMonthMatrix(
   baseDate: Date,
@@ -6,15 +7,8 @@ export function getMonthMatrix(
 ): MiniCalendarDay[] {
   const result: MiniCalendarDay[] = [];
 
-  const year = baseDate.getFullYear();
+  const startDate = getMonthStart(baseDate);
   const month = baseDate.getMonth();
-
-  const firstOfMonth = new Date(year, month, 1);
-
-  const dayOfWeek = firstOfMonth.getDay() || 7;
-  const startDate = new Date(firstOfMonth);
-  startDate.setDate(firstOfMonth.getDate() - (dayOfWeek - 1));
-
   const today = new Date();
 
   for (let i = 0; i < 42; i++) {
@@ -40,10 +34,17 @@ export function getMonthMatrix(
   return result;
 }
 
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+export function isSameDay(a: Date, b: Date) {
+  return isSameMonth(a, b) && a.getDate() === b.getDate();
+}
+
+export function isSameMonth(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+export function formatDayKey(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }

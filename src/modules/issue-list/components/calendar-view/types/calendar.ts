@@ -1,13 +1,17 @@
+import { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 export interface MiniCalendarDay {
   date: Date;
   isCurrentMonth: boolean;
   isToday: boolean;
-  isInHighlightedWeek: boolean;
-  isInHighlightedBorderStart: boolean;
-  isInHighlightedBorderEnd: boolean;
+  isInHighlightedWeek?: boolean;
+  isInHighlightedBorderStart?: boolean;
+  isInHighlightedBorderEnd?: boolean;
 }
 
 export type CalendarEventType = 'created' | 'target' | 'completed' | 'canceled';
+
+export type CalendarTransitionDirection = 'forward' | 'backward';
 
 export interface CalendarEventFilter {
   type: CalendarEventType;
@@ -22,9 +26,17 @@ export interface CalendarEvent {
 
   title: string;
   date: Date;
-
   color: string;
-  isAllDay: boolean;
 
-  issueUrl?: string;
+  issueData: {
+    id: string;
+    title: string;
+    indentifier: string;
+    sequence_id: number;
+    issueUrl?: string;
+    state_detail: DtoStateLight;
+    completed_at: string | null;
+    created_at: string;
+    target_date: string | null;
+  };
 }
