@@ -29,6 +29,16 @@
         round
         style="height: 30px; width: 30px"
         class="q-ml-sm"
+        @click="downloadZip(pagination)"
+      >
+        <FileZIPIcon />
+      </q-btn>
+      <q-btn
+        flat
+        dense
+        round
+        style="height: 30px; width: 30px"
+        class="q-ml-sm"
         @click="onRequest(pagination)"
       >
         <RefreshIcon />
@@ -300,6 +310,7 @@ import { parseBoldText } from 'src/utils/helpers';
 
 // components
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
+import FileZIPIcon from 'src/components/icons/FileZIPIcon.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import Filterv2Icon from 'src/components/icons/Filterv2Icon.vue';
 import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
@@ -325,7 +336,7 @@ const emits = defineEmits<{
 const router = useRouter();
 
 //stores
-const { extendedSearchIssues } = useIssuesStore();
+const { extendedSearchIssues, exportIssues } = useIssuesStore();
 const filtersStore = useFiltersStore();
 const { columnsToShow } = storeToRefs(filtersStore);
 
@@ -400,6 +411,20 @@ const onRequest = async (p) => {
   pagination.value.sortBy = p.sortBy;
   pagination.value.descending = p.descending;
   loading.value = false;
+};
+
+const downloadZip = async (p) => {
+  let req = Object.assign((filter.value as any) ?? {}, {
+    search_query: searchQuery.value,
+  });
+  const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
+  await exportIssues(req as any, {
+    order_by: order_by ?? 'sequence_id',
+    desc: p.descending,
+    offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
+    limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
+    only_active: filter.value?.only_active || false,
+  });
 };
 
 const handleSearchIssues = debounce(() => {

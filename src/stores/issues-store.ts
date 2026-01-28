@@ -98,6 +98,14 @@ export const useIssuesStore = defineStore('issues-store', {
         return data;
       } catch {}
     },
+
+    async exportIssues(
+      filters: TypesIssuesListFilters,
+      pagination: IPagination,
+    ) {
+      return issuesApi.exportIssueList(filters, pagination);
+    },
+
     async getIssueList(filters: TypesIssuesListFilters, query: IQuery) {
       return issuesApi.getIssueList(filters, query);
     },
