@@ -114,6 +114,22 @@
               class="col centered-horisontally"
             ></SelectWatchers>
           </div>
+
+          <div
+            v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
+            class="row q-mb-sm centered-horisontally"
+          >
+            <div class="col centered-horisontally issue-selector-label">
+              <SprintIcon />
+              <span class="q-ml-sm"> Спринт </span>
+            </div>
+            <SprintIcon class="issue-selector-icon mr-12" />
+            <SelectSprints
+              v-model="sprints"
+              class="col centered-horisontally"
+              label="Выберите спринт"
+            />
+          </div>
         </div>
         <q-separator vertical class="q-mx-md" />
         <div class="col">
@@ -167,11 +183,20 @@
               class="col centered-horisontally"
             ></select-parent-issue>
           </div>
+          <select-tags
+            v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
+            v-model:tags="tags"
+            :projectid="project.id"
+            :isDisabled="true"
+          >
+          </select-tags>
         </div>
         <select-tags
+          v-if="!hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
           v-model:tags="tags"
           :projectid="project.id"
           :isDisabled="true"
+          isFullWidth
         >
         </select-tags>
       </q-card-section>
@@ -230,6 +255,9 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
+import { useRolesStore } from 'src/stores/roles-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { getIssueLink } from 'src/utils/links';
@@ -251,6 +279,9 @@ import SelectParentIssue from './SelectParentIssue.vue';
 import PriorityIcon from './icons/PriorityIcon.vue';
 import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-template/ui/SelectSingleIssueTemplate.vue';
 import SelectAttachments from './SelectAttachments.vue';
+import SprintIcon from './icons/SprintIcon.vue';
+import SelectSprints from 'src/components/SelectSprints.vue';
+
 //types
 import { QCard } from 'quasar';
 //icons
@@ -260,7 +291,12 @@ import CalendarIcon from './icons/CalendarIcon.vue';
 import ShareIcon from './icons/ShareIcon.vue';
 import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  AiplanRequestIssueIdList,
+  DtoProject,
+  DtoSprintLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { sprintIssuesUpdate } from 'src/modules/sprints/services/api';
 
 const props = defineProps<{
   project_detail?: DtoProject;
@@ -292,10 +328,12 @@ const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
 const issuesStore = useIssuesStore();
 const singleIssueStore = useSingleIssueStore();
+const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 
 //storesToRefs
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
 
 const { user } = storeToRefs(userStore);
@@ -312,6 +350,7 @@ const status = ref(null);
 const priority = ref(null);
 const assigness = ref([]);
 const watchers = ref([]);
+const sprints = ref([]);
 const tags = ref([]);
 const date = ref(null);
 const parent = ref(null);
@@ -393,6 +432,27 @@ const handleDeleteTemplate = async (id: string) => {
   }
 };
 
+const updateSprint = async (sprint: DtoSprintLight, issueid: string) => {
+  const data: AiplanRequestIssueIdList = {
+    issues_add: [issueid],
+  };
+
+  await sprintIssuesUpdate(
+    currentWorkspaceSlug.value ?? '',
+    sprint.id ?? '',
+    data,
+  ).catch((err) => {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: 'Ошибка при обновлении спринтов',
+    });
+    throw err;
+  });
+
+  sprintStore.triggerSprintRefresh();
+};
+
 const create = async () => {
   titleRef.value.validate();
 
@@ -453,6 +513,11 @@ const create = async () => {
             ),
       });
       await selectAttachments.value.uploadDraftAttachments(res.data.id);
+
+      sprints.value.forEach((sprint) => {
+        updateSprint(sprint, issue.id);
+      });
+
       emits('ok');
     })
     .catch(() => {
