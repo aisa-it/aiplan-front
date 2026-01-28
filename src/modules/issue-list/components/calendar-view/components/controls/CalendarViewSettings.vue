@@ -25,63 +25,57 @@
         </q-select>
       </q-item>
       <SelectMembersFilter
-        v-model="filter.filter.authors"
+        v-model="filters.authors"
         :label="'Авторы'"
-        :searched-options="searchedMembers.authors"
-        :options="members.authors"
-        :loading="loading"
-        :search="search.authors"
-        @search="(val) => handleSearchMembers(val, 'authors')"
+        :searched-options="authorsSelect.searched.value"
+        :options="authorsSelect.list.value"
+        :search="authorsSelect.search.value"
+        @search="authorsSelect.handleSearch"
       />
       <SelectMembersFilter
         ref="selectAssigneesFilterRef"
-        v-model="filter.filter.assignees"
+        v-model="filters.assignees"
         :label="'Исполнители'"
-        :searched-options="searchedMembers.assignees"
-        :options="members.assignees"
-        :loading="loading"
-        :search="search.assignees"
-        @search="(val) => handleSearchMembers(val, 'assignees')"
+        :searched-options="assigneesSelect.searched.value"
+        :options="assigneesSelect.list.value"
+        :search="assigneesSelect.search.value"
+        @search="assigneesSelect.handleSearch"
       />
       <SelectMembersFilter
-        v-model="filter.filter.watchers"
+        v-model="filters.watchers"
         ref="selectWatchersFilterRef"
         :label="'Наблюдатели'"
-        :searched-options="searchedMembers.watchers"
-        :options="members.watchers"
-        :loading="loading"
-        :search="search.watchers"
-        @search="(val) => handleSearchMembers(val, 'watchers')"
+        :searched-options="watchersSelect.searched.value"
+        :options="watchersSelect.list.value"
+        :search="watchersSelect.search.value"
+        @search="watchersSelect.handleSearch"
       />
       <SelectLabelsFilter
         ref="selectLabelsFilterRef"
-        v-model="filter.filter.labels"
+        v-model="filters.labels"
         label="Теги"
-        :options="userLabels"
-        :searched-options="searchedLabels"
-        :loading="loading"
-        :search="search.labels"
+        :options="labelsSelect.list.value"
+        :searched-options="labelsSelect.searched.value"
+        :search="labelsSelect.search.value"
         :projects="[project]"
         unavailable-text="Тег недоступен"
-        @search="handleSearchLabels"
+        @search="labelsSelect.handleSearch"
       />
       <SelectStatesFilter
         ref="selectStatesFilterRef"
-        v-model="filter.filter.states"
-        :options="userStates"
-        :searched-options="searchedStates"
+        v-model="filters.states"
+        :options="statesSelect.list.value"
+        :searched-options="statesSelect.searched.value"
         :projects="[project]"
-        :loading="loading"
         label="Статусы"
-        :search="search.states"
-        :only-active="filter.filter.only_active"
+        :search="statesSelect.search.value"
+        :only-active="filters.only_active"
         unavailableText="Статус недоступен"
-        @search="handleSearchStates"
+        @search="statesSelect.handleSearch"
         @setOnlyActive="setOnlyActive"
       />
       <q-select
-        ref="selectPrioritiesFilterRef"
-        v-model="filter.filter.priorities"
+        v-model="filters.priorities"
         dense
         multiple
         clearable
@@ -95,10 +89,8 @@
         @update:model-value="
           (e) => {
             if (e)
-              filter.filter.priorities = e.map((el: any) =>
-                el.id ? el.id : el,
-              );
-            else return (filter.filter.priorities = []);
+              filters.priorities = e.map((el: any) => (el.id ? el.id : el));
+            else return (filters.priorities = []);
           }
         "
       >
@@ -108,32 +100,35 @@
 </template>
 
 <script setup lang="ts">
-import { debounce, useQuasar } from 'quasar';
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watchEffect } from 'vue';
+import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
+
 import { PROJECT_VIEWS } from 'src/constants/constants';
 import { useProjectFilters } from 'src/modules/issue-list/composables/useProjectFilters';
-import { IFilter } from 'src/interfaces/filters';
+
 import SelectMembersFilter from 'src/modules/search-issues/filter-list/ui/add-filter/selects/SelectMembersFilter.vue';
 import SelectLabelsFilter from 'src/modules/search-issues/filter-list/ui/add-filter/selects/SelectLabelsFilter.vue';
 import SelectStatesFilter from 'src/modules/search-issues/filter-list/ui/add-filter/selects/SelectStatesFilter.vue';
 
 import {
-  getFilterLabels,
   getFilterMembers,
+  getFilterLabels,
   getFilterStates,
 } from 'src/modules/search-issues/filter-list/services/api';
-import { useRoute } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useUserStore } from 'src/stores/user-store';
-import {
-  DtoLabelLight,
-  DtoUser,
-} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
-const q = useQuasar();
+import type {
+  DtoLabelLight,
+  DtoStateLight,
+  DtoUser,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
+import { useRemoteSelect } from '../../composables/useRemoteSelect';
+
+const q = useQuasar();
 const isMobile = computed(() => q.platform.is.mobile);
 
 const viewsOptionsFiltered = computed(() =>
@@ -144,185 +139,106 @@ const viewsOptionsFiltered = computed(() =>
 
 const { viewForm, updateIssueView } = useProjectFilters();
 
-// -------------------------------------------------------
-type Members = 'authors' | 'assignees' | 'watchers';
+type CalendarFilters = {
+  only_active: boolean;
+  states: string[];
+  labels: string[];
+  authors: string[];
+  assignees: string[];
+  watchers: string[];
+  priorities: string[];
+};
 
-const loading = ref(false);
-
-const searchedMembers = ref<Record<Members, any[] | null>>({
-  authors: null,
-  assignees: null,
-  watchers: null,
-});
-
-const members = ref<Record<Members, any[]>>({
+const filters = ref<CalendarFilters>({
+  only_active: false,
+  states: [],
+  labels: [],
   authors: [],
   assignees: [],
   watchers: [],
+  priorities: [],
 });
 
-const search = ref({
-  workspaces: '',
-  projects: '',
-  authors: '',
-  assignees: '',
-  watchers: '',
-  labels: '',
-  states: '',
+const emit = defineEmits<{
+  (e: 'update:filters', value: CalendarFilters): void;
+}>();
+
+watchEffect(() => {
+  emit('update:filters', filters.value);
 });
-
-const priorities = [
-  {
-    id: 'low',
-    name: 'Низкий',
-  },
-  {
-    id: 'medium',
-    name: 'Средний',
-  },
-  {
-    id: 'high',
-    name: 'Высокий',
-  },
-  {
-    id: 'urgent',
-    name: 'Критический',
-  },
-];
-
-const INIT_FILTER = {
-  name: '',
-  description: '',
-  public: false,
-  filter: {
-    only_active: false,
-    states: [],
-    labels: [],
-    authors: [],
-    projects: [],
-    watchers: [],
-    assignees: [],
-    workspaces: [],
-    priorities: [],
-  },
-} as IFilter;
-
-const filter = ref<IFilter>(JSON.parse(JSON.stringify(INIT_FILTER)));
-
-const route = useRoute();
-const { user } = storeToRefs(useUserStore());
 
 const { project } = storeToRefs(useProjectStore());
 const { workspaceInfo } = useWorkspaceStore();
 
-const userLabels = ref<any>([]);
-const searchedLabels = ref<any[] | null>(null);
-const userStates = ref<{ name: string; id: string }[]>([]);
-const searchedStates = ref<any[] | null>(null);
+const workspaceId = computed(() => workspaceInfo?.id ?? '');
+const projectId = computed(() => project.value?.id ?? '');
 
-const searchStates = async (searchQuery?: string): Promise<any[]> => {
-  const dataFiltered: any[] = [];
-  await getFilterStates({
-    workspace_ids: [workspaceInfo?.id ?? ''],
-    project_ids: [project.value.id],
-    search_query: searchQuery,
-  }).then(({ data }) => {
-    for (let el in data.result)
-      dataFiltered.push({
-        color: data.result[el].color,
-        id: data.result[el].id,
-        name: data.result[el].name,
-        project: data.result[el].project,
+const priorities = [
+  { id: 'low', name: 'Низкий' },
+  { id: 'medium', name: 'Средний' },
+  { id: 'high', name: 'Высокий' },
+  { id: 'urgent', name: 'Критический' },
+] as const;
+
+const createMembersSelect = () =>
+  useRemoteSelect<DtoUser>({
+    fetch: async (search?: string) => {
+      const { data } = await getFilterMembers({
+        workspace_ids: [workspaceId.value],
+        project_ids: [projectId.value],
+        search_query: search,
       });
+      return data.result;
+    },
   });
-  return dataFiltered;
-};
 
-const searchLabels = async (searchQuery?: string): Promise<DtoLabelLight[]> => {
-  let labels: DtoLabelLight[] = [];
-  await getFilterLabels({
-    workspace_ids: [workspaceInfo?.id ?? ''],
-    project_ids: [project.value.id],
-    search_query: searchQuery,
-  })
-    .then(({ data }) => {
-      labels = data.result;
-    })
-    .catch(() => (labels = []));
+const authorsSelect = createMembersSelect();
+const assigneesSelect = createMembersSelect();
+const watchersSelect = createMembersSelect();
 
-  return labels;
-};
-
-const handleSearchLabels = debounce(async (search?: string) => {
-  searchedLabels.value = !search ? null : await searchLabels(search);
-
-  return;
-}, 700);
-
-const handleSearchStates = debounce(async (search?: string) => {
-  searchedStates.value = !search ? null : await searchStates(search);
-  return;
-}, 700);
-
-const setOnlyActive = (value: boolean, resetStates = false) => {
-  if (value || resetStates) filter.value.filter.states = [];
-  filter.value.filter.only_active = value;
-};
-
-const getMembers = async (filters?: any) => {
-  return getFilterMembers({
-    workspace_ids: filters?.workspaces,
-    project_ids: filters?.projects,
-    search_query: filters?.searchQuery,
-  });
-};
-
-function fixCurrentUserInList(result: []) {
-  return [
-    ...result.filter((u: DtoUser) => u?.id === user.value.id),
-    ...result.filter((u: DtoUser) => u?.id !== user.value.id),
-  ];
-}
-
-const handleSearchMembers = debounce(
-  async (search: string | undefined, type: Members) => {
-    if (!search) searchedMembers.value[type] = null;
-    await getMembers({
-      workspaces: [workspaceInfo?.id],
-      projects: [project.value.id],
-      searchQuery: search,
-    }).then(({ data }) => {
-      search
-        ? (searchedMembers.value[type] = data.result)
-        : (members.value[type] = data.result);
+const labelsSelect = useRemoteSelect<DtoLabelLight>({
+  fetch: async (search?: string) => {
+    const { data } = await getFilterLabels({
+      workspace_ids: [workspaceId.value],
+      project_ids: [projectId.value],
+      search_query: search,
     });
-    return;
+    return data.result;
   },
-  700,
-);
-
-onMounted(async () => {
-  await getMembers({
-    workspaces: [workspaceInfo?.id],
-    projects: [project.value.id],
-    searchQuery: null,
-  }).then(({ data }) => {
-    members.value.authors = data.result;
-    members.value.assignees = data.result;
-    members.value.watchers = data.result;
-  });
-
-  userLabels.value = await searchLabels();
-  userStates.value = await searchStates();
 });
 
-watch(
-  () => filter.value.filter,
-  (newVal) => {
-    console.log(newVal);
+const statesSelect = useRemoteSelect<DtoStateLight>({
+  fetch: async (search?: string) => {
+    const { data } = await getFilterStates({
+      workspace_ids: [workspaceId.value],
+      project_ids: [projectId.value],
+      search_query: search,
+    });
+
+    if (!data.result) return [];
+
+    return data.result.map((s: DtoStateLight) => ({
+      id: s.id,
+      name: s.name,
+      color: s.color,
+      project: s.project,
+    }));
   },
-  { deep: true },
-);
+});
+
+const setOnlyActive = (value: boolean, resetStates = false) => {
+  if (value || resetStates) filters.value.states = [];
+  filters.value.only_active = value;
+};
+
+onMounted(async () => {
+  authorsSelect.load();
+  assigneesSelect.load();
+  watchersSelect.load();
+
+  labelsSelect.load();
+  statesSelect.load();
+});
 </script>
 
 <style scoped lang="scss">
