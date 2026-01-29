@@ -142,6 +142,8 @@
   </div>
   <FormTagNew
     v-model="isFormTagNewOpen"
+    :project-id="projectid"
+    :workspace-id="currentWorkspaceSlug"
     @refresh="refresh"
     @add="handleAddTag"
   />
