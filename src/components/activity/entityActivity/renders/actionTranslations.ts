@@ -33,8 +33,8 @@ export const HISTORY_ACTIONS: Record<string, ActionTranslation> = {
     remove: 'удалил(-а) подзадачу',
   },
   parent: {
-    add: 'заблокировал(-а) задачу',
-    remove: 'снял(-а)',
+    add: 'добавил(-а)',
+    remove: ' удалил(-а)',
   },
   blocking: {
     add: 'заблокировал(-а) задачу',
@@ -62,4 +62,3 @@ export function translateHistoryAction(field: string, isAdd: boolean): string {
   const actions = HISTORY_ACTIONS[field] || HISTORY_ACTIONS.blocks;
   return isAdd ? actions.add : actions.remove;
 }
-
