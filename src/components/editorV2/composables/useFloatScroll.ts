@@ -165,7 +165,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
     };
 
     const updateWidth = () => {
-      spacer.style.width = `${container.scrollWidth}px`;
+      spacer.style.width = `${container.scrollWidth - 1}px`;
 
       if (!lock) {
         lock = true;
