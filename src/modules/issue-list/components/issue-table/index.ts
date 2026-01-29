@@ -9,6 +9,7 @@ import AssigneesColumn from './AssigneesColumn.vue';
 import UpdatedAtColumn from './UpdatedAtColumn.vue';
 import LabelsColumn from './LabelsColumn.vue';
 import ChipCountColumn from './ChipCountColumn.vue';
+import SprintColumn from './SprintColumn.vue';
 
 export {
   CreatedAtColumn,
@@ -22,4 +23,5 @@ export {
   UpdatedAtColumn,
   LabelsColumn,
   ChipCountColumn,
+  SprintColumn,
 };
