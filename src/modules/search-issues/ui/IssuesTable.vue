@@ -29,6 +29,17 @@
         round
         style="height: 30px; width: 30px"
         class="q-ml-sm"
+        @click="downloadZip(pagination)"
+        v-if="!isCreateSprint"
+      >
+        <FileZIPIcon />
+      </q-btn>
+      <q-btn
+        flat
+        dense
+        round
+        style="height: 30px; width: 30px"
+        class="q-ml-sm"
         @click="onRequest(pagination)"
       >
         <RefreshIcon />
@@ -292,6 +303,7 @@ import { onMounted, ref, watch, computed } from 'vue';
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
 import aiplan from 'src/utils/aiplan';
@@ -300,6 +312,7 @@ import { parseBoldText } from 'src/utils/helpers';
 
 // components
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
+import FileZIPIcon from 'src/components/icons/FileZIPIcon.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import Filterv2Icon from 'src/components/icons/Filterv2Icon.vue';
 import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
@@ -325,8 +338,9 @@ const emits = defineEmits<{
 const router = useRouter();
 
 //stores
-const { extendedSearchIssues } = useIssuesStore();
+const { extendedSearchIssues, exportIssues } = useIssuesStore();
 const filtersStore = useFiltersStore();
+const { setNotificationView } = useNotificationStore();
 const { columnsToShow } = storeToRefs(filtersStore);
 
 //state
@@ -400,6 +414,36 @@ const onRequest = async (p) => {
   pagination.value.sortBy = p.sortBy;
   pagination.value.descending = p.descending;
   loading.value = false;
+};
+
+const downloadZip = async (p) => {
+  try {
+    let req = Object.assign((filter.value as any) ?? {}, {
+      search_query: searchQuery.value,
+    });
+
+    const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
+
+    const pagination = {
+      order_by: order_by ?? 'sequence_id',
+      desc: p.descending,
+      only_active: filter.value?.only_active || false,
+    };
+
+    await exportIssues(req, pagination);
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Файл успешно скачан',
+    });
+  } catch {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: 'Не удалось скачать файл',
+    });
+  }
 };
 
 const handleSearchIssues = debounce(() => {
