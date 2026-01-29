@@ -3,6 +3,7 @@
     <q-card-section
       class="row issue-list__header"
       :style="'padding: 12px 16px'"
+      v-if="!isCalendar"
     >
       <IssuesListTitle />
       <q-space />
@@ -27,6 +28,7 @@
         :is="currentIssueList"
         contextType="project"
         data-tour="issue-table"
+        @update="load()"
       />
     </transition>
   </q-card>
@@ -84,6 +86,7 @@ const projectStore = useProjectStore();
 const {
   project,
   isGroupingEnabled,
+  isCalendar,
   isGanttDiagramm,
   isKanbanEnabled,
   issuesLoader,
@@ -98,6 +101,11 @@ const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
 
 const load = async () => {
+  if (isCalendar.value) {
+    issuesLoader.value = false;
+    return;
+  }
+
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
@@ -135,6 +143,12 @@ const components = {
   GanttView: defineAsyncComponent(
     () => import('src/modules/issue-list/components/gantt-view/GanttView.vue'),
   ),
+  CalendarView: defineAsyncComponent(
+    () =>
+      import(
+        'src/modules/issue-list/components/calendar-view/CalendarView.vue'
+      ),
+  ),
   TableListSkeleton: defineAsyncComponent(
     () => import('./components/skeletons/TableListSkeleton.vue'),
   ),
@@ -164,6 +178,11 @@ watchEffect(() => {
       return;
     }
 
+    if (isCalendar.value) {
+      currentIssueList.value = components.CalendarView;
+      return;
+    }
+
     if (isGroupingEnabled.value) {
       currentIssueList.value = components.GroupedIssueList;
       return;
@@ -175,6 +194,10 @@ watchEffect(() => {
       ? components.BoardListSkeleton
       : components.TableListSkeleton;
   }
+});
+
+watch(isCalendar, (newState, oldState) => {
+  if (!newState && oldState) load();
 });
 </script>
 

@@ -75,6 +75,10 @@ export const useProjectStore = defineStore('project-store', {
       return this.projectProps?.issueView === 'gantt_chart';
     },
 
+    isCalendar(): boolean | undefined {
+      return this.projectProps?.issueView === 'calendar';
+    },
+
     isKanbanEnabled(): boolean | undefined {
       return this.projectProps?.issueView === 'kanban';
     },
