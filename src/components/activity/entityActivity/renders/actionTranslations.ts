@@ -34,7 +34,7 @@ export const HISTORY_ACTIONS: Record<string, ActionTranslation> = {
   },
   parent: {
     add: 'добавил(-а)',
-    remove: ' удалил(-а)',
+    remove: 'удалил(-а)',
   },
   blocking: {
     add: 'заблокировал(-а) задачу',
