@@ -2,7 +2,7 @@
   <div :class="`${!newIssue ? 'column-wrapper' : 'row-wrapper'}`">
     <div v-if="newIssue" class="centered-horisontally">
       <TagIcon class="mr-12" />
-      <span class="q-ml-sm new-issue-label">Теги </span>
+      <span class="new-issue-label q-mr-lg">Теги </span>
     </div>
 
     <div v-else class="row">
@@ -32,7 +32,7 @@
       :virtual-scroll-sticky-size-start="50"
       :label="newIssue ? 'Выберите тег' : 'Теги'"
       popup-content-class="custom-menu scrollable-content"
-      :class="`base-selector ${newIssue ? 'new-issue-btn-wrapper ' : ''}`"
+      :class="`base-selector ${newIssue ? 'full-w ' : ''}`"
       :popup-content-style="selectTagsWidth"
       :modelValue="currentTags"
       :options="labels"
@@ -130,13 +130,15 @@
 
     <q-btn
       v-if="isDisabled === true && newIssue"
-      class="btn add-tag-new-issue-btn"
+      class="btn btn-only-icon-sm self-center q-mt-xs q-ml-xs"
+      :style="isFullWidth ? 'flex-shrink: 0;' : ''"
       no-caps
       @click="isFormTagNewOpen = true"
     >
       <div v-if="newIssue" class="full-w centered-horisontally justify-between">
-        <span v-if="Screen.width > 720">Создать</span>
+        <span v-if="Screen.width > 720 && isFullWidth">Создать</span>
         <AddIcon />
+        <q-tooltip v-if="newIssue && !isFullWidth">Создать</q-tooltip>
       </div>
     </q-btn>
   </div>
@@ -182,6 +184,7 @@ const props = withDefaults(
     tags: ITag[];
     isDisabled?: boolean;
     newIssue?: boolean;
+    isFullWidth?: boolean;
   }>(),
   { newIssue: () => true },
 );
@@ -353,25 +356,10 @@ watch(
   }
 }
 
-.new-issue-btn-wrapper {
-  width: 60%;
-}
-.add-tag-new-issue-btn {
-  width: 20%;
-}
-
 @media screen and (max-width: 720px) {
-  .new-issue-btn-wrapper {
-    width: 100%;
-  }
-
   .new-issue-tags {
     max-width: 49% !important;
     min-width: 49% !important;
-  }
-
-  .add-tag-new-issue-btn {
-    width: auto;
   }
 
   .new-issue-label {
