@@ -361,7 +361,11 @@
       >
       </SelectLinks>
 
-      <IssueCustomProperties class="q-pt-md" />
+      <IssueCustomProperties
+        class="q-pt-md"
+        :project-id="issueData.project"
+        :issue-id="issueData.id"
+      />
     </template>
     <template v-else>
       <div class="q-pt-md">

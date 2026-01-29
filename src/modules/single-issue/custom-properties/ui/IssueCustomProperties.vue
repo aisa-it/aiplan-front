@@ -1,12 +1,12 @@
 <template>
-  <div v-if="properties.length > 0">
+  <div>
     <div class="col">
       <div class="row items-center q-mb-md">
         <ListDotIcon class="issue-icon" />
         <span class="q-ml-sm"> Кастомные параметры </span>
       </div>
     </div>
-    <div class="q-gutter-y-sm">
+    <div class="q-gutter-y-sm" v-if="properties.length > 0 && !isLoading">
       <div
         v-for="prop in properties"
         :key="prop.id"
@@ -46,6 +46,16 @@
         </div>
       </div>
     </div>
+    <div v-if="isLoading" class="q-gutter-y-sm">
+      <div v-for="n in 3" :key="n" class="row items-center q-py-xs">
+        <div class="col-4 q-pr-sm">
+          <q-skeleton type="text" width="70%" />
+        </div>
+        <div class="col-8">
+          <q-skeleton type="rect" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -55,8 +65,6 @@ import { ref, onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 //stores
-import { useProjectStore } from 'src/stores/project-store';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
@@ -70,31 +78,37 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 //components
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
 
+//props
+const props = defineProps<{
+  projectId: string;
+  issueId: string;
+}>();
+
 //stores
-const projectStore = useProjectStore();
-const singleIssueStore = useSingleIssueStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
 
-const { currentProjectID } = storeToRefs(projectStore);
-const { currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
 const properties = ref<DtoIssueProperty[]>([]);
+const isLoading = ref(false);
 
 //methods
 const fetchData = async () => {
-  if (!currentIssueID.value) return;
+  if (!props.issueId) return;
+  isLoading.value = true;
   try {
     const data = await getIssueProperties(
       currentWorkspaceSlug.value as string,
-      currentProjectID.value,
-      currentIssueID.value,
+      props.projectId,
+      props.issueId,
     );
     properties.value = [...data];
   } catch (e) {
     console.error('Failed to load properties', e);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -102,8 +116,8 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
   try {
     await updateIssueProperty(
       currentWorkspaceSlug.value as string,
-      currentProjectID.value,
-      currentIssueID.value as string,
+      props.projectId,
+      props.issueId,
       prop.template_id as string,
       newValue,
     );
@@ -123,6 +137,6 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
 };
 
 //lifecycle hooks
-watch(() => currentIssueID.value, fetchData);
+watch(() => props.issueId, fetchData);
 onMounted(fetchData);
 </script>
