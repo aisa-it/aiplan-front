@@ -30,6 +30,7 @@
         style="height: 30px; width: 30px"
         class="q-ml-sm"
         @click="downloadZip(pagination)"
+        v-if="!isCreateSprint"
       >
         <FileZIPIcon />
       </q-btn>
@@ -302,6 +303,7 @@ import { onMounted, ref, watch, computed } from 'vue';
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
 import aiplan from 'src/utils/aiplan';
@@ -338,6 +340,7 @@ const router = useRouter();
 //stores
 const { extendedSearchIssues, exportIssues } = useIssuesStore();
 const filtersStore = useFiltersStore();
+const { setNotificationView } = useNotificationStore();
 const { columnsToShow } = storeToRefs(filtersStore);
 
 //state
@@ -414,17 +417,33 @@ const onRequest = async (p) => {
 };
 
 const downloadZip = async (p) => {
-  let req = Object.assign((filter.value as any) ?? {}, {
-    search_query: searchQuery.value,
-  });
-  const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
-  await exportIssues(req as any, {
-    order_by: order_by ?? 'sequence_id',
-    desc: p.descending,
-    offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
-    limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
-    only_active: filter.value?.only_active || false,
-  });
+  try {
+    let req = Object.assign((filter.value as any) ?? {}, {
+      search_query: searchQuery.value,
+    });
+
+    const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
+
+    const pagination = {
+      order_by: order_by ?? 'sequence_id',
+      desc: p.descending,
+      only_active: filter.value?.only_active || false,
+    };
+
+    await exportIssues(req, pagination);
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Файл успешно скачан',
+    });
+  } catch {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: 'Не удалось скачать файл',
+    });
+  }
 };
 
 const handleSearchIssues = debounce(() => {

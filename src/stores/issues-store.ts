@@ -101,9 +101,35 @@ export const useIssuesStore = defineStore('issues-store', {
 
     async exportIssues(
       filters: TypesIssuesListFilters,
-      pagination: IPagination,
+      pagination: Omit<IPagination, 'offset' | 'limit'>,
     ) {
-      return issuesApi.exportIssueList(filters, pagination);
+      try {
+        const res = await api.post('/api/auth/issues/search/export/', filters, {
+          params: pagination,
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const url = window.URL.createObjectURL(res.data);
+
+        const link = document.createElement('a');
+        link.href = url;
+
+        const filename =
+          res.headers?.['content-disposition'].match(/filename="?(.+)"?/i)[1];
+
+        link.setAttribute('download', filename);
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        throw e;
+      }
     },
 
     async getIssueList(filters: TypesIssuesListFilters, query: IQuery) {
