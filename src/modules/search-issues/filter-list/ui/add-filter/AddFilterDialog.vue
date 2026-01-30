@@ -98,6 +98,7 @@
               :popup-content-style="selectWorkspacesFilterWidth"
               :loading="loading"
               :search="search.workspaces"
+              :disabled="singleWorkspace"
               unavailable-text="Пространство недоступно"
               @search="handleSearchWorkspaces"
               @update="(e) => updateProjectList(e)"
@@ -292,6 +293,7 @@ type Members = 'authors' | 'assignees' | 'watchers';
 
 const props = defineProps<{
   currentFilter?: DtoSearchFilterFull | null;
+  singleWorkspace?: boolean;
 }>();
 
 const emits = defineEmits<{
