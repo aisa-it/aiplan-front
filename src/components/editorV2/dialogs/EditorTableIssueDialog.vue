@@ -1,5 +1,10 @@
 <template>
-  <q-dialog ref="dialogRef" @show="handleOpenDialog">
+  <q-dialog
+    ref="dialogRef"
+    class="prevent-click-issue-outside"
+    @show="handleOpenDialog"
+    @hide="handleCloseDialog"
+  >
     <q-card :class="`dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`">
       <header class="dialog__header">
         <h5 class="dialog__heading">Настройка таблицы задач</h5>
@@ -13,20 +18,20 @@
         />
       </header>
 
-      <q-layout view="lhr lpR lfr" class="table-issue">
+      <q-layout view="hHh LpR lff" class="table-issue" container>
         <q-drawer
           v-model="leftDrawerOpen"
           :width="drawerWidth"
           :breakpoint="500"
-          class="no-wrap q-pr-lg table-issue__drawer"
+          class="no-wrap q-pr-lg q-pb-lg table-issue__drawer"
           side="left"
           show-if-above
           bordered
         >
-          <MyFilterList @update-filter="handleUpdateFilter" />
+          <MyFilterList single-workspace @update-filter="handleUpdateFilter" />
         </q-drawer>
 
-        <q-page-container style="height: 100%">
+        <q-page-container>
           <IssuesTable
             v-model:checked-rows="checkedIssues"
             :class="[
@@ -45,7 +50,7 @@
           v-model="rightDrawerOpen"
           :width="drawerWidth"
           :breakpoint="500"
-          class="no-wrap q-pl-lg table-issue__drawer"
+          class="no-wrap q-pl-lg q-pb-lg table-issue__drawer"
           side="right"
           show-if-above
           bordered
@@ -79,8 +84,8 @@
               dense
             />
 
-            <div class="table-issue__selected-issues col">
-              <p class="centered-horisontally">
+            <div class="table-issue__selected-issues">
+              <p class="table-issue__selected-heading">
                 <LinkIcon />
                 <span class="q-ml-sm">Задачи</span>
               </p>
@@ -88,13 +93,13 @@
               <SelectSprintIssues
                 v-if="checkedIssues.length > 0"
                 :issues="checkedIssues"
-                class="visible-scroll issues-scroll"
+                class="table-issue__selected-list visible-scroll issues-scroll"
                 @delete="(id) => removeCheckedIssue(id)"
               />
             </div>
 
             <q-btn
-              class="primary-btn full-w q-mb-sm"
+              class="primary-btn full-w q-mb-md"
               flat
               dense
               no-caps
@@ -182,24 +187,41 @@ const {
 .table-issue {
   margin-top: 16px;
 
-  &:deep(.q-drawer) {
-    position: absolute;
-  }
-
   &__issues {
     padding: 0 !important;
 
     &:deep(.sticky-fix) {
       padding: 0 !important;
-      bottom: -10px;
+    }
+
+    &:deep(.pagination) {
+      padding-bottom: 25px;
     }
   }
 
   &__parameters {
     display: flex;
     flex-direction: column;
+    height: 100%;
     gap: 24px;
-    min-height: 80%;
+  }
+
+  &__selected-issues {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &__selected-heading {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  &__selected-list {
+    flex-grow: 1;
+    overflow-y: auto;
   }
 }
 </style>

@@ -41,7 +41,7 @@ import { getFilters, getMyFilters } from '../../services/api';
 
 const props = defineProps<{
   filter: DtoSearchFilterFull;
-  currentFilter: string;
+  currentFilter: string | undefined;
 }>();
 
 const emits = defineEmits<{
@@ -53,7 +53,7 @@ const dialogRef = ref();
 
 const handleDeleteMyFilter = async (filter_id: string) => {
   await deleteFilter(filter_id).then(async () => {
-    if (props.filter.id === props.currentFilter) emits('resetByDelete');
+    if (props.currentFilter && props.filter.id === props.currentFilter) emits('resetByDelete');
     filterStore.myFilterList = await getMyFilters();
     filterStore.filterList = await getFilters();
     dialogRef.value.hide();

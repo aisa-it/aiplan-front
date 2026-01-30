@@ -40,7 +40,6 @@ export const useTableIssueDialog = (
   const { getIssueDataById } = useSingleIssueStore();
 
   const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
-    workspaces: [workspaceInfo?.value?.id ?? ''],
     search_query: '',
   });
   const checkedIssues = ref<DtoIssue[]>([]);
@@ -60,7 +59,6 @@ export const useTableIssueDialog = (
   ): Promise<void> => {
     currentFilter.value = {
       ...filter,
-      workspaces: [workspaceInfo?.value?.id ?? ''],
     };
     await refresh();
   };
@@ -242,7 +240,6 @@ export const useTableIssueDialog = (
 
     // Запись данных в data-атрибуты для возможности редактирования таблицы
     const tableParams: IIssueTableParams = {
-      currentFilter: currentFilter.value ?? null,
       chosenTableColumns: chosenTableColumns.value,
       additionalColumnsNumber: additionalColumnsNumber.value ?? 0,
       checkedIssuesInfo: checkedIssues.value.map((issue) => ({
@@ -253,7 +250,7 @@ export const useTableIssueDialog = (
     };
     const encodedParams = encodeURIComponent(JSON.stringify(tableParams));
     const tableHtml =
-      `<table class="issue-table" ${encodedParams ? `data-issue-table-params="${encodedParams}"` : ''}>${thead}${tbody}</table>`.trim();
+      `<p></p><table class="issue-table" ${encodedParams ? `data-issue-table-params="${encodedParams}"` : ''}>${thead}${tbody}</table>`.trim();
 
     // Вставка HTML
     if (props.savedTableData) {

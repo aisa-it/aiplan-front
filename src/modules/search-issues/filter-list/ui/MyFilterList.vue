@@ -105,6 +105,7 @@
   <AddFilterDialog
     v-model="isOpenAddingFilter"
     :current-filter="filterToEdit"
+    :single-workspace="singleWorkspace"
     @save-temp-filter="
       (filter) => {
         emits('update-filter', filter?.filter);
@@ -162,6 +163,10 @@ import ConfirmDeleteFilterDialog from 'src/modules/search-issues/filter-list/ui/
 
 //services
 import { getMyFilters, getFilterById } from '../../services/api';
+
+const props = defineProps<{
+  singleWorkspace? : boolean;
+}>()
 
 const emits = defineEmits<{
   'update-filter': [value?: TypesIssuesListFilters];

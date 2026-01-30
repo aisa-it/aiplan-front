@@ -7,6 +7,7 @@
     :option-label="'name'"
     :loading="loading"
     :popup-content-style="popupContentStyle"
+    :disable="disabled"
     popup-content-class="inh-popup scrollable-content"
     class="base-selector q-mb-sm"
     dense
@@ -72,6 +73,7 @@ const props = defineProps<{
   loading?: boolean;
   search?: string;
   unavailableText?: string;
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
