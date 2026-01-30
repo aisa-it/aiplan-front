@@ -85,6 +85,7 @@ import {
   ERROR_IDENTITY_SLUG,
 } from 'src/constants/notifications';
 import { RESTRICTED_URLS } from 'src/constants/constants';
+import { INITIAL_WORKSPACE_NOTIFICATION_SETTINGS } from 'src/constants/aidocNotificationSettings';
 
 // components
 import ConfirmCloseWsCreateDialog from './ConfirmCloseWsCreateDialog.vue';
@@ -171,6 +172,20 @@ const handleCreateWorkspace = async () => {
       slug: newWorkspaceSlug.value,
     })
     .then(async () => {
+      await workspaceStore.setAiDocNotificationSettings(
+        newWorkspaceSlug.value,
+        {
+          notification_author_settings_app:
+            INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+          notification_author_settings_email:
+            INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+          notification_author_settings_tg:
+            INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+          notification_settings_app: INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+          notification_settings_email: INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+          notification_settings_tg: INITIAL_WORKSPACE_NOTIFICATION_SETTINGS,
+        },
+      );
       await userStore.getUserWorkspaces();
       showOK();
       emits('wsName', newWorkspaceSlug.value);

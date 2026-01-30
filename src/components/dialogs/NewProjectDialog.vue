@@ -110,6 +110,7 @@ import { getRandomEmoji } from 'src/utils/helpers';
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJIS, PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
 import { SUCCESS_PROJECT_CREATE } from 'src/constants/notifications';
+import { INITIAL_PROJECT_NOTIFICATION_SETTINGS } from 'src/constants/projectNotificationSettings';
 
 // interfaces
 import { IStateResponse } from 'src/interfaces/states';
@@ -197,43 +198,74 @@ const createIdentifier = () => {
     .toUpperCase();
 };
 
+const getNotificationSettings = () => {
+  const initialSettings = {
+    ...INITIAL_PROJECT_NOTIFICATION_SETTINGS,
+    notify_before_deadline: null,
+  };
+
+  return {
+    notification_author_settings_email: initialSettings,
+    notification_author_settings_tg: initialSettings,
+    notification_settings_email: initialSettings,
+    notification_settings_tg: initialSettings,
+    notification_settings_app: initialSettings,
+    notification_author_settings_app: initialSettings,
+  };
+};
+
 const createNewProject = async () => {
+  const slug = currentWorkspaceSlug.value;
+  if (!slug) return;
+
   const payload = {
     cover_image: '/images/vercel.jpeg',
     description: '',
-    emoji: projectValues.value.emoji_and_icon.value
+    emoji: projectValues.value.emoji_and_icon?.value
       ? projectValues.value.emoji_and_icon.value
       : getRandomEmoji(PROJECT_EMOJIS),
     identifier: projectValues.value.identifier,
     name: projectValues.value.name,
     public: projectValues.value.public.value,
   };
-  await projectStore
-    .createProject(currentWorkspaceSlug.value, payload)
-    .then(async () => {
-      await workspaceStore
-        .getAllWorkspaceStates(currentWorkspaceSlug.value)
-        .then(() => {
-          let obj: IStateResponse = {};
-          for (let o in workspaceStore.allWorkspaceStates) {
-            obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
-          }
 
-          statesCache.value = obj;
-        });
-      setNotificationView({
-        open: true,
-        type: 'success',
-        customMessage: SUCCESS_PROJECT_CREATE,
-      });
-      dialogRef.value.hide();
-      clear();
-    })
-    .then(async () => {
-      await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
-      await userStore.getUserProjects();
+  try {
+    const project = await projectStore.createProject(slug, payload);
+
+    if (!project?.id) return;
+
+    await projectStore.setProjectNotificationSettings(
+      slug,
+      project.id,
+      getNotificationSettings(),
+    );
+
+    await workspaceStore.getAllWorkspaceStates(slug);
+
+    const obj: IStateResponse = {};
+    for (const o in workspaceStore.allWorkspaceStates) {
+      obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
+    }
+    statesCache.value = obj;
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: SUCCESS_PROJECT_CREATE,
     });
+
+    dialogRef.value.hide();
+    clear();
+
+    await Promise.all([
+      workspaceStore.getWorkspaceProjects(slug),
+      userStore.getUserProjects(),
+    ]);
+  } catch (error) {
+    console.error('Error creating project:', error);
+  }
 };
+
 watch(
   () => projectValues.value.identifier,
   (newValue, oldValue) => {
