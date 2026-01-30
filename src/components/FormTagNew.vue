@@ -66,7 +66,7 @@ import { usePalette } from 'src/modules/project-settings/labels/composables/useP
 export default defineComponent({
   name: 'FormTagNew',
   emits: ['close', 'add'],
-  props: ['projectId'],
+  props: ['projectId', 'workspaceId'],
   components: { CloseIcon, AddIcon, ColorPicker },
   setup(props, { emit }) {
     const { getRandomColorFromPalette } = usePalette();
@@ -100,7 +100,7 @@ export default defineComponent({
         showError.value = false;
         api
           .issueLabelCreate(
-            route.params.workspace,
+            props.workspaceId ?? route.params.workspace,
             props.projectId ?? route.params.project,
             name.value,
             color.value,

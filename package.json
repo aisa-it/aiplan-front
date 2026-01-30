@@ -13,7 +13,7 @@
     "build": "quasar mode add pwa && quasar build --mode pwa"
   },
   "dependencies": {
-    "@aisa-it/aiplan-api-ts": "^1.116.0",
+    "@aisa-it/aiplan-api-ts": "^1.117.0",
     "@headlessui/vue": "^1.7.17",
     "@jitsi/vue-sdk": "^1.0.4",
     "@quasar/extras": "^1.16.4",
@@ -61,6 +61,7 @@
     "pinia": "^3.0.3",
     "quasar": "^2.18.5",
     "register-service-worker": "^1.7.2",
+    "sortablejs": "^1.15.6",
     "three": "^0.180.0",
     "tippy.js": "^6.3.7",
     "tiptap-extension-font-size": "^1.2.0",
@@ -80,6 +81,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/lunr": "^2.3.7",
     "@types/node": "^24.9.2",
+    "@types/sortablejs": "^1.15.9",
     "@types/turndown": "^5.0.6",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",

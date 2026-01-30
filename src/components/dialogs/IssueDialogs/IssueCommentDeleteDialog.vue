@@ -16,6 +16,7 @@
           dense
           no-caps
           class="secondary-btn"
+          style="width: 100px"
           label="Отменить"
           v-close-popup
         />
@@ -24,6 +25,7 @@
           dense
           no-caps
           class="delete-btn"
+          style="width: 100px"
           label="Удалить"
           v-close-popup
           @click="$emit('onDelete')"

@@ -157,7 +157,10 @@
           <q-btn
             no-caps
             class="secondary-btn q-mr-sm"
-            :style="$q.screen.lt.sm ? 'order: 1; width: 100%' : 'width: 95px'"
+            :style="{
+              width: $q.screen.lt.sm ? '100%' : '105px',
+              order: $q.screen.lt.sm ? 1 : undefined,
+            }"
             label="Отмена"
             @click="() => dialogRef?.hide()"
           />
@@ -168,7 +171,7 @@
             label="Создать"
             @click="formRef?.submit()"
             :disabled="isDisabled"
-            :style="$q.screen.lt.sm ? 'width: 100%' : 'width: 102px'"
+            :style="{ width: $q.screen.lt.sm ? '100%' : '105px' }"
           />
         </q-card-section>
         <q-inner-loading
