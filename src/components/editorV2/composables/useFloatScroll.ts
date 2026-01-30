@@ -165,7 +165,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
     };
 
     const updateWidth = () => {
-      spacer.style.width = `${container.scrollWidth}px`;
+      spacer.style.width = `${container.scrollWidth - 1}px`;
 
       if (!lock) {
         lock = true;
@@ -193,6 +193,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
     scrollTrack.addEventListener('scroll', onTrackScroll, { passive: true });
     container.addEventListener('scroll', onContainerScroll, { passive: true });
 
+    window.addEventListener('wheel', onContainerScroll, { passive: true });
     window.addEventListener('scroll', rafUpdatePos, { passive: true });
     window.addEventListener('resize', rafUpdatePos, { passive: true });
 
@@ -211,6 +212,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
       scrollTrack.removeEventListener('scroll', onTrackScroll);
       container.removeEventListener('scroll', onContainerScroll);
 
+      window.removeEventListener('wheel', onContainerScroll);
       window.removeEventListener('scroll', rafUpdatePos);
       window.removeEventListener('resize', rafUpdatePos);
 

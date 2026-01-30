@@ -136,9 +136,34 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const response = await getIssue(filters, pagination);
 
     const data = response?.data?.issues;
-    issuesStore.groupedIssueList[index].issues =
-      Array.isArray(data) && data[0]?.issues ? data[0].issues : (data ?? []);
-    issuesStore.groupedIssueList[index].count = response?.data?.count ?? 0;
+    const issues =
+      Array.isArray(data) && data[0]?.issues ? data[0]?.issues : (data ?? []);
+    const count = response?.data?.count ?? 0;
+
+    const groups = issuesStore.groupedIssueList as any[];
+
+    const sameEntity = (a: any, b: any) => {
+      if (a?.id != null && b?.id != null) return a.id === b.id;
+      return a === b;
+    };
+
+    const targetIndex =
+      index != null && index >= 0
+        ? index
+        : groups.findIndex((g) => sameEntity(g?.entity, entity));
+
+    if (targetIndex < 0) {
+      groups.push({ entity, issues, count });
+      return;
+    }
+
+    if (!groups[targetIndex]) {
+      groups[targetIndex] = { entity, issues, count };
+      return;
+    }
+
+    groups[targetIndex].issues = issues;
+    groups[targetIndex].count = count;
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {

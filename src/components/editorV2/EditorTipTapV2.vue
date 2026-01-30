@@ -75,7 +75,7 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                      {{ link.index }} {{ link.text }}
+                        {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -252,8 +252,12 @@ const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
 provide('isEditorReadOnly', isReadOnly);
-
 const editorExtensions = computed(() => getEditorExtensions(props));
+
+const hasOwnNumeration = (heading: string) => {
+  const firstChar = heading[0];
+  return /\d/.test(firstChar);
+}
 
 // Попап с информацией о пользователе при наведении
 const handleMouseMove = (e: any) => {
@@ -493,7 +497,7 @@ defineExpose({
   }
 
   &__btn-edit {
-    display: none;
+    display: flex;
     width: 34px;
     box-sizing: border-box;
     padding: 6px 0;
@@ -508,10 +512,11 @@ defineExpose({
     position: sticky;
     top: 50px;
     z-index: 10;
+    visibility: hidden;
   }
 
   &__btn-edit--force {
-    display: flex !important;
+    visibility: visible;
   }
 
   &__btn-toc {

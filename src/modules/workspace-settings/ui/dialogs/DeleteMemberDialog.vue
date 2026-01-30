@@ -17,6 +17,7 @@
           data-id="cancel-member-delete-button"
           label="Отменить"
           class="secondary-btn"
+          style="width: 100px"
           v-close-popup
         />
         <q-btn
@@ -25,6 +26,7 @@
           data-id="approve-delete-member-button"
           label="Удалить"
           class="delete-btn"
+          style="width: 100px"
           @click="deleteUser"
           v-close-popup
         />

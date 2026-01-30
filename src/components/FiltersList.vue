@@ -45,6 +45,7 @@
                   <q-btn
                     no-caps
                     class="secondary-btn q-mr-xs"
+                    style="width: 110px"
                     label="Отменить"
                     v-close-popup
                   />
@@ -52,6 +53,7 @@
                     flat
                     no-caps
                     label="Выполнить"
+                    style="width: 110px"
                     class="primary-btn"
                     @click="onConfirmRefresh"
                   />

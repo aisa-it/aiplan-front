@@ -94,11 +94,11 @@ const { setNotificationView } = useNotificationStore();
 const dialogRef = ref();
 
 const sprintSettingsList: any[] = [
-  { title: 'Изменение дат спринта', field: 'disable_sprint_date' },
   { title: 'Изменилось название', field: 'disable_sprint_name' },
-  { title: 'Изменение списка задач', field: 'disable_sprint_issue_list' },
   { title: 'Изменилось описание', field: 'disable_sprint_description' },
+  { title: 'Изменение дат спринта', field: 'disable_sprint_date' },
   { title: 'Изменился наблюдатель', field: 'disable_sprint_watcher_list' },
+  { title: 'Изменение списка задач', field: 'disable_sprint_issue_list' },
 ];
 
 const settings = ref<any>({

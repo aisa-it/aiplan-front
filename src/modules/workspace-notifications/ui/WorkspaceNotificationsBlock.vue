@@ -15,15 +15,7 @@
     <div class="full-width">
       <div class="q-mx-sm flex justify-between full-width no-wrap">
         <p class="text-bold q-mb-none body-1-medium">
-          <template v-if="props.notificationRow?.data?.entity_type === 'sprint'">
-            {{ props.notificationRow?.detail?.sprint?.name }}
-            <span style="font-weight: 400">
-              {{ ' ' + (props.notificationRow?.detail?.workspace?.name ?? '') }}
-            </span>
-          </template>
-          <template v-else>
-            {{ title }}
-          </template>
+          {{ title }}
         </p>
         <p class="q-mb-none body-2">
           {{
@@ -118,6 +110,7 @@ const title = computed(() => {
   )
     return 'АИДок';
   if (props.notificationRow?.data.entity_type === 'workspace') return 'Настройки пространства';
+  if (props.notificationRow?.data.entity_type === 'sprint') return props.notificationRow?.detail?.sprint?.name
 
   return props.notificationRow?.detail?.project?.name;
 });
@@ -145,9 +138,9 @@ function transform() {
     props.notificationRow?.type === 'activity' ||
     props.notificationRow?.type === 'comment'
   ) {
-    if (props.notificationRow?.data?.field === 'start_date') {
-      return 'начал(-а) выполнение задачи';
-    }
+    // if (props.notificationRow?.data?.field === 'start_date') {
+    //   return 'начал(-а) выполнение задачи';
+    // }
     if (props.notificationRow?.data?.field === 'status') {
       return `
       поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 

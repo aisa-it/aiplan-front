@@ -106,7 +106,7 @@
           flat
           no-caps
           label="Отмена"
-          style="width: 103px"
+          style="width: 110px"
           class="secondary-btn"
           v-close-popup
         />
@@ -114,6 +114,7 @@
           flat
           no-caps
           label="Сохранить"
+          style="width: 110px"
           class="primary-btn"
           @click="saveChanges"
         />

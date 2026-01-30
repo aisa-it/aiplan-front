@@ -208,6 +208,7 @@
                   flat
                   no-caps
                   label="Сбросить"
+                  style="width: 110px"
                   class="delete-btn q-mx-sm q-mt-sm"
                   @click="clearAll"
                 />
@@ -221,11 +222,16 @@
                   v-if="!isEdit"
                   no-caps
                   class="secondary-btn"
+                  style="width: 110px"
                   @click="emits('saveTempFilter', filter)"
                   v-close-popup
                   >Применить</q-btn
                 >
-                <q-btn no-caps class="primary-btn" @click="handleSaveFilter"
+                <q-btn
+                  no-caps
+                  class="primary-btn"
+                  style="width: 110px"
+                  @click="handleSaveFilter"
                   >Сохранить
                 </q-btn></q-card-actions
               >
