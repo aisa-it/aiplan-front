@@ -301,17 +301,6 @@ export const useTableIssueDialog = (
     dialogRef?.value?.hide();
   }
 
-  // Обновление фильтра
-  watch(
-    () => currentWorkspaceSlug.value,
-    () => {
-      currentFilter.value = {
-        workspaces: [workspaceInfo?.value?.id ?? ''],
-      };
-      refresh();
-    },
-  );
-
   // Загрузка параметров таблицы из data-атрибута
   watch(
     () => props.savedTableData,
