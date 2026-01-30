@@ -11,6 +11,7 @@
       @update="getNotifications"
       @read="readAllNotifications"
       @hide="onHide"
+      @load="lazyLoadNotifications"
     />
   </WorkspaceNotificationsButton>
   <WorkspaceNotificationsCreateDialog v-model="isCreateOpen" />
@@ -49,6 +50,9 @@ const isShowList = ref<boolean>(false);
 
 const userNotifications = ref<NotificationsNotificationResponse[]>([]);
 
+const offset = ref(0);
+const notificationsCount = ref(0);
+
 const notifications = computed<NotificationsNotificationResponse[]>(() => {
   return [...messages.value, ...userNotifications.value];
 });
@@ -70,14 +74,28 @@ const unreadNotificationsCount = computed<number>(() =>
 );
 
 const readAllNotifications = async (): Promise<void> => {
+  offset.value = 0;
   await checkedUserNotifications({
     viewed_all: true,
-  })
+  });
   await getNotifications();
 };
 
 const getNotifications = async (): Promise<void> => {
-  userNotifications.value = await getUserNotifications();
+  const { count, result } = await getUserNotifications();
+  notificationsCount.value = count ?? 0;
+  userNotifications.value = result;
+};
+
+const lazyLoadNotifications = async () => {
+  offset.value += 100;
+  if (offset.value < notificationsCount.value) {
+    const { count, result } = await getUserNotifications({
+      offset: offset.value,
+    });
+    notificationsCount.value = count ?? 0;
+    userNotifications.value = [...userNotifications.value, ...result];
+  }
 };
 
 const wsParser = (event: any) => {
@@ -98,11 +116,13 @@ const wsParser = (event: any) => {
 };
 
 const onHide = () => {
+  offset.value = 0;
   getNotifications();
   ws.clear();
 };
 
 onMounted(async () => {
+  offset.value = 0;
   ws.connect(wsParser);
   getNotifications();
 });

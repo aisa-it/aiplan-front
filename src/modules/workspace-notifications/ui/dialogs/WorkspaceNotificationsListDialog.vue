@@ -31,6 +31,7 @@
           :read-notifications="readNotifications"
           @getNotifications="onUpdate"
           @read="onRead"
+          @load="onLoad"
         />
       </q-item>
     </q-list>
@@ -61,6 +62,7 @@ const emits = defineEmits<{
   create: [];
   update: [];
   read: [];
+  load: [];
 }>();
 
 const userStore = useUserStore();
@@ -83,6 +85,10 @@ const onRead = () => {
 
 const onHide = () => {
   emits('hide');
+};
+
+const onLoad = () => {
+  emits('load');
 };
 
 const isWorkspaceAdmin = computed(() => {

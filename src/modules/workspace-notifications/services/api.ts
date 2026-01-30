@@ -1,6 +1,7 @@
 import {
   AiplanNotificationViewRequest,
   AiplanRequestMessage,
+  DaoPaginationResponse,
   NotificationsNotificationResponse,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Notifications } from '@aisa-it/aiplan-api-ts/src/Notifications';
@@ -12,10 +13,12 @@ const workspaceApi = new (withInterceptors(Workspace))();
 const getUserNotifications = async (data?: {
   offset?: number;
   limit?: number;
-}): Promise<NotificationsNotificationResponse[]> => {
-  return notificationsApi
-    .getMyNotificationList(data)
-    .then((res) => res.data.result);
+}): Promise<
+  DaoPaginationResponse & {
+    result?: NotificationsNotificationResponse[];
+  }
+> => {
+  return notificationsApi.getMyNotificationList(data).then((res) => res.data);
 };
 
 const checkedUserNotifications = async (

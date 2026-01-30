@@ -42,25 +42,29 @@
     <div v-else class="notifications__no-data">
       <span class="body-1">Уведомления не найдены</span>
     </div>
+    <div ref="lazyLoadTrigger" />
   </div>
 </template>
 
 <script setup lang="ts">
 //core
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 // interfaces
 import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 // components
 import WorkspaceNotificationsBlock from './WorkspaceNotificationsBlock.vue';
 import SettingsTabs from 'src/shared/components/SettingsTabs.vue';
 import { renderLongDateFormat } from 'src/utils/time';
+import { useIntersectionObserver } from 'src/composables/useIntersectionObserver';
 
 const props = defineProps<{
   readNotifications: NotificationsNotificationResponse[];
   unreadNotifications: NotificationsNotificationResponse[];
 }>();
 
-const emits = defineEmits<{ getNotifications: []; read: [] }>();
+const emits = defineEmits<{ getNotifications: []; read: []; load: [] }>();
+
+const { observer } = useIntersectionObserver(() => emits('load'));
 
 //constants
 const listTabs = [
@@ -76,6 +80,8 @@ const listTabs = [
 
 //state
 const currentTab = ref(0);
+
+const lazyLoadTrigger = ref<HTMLDivElement | null>(null);
 
 //computed
 const groupedNotifications = computed(() => {
@@ -116,6 +122,14 @@ const handleGetNotifications = () => {
 const onRead = () => {
   emits('read');
 };
+
+onMounted(() => {
+  if (lazyLoadTrigger.value) observer.observe(lazyLoadTrigger.value);
+});
+
+onUnmounted(() => {
+  observer.disconnect();
+});
 </script>
 <style scoped lang="scss">
 .notifications__list {
