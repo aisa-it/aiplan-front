@@ -4,9 +4,12 @@
     class="groupped-table"
     :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
-    @scroll="handleScroll"
   >
-    <div v-for="(table, index) in issueList" :key="index">
+    <q-virtual-scroll
+      :items="issueList"
+      :virtual-scroll-item-size="900"
+      v-slot="{ item: table, index }"
+    >
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
         <GroupedHeader
           :entity="table?.entity"
@@ -34,6 +37,7 @@
           />
         </template>
         <IssueTable
+          v-if="!isGroupHide(table?.entity?.id || table.entity)"
           :rows="table?.issues"
           :rowsCount="table?.count"
           :entity="table.entity"
@@ -50,13 +54,13 @@
           @open-issue="(id, issue) => emits('openIssue', id, issue)"
         />
       </q-expansion-item>
-    </div>
+    </q-virtual-scroll>
     <div ref="observerTarget" class="observer-target"></div>
   </q-scroll-area>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, shallowRef, watch } from 'vue';
 import { throttle } from 'quasar';
 import { storeToRefs } from 'pinia';
 
@@ -92,30 +96,30 @@ const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
 };
 
-const issueList = ref([]);
+const issueList = shallowRef([]);
 const scrollContainer = ref(null);
 let generator;
 
-const handleScroll = throttle((info) => {
-  const { verticalPercentage } = info;
-  const threshold = 0.8; // 95% от конца списка  console.log(e, 'lol');
+// const handleScroll = throttle((info) => {
+//   const { verticalPercentage } = info;
+//   const threshold = 0.8; // 95% от конца списка  console.log(e, 'lol');
 
-  // if (!scrollContainer.value) return;
-  if (verticalPercentage < threshold) return;
+//   // if (!scrollContainer.value) return;
+//   if (verticalPercentage < threshold) return;
 
-  const chunk = generator.next().value;
+//   const chunk = generator.next().value;
 
-  if (!chunk) return;
+//   if (!chunk) return;
 
-  issueList.value.push(...chunk);
-}, 100);
+//   issueList.value.push(...chunk);
+// }, 100);
 
 const updateGroupedIssues = async (status: any) => {
   const group = (props?.issues as any[]).find(
     (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group?.issues || !group || group?.issues.length === 0) {
+  if ((group && !group?.issues) || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -138,11 +142,13 @@ function* chunkGenerator(sourceArray, chunkSize = 10) {
 }
 
 const refresh = () => {
-  issueList.value = [];
-  generator = chunkGenerator(props.issues);
-  let chunk = generator.next().value;
-  if (!chunk) return;
-  issueList.value.push(...chunk);
+  // issueList.value = [];
+  // generator = chunkGenerator(props.issues);
+  // let chunk = generator.next().value;
+  // if (!chunk) return;
+  // issueList.value.push(...chunk);
+
+  issueList.value = props.issues;
 };
 
 onMounted(() => {
@@ -150,7 +156,7 @@ onMounted(() => {
 });
 
 watch(
-  () => [props.issues,props.issues?.length],
+  () => [props.issues, props.issues?.length],
   () => {
     refresh();
   },

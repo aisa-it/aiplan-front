@@ -43,7 +43,7 @@ export const useUtilsStore = defineStore('utils-store', {
           this.isDemo = res.data.demo;
           this.isSingUp = res.data.sign_up;
           this.version = res.data.version;
-          this.ny = res.data.ny;
+          //this.ny = res.data.ny;
           this.isEnabledJitsi = res.data.jitsi;
           this.isEnabledCaptcha = res.data.captcha;
 

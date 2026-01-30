@@ -72,7 +72,7 @@ const unreadNotificationsCount = computed<number>(() =>
 const readAllNotifications = async (): Promise<void> => {
   await checkedUserNotifications({
     viewed_all: true,
-  })
+  });
   await getNotifications();
 };
 
