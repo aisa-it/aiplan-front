@@ -130,7 +130,8 @@ export interface IProjectFilters {
     | 'attachment_count'
     | 'assignees'
     | 'watchers'
-    | 'author';
+    | 'author'
+    | 'sprint';
   orderDesc: boolean;
   states: string[];
 }
