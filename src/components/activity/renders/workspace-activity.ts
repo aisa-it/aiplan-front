@@ -6,6 +6,10 @@ import { getURLDoc } from './doc-activity';
 export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
   let action = '';
   let value = '';
+  const userLabel = (u: any, fallback?: string) => {
+    const name = u ? aiplan.UserName(u).join(' ').trim() : '';
+    return name || fallback || '';
+  };
 
   const atWorkspace = onlyWorkspace
     ? ''
@@ -83,6 +87,13 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
     case 'description':
       action = translateVerb(activity.verb);
       return `<span>${action} описание ${ofWorkspace} </span>`;
+
+    case 'owner':
+      action = translateVerb(activity.verb);
+      return `<span>${action} лидера ${ofWorkspace} с "${userLabel(
+        activity.old_entity_detail,
+        activity.old_value,
+      )}" на "${userLabel(activity.new_entity_detail, activity.new_value)}" <span/>`;
 
     case 'doc':
       if (activity.verb === 'created')

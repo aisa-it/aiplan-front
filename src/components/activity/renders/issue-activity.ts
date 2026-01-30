@@ -50,6 +50,7 @@ export function issueActivityRender(
           ? activity.project_detail?.identifier + '-' + activity.old_value
           : ''
       } ${workspaceSource}<span/>`;
+    case 'label':
     case 'labels':
       action = translateAction('labels', Boolean(activity.new_value));
       value = setValue(activity);
@@ -103,7 +104,7 @@ export function issueActivityRender(
       action = translateAction('issues', Boolean(activity.new_value));
       value = setValue(activity);
 
-      return `<span>${action} ${link} ${activity.verb === 'added' ? 'к спринту' : 'из спринта'} ${`<a target="_blank"
+      return `<span>${action} ${link} ${activity.verb === 'added' ? 'в спринт' : 'из спринта'} ${`<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${`/${activity.workspace_detail?.slug}/sprints/${entityDetail.id}`}>
                     "${entityDetail.name}"<a/>`}<span/>`;

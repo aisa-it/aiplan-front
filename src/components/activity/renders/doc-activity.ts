@@ -1,4 +1,5 @@
 import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { valToRole } from 'src/utils/translator';
 
 export function getURLDoc(activity: DtoEntityActivityFull) {
   return `<a target="_blank"
@@ -22,11 +23,58 @@ export function docActivityRender(activity: DtoEntityActivityFull) {
     return createDocLink(activity.doc_detail?.id, activity.doc_detail?.title);
   }
 
+  const userName = (u: any) => {
+    if (!u) return '';
+    const full = `${u.last_name ?? ''} ${u.first_name ?? ''}`.trim();
+    return full || u.email || u.username || '';
+  };
+
   switch (activity.field) {
     case 'description':
       return `<span>изменил(-а) описание документа ${createLinkByDocDetail()}<span/>`;
     case 'title':
       return `<span>изменил(-а) название документа ${createLinkByDocDetail()}<span/>`;
+
+    case 'readers': {
+      const person =
+        (activity.new_value
+          ? userName(activity.new_entity_detail) || activity.new_value
+          : userName(activity.old_entity_detail) || activity.old_value) || '';
+
+      if (activity.verb === 'added') {
+        return `<span>добавил(-а) право на просмотр пользователю ${person} в документе ${createLinkByDocDetail()}<span/>`;
+      }
+      if (activity.verb === 'removed' || activity.verb === 'remove') {
+        return `<span>удалил(-а) право на просмотр пользователю ${person} в документе ${createLinkByDocDetail()}<span/>`;
+      }
+      break;
+    }
+
+    case 'editors': {
+      const person =
+        (activity.new_value
+          ? userName(activity.new_entity_detail) || activity.new_value
+          : userName(activity.old_entity_detail) || activity.old_value) || '';
+
+      if (activity.verb === 'added') {
+        return `<span>добавил(-а) право на редактирование пользователю ${person} в документе ${createLinkByDocDetail()}<span/>`;
+      }
+      if (activity.verb === 'removed' || activity.verb === 'remove') {
+        return `<span>удалил(-а) право на редактирование пользователю ${person} в документе ${createLinkByDocDetail()}<span/>`;
+      }
+      break;
+    }
+
+    case 'reader_role': {
+      const oldRole = valToRole(+activity.old_value)?.label ?? activity.old_value;
+      const newRole = valToRole(+activity.new_value)?.label ?? activity.new_value;
+      return `<span>изменил(-а) роль чтения документа ${createLinkByDocDetail()} с "${oldRole}" на "${newRole}"<span/>`;
+    }
+    case 'editor_role': {
+      const oldRole = valToRole(+activity.old_value)?.label ?? activity.old_value;
+      const newRole = valToRole(+activity.new_value)?.label ?? activity.new_value;
+      return `<span>изменил(-а) роль редактирования документа ${createLinkByDocDetail()} с "${oldRole}" на "${newRole}"<span/>`;
+    }
     case 'attachment':
       switch (activity.verb) {
         case 'created':
