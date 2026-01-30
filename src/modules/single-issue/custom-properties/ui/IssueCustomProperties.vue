@@ -3,7 +3,7 @@
     <div class="col">
       <div class="row items-center q-mb-md">
         <ListDotIcon class="issue-icon" />
-        <span class="q-ml-sm"> Кастомные параметры </span>
+        <span class="q-ml-sm"> Дополнительные параметры </span>
       </div>
     </div>
     <div class="q-gutter-y-sm" v-if="properties.length > 0 && !isLoading">
