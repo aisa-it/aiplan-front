@@ -1,6 +1,6 @@
 <template>
   <q-td :props="rowInfo">
-    <div class="row no-wrap" style="gap: 4px">
+    <div class="row" style="gap: 4px">
       <q-badge
         v-for="l in rowInfo.value"
         :key="l?.name"
