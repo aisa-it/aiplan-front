@@ -7,7 +7,8 @@
     flat
     :loading="loadingTable"
     :rows="rows"
-    :columns="columns"
+    :columns="columnWidths ? computedColumns : columns"
+    :table-style="'table-layout: fixed;'"
     @row-contextmenu.prevent="(ev, row) => (selectedRow = row)"
     @row-click="(_, row) => handleClick(row)"
     @request="(e) => getIssues(e.pagination)"
@@ -129,8 +130,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, watch, watchEffect, computed } from 'vue';
-import { EventBus } from 'quasar';
+import { inject, ref, watch, watchEffect, computed, onMounted } from 'vue';
+import { debounce, EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -171,6 +172,7 @@ const emits = defineEmits([
   'openPreview',
   'openIssue',
   'updateGroupedIssues',
+  'columnMeasurements',
 ]);
 const props = defineProps([
   'entity',
@@ -179,6 +181,7 @@ const props = defineProps([
   'loading',
   'columns',
   'contextType',
+  'columnWidths',
 ]);
 
 const { fetchPinnedIssues } = useIssuesStore();
@@ -195,6 +198,23 @@ const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
 const columns = computed(() => {
   return props.columns ?? getTableColumns;
+});
+
+const computedColumns = computed(() => {
+  const baseColumns = columns.value;
+
+  return baseColumns.map(col => {
+    // Если для колонки есть заданная ширина
+    if (props.columnWidths[col.name]) {
+      return {
+        ...col,
+        style: `width: ${props.columnWidths[col.name]}px; min-width: ${props.columnWidths[col.name]}px;`
+      };
+    }
+
+    // Иначе используем стандартную колонку
+    return col;
+  });
 });
 
 const bus = inject('bus') as EventBus;
@@ -282,6 +302,39 @@ const updateIssueField = (
     updateCurrentTable(action, row, entity);
   } else refreshTable()
 };
+
+const measureColumns = () => {
+  const table = document.querySelector<HTMLTableElement>('.my-sticky-column-table table');
+  if (!table) return;
+
+  const headers = table.querySelectorAll<HTMLElement>('thead th');
+  const measurements: Record<string, number> = {};
+
+  headers.forEach((header, index) => {
+    const colName = columns.value[index]?.name;
+    if (colName) {
+      measurements[colName] = header.offsetWidth;
+    }
+  });
+
+  emits('columnMeasurements', measurements);
+};
+
+const debouncedMeasure = debounce(measureColumns, 200);
+
+onMounted(() => {
+  if (props.columnWidths) {
+    setTimeout(() => {
+      measureColumns();
+    }, 300);
+  }
+});
+
+watch(() => props.rows, () => {
+  if (props.columnWidths) {
+    debouncedMeasure();
+  }
+});
 
 watchEffect(() => {
   quasarPagination.value.rowsNumber = props.rowsCount;
