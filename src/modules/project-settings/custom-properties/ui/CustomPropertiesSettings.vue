@@ -6,7 +6,7 @@
         class="font-semibold"
         style="font-size: 24px"
       >
-        Кастомные параметры
+        Дополнительные параметры
       </span>
       <q-btn
         class="primary-btn"
