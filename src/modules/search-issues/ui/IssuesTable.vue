@@ -425,8 +425,11 @@ const downloadZip = async (p) => {
     const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
 
     const pagination = {
-      order_by: order_by ?? 'sequence_id',
+      order_by: order_by,
       desc: p.descending,
+      offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
+      limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
+      light: true,
       only_active: filter.value?.only_active || false,
     };
 
