@@ -8,7 +8,6 @@ import { isSingleTableInHTML } from 'src/utils/isSingleTableInHTML';
 export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   const html = event.clipboardData?.getData('text/html');
   if (!html) return false;
-  console.log(html);
 
   const { state, dispatch } = editorInstance.value.view;
   const { selection } = state;
