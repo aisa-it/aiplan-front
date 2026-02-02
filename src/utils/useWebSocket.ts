@@ -13,6 +13,8 @@ export function useWebSocket(wsUrl: string) {
   const initialUrl = wsUrl;
   let currentUrl = normalizeUrl(wsUrl);
 
+  let onMessageFunc: ((event: MessageEvent) => void) | null = null;
+
   function normalizeUrl(url: string) {
     if (window.location.protocol === 'http:') {
       return url.replace('wss://', 'ws://');
@@ -44,6 +46,8 @@ export function useWebSocket(wsUrl: string) {
       console.warn('WebSocket max retries reached, stop reconnecting');
       return;
     }
+
+    onMessageFunc = onMessage;
 
     isManuallyClosed = false;
     socket = new WebSocket(currentUrl);
@@ -110,6 +114,8 @@ export function useWebSocket(wsUrl: string) {
   function handleVisibilityChange() {
     if (document.hidden) {
       disconnect();
+    } else {
+      if (onMessageFunc) connect(onMessageFunc);
     }
   }
 
