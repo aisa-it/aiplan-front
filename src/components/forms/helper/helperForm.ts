@@ -319,3 +319,133 @@ export const groupFieldsByDependency = (
   );
   return levels.filter((l) => l && l.length > 0);
 };
+
+export const findVisiblePage = (
+  startPage: number,
+  direction: number,
+  pages: any[][],
+  allFields: any[],
+) => {
+  let i = startPage + direction;
+  while (i >= 0 && i < pages.length) {
+    if (pages[i].some((field) => isFieldVisible(field, allFields))) {
+      return i;
+    }
+    i += direction;
+  }
+  return -1;
+};
+
+export const isFieldVisible = (field: any, fields: any[]) => {
+  if (!field.depend_on) return true;
+  const { field_index, option_index, value: dependValue } = field.depend_on;
+
+  if (field_index === undefined || field_index === null) return true;
+
+  const parent = fields[field_index];
+  if (!parent) return false;
+
+  if (!isFieldVisible(parent, fields)) return false;
+
+  if (parent.type === 'checkbox') {
+    return String(parent.value) === String(dependValue);
+  }
+
+  if (parent.type === 'select' || parent.type === 'multiselect') {
+    if (!Array.isArray(parent.value)) return false;
+
+    let targetValue: any;
+    if (option_index !== undefined && option_index !== null) {
+      const option = parent.validate.opt[option_index];
+      targetValue = typeof option === 'object' ? option.value : option;
+    } else {
+      targetValue = dependValue;
+    }
+
+    return parent.value.some(
+      (opt: any) => String(opt.value) === String(targetValue),
+    );
+  }
+
+  return true;
+};
+
+export const getSubmissionValue = (field: any) => {
+  if (field.type === 'date') {
+    const isoDate = serializationDate(field.value, true);
+    return {
+      value: new Date(isoDate).getTime(),
+    };
+  }
+  if (field.type === 'multiselect') {
+    return {
+      value: field.value?.length
+        ? field.value?.map((el: any) => el.value)
+        : null,
+    };
+  }
+  if (field.type === 'select') {
+    return {
+      value: field.value[0]?.value ?? null,
+    };
+  }
+  return { value: field.value || null };
+};
+
+export const resetFieldValues = (targetFields: any[], allFields: any[]) => {
+  targetFields.forEach((field) => {
+    const originalIndex =
+      field.originalIndex !== undefined
+        ? field.originalIndex
+        : allFields.indexOf(field);
+    const targetField = allFields[originalIndex];
+
+    switch (targetField.type) {
+      case 'checkbox':
+        targetField.value = false;
+        break;
+      case 'numeric':
+        targetField.value = null;
+        break;
+      case 'color':
+        targetField.value = '';
+        break;
+      case 'select':
+      case 'multiselect':
+        targetField.value = [];
+        break;
+      case 'date':
+        targetField.value = null;
+        break;
+      default:
+        if (targetField.validate?.value_type === 'numeric') {
+          targetField.value = null;
+        } else if (targetField.validate?.value_type === 'string') {
+          targetField.value = '';
+        }
+    }
+  });
+};
+
+export const isFieldInvalid = (field: any) => {
+  const { value, type, required } = field;
+  if (type === 'date') {
+    if (
+      value &&
+      (value.length !== 10 ||
+        Number(value.split('.')[2]) < 1000 ||
+        isNaN(new Date(serializationDate(value, true)).getTime()))
+    ) {
+      return true;
+    }
+  }
+  if (type === 'color') {
+    if (value && value.length !== 7) return true;
+  }
+  if ((type === 'select' || type === 'multiselect') && required) {
+    if (!value.length) {
+      return true;
+    }
+  }
+  return false;
+};
