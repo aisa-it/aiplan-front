@@ -28,141 +28,16 @@
               </div>
             </div>
             <template v-for="field in currentFields" :key="field.originalIndex">
-              <div
+              <AiFormPageField
                 v-if="isFieldVisible(field)"
-                class="q-mt-md q-pa-md title-container"
-              >
-                <div
-                  v-if="
-                    field.type !== 'checkbox' &&
-                    field.type !== 'select' &&
-                    field.type !== 'multiselect'
-                  "
-                  class="text-weight-bold"
-                >
-                  {{ field.label }}
-                  <span v-if="field.required" class="negative-text">*</span>
-                </div>
-                <div
-                  v-if="field.type !== 'checkbox'"
-                  class="text-weight-bold"
-                ></div>
-                <component
-                  :is="components[field.type]"
-                  :ref="(el) => (fieldRefs[field.originalIndex] = el)"
-                  :model-value="fields[field.originalIndex].value"
-                  @update:model-value="
-                    (val) => updateValue(val, field.originalIndex)
-                  "
-                  @keypress.enter="handleEnterPress(field.type, $event)"
-                  :label="getFieldLabel(field)"
-                  :type="getFieldType(field.type)"
-                  :counter="!!getFieldMaxLenght(field.type)"
-                  :maxlength="getFieldMaxLenght(field.type)"
-                  :dense="true"
-                  :checked="
-                    field.type === 'checkbox'
-                      ? fields[field.originalIndex].value
-                      : undefined
-                  "
-                  :validate="field.validate"
-                  :required="field.required"
-                  :style="{
-                    width: '100%',
-                    'margin-top': field.type === 'checkbox' ? '12px' : '8px',
-                  }"
-                  class="q-mt-sm"
-                  input-class="form-input"
-                  :rules="getRules(field.type, field.required)"
-                  :lazy-rules="field.type === 'date'"
-                  :mask="getMask(field.type)"
-                  :error-message="
-                    validaionError[field.originalIndex]
-                      ? getErrorMessage(field.type)
-                      : ''
-                  "
-                  :error="validaionError[field.originalIndex]"
-                  style="padding-top: 1px"
-                  no-error-icon
-                >
-                  <template v-if="field.type === 'numeric'" v-slot:append>
-                    <div style="height: 100%">
-                      <q-btn
-                        @click="updateValue(1, field.originalIndex, true)"
-                        icon="add"
-                        flat
-                      />
-                      <q-btn
-                        @click="updateValue(-1, field.originalIndex, true)"
-                        icon="remove"
-                        flat
-                      />
-                    </div>
-                  </template>
-                  <template v-else-if="field.type === 'date'" v-slot:append>
-                    <q-icon
-                      name="event"
-                      class="cursor-pointer"
-                      @click="dateDialogsVisible[field.originalIndex] = true"
-                    >
-                    </q-icon>
-                    <q-dialog v-model="dateDialogsVisible[field.originalIndex]">
-                      <q-date
-                        v-model="formDates[field.originalIndex]"
-                        mask="YYYY-MM-DD"
-                        navigation-min-year-month="1000/01"
-                        @update:model-value="
-                          (val) => setDateToInput(val, field.originalIndex)
-                        "
-                      >
-                        <div class="row items-center justify-between">
-                          <q-btn
-                            label="Сбросить"
-                            class="secondary-btn"
-                            no-caps
-                            flat
-                            dense
-                            @click="resetDate(field.originalIndex)"
-                          />
-                          <q-btn
-                            v-close-popup
-                            label="Выбрать"
-                            class="primary-btn"
-                            flat
-                          />
-                        </div>
-                      </q-date>
-                    </q-dialog>
-                  </template>
-                  <template v-else-if="field.type === 'color'" v-slot:append>
-                    <q-icon
-                      name="colorize"
-                      class="cursor-pointer"
-                      @click="
-                        colorPickerDialogsVisible[field.originalIndex] = true
-                      "
-                    ></q-icon>
-                    <q-dialog
-                      v-model="colorPickerDialogsVisible[field.originalIndex]"
-                    >
-                      <q-color
-                        v-model="fields[field.originalIndex].value"
-                        no-header-tabs
-                        @input="
-                          colorPickerDialogsVisible[field.originalIndex] = false
-                        "
-                      />
-                    </q-dialog>
-                  </template>
-                  <template v-if="field.type === 'color'" v-slot:prepend
-                    ><q-badge
-                      rounded
-                      :style="{
-                        backgroundColor: fields[field.originalIndex].value,
-                      }"
-                  /></template>
-                </component>
-              </div>
+                :field="field"
+                :model-value="fields[field.originalIndex].value"
+                :error="validaionError[field.originalIndex]"
+                @update:model-value="
+                  (val) => updateValue(val, field.originalIndex)
+                "
+                :ref="(el) => (fieldRefs[field.originalIndex] = el)"
+              />
             </template>
             <div class="flex justify-between button-container q-mt-md">
               <q-btn
@@ -289,15 +164,7 @@
 //core
 import dayjs from 'dayjs';
 import { ref, onMounted, computed } from 'vue';
-import {
-  QInput,
-  QCheckbox,
-  QBtn,
-  QDate,
-  QColor,
-  useQuasar,
-  useMeta,
-} from 'quasar';
+import { useQuasar, useMeta } from 'quasar';
 import { useRoute } from 'vue-router';
 //stores
 import { useFormStore } from 'src/stores/form-store';
@@ -309,15 +176,10 @@ import { SUCCESS_SEND_FORM } from 'src/constants/notifications';
 //components
 import LoginFromForm from 'src/components/LoginFromForm.vue';
 import BackgroundForm from 'src/components/icons/BackgroundForm.vue';
-import AiFormPageSelect from 'src/components/AiFormPageSelect.vue';
+import AiFormPageField from 'src/components/forms/components/AiFormPageField.vue';
 import {
-  getFieldType,
-  getFieldMaxLenght,
-  getFieldLabel,
-  getErrorMessage,
-  getRules,
-  getMask,
   groupFieldsByDependency,
+  serializationDate,
 } from 'src/components/forms/helper/helperForm';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 //composables
@@ -339,25 +201,11 @@ const noActiveForm = ref(false);
 const completedForm = ref(false);
 const loadReq = ref(false);
 const emptyForm = ref(false);
-const formDates = ref([]);
-const colorPickerDialogsVisible = ref([]);
-const dateDialogsVisible = ref([]);
 const validaionError = ref([]);
 const currentPage = ref(0);
 const pages = ref([]);
 
 const fieldRefs = ref([]);
-
-const components = ref({
-  input: QInput,
-  textarea: QInput,
-  checkbox: QCheckbox,
-  numeric: QInput,
-  date: QInput,
-  color: QInput,
-  select: AiFormPageSelect,
-  multiselect: AiFormPageSelect,
-});
 
 //computeds
 const isMobile = computed(() => quasar.screen.width < 451);
@@ -367,45 +215,9 @@ const currentFields = computed(() => {
 });
 
 //methods
-const transformDate = (date) => {
-  return date.split('.').reverse().join('-');
-};
-
-const updateValue = (val, index, isButton = false) => {
+const updateValue = (val, index) => {
   validaionError.value[index] = false;
-  if (isButton) {
-    fields.value[index].value = String(Number(fields.value[index].value) + val);
-    return;
-  }
-  if (fields.value[index].type === 'numeric') {
-    if (isNaN(val)) return;
-    fields.value[index].value = Math.trunc(Number(val));
-    return;
-  }
-  if (fields.value[index].type === 'date') {
-    updateFormDate(val, index);
-  }
-  if (fields.value[index].type === 'color') {
-    if (!fields.value[index].value.length) {
-      fields.value[index].value = '#' + val;
-    } else {
-      fields.value[index].value = val;
-    }
-    return;
-  }
   fields.value[index].value = val;
-};
-
-const handleEnterPress = (type, event) => {
-  if (type !== 'textarea') {
-    event.preventDefault();
-  }
-};
-
-const updateFormDate = (val, index) => {
-  if (val.length === 10) {
-    formDates.value[index] = transformDate(val);
-  }
 };
 
 const isFieldVisible = (field) => {
@@ -444,8 +256,9 @@ const isFieldVisible = (field) => {
 
 const getSubmissionValue = (field, index) => {
   if (field.type === 'date') {
+    const isoDate = serializationDate(field.value, true);
     return {
-      value: new Date(formDates.value[index]).getTime(),
+      value: new Date(isoDate).getTime(),
     };
   }
   if (field.type === 'multiselect') {
@@ -645,11 +458,12 @@ const validateReq = (data) => {
 
 const validateForm = ({ value, type, required }, index) => {
   if (type === 'date') {
+    // transformed date logic
     if (
       value &&
       (value.length !== 10 ||
         Number(value.split('.')[2]) < 1000 ||
-        isNaN(new Date(transformDate(value)).getTime()))
+        isNaN(new Date(serializationDate(value, true)).getTime()))
     )
       validaionError.value[index] = true;
   }
@@ -661,15 +475,6 @@ const validateForm = ({ value, type, required }, index) => {
       validaionError.value[index] = true;
     }
   }
-};
-
-const setDateToInput = (val, index) => {
-  fields.value[index].value = dayjs(val).format('DD-MM-YYYY');
-};
-
-const resetDate = (index) => {
-  fields.value[index].value = null;
-  formDates.value[index] = null;
 };
 
 //lifecycle hooks
@@ -753,13 +558,6 @@ onMounted(async () => {
   :deep(.tiptap) {
     min-height: auto;
   }
-}
-:deep(.q-field--dense.q-field--float .q-field__label) {
-  padding-bottom: 12px;
-}
-:deep(.q-field__control) {
-  padding-right: 3px;
-  padding-bottom: 1px;
 }
 
 .background-end-form {
