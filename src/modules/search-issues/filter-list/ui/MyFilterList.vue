@@ -15,7 +15,7 @@
         v-if="currentFilter"
         no-caps
         class="secondary-btn full-w"
-        @click="
+        @click.stop="
           () => {
             currentFilter = null;
             emits('update-filter', {});

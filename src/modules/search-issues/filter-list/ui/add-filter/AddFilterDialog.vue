@@ -1,6 +1,7 @@
 <template>
   <q-dialog
     ref="dialogRef"
+    class="prevent-click-issue-outside"
     @show="prepareFilterOptions"
     @hide="
       () => {
@@ -9,6 +10,7 @@
         filter = JSON.parse(JSON.stringify(INIT_FILTER));
       }
     "
+    v-click-outside:prevent-click-issue-outside
   >
     <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
       <q-layout view="hHh Lpr lff" container>

@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef">
+  <q-dialog ref="dialogRef" class="prevent-click-issue-outside" v-click-outside:prevent-click-issue-outside>
     <q-card class="inner-modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-mb-sm q-mt-sm" style="font-weight: 600">

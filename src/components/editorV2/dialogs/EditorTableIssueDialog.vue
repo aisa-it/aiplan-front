@@ -4,6 +4,7 @@
     class="prevent-click-issue-outside"
     @show="handleOpenDialog"
     @hide="handleCloseDialog"
+    v-click-outside:prevent-click-issue-outside
   >
     <q-card :class="`dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`">
       <header class="dialog__header">
@@ -62,6 +63,7 @@
               option-label="label"
               option-value="key"
               class="base-selector"
+              popup-content-class="prevent-click-issue-outside"
               label="Колонки"
               multiple
               dense
