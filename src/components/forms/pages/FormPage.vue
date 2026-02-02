@@ -27,126 +27,129 @@
                 />
               </div>
             </div>
-            <div
-              v-for="(field, index) in fields"
-              :key="index"
-              class="q-mt-md q-pa-md title-container"
-            >
+            <template v-for="(field, index) in fields" :key="index">
               <div
-                v-if="
-                  field.type !== 'checkbox' &&
-                  field.type !== 'select' &&
-                  field.type !== 'multiselect'
-                "
-                class="text-weight-bold"
+                v-if="isFieldVisible(field)"
+                class="q-mt-md q-pa-md title-container"
               >
-                {{ field.label }}
-                <span v-if="field.required" class="negative-text">*</span>
-              </div>
-              <div
-                v-if="field.type !== 'checkbox'"
-                class="text-weight-bold"
-              ></div>
-              <component
-                :is="components[field.type]"
-                :ref="(el) => (fieldRefs[index] = el)"
-                :model-value="fields[index].value"
-                @update:model-value="(val) => updateValue(val, index)"
-                @keypress.enter="handleEnterPress(field.type, $event)"
-                :label="getFieldLabel(field)"
-                :type="getFieldType(field.type)"
-                :counter="!!getFieldMaxLenght(field.type)"
-                :maxlength="getFieldMaxLenght(field.type)"
-                :dense="true"
-                :checked="
-                  field.type === 'checkbox' ? fields[index].value : undefined
-                "
-                :validate="field.validate"
-                :required="field.required"
-                :style="{
-                  width: '100%',
-                  'margin-top': field.type === 'checkbox' ? '12px' : '8px',
-                }"
-                class="q-mt-sm"
-                input-class="form-input"
-                :rules="getRules(field.type, field.required)"
-                :lazy-rules="field.type === 'date'"
-                :mask="getMask(field.type)"
-                :error-message="
-                  validaionError[index] ? getErrorMessage(field.type) : ''
-                "
-                :error="validaionError[index]"
-                style="padding-top: 1px"
-                no-error-icon
-              >
-                <template v-if="field.type === 'numeric'" v-slot:append>
-                  <div style="height: 100%">
-                    <q-btn
-                      @click="updateValue(1, index, true)"
-                      icon="add"
-                      flat
-                    />
-                    <q-btn
-                      @click="updateValue(-1, index, true)"
-                      icon="remove"
-                      flat
-                    />
-                  </div>
-                </template>
-                <template v-else-if="field.type === 'date'" v-slot:append>
-                  <q-icon
-                    name="event"
-                    class="cursor-pointer"
-                    @click="dateDialogsVisible[index] = true"
-                  >
-                  </q-icon>
-                  <q-dialog v-model="dateDialogsVisible[index]">
-                    <q-date
-                      v-model="formDates[index]"
-                      mask="YYYY-MM-DD"
-                      navigation-min-year-month="1000/01"
-                      @update:model-value="(val) => setDateToInput(val, index)"
+                <div
+                  v-if="
+                    field.type !== 'checkbox' &&
+                    field.type !== 'select' &&
+                    field.type !== 'multiselect'
+                  "
+                  class="text-weight-bold"
+                >
+                  {{ field.label }}
+                  <span v-if="field.required" class="negative-text">*</span>
+                </div>
+                <div
+                  v-if="field.type !== 'checkbox'"
+                  class="text-weight-bold"
+                ></div>
+                <component
+                  :is="components[field.type]"
+                  :ref="(el) => (fieldRefs[index] = el)"
+                  :model-value="fields[index].value"
+                  @update:model-value="(val) => updateValue(val, index)"
+                  @keypress.enter="handleEnterPress(field.type, $event)"
+                  :label="getFieldLabel(field)"
+                  :type="getFieldType(field.type)"
+                  :counter="!!getFieldMaxLenght(field.type)"
+                  :maxlength="getFieldMaxLenght(field.type)"
+                  :dense="true"
+                  :checked="
+                    field.type === 'checkbox' ? fields[index].value : undefined
+                  "
+                  :validate="field.validate"
+                  :required="field.required"
+                  :style="{
+                    width: '100%',
+                    'margin-top': field.type === 'checkbox' ? '12px' : '8px',
+                  }"
+                  class="q-mt-sm"
+                  input-class="form-input"
+                  :rules="getRules(field.type, field.required)"
+                  :lazy-rules="field.type === 'date'"
+                  :mask="getMask(field.type)"
+                  :error-message="
+                    validaionError[index] ? getErrorMessage(field.type) : ''
+                  "
+                  :error="validaionError[index]"
+                  style="padding-top: 1px"
+                  no-error-icon
+                >
+                  <template v-if="field.type === 'numeric'" v-slot:append>
+                    <div style="height: 100%">
+                      <q-btn
+                        @click="updateValue(1, index, true)"
+                        icon="add"
+                        flat
+                      />
+                      <q-btn
+                        @click="updateValue(-1, index, true)"
+                        icon="remove"
+                        flat
+                      />
+                    </div>
+                  </template>
+                  <template v-else-if="field.type === 'date'" v-slot:append>
+                    <q-icon
+                      name="event"
+                      class="cursor-pointer"
+                      @click="dateDialogsVisible[index] = true"
                     >
-                      <div class="row items-center justify-between">
-                        <q-btn
-                          label="Сбросить"
-                          class="secondary-btn"
-                          no-caps
-                          flat
-                          dense
-                          @click="resetDate(index)"
-                        />
-                        <q-btn
-                          v-close-popup
-                          label="Выбрать"
-                          class="primary-btn"
-                          flat
-                        />
-                      </div>
-                    </q-date>
-                  </q-dialog>
-                </template>
-                <template v-else-if="field.type === 'color'" v-slot:append>
-                  <q-icon
-                    name="colorize"
-                    class="cursor-pointer"
-                    @click="colorPickerDialogsVisible[index] = true"
-                  ></q-icon>
-                  <q-dialog v-model="colorPickerDialogsVisible[index]">
-                    <q-color
-                      v-model="fields[index].value"
-                      no-header-tabs
-                      @input="colorPickerDialogsVisible[index] = false"
-                    />
-                  </q-dialog>
-                </template>
-                <template v-if="field.type === 'color'" v-slot:prepend
-                  ><q-badge
-                    rounded
-                    :style="{ backgroundColor: fields[index].value }"
-                /></template>
-              </component>
-            </div>
+                    </q-icon>
+                    <q-dialog v-model="dateDialogsVisible[index]">
+                      <q-date
+                        v-model="formDates[index]"
+                        mask="YYYY-MM-DD"
+                        navigation-min-year-month="1000/01"
+                        @update:model-value="
+                          (val) => setDateToInput(val, index)
+                        "
+                      >
+                        <div class="row items-center justify-between">
+                          <q-btn
+                            label="Сбросить"
+                            class="secondary-btn"
+                            no-caps
+                            flat
+                            dense
+                            @click="resetDate(index)"
+                          />
+                          <q-btn
+                            v-close-popup
+                            label="Выбрать"
+                            class="primary-btn"
+                            flat
+                          />
+                        </div>
+                      </q-date>
+                    </q-dialog>
+                  </template>
+                  <template v-else-if="field.type === 'color'" v-slot:append>
+                    <q-icon
+                      name="colorize"
+                      class="cursor-pointer"
+                      @click="colorPickerDialogsVisible[index] = true"
+                    ></q-icon>
+                    <q-dialog v-model="colorPickerDialogsVisible[index]">
+                      <q-color
+                        v-model="fields[index].value"
+                        no-header-tabs
+                        @input="colorPickerDialogsVisible[index] = false"
+                      />
+                    </q-dialog>
+                  </template>
+                  <template v-if="field.type === 'color'" v-slot:prepend
+                    ><q-badge
+                      rounded
+                      :style="{ backgroundColor: fields[index].value }"
+                  /></template>
+                </component>
+              </div>
+            </template>
             <div class="flex justify-between button-container q-mt-md">
               <q-btn
                 v-if="!isMobile && !emptyForm"
@@ -362,38 +365,93 @@ const updateFormDate = (val, index) => {
   }
 };
 
+const isFieldVisible = (field) => {
+  if (!field.depend_on) return true;
+  const { field_index, option_index, value: dependValue } = field.depend_on;
+
+  if (field_index === undefined || field_index === null) return true;
+
+  const parent = fields.value[field_index];
+  if (!parent) return false;
+
+  if (!isFieldVisible(parent)) return false;
+
+  if (parent.type === 'checkbox') {
+    return String(parent.value) === String(dependValue);
+  }
+
+  if (parent.type === 'select' || parent.type === 'multiselect') {
+    if (!Array.isArray(parent.value)) return false;
+
+    let targetValue;
+    if (option_index !== undefined && option_index !== null) {
+      const option = parent.validate.opt[option_index];
+      targetValue = typeof option === 'object' ? option.value : option;
+    } else {
+      targetValue = dependValue;
+    }
+
+    return parent.value.some(
+      (opt) => String(opt.value) === String(targetValue),
+    );
+  }
+
+  return true;
+};
+
+const getSubmissionValue = (field, index) => {
+  if (field.type === 'date') {
+    return {
+      value: new Date(formDates.value[index]).getTime(),
+    };
+  }
+  if (field.type === 'multiselect') {
+    return {
+      value: field.value?.length ? field.value?.map((el) => el.value) : null,
+    };
+  }
+  if (field.type === 'select') {
+    return {
+      value: field.value[0]?.value ?? null,
+    };
+  }
+  return { value: field.value || null };
+};
+
 const submitForm = async () => {
+  let hasErrors = false;
+
   fields.value.forEach((field, index) => {
+    if (!isFieldVisible(field)) {
+      validaionError.value[index] = false;
+      return;
+    }
+
     if (field.validate.value_type === 'numeric' && field.type !== 'date') {
       field.value = field.value !== null ? Number(field.value) : null;
     }
+
     validateForm(field, index);
-  });
 
-  if (validaionError.value.some((er) => er)) return;
-
-  const res = fields.value.map((field, index) => {
-    if (field.type === 'date') {
-      return {
-        value: new Date(formDates.value[index]).getTime(),
-      };
-    } else if (field.type === 'multiselect') {
-      return {
-        value: field.value?.length ? field.value?.map((el) => el.value) : null,
-      };
-    } else if (field.type === 'select') {
-      return {
-        value: field.value[0]?.value ?? null,
-      };
-    } else {
-      return { value: field.value || null };
+    if (validaionError.value[index]) {
+      hasErrors = true;
     }
   });
+
+  if (hasErrors) return;
+
+  const submissionData = [];
+  fields.value.forEach((field, index) => {
+    if (isFieldVisible(field)) {
+      submissionData.push(getSubmissionValue(field, index));
+    }
+  });
+
   try {
     await formStore.sendForm(
       route.params.slug,
-      res,
-      useAuth.value ? true : false,
+      submissionData,
+      !!useAuth.value,
     );
     setNotificationView({
       open: true,

@@ -93,7 +93,10 @@
                 label="Система"
                 class="q-mr-md"
               />
-              <q-checkbox v-model="form.notification_channels.email" label="Email" />
+              <q-checkbox
+                v-model="form.notification_channels.email"
+                label="Email"
+              />
             </div>
           </div>
           <EditorTipTapV2
@@ -107,7 +110,7 @@
         </q-card-section>
         <q-card-section class="column q-pa-none q-mt-lg">
           <q-list>
-            <template v-for="(element, id) in form?.fields" :key="id">
+            <template v-for="(_, id) in form?.fields" :key="id">
               <AiFormItemBody
                 v-model="form.fields[id]"
                 @delete-question="deleteQuestion(id, form?.fields)"
@@ -115,6 +118,7 @@
                 @lower="lower(id, form?.fields)"
                 :number="id + 1"
                 :show-arrow="form?.fields?.length > 1"
+                :all-fields="form?.fields"
               />
             </template>
           </q-list>
@@ -144,19 +148,20 @@
 </template>
 
 <script lang="ts" setup>
+//core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useQuasar } from 'quasar';
 
+//store
 import { useFormStore } from 'stores/form-store';
 import { useWorkspaceStore } from 'stores/workspace-store';
 
+// types
+import { AiplanReqForm } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 // utils
 import { isEmpty } from 'src/utils/validation';
-
-// component
-import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-import AddQuestionTypeField from 'src/components/forms/components/AddQuestionTypeField.vue';
-import { TIPTAP_TABS } from 'src/constants/tiptap';
 import {
   upper,
   lower,
@@ -169,9 +174,15 @@ import {
   validDate,
   getDate,
 } from 'src/components/forms/helper/helperForm';
+
+// constants
+import { TIPTAP_TABS } from 'src/constants/tiptap';
+
+// component
+import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import AddQuestionTypeField from 'src/components/forms/components/AddQuestionTypeField.vue';
 import FormsButton from '../components/formsButton.vue';
 import FormsDate from '../components/formsDate.vue';
-import { AiplanReqForm } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import AiFormItemBody from '../components/AiFormItemBody.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
@@ -183,9 +194,17 @@ const emits = defineEmits<{
   'success-create': [];
 }>();
 
+//core
+const $q = useQuasar();
+
+//store
 const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
 
+//store to refs
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+//refs
 const dialogRef = ref();
 const formRef = ref();
 const formTitle = ref();
@@ -195,8 +214,8 @@ const visible = ref('all');
 const isAutoCreateProject = ref(false);
 const projects = ref([]);
 const isLoading = ref(false);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
+//methods
 const clear = () => {
   form.value = {
     title: '',

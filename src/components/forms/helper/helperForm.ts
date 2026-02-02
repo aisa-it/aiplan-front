@@ -10,17 +10,53 @@ const { setNotificationView } = useNotificationStore();
 
 // Блок для создания/ракдактирования формы
 
-export const upper = (index: number, array: object[] = []) => {
+export const upper = (index: number, array: any[] = []) => {
   if (index > 0 && index < array.length) {
+    updateDependenciesOnMove(array, index, index - 1);
     [array[index], array[index - 1]] = [array[index - 1], array[index]];
   }
 };
 
-export const lower = (index: number, array: object[] = []) => {
+export const lower = (index: number, array: any[] = []) => {
   if (index >= 0 && index < array.length - 1) {
+    updateDependenciesOnMove(array, index, index + 1);
     [array[index], array[index + 1]] = [array[index + 1], array[index]];
   }
 };
+
+function updateDependenciesOnMove(
+  array: any[],
+  oldIndex: number,
+  newIndex: number,
+) {
+  const itemMovingToNewIndex = array[oldIndex];
+  const itemMovingToOldIndex = array[newIndex];
+
+  array.forEach((item) => {
+    if (!item.depend_on) return;
+
+    if (item.depend_on.field_index === oldIndex) {
+      item.depend_on.field_index = newIndex;
+    } else if (item.depend_on.field_index === newIndex) {
+      item.depend_on.field_index = oldIndex;
+    }
+  });
+
+
+  if (
+    itemMovingToNewIndex.depend_on &&
+    itemMovingToNewIndex.depend_on.field_index >= newIndex
+  ) {
+    itemMovingToNewIndex.depend_on = null;
+  }
+
+  if (
+    itemMovingToOldIndex.depend_on &&
+    itemMovingToOldIndex.depend_on.field_index >= oldIndex
+  ) {
+    itemMovingToOldIndex.depend_on = null;
+  }
+}
 
 export const deleteQuestion = (index: number, array: object[] = []) => {
   array.splice(index, 1);
@@ -93,9 +129,12 @@ export const onError = () => {
   });
 };
 
-export const addQuestion = (object: object, linkSelect: object[]) => {
-  if (object.type === 'select') {
-    object.validate = { opt: [] };
+export const addQuestion = (object: any, linkSelect: any[]) => {
+  if (typeof object === 'object' && object !== null) {
+    object.depend_on = null;
+    if (object.type === 'select') {
+      object.validate = { opt: [] };
+    }
   }
   linkSelect.push(object);
 };
@@ -117,6 +156,7 @@ export const validateFormWithSlug = (data) => {
         type: el.type,
         label: el.label,
         required: el.required,
+        depend_on: el.depend_on || null,
         validate:
           el.type === 'date'
             ? undefined
