@@ -27,7 +27,7 @@
                 />
               </div>
             </div>
-            <template v-for="(field, index) in fields" :key="index">
+            <template v-for="field in currentFields" :key="field.originalIndex">
               <div
                 v-if="isFieldVisible(field)"
                 class="q-mt-md q-pa-md title-container"
@@ -49,9 +49,11 @@
                 ></div>
                 <component
                   :is="components[field.type]"
-                  :ref="(el) => (fieldRefs[index] = el)"
-                  :model-value="fields[index].value"
-                  @update:model-value="(val) => updateValue(val, index)"
+                  :ref="(el) => (fieldRefs[field.originalIndex] = el)"
+                  :model-value="fields[field.originalIndex].value"
+                  @update:model-value="
+                    (val) => updateValue(val, field.originalIndex)
+                  "
                   @keypress.enter="handleEnterPress(field.type, $event)"
                   :label="getFieldLabel(field)"
                   :type="getFieldType(field.type)"
@@ -59,7 +61,9 @@
                   :maxlength="getFieldMaxLenght(field.type)"
                   :dense="true"
                   :checked="
-                    field.type === 'checkbox' ? fields[index].value : undefined
+                    field.type === 'checkbox'
+                      ? fields[field.originalIndex].value
+                      : undefined
                   "
                   :validate="field.validate"
                   :required="field.required"
@@ -73,21 +77,23 @@
                   :lazy-rules="field.type === 'date'"
                   :mask="getMask(field.type)"
                   :error-message="
-                    validaionError[index] ? getErrorMessage(field.type) : ''
+                    validaionError[field.originalIndex]
+                      ? getErrorMessage(field.type)
+                      : ''
                   "
-                  :error="validaionError[index]"
+                  :error="validaionError[field.originalIndex]"
                   style="padding-top: 1px"
                   no-error-icon
                 >
                   <template v-if="field.type === 'numeric'" v-slot:append>
                     <div style="height: 100%">
                       <q-btn
-                        @click="updateValue(1, index, true)"
+                        @click="updateValue(1, field.originalIndex, true)"
                         icon="add"
                         flat
                       />
                       <q-btn
-                        @click="updateValue(-1, index, true)"
+                        @click="updateValue(-1, field.originalIndex, true)"
                         icon="remove"
                         flat
                       />
@@ -97,16 +103,16 @@
                     <q-icon
                       name="event"
                       class="cursor-pointer"
-                      @click="dateDialogsVisible[index] = true"
+                      @click="dateDialogsVisible[field.originalIndex] = true"
                     >
                     </q-icon>
-                    <q-dialog v-model="dateDialogsVisible[index]">
+                    <q-dialog v-model="dateDialogsVisible[field.originalIndex]">
                       <q-date
-                        v-model="formDates[index]"
+                        v-model="formDates[field.originalIndex]"
                         mask="YYYY-MM-DD"
                         navigation-min-year-month="1000/01"
                         @update:model-value="
-                          (val) => setDateToInput(val, index)
+                          (val) => setDateToInput(val, field.originalIndex)
                         "
                       >
                         <div class="row items-center justify-between">
@@ -116,7 +122,7 @@
                             no-caps
                             flat
                             dense
-                            @click="resetDate(index)"
+                            @click="resetDate(field.originalIndex)"
                           />
                           <q-btn
                             v-close-popup
@@ -132,36 +138,55 @@
                     <q-icon
                       name="colorize"
                       class="cursor-pointer"
-                      @click="colorPickerDialogsVisible[index] = true"
+                      @click="
+                        colorPickerDialogsVisible[field.originalIndex] = true
+                      "
                     ></q-icon>
-                    <q-dialog v-model="colorPickerDialogsVisible[index]">
+                    <q-dialog
+                      v-model="colorPickerDialogsVisible[field.originalIndex]"
+                    >
                       <q-color
-                        v-model="fields[index].value"
+                        v-model="fields[field.originalIndex].value"
                         no-header-tabs
-                        @input="colorPickerDialogsVisible[index] = false"
+                        @input="
+                          colorPickerDialogsVisible[field.originalIndex] = false
+                        "
                       />
                     </q-dialog>
                   </template>
                   <template v-if="field.type === 'color'" v-slot:prepend
                     ><q-badge
                       rounded
-                      :style="{ backgroundColor: fields[index].value }"
+                      :style="{
+                        backgroundColor: fields[field.originalIndex].value,
+                      }"
                   /></template>
                 </component>
               </div>
             </template>
             <div class="flex justify-between button-container q-mt-md">
               <q-btn
-                v-if="!isMobile && !emptyForm"
+                v-if="!isMobile && !emptyForm && currentPage === 0"
                 label="Очистить форму"
-                type="reset"
+                @click="resetForm"
                 flat
                 color="primary"
                 class="text-weight-bold"
                 no-caps
-                style="max-width: 150px"
+                style="max-width: 170px"
               />
-              <div style="max-height: 30px" class="button-container">
+              <q-btn
+                v-if="!isMobile && !emptyForm && currentPage > 0"
+                label="Очистить страницу"
+                @click="resetCurrentPage"
+                flat
+                color="primary"
+                class="text-weight-bold"
+                no-caps
+                style="max-width: 170px"
+              />
+
+              <div class="button-container q-ml-auto">
                 <q-btn
                   flat
                   no-caps
@@ -171,11 +196,22 @@
                   label="Отмена"
                 />
                 <q-btn
+                  v-if="!isMobile && !emptyForm && currentPage > 0"
+                  label="Назад"
+                  @click="prevPage"
+                  flat
+                  color="primary"
+                  class="primary-btn q-mb-xs q-mr-sm"
+                  no-caps
+                  style="max-width: 150px"
+                />
+                <q-btn
                   v-if="!emptyForm"
                   class="primary-btn q-mb-xs"
-                  label="Записать ответ"
+                  :label="!hasNextVisiblePage ? 'Записать ответ' : 'Далее'"
                   size="15px"
-                  type="submit"
+                  @click="nextPage"
+                  :disable="isNextButtonDisabled"
                   no-caps
                 />
               </div>
@@ -281,6 +317,7 @@ import {
   getErrorMessage,
   getRules,
   getMask,
+  groupFieldsByDependency,
 } from 'src/components/forms/helper/helperForm';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 //composables
@@ -306,6 +343,8 @@ const formDates = ref([]);
 const colorPickerDialogsVisible = ref([]);
 const dateDialogsVisible = ref([]);
 const validaionError = ref([]);
+const currentPage = ref(0);
+const pages = ref([]);
 
 const fieldRefs = ref([]);
 
@@ -322,6 +361,10 @@ const components = ref({
 
 //computeds
 const isMobile = computed(() => quasar.screen.width < 451);
+
+const currentFields = computed(() => {
+  return pages.value[currentPage.value] || [];
+});
 
 //methods
 const transformDate = (date) => {
@@ -444,15 +487,18 @@ const submitForm = async () => {
   fields.value.forEach((field, index) => {
     if (isFieldVisible(field)) {
       submissionData.push(getSubmissionValue(field, index));
+    } else {
+      submissionData.push({ value: null });
     }
   });
 
   try {
-    await formStore.sendForm(
+    const { data } = await formStore.sendForm(
       route.params.slug,
       submissionData,
       !!useAuth.value,
     );
+
     setNotificationView({
       open: true,
       type: 'success',
@@ -462,34 +508,136 @@ const submitForm = async () => {
   } catch (e) {}
 };
 
-const resetForm = () => {
-  fields.value.forEach((field) => {
-    if (field.type === 'checkbox') {
-      field.value = false;
+const hasNextVisiblePage = computed(() => {
+  for (let i = currentPage.value + 1; i < pages.value.length; i++) {
+    if (pages.value[i].some((field) => isFieldVisible(field))) {
+      return true;
     }
-    if (field.validate.value_type === 'numeric') {
-      field.value = null;
-    }
-    if (field.validate.value_type === 'string') {
-      field.value = '';
-    }
-    if (field.type === 'color') {
-      field.value = '';
-    }
+  }
+  return false;
+});
+
+const isNextButtonDisabled = computed(() => {
+  return currentFields.value.some((field) => {
+    if (!isFieldVisible(field)) return false;
+    if (!field.required) return false;
+    if (field.type === 'checkbox') return false;
+
+    const val = fields.value[field.originalIndex].value;
+
     if (field.type === 'select' || field.type === 'multiselect') {
-      field.value = [];
+      return !val || val.length === 0;
     }
-    if (field.type === 'date') {
-      field.value = null;
+
+    return val === '' || val === null || val === undefined;
+  });
+});
+
+const findVisiblePage = (startPage, direction) => {
+  let i = startPage + direction;
+  while (i >= 0 && i < pages.value.length) {
+    if (pages.value[i].some((field) => isFieldVisible(field))) {
+      return i;
+    }
+    i += direction;
+  }
+  return -1;
+};
+
+const nextPage = () => {
+  let hasErrors = false;
+  currentFields.value.forEach((field) => {
+    if (!isFieldVisible(field)) {
+      validaionError.value[field.originalIndex] = false;
+      return;
+    }
+
+    if (field.validate.value_type === 'numeric' && field.type !== 'date') {
+      const currentValue = fields.value[field.originalIndex].value;
+      fields.value[field.originalIndex].value =
+        currentValue !== null ? Number(currentValue) : null;
+    }
+
+    validateForm(fields.value[field.originalIndex], field.originalIndex);
+    if (validaionError.value[field.originalIndex]) {
+      hasErrors = true;
     }
   });
+
+  if (hasErrors) return;
+
+  const nextPageIndex = findVisiblePage(currentPage.value, 1);
+
+  if (nextPageIndex !== -1) {
+    currentPage.value = nextPageIndex;
+    window.scrollTo(0, 0);
+  } else {
+    submitForm();
+  }
+};
+
+const prevPage = () => {
+  const prevPageIndex = findVisiblePage(currentPage.value, -1);
+
+  if (prevPageIndex !== -1) {
+    currentPage.value = prevPageIndex;
+    window.scrollTo(0, 0);
+  }
+};
+
+const resetFields = (targetFields) => {
+  targetFields.forEach((field) => {
+    const originalIndex =
+      field.originalIndex !== undefined
+        ? field.originalIndex
+        : fields.value.indexOf(field);
+    const targetField = fields.value[originalIndex];
+
+    switch (targetField.type) {
+      case 'checkbox':
+        targetField.value = false;
+        break;
+      case 'numeric':
+        targetField.value = null;
+        break;
+      case 'color':
+        targetField.value = '';
+        break;
+      case 'select':
+      case 'multiselect':
+        targetField.value = [];
+        break;
+      case 'date':
+        targetField.value = null;
+        break;
+      default:
+        if (targetField.validate?.value_type === 'numeric') {
+          targetField.value = null;
+        } else if (targetField.validate?.value_type === 'string') {
+          targetField.value = '';
+        }
+    }
+  });
+};
+
+const resetCurrentPage = () => {
+  resetFields(currentFields.value);
+  currentFields.value.forEach((field) => {
+    validaionError.value[field.originalIndex] = false;
+  });
+};
+
+const resetForm = () => {
+  resetFields(fields.value);
   validaionError.value = [];
+  currentPage.value = 0;
 };
 
 const validateReq = (data) => {
   if (!data.active) noActiveForm.value = true;
   if (!data.fields.length) emptyForm.value = true;
   fields.value = data.fields;
+  pages.value = groupFieldsByDependency(fields.value);
   description.value = data.description;
   title.value = data.title;
   resetForm();

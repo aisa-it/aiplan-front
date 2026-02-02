@@ -1,3 +1,4 @@
+import { TypesFormFields } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import dayjs from 'dayjs';
 import {
   ERROR_EDIT_FORM,
@@ -5,6 +6,7 @@ import {
 } from 'src/constants/notifications';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { isValidDate } from 'src/utils/validation';
+import { ExtendedFormFields, GroupedFormField } from '../types/types';
 
 const { setNotificationView } = useNotificationStore();
 
@@ -41,7 +43,6 @@ function updateDependenciesOnMove(
       item.depend_on.field_index = oldIndex;
     }
   });
-
 
   if (
     itemMovingToNewIndex.depend_on &&
@@ -270,4 +271,51 @@ export const getRules = (fieldType: string, required: boolean) => {
     rules.push((val) => (val !== '' && val !== null) || 'Обязательное поле');
   }
   return rules;
+};
+
+export const groupFieldsByDependency = (
+  fields: ExtendedFormFields[],
+): GroupedFormField[][] => {
+  const levels: GroupedFormField[][] = [];
+  const memo = new Map<number, number>();
+  const visiting = new Set<number>();
+
+  const getLevel = (index: number): number => {
+    if (memo.has(index)) return memo.get(index)!;
+
+    if (visiting.has(index)) {
+      console.warn(`Circular dependency detected at field index ${index}`);
+      return 0;
+    }
+
+    visiting.add(index);
+
+    const field = fields[index];
+    let level = 0;
+
+    if (field && field.depend_on) {
+      const parentIndex = field.depend_on.field_index;
+
+      if (parentIndex !== null && fields[parentIndex]) {
+        level = getLevel(parentIndex) + 1;
+      }
+    }
+
+    visiting.delete(index);
+    memo.set(index, level);
+    return level;
+  };
+
+  fields.forEach((field, index) => {
+    const level = getLevel(index);
+    if (!levels[level]) {
+      levels[level] = [];
+    }
+    levels[level].push({ ...field, originalIndex: index });
+  });
+  console.log(
+    'er',
+    levels.filter((l) => l && l.length > 0),
+  );
+  return levels.filter((l) => l && l.length > 0);
 };

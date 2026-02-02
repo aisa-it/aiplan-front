@@ -154,22 +154,11 @@ import {
   upper,
 } from '../helper/helperForm';
 
-//types
-import { TypesFormFields } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-
 //components
 import AddQuestionTypeField from './AddQuestionTypeField.vue';
 
-//fixme убрать, когда обновится тип в data-contracts
-export interface DtoDependOn {
-  field_index: number | null;
-  option_index?: number | null;
-  value?: any;
-}
-
-export type ExtendedFormFields = TypesFormFields & {
-  depend_on?: DtoDependOn | null;
-};
+//types
+import { ExtendedFormFields } from '../types/types';
 
 const props = defineProps<{
   modelValue: ExtendedFormFields;
