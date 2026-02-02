@@ -10,7 +10,7 @@
         class="col"
         style="
           max-height: calc(100vh - 340px);
-          overflow: scroll;
+          overflow: auto;
           padding-right: 12px;
         "
       >
