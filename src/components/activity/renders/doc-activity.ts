@@ -1,4 +1,4 @@
-import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoEntityActivityFull, DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { valToRole } from 'src/utils/translator';
 
 export function getURLDoc(activity: DtoEntityActivityFull) {
@@ -23,7 +23,7 @@ export function docActivityRender(activity: DtoEntityActivityFull) {
     return createDocLink(activity.doc_detail?.id, activity.doc_detail?.title);
   }
 
-  const userName = (u: any) => {
+  const userName = (u: DtoUser) => {
     if (!u) return '';
     const full = `${u.last_name ?? ''} ${u.first_name ?? ''}`.trim();
     return full || u.email || u.username || '';
