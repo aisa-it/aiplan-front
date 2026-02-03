@@ -1,5 +1,6 @@
 <template>
   <q-table
+    ref="issueTable"
     v-model:pagination="quasarPagination"
     binary-state-sort
     class="my-sticky-column-table table-bottom-reverse"
@@ -18,14 +19,17 @@
           v-for="col in columns"
           :key="col.name"
           :props="props"
-          :class="`${col.name.includes('count') ? 'count-column': ''}`"
-          >
+          :class="`${col.name.includes('count') ? 'count-column' : ''}`"
+        >
           {{ col.label }}
         </q-th>
       </q-tr>
     </template>
 
     <template #bottom>
+      <div class="table-h-scroll" ref="hScroll">
+        <div class="table-h-scroll__content" />
+      </div>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
         :rows-per-page="quasarPagination.rowsPerPage"
@@ -38,7 +42,11 @@
 
     <template v-slot:body-cell-sequence_id="props">
       <SequenceIdColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-name="props">
@@ -49,7 +57,11 @@
             emits('openPreview', issue, parsePagination(quasarPagination))
         "
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-priority="props">
@@ -57,7 +69,11 @@
         :row-info="props"
         @refresh="updateIssueField('priority', props.row, entity)"
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-state="props">
@@ -70,7 +86,11 @@
           }
         "
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-target_date="props">
@@ -78,59 +98,108 @@
         :row-info="props"
         @refresh="updateIssueField('targetDate', props.row, entity)"
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-created_at="props">
       <CreatedAtColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-updated_at="props">
       <UpdatedAtColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-author="props">
       <AuthorColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-assignees="props">
       <AssigneesColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-labels="props">
       <LabelsColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-sub_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-linked_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'linked_issues_count'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-link_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'links'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-attachment_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'attachments'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
   </q-table>
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, watch, watchEffect, computed } from 'vue';
-import { EventBus } from 'quasar';
+import {
+  inject,
+  ref,
+  watch,
+  watchEffect,
+  computed,
+  onMounted,
+  nextTick,
+  onBeforeUnmount,
+} from 'vue';
+import { EventBus, QTable } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -180,6 +249,54 @@ const props = defineProps([
   'columns',
   'contextType',
 ]);
+
+const hScroll = ref<HTMLElement | null>(null);
+const issueTable = ref<InstanceType<typeof QTable> | null>(null);
+
+onMounted(async () => {
+  await nextTick();
+
+  const rootEl = issueTable.value?.$el as HTMLElement | undefined;
+  if (!rootEl || !hScroll.value) return;
+
+  const middle = rootEl.querySelector('.q-table__middle') as HTMLElement | null;
+
+  const table = rootEl.querySelector('table') as HTMLElement | null;
+
+  if (!middle || !table) return;
+
+  const updateWidth = () => {
+    const tableWidth = table.scrollWidth;
+    const containerWidth = middle.clientWidth;
+
+    hScroll.value!.firstElementChild!.style.width = tableWidth + 'px';
+
+    hScroll.value!.style.display =
+      tableWidth - 20 > containerWidth ? 'block' : 'none';
+  };
+
+  updateWidth();
+
+  const onHScroll = () => {
+    middle.scrollLeft = hScroll.value!.scrollLeft;
+  };
+
+  const onMiddleScroll = () => {
+    hScroll.value!.scrollLeft = middle.scrollLeft;
+  };
+
+  hScroll.value.addEventListener('scroll', onHScroll);
+  middle.addEventListener('scroll', onMiddleScroll);
+
+  const resizeObserver = new ResizeObserver(updateWidth);
+  resizeObserver.observe(middle);
+
+  onBeforeUnmount(() => {
+    hScroll.value?.removeEventListener('scroll', onHScroll);
+    middle.removeEventListener('scroll', onMiddleScroll);
+    resizeObserver.disconnect();
+  });
+});
 
 const { fetchPinnedIssues } = useIssuesStore();
 const { project } = storeToRefs(useProjectStore());
@@ -249,7 +366,7 @@ const handleClick = (row) => {
 
 const refreshTable = (isFullRefresh?: boolean) => {
   emits('refresh', parsePagination(quasarPagination.value), isFullRefresh);
-}
+};
 
 const getIssues = async (p: any, action = 'sorting') => {
   let isFullUpdate = action !== 'selectedPage' ? true : false;
@@ -280,7 +397,7 @@ const updateIssueField = (
   if (isGroupingEnabled.value === true) {
     emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
-  } else refreshTable()
+  } else refreshTable();
 };
 
 watchEffect(() => {
@@ -296,11 +413,11 @@ watch(
 </script>
 
 <style lang="scss">
-  th.count-column {
-    min-width: 95px;
-    max-width: 95px;
-    padding-right: 0;
-  }
+th.count-column {
+  min-width: 95px;
+  max-width: 95px;
+  padding-right: 0;
+}
 
 .my-sticky-column-table {
   thead tr:first-child th:first-child {
@@ -330,5 +447,42 @@ watch(
     z-index: 101;
     background-color: $color-shadow !important;
   }
+}
+</style>
+
+<style lang="scss" scoped>
+:deep(.q-table__container) {
+  overflow: auto;
+  height: calc(100vh - 212px);
+  position: relative;
+}
+
+:deep(.q-table__bottom) {
+  position: sticky;
+  bottom: 0;
+  background: $bg-color !important;
+  z-index: 100;
+}
+
+.table-h-scroll {
+  height: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: $bg-color;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: none;
+}
+
+.my-sticky-column-table:hover .table-h-scroll {
+  opacity: 1;
+}
+
+.table-h-scroll__content {
+  height: 1px;
+}
+
+:deep(.q-table__middle) {
+  overflow-x: hidden;
 }
 </style>
