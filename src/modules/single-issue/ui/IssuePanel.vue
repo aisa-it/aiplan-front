@@ -19,6 +19,7 @@
 
         <SelectChildren
           :projectid="issueData.project"
+          :project="issueData.project_detail"
           :issueid="issueData.id"
           :is-disabled="
             hasPermissionByIssue(issueData, project, 'add-sub-issue')
