@@ -2,11 +2,12 @@ import { valToRole } from 'src/utils/translator';
 import { translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
 import { getURLDoc } from './doc-activity';
+import { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
   let action = '';
   let value = '';
-  const userLabel = (u: any, fallback?: string) => {
+  const userLabel = (u: DtoUser, fallback?: string) => {
     const name = u ? aiplan.UserName(u).join(' ').trim() : '';
     return name || fallback || '';
   };
