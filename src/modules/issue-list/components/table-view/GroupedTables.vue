@@ -35,7 +35,7 @@
         </template>
         <LazyVirtualMount
           :active="!isGroupHide(table?.entity?.id || table.entity)"
-          :estimated-height="estimatedHeights[table?.issues?.length]"
+          :estimated-height="estimatedHeights[table?.issues?.length] ?? 300"
         >
           <IssueTable
             v-if="!isGroupHide(table?.entity?.id || table.entity)"

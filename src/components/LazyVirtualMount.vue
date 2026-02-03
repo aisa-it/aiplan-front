@@ -11,7 +11,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+  computed,
+} from 'vue';
 
 const props = defineProps<{
   active: boolean;
@@ -21,7 +28,8 @@ const props = defineProps<{
 const root = ref<HTMLElement | null>(null);
 const content = ref<HTMLElement | null>(null);
 
-const visible = ref(false);
+const intersecting = ref(false);
+const visible = computed(() => intersecting.value && props.active);
 const measuredHeight = ref(props.estimatedHeight ?? 600);
 
 let io: IntersectionObserver | null = null;
@@ -30,7 +38,7 @@ let ro: ResizeObserver | null = null;
 onMounted(() => {
   io = new IntersectionObserver(
     ([entry]) => {
-      visible.value = entry.isIntersecting && props.active;
+      intersecting.value = entry.isIntersecting;
     },
     {
       root: document.querySelector('#grouped-table-target-scroll-container'),
