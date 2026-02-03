@@ -1,25 +1,29 @@
 import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export function getURLDoc(activity: DtoEntityActivityFull) {
+export function getURLDoc(
+  activity: DtoEntityActivityFull,
+  field: 'new_entity_detail' | 'old_entity_detail',
+  fallback: string = '',
+) {
+  if (!activity?.[field]) return fallback;
   return `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${`/${activity.workspace_detail?.slug}/aidoc/${activity?.new_entity_detail?.id}`}>
-                    "${activity.new_entity_detail?.title}"<a/>`;
+                    href=${`/${activity.workspace_detail?.slug}/aidoc/${activity?.[field]?.id}`}>
+                    "${activity?.[field]?.title}"<a/>`;
 }
 
 export function docActivityRender(activity: DtoEntityActivityFull) {
-  function createDocLink(
-    activityId: string | undefined,
-    activityTitle: string | undefined,
-  ) {
+  function createDocLink(entityDetail: any, fallback: string = '') {
+    if (!entityDetail) return fallback;
+
     return `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${`/${activity.workspace_detail?.slug}/aidoc/${activityId}`}>
-                    "${activityTitle}"<a/>`;
+                    href=${`/${activity.workspace_detail?.slug}/aidoc/${entityDetail.id}`}>
+                    "${entityDetail.title}"<a/>`;
   }
 
   function createLinkByDocDetail() {
-    return createDocLink(activity.doc_detail?.id, activity.doc_detail?.title);
+    return createDocLink(activity.doc_detail);
   }
 
   switch (activity.field) {
@@ -49,31 +53,42 @@ export function docActivityRender(activity: DtoEntityActivityFull) {
       }
     case 'doc':
       switch (activity.verb) {
+        case 'move_workspace_to_doc':
+        case 'move_doc_to_workspace':
+        case 'move_doc_to_doc':
         case 'move':
-          return `<span>перенес(-ла) документ "${activity.doc_detail
-            ?.title}" из "${
+          return `<span>перенес(-ла) документ ${createLinkByDocDetail()} из ${
             activity.old_value === activity.workspace_detail?.name
-              ? 'корневого'
-              : activity.old_value
-          }" в "${
+              ? 'корневой папки'
+              : createDocLink(
+                  activity.old_entity_detail,
+                  activity.old_value ?? '',
+                )
+          } в ${
             activity.new_value === activity.workspace_detail?.name
-              ? 'корневой'
-              : activity.new_value
-          }"<span/>`;
+              ? 'корневую папку'
+              : createDocLink(
+                  activity.new_entity_detail,
+                  activity.new_value ?? '',
+                )
+          }<span/>`;
+        case 'deleted':
+          return `удалил(-а) дочерний документ ${activity.old_value}`;
+        case 'removed':
         case 'remove':
           return `<span>убрал(-а) дочерний документ ${createDocLink(
-            activity.old_entity_detail?.id,
-            activity.old_entity_detail?.title,
+            activity.old_entity_detail,
+            activity.old_value ?? '',
           )} из документа ${createLinkByDocDetail()}`;
         case 'added':
           return `<span>добавил(-а) дочерний документ ${createDocLink(
-            activity.new_entity_detail?.id,
-            activity.new_entity_detail?.title,
+            activity.new_entity_detail,
+            activity.new_value ?? '',
           )} в ${createLinkByDocDetail()}</span>`;
         case 'created':
           return `<span>создал(-а) дочерний документ ${createDocLink(
-            activity.new_entity_detail?.id,
-            activity.new_entity_detail?.title,
+            activity.new_entity_detail,
+            activity.new_value ?? '',
           )} в ${createLinkByDocDetail()}</span>`;
       }
     case 'doc_sort':
