@@ -199,6 +199,14 @@ import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 
+//api
+import {
+  createAnswerAuth,
+  createAnswerNoAuth,
+  getFormAuth,
+  getFormNoAuth,
+} from 'src/components/forms/services/api';
+
 //constants
 import { SUCCESS_SEND_FORM } from 'src/constants/notifications';
 
@@ -229,6 +237,7 @@ const formStore = useFormStore();
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const { setNotificationView } = useNotificationStore();
+
 //state
 const fields = ref([]);
 const description = ref('');
@@ -243,7 +252,6 @@ const validaionError = ref([]);
 const currentPage = ref(0);
 const pages = ref([]);
 const drawerOpen = ref(false);
-
 const fieldRefs = ref([]);
 
 //computeds
@@ -341,11 +349,8 @@ const submitForm = async () => {
   });
 
   try {
-    const { data } = await formStore.sendForm(
-      route.params.slug,
-      submissionData,
-      !!useAuth.value,
-    );
+    const createAnswer = useAuth.value ? createAnswerAuth : createAnswerNoAuth;
+    await createAnswer(route.params.slug, submissionData);
 
     setNotificationView({
       open: true,
@@ -462,19 +467,12 @@ onMounted(async () => {
   } catch (e) {
     useAuth.value = false;
   } finally {
-    if (useAuth.value) {
-      const { data } = await formStore.getSettingsForm(route.params.slug, true);
+    const getForm = useAuth.value ? getFormAuth : getFormNoAuth;
+    try {
+      const data = await getForm(route.params.slug);
       validateReq(data);
-    } else {
-      try {
-        const { data } = await formStore.getSettingsForm(
-          route.params.slug,
-          false,
-        );
-        validateReq(data);
-      } catch (e) {
-        onlyAuth.value = true;
-      }
+    } catch (e) {
+      if (!useAuth.value) onlyAuth.value = true;
     }
     if (localStorage.getItem('dark') === 'true') {
       quasar.dark.set(true);

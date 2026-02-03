@@ -154,11 +154,13 @@ import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 
 //store
-import { useFormStore } from 'stores/form-store';
 import { useWorkspaceStore } from 'stores/workspace-store';
 
 // types
-import { AiplanReqForm } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  AiplanReqForm,
+  DtoProjectLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // utils
 import { isEmpty } from 'src/utils/validation';
@@ -174,6 +176,13 @@ import {
   validDate,
   getDate,
 } from 'src/components/forms/helper/helperForm';
+
+//api
+import {
+  createForm,
+  updateForm,
+  getFormAuth,
+} from 'src/components/forms/services/api';
 
 // constants
 import { TIPTAP_TABS } from 'src/constants/tiptap';
@@ -198,7 +207,6 @@ const emits = defineEmits<{
 const $q = useQuasar();
 
 //store
-const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
 
 //store to refs
@@ -209,22 +217,29 @@ const dialogRef = ref();
 const formRef = ref();
 const formTitle = ref();
 
-const form = ref<AiplanReqForm>();
+const initialFormState = {
+  title: '',
+  description: '',
+  fields: [],
+  auth_require: false,
+  end_date: getDate(),
+  target_project_id: '',
+  notification_channels: {
+    telegram: false,
+    app: false,
+    email: false,
+  },
+};
+
+const form = ref<AiplanReqForm>(initialFormState);
 const visible = ref('all');
 const isAutoCreateProject = ref(false);
-const projects = ref([]);
+const projects = ref<DtoProjectLight[]>([]);
 const isLoading = ref(false);
 
 //methods
 const clear = () => {
-  form.value = {
-    title: '',
-    description: '',
-    fields: [],
-    auth_require: false,
-    end_date: getDate(),
-    target_project_id: '',
-  };
+  form.value = initialFormState;
   visible.value = 'all';
   isAutoCreateProject.value = false;
   form.value.notification_channels = {
@@ -240,8 +255,9 @@ const save = async () => {
       onError();
       return;
     }
-    if (formTitle.value.hasError) return;
+    if (formTitle.value.hasError || !form.value) return;
     isLoading.value = true;
+
     const requestBody = {
       title: form.value.title,
       description: form.value.description,
@@ -257,14 +273,16 @@ const save = async () => {
     };
 
     try {
+      if (!currentWorkspaceSlug.value) return;
+
       if (props.formSlug) {
-        await formStore.updateForm(
+        await updateForm(
           currentWorkspaceSlug.value,
           props.formSlug,
           requestBody,
         );
       } else {
-        await formStore.createForm(currentWorkspaceSlug.value, requestBody);
+        await createForm(currentWorkspaceSlug.value, requestBody);
       }
       onSuccess();
     } catch (e) {
@@ -283,23 +301,26 @@ const validateDate = (val: string) => {
 };
 
 const refresh = async () => {
+  if (!currentWorkspaceSlug.value) return;
   clear();
-  await workspaceStore
-    .getWorkspaceProjects(currentWorkspaceSlug.value as string)
-    .then((d) => {
-      projects.value = d.filter(
-        (project) => project?.current_user_membership?.role > 5,
-      );
-    });
+
+  const data = await workspaceStore.getWorkspaceProjects(
+    currentWorkspaceSlug.value,
+  );
+
+  if (data)
+    projects.value = data.filter(
+      (project) => (project?.current_user_membership?.role ?? 0) > 5,
+    );
 };
 
 const getForm = async () => {
   refresh();
   if (props.formSlug) {
-    const { data } = await formStore.getSettingsForm(props.formSlug, true);
+    const data = await getFormAuth(props.formSlug);
     form.value = validateFormWithSlug(data);
     form.value.target_project_id = projects.value.find(
-      (el) => el.id === form.value.target_project_id,
+      (el) => el.id === form.value?.target_project_id,
     );
     visible.value = form.value.auth_require ? 'authorize' : 'all';
     isAutoCreateProject.value = form.value.target_project_id ? true : false;
