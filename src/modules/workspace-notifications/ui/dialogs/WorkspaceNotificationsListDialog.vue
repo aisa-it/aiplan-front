@@ -30,6 +30,7 @@
           :unread-notifications="unreadNotifications"
           :read-notifications="readNotifications"
           @getNotifications="onUpdate"
+          @loadMore="onLoadMore"
           @read="onRead"
         />
       </q-item>
@@ -60,6 +61,7 @@ const emits = defineEmits<{
   hide: [];
   create: [];
   update: [];
+  loadMore: [];
   read: [];
 }>();
 
@@ -79,6 +81,10 @@ const onUpdate = () => {
 
 const onRead = () => {
   emits('read');
+};
+
+const onLoadMore = () => {
+  emits('loadMore');
 };
 
 const onHide = () => {

@@ -9,6 +9,7 @@
       :read-notifications="readNotifications"
       @create="() => (isCreateOpen = true)"
       @update="getNotifications"
+      @loadMore="loadMoreNotifications"
       @read="readAllNotifications"
       @hide="onHide"
     />
@@ -77,7 +78,13 @@ const readAllNotifications = async (): Promise<void> => {
 };
 
 const getNotifications = async (): Promise<void> => {
-  userNotifications.value = await getUserNotifications();
+  userNotifications.value = await getUserNotifications({ offset: 0, limit: 100 });
+};
+
+const loadMoreNotifications = async (): Promise<void> => {
+  const offset = userNotifications.value.length;
+  const next = await getUserNotifications({ offset, limit: 50 });
+  userNotifications.value = [...userNotifications.value, ...next];
 };
 
 const wsParser = (event: any) => {

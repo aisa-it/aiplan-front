@@ -1,5 +1,5 @@
 <template>
-  <div class="notifications__list">
+  <div class="notifications__list" @scroll.passive="onScroll">
     <div class="row justify-around">
       <SettingsTabs
         :current-tab="currentTab"
@@ -60,7 +60,7 @@ const props = defineProps<{
   unreadNotifications: NotificationsNotificationResponse[];
 }>();
 
-const emits = defineEmits<{ getNotifications: []; read: [] }>();
+const emits = defineEmits<{ getNotifications: []; read: []; loadMore: [] }>();
 
 //constants
 const listTabs = [
@@ -115,6 +115,15 @@ const handleGetNotifications = () => {
 
 const onRead = () => {
   emits('read');
+};
+
+const onScroll = (e: Event) => {
+  const el = e.target as HTMLElement | null;
+  if (!el) return;
+
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
+    emits('loadMore');
+  }
 };
 </script>
 <style scoped lang="scss">
