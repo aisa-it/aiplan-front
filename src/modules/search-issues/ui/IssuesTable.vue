@@ -33,6 +33,7 @@
         v-if="!isCreateSprint"
       >
         <FileZIPIcon />
+        <q-tooltip>Скачать задачи архивом</q-tooltip>
       </q-btn>
       <q-btn
         flat
@@ -43,9 +44,11 @@
         @click="onRequest(pagination)"
       >
         <RefreshIcon />
+        <q-tooltip>Обновить результаты поиска</q-tooltip>
       </q-btn>
       <q-btn flat dense round style="height: 30px; width: 30px" class="q-ml-sm">
         <Filterv2Icon />
+        <q-tooltip>Настроить отображение</q-tooltip>
         <q-menu style="width: 200px" :offset="[-10, 10]">
           <q-card class="column q-py-md q-pl-sm q-pr-md">
             <h6 style="margin: 4px 0 4px 8px !important">Колонки</h6>
