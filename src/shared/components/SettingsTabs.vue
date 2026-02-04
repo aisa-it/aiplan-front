@@ -47,6 +47,7 @@ defineEmits<{
 .settings-tabs {
   &__chip {
     min-width: 150px;
+    flex-shrink: 0;
   }
 }
 </style>
