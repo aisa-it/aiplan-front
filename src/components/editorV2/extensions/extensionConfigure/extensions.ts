@@ -39,6 +39,7 @@ import { CommentLinkMention } from 'src/utils/commentLinkEditor';
 import { IssueLinkMention } from 'src/utils/issueLinkEditor';
 import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 import { TableOfContentsCustom } from 'src/utils/tableOfContents';
+import { NonEditableCellPlugin } from './nonEditableTableCell';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
 class CustomTableView extends TableView {
@@ -122,26 +123,6 @@ export const getEditorExtensions = (props) => {
           },
         };
       },
-      // parseHTML() {
-      //   return [
-      //     {
-      //       tag: 'table.issue-table',
-      //       priority: 1000,
-      //       getAttrs: (el) => {
-      //         console.log('[PARSE TABLE] el:',  el.getAttributeNames());
-      //         return {
-      //           'data-issue-table-params': el.getAttribute(
-      //             'data-issue-table-params',
-      //           ),
-      //         };
-      //       },
-      //     },
-      //   ];
-      // },
-      // renderHTML({ HTMLAttributes }) {
-      //   console.log('Final table attrs:', HTMLAttributes);
-      //   return ['table', HTMLAttributes, ['tbody', 0]];
-      // },
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],
@@ -288,6 +269,8 @@ export const getEditorExtensions = (props) => {
       TableOfContentsCustom,
     );
   }
+
+  extensions.push(NonEditableCellPlugin);
 
   return extensions;
 };

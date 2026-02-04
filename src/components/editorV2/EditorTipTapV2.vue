@@ -76,7 +76,8 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                        {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
+                      {{ !hasOwnNumeration(link.text) ? link.index + ' ' : ''
+                      }}{{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -280,7 +281,7 @@ const editorExtensions = computed(() => getEditorExtensions(props));
 const hasOwnNumeration = (heading: string) => {
   const firstChar = heading[0];
   return /\d/.test(firstChar);
-}
+};
 
 // Наведение на таблицу
 const hoveredTable = ref<HTMLElement | null>(null);
@@ -323,15 +324,21 @@ function onButtonMouseLeave(): void {
 }
 
 function updateTableButtonPosition(tableEl: HTMLElement): void {
-  const rect = tableEl.getBoundingClientRect();
-  const containerRect = document
-    .querySelector('.html-editor__wrapper')
-    ?.getBoundingClientRect();
+  const wrapper = tableEl.closest('.html-editor__wrapper') as HTMLElement | null;
+  if (!wrapper) return;
 
-  if (!containerRect) return;
+  const tableRect = tableEl.getBoundingClientRect();
+  const wrapperRect = wrapper.getBoundingClientRect();
 
-  const top = rect.bottom - containerRect.top + 8;
-  const left = rect.left - containerRect.left;
+  const style = getComputedStyle(wrapper);
+  const paddingTop = parseFloat(style.paddingTop) || 0;
+  const paddingLeft = parseFloat(style.paddingLeft) || 0;
+
+  let top = tableRect.bottom - wrapperRect.top + 8 - paddingTop;
+  let left = tableRect.left - wrapperRect.left - paddingLeft;
+  top = Math.max(0, top);
+  left = Math.max(0, left);
+
   tableButtonPosition.value = { top, left };
 }
 

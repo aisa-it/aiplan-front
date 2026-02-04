@@ -1,6 +1,11 @@
 <template>
-  <q-dialog ref="dialogRef" class="prevent-click-issue-outside" v-click-outside:prevent-click-issue-outside>
-    <q-card class="inner-modal-card">
+  <q-dialog ref="dialogRef">
+    <q-card
+      class="inner-modal-card prevent-click-issue-outside"
+      v-click-outside:prevent-click-issue-outside="{
+        isAutoSave: true,
+      }"
+    >
       <q-card-section class="column q-pt-none">
         <h6 class="q-mb-sm q-mt-sm" style="font-weight: 600">
           Удаление фильтра
@@ -39,6 +44,14 @@ import { DtoSearchFilterFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { deleteFilter } from '../services/api';
 import { getFilters, getMyFilters } from '../../services/api';
 
+import ClickOutside from 'src/directives/click-outside';
+
+defineOptions({
+  directives: {
+    ClickOutside,
+  },
+});
+
 const props = defineProps<{
   filter: DtoSearchFilterFull;
   currentFilter: string | undefined;
@@ -53,7 +66,8 @@ const dialogRef = ref();
 
 const handleDeleteMyFilter = async (filter_id: string) => {
   await deleteFilter(filter_id).then(async () => {
-    if (props.currentFilter && props.filter.id === props.currentFilter) emits('resetByDelete');
+    if (props.currentFilter && props.filter.id === props.currentFilter)
+      emits('resetByDelete');
     filterStore.myFilterList = await getMyFilters();
     filterStore.filterList = await getFilters();
     dialogRef.value.hide();

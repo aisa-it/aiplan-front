@@ -59,7 +59,11 @@ export const useTableIssueDialog = (
   ): Promise<void> => {
     currentFilter.value = {
       ...filter,
-    };
+      workspaces:
+        filter?.workspaces?.length > 0
+          ? filter?.workspaces
+          : [workspaceInfo?.value?.id ?? ''],
+    }; // Проставление текущего workspace id предотвращает получение фильтра с undefined.
     await refresh();
   };
 

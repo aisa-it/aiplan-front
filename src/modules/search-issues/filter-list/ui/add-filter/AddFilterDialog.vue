@@ -1,7 +1,6 @@
 <template>
   <q-dialog
     ref="dialogRef"
-    class="prevent-click-issue-outside"
     @show="prepareFilterOptions"
     @hide="
       () => {
@@ -10,9 +9,14 @@
         filter = JSON.parse(JSON.stringify(INIT_FILTER));
       }
     "
-    v-click-outside:prevent-click-issue-outside
   >
-    <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
+    <q-card
+      class="add-filters-card row prevent-click-issue-outside"
+      style="height: 80vh; max-width: 60vw"
+      v-click-outside:prevent-click-issue-outside="{
+        isAutoSave: true,
+      }"
+    >
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
           v-if="!isEdit"
@@ -285,6 +289,13 @@ import {
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
 
+import ClickOutside from 'src/directives/click-outside';
+
+defineOptions({
+  directives: {
+    ClickOutside,
+  },
+});
 type Members = 'authors' | 'assignees' | 'watchers';
 
 const props = defineProps<{

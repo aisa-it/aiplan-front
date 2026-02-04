@@ -1,22 +1,14 @@
 <template>
-  <q-dialog
-    ref="dialogRef"
-    class="prevent-click-issue-outside"
-    @show="handleOpenDialog"
-    @hide="handleCloseDialog"
-    v-click-outside:prevent-click-issue-outside
-  >
-    <q-card :class="`dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`">
+  <q-dialog ref="dialogRef" @show="handleOpenDialog" @hide="handleCloseDialog">
+    <q-card
+      :class="`prevent-click-issue-outside dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`"
+      v-click-outside:prevent-click-issue-outside="{
+        isAutoSave: true,
+      }"
+    >
       <header class="dialog__header">
-        <h5 class="dialog__heading">Настройка таблицы задач</h5>
-        <q-btn
-          v-if="!$q.screen.lt.sm"
-          flat
-          dense
-          rounded
-          icon="close"
-          @click="handleCloseDialog"
-        />
+        <h5 class="dialog__heading ellipsis">Настройка таблицы задач</h5>
+        <q-btn flat dense rounded icon="close" @click="handleCloseDialog" />
       </header>
 
       <q-layout view="hHh LpR lff" class="table-issue" container>
@@ -105,9 +97,9 @@
               flat
               dense
               no-caps
-              @click="createIssueTable"
+              @click.stop="createIssueTable"
             >
-              Создать/обновить таблицу задач
+              <span class="ellipsis">Создать/обновить таблицу задач</span>
             </q-btn>
           </div>
         </q-drawer>
@@ -132,6 +124,13 @@ import { useTableIssueDialog } from '../composables/dialogs/useTableIssueDialog'
 import { COLUMN_FILTERS_MAP } from 'src/constants/tableFilters';
 
 import { IIssueTableParams } from 'src/interfaces/tableIssue';
+import ClickOutside from 'src/directives/click-outside';
+
+defineOptions({
+  directives: {
+    ClickOutside,
+  },
+});
 
 const props = defineProps<{
   editorInstance: Editor;
@@ -178,7 +177,6 @@ const {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    margin-bottom: 8px;
   }
 
   &__heading {
@@ -224,6 +222,12 @@ const {
   &__selected-list {
     flex-grow: 1;
     overflow-y: auto;
+  }
+}
+
+@media screen and (width < 900px) {
+  .dialog {
+    max-width: 100%;
   }
 }
 </style>
