@@ -1,45 +1,23 @@
 <template>
-  <div class="all-states bordered-table">
+  <div
+    v-if="localStates.length"
+    class="list-container"
+    ref="listContainerRef"
+    :key="listKey"
+    @update.stop
+    @add.stop
+    @remove.stop
+  >
     <div
-      v-for="(state, idx) in props.states"
+      v-for="state in localStates"
       class="drag-card"
-      :key="idx"
-      :draggable="startDrag ? true : false"
-      @dragstart="handleDragStart($event, +idx, state)"
-      @dragover.prevent="handleDragOver($event)"
-      @dragend="handleDragEnd($event)"
-      @drop="handleDrop($event, +idx)"
+      :key="state.id"
+      :data-id="state.id"
     >
-      <div v-if="$q.platform.is.desktop === true" class="row justify-center">
-        <div class="card-handle" @mousedown="startDragging($event, +idx)">☰</div>
-      </div>
-      <div
-        v-if="$q.platform.is.mobile === true"
-        class="q-pa-sm row justify-end"
-      >
-        <q-btn
-          v-if="idx + 1 !== props.states.length"
-          no-caps
-          class="btn-only-icon-sm bordered q-mr-xs"
-          @click="changeGroupSequence(state, +idx + 1)"
-        >
-          <HintTooltip>Переместить вниз</HintTooltip>
-          <ArrowDown />
-        </q-btn>
-        <q-btn
-          v-if="+idx !== 0"
-          no-caps
-          class="btn-only-icon-sm bordered"
-          @click="changeGroupSequence(state, +idx - 1)"
-        >
-          <HintTooltip>Переместить вверх</HintTooltip>
-          <ArrowDown class="rotate-180" />
-        </q-btn>
-      </div>
       <SingleState
         :singleState="state"
+        :key="state.id"
         :statesList="states"
-        class="state"
         @delete="onDeleteOpen"
         @edit="onEditOpen"
         @success="(msg) => onSuccess(msg)"
@@ -63,22 +41,20 @@
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
-import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import { useSortable } from 'src/composables/useSortable';
 
 // components
 import SingleState from 'src/modules/project-settings/states/ui/SingleState.vue';
-import ArrowDown from 'src/components/icons/ArrowDown.vue';
 import EditStateDialog from 'src/modules/project-settings/states/ui/dialogs/EditStateDialog.vue';
 import DeleteStateDialog from 'src/modules/project-settings/states/ui/dialogs/DeleteStateDialog.vue';
 
@@ -94,9 +70,7 @@ const props = defineProps<{
 const emit = defineEmits(['update', 'refresh', 'refresh-states']);
 
 const { setNotificationView } = useNotificationStore();
-const $q = useQuasar();
 // vars
-const statesStore = useStatesStore();
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 
@@ -104,11 +78,17 @@ const { currentProjectID } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const state = ref<DtoStateLight>();
-const startDrag = ref(false);
 // flags for dialogs
 const isDeleteOpen = ref(false);
 const isEditOpen = ref(false);
-const draggableState = ref<DtoStateLight>();
+const listContainerRef = ref();
+const localStates = ref([]);
+const saveTimer = ref<ReturnType<typeof setTimeout> | null>(null);
+const listKey = ref(0);
+
+onMounted(() => {
+  initSortable();
+});
 
 const onError = async () => {
   emit('update');
@@ -136,50 +116,6 @@ const onDeleteOpen = (s: DtoStateLight) => {
   isDeleteOpen.value = true;
 };
 
-let draggingIndex = -1;
-
-const startDragging = (event: MouseEvent, index: number) => {
-  startDrag.value = true;
-  draggingIndex = index;
-};
-
-const handleDragStart = (event: any, index: number, state: DtoStateLight) => {
-  if (draggingIndex !== -1) {
-    statesStore.setDraggingState(state.group as string);
-    draggableState.value = state;
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', '');
-    event.currentTarget.classList.add('dragging-state');
-  }
-};
-
-const handleDragOver = (event: DragEvent) => {
-  event.dataTransfer.dropEffect = 'move';
-};
-
-const handleDrop = async (event: Event, dropIndex: number) => {
-  if (
-    draggingIndex !== -1 &&
-    draggingIndex !== dropIndex &&
-    statesStore.draggingState === props.states[0]?.group &&
-    draggableState.value
-  ) {
-    await changeGroupSequence(draggableState.value, dropIndex);
-  } else if (
-    dropIndex === draggingIndex &&
-    statesStore.draggingState === props.states[0]?.group
-  ) {
-    return;
-  } else
-    return setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage: 'Перемещать статусы можно только внутри группы',
-    });
-
-  statesStore.setDraggingState('');
-};
-
 const changeGroupSequence = async (state: DtoStateLight, index: number) => {
   await updateState(
     currentWorkspaceSlug.value || '',
@@ -196,13 +132,54 @@ const changeGroupSequence = async (state: DtoStateLight, index: number) => {
     });
   });
 };
-const handleDragEnd = (event: any) => {
-  event.currentTarget.classList.remove('dragging-state');
-  startDrag.value = false;
-};
+
+const { initSortable } = useSortable(listContainerRef, {
+  draggable: '.drag-card',
+  handle: '.drag-handle',
+  ghostClass: 'sortable-ghost',
+  animation: 150,
+  forceFallback: true,
+  fallbackOnBody: true,
+  fallbackTolerance: 5,
+  onStart: () => {
+    console.log('lol');
+    if (saveTimer.value !== null) {
+      clearTimeout(saveTimer.value);
+      saveTimer.value = null;
+    }
+  },
+  onEnd: async ({ oldIndex, newIndex, evt }) => {
+    evt.stopPropagation();
+    evt.preventDefault();
+    if (oldIndex === newIndex) return;
+
+    const stateToChangeSequence = localStates.value[oldIndex];
+    console.log(stateToChangeSequence);
+    const movedItem = localStates.value.splice(oldIndex, 1)[0];
+    localStates.value.splice(newIndex, 0, movedItem);
+
+    changeGroupSequence(stateToChangeSequence, newIndex);
+    listKey.value += 1;
+    await initSortable();
+  },
+});
+
+watch(
+  () => props.states,
+  () => {
+    localStates.value = props.states;
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .card-content {
   flex: 1;
 }

@@ -2,10 +2,15 @@ import { valToRole } from 'src/utils/translator';
 import { translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
 import { getURLDoc } from './doc-activity';
+import { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
   let action = '';
   let value = '';
+  const userLabel = (u: DtoUser, fallback?: string) => {
+    const name = u ? aiplan.UserName(u).join(' ').trim() : '';
+    return name || fallback || '';
+  };
 
   const atWorkspace = onlyWorkspace
     ? ''
@@ -84,15 +89,22 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
       action = translateVerb(activity.verb);
       return `<span>${action} описание ${ofWorkspace} </span>`;
 
+    case 'owner':
+      action = translateVerb(activity.verb);
+      return `<span>${action} лидера ${ofWorkspace} с "${userLabel(
+        activity.old_entity_detail,
+        activity.old_value,
+      )}" на "${userLabel(activity.new_entity_detail, activity.new_value)}" <span/>`;
+
     case 'doc':
       if (activity.verb === 'created')
-        return `<span>создал(-а) документ ${getURLDoc(activity)}</span>`;
+        return `<span>создал(-а) документ ${getURLDoc(activity, 'new_entity_detail', activity.new_value)}</span>`;
       if (activity.verb === 'deleted')
         return `<span>удалил(-а) документ ${activity.old_value}</span>`;
       if (activity.verb === 'added')
-        return `<span>добавил(-а) дочерний документ "${activity.new_value}" в корневой</span>`;
+        return `<span>добавил(-а) дочерний документ "${getURLDoc(activity, 'new_entity_detail', activity.new_value)}" в корневую папку</span>`;
       if (activity.verb === 'remove')
-        return `<span>убрал(-а) дочерний документ "${activity.old_value}" из корневого`;
+        return `<span>убрал(-а) дочерний документ "${getURLDoc(activity, 'old_entity_detail', activity.old_value)}" из корневой папки`;
 
     case 'doc_sort':
       return '<span>отсортировал(-а) список корневых документов';
