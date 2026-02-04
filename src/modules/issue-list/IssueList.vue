@@ -74,12 +74,15 @@ import { useDefaultIssues } from './composables/useDefaultIssues';
 import { useGroupedIssues } from './composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useRouter } from 'vue-router';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues('project');
 const { getGroupedIssues } = useGroupedIssues('project');
 
 const projectStore = useProjectStore();
+const issuesStore = useIssuesStore();
+const router = useRouter();
 
 const {
   project,
@@ -94,8 +97,7 @@ const userStore = useUserStore();
 
 const { user } = storeToRefs(userStore);
 
-const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
-const { fetchPinnedIssues } = useIssuesStore();
+const { refreshIssues, pinnedIssues } = storeToRefs(issuesStore);
 
 const load = async () => {
   issuesLoader.value = true;
@@ -113,7 +115,7 @@ onMounted(async () => {
   issuesLoader.value = true;
   await getAllProjectInfo();
   await load();
-  fetchPinnedIssues(project.value.id);
+  issuesStore.fetchPinnedIssues(project.value.id);
 });
 
 watch(
@@ -176,6 +178,14 @@ watchEffect(() => {
       : components.TableListSkeleton;
   }
 });
+
+watch(
+  () => router.currentRoute.value.params.project,
+  () => {
+    issuesStore.$reset();
+    projectStore.$reset();
+  },
+);
 </script>
 
 <style>

@@ -1,8 +1,9 @@
 <template>
   <q-menu
+    ref="menuRef"
     class="context-menu"
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
-    context-menu
+    v-bind="menuProps"
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
@@ -104,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
@@ -133,12 +134,20 @@ import ParentIcon from 'src/components/icons/ParentIcon.vue';
 
 const props = defineProps<{
   row: object | null;
-  unpin?: boolean;
+  anchorEvent?: MouseEvent | null;
 }>();
 
 const emit = defineEmits<{
   refresh: [];
 }>();
+
+const menuRef = ref<any>(null);
+
+const isControlled = computed(() => !!props.anchorEvent);
+
+const menuProps = computed(() => {
+  return isControlled.value ? {} : { 'context-menu': true };
+});
 
 const { sprintsList } = storeToRefs(useSprintStore());
 const { project } = storeToRefs(useProjectStore());
@@ -154,7 +163,7 @@ const workspaceSlug = computed<string>(() => {
   return route.params.workspace as string;
 });
 
-const issueLink = props.row?.short_url;
+let issueLink = props.row?.short_url;
 const isDeletingOpen = ref<boolean>(false);
 const isTransferOpen = ref<boolean>(false);
 const isManageSprintsOpen = ref<boolean>(false);
@@ -223,6 +232,18 @@ const addNewIssue = () => {
     },
   }).onOk(() => emit('refresh'));
 };
+
+watch(
+  () => props.anchorEvent,
+  async (evt) => {
+    if (evt && menuRef.value) {
+      menuRef.value.hide();
+      await nextTick();
+      menuRef.value.show(evt);
+      issueLink = props.row?.short_url;
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>

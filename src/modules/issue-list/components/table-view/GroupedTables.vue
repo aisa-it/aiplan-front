@@ -4,7 +4,7 @@
     class="groupped-table"
     :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
-    @scroll="handleScroll"
+    id="grouped-table-target-scroll-container"
   >
     <div v-for="(table, index) in issueList" :key="index">
       <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
@@ -33,22 +33,28 @@
             :issues-count="table?.count"
           />
         </template>
-        <IssueTable
-          :rows="table?.issues"
-          :rowsCount="table?.count"
-          :entity="table.entity"
-          @updateGroupedIssues="updateGroupedIssues"
-          @refresh="
-            (pagination, isFullUpdate) =>
-              refreshTable(index, pagination, isFullUpdate, table?.entity)
-          "
-          @open-preview="
-            (issue, pagination) =>
-              emits('openPreview', issue, index, pagination, table?.entity)
-          "
-          :context-type="contextType"
-          @open-issue="(id, issue) => emits('openIssue', id, issue)"
-        />
+        <LazyVirtualMount
+          :active="!isGroupHide(table?.entity?.id || table.entity)"
+          :estimated-height="estimatedHeights[table?.issues?.length] ?? 300"
+        >
+          <IssueTable
+            v-if="!isGroupHide(table?.entity?.id || table.entity)"
+            :rows="table?.issues"
+            :rowsCount="table?.count"
+            :entity="table.entity"
+            @updateGroupedIssues="updateGroupedIssues"
+            @refresh="
+              (pagination, isFullUpdate) =>
+                refreshTable(index, pagination, isFullUpdate, table?.entity)
+            "
+            @open-preview="
+              (issue, pagination) =>
+                emits('openPreview', issue, index, pagination, table?.entity)
+            "
+            :context-type="contextType"
+            @open-issue="(id, issue) => emits('openIssue', id, issue)"
+          />
+        </LazyVirtualMount>
       </q-expansion-item>
     </div>
     <div ref="observerTarget" class="observer-target"></div>
@@ -56,8 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue';
-import { throttle } from 'quasar';
+import { onMounted, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUtilsStore } from 'src/stores/utils-store';
@@ -65,6 +70,7 @@ import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
 import GroupedHeader from '../ui/GroupedHeader.vue';
+import LazyVirtualMount from 'src/components/LazyVirtualMount.vue';
 
 import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
@@ -92,30 +98,20 @@ const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
 };
 
-const issueList = ref([]);
-const scrollContainer = ref(null);
-let generator;
+const estimatedHeights = {
+  10: 630,
+  25: 1400,
+  50: 2770,
+} as const;
 
-const handleScroll = throttle((info) => {
-  const { verticalPercentage } = info;
-  const threshold = 0.8; // 95% от конца списка  console.log(e, 'lol');
-
-  // if (!scrollContainer.value) return;
-  if (verticalPercentage < threshold) return;
-
-  const chunk = generator.next().value;
-
-  if (!chunk) return;
-
-  issueList.value.push(...chunk);
-}, 100);
+const issueList = shallowRef([] as IGroupedResponse[]);
 
 const updateGroupedIssues = async (status: any) => {
   const group = (props?.issues as any[]).find(
     (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group?.issues || !group || group?.issues.length === 0) {
+  if ((group && !group?.issues) || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -131,18 +127,8 @@ const updateGroupedIssues = async (status: any) => {
   }
 };
 
-function* chunkGenerator(sourceArray, chunkSize = 10) {
-  for (let i = 0; i < sourceArray.length; i += chunkSize) {
-    yield sourceArray.slice(i, i + chunkSize);
-  }
-}
-
 const refresh = () => {
-  issueList.value = [];
-  generator = chunkGenerator(props.issues);
-  let chunk = generator.next().value;
-  if (!chunk) return;
-  issueList.value.push(...chunk);
+  issueList.value = props.issues;
 };
 
 onMounted(() => {
@@ -150,7 +136,7 @@ onMounted(() => {
 });
 
 watch(
-  () => [props.issues,props.issues?.length],
+  () => [props.issues, props.issues?.length],
   () => {
     refresh();
   },

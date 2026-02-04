@@ -10,7 +10,6 @@
       @create="() => (isCreateOpen = true)"
       @update="getNotifications"
       @read="readAllNotifications"
-      @hide="onHide"
     />
   </WorkspaceNotificationsButton>
   <WorkspaceNotificationsCreateDialog v-model="isCreateOpen" />
@@ -18,8 +17,7 @@
 
 <script setup lang="ts">
 //core
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue';
 // stores
 import { useNotificationStore } from 'src/stores/notification-store';
 // utils
@@ -39,67 +37,66 @@ import WorkspaceNotificationsListDialog from 'src/modules/workspace-notification
 // TODO убрать в env
 const wsUrl = `wss://${window.location.hostname}/api/auth/ws/notifications/`;
 const ws = useWebSocket(wsUrl);
-const { messages } = ws;
 
 const { setNotificationView } = useNotificationStore();
-const $q = useQuasar();
 
 const isCreateOpen = ref<boolean>(false);
 const isShowList = ref<boolean>(false);
+const unreadNotificationsCount = ref(0);
 
-const userNotifications = ref<NotificationsNotificationResponse[]>([]);
-
-const notifications = computed<NotificationsNotificationResponse[]>(() => {
-  return [...messages.value, ...userNotifications.value];
-});
+const userNotifications = shallowRef<NotificationsNotificationResponse[]>([]);
 
 const unreadNotifications = computed<NotificationsNotificationResponse[]>(
   () => {
-    return notifications.value.filter((notification) => !notification.viewed);
+    return userNotifications.value.filter(
+      (notification) => !notification.viewed,
+    );
   },
 );
 
 const readNotifications = computed<NotificationsNotificationResponse[]>(() => {
-  return notifications.value.filter((notification) => notification.viewed);
+  return userNotifications.value.filter((notification) => notification.viewed);
 });
-
-const unreadNotificationsCount = computed<number>(() =>
-  unreadNotifications.value.length > 100
-    ? 100
-    : unreadNotifications.value.length,
-);
 
 const readAllNotifications = async (): Promise<void> => {
   await checkedUserNotifications({
     viewed_all: true,
-  })
+  });
   await getNotifications();
 };
 
 const getNotifications = async (): Promise<void> => {
   userNotifications.value = await getUserNotifications();
+  unreadNotificationsCount.value = Math.min(
+    unreadNotifications.value.length,
+    100,
+  );
 };
+
+const hasNewNotifications = ref(false);
 
 const wsParser = (event: any) => {
   const data = JSON.parse(event.data);
-  const newMessage = {
-    ...data,
-    viewed: false,
-  };
-  if (newMessage.type === 'message') {
-    setNotificationView({
-      open: true,
-      type: 'message',
-      customTitle: newMessage.data.title,
-      customMessage: newMessage.data.msg,
-    });
-  }
-  return newMessage;
-};
 
-const onHide = () => {
-  getNotifications();
-  ws.clear();
+  if (data?.type !== 'message') return;
+
+  unreadNotificationsCount.value = Math.min(
+    unreadNotificationsCount.value + 1,
+    100,
+  );
+
+  setNotificationView({
+    open: true,
+    type: 'message',
+    customTitle: data.data.title,
+    customMessage: data.data.msg,
+  });
+
+  if (isShowList.value) {
+    getNotifications();
+  } else {
+    hasNewNotifications.value = true;
+  }
 };
 
 onMounted(async () => {
@@ -111,13 +108,10 @@ onUnmounted(() => {
   ws.disconnect();
 });
 
-watch(
-  () => $q.appVisible,
-  async (onVision) => {
-    if (onVision) {
-      ws.clear();
-      getNotifications();
-    }
-  },
-);
+watch(isShowList, async (open) => {
+  if (open && hasNewNotifications.value) {
+    await getNotifications();
+    hasNewNotifications.value = false;
+  }
+});
 </script>
