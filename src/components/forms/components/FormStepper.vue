@@ -21,7 +21,11 @@
             :disable="page.disabled"
             @click="$emit('go-to-page', page.index)"
             :active="page.active"
-            active-class="text-primary bg-blue-1"
+            :active-class="
+              quasar.dark.isActive
+                ? 'text-blue-1 bg-grey-9'
+                : 'text-primary bg-blue-1'
+            "
             class="q-mb-sm rounded-borders"
           >
             <q-item-section avatar style="min-width: 40px">
@@ -47,7 +51,7 @@
 
             <q-item-section>
               <q-item-label class="text-weight-medium">
-                Вопрос {{ page.index + 1 }}
+                Страница {{ page.index + 1 }}
               </q-item-label>
             </q-item-section>
           </q-item>

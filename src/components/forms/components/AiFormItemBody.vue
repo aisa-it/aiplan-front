@@ -49,7 +49,7 @@
               dense
               emit-value
               map-options
-              class="base-select col-grow q-mr-md"
+              class="base-selector col-grow q-mr-md"
               hide-bottom-space
               outlined
               option-value="value"
@@ -73,7 +73,7 @@
               dense
               emit-value
               map-options
-              class="base-select col-grow"
+              class="base-selector col-grow"
               hide-bottom-space
               outlined
               :rules="[
@@ -158,7 +158,7 @@ import {
 import AddQuestionTypeField from './AddQuestionTypeField.vue';
 
 //types
-import { ExtendedFormFields } from '../types/types';
+import { ExtendedFormFields } from 'src/interfaces/forms';
 
 const props = defineProps<{
   modelValue: ExtendedFormFields;
