@@ -37,8 +37,6 @@
           :rows="table?.issues"
           :rowsCount="table?.count"
           :entity="table.entity"
-          :column-widths="columnWidths"
-          @columnMeasurements="handleColumnMeasurements"
           @updateGroupedIssues="updateGroupedIssues"
           @refresh="
             (pagination, isFullUpdate) =>
@@ -97,27 +95,6 @@ const refreshTable = (index, pagination, isFullUpdate, entity) => {
 const issueList = ref([]);
 const scrollContainer = ref(null);
 let generator;
-
-type ColumnWidths = Record<string, number>;
-
-const columnWidths = ref<ColumnWidths>({});
-const allMeasurements = ref<ColumnWidths[]>([]);
-
-const handleColumnMeasurements = (measurements: ColumnWidths) => {
-  allMeasurements.value.push(measurements);
-
-  const maxWidths: ColumnWidths = {};
-
-  allMeasurements.value.forEach(measurement => {
-    Object.entries(measurement).forEach(([colName, width]) => {
-      if (!maxWidths[colName] || width > maxWidths[colName]) {
-        maxWidths[colName] = width;
-      }
-    });
-  });
-
-  columnWidths.value = maxWidths;
-};
 
 const handleScroll = throttle((info) => {
   const { verticalPercentage } = info;
