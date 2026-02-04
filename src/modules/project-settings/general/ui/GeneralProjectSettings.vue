@@ -108,11 +108,11 @@
 
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
-      flat
+      :flat="!hasChanges"
+      :outline="!hasChanges"
       no-caps
-      outline
-      class="secondary-btn"
-      :disable="!isValidName || !isValidIdentifier"
+      :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+      :disable="!isValidName || !isValidIdentifier || !hasChanges"
       @click="onSubmit"
     >
       Сохранить
@@ -158,7 +158,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
@@ -211,6 +211,7 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
 // vars
 const isDeleteOpen = ref(false);
 const isOpenUploadDialog = ref(false);
@@ -226,6 +227,19 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
+
+//computeds
+const hasChanges = computed(() => {
+  if (!project.value) return false;
+
+  const getVal = (val: any) => val?.value ?? val;
+
+  return Object.keys(projectForm.value).some(
+    (key) => getVal(projectForm.value[key]) !== getVal(project.value[key]),
+  );
+});
+
+//methods
 const updateStores = async () => {
   await Promise.all([
     projectStore.getProjectInfo(
