@@ -1,5 +1,5 @@
 import StarterKit from '@tiptap/starter-kit';
-import { Table } from '@tiptap/extension-table';
+import { Table, TableView } from '@tiptap/extension-table';
 import { Color } from '@tiptap/extension-color';
 import TableRow from '@tiptap/extension-table-row';
 import TaskList from '@tiptap/extension-task-list';
@@ -41,6 +41,29 @@ import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 import { TableOfContentsCustom } from 'src/utils/tableOfContents';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
+class CustomTableView extends TableView {
+  constructor(node: Node, cellMinWidth: number) {
+    super(node, cellMinWidth);
+    this.applyAttributes();
+  }
+
+  applyAttributes() {
+    Object.entries(this.node.attrs).forEach(([key, value]) => {
+      if (value != null) {
+        this.table.setAttribute(key, String(value));
+      } else {
+        this.table.removeAttribute(key);
+      }
+    });
+  }
+
+  update(node: Node) {
+    super.update(node);
+    this.applyAttributes();
+    return true;
+  }
+}
+
 export const getEditorExtensions = (props) => {
   const { mention } = useMention(props.getMembersForMention);
   const { FormatSample } = useEditorMarks();
@@ -70,6 +93,12 @@ export const getEditorExtensions = (props) => {
       resizable: true,
       cellMinWidth: 25,
     }).extend({
+      addOptions() {
+        return {
+          ...this.parent?.(),
+          View: CustomTableView,
+        };
+      },
       addAttributes() {
         return {
           ...this.parent?.(),
@@ -93,6 +122,26 @@ export const getEditorExtensions = (props) => {
           },
         };
       },
+      // parseHTML() {
+      //   return [
+      //     {
+      //       tag: 'table.issue-table',
+      //       priority: 1000,
+      //       getAttrs: (el) => {
+      //         console.log('[PARSE TABLE] el:',  el.getAttributeNames());
+      //         return {
+      //           'data-issue-table-params': el.getAttribute(
+      //             'data-issue-table-params',
+      //           ),
+      //         };
+      //       },
+      //     },
+      //   ];
+      // },
+      // renderHTML({ HTMLAttributes }) {
+      //   console.log('Final table attrs:', HTMLAttributes);
+      //   return ['table', HTMLAttributes, ['tbody', 0]];
+      // },
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],
