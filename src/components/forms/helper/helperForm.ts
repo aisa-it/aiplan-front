@@ -1,3 +1,4 @@
+import { TypesFormFields } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import dayjs from 'dayjs';
 import {
   ERROR_EDIT_FORM,
@@ -5,22 +6,58 @@ import {
 } from 'src/constants/notifications';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { isValidDate } from 'src/utils/validation';
+import { ExtendedFormFields, GroupedFormField } from '../types/types';
 
 const { setNotificationView } = useNotificationStore();
 
 // Блок для создания/ракдактирования формы
 
-export const upper = (index: number, array: object[] = []) => {
+export const upper = (index: number, array: any[] = []) => {
   if (index > 0 && index < array.length) {
+    updateDependenciesOnMove(array, index, index - 1);
     [array[index], array[index - 1]] = [array[index - 1], array[index]];
   }
 };
 
-export const lower = (index: number, array: object[] = []) => {
+export const lower = (index: number, array: any[] = []) => {
   if (index >= 0 && index < array.length - 1) {
+    updateDependenciesOnMove(array, index, index + 1);
     [array[index], array[index + 1]] = [array[index + 1], array[index]];
   }
 };
+
+function updateDependenciesOnMove(
+  array: any[],
+  oldIndex: number,
+  newIndex: number,
+) {
+  const itemMovingToNewIndex = array[oldIndex];
+  const itemMovingToOldIndex = array[newIndex];
+
+  array.forEach((item) => {
+    if (!item.depend_on) return;
+
+    if (item.depend_on.field_index === oldIndex) {
+      item.depend_on.field_index = newIndex;
+    } else if (item.depend_on.field_index === newIndex) {
+      item.depend_on.field_index = oldIndex;
+    }
+  });
+
+  if (
+    itemMovingToNewIndex.depend_on &&
+    itemMovingToNewIndex.depend_on.field_index >= newIndex
+  ) {
+    itemMovingToNewIndex.depend_on = null;
+  }
+
+  if (
+    itemMovingToOldIndex.depend_on &&
+    itemMovingToOldIndex.depend_on.field_index >= oldIndex
+  ) {
+    itemMovingToOldIndex.depend_on = null;
+  }
+}
 
 export const deleteQuestion = (index: number, array: object[] = []) => {
   array.splice(index, 1);
@@ -93,9 +130,12 @@ export const onError = () => {
   });
 };
 
-export const addQuestion = (object: object, linkSelect: object[]) => {
-  if (object.type === 'select') {
-    object.validate = { opt: [] };
+export const addQuestion = (object: any, linkSelect: any[]) => {
+  if (typeof object === 'object' && object !== null) {
+    object.depend_on = null;
+    if (object.type === 'select') {
+      object.validate = { opt: [] };
+    }
   }
   linkSelect.push(object);
 };
@@ -117,6 +157,7 @@ export const validateFormWithSlug = (data) => {
         type: el.type,
         label: el.label,
         required: el.required,
+        depend_on: el.depend_on || null,
         validate:
           el.type === 'date'
             ? undefined
@@ -230,4 +271,181 @@ export const getRules = (fieldType: string, required: boolean) => {
     rules.push((val) => (val !== '' && val !== null) || 'Обязательное поле');
   }
   return rules;
+};
+
+export const groupFieldsByDependency = (
+  fields: ExtendedFormFields[],
+): GroupedFormField[][] => {
+  const levels: GroupedFormField[][] = [];
+  const memo = new Map<number, number>();
+  const visiting = new Set<number>();
+
+  const getLevel = (index: number): number => {
+    if (memo.has(index)) return memo.get(index)!;
+
+    if (visiting.has(index)) {
+      console.warn(`Circular dependency detected at field index ${index}`);
+      return 0;
+    }
+
+    visiting.add(index);
+
+    const field = fields[index];
+    let level = 0;
+
+    if (field && field.depend_on) {
+      const parentIndex = field.depend_on.field_index;
+
+      if (parentIndex !== null && fields[parentIndex]) {
+        level = getLevel(parentIndex) + 1;
+      }
+    }
+
+    visiting.delete(index);
+    memo.set(index, level);
+    return level;
+  };
+
+  fields.forEach((field, index) => {
+    const level = getLevel(index);
+    if (!levels[level]) {
+      levels[level] = [];
+    }
+    levels[level].push({ ...field, originalIndex: index });
+  });
+  console.log(
+    'er',
+    levels.filter((l) => l && l.length > 0),
+  );
+  return levels.filter((l) => l && l.length > 0);
+};
+
+export const findVisiblePage = (
+  startPage: number,
+  direction: number,
+  pages: any[][],
+  allFields: any[],
+) => {
+  let i = startPage + direction;
+  while (i >= 0 && i < pages.length) {
+    if (pages[i].some((field) => isFieldVisible(field, allFields))) {
+      return i;
+    }
+    i += direction;
+  }
+  return -1;
+};
+
+export const isFieldVisible = (field: any, fields: any[]) => {
+  if (!field.depend_on) return true;
+  const { field_index, option_index, value: dependValue } = field.depend_on;
+
+  if (field_index === undefined || field_index === null) return true;
+
+  const parent = fields[field_index];
+  if (!parent) return false;
+
+  if (!isFieldVisible(parent, fields)) return false;
+
+  if (parent.type === 'checkbox') {
+    return String(parent.value) === String(dependValue);
+  }
+
+  if (parent.type === 'select' || parent.type === 'multiselect') {
+    if (!Array.isArray(parent.value)) return false;
+
+    let targetValue: any;
+    if (option_index !== undefined && option_index !== null) {
+      const option = parent.validate.opt[option_index];
+      targetValue = typeof option === 'object' ? option.value : option;
+    } else {
+      targetValue = dependValue;
+    }
+
+    return parent.value.some(
+      (opt: any) => String(opt.value) === String(targetValue),
+    );
+  }
+
+  return true;
+};
+
+export const getSubmissionValue = (field: any) => {
+  if (field.type === 'date') {
+    const isoDate = serializationDate(field.value, true);
+    return {
+      value: new Date(isoDate).getTime(),
+    };
+  }
+  if (field.type === 'multiselect') {
+    return {
+      value: field.value?.length
+        ? field.value?.map((el: any) => el.value)
+        : null,
+    };
+  }
+  if (field.type === 'select') {
+    return {
+      value: field.value[0]?.value ?? null,
+    };
+  }
+  return { value: field.value || null };
+};
+
+export const resetFieldValues = (targetFields: any[], allFields: any[]) => {
+  targetFields.forEach((field) => {
+    const originalIndex =
+      field.originalIndex !== undefined
+        ? field.originalIndex
+        : allFields.indexOf(field);
+    const targetField = allFields[originalIndex];
+
+    switch (targetField.type) {
+      case 'checkbox':
+        targetField.value = false;
+        break;
+      case 'numeric':
+        targetField.value = null;
+        break;
+      case 'color':
+        targetField.value = '';
+        break;
+      case 'select':
+      case 'multiselect':
+        targetField.value = [];
+        break;
+      case 'date':
+        targetField.value = null;
+        break;
+      default:
+        if (targetField.validate?.value_type === 'numeric') {
+          targetField.value = null;
+        } else if (targetField.validate?.value_type === 'string') {
+          targetField.value = '';
+        }
+    }
+  });
+};
+
+export const isFieldInvalid = (field: any) => {
+  const { value, type, required } = field;
+  if (type === 'date') {
+    if (
+      value &&
+      (value.length !== 10 ||
+        Number(value.split('.')[2]) < 1000 ||
+        isNaN(new Date(serializationDate(value, true)).getTime()))
+    ) {
+      return true;
+    }
+  }
+  if (type === 'color') {
+    if (value && value.length !== 7) return true;
+  }
+  if ((type === 'select' || type === 'multiselect') && required) {
+    if (!value.length) {
+      return true;
+    }
+  }
+  return false;
 };
