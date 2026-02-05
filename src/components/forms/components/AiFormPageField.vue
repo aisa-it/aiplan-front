@@ -15,6 +15,7 @@
     <component
       :is="components[field.type]"
       :model-value="modelValue"
+      :field="field"
       @update:model-value="handleUpdateValue"
       @keypress.enter="handleEnterPress(field.type, $event)"
       :label="getFieldLabel(field)"
@@ -25,6 +26,8 @@
       :checked="field.type === 'checkbox' ? modelValue : undefined"
       :validate="field.validate"
       :required="field.required"
+      :form-slug="formSlug"
+      :workspace-slug="workspaceSlug"
       :style="{
         width: '100%',
         'margin-top': field.type === 'checkbox' ? '12px' : '8px',
@@ -115,6 +118,7 @@ import {
 
 //components
 import AiFormPageSelect from 'src/components/AiFormPageSelect.vue';
+import FormAttachment from './FormAttachment.vue';
 
 //utils
 import {
@@ -139,6 +143,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  formSlug: {
+    type: String,
+    default: '',
+  },
+  workspaceSlug: {
+    type: String,
+    required: true,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -157,6 +169,7 @@ const components = {
   color: QInput,
   select: AiFormPageSelect,
   multiselect: AiFormPageSelect,
+  attachment: FormAttachment,
 };
 
 const transformDate = (date) => {
@@ -184,6 +197,7 @@ const handleUpdateValue = (val) => {
     }
     return;
   }
+
   emit('update:modelValue', val);
 };
 

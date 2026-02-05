@@ -79,6 +79,16 @@
             <p v-else-if="a?.type === 'date'">
               {{ a.value ? formatDate(a.value) : 'Нет ответа' }}
             </p>
+            <div v-else-if="a?.type === 'attachment'">
+              <div v-if="a.value" class="row q-col-gutter-sm">
+                <FileUploaderCard
+                  v-if="getAttachment(a.value)"
+                  :row="getAttachment(a.value)"
+                  :is-edit="false"
+                />
+              </div>
+            </div>
+            <p v-else>Нет ответа</p>
           </div>
         </div>
       </q-card-section>
@@ -107,6 +117,7 @@ import { getAnswer, getFormAuth } from 'src/components/forms/services/api';
 
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
+import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
 
 const props = defineProps<{
   answerId: number;
@@ -159,6 +170,16 @@ const getInfo = async () => {
 
 const resetDialog = () => {
   loading.value = true;
+};
+
+const getAttachment = (id: string) => {
+  if (!answer.value?.attachment) return null;
+
+  if (!Array.isArray(answer.value.attachment)) {
+    return answer.value.attachment.id === id ? answer.value.attachment : null;
+  }
+
+  return answer.value.attachment.find((a: any) => a.id === id);
 };
 </script>
 
