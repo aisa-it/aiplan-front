@@ -6,6 +6,10 @@
     ref="newIssueCardRef"
   >
     <div class="relative-position">
+      <q-card-section class="row q-pa-sm">
+        <q-btn flat dense class="q-ml-auto" @click="emits('onCancel')">
+          <q-icon name="close" dense size="18px" /> </q-btn>
+      </q-card-section>
       <q-card-section>
         <div v-if="project" class="relative-position">
           <div class="row flex items-stretch content-stretch q-mb-xs">
