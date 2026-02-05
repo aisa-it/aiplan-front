@@ -1,21 +1,25 @@
+import {
+  DtoFormLight,
+  TypesFormFields,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 // TODO типы доделать
-export interface IForms {
-  active: boolean;
-  auth_require: boolean;
-  author_detail: null | any;
-  created_at: Date | string;
-  created_by: Date | string;
-  description: string;
-  end_date: Date | string;
-  fields: IFormFields;
-  id: string;
-  slug: string;
-  title: string;
-  updated_at: Date | string | null;
-  updated_by: string | null;
-  workspace: string;
-  workspace_detail: null | any;
+export interface IForms extends DtoFormLight {}
+
+//fixme убрать, когда обновится тип в data-contracts
+export interface DtoDependOn {
+  field_index: number | null;
+  option_index?: number | null;
+  value?: any;
 }
+
+export type ExtendedFormFields = TypesFormFields & {
+  depend_on?: DtoDependOn | null;
+};
+
+export type GroupedFormField = ExtendedFormFields & {
+  originalIndex: number;
+};
 
 export interface IFormFields {
   label: string;

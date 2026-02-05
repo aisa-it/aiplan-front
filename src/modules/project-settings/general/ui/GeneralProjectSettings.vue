@@ -108,11 +108,11 @@
 
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
-      flat
+      :flat="!hasChanges"
+      :outline="!hasChanges"
       no-caps
-      outline
-      class="secondary-btn"
-      :disable="!isValidName || !isValidIdentifier"
+      :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+      :disable="!isValidName || !isValidIdentifier || !hasChanges"
       @click="onSubmit"
     >
       Сохранить
@@ -158,7 +158,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
@@ -186,6 +186,7 @@ import { getUrlFile } from 'src/utils/helpers';
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
+import { PROJECT_IDENTIFIER_LENGTH  } from 'src/constants/constants';
 
 // interfaces
 import { IProject } from 'src/interfaces/projects';
@@ -211,6 +212,7 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
 // vars
 const isDeleteOpen = ref(false);
 const isOpenUploadDialog = ref(false);
@@ -226,6 +228,19 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
+
+//computeds
+const hasChanges = computed(() => {
+  if (!project.value) return false;
+
+  const getVal = (val: any) => val?.value ?? val;
+
+  return Object.keys(projectForm.value).some(
+    (key) => getVal(projectForm.value[key]) !== getVal(project.value[key]),
+  );
+});
+
+//methods
 const updateStores = async () => {
   await Promise.all([
     projectStore.getProjectInfo(
@@ -294,9 +309,9 @@ const validateName = (val: string): boolean | string => {
 const validateIdentifier = (val: string): boolean | string => {
   isValidIdentifier.value = false;
   const minL =
-    val.trim().length >= 3 ||
-    'Идентификатор должен содержать 3 и более симолов';
-  const maxL = maxLength(val, 10);
+    val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
+    `Идентификатор должен содержать ${PROJECT_IDENTIFIER_LENGTH.MIN} и более симолов`;
+  const maxL = maxLength(val, PROJECT_IDENTIFIER_LENGTH.MAX);
   const upperCaseAndNumber = isUpperCaseAndNumber(val, 'Идентификатор');
 
   if (typeof minL === 'string') {
