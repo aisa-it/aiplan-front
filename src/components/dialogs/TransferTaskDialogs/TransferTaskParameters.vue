@@ -1,5 +1,10 @@
 <template>
-  <q-dialog ref="dialogRef" class="col q-pb-sm q-px-sm" @hide="() => close()" @before-show="() => checkParameters()">
+  <q-dialog
+    ref="dialogRef"
+    class="col q-pb-sm q-px-sm"
+    @hide="() => close()"
+    @before-show="() => checkParameters()"
+  >
     <q-card
       class="modal-card modal-card__small"
       :style="{ width: dynamicWidthDialog + 'px' }"
@@ -179,6 +184,7 @@
           no-caps
           label="Отмена"
           class="secondary-btn"
+          style="width: 110px"
           v-close-popup
         />
         <q-btn
@@ -186,6 +192,7 @@
           no-caps
           label="Сохранить"
           class="primary-btn"
+          style="width: 110px"
           @click="
             () => {
               isSave = true;
@@ -321,18 +328,21 @@ const checkStatus = async () => {
       status.name === props.issue_settings.state_detail?.name &&
       status.group === props.issue_settings.state_detail?.group,
   );
-  issueSettings.value.state_detail = newStatus || arr.find((status) => status.default === true) || arr[0];
+  issueSettings.value.state_detail =
+    newStatus || arr.find((status) => status.default === true) || arr[0];
 };
 
 const checkWatchers = async () => {
   let checkedWatchers = await getFilteredMembers(props.issue_settings.watchers);
   issueSettings.value.watchers = checkedWatchers;
-}
+};
 
 const checkAssignees = async () => {
-  let checkedAssignees = await getFilteredMembers(props.issue_settings.assignees);
+  let checkedAssignees = await getFilteredMembers(
+    props.issue_settings.assignees,
+  );
   issueSettings.value.assignees = checkedAssignees;
-}
+};
 
 const checkParameters = async () => {
   if (props.isDifferentProject) {
@@ -340,17 +350,23 @@ const checkParameters = async () => {
       if (props.issue_settings.state_detail) {
         await checkStatus();
       }
-      if (props.issue_settings.assignees && props.issue_settings.assignees.length){
+      if (
+        props.issue_settings.assignees &&
+        props.issue_settings.assignees.length
+      ) {
         await checkAssignees();
       }
-      if (props.issue_settings.watchers && props.issue_settings.watchers.length) {
+      if (
+        props.issue_settings.watchers &&
+        props.issue_settings.watchers.length
+      ) {
         await checkWatchers();
       }
-    } finally{
+    } finally {
       emit('save', issueSettings.value);
     }
   }
-}
+};
 
 const resetSettings = () => {
   issueSettings.value = {

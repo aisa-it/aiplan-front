@@ -15,12 +15,18 @@
         </p>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn no-caps class="secondary-btn" @click="dialogRef.hide()">
+        <q-btn
+          no-caps
+          class="secondary-btn"
+          style="width: 100px"
+          @click="dialogRef.hide()"
+        >
           Отмена
         </q-btn>
         <q-btn
           no-caps
           class="delete-btn"
+          style="width: 100px"
           @click="handleDeleteMyFilter(filter?.id as string)"
         >
           Удалить

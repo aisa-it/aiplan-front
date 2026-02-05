@@ -137,7 +137,7 @@ import LogsProjectSettings from 'src/modules/project-settings/rules/ui/LogsProje
 
 // services
 import { updateProject } from '../../services/api';
-import { loadLogsList } from '../services/api';
+import { loadLogsList, loadRulesScript } from '../services/api';
 
 
 // core
@@ -179,7 +179,7 @@ function setAnotherTitle(title: string) {
 async function refresh() {
   await loadLogs();
   setAnotherTitle(project.value.name);
-  rulesField.value = project.value.rules_script;
+  await loadScript();
 }
 
 onMounted(async () => refresh());
@@ -216,6 +216,12 @@ async function loadLogs() {
     select: logs.select,
   }).then((response) => {
     logs.content = response.result?.reverse();
+  });
+}
+
+async function loadScript() {
+  await loadRulesScript(project.value.workspace_detail?.slug, project.value.id).then((response) => {
+    rulesField.value = response?.rules_script ?? '';
   });
 }
 </script>

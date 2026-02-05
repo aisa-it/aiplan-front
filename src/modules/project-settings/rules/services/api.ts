@@ -4,6 +4,7 @@ import {
   AiplanGetRulesLogfilterRequest,
   DaoPaginationResponse,
   DtoRulesLog,
+  DtoRulesScriptResponse,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const projectsApi = new (withInterceptors(Projects))();
@@ -23,4 +24,11 @@ const loadLogsList = async (
     .then((res) => res.data);
 };
 
-export { loadLogsList };
+const loadRulesScript = async (
+  workspaceSlug: string,
+  projectID: string,
+): Promise<DtoRulesScriptResponse> => {
+  return projectsApi.getProjectRulesScript(workspaceSlug, projectID).then((res) => res.data);
+};
+
+export { loadLogsList, loadRulesScript };

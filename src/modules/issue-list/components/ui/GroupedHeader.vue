@@ -1,7 +1,6 @@
 <template>
   <div class="grouped-header-wrapper">
     <q-badge
-      v-if="isBadge"
       :label="issuesCount"
       :style="`
         background-color:${badgeColor};
@@ -61,10 +60,6 @@ function hexToRgb(hex: string) {
   const b = bigint & 255;
   return [r, g, b];
 }
-
-const isBadge = computed(() => {
-  return ['labels', 'state', 'priority'].includes(props.groupBy);
-});
 
 const isMembers = computed(() => {
   return ['author', 'assignees', 'watchers'].includes(props.groupBy);

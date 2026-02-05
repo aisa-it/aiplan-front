@@ -15,6 +15,7 @@
           no-caps
           label="Отменить"
           class="secondary-btn"
+          style="width: 100px"
           v-close-popup
         />
         <q-btn
@@ -22,6 +23,7 @@
           no-caps
           label="Удалить"
           class="delete-btn"
+          style="width: 100px"
           @click="handleDeleteForm"
           v-close-popup
         />

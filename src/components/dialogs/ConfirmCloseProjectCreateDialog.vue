@@ -15,6 +15,7 @@
           class="secondary-btn"
           label="Вернуться"
           v-close-popup
+          style="width: 110px"
         />
         <q-btn
           flat
@@ -24,6 +25,7 @@
           label="Закрыть"
           v-close-popup
           @click="$emit('close')"
+          style="width: 110px"
         />
       </q-card-actions>
     </q-card>

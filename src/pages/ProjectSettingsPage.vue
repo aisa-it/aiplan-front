@@ -45,6 +45,8 @@ const projectStore = useProjectStore();
 
 const { hasPermissionByProject } = useRolesStore();
 
+const { roles } = storeToRefs(useRolesStore());
+
 // store to refs
 const { project } = storeToRefs(projectStore);
 
@@ -119,6 +121,13 @@ const activeTab = computed(() => {
             'src/modules/project-settings/new-issue-template/ui/NewIssueTemplate.vue'
           ),
       );
+    case 8:
+      return asyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/custom-properties/ui/CustomPropertiesSettings.vue'
+          ),
+      );
     default:
       return asyncImport(
         () =>
@@ -129,40 +138,54 @@ const activeTab = computed(() => {
   }
 });
 
-const listTabs = [
-  {
-    name: 0,
-    label: 'Основные',
-  },
-  {
-    name: 1,
-    label: 'Управление',
-  },
-  {
-    name: 2,
-    label: 'Пользователи',
-  },
-  {
-    name: 3,
-    label: 'Статусы',
-  },
-  {
-    name: 4,
-    label: 'Теги',
-  },
-  {
-    name: 5,
-    label: 'Сценарии',
-  },
-  {
-    name: 6,
-    label: 'Активности',
-  },
-  {
-    name: 7,
-    label: 'Шаблоны задач',
-  },
-];
+const listTabs = computed(() => {
+  const tabs = [
+    {
+      name: 0,
+      label: 'Основные',
+    },
+    {
+      name: 1,
+      label: 'Управление',
+    },
+    {
+      name: 2,
+      label: 'Пользователи',
+    },
+    {
+      name: 3,
+      label: 'Статусы',
+    },
+    {
+      name: 4,
+      label: 'Теги',
+    },
+    {
+      name: 5,
+      label: 'Сценарии',
+    },
+    {
+      name: 6,
+      label: 'Активности',
+    },
+    {
+      name: 7,
+      label: 'Шаблоны задач',
+    },
+    {
+      name: 8,
+      label: 'Дополнительные параметры',
+      allowedRoles: ['owner', 'admin'],
+    },
+  ];
+
+  return tabs.filter((tab) => {
+    if (tab.allowedRoles) {
+      return tab.allowedRoles.includes(roles.value.project);
+    }
+    return true;
+  });
+});
 
 useMeta(() => {
   return {

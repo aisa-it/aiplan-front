@@ -1,7 +1,15 @@
 <template>
   <q-expansion-item
     v-if="table.issues?.length"
-    class="board-item"
+    :class="[
+      'board-item',
+      { 'tag-colored-board': groupBy === 'labels' && table.entity?.color }
+    ]"
+    :style="
+      groupBy === 'labels' && table.entity?.color
+        ? `--tag-color: ${table.entity.color}`
+        : ''
+    "
     hide-expand-icon
     :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
     @update:model-value="
@@ -58,7 +66,18 @@
     </div>
   </q-expansion-item>
 
-  <q-item v-else class="empty-board-item">
+  <q-item 
+    v-else 
+    :class="[
+      'empty-board-item',
+      { 'tag-colored-board-empty': groupBy === 'labels' && table.entity?.color }
+    ]"
+    :style="
+      groupBy === 'labels' && table.entity?.color
+        ? `--tag-color: ${table.entity.color}`
+        : ''
+    "
+  >
     <div class="board-list-header">
       <GroupedHeader
         :entity="table?.entity"
@@ -177,6 +196,24 @@ onMounted(() => {
     border: 1px solid var(--darkest-border-color);
   }
 }
+
+.tag-colored-board {
+  position: relative;
+  padding-left: 8px;
+  
+  :deep(.q-item) {
+    border-left: 4px solid var(--tag-color) !important;
+  }
+  
+  :deep(.board-card) {
+    border-left: 4px solid var(--tag-color) !important;
+  }
+}
+
+.tag-colored-board-empty {
+  border-left: 4px solid var(--tag-color) !important;
+}
+
 .board-list-header {
   display: flex;
   flex-direction: column;

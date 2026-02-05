@@ -35,11 +35,18 @@
         />
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn no-caps label="Отменить" class="secondary-btn" v-close-popup />
+        <q-btn
+          no-caps
+          label="Отменить"
+          class="secondary-btn"
+          style="width: 115px"
+          v-close-popup
+        />
         <q-btn
           no-caps
           label="Пригласить"
           class="primary-btn"
+          style="width: 115px"
           :disable="!personToInvite"
           @click="handleInviteToProject"
           v-close-popup

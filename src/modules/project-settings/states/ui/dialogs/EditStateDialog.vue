@@ -29,7 +29,7 @@
         />
         <q-input
           dense
-          class="base-input"
+          class="base-input q-mb-md"
           v-model="form.color"
           label="Выберите цвет"
         >
@@ -40,6 +40,8 @@
             />
           </template>
         </q-input>
+
+        <q-checkbox v-model="form.default" label="По умолчанию" />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn

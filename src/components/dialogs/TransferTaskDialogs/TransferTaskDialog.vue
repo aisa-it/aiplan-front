@@ -220,6 +220,7 @@
           no-caps
           label="Отменить"
           class="secondary-btn"
+          style="width: 110px"
           v-close-popup
         />
         <q-btn
@@ -227,6 +228,7 @@
           no-caps
           label="Выполнить"
           class="primary-btn"
+          style="width: 110px"
           :disable="
             isDifferentProjectSelected && !(selectedProject && selectedAction)
           "
@@ -365,21 +367,21 @@ const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () => selectedProject.value?.identifier !== projectStore.currentProject.identifier,
+  () =>
+    selectedProject.value?.identifier !==
+    projectStore.currentProject.identifier,
 );
-const initialSettings = computed(() =>
-  ({
-    state_detail: props.issue.state_detail,
-    priority: props.issue.priority,
-    target_date: props.issue.target_date,
-    assignees: props.issue.assignee_details.map((assignee) => ({
-      member: assignee,
-    })),
-    watchers: props.issue.watcher_details.map((watcher) => ({
-      member: watcher,
-    })),
-  })
-)
+const initialSettings = computed(() => ({
+  state_detail: props.issue.state_detail,
+  priority: props.issue.priority,
+  target_date: props.issue.target_date,
+  assignees: props.issue.assignee_details.map((assignee) => ({
+    member: assignee,
+  })),
+  watchers: props.issue.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+}));
 
 const projectId = computed(() => {
   return selectedProject.value
@@ -680,7 +682,7 @@ const updateEditedParams = (newSettings: typeof issueSettings.value) => {
   if (!isArraysEqual(newWatcherIds, initialWatcherIds.value)) {
     editedIssueParams.watcher_ids = newWatcherIds;
   }
-}
+};
 
 const saveSettings = (data: typeof issueSettings.value) => {
   const newSettings = data;

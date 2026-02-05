@@ -23,6 +23,7 @@
           dense
           no-caps
           class="secondary-btn"
+          style="width: 110px"
           label="Отмена"
           v-close-popup
         />
@@ -32,6 +33,7 @@
           dense
           no-caps
           class="primary-btn"
+          style="width: 110px"
           label="Сохранить"
           v-close-popup
           @click="handleUpdateMessage"

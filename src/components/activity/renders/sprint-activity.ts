@@ -25,10 +25,33 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
     case 'description':
       return `<span>изменил(-а) описание в спринте ${sprintLink}<span/>`;
 
-    case 'issues':
+    case 'issue':
+    case 'issues': {
       action = translateAction('issues', Boolean(activity.new_value));
 
-      return `<span>${action} ${activity.verb === 'added' ? 'к спринту' : 'из спринта'} ${sprintLink}<span/>`;
+      const issueEntity =
+        activity?.verb === 'removed'
+          ? activity?.old_entity_detail
+          : activity?.new_entity_detail;
+      const issueKey =
+        activity?.verb === 'removed' ? activity?.old_value : activity?.new_value;
+      const issueName = issueEntity?.name || '';
+
+      const issueLink = issueEntity?.url
+        ? `<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
+                    href=${issueEntity.url}>
+                    ${issueKey ? issueKey + ' ' : ''}"${issueName}"<a/>`
+        : issueKey
+          ? `"${issueKey}"`
+          : issueName
+            ? `"${issueName}"`
+            : '';
+
+      return `<span>${action} ${issueLink || ''} ${
+        activity?.verb === 'added' ? 'в спринт' : 'из спринта'
+      } ${sprintLink}<span/>`;
+    }
 
     case 'watchers':
       const entityDetail = activity.new_value
