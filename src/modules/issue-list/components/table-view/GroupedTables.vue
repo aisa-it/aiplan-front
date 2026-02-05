@@ -17,7 +17,7 @@
       /></q-item>
 
       <q-expansion-item
-        v-if="table.issues?.length"
+        v-if="table?.count > 0"
         :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
         @update:model-value="
           (value) => setGroupHide(table?.entity?.id || table.entity, value)
@@ -33,22 +33,33 @@
             :issues-count="table?.count"
           />
         </template>
-        <IssueTable
-          :rows="table?.issues"
-          :rowsCount="table?.count"
-          :entity="table.entity"
-          @updateGroupedIssues="updateGroupedIssues"
-          @refresh="
-            (pagination, isFullUpdate) =>
-              refreshTable(index, pagination, isFullUpdate, table?.entity)
+        <div
+          :class="{
+            'tag-colored-table': groupBy === 'labels' && table.entity?.color
+          }"
+          :style="
+            groupBy === 'labels' && table.entity?.color
+              ? `--tag-color: ${table.entity.color}`
+              : ''
           "
-          @open-preview="
-            (issue, pagination) =>
-              emits('openPreview', issue, index, pagination, table?.entity)
-          "
-          :context-type="contextType"
-          @open-issue="(id, issue) => emits('openIssue', id, issue)"
-        />
+        >
+          <IssueTable
+            :rows="table?.issues"
+            :rowsCount="table?.count"
+            :entity="table.entity"
+            @updateGroupedIssues="updateGroupedIssues"
+            @refresh="
+              (pagination, isFullUpdate) =>
+                refreshTable(index, pagination, isFullUpdate, table?.entity)
+            "
+            @open-preview="
+              (issue, pagination) =>
+                emits('openPreview', issue, index, pagination, table?.entity)
+            "
+            :context-type="contextType"
+            @open-issue="(id, issue) => emits('openIssue', id, issue)"
+          />
+        </div>
       </q-expansion-item>
     </div>
     <div ref="observerTarget" class="observer-target"></div>
@@ -120,11 +131,11 @@ const updateGroupedIssues = async (status: any) => {
     return;
   }
 
-  const group = (props.issues as any[]).find(
-    (item: any) => item.entity?.id === status.id,
+  const group = (props?.issues as any[]).find(
+    (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group.issues || group.issues.length === 0) {
+  if (group && !group?.issues || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -136,7 +147,7 @@ const updateGroupedIssues = async (status: any) => {
       limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
 
-    await refreshTable(groupIndex, pagination, false, group.entity);
+    await refreshTable(groupIndex, pagination, false, status);
   }
 };
 
@@ -159,7 +170,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.issues,
+  () => [props.issues,props.issues?.length],
   () => {
     refresh();
   },
@@ -176,5 +187,12 @@ watch(
   height: calc(100vh - 135px);
   overflow-y: auto;
   contain: inherit;
+}
+
+.tag-colored-table {
+  :deep(.q-table) {
+    border-left: 4px solid var(--tag-color);
+    border-radius: 2px 0 0 2px;
+  }
 }
 </style>

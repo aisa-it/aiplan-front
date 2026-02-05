@@ -54,7 +54,7 @@ export function isUpperCaseAndNumber(val: string, param: string) {
 }
 
 export function maxLength(val: string, length = 50) {
-  return val.length <= length || `Максимальный размер - ${length} символов`;
+  return val.length <= length || `Максимальный размер — ${length} символов`;
 }
 
 export function validateAllowedCharacters(val: string, param: string) {

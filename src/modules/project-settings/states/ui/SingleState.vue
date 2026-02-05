@@ -1,38 +1,38 @@
 <template>
-  <div class="state row q-px-md q-pb-md">
-    <div class="centered-horisontally" style="width: 100%">
-      <div class="circle" :style="`background-color: ${state.color}`" />
-      <div :style="'margin: 0 16px; max-width: calc(100% - 60px);'">
-        <h6 class="font-medium word-wrap">{{ stateRUS(state.name!) }}</h6>
-        <HintTooltip>{{ stateRUS(state.name!) }}</HintTooltip>
+  <div class="flex flex-column rounded-borders bordered-table q-pa-md">
+    <div class="list-item row items-center full-w">
+      <div class="q-mr-md cursor-pointer drag-handle">
+        <q-icon name="drag_indicator" size="24px" color="grey" />
       </div>
-    </div>
-    <span class="word-wrap" style="max-width: 100%">{{
-      state.description
-    }}</span>
-    <div class="centered-horisontally justify-between" style="width: 100%">
-      <div v-if="state.default">
-        <span style="font-weight: 600">По умолчанию</span>
+
+      <div class="circle q-mr-md" :style="`background-color: ${state.color}`" />
+      <div class="col">
+        <div class="overflow-hidden">
+          <h6 class="font-medium word-wrap" style="line-height: 18px">
+            {{
+              `${stateRUS(state.name!)} ${state.default === true ? '(По умолчанию)' : ''}`
+            }}
+          </h6>
+          <!-- <HintTooltip>{{ stateRUS(state.name!) }}</HintTooltip> -->
+        </div>
+        <span class="word-wrap" style="max-width: 100%">{{
+          state.description
+        }}</span>
       </div>
-      <div v-else @click="handleMakeDefault()" class="set-by-default">
-        <span class="primary-link">Установить по умолчанию</span>
-      </div>
-      <div class="buttons row q-ml-sm no-wrap">
+      <div class="buttons row no-wrap q-ml-auto">
         <q-btn dense flat @click="emits('edit', state)">
           <EditIcon />
           <HintTooltip> Редактировать </HintTooltip>
         </q-btn>
-
-        <div v-if="!state.default">
-          <q-btn dense flat @click="emits('delete', state)">
-            <BinIcon color="#DC3E3E" />
-            <HintTooltip> Удалить </HintTooltip>
-          </q-btn>
-        </div>
+        <q-btn dense flat @click="emits('delete', state)">
+          <BinIcon color="#DC3E3E" />
+          <HintTooltip> Удалить </HintTooltip>
+        </q-btn>
       </div>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 // core
 import { onUpdated, ref } from 'vue';
@@ -87,7 +87,7 @@ const handleMakeDefault = async () => {
 }
 
 .state {
-  border-bottom: 1px solid $color-border-2;
+  border-bottom: 1px solid $dark-border-color;
   align-items: start;
   flex-direction: column;
 

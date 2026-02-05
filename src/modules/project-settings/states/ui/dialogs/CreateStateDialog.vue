@@ -49,12 +49,14 @@
           outline
           label="Отменить"
           class="secondary-btn"
+          style="width: 100px"
           v-close-popup
         />
         <q-btn
           no-caps
           label="Создать"
           class="primary-btn"
+          style="width: 100px"
           @click="handleSubmit"
           :disable="form.name.length === 0"
           v-close-popup
@@ -100,9 +102,7 @@ const form = ref({
   description: '',
 });
 
-const group = ref<ISelect | undefined>(props.stateType)
-
-const myDialog = ref(null);
+const group = ref<ISelect | undefined>(props.stateType);
 
 const onClose = (type: 'error' | 'success', msg?: string) => {
   clear();
@@ -110,7 +110,7 @@ const onClose = (type: 'error' | 'success', msg?: string) => {
 };
 
 const handleSubmit = async () => {
-  form.value.group = group.value?.value
+  form.value.group = group.value?.value;
   await createState(
     route.params.workspace as string,
     route.params.project as string,

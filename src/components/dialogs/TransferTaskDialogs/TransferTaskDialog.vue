@@ -178,6 +178,7 @@
           :project_id="projectId"
           :issue="props.issue"
           :issue_settings="issueSettings"
+          :is-different-project="isDifferentProjectSelected"
           @save="saveSettings"
         />
 
@@ -219,6 +220,7 @@
           no-caps
           label="Отменить"
           class="secondary-btn"
+          style="width: 110px"
           v-close-popup
         />
         <q-btn
@@ -226,6 +228,7 @@
           no-caps
           label="Выполнить"
           class="primary-btn"
+          style="width: 110px"
           :disable="
             isDifferentProjectSelected && !(selectedProject && selectedAction)
           "
@@ -364,8 +367,21 @@ const settings = ref(false);
 
 // computed
 const isDifferentProjectSelected = computed<boolean>(
-  () => selectedProject.value?.identifier !== (route.params.project as string),
+  () =>
+    selectedProject.value?.identifier !==
+    projectStore.currentProject.identifier,
 );
+const initialSettings = computed(() => ({
+  state_detail: props.issue.state_detail,
+  priority: props.issue.priority,
+  target_date: props.issue.target_date,
+  assignees: props.issue.assignee_details.map((assignee) => ({
+    member: assignee,
+  })),
+  watchers: props.issue.watcher_details.map((watcher) => ({
+    member: watcher,
+  })),
+}));
 
 const projectId = computed(() => {
   return selectedProject.value
@@ -400,17 +416,17 @@ const filterTransferErrorsByNotCurrentIssueIdAndType = computed(() => {
   );
 });
 
-const assignerIds = computed(() =>
-  issueSettings.value.assignees
-    ? issueSettings.value.assignees.map((assignee) =>
+const initialAssignerIds = computed(() =>
+  initialSettings.value.assignees
+    ? initialSettings.value.assignees.map((assignee) =>
         assignee.member ? assignee.member.id || assignee.id : assignee,
       )
     : [],
 );
 
-const watcherIds = computed(() =>
-  issueSettings.value.watchers
-    ? issueSettings.value.watchers.map((watcher) =>
+const initialWatcherIds = computed(() =>
+  initialSettings.value.watchers
+    ? initialSettings.value.watchers.map((watcher) =>
         watcher.member ? watcher.member.id || watcher.id : watcher,
       )
     : [],
@@ -634,22 +650,16 @@ const resetActionOptions = () => {
   transferLabel.value = null;
 };
 
-const saveSettings = (data: typeof issueSettings) => {
-  const newSettings = data.value;
-  editedIssueParams = {};
-
-  if (newSettings.state_detail.id !== issueSettings.value.state_detail.id) {
-    issueSettings.value.state_detail = newSettings.state_detail;
+const updateEditedParams = (newSettings: typeof issueSettings.value) => {
+  if (newSettings.state_detail.id !== initialSettings.value.state_detail.id) {
     editedIssueParams.state_id = newSettings.state_detail.id;
   }
 
-  if (newSettings.priority !== issueSettings.value.priority) {
-    issueSettings.value.priority = newSettings.priority;
+  if (newSettings.priority !== initialSettings.value.priority) {
     editedIssueParams.priority = newSettings.priority;
   }
 
-  if (newSettings.target_date !== issueSettings.value.target_date) {
-    issueSettings.value.target_date = newSettings.target_date;
+  if (newSettings.target_date !== initialSettings.value.target_date) {
     editedIssueParams.target_date = newSettings.target_date;
   }
 
@@ -659,8 +669,7 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!isArraysEqual(newAssignerIds, assignerIds.value)) {
-    issueSettings.value.assignees = newSettings.assignees;
+  if (!isArraysEqual(newAssignerIds, initialAssignerIds.value)) {
     editedIssueParams.assigner_ids = newAssignerIds;
   }
 
@@ -670,10 +679,24 @@ const saveSettings = (data: typeof issueSettings) => {
       )
     : [];
 
-  if (!isArraysEqual(newWatcherIds, watcherIds.value)) {
-    issueSettings.value.watchers = newSettings.watchers;
+  if (!isArraysEqual(newWatcherIds, initialWatcherIds.value)) {
     editedIssueParams.watcher_ids = newWatcherIds;
   }
+};
+
+const saveSettings = (data: typeof issueSettings.value) => {
+  const newSettings = data;
+  editedIssueParams = {};
+
+  // Update Issue Settings
+  issueSettings.value.state_detail = newSettings.state_detail;
+  issueSettings.value.priority = newSettings.priority;
+  issueSettings.value.target_date = newSettings.target_date;
+  issueSettings.value.assignees = newSettings.assignees;
+  issueSettings.value.watchers = newSettings.watchers;
+
+  // Update Edited Params
+  updateEditedParams(newSettings);
 
   return;
 };

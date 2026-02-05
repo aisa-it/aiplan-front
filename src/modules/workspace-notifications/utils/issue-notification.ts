@@ -208,6 +208,30 @@ export function issueNotificationRender(data: any, detail: any) {
 
       return `<span>перенес(-ла) задачу ${link} ${oldVal} ${newVal} </span>`;
 
+    case 'sprint': {
+      const sprintEntity =
+        data?.verb === 'removed' ? data?.old_entity_detail : data?.new_entity_detail;
+      const sprintName =
+        sprintEntity?.name || data?.new_value || data?.old_value || '';
+      const sprintLink =
+        sprintEntity?.url
+          ? customLink(sprintEntity.url, `${sprintName}`)
+          : sprintName
+            ? `"${sprintName}"`
+            : '';
+
+      if (data?.verb === 'added') {
+        return `<span>добавил(-а) задачу ${link} в спринт ${sprintLink}<span/>`;
+      }
+      if (data?.verb === 'removed') {
+        return `<span>убрал(-а) задачу ${link} из спринта ${sprintLink}<span/>`;
+      }
+      if (data?.verb === 'updated') {
+        return `<span>изменил(-а) спринт на ${sprintLink} в задаче ${link}<span/>`;
+      }
+      break;
+    }
+
     default:
       break;
   }

@@ -38,19 +38,20 @@
           <MenuActions :items="getFormMenuItems(form)" @click.stop />
         </q-item>
       </q-list>
+
+      <FormDialog
+        v-model="isOpenEditingForm"
+        :form-slug="currentFormSlug"
+        @success-create="refresh"
+        @success-edit="refresh"
+      />
+      <DeleteFormDialog
+        v-model="isOpenDeletingForm"
+        :form="formToDelete!"
+        @success-delete="refresh"
+      />
     </template>
   </ExpansionItem>
-  <FormDialog
-    v-model="isOpenEditingForm"
-    :form-slug="currentFormSlug"
-    @success-create="refresh"
-    @success-edit="refresh"
-  />
-  <DeleteFormDialog
-    v-model="isOpenDeletingForm"
-    :form="formToDelete!"
-    @success-delete="refresh"
-  />
 </template>
 
 <script setup lang="ts">

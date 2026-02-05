@@ -166,7 +166,12 @@ const handleUpdateSprints = async (
       throw err;
     });
 
-    sprintStore.triggerSprintRefresh();
+    const changedSprintId = String(sprint.id ?? '');
+    const activeSprintId = String(sprintStore.sprint?.id ?? '');
+
+    if (changedSprintId && activeSprintId && changedSprintId === activeSprintId) {
+      sprintStore.triggerSprintRefresh();
+    }
 
     setNotificationView({ open: true, type: 'success' });
     emit('refresh');
