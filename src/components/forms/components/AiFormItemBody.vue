@@ -51,7 +51,6 @@
               map-options
               class="base-selector col-grow q-mr-md"
               hide-bottom-space
-              outlined
               option-value="value"
               option-label="label"
               :rules="[
@@ -75,7 +74,6 @@
               map-options
               class="base-selector col-grow"
               hide-bottom-space
-              outlined
               :rules="[
                 (val) =>
                   (val !== null && val !== undefined) || 'Выберите ответ',

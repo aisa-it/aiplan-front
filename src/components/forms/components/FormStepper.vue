@@ -21,11 +21,7 @@
             :disable="page.disabled"
             @click="$emit('go-to-page', page.index)"
             :active="page.active"
-            :active-class="
-              quasar.dark.isActive
-                ? 'text-blue-1 bg-grey-9'
-                : 'text-primary bg-blue-1'
-            "
+            :active-class="'active-step'"
             class="q-mb-sm rounded-borders"
           >
             <q-item-section avatar style="min-width: 40px">
@@ -87,3 +83,9 @@ const quasar = useQuasar();
 //computed
 const isMobile = computed(() => quasar.screen.width < 451);
 </script>
+
+<style scoped lang="scss">
+.active-step {
+  background: $active-color;
+}
+</style>
