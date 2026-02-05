@@ -181,12 +181,12 @@ import {
   validateAllowedCharacters,
 } from 'src/utils/validation';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
-import { getUrlFile } from 'src/utils/helpers';
+import { getUrlFile, hasFormChanges } from 'src/utils/helpers';
 
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
-import { PROJECT_IDENTIFIER_LENGTH  } from 'src/constants/constants';
+import { PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
 
 // interfaces
 import { IProject } from 'src/interfaces/projects';
@@ -228,16 +228,24 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
-
 //computeds
 const hasChanges = computed(() => {
-  if (!project.value) return false;
+  const unwrapValue = (val: any) => val?.value ?? val;
+  const form = {
+    name: projectForm.value.name,
+    identifier: projectForm.value.identifier,
+    public: unwrapValue(projectForm.value.public),
+    emoji: unwrapValue(projectForm.value.emoji),
+  };
 
-  const getVal = (val: any) => val?.value ?? val;
+  const original = {
+    name: project.value.name,
+    identifier: project.value.identifier,
+    public: unwrapValue(project.value.public),
+    emoji: unwrapValue(project.value.emoji),
+  };
 
-  return Object.keys(projectForm.value).some(
-    (key) => getVal(projectForm.value[key]) !== getVal(project.value[key]),
-  );
+  return hasFormChanges(original, form);
 });
 
 //methods

@@ -203,8 +203,10 @@
     <q-btn
       no-caps
       data-id="workspace-save-settings"
-      class="secondary-btn"
-      :disable="!isValidName"
+      :flat="!hasChanges"
+      :outline="!hasChanges"
+      :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+      :disable="!isValidName || !hasChanges"
       @click="handleUpdateWorkspace"
     >
       Сохранить
@@ -349,7 +351,10 @@
           v-close-popup
           data-id="workspace-save-settings"
           class="secondary-btn"
-          :disable="!isValidName"
+          :disable="!isValidName || !hasChanges"
+          :flat="!hasChanges"
+          :outline="!hasChanges"
+          :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
           @click="handleUpdateWorkspace"
         >
           Сохранить
@@ -376,7 +381,7 @@ import { useSettingsStore } from 'src/modules/workspace-settings/stores/settings
 
 // utils
 import { maxLength, validateAllowedCharacters } from 'src/utils/validation';
-import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
+import { getUrlFile, getFirstSymbol, hasFormChanges } from 'src/utils/helpers';
 import {
   updateWorkspace,
   resetWorkspaceToken,
@@ -474,6 +479,36 @@ const isMobile = computed(() => {
 const canEdit = computed(() =>
   hasPermissionByWorkspace(computedWorkspaceInfo.value, 'ws-settings'),
 );
+
+const hasChanges = computed(() => {
+  const normalizeHtml = (html: string | undefined | null) => {
+    // Редактор автоматически добавляет точку с запятой в атрибуты style
+    // Поэтому удаляем точки с запятой внутри атрибутов style и пробелы для сравнения
+    if (!html) return '';
+
+    return html.replace(/style="[^"]*"/g, (match) =>
+      match.replace(/;/g, '').replace(/\s/g, ''),
+    );
+  };
+
+  const form = {
+    name: workspaceInfoForm.value.name,
+    description: normalizeHtml(workspaceInfoForm.value.description),
+    owner_id:
+      workspaceInfoForm.value.owner_id?.value ??
+      workspaceInfoForm.value.owner_id,
+  };
+
+  const original = {
+    name: computedWorkspaceInfo.value.name,
+    description: normalizeHtml(computedWorkspaceInfo.value.description),
+    owner_id:
+      computedWorkspaceInfo.value.owner_id ??
+      computedWorkspaceInfo.value.owner?.id,
+  };
+
+  return hasFormChanges(original, form);
+});
 
 onMounted(async () => {
   await refreshInfo();
@@ -655,7 +690,7 @@ const handleAvatarError = () => {
 
 const editor = ref<Editor | undefined>();
 // Текст в диалоговом окне
-const editorValueDialog = ref<string | undefined>();
+const editorValueDialog = ref<string>('');
 // Переключатель диалогового окна
 const isFullscreen = ref<boolean>(false);
 // EditorDOM

@@ -61,7 +61,16 @@
     </div>
 
     <q-card-actions style="background-color: transparent" align="right">
-      <q-btn no-caps @click="onSubmit" class="secondary-btn"> Сохранить </q-btn>
+      <q-btn
+        no-caps
+        :flat="!hasChanges"
+        :outline="!hasChanges"
+        :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+        :disable="!hasChanges"
+        @click="onSubmit"
+      >
+        Сохранить
+      </q-btn>
     </q-card-actions>
   </div>
 </template>
@@ -89,14 +98,15 @@ import SelectWatchers from 'components/selects/SelectWatchers.vue';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 
 import { updateProject } from '../../services/api';
+import { hasFormChanges } from 'src/utils/helpers';
 
 const route = useRoute();
 const rolesStore = useRolesStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 const { project } = storeToRefs(projectStore);
-const currentProject = ref(); 
-// TODO касается типизации project, в данном компоненте идёт нарушение контракта в угоду используемым компонентам типа селекта 
+const currentProject = ref();
+// TODO касается типизации project, в данном компоненте идёт нарушение контракта в угоду используемым компонентам типа селекта
 // FE project_lead является по контракту строкой, здесь же используется как объект
 // нужно или изменить селекты и логику получения информации об выбранном пользователе либо же создавать промежуточные стейты, а не переписывать переменные в нарушение контрактов
 const projectMembers = ref<DtoProjectMemberLight[]>();
@@ -111,6 +121,27 @@ const isLoading = computed(() => {
   return (
     projectMembers.value === undefined || currentProject.value === undefined
   );
+});
+
+const hasChanges = computed(() => {
+  const normalizeArray = (arr: any[]) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((val) => val?.member_id ?? val);
+  };
+
+  const form = {
+    project_lead: currentProject.value.project_lead?.value,
+    default_assignees: normalizeArray(currentProject.value.default_assignees),
+    default_watchers: normalizeArray(currentProject.value.default_watchers),
+  };
+
+  const original = {
+    project_lead: project.value.project_lead,
+    default_assignees: normalizeArray(project.value.default_assignees),
+    default_watchers: normalizeArray(project.value.default_watchers),
+  };
+
+  return hasFormChanges(original, form);
 });
 
 useMeta(() => {
