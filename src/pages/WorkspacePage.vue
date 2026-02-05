@@ -14,21 +14,35 @@
 </template>
 
 <script lang="ts" setup>
+//core
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { ref, watch, onBeforeMount } from 'vue';
 
+//stores
 import { useFormStore } from 'src/stores/form-store';
+
 import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
+//utils
 import { sortStates } from 'src/utils/sort';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
+
+//composables
 import { stopGlobalLoading } from 'src/composables/useGlobalLoader';
 
+//api
+import { getFormList } from 'src/components/forms/services/api';
+
+//core
+const route = useRoute();
+const router = useRouter();
+
+//stores
 const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
 
@@ -40,11 +54,10 @@ const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 
-const route = useRoute();
-const router = useRouter();
-
+//refs
 const startLoader = ref(true);
 
+//methods
 const refresh = async () => {
   if (!route.params.project) project.value = null;
 
@@ -71,7 +84,9 @@ const refresh = async () => {
       workspaceInfo.value.current_user_membership &&
       workspaceInfo.value.current_user_membership?.role === 15
     ) {
-      await formStore.getFormList(slug).catch(() => formStore.resetForms());
+      await getFormList(slug)
+        .then((res) => (formStore.forms = res))
+        .catch(() => formStore.resetForms());
     } else formStore.resetForms();
 
     await workspaceStore
@@ -97,10 +112,9 @@ const refreshAfterVisible = async () => {
   await refresh();
 };
 
+//hooks
 onBeforeMount(async () => {
   appVisibleTimeout(() => refreshAfterVisible());
-  // if (!route.params.project) loaderStore.startLoading();
-
   await refresh();
 });
 

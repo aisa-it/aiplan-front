@@ -93,13 +93,18 @@
 //core
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+
 //stores
-import { useFormStore } from 'src/stores/form-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+
 //utils
 import aiplan from 'src/utils/aiplan';
 import { formatDate, formatDateTime } from 'src/utils/time';
+
+//api
+import { getAnswer, getFormAuth } from 'src/components/forms/services/api';
+
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
 
@@ -107,9 +112,6 @@ const props = defineProps<{
   answerId: number;
   formSlug: string;
 }>();
-
-//composables
-const formStore = useFormStore();
 
 //stores
 const workspaceStore = useWorkspaceStore();
@@ -134,17 +136,18 @@ const headContent = computed(() => {
 
 //methods
 const getCurrentAnswer = async () => {
-  const { data } = await formStore.getFormAnswer(
+  if (!currentWorkspaceSlug.value) return;
+
+  const data = await getAnswer(
     currentWorkspaceSlug.value,
     props.formSlug,
-    props.answerId,
+    String(props.answerId),
   );
   answer.value = data;
 };
 
 const getCurrentForm = async () => {
-  const { data } = await formStore.getSettingsForm(props.formSlug, true);
-  form.value = data;
+  form.value = await getFormAuth(props.formSlug);
 };
 
 const getInfo = async () => {

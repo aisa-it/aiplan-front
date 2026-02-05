@@ -63,6 +63,9 @@ import { storeToRefs } from 'pinia';
 import { useFormStore } from 'src/stores/form-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
+//api
+import { getFormList } from 'src/components/forms/services/api';
+
 // components
 import LinkIcon from '../icons/LinkIcon.vue';
 import ExpansionItem from '../ExpansionItem.vue';
@@ -91,7 +94,10 @@ const currentFormSlug = ref<string | null>(null);
 const formToDelete = ref<IForms>();
 
 const refresh = async () => {
-  await formStore.getFormList(currentWorkspaceSlug.value);
+  if (!currentWorkspaceSlug.value) return;
+  await getFormList(currentWorkspaceSlug.value).then(
+    (res) => (formStore.forms = res),
+  );
 };
 
 const deleteForm = async (form: IForms) => {
@@ -105,7 +111,7 @@ const getFormMenuItems = (form: IForms) => {
       text: 'Редактировать форму',
       icon: EditIcon,
       onClick: () => {
-        currentFormSlug.value = form.slug;
+        currentFormSlug.value = form.slug ?? '';
         isOpenEditingForm.value = true;
       },
     },
