@@ -70,6 +70,8 @@ import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
 import { useIssueContext } from '../../composables/useIssueContext';
 
+import { useGroupedIssues } from '../../composables/useGroupedIssues';
+
 const props = defineProps<{
   issues: IGroupedResponse[];
   groupBy: string;
@@ -87,6 +89,8 @@ const { ny } = storeToRefs(useUtilsStore());
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
+
+const { getGroupedIssues } = useGroupedIssues(props.contextType);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
@@ -111,6 +115,11 @@ const handleScroll = throttle((info) => {
 }, 100);
 
 const updateGroupedIssues = async (status: any) => {
+  if (!status) {
+    getGroupedIssues();
+    return;
+  }
+
   const group = (props.issues as any[]).find(
     (item: any) => item.entity?.id === status.id,
   );
