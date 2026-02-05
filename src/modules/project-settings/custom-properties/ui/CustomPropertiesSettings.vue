@@ -1,10 +1,28 @@
 <template>
   <div class="q-pr-md q-pl-md">
+    <p
+      :class="{ 'text-h6': $q.screen.lt.sm }"
+      class="font-semibold"
+      style="font-size: 24px"
+    >
+      Параметры
+    </p>
+
+    <p
+      :class="{ 'text-h4': $q.screen.lt.sm }"
+      class="font-semibold"
+      style="font-size: 16px"
+    >
+      Параметры по умолчанию
+    </p>
+
+    <DefaultParams class="q-mb-md" />
+
     <div class="row items-center justify-between q-mb-md">
       <span
-        :class="{ 'text-h6': $q.screen.lt.sm }"
+        :class="{ 'text-h4': $q.screen.lt.sm }"
         class="font-semibold"
-        style="font-size: 24px"
+        style="font-size: 16px"
       >
         Дополнительные параметры
       </span>
@@ -78,6 +96,8 @@ import CustomPropertyItem from './CustomPropertyItem.vue';
 import CustomPropertyEditModal from './CustomPropertyEditModal.vue';
 import CustomPropertyDeleteModal from './CustomPropertyDeleteModal.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+
+import DefaultParams from './DefaultParams.vue';
 
 //services
 import {
