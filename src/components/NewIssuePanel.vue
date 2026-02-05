@@ -5,7 +5,7 @@
     ]"
     ref="newIssueCardRef"
   >
-    <div class="relative-position">
+    <div v-if="!loading" class="relative-position">
       <q-card-section>
         <div v-if="project" class="relative-position">
           <div class="row flex items-stretch content-stretch q-mb-xs">
@@ -130,6 +130,12 @@
               label="Выберите спринт"
             />
           </div>
+          <SelectLinks
+            :links="links"
+            @add="handleLinkAdd"
+            @delete="handleLinkDelete"
+            @edit="handleLinkEdit"
+          />
         </div>
         <q-separator vertical class="q-mx-md" />
         <div class="col">
@@ -236,10 +242,8 @@
           </q-btn>
         </div>
       </q-card-actions>
-      <q-inner-loading style="z-index: 99" :showing="loading">
-        <DefaultLoader />
-      </q-inner-loading>
     </div>
+    <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
 
@@ -249,6 +253,10 @@ import { useRoute } from 'vue-router';
 import { ref, onMounted, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/vue-3';
+
+//api
+import { sprintIssuesUpdate } from 'src/modules/sprints/services/api';
+
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -267,8 +275,10 @@ import {
   getSuccessCreateIssueMessage,
   getSuccessCreateSubissueMessage,
 } from 'src/utils/notifications';
+
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+
 // components
 import SelectDate from './SelectDate.vue';
 import SelectTags from './SelectTags.vue';
@@ -276,16 +286,22 @@ import SelectStatus from './SelectStatus.vue';
 import SelectPriority from './SelectPriority.vue';
 import SelectAssignee from './selects/SelectAssignee.vue';
 import SelectWatchers from './selects/SelectWatchers.vue';
-import DefaultLoader from './loaders/DefaultLoader.vue';
 import SelectParentIssue from './SelectParentIssue.vue';
-import PriorityIcon from './icons/PriorityIcon.vue';
 import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-template/ui/SelectSingleIssueTemplate.vue';
 import SelectAttachments from './SelectAttachments.vue';
-import SprintIcon from './icons/SprintIcon.vue';
 import SelectSprints from 'src/components/SelectSprints.vue';
+import SelectLinks from './SelectLinks.vue';
+import NewIssuePanelSkeleton from './NewIssuePanelSkeleton.vue';
 
 //types
 import { QCard } from 'quasar';
+import {
+  AiplanRequestIssueIdList,
+  DtoIssueLinkLight,
+  DtoProject,
+  DtoSprintLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 //icons
 import UserIcon from './icons/UserIcon.vue';
 import ObserveIcon from './icons/ObserveIcon.vue';
@@ -293,23 +309,21 @@ import CalendarIcon from './icons/CalendarIcon.vue';
 import ShareIcon from './icons/ShareIcon.vue';
 import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
-import {
-  AiplanRequestIssueIdList,
-  DtoProject,
-  DtoSprintLight,
-} from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { sprintIssuesUpdate } from 'src/modules/sprints/services/api';
+import SprintIcon from './icons/SprintIcon.vue';
+import PriorityIcon from './icons/PriorityIcon.vue';
 
 const props = defineProps<{
   project_detail?: DtoProject;
   parentissue?: string;
   isUserTextData?: boolean;
   isIssuesTemplate?: boolean;
+  loading?: boolean;
 }>();
 
 const emits = defineEmits<{
   onCancel: [];
   changeTextStatus: [status: boolean];
+  'update:loading': [status: boolean];
   ok: [];
 }>();
 
@@ -358,9 +372,10 @@ const date = ref(null);
 const parent = ref(null);
 const draft = ref(false);
 const selectedIssueTemplate = ref<any>(null);
-const loading = ref(true);
+
 const editorInstance = ref<Editor>();
 const autoupdateDate = ref<boolean>(true);
+const links = ref<DtoIssueLinkLight[]>([]);
 
 const selectAttachments = ref();
 
@@ -368,8 +383,18 @@ const selectAttachments = ref();
 const workspaceSlug = computed(() => {
   return (route.params.workspace as string) || currentWorkspaceSlug.value;
 });
+
 const projectId = computed(() => {
   return props.project_detail?.id ?? (route.params.project as string);
+});
+
+const loading = computed({
+  get() {
+    return props.loading;
+  },
+  set(val) {
+    emits('update:loading', val);
+  },
 });
 
 //methods
@@ -455,7 +480,25 @@ const updateSprint = async (sprint: DtoSprintLight, issueid: string) => {
   sprintStore.triggerSprintRefresh();
 };
 
-const create = async () => {
+const handleLinkAdd = (link: DtoIssueLinkLight) => {
+  links.value.push({
+    ...link,
+    created_at: new Date().toISOString(),
+  });
+};
+
+const handleLinkDelete = (id: string) => {
+  links.value = links.value.filter((l) => l.id !== id);
+};
+
+const handleLinkEdit = (link: DtoIssueLinkLight) => {
+  const index = links.value.findIndex((l) => l.id === link.id);
+  if (index !== -1) {
+    links.value[index] = { ...links.value[index], ...link };
+  }
+};
+
+const scrollOnInvalid = () => {
   titleRef.value.validate();
 
   if (titleRef.value.hasError) {
@@ -463,68 +506,95 @@ const create = async () => {
       top: 0,
       behavior: 'smooth',
     });
+    return true;
+  }
+  return false;
+};
+
+const create = async () => {
+  if (scrollOnInvalid()) {
     return;
   }
 
   loading.value = true;
-  const content = await handleEditorValue(description.value);
-  const descriptionJson = editorInstance.value?.getJSON();
   autoupdateDate.value = false;
-  await singleIssueStore
-    .createIssue(
-      currentWorkspaceSlug.value,
+
+  try {
+    const content = await handleEditorValue(description.value);
+    const descriptionJson = editorInstance.value?.getJSON();
+
+    const assigneeIds = (assigness.value as any[]).map((assignee) =>
+      assignee?.member_id ? assignee?.member_id : assignee,
+    );
+
+    const watcherIds = (watchers.value as any[]).map((watcher) =>
+      watcher?.member_id ? watcher?.member_id : watcher,
+    );
+
+    const tagIds = (tags.value as any[]).map((d) => d.id);
+    const parentId =
+      !!parent.value && parent.value?.id !== '' ? parent.value?.id : null;
+
+    const res = await singleIssueStore.createIssue(
+      workspaceSlug.value,
       project.value?.id,
       name.value,
       content,
       status.value ? status.value?.id : '',
       priority.value,
-      assigness.value.map((assignee) =>
-        assignee?.member_id ? assignee?.member_id : assignee,
-      ),
-      watchers.value.map((watcher) =>
-        watcher?.member_id ? watcher?.member_id : watcher,
-      ),
-      tags.value.map((d) => d.id),
+      assigneeIds,
+      watcherIds,
+      tagIds,
       date.value,
-      !!parent.value && parent.value?.id !== '' ? parent.value?.id : null,
+      parentId,
       draft.value,
       descriptionJson,
+      links.value,
+    );
+
+    await handleCreateSuccess(res.data);
+  } catch (e) {
+    loading.value = false;
+  }
+};
+
+const handleCreateSuccess = async (createdIssueData: any) => {
+  if (!workspaceSlug.value || !project.value?.id) {
+    loading.value = false;
+    return;
+  }
+  const issue = (
+    await singleIssueStore.getIssueDataById(
+      workspaceSlug.value,
+      project.value?.id,
+      createdIssueData.id,
     )
-    .then(async (res) => {
-      const issue = (
-        await singleIssueStore.getIssueDataById(
-          currentWorkspaceSlug.value,
-          project.value?.id,
-          res.data.id,
-        )
-      ).data;
+  ).data;
 
-      const link = getIssueLink(
-        currentWorkspaceSlug.value,
-        project.value?.identifier,
-        res.data.id,
-      );
-      setNotificationView({
-        open: true,
-        type: 'success',
-        customMessage: props.parentissue
-          ? getSuccessCreateSubissueMessage(link)
-          : getSuccessCreateIssueMessage(
-              link,
-              `${issue.project_detail.identifier}-${issue.sequence_id}`,
-            ),
-      });
-      await selectAttachments.value.uploadDraftAttachments(res.data.id);
+  const link = getIssueLink(
+    workspaceSlug.value,
+    project.value?.identifier,
+    createdIssueData.id,
+  );
 
-      sprints.value.forEach((sprint) => {
-        updateSprint(sprint, issue.id);
-      });
+  setNotificationView({
+    open: true,
+    type: 'success',
+    customMessage: props.parentissue
+      ? getSuccessCreateSubissueMessage(link)
+      : getSuccessCreateIssueMessage(
+          link,
+          `${issue.project_detail.identifier}-${issue.sequence_id}`,
+        ),
+  });
 
-      emits('ok');
-    })
-    .catch(() => {
-      loading.value = false;
-    });
+  await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
+
+  sprints.value.forEach((sprint) => {
+    updateSprint(sprint, issue.id);
+  });
+
+  emits('ok');
 };
 
 const handleClearIssueTemplate = () => {

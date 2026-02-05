@@ -357,7 +357,9 @@
             'change-issue-secondary',
           )
         "
-        @refresh="handleRefresh"
+        @add="handleLinkAdd"
+        @delete="handleLinkDelete"
+        @edit="handleLinkEdit"
       >
       </SelectLinks>
 
@@ -453,9 +455,15 @@ import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 
 // constants
-import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import {
+  SUCCESS_UPDATE_DATA,
+  SUCCESS_LINK_ADDING,
+  SUCCESS_LINK_EDITING,
+  SUCCESS_LINK_DELETING,
+} from 'src/constants/notifications';
 
 import { setIntervalFunction } from 'src/utils/helpers';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
@@ -481,12 +489,12 @@ const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
 
-const refreshCycle = ref();
-
 const { navigateToActivityPage } = useUserActivityNavigation();
 
-// functions
+//refs
+const refreshCycle = ref();
 
+// functions
 const handleRefresh = async () => {
   await refresh();
   emits('refresh');
@@ -574,6 +582,60 @@ const getCompareText = () => {
   return `${captureTime}, ${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
     Math.abs(getCompareDate.value),
   )}`;
+};
+
+const handleLinkAdd = async (link: DtoIssueLinkLight) => {
+  if (!currentWorkspaceSlug.value) return;
+  await singleIssueStore.issueLinkCreate(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    link.url,
+    link.title,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_ADDING,
+  });
+};
+
+const handleLinkDelete = async (linkID: string) => {
+  if (!currentWorkspaceSlug.value) return;
+  await singleIssueStore.issueLinkDelete(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    linkID,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_DELETING,
+  });
+};
+
+const handleLinkEdit = async (link: DtoIssueLinkLight) => {
+  if (!currentWorkspaceSlug.value || !link.id) return;
+  await singleIssueStore.issueLinkEdit(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    link.url,
+    link.title,
+    link.id,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_EDITING,
+  });
 };
 
 onMounted(() => {

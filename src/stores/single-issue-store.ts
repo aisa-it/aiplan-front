@@ -16,6 +16,7 @@ import {
 import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 import axios from 'axios';
 import { NON_VALIDATED_ROUTES } from 'src/constants/constants';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const aiplan = useAiplanStore();
 const rolesStore = useRolesStore();
@@ -143,6 +144,7 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       parent: any,
       draft: boolean,
       description_json: any,
+      issue_link: DtoIssueLinkLight,
     ) {
       const data = {
         name,
@@ -157,7 +159,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
         parent,
         draft,
         description_json,
+        issue_link,
       };
+
+      console.log('asdads', data);
 
       const formData = buildFormData(data, content.files, 'issue');
 
@@ -216,7 +221,11 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
     },
 
     // ------------- Exact issue transfer -------------
-    async issueTransferById(data: IIssueTransferById, create_entities = false, new_issue_params: IIssueTransferParams | null = null) {
+    async issueTransferById(
+      data: IIssueTransferById,
+      create_entities = false,
+      new_issue_params: IIssueTransferParams | null = null,
+    ) {
       return await api.post(
         `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params.workspace}/issues/migrate/`,
         new_issue_params ? new_issue_params : {},
