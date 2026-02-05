@@ -107,7 +107,7 @@ import { sortStates } from 'src/utils/sort';
 import { getRandomEmoji } from 'src/utils/helpers';
 
 // constants
-import { NETWORK_CHOICES } from 'src/constants/constants';
+import { NETWORK_CHOICES, PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
 import { PROJECT_EMOJIS, PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
 import { SUCCESS_PROJECT_CREATE } from 'src/constants/notifications';
 
@@ -182,9 +182,9 @@ const validateName = (val: string): boolean | string => {
 const validateIdentifier = (val: string): boolean | string => {
   isValidIdentifier.value = false;
   const minL =
-    val.trim().length >= 3 ||
-    'Идентификатор должен содержать 3 и более симолов';
-  const maxL = maxLength(val, 10);
+    val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
+    `Идентификатор должен содержать ${PROJECT_IDENTIFIER_LENGTH.MIN} и более симолов`;
+  const maxL = maxLength(val, PROJECT_IDENTIFIER_LENGTH.MAX);
   const upperCaseAndNumber = isUpperCaseAndNumber(val, 'Идентификатор');
   const validations = [minL, maxL, upperCaseAndNumber];
 
