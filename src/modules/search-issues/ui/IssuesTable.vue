@@ -49,50 +49,16 @@
       <q-btn flat dense round style="height: 30px; width: 30px" class="q-ml-sm">
         <Filterv2Icon />
         <q-tooltip>Настроить отображение</q-tooltip>
-        <q-menu style="width: 200px" :offset="[-10, 10]">
-          <q-card class="column q-py-md q-pl-sm q-pr-md">
-            <h6 style="margin: 4px 0 4px 8px !important">Колонки</h6>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.name"></q-checkbox>
-              <span> Название </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.priority"></q-checkbox>
-              <span> Приоритет </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.state"></q-checkbox>
-              <span> Статус </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.target_date"></q-checkbox>
-              <span> Срок исполнения</span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.created_at"></q-checkbox>
-              <span> Дата создания </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.updated_at"></q-checkbox>
-              <span>
-                Последнее<br />
-                изменение
-              </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.author"></q-checkbox>
-              <span> Автор </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.assignees"></q-checkbox>
-              <span> Исполнитель </span>
-            </div>
-            <div class="row gap-x-sm centered-horisontally">
-              <q-checkbox v-model="columnsToShow.labels"></q-checkbox>
-              <span> Теги </span>
-            </div>
-          </q-card>
-        </q-menu>
+        <q-popup-proxy class="hide-scrollbar">
+          <q-list style="width: 320px">
+            <q-item class="row">
+              <FilterColumnsOptions
+                v-model:columns-to-show="columnsToShow"
+                :columns="allColumns"
+              />
+            </q-item>
+          </q-list>
+        </q-popup-proxy>
       </q-btn>
 
       <q-btn
@@ -119,7 +85,7 @@
       :hide-no-data="true"
       :rows="rows"
       :selection="selection"
-      :columns="allColumns"
+      :columns="visibleColumns"
       :rows-per-page-options="
         Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
       "
@@ -298,14 +264,12 @@
 
 <script setup lang="ts">
 // core
-import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { debounce, Screen } from 'quasar';
 import { onMounted, ref, watch, computed } from 'vue';
 
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
-import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
@@ -322,6 +286,7 @@ import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'components/pagination/PaginationDefault.vue';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
+import FilterColumnsOptions from 'src/components/FilterColumnsOptions.vue';
 
 const props = defineProps<{
   currentFilter: any;
@@ -342,9 +307,7 @@ const router = useRouter();
 
 //stores
 const { extendedSearchIssues, exportIssues } = useIssuesStore();
-const filtersStore = useFiltersStore();
 const { setNotificationView } = useNotificationStore();
-const { columnsToShow } = storeToRefs(filtersStore);
 
 //state
 const rows = ref([] as any);
@@ -360,15 +323,17 @@ const pagination = ref({
 });
 
 //computeds
+const visibleColumns = computed(() => {
+  return columnsToShow.value
+    .map((name) => columns.find((c) => c.name === name))
+    .filter(Boolean);
+});
+
 const allColumns = computed(() => {
-  return (
-    columns.filter((col) => columnsToShow.value[col.name] == true) || columns
+  const inactive = columns.filter(
+    (el) => !columnsToShow.value.includes(el.name),
   );
-  // columns.filter((col) => {
-  //   if (!columnsToShow.value || columnsToShow.value.length == 0)
-  //     return true;
-  //   return columnsToShow.value.some((c: any) => c === col.name);
-  // });
+  return [...visibleColumns.value, ...inactive];
 });
 
 const checkedRows = computed({
@@ -472,17 +437,6 @@ watch(
   },
   { deep: true },
 );
-
-// const allColumns = computed(() => {
-//   return (
-//     columns.filter((col) => columnsToShow.value[col.name] == true) || columns
-//   );
-// columns.filter((col) => {
-//   if (!columnsToShow.value || columnsToShow.value.length == 0)
-//     return true;
-//   return columnsToShow.value.some((c: any) => c === col.name);
-// });
-// });
 
 const route = (row) => {
   const routeData = router.resolve(
@@ -594,6 +548,8 @@ const columns = [
     sortable: true,
   },
 ];
+
+const columnsToShow = ref(columns.map((el) => el.name));
 
 const showDescHighlighted = (text: string) => {
   return text && parseBoldText(text)?.includes('<b>');
