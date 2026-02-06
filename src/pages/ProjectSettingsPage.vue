@@ -8,6 +8,7 @@
       <SettingsTabs
         :current-tab="projectSettingsTab"
         :list-tabs="listTabs"
+        :content-class="'col-shrink'"
         @set="(val: number) => (projectSettingsTab = val)"
       />
 
