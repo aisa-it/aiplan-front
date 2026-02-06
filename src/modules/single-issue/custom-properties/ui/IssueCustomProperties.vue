@@ -29,6 +29,24 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'select'">
+            <q-select
+              class="base-selector issue-selector"
+              :model-value="(prop.value as string) || null"
+              @update:model-value="
+                (val) => {
+                  prop.value = val as string;
+                  updateValue(prop, val);
+                }
+              "
+              :options="(prop as any).options || []"
+              dense
+              clearable
+              emit-value
+              map-options
+            />
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
@@ -140,3 +158,10 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
 watch(() => props.issueId, fetchData);
 onMounted(fetchData);
 </script>
+
+<style scoped lang="scss">
+.issue-selector {
+  max-width: 100%;
+  min-width: 100%;
+}
+</style>
