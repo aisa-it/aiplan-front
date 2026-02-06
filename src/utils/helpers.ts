@@ -238,7 +238,7 @@ export const isArraysEqual = (arr1: string[], arr2: string[]): boolean => {
   return sorterArr1.every((value, index) => value === sorterArr2[index]);
 };
 
-export const hasFormChanges = (
+export const hasObjectChanges = (
   original: Record<string, any>,
   current: Record<string, any>,
 ): boolean => {

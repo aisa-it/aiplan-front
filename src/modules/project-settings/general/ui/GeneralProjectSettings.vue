@@ -158,7 +158,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
@@ -181,7 +181,7 @@ import {
   validateAllowedCharacters,
 } from 'src/utils/validation';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
-import { getUrlFile, hasFormChanges } from 'src/utils/helpers';
+import { getUrlFile } from 'src/utils/helpers';
 
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
@@ -198,6 +198,9 @@ import {
   updateProjectLogo,
   deleteProjectLogo,
 } from '../../services/api';
+
+// composables
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 //routes
 const router = useRouter();
@@ -229,23 +232,16 @@ const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
 //computeds
-const hasChanges = computed(() => {
-  const unwrapValue = (val: any) => val?.value ?? val;
-  const form = {
-    name: projectForm.value.name,
-    identifier: projectForm.value.identifier,
-    public: unwrapValue(projectForm.value.public),
-    emoji: unwrapValue(projectForm.value.emoji),
-  };
-
-  const original = {
-    name: project.value.name,
-    identifier: project.value.identifier,
-    public: unwrapValue(project.value.public),
-    emoji: unwrapValue(project.value.emoji),
-  };
-
-  return hasFormChanges(original, form);
+const { hasChanges, init } = useFormChanges(projectForm, {
+  transform: (val) => {
+    const unwrapValue = (v: any) => v?.value ?? v;
+    return {
+      name: val.name,
+      identifier: val.identifier,
+      public: unwrapValue(val.public),
+      emoji: unwrapValue(val.emoji),
+    };
+  },
 });
 
 //methods
@@ -375,6 +371,7 @@ watch(
       projectForm.value = Object.assign({}, newValue);
       validateName(projectForm.value.name);
       validateIdentifier(projectForm.value.identifier);
+      init();
     }
   },
   {

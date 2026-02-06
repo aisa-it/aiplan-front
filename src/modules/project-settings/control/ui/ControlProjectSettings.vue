@@ -76,29 +76,36 @@
 </template>
 
 <script setup lang="ts">
+//core
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { computed, onBeforeMount, onMounted, ref } from 'vue';
 
+//stores
 import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUserStore } from 'stores/user-store';
 
+//types
 import { IProjectLeader } from 'src/interfaces/projects';
 import {
   DtoProject,
   DtoProjectMemberLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
+//components
 import LoadPage from 'src/pages/LoadPage.vue';
 import SelectAssignee from 'components/selects/SelectAssignee.vue';
 import SelectWatchers from 'components/selects/SelectWatchers.vue';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 
+//api
 import { updateProject } from '../../services/api';
-import { hasFormChanges } from 'src/utils/helpers';
+
+//composables
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 const route = useRoute();
 const rolesStore = useRolesStore();
@@ -123,25 +130,20 @@ const isLoading = computed(() => {
   );
 });
 
-const hasChanges = computed(() => {
-  const normalizeArray = (arr: any[]) => {
-    if (!Array.isArray(arr)) return [];
-    return arr.map((val) => val?.member_id ?? val);
-  };
+const normalizeArray = (arr: any[]) => {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((val) => val?.member_id ?? val);
+};
 
-  const form = {
-    project_lead: currentProject.value.project_lead?.value,
-    default_assignees: normalizeArray(currentProject.value.default_assignees),
-    default_watchers: normalizeArray(currentProject.value.default_watchers),
-  };
-
-  const original = {
-    project_lead: project.value.project_lead,
-    default_assignees: normalizeArray(project.value.default_assignees),
-    default_watchers: normalizeArray(project.value.default_watchers),
-  };
-
-  return hasFormChanges(original, form);
+const { hasChanges, init } = useFormChanges(currentProject, {
+  transform: (val) => {
+    if (!val) return {};
+    return {
+      project_lead: val.project_lead?.value,
+      default_assignees: normalizeArray(val.default_assignees),
+      default_watchers: normalizeArray(val.default_watchers),
+    };
+  },
 });
 
 useMeta(() => {
@@ -200,6 +202,7 @@ async function refresh() {
   });
 
   setAnotherTitle(currentProject.value.name);
+  init();
 }
 
 onBeforeMount(async () => await userStore.getUserInfo());

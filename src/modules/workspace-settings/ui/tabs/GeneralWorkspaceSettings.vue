@@ -381,7 +381,7 @@ import { useSettingsStore } from 'src/modules/workspace-settings/stores/settings
 
 // utils
 import { maxLength, validateAllowedCharacters } from 'src/utils/validation';
-import { getUrlFile, getFirstSymbol, hasFormChanges } from 'src/utils/helpers';
+import { getUrlFile, getFirstSymbol } from 'src/utils/helpers';
 import {
   updateWorkspace,
   resetWorkspaceToken,
@@ -391,6 +391,7 @@ import aiplan from 'src/utils/aiplan';
 
 // composables
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 // constants
 import {
@@ -412,7 +413,6 @@ import {
 } from 'src/modules/workspace-settings/ui/dialogs';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
-// import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
 const EditorTipTapV2 = defineAsyncComponent(
   () => import('src/components/editorV2/EditorTipTapV2.vue'),
@@ -480,34 +480,25 @@ const canEdit = computed(() =>
   hasPermissionByWorkspace(computedWorkspaceInfo.value, 'ws-settings'),
 );
 
-const hasChanges = computed(() => {
-  const normalizeHtml = (html: string | undefined | null) => {
-    // Редактор автоматически добавляет точку с запятой в атрибуты style
-    // Поэтому удаляем точки с запятой внутри атрибутов style и пробелы для сравнения
-    if (!html) return '';
+const normalizeHtml = (html: string | undefined | null) => {
+  // Редактор автоматически добавляет точку с запятой в атрибуты style
+  // Поэтому удаляем точки с запятой внутри атрибутов style и пробелы для сравнения
+  if (!html) return '';
 
-    return html.replace(/style="[^"]*"/g, (match) =>
-      match.replace(/;/g, '').replace(/\s/g, ''),
-    );
-  };
+  return html.replace(/style="[^"]*"/g, (match) =>
+    match.replace(/;/g, '').replace(/\s/g, ''),
+  );
+};
 
-  const form = {
-    name: workspaceInfoForm.value.name,
-    description: normalizeHtml(workspaceInfoForm.value.description),
-    owner_id:
-      workspaceInfoForm.value.owner_id?.value ??
-      workspaceInfoForm.value.owner_id,
-  };
-
-  const original = {
-    name: computedWorkspaceInfo.value.name,
-    description: normalizeHtml(computedWorkspaceInfo.value.description),
-    owner_id:
-      computedWorkspaceInfo.value.owner_id ??
-      computedWorkspaceInfo.value.owner?.id,
-  };
-
-  return hasFormChanges(original, form);
+const { hasChanges, init } = useFormChanges(workspaceInfoForm, {
+  transform: (val) => {
+    if (!val) return {};
+    return {
+      name: val.name,
+      description: normalizeHtml(val.description),
+      owner_id: val.owner_id?.value ?? val.owner_id,
+    };
+  },
 });
 
 onMounted(async () => {
@@ -569,6 +560,7 @@ const refreshInfo = async () => {
     label: 'Не выбран',
     value: null,
   };
+  init();
 };
 
 const refreshToken = async () => {
