@@ -59,14 +59,6 @@ export function issueActivityRender(
                   ${link} ${workspaceSource}
                 <span/>`;
 
-    case 'state':
-      action = 'поменял(-а) статус на';
-      value = activity.new_entity_detail.name
-        ? addSpaceIfCamelCase(activity.new_value as string)
-        : 'Не выбрано';
-      return `<span>${action} "${value}" в задаче
-                ${link} ${workspaceSource}
-                <span/>`;
     case 'status':
       action = 'поменял(-а) статус на';
       value = activity.new_entity_detail.name
@@ -192,6 +184,11 @@ export function issueActivityRender(
 
     case 'link_title':
       return `<span>изменил(-а) название ссылки с "${activity.old_value}" на "${activity.new_value}" в задачe ${link} ${workspaceSource}<span>`;
+
+    case 'label':
+      action = translateVerb(activity.verb as string);
+      return `<span>${action} тег в задачe ${link} ${workspaceSource}<span/>`;
+
     default:
       break;
   }

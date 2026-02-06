@@ -40,6 +40,10 @@ export function projectNotificationRender(
       action = 'изменил(-а)';
       return `<span>${action} эмодзи проекта ${projectLink}<span/>`;
 
+    case 'logo':
+      action = 'изменил(-а)';
+      return `<span>${action} лого проекта ${projectLink}<span/>`;
+
     case 'name':
       action = 'изменил(-а)';
       return `<span>${action} имя проекта с "${data.old_value}" на ${
@@ -62,11 +66,18 @@ export function projectNotificationRender(
         valToNet(Boolean(data.old_value))?.label
       }" на "${valToNet(Boolean(data.new_value))?.label}"<span/>`;
 
+    case 'public':
+      return `<span>изменил(-а) приватность проекта ${projectLink} с "${
+        valToNet(JSON.parse(data?.old_value))?.label
+      }" на "${
+        valToNet(JSON.parse(data?.new_value))?.label
+      }"<span/>`;
+
     case 'project_lead':
       action = 'изменил(-а)';
       return `<span>${action} лидера проекта ${projectLink} с ${getFullName(
-        data.old_value,
-      )} на ${getFullName(data.new_value)}<span/>`;
+        data.old_entity_detail,
+      )} на ${getFullName(data.new_entity_detail)}<span/>`;
 
     case 'default_assignees':
       action = data.new_value ? 'добавил(-а)' : 'убрал(-а)';
@@ -116,7 +127,7 @@ export function projectNotificationRender(
         valToRole(+data.old_value)?.label
       }" на "${valToRole(+data.new_value)?.label}" <span/>`;
 
-    case 'state':
+    case 'status':
       action = translateVerb(data.verb);
       if (data.verb === 'created')
         value = ` статус "${data.new_value}" ${
@@ -135,6 +146,14 @@ export function projectNotificationRender(
           data.new_value
         }" ${projectLink ? `в проекте ${projectLink}` : ''}`;
       return `<span>${action} ${value}<span/>`;
+
+    case 'status_default':
+      action = 'изменил(-а)';
+      return `<span>${action} статус по умолчанию с "${
+        data.old_value
+      }" на "${data.new_value}" ${
+        projectLink ? `в проекте ${projectLink}` : ''
+      }<span/>`;
 
     case 'status_name':
       action = 'изменил(-а)';
@@ -214,6 +233,28 @@ export function projectNotificationRender(
       if (data.verb === 'added') {
         return `<span>добавил(-а) задачу ${issueLink(data?.new_entity_detail?.url, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
       }
+      return;
+
+    case 'template':
+      if (data.verb === 'created') {
+        return `<span>создал(-а) шаблон задачи "${data.new_value}" в проекте ${projectLink} </span>`;
+      }
+      if (data.verb === 'deleted') {
+        return `<span>удалил(-а) шаблон задачи "${data.old_value}" в проекте ${projectLink} </span>`;
+      }
+      return;
+
+    case 'template_name':
+      if (data.verb === 'updated') {
+        return `<span>изменил(-а) название шаблона задачи с "${data.old_value}" на "${data.new_value}" в проекте ${projectLink} </span>`;
+      }
+      return;
+
+    case 'template_template':
+      if (data.verb === 'updated') {
+        return `<span>изменил(-а) шаблон задачи "${data.new_entity_detail.name}" в проекте ${projectLink} </span>`;
+      }
+      return;
 
     default:
       break;
