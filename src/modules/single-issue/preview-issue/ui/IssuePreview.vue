@@ -32,7 +32,13 @@
         <q-btn
           class="secondary-btn-only-icon-sm"
           icon="open_in_full"
-          @click="emits('open', issueData.sequence_id, issueData.project_detail.identifier)"
+          @click="
+            emits(
+              'open',
+              issueData.sequence_id,
+              issueData.project_detail.identifier,
+            )
+          "
         >
           <HintTooltip>Развернуть</HintTooltip>
         </q-btn>
@@ -54,6 +60,7 @@
       <MainIssueInfo preview @update:issue-page="refreshData" />
 
       <SelectChildren
+        v-if="!hideSettings.includes('sub_issues_count')"
         :projectid="issueData.project"
         :project="issueData.project_detail"
         :issueid="issueData.id"
@@ -157,13 +164,9 @@ const { fetchPinnedIssues } = useIssuesStore();
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
-const clientWidth = ref(document.documentElement.clientWidth)
-const minWidth = computed(() =>
-  Math.max(clientWidth.value / 2, defaultWidth),
-);
-const maxWidth = computed(
-  () => clientWidth.value - menuSidebarWidth.value,
-);
+const clientWidth = ref(document.documentElement.clientWidth);
+const minWidth = computed(() => Math.max(clientWidth.value / 2, defaultWidth));
+const maxWidth = computed(() => clientWidth.value - menuSidebarWidth.value);
 const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   minWidth,
   maxWidth,
@@ -171,6 +174,10 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   'drawerWidth',
   'right',
 );
+
+const hideSettings = computed(() => {
+  return project.value?.hide_fields ?? [];
+});
 
 const refreshData = (args?: any): void => {
   fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);

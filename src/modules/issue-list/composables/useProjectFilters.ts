@@ -15,7 +15,7 @@ import {
 export function useProjectFilters(emits?) {
   const route = useRoute();
   const projectStore = useProjectStore();
-  const { projectProps, issuesLoader, getStatusesAsArray } =
+  const { projectProps, issuesLoader, getStatusesAsArray, project } =
     storeToRefs(projectStore);
 
   const viewForm = ref(DEFAULT_VIEW_PROPS);
@@ -122,6 +122,9 @@ export function useProjectFilters(emits?) {
     () => {
       if (is.object(projectProps.value)) {
         viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
+        viewForm.value.columns_to_show = viewForm.value.columns_to_show.filter(
+          (el) => !project.value?.hide_fields?.includes(el),
+        );
         if (viewForm.value.issueView === 'kanban') {
           optionsGroup.value = optionsGroup.value.filter(
             (opt) => opt.value !== 'none',
