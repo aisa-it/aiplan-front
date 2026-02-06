@@ -96,9 +96,8 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         return filters;
       }
       case 'priority': {
-        if (entity) {
-          filters = { priorities: [entity] };
-        }
+        // Для "Без приоритета" и др. отправляем пустую строку
+        filters = { priorities: [entity || ''] };
         return filters;
       }
       case 'watchers': {
