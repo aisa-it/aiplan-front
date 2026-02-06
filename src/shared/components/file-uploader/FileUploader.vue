@@ -33,7 +33,7 @@
       <div v-if="attachments?.length" class="row q-col-gutter-sm q-mt-sm">
         <div v-for="attachment in attachments" :key="attachment.id">
           <FileUploaderCard
-            :row="attachment"
+            :file="attachment"
             :is-edit="true"
             @delete="handleDelete(attachment.id)"
             @download="handleDownload(attachment)"
@@ -110,19 +110,18 @@ const handleDelete = (id: string) => {
 .upload-btn {
   border: 1px dashed #ccc;
   min-height: 50px;
-  background-color: white; /* Ensure visible background */
+  background-color: white;
 
   &:hover {
-    background-color: #f5f5f5; /* $grey-2 equiv roughly */
+    background-color: #f5f5f5;
   }
 }
 
 .isDragIn {
   outline: 1px dashed black;
-  background-color: #f5f5f5; /* $grey-2 equiv */
+  background-color: #f5f5f5;
 }
 
-/* Ensure full width */
 .full-w {
   width: 100%;
 }

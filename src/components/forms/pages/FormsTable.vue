@@ -84,7 +84,7 @@
   <FormAnswers
     v-model="isFormAnswersOpen"
     :answerId="answerId"
-    :formSlug="route.params.formSlug"
+    :formSlug="String(route.params.formSlug)"
   />
 </template>
 
@@ -168,6 +168,11 @@ const getCurrentForm = async () => {
 const answerRender = (type: string, value: string | boolean) => {
   if (type === 'checkbox') {
     return value ? 'Да' : 'Нет';
+  }
+  console.log(form.value);
+  if (type === 'attachment') {
+    const found = form.value.attachments.find((a) => a.id === value);
+    if (found?.asset?.name) return found.asset.name;
   }
   return parseText(value?.toString()) ?? 'Нет ответа';
 };
@@ -277,7 +282,7 @@ const columns: QTableColumn[] = [
           (el, index) =>
             `<p class="q-ma-none abbriviated-text"> Ответ ${
               index + 1
-            }: ${answerRender(el.type, el.value)} </p> `,
+            }: ${answerRender(el.type, el.values)} </p> `,
         )
         .join('');
       return fields.length > 2 ? parsedFields + endTag : parsedFields;

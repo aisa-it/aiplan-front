@@ -1,5 +1,10 @@
 <template>
-  <q-dialog no-refocus @show="getInfo()" @hide="() => resetDialog()">
+  <q-dialog
+    v-bind="$attrs"
+    no-refocus
+    @show="getInfo()"
+    @hide="() => resetDialog()"
+  >
     <q-card class="fullscreen-dialog">
       <q-card-section v-if="!loading" class="q-pa-lg">
         <h6 class="form-header">{{ headContent }}</h6>
@@ -35,7 +40,7 @@
             class="form-answers"
           >
             <p class="form-answers_title">
-              {{ index + 1 + '. ' + a.label }}
+              {{ Number(index) + 1 + '. ' + a.label }}
             </p>
             <p v-if="a?.type === 'checkbox'">
               {{ a.value === true ? 'Да' : 'Нет' }}
@@ -83,8 +88,10 @@
               <div v-if="a.value" class="row q-col-gutter-sm">
                 <FileUploaderCard
                   v-if="getAttachment(a.value)"
-                  :row="getAttachment(a.value)"
+                  :file="getAttachment(a.value)"
                   :is-edit="false"
+                  @open="openPreview(getAttachment(a.value))"
+                  @download="downloadFile(getAttachment(a.value))"
                 />
               </div>
             </div>
@@ -93,10 +100,12 @@
         </div>
       </q-card-section>
       <div v-else class="loader-wrapper">
-        <DefaultLoader></DefaultLoader>
+        <DefaultLoader />
       </div>
     </q-card>
   </q-dialog>
+
+  <DocPreviewDialog v-model="isPreviewOpen" :file="previewFile" />
 </template>
 
 <script setup lang="ts">
@@ -118,6 +127,7 @@ import { getAnswer, getFormAuth } from 'src/components/forms/services/api';
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
 import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
+import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
 
 const props = defineProps<{
   answerId: number;
@@ -134,6 +144,8 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const form = ref();
 const answer = ref();
 const loading = ref(true);
+const previewFile = ref<any>(null);
+const isPreviewOpen = ref(false);
 
 //computeds
 const headContent = computed(() => {
@@ -173,13 +185,27 @@ const resetDialog = () => {
 };
 
 const getAttachment = (id: string) => {
-  if (!answer.value?.attachment) return null;
+  if (!answer.value?.attachments) return null;
 
-  if (!Array.isArray(answer.value.attachment)) {
-    return answer.value.attachment.id === id ? answer.value.attachment : null;
+  return answer.value.attachments.find((a: any) => a.id === id);
+};
+
+const openPreview = (file: any) => {
+  previewFile.value = file;
+  isPreviewOpen.value = true;
+};
+
+const downloadFile = (file: any) => {
+  if (!file?.asset?.id) return;
+  const url = `/api/auth/file/${file.asset.id}`;
+  const link = document.createElement('a');
+  link.href = url;
+  if (file.asset.name) {
+    link.setAttribute('download', file.asset.name);
   }
-
-  return answer.value.attachment.find((a: any) => a.id === id);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 </script>
 

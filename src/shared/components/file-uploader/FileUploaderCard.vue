@@ -1,6 +1,6 @@
 <template>
   <div class="file-grid q-px-sm q-pt-sm">
-    <q-card :key="row.id" class="file-card" flat dense>
+    <q-card :key="file.id" class="file-card" flat dense>
       <q-card-section class="no-padding">
         <div class="file-icon-container">
           <div
@@ -32,7 +32,7 @@
           <component
             v-if="!progress && !status"
             :is="
-              getIconFormat(getFileExtension(row, 'extension')) || FileNoneIcon
+              getIconFormat(getFileExtension(file, 'extension')) || FileNoneIcon
             "
             :width="42"
             :height="42"
@@ -41,16 +41,16 @@
           <div class="file-actions">
             <slot
               name="actions"
-              :row="row"
+              :row="file"
               :is-edit="isEdit"
               :status="status"
               :progress="progress"
             >
               <q-btn
-                v-if="!progress && !status && !row.draft"
+                v-if="!progress && !status && !file.draft"
                 unelevated
                 dense
-                @click="$emit('download', row)"
+                @click="$emit('download', file)"
                 class="buttons-attachments"
               >
                 <LoadIcon :width="20" :height="20" />
@@ -58,13 +58,13 @@
               </q-btn>
 
               <q-btn
-                v-if="!progress && !status && isPossibleToOpen(row)"
+                v-if="!progress && !status && isPossibleToOpen(file)"
                 unelevated
                 dense
                 @click="$emit('open')"
                 class="buttons-attachments"
                 :style="
-                  !isPossibleToOpen(row) ? 'visibility: hidden;' : undefined
+                  !isPossibleToOpen(file) ? 'visibility: hidden;' : undefined
                 "
               >
                 <ZoomIcon :width="20" :height="20" />
@@ -76,7 +76,7 @@
                 padding="4px 4px"
                 flat
                 dense
-                @click="$emit('delete', row.asset.name, row.id)"
+                @click="$emit('delete', file.asset.name, file.id)"
                 class="buttons-attachments"
               >
                 <BinIcon color="#DC3E3E" :width="20" :height="20" />
@@ -88,24 +88,24 @@
         <div class="file-info">
           <div class="file-info-block">
             <div class="file-name ellipsis">
-              {{ getFileExtension(row, 'name') }}
+              {{ getFileExtension(file, 'name') }}
               <HintTooltip>
-                {{ getFileExtension(row, 'name') }}
+                {{ getFileExtension(file, 'name') }}
               </HintTooltip>
             </div>
             <div
               class="font-semibold q-ml-md"
               style="font-size: 12px; white-space: nowrap"
             >
-              {{ getFileSize(row.asset.size) }}
+              {{ getFileSize(file.asset.size) }}
             </div>
           </div>
           <div class="file-info-block file-date">
             <span class="abbriviated-text">{{
-              formatDate(row.created_at)
+              formatDate(file.created_at)
             }}</span>
             <span style="font-weight: 800">{{
-              '.' + getFileExtension(row, 'extension')
+              '.' + getFileExtension(file, 'extension')
             }}</span>
           </div>
           <q-linear-progress
@@ -146,7 +146,7 @@ import { IAttachmentCard } from 'src/interfaces/files';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 
 interface IProps {
-  row: IAttachmentCard;
+  file: IAttachmentCard;
   isEdit?: boolean;
   progress?: number | null | undefined;
   status?: 'pending' | 'uploading' | 'success' | 'error' | 'cancelled';
