@@ -60,7 +60,7 @@ interface ParamItem {
 const params = ref<ParamItem[]>([
   {
     icon: markRaw(PriorityIcon),
-    label: 'Приориет',
+    label: 'Приоритет',
     name: 'priority',
     show: true,
   },
