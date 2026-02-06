@@ -162,8 +162,6 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
         issue_link,
       };
 
-      console.log('asdads', data);
-
       const formData = buildFormData(data, content.files, 'issue');
 
       return api.post(
