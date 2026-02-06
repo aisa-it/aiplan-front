@@ -158,7 +158,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
@@ -186,7 +186,7 @@ import { getUrlFile } from 'src/utils/helpers';
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
-import { PROJECT_IDENTIFIER_LENGTH  } from 'src/constants/constants';
+import { PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
 
 // interfaces
 import { IProject } from 'src/interfaces/projects';
@@ -198,6 +198,9 @@ import {
   updateProjectLogo,
   deleteProjectLogo,
 } from '../../services/api';
+
+// composables
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 //routes
 const router = useRouter();
@@ -228,16 +231,17 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
-
 //computeds
-const hasChanges = computed(() => {
-  if (!project.value) return false;
-
-  const getVal = (val: any) => val?.value ?? val;
-
-  return Object.keys(projectForm.value).some(
-    (key) => getVal(projectForm.value[key]) !== getVal(project.value[key]),
-  );
+const { hasChanges, init } = useFormChanges(projectForm, {
+  transform: (val) => {
+    const unwrapValue = (v: any) => v?.value ?? v;
+    return {
+      name: val.name,
+      identifier: val.identifier,
+      public: unwrapValue(val.public),
+      emoji: unwrapValue(val.emoji),
+    };
+  },
 });
 
 //methods
@@ -367,6 +371,7 @@ watch(
       projectForm.value = Object.assign({}, newValue);
       validateName(projectForm.value.name);
       validateIdentifier(projectForm.value.identifier);
+      init();
     }
   },
   {

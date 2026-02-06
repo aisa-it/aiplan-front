@@ -2,7 +2,6 @@
   <q-select
     ref="selectLeaderRef"
     dense
-    
     :model-value="currentValue"
     :label="label"
     class="base-selector"
@@ -80,11 +79,11 @@ const emits = defineEmits<{
 const selectLeaderRef = ref();
 const { getWidthStyle: selectLeaderWidth } =
   useResizeObserverSelect(selectLeaderRef);
-  
+
 const isShowTooltip = ref(false)
-  
-const isMobile = computed(() => Screen.width <= 650);  
-  
+
+const isMobile = computed(() => Screen.width <= 650);
+
 const leaderOptionsComputed = computed(() => {
   return props.options;
 });

@@ -144,7 +144,8 @@ export function getEmojiFromHexCode(code: string) {
 export function getFullName(member?: DtoUserLight, type?: string) {
   if (!member) return 'Пользователь удалён';
 
-  if (!member.is_onboarded && type === 'form') return member.last_name + ' ' + member.first_name;
+  if (!member.is_onboarded && type === 'form')
+    return member.last_name + ' ' + member.first_name;
 
   if (!member.is_onboarded) return member.email;
 
@@ -229,10 +230,28 @@ export const parseBoldText = (html: string) => {
     ?.replace(/&lt;\/b&gt;/gi, '</b>');
 };
 
-export const isArraysEqual = (arr1: string[], arr2: string[]): boolean =>{
+export const isArraysEqual = (arr1: string[], arr2: string[]): boolean => {
   if (arr1.length !== arr2.length) return false;
   const sorterArr1 = [...arr1].sort();
   const sorterArr2 = [...arr2].sort();
 
   return sorterArr1.every((value, index) => value === sorterArr2[index]);
-}
+};
+
+export const hasObjectChanges = (
+  original: Record<string, any>,
+  current: Record<string, any>,
+): boolean => {
+  if (!original || !current) return false;
+
+  return Object.keys(current).some((key) => {
+    const val1 = current[key];
+    const val2 = original[key];
+
+    if (Array.isArray(val1) && Array.isArray(val2)) {
+      return !isArraysEqual(val1, val2);
+    }
+
+    return val1 !== val2;
+  });
+};
