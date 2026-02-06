@@ -1,90 +1,92 @@
 <template>
-  <div class="row q-pt-md">
-    <div class="col centered-horisontally">
-      <div class="row items-center">
-        <LinkIcon class="issue-icon" /> <span class="q-ml-sm">Ссылки </span>
+  <div>
+    <div class="row q-pt-md">
+      <div class="col centered-horisontally">
+        <div class="row items-center">
+          <LinkIcon class="issue-icon" /> <span class="q-ml-sm">Ссылки</span>
+        </div>
+      </div>
+      <div class="col flex justify-end">
+        <q-btn
+          v-if="isDemo ? isDemoUserValid() : !isDisabled"
+          class="btn-only-icon-sm"
+          @click="isLinkOpenDialog = true"
+          ><AddIcon
+        /></q-btn>
       </div>
     </div>
-    <div class="col flex justify-end">
-      <q-btn
-        v-if="isDemo ? isDemoUserValid() : !isDisabled"
-        class="btn-only-icon-sm"
-        @click="isLinkOpenDialog = true"
-        ><AddIcon
-      /></q-btn>
-    </div>
-  </div>
-  <q-list class="q-mt-sm issue-links-wrapper">
-    <q-item v-for="l in links" :key="l.id" class="issue-link-card">
-      <HintTooltip>
-        {{ l.title }} <br />
-        {{ l.url }}</HintTooltip
-      >
-      <LinkIcon class="q-mt-xs"></LinkIcon>
-      <q-item-section>
-        <q-item-label>
-          <q-btn
-            v-if="l.url"
-            flat
-            dense
-            no-caps
-            @click.stop="goToLink(l.url)"
-            style="width: 90%"
-          >
-            <span class="abbriviated-text" style="text-align: start">
+    <q-list class="q-mt-sm issue-links-wrapper">
+      <q-item v-for="l in links" :key="l.id" class="issue-link-card">
+        <HintTooltip>
+          {{ l.title }} <br />
+          {{ l.url }}</HintTooltip
+        >
+        <LinkIcon class="q-mt-xs q-mr-xs" />
+        <div class="row column" style="width: 100%">
+          <q-item-label>
+            <q-btn
+              v-if="l.url"
+              flat
+              dense
+              no-caps
+              @click.stop="goToLink(l.url)"
+              style="width: 100%"
+            >
+              <span class="abbriviated-text" style="text-align: start">
+                {{ l.title }}
+              </span>
+            </q-btn>
+            <span v-else class="abbriviated-text" style="text-align: start">
               {{ l.title }}
             </span>
+          </q-item-label>
+          <q-item-label v-if="l.created_at" caption lines="2" class="sub-text">
+            Добавлено {{ formatDateTime(l.created_at) }}<br />
+            <!--   {{ aiplan.UserName(l.created_by_detail).join(' ') }} -->
+          </q-item-label>
+        </div>
+        <div class="row column q-ml-auto justify-between q-pl-sm">
+          <q-btn
+            v-if="!isDisabled"
+            flat
+            dense
+            @click="
+              () => {
+                linkToUpdate = l;
+                isLinkOpenDialog = true;
+              }
+            "
+          >
+            <EditIcon />
           </q-btn>
-          <span v-else class="abbriviated-text" style="text-align: start">
-            {{ l.title }}
-          </span>
-        </q-item-label>
-        <q-item-label v-if="l.created_at" caption lines="2" class="sub-text">
-          Добавлено {{ formatDateTime(l.created_at) }}<br />
-          <!--   {{ aiplan.UserName(l.created_by_detail).join(' ') }} -->
-        </q-item-label>
-      </q-item-section>
-      <q-item-section side class="justify-between">
-        <q-btn
-          v-if="!isDisabled"
-          flat
-          dense
-          @click="
-            () => {
-              linkToUpdate = l;
-              isLinkOpenDialog = true;
-            }
-          "
-        >
-          <EditIcon />
-        </q-btn>
-        <q-btn
-          v-if="!isDisabled"
-          flat
-          dense
-          @click="
-            () => {
-              linkToDelete = l;
-              isConfirmOpen = true;
-            }
-          "
-        >
-          <BinIcon color="#DC3E3E" />
-        </q-btn>
-      </q-item-section>
-    </q-item>
-  </q-list>
-  <ConfirmDeleteLinkDialog
-    v-model="isConfirmOpen"
-    :link="linkToDelete"
-    @delete="deleteLink(linkToDelete.id)"
-  />
-  <LinkDialog
-    v-model="isLinkOpenDialog"
-    :link="linkToUpdate"
-    @create="(link) => addLink(link)"
-    @edit="editLink"
-  />
+          <q-btn
+            v-if="!isDisabled"
+            flat
+            dense
+            @click="
+              () => {
+                linkToDelete = l;
+                isConfirmOpen = true;
+              }
+            "
+          >
+            <BinIcon color="#DC3E3E" />
+          </q-btn>
+        </div>
+      </q-item>
+    </q-list>
+    <ConfirmDeleteLinkDialog
+      v-model="isConfirmOpen"
+      :link="linkToDelete"
+      @delete="deleteLink(linkToDelete.id)"
+    />
+    <LinkDialog
+      v-model="isLinkOpenDialog"
+      :link="linkToUpdate"
+      @create="(link) => addLink(link)"
+      @edit="editLink"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
