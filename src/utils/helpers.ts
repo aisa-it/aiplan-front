@@ -222,6 +222,15 @@ export const parseText = (html: string) => {
     ?.replace(/>/g, '&gt;');
 };
 
+export const escapeHtml = (html: string): string => {
+  return html
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 // экранируем теги кроме <b></b>
 export const parseBoldText = (html: string) => {
   return parseText(html)
@@ -229,10 +238,10 @@ export const parseBoldText = (html: string) => {
     ?.replace(/&lt;\/b&gt;/gi, '</b>');
 };
 
-export const isArraysEqual = (arr1: string[], arr2: string[]): boolean =>{
+export const isArraysEqual = (arr1: string[], arr2: string[]): boolean => {
   if (arr1.length !== arr2.length) return false;
   const sorterArr1 = [...arr1].sort();
   const sorterArr2 = [...arr2].sort();
 
   return sorterArr1.every((value, index) => value === sorterArr2[index]);
-}
+};
