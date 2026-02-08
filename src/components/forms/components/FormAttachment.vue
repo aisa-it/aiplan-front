@@ -6,6 +6,12 @@
     :max-items="1"
     @upload="handleUpload"
     @delete="handleDelete"
+    @open="handleOpen"
+  />
+  <DocPreviewDialog
+    v-if="isPreviewOpen"
+    v-model="isPreviewOpen"
+    :file="previewFile"
   />
 </template>
 
@@ -15,6 +21,7 @@ import { createFormAttachments } from 'src/components/forms/services/api';
 import FileUploader from 'src/shared/components/file-uploader/FileUploader.vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useFormStore } from 'src/stores/form-store';
+import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -77,5 +84,14 @@ const handleDelete = async (id: string) => {
       open: true,
     });
   }
+};
+
+const isPreviewOpen = ref(false);
+const previewFile = ref();
+
+const handleOpen = (file: any) => {
+  if (!file) return;
+  previewFile.value = file;
+  isPreviewOpen.value = true;
 };
 </script>

@@ -13,6 +13,11 @@ export const useFormStore = defineStore('form-store', {
       forms: [] as IForms[],
     };
   },
+  getters: {
+    getFormBySlug: (state) => (slug: string) => {
+      return state.forms.find((f) => f.slug === slug);
+    },
+  },
   actions: {
     async resetForms() {
       return (this.forms = []);

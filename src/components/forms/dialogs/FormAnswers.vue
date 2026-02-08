@@ -115,7 +115,7 @@ import { storeToRefs } from 'pinia';
 
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+import { useFormStore } from 'src/stores/form-store';
 
 //utils
 import aiplan from 'src/utils/aiplan';
@@ -128,6 +128,7 @@ import { getAnswer, getFormAuth } from 'src/components/forms/services/api';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
 import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 
 const props = defineProps<{
   answerId: number;
@@ -170,7 +171,9 @@ const getCurrentAnswer = async () => {
 };
 
 const getCurrentForm = async () => {
-  form.value = await getFormAuth(props.formSlug);
+  const storedForm = useFormStore().getFormBySlug(props.formSlug);
+  if (storedForm) form.value = storedForm;
+  else form.value = await getFormAuth(props.formSlug);
 };
 
 const getInfo = async () => {

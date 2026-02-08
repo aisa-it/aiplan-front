@@ -169,10 +169,11 @@ const answerRender = (type: string, value: string | boolean) => {
   if (type === 'checkbox') {
     return value ? 'Да' : 'Нет';
   }
-  console.log(form.value);
   if (type === 'attachment') {
-    const found = form.value.attachments.find((a) => a.id === value);
-    if (found?.asset?.name) return found.asset.name;
+    const attachment = form.value?.attachments?.find(
+      (a: any) => a.id === value,
+    );
+    if (attachment?.asset?.name) return attachment.asset.name;
   }
   return parseText(value?.toString()) ?? 'Нет ответа';
 };

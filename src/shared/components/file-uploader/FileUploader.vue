@@ -37,6 +37,7 @@
             :is-edit="true"
             @delete="handleDelete(attachment.id)"
             @download="handleDownload(attachment)"
+            @open="handleOpen(attachment)"
           >
             <template #actions="slotProps">
               <slot name="actions" v-bind="slotProps" />
@@ -73,6 +74,7 @@ const emit = defineEmits<{
   (e: 'upload', file: File): void;
   (e: 'delete', id: string): void;
   (e: 'download', attachment: any): void;
+  (e: 'open', attachment: any): void;
 }>();
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -101,27 +103,19 @@ const handleDownload = (attachment: any) => {
   emit('download', attachment);
 };
 
+const handleOpen = (attachment: any) => {
+  emit('open', attachment);
+};
+
 const handleDelete = (id: string) => {
   emit('delete', id);
 };
 </script>
 
 <style scoped lang="scss">
-.upload-btn {
-  border: 1px dashed #ccc;
-  min-height: 50px;
-  background-color: white;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-}
-
 .isDragIn {
-  outline: 1px dashed black;
-  background-color: #f5f5f5;
+  background-color: color-mix(in srgb, $primary, transparent 90%);
 }
-
 .full-w {
   width: 100%;
 }
