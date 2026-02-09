@@ -28,6 +28,7 @@
 import { computed, markRaw, onMounted, ref } from 'vue';
 
 import { useProjectStore } from 'src/stores/project-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { storeToRefs } from 'pinia';
 
@@ -45,9 +46,12 @@ import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 import AlertIcon from 'src/components/icons/AlertIcon.vue';
 import ParentIcon from 'src/components/icons/ParentIcon.vue';
 
+import { BASE_ERROR, SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const { setNotificationView } = useNotificationStore();
 
 interface ParamItem {
   icon: any;
@@ -164,10 +168,38 @@ onMounted(() => {
 const updateHideFields = async (item: ParamItem) => {
   item.show = !item.show;
 
-  projectStore.updateProjectInfo(
+  try {
+    await projectStore.updateProjectInfo(
+      currentWorkspaceSlug.value ?? '',
+      project.value.id,
+      {
+        hide_fields: params.value.filter((el) => !el.show).map((el) => el.name),
+      },
+    );
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: SUCCESS_UPDATE_DATA,
+    });
+  } catch {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: BASE_ERROR,
+    });
+    item.show = !item.show;
+    return;
+  }
+
+  const columns_to_show = projectStore.projectProps?.columns_to_show?.filter(
+    (el) => !project.value?.hide_fields?.includes(el),
+  );
+
+  await projectStore.setProjectProps(
     currentWorkspaceSlug.value ?? '',
     project.value.id,
-    { hide_fields: params.value.filter((el) => !el.show).map((el) => el.name) },
+    { ...projectStore.projectProps, columns_to_show: columns_to_show },
   );
 };
 
