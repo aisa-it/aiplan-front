@@ -5,10 +5,11 @@
     ]"
     ref="newIssueCardRef"
   >
-    <div v-if="!loading" class="relative-position">
+    <div v-show="!loading" class="relative-position">
       <q-card-section class="row q-pa-sm">
         <q-btn flat dense class="q-ml-auto" @click="emits('onCancel')">
-          <q-icon name="close" dense size="18px" /> </q-btn>
+          <q-icon name="close" dense size="18px" />
+        </q-btn>
       </q-card-section>
       <q-card-section>
         <div v-if="project" class="relative-position">
@@ -247,6 +248,9 @@
         </div>
       </q-card-actions>
     </div>
+    <q-inner-loading :showing="creationLoading">
+      <DefaultLoader />
+    </q-inner-loading>
     <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
@@ -296,6 +300,7 @@ import SelectAttachments from './SelectAttachments.vue';
 import SelectSprints from 'src/components/SelectSprints.vue';
 import SelectLinks from './SelectLinks.vue';
 import NewIssuePanelSkeleton from './NewIssuePanelSkeleton.vue';
+import DefaultLoader from './loaders/DefaultLoader.vue';
 
 //types
 import { QCard } from 'quasar';
@@ -380,6 +385,7 @@ const selectedIssueTemplate = ref<any>(null);
 const editorInstance = ref<Editor>();
 const autoupdateDate = ref<boolean>(true);
 const links = ref<DtoIssueLinkLight[]>([]);
+const creationLoading = ref(false);
 
 const selectAttachments = ref();
 
@@ -520,7 +526,7 @@ const create = async () => {
     return;
   }
 
-  loading.value = true;
+  creationLoading.value = true;
   autoupdateDate.value = false;
 
   try {
@@ -558,13 +564,13 @@ const create = async () => {
 
     await handleCreateSuccess(res.data);
   } catch (e) {
-    loading.value = false;
+    creationLoading.value = false;
   }
 };
 
 const handleCreateSuccess = async (createdIssueData: any) => {
   if (!workspaceSlug.value || !project.value?.id) {
-    loading.value = false;
+    creationLoading.value = false;
     return;
   }
   const issue = (
