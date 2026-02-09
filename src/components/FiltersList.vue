@@ -95,31 +95,11 @@
         </div>
 
         <q-item class="row" data-tour="group-options">
-          <q-select
-            dense
-            label="Группировка"
-            v-model="viewForm.filters.group_by"
-            map-options
-            class="base-selector full-w"
-            popup-content-class="fit-select-popup selector-option__wrapper scrollable-content"
-            :options="optionsGroup"
-            @update:model-value="
-              () => {
-                viewForm.filters.group_by = viewForm.filters.group_by.value;
-                onUpdate();
-              }
-            "
-          >
-            <template v-slot:option="{ itemProps, opt }">
-              <q-item v-bind="itemProps" class="selector-option__wrapper">
-                <q-item-section>
-                  <q-item-label>
-                    {{ opt.label }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
+          <FilterGroupsOptions
+            v-model:group_by="viewForm.filters.group_by"
+            :options-group="optionsGroup"
+            @update:group_by="onUpdate"
+          />
         </q-item>
 
         <q-item class="row" data-tour="status-options">
@@ -180,6 +160,7 @@ import DotListSelectIcon from './icons/DotListSelectIcon.vue';
 import SelectStatusFilter from './selects/SelectStatusFilter.vue';
 
 import FilterColumnsOptions from './FilterColumnsOptions.vue';
+import FilterGroupsOptions from './FilterGroupsOptions.vue';
 
 import { useGuiderStore } from 'src/modules/guided-tours/guider-store';
 

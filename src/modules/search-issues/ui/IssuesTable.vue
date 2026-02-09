@@ -57,6 +57,13 @@
                 :columns="allColumns"
               />
             </q-item>
+            <q-item class="row">
+              <FilterGroupsOptions
+                v-model:group_by="group_by"
+                :options-group="SPRINT_GROUP_BY_OPTIONS"
+                @update:group_by="onRequest(pagination)"
+              />
+            </q-item>
           </q-list>
         </q-popup-proxy>
       </q-btn>
@@ -74,157 +81,43 @@
         <MenuIcon />
       </q-btn>
     </div>
-    <q-table
-      v-if="!loading && rows.length"
-      v-model:pagination="pagination"
-      v-model:selected="checkedRows"
-      flat
-      row-key="id"
-      class="sprint-checkboxes my-sticky-column-table search-filters-table table-bottom-reverse"
-      :class="{ 'table-scroll-off': isCreateSprint }"
-      :hide-no-data="true"
+    <IssuesTableUI
+      v-if="!loading && rows?.length && group_by === 'none'"
       :rows="rows"
-      :selection="selection"
       :columns="visibleColumns"
-      :rows-per-page-options="
-        Screen.height > 720 ? [10, 25, 50] : [5, 10, 25, 50]
-      "
-      @request="(e) => onRequest(e.pagination)"
-      @row-click="(evt, row) => route(row)"
+      :loading="loading"
+      :pagination="pagination"
+      :selection="selection"
+      :selected-rows="checkedRows"
+      :is-create-sprint="isCreateSprint"
+      @update:selected-rows="(v) => (checkedRows = v)"
+      @request="onRequest"
+    />
+
+    <GroupedTablesWrapper
+      v-if="!loading && group_by !== 'none' && rows?.issues"
+      :groups="rows"
+      :group-by="group_by"
     >
-      <template #bottom> </template>
-
-      <template v-slot:body-cell-name="props">
-        <q-td :props="props">
-          <div
-            style="
-              text-overflow: ellipsis;
-              overflow: hidden;
-              font-size: 0.813rem;
-              line-height: 1.25rem;
-            "
-          >
-            <span v-html="parseBoldText(props.value)" />
-            <HintTooltip>
-              <span v-html="parseBoldText(props.value)"
-            /></HintTooltip>
-          </div>
-          <div v-if="showDescHighlighted(props.row.desc_highlighted)">
-            <span
-              class="desc-highlighted"
-              v-html="
-                getDescHighlightedText(
-                  parseBoldText(props.row.desc_highlighted),
-                  undefined,
-                  true,
-                )
-              "
-            />
-            <HintTooltip>
-              <span
-                v-html="
-                  getDescHighlightedText(
-                    parseBoldText(props.row.desc_highlighted),
-                  )
-                "
-            /></HintTooltip>
-          </div>
-        </q-td>
+      <template #default="{ group, index }">
+        <IssuesTableUI
+          :rows="group.issues"
+          :columns="visibleColumns"
+          :loading="loading"
+          :selection="selection"
+          :selected-rows="checkedRows"
+          @update:selected-rows="
+            (v) => (checkedRows = [...(checkedRows ?? []), ...v])
+          "
+          @request="(p) => onRequestGroupTable(group, p)"
+        />
       </template>
-
-      <template v-slot:body-cell-state="props">
-        <q-td :props="props">
-          <div
-            class="centered-horisontally"
-            style="max-width: 190px; min-width: 100px"
-          >
-            <q-badge
-              rounded
-              class="q-mr-sm"
-              :style="{ backgroundColor: props.value.color }"
-              style="height: 12px; width: 12px"
-            />
-            <span class="abbriviated-text">
-              {{ props.value.name }}
-            </span>
-          </div>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-author="props">
-        <q-td :props="props">
-          <AvatarImage
-            :key="props.value.name"
-            :tooltip="aiplan.UserName(props.value).join(' ')"
-            :text="
-              [
-                aiplan.UserName(props.value)[0]?.at(0),
-                aiplan.UserName(props.value)[1]?.at(0),
-              ].join(' ')
-            "
-            :image="props.value.avatar_id"
-            :member="props.value"
-          ></AvatarImage>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-assignees="props">
-        <q-td :props="props" style="position: relative">
-          <AvatarImage
-            v-for="(l, n) in props.value"
-            :style="{ zIndex: props.value.length - n }"
-            class="overlapping"
-            :key="l.name"
-            :tooltip="aiplan.UserName(l).join(' ')"
-            :text="
-              [aiplan.UserName(l)[0]?.at(0), aiplan.UserName(l)[1]?.at(0)].join(
-                ' ',
-              )
-            "
-            :image="l.avatar_id"
-            :member="l"
-          ></AvatarImage>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-priority="props">
-        <q-td :props="props">
-          <div
-            v-if="props.value"
-            class="centered-horisontally"
-            style="max-width: 190px; min-width: 100px"
-          >
-            <PrioritySingleIcon :type="props.value" />
-            <span class="q-ml-xs">{{ p[props.value] }}</span>
-          </div>
-          <div v-else>Не выбран</div>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-labels="props">
-        <q-td :props="props">
-          <div class="row no-wrap" style="gap: 4px">
-            <q-badge
-              v-for="l in props.value"
-              :key="l?.name"
-              class="q-ml-xs overflow-hidden"
-              :style="['background-color: ' + l.color, 'max-width: 200px']"
-            >
-              <span class="abbriviated-text">
-                {{ l?.name }}
-                <HintTooltip>
-                  {{ l?.name }}
-                </HintTooltip>
-              </span>
-            </q-badge>
-          </div>
-        </q-td>
-      </template>
-    </q-table>
+    </GroupedTablesWrapper>
 
     <div
       class="sticky-fix bottom"
       :style="!isCreateSprint ? { padding: '0 0 10px' } : {}"
+      v-if="group_by === 'none'"
     >
       <PaginationDefault
         v-model:selected-page="pagination.page"
@@ -246,12 +139,12 @@
       </div>
     </div>
     <div
-      v-show="loading || rows.length === 0"
+      v-show="loading || rows?.length === 0 || !rows?.issues"
       style="height: calc(90vh - 122px)"
       class="centered-horisontally justify-center"
     >
       <DefaultLoader v-if="loading" />
-      <h6 v-else-if="rows.length === 0">
+      <h6 v-else-if="rows?.length === 0 || !rows?.issues">
         {{
           isCreateSprint
             ? 'Не найдено задач в данном пространстве'
@@ -263,8 +156,6 @@
 </template>
 
 <script setup lang="ts">
-// core
-import { useRouter } from 'vue-router';
 import { debounce, Screen } from 'quasar';
 import { onMounted, ref, watch, computed } from 'vue';
 
@@ -273,20 +164,22 @@ import { useIssuesStore } from 'src/stores/issues-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
-import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
-import { parseBoldText } from 'src/utils/helpers';
 
 // components
+import IssuesTableUI from './IssuesTableUI.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import FileZIPIcon from 'src/components/icons/FileZIPIcon.vue';
-import AvatarImage from 'src/components/AvatarImage.vue';
 import Filterv2Icon from 'src/components/icons/Filterv2Icon.vue';
 import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'components/pagination/PaginationDefault.vue';
-import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
 import FilterColumnsOptions from 'src/components/FilterColumnsOptions.vue';
+import FilterGroupsOptions from 'src/components/FilterGroupsOptions.vue';
+import GroupedTablesWrapper from 'src/modules/issue-list/components/table-view/GroupedTablesWrapper.vue';
+
+import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
+import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   currentFilter: any;
@@ -302,8 +195,7 @@ const emits = defineEmits<{
   (event: 'update:checkedRows', checkedRows: any[]): void;
 }>();
 
-//hooks
-const router = useRouter();
+const group_by = ref(SPRINT_GROUP_BY_OPTIONS[0].value);
 
 //stores
 const { extendedSearchIssues, exportIssues } = useIssuesStore();
@@ -343,20 +235,55 @@ const checkedRows = computed({
   },
 });
 
-//constants
-const p = {
-  urgent: 'Критический',
-  high: 'Высокий',
-  medium: 'Средний',
-  low: 'Низкий',
-  null: 'Нет',
-};
-
 onMounted(() => {
   onRequest(pagination.value);
 });
 
 //methods
+function defineFiltersByEntity(entity): TypesIssuesListFilters {
+  if (!entity) return {};
+
+  // простые соответствия
+  const map: Record<string, keyof TypesIssuesListFilters> = {
+    state: 'states',
+    labels: 'labels',
+    priority: 'priorities',
+    watchers: 'watchers',
+    assignees: 'assignees',
+    author: 'authors',
+    project: 'projects',
+  };
+
+  const filterKey = map[group_by.value];
+  if (!filterKey) return {};
+
+  const value = entity?.id ?? entity;
+  return value ? { [filterKey]: [value] } : {};
+}
+
+const onRequestGroupTable = async (group, p) => {
+  console.log(p);
+  loading.value = true;
+
+  let req = Object.assign((filter.value as any) ?? {}, {
+    search_query: searchQuery.value,
+  });
+  req = { ...req, ...defineFiltersByEntity(group.entity) };
+  const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
+  const { issues, count, limit } = await extendedSearchIssues(req as any, {
+    order_by: order_by,
+    desc: p.descending,
+    offset: (p.page - 1) * (p.rowsPerPage == 0 ? 10 : p.rowsPerPage),
+    limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
+    light: true,
+    only_active: filter.value?.only_active || false,
+  });
+
+  group.issues = issues;
+  group.count = count;
+  loading.value = false;
+};
+
 const onRequest = async (p) => {
   if (props.isCreateSprint && !filter.value) return;
   loading.value = true;
@@ -373,6 +300,7 @@ const onRequest = async (p) => {
     limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
     light: true,
     only_active: filter.value?.only_active || false,
+    group_by: group_by.value !== 'none' ? group_by.value : undefined,
   });
   rows.value = [];
   rows.value = issues;
@@ -437,13 +365,6 @@ watch(
   },
   { deep: true },
 );
-
-const route = (row) => {
-  const routeData = router.resolve(
-    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
-  );
-  window.open(routeData.href, '_blank');
-};
 
 const columns = [
   {
@@ -550,89 +471,9 @@ const columns = [
 ];
 
 const columnsToShow = ref(columns.map((el) => el.name));
-
-const showDescHighlighted = (text: string) => {
-  return text && parseBoldText(text)?.includes('<b>');
-};
-
-const getDescHighlightedText = (
-  text?: string,
-  maxLength = 110,
-  showMatchesCount = false,
-) => {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
-
-  let truncatedText = text.substring(0, maxLength);
-  const isLetterOrDigit = (char: string) => /^[\p{L}\p{N}]$/u.test(char);
-  let lastValidIndex = -1;
-
-  for (let i = truncatedText.length - 1; i >= 0; i--) {
-    if (!isLetterOrDigit(truncatedText[i])) {
-      lastValidIndex = i;
-      break;
-    }
-  }
-  truncatedText = truncatedText.substring(0, lastValidIndex + 1);
-
-  const remainingText = text.substring(maxLength);
-  const matches = remainingText.match(/<b>/g);
-
-  return matches && showMatchesCount
-    ? truncatedText +
-        `... и ещё <b>${matches.length}</b> ${getWordForm(matches.length)}`
-    : truncatedText;
-};
-
-const getWordForm = (count: number) => {
-  const lastDigit = count % 10;
-  const lastTwoDigits = count % 100;
-
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-    return 'совпадений';
-  } else {
-    switch (lastDigit) {
-      case 1:
-        return 'совпадение';
-      case 2:
-      case 3:
-      case 4:
-        return 'совпадения';
-      default:
-        return 'совпадений';
-    }
-  }
-};
 </script>
 
 <style scoped lang="scss">
-:deep(.q-table__progress) {
-  display: none;
-}
-.my-sticky-column-table {
-  ::-webkit-scrollbar {
-    display: block;
-  }
-}
-
-.search-filters-table :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
-.search-filters-table :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
-  background: $primary !important;
-  border-color: $primary !important;
-}
-
-.search-filters-table
-  :deep(.q-checkbox__inner--truthy .q-checkbox__svg path.q-checkbox__truthy),
-.search-filters-table
-  :deep(.q-checkbox__inner--indet .q-checkbox__svg path.q-checkbox__indet) {
-  stroke: white !important;
-}
-
-.search-filters-table :deep(.q-checkbox__inner--truthy),
-.search-filters-table :deep(.q-checkbox__inner--indet) {
-  color: $primary !important;
-}
-
 .sticky-fix {
   position: sticky;
   z-index: 110;
@@ -656,36 +497,5 @@ const getWordForm = (count: number) => {
 
 :deep(.q-table__bottom) {
   min-height: 0;
-}
-
-:deep(.table-scroll-off.search-filters-table) {
-  max-height: none;
-}
-
-.desc-highlighted {
-  display: inline-block;
-  text-wrap: wrap;
-  line-height: 0.85rem;
-  color: $sub-text-color;
-}
-
-:deep(.desc-highlighted b) {
-  color: $text-color;
-}
-</style>
-<style lang="scss">
-.search-filters-table {
-  max-height: 76vh;
-  @media (max-width: 768px) {
-    max-height: 72vh;
-  }
-  @media (max-width: 500px) {
-    max-height: 66vh;
-  }
-}
-@supports (-moz-appearance: none) {
-  .search-filters-table .q-table__middle {
-    scrollbar-width: thin;
-  }
 }
 </style>
