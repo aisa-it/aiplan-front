@@ -1,6 +1,5 @@
 <template>
   <FileUploader
-    :model-value="modelValue ? [modelValue] : []"
     :attachments="field.attachments"
     :loading="uploading"
     :max-items="1"
@@ -16,12 +15,19 @@
 </template>
 
 <script setup lang="ts">
+//core
 import { ref } from 'vue';
+
+//api
 import { createFormAttachments } from 'src/components/forms/services/api';
+
+//components
 import FileUploader from 'src/shared/components/file-uploader/FileUploader.vue';
+import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
+
+//stores
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useFormStore } from 'src/stores/form-store';
-import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -32,10 +38,16 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 
+//stores
 const { setNotificationView } = useNotificationStore();
 const formStore = useFormStore();
-const uploading = ref(false);
 
+//refs
+const uploading = ref(false);
+const isPreviewOpen = ref(false);
+const previewFile = ref();
+
+//methods
 const handleUpload = async (file: File) => {
   uploading.value = true;
   try {
@@ -85,9 +97,6 @@ const handleDelete = async (id: string) => {
     });
   }
 };
-
-const isPreviewOpen = ref(false);
-const previewFile = ref();
 
 const handleOpen = (file: any) => {
   if (!file) return;

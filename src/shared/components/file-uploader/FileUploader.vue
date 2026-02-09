@@ -50,15 +50,18 @@
 </template>
 
 <script setup lang="ts">
+//core
 import { ref } from 'vue';
+//components
 import FileUploaderCard from './FileUploaderCard.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+//types
+import { IAttachmentCard } from 'src/interfaces/files';
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: string[] | null;
-    attachments?: any[];
+    attachments?: IAttachmentCard[];
     label?: string;
     accept?: string;
     loading?: boolean;
@@ -70,16 +73,17 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string[] | null): void;
   (e: 'upload', file: File): void;
   (e: 'delete', id: string): void;
   (e: 'download', attachment: any): void;
   (e: 'open', attachment: any): void;
 }>();
 
+//refs
 const fileInput = ref<HTMLInputElement | null>(null);
 const isDragIn = ref(false);
 
+//methods
 const triggerUpload = () => {
   fileInput.value?.click();
 };
