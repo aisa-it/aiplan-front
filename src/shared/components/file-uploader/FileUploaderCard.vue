@@ -44,13 +44,24 @@
               :row="file"
               :is-edit="isEdit"
               :status="status"
-              :progress="progress"
+              :progress="progress || internalProgress"
+              :download="handleDownload"
             >
+              <q-btn
+                v-if="!progress && !status && !file.draft"
+                flat
+                dense
+                @click="$emit('copyLink', file)"
+                class="buttons-attachments"
+              >
+                <LinkIcon :width="20" :height="20" />
+                <HintTooltip>Скопировать ссылку</HintTooltip>
+              </q-btn>
               <q-btn
                 v-if="!progress && !status && !file.draft"
                 unelevated
                 dense
-                @click="$emit('download', file)"
+                @click="handleDownload()"
                 class="buttons-attachments"
               >
                 <LoadIcon :width="20" :height="20" />
@@ -63,12 +74,34 @@
                 dense
                 @click="$emit('open')"
                 class="buttons-attachments"
-                :style="
-                  !isPossibleToOpen(file) ? 'visibility: hidden;' : undefined
-                "
               >
                 <ZoomIcon :width="20" :height="20" />
                 <HintTooltip>Предпросмотр</HintTooltip>
+              </q-btn>
+
+              <q-btn
+                v-if="progress"
+                padding="2px 2px"
+                flat
+                round
+                dense
+                @click="$emit('cancel', file.asset.name)"
+                class="buttons-attachments"
+              >
+                <CloseIcon :width="35" :height="35" />
+              </q-btn>
+
+              <q-btn
+                v-if="
+                  (!progress && status === 'error') || status === 'cancelled'
+                "
+                unelevated
+                dense
+                @click="$emit('retry', file.asset.name)"
+                class="buttons-attachments"
+              >
+                <RefreshIcon :width="20" :height="20" />
+                <HintTooltip>Повторить загрузку</HintTooltip>
               </q-btn>
 
               <q-btn
@@ -109,10 +142,12 @@
             }}</span>
           </div>
           <q-linear-progress
-            v-if="downloadProgress"
+            v-if="
+              downloadProgress !== undefined || internalProgress !== undefined
+            "
             size="sm"
             animationSpeed="200"
-            :value="downloadProgress / 100"
+            :value="(downloadProgress || internalProgress || 0) / 100"
             color="primary"
           />
         </div>
@@ -134,16 +169,31 @@ import CheckIcon from 'src/components/icons/CheckIcon.vue';
 import ProgressUploadIcon from 'src/components/icons/ProgressUploadIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import CloseIcon from 'src/components/icons/CloseIcon.vue';
+import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
+import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import HintTooltip from 'src/components/HintTooltip.vue';
 
 //utils
-import { getFileExtension, getFileSize } from 'src/utils/files';
+import {
+  getFileExtension,
+  getFileSize,
+  downloadAttachment,
+  isFilePreviewable,
+} from 'src/utils/files';
+
+//items
+import { useAiplanStore } from 'src/stores/aiplan-store';
 
 //types
 import { IAttachmentCard } from 'src/interfaces/files';
 
 //components
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+import { SUCCESS_DOWNLOAD_FILE } from 'src/constants/notifications';
+import { useNotificationStore } from 'src/stores/notification-store';
+
+//constants
+import { ATTACHMENT_SUPPORTED_FORMATS } from 'src/constants/attachments';
 
 interface IProps {
   file: IAttachmentCard;
@@ -159,9 +209,46 @@ defineEmits<{
   (e: 'delete', fileName: string, id: string): void;
   (e: 'open'): void;
   (e: 'download', row: IAttachmentCard): void;
+  (e: 'copyLink', row: IAttachmentCard): void;
+  (e: 'cancel', fileName: string): void;
+  (e: 'retry', fileName: string): void;
 }>();
 
+const api = useAiplanStore();
+
+const { setNotificationView } = useNotificationStore();
+
 const iconColor = ref('');
+const internalProgress = ref<number | undefined>(undefined);
+
+const handleDownload = async () => {
+  internalProgress.value = 0;
+  try {
+    await downloadAttachment(async () => {
+      const { data } = await api.api.get(
+        `/api/auth/file/${props.file.asset.id}`,
+        {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            internalProgress.value = Math.round(
+              (progressEvent.loaded * 100) / (progressEvent.total || 1),
+            );
+          },
+        },
+      );
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_DOWNLOAD_FILE,
+      });
+      return data;
+    }, props.file.asset.name);
+  } finally {
+    setTimeout(() => {
+      internalProgress.value = undefined;
+    }, 1000);
+  }
+};
 
 const getStatusIcon = () => {
   switch (props.status) {
@@ -194,31 +281,9 @@ const getStatusColor = () => {
 };
 
 const isPossibleToOpen = (value: IAttachmentCard) => {
-  if (props.progress) return false;
-  let extension = getFileName(value).split('.').pop()?.toLowerCase() ?? '';
-  const legacyFormats = [
-    'pdf',
-    'png',
-    'jpeg',
-    'jpg',
-    'mp4',
-    'mov',
-    'wmv',
-    'webm',
-    'mkv',
-    'gif',
-    'wav',
-    'aiff',
-    'ape',
-    'flac',
-    'mp3',
-    'ogg',
-  ];
-  return legacyFormats.includes(extension);
-};
+  if (props.progress || internalProgress.value !== undefined) return false;
 
-const getFileName = (value: IAttachmentCard): string => {
-  return value.asset.name;
+  return isFilePreviewable(value.asset.name, ATTACHMENT_SUPPORTED_FORMATS);
 };
 
 function formatDate(inputDate: string) {

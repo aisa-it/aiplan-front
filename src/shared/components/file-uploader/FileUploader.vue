@@ -35,8 +35,8 @@
           <FileUploaderCard
             :file="attachment"
             :is-edit="true"
+            :download-handler="downloadHandler"
             @delete="handleDelete(attachment.id)"
-            @download="handleDownload(attachment)"
             @open="handleOpen(attachment)"
           >
             <template #actions="slotProps">
@@ -66,6 +66,10 @@ const props = withDefaults(
     accept?: string;
     loading?: boolean;
     maxItems?: number | boolean;
+    downloadHandler?: (
+      file: IAttachmentCard,
+      onProgress: (progress: number) => void,
+    ) => Promise<void>;
   }>(),
   {
     maxItems: false,
@@ -75,7 +79,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'upload', file: File): void;
   (e: 'delete', id: string): void;
-  (e: 'download', attachment: any): void;
   (e: 'open', attachment: any): void;
 }>();
 
@@ -103,10 +106,6 @@ const handleDrop = (event: DragEvent) => {
   }
 };
 
-const handleDownload = (attachment: any) => {
-  emit('download', attachment);
-};
-
 const handleOpen = (attachment: any) => {
   emit('open', attachment);
 };
@@ -119,8 +118,5 @@ const handleDelete = (id: string) => {
 <style scoped lang="scss">
 .isDragIn {
   background-color: color-mix(in srgb, $primary, transparent 90%);
-}
-.full-w {
-  width: 100%;
 }
 </style>
