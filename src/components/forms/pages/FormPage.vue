@@ -61,6 +61,8 @@
                       (val) => updateValue(val, field.originalIndex)
                     "
                     :ref="(el) => (fieldRefs[field.originalIndex] = el)"
+                    :form-slug="route.params.slug"
+                    :workspace-slug="route.params.workspaceSlug"
                   />
                 </template>
                 <div class="flex justify-between button-container q-mt-md">

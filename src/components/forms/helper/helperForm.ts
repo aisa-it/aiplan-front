@@ -410,6 +410,9 @@ export const resetFieldValues = (targetFields: any[], allFields: any[]) => {
       case 'color':
         targetField.value = '';
         break;
+      case 'attachment':
+        targetField.value = [];
+        break;
       case 'select':
       case 'multiselect':
         targetField.value = [];

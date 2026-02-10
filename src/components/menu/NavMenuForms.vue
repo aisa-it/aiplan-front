@@ -119,8 +119,8 @@ const getFormMenuItems = (form: IForms) => {
       text: 'Скопировать ссылку',
       icon: LinkIcon,
       onClick: () => {
-        if (form?.slug) {
-          formStore.copyFormLink(form.slug);
+        if (form?.slug && currentWorkspaceSlug.value) {
+          formStore.copyFormLink(currentWorkspaceSlug.value, form.slug);
         }
       },
     },
