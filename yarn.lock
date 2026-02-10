@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@aisa-it/aiplan-api-ts@^1.120.0":
+"@aisa-it/aiplan-api-ts@^"1.119.0":
   version "1.119.0"
   resolved "https://registry.npmjs.org/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.119.0.tgz#dccb30c8c25927b93612335ff9de7c68782fcff2"
   integrity sha512-DOMNUsCJlkfHnQgZ0oxk1fGgPqWkW5r7P+YVpGaofmK/FQXwviopxiA51mJSsv+9z06VVBzzghb+bMYaG6645g==
