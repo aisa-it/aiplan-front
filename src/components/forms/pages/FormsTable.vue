@@ -170,10 +170,7 @@ const answerRender = (type: string, value: string | boolean) => {
     return value ? 'Да' : 'Нет';
   }
   if (type === 'attachment') {
-    const attachment = form.value?.attachments?.find(
-      (a: any) => a.id === value,
-    );
-    if (attachment?.asset?.name) return attachment.asset.name;
+    return 'Вложение';
   }
   return parseText(value?.toString()) ?? 'Нет ответа';
 };
@@ -245,7 +242,6 @@ const columns: QTableColumn[] = [
     field: (row: any) => row?.fields,
     format: (fields) => {
       if (!fields) return '';
-
       const endTag = `<p class="q-ma-none file-date">и еще ${pluralQuestions(
         fields.length - 2,
       )}</p>`;
@@ -283,7 +279,7 @@ const columns: QTableColumn[] = [
           (el, index) =>
             `<p class="q-ma-none abbriviated-text"> Ответ ${
               index + 1
-            }: ${answerRender(el.type, el.values)} </p> `,
+            }: ${answerRender(el.type, el.value)} </p> `,
         )
         .join('');
       return fields.length > 2 ? parsedFields + endTag : parsedFields;
