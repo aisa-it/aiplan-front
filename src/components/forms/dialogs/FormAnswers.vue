@@ -92,6 +92,7 @@
                   :is-edit="false"
                   @open="openPreview(getAttachment(a.value))"
                   @download="downloadFile(getAttachment(a.value))"
+                  @copy-link="handleCopyLink(getAttachment(a.value))"
                 />
               </div>
             </div>
@@ -112,10 +113,12 @@
 //core
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { copyToClipboard } from 'quasar';
 
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useFormStore } from 'src/stores/form-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 //utils
 import aiplan from 'src/utils/aiplan';
@@ -129,6 +132,10 @@ import AvatarImage from 'src/components/AvatarImage.vue';
 import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
 import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+import {
+  SUCCESS_COPY_LINK_TO_CLIPBOARD,
+  ERROR_COPY_LINK_TO_CLIPBOARD,
+} from 'src/constants/notifications';
 
 const props = defineProps<{
   answerId: number;
@@ -137,6 +144,7 @@ const props = defineProps<{
 
 //stores
 const workspaceStore = useWorkspaceStore();
+const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -209,6 +217,27 @@ const downloadFile = (file: any) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+const handleCopyLink = (file: any) => {
+  if (!file?.asset?.id) return;
+  const url = `${window.location.origin}/api/auth/file/${file.asset.id}`;
+
+  copyToClipboard(url)
+    .then(() => {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+      });
+    })
+    .catch(() => {
+      setNotificationView({
+        type: 'error',
+        open: true,
+        customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
+      });
+    });
 };
 </script>
 
