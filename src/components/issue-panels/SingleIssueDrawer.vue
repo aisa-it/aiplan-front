@@ -391,7 +391,7 @@
         :links="issueData.issue_link"
         :project="issueData.project_detail"
         :isDisabled="
-          hasPermissionByIssue(
+          !hasPermissionByIssue(
             issueData,
             issueData.project_detail ?? project,
             'change-issue-secondary',
@@ -529,14 +529,12 @@ const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
 
-
 const { navigateToActivityPage } = useUserActivityNavigation();
 
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
 
-  
 //refs
 const refreshCycle = ref();
 
