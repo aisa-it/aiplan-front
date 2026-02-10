@@ -65,6 +65,7 @@ const addQuestion = (type: string) => {
         required: type !== 'checkbox',
         type: type,
         value: null,
+        issue_name_field: type !== 'checkbox' ? false : undefined,
       };
 
   emits('addField', objectField);

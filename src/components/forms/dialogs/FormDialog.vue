@@ -119,6 +119,8 @@
                 :number="id + 1"
                 :show-arrow="form?.fields?.length > 1"
                 :all-fields="form?.fields"
+                :is-auto-create-project="isAutoCreateProject"
+                @set-issue-name-field="setIssueNameField(id)"
               />
             </template>
           </q-list>
@@ -238,6 +240,13 @@ const projects = ref<DtoProjectLight[]>([]);
 const isLoading = ref(false);
 
 //methods
+const setIssueNameField = (id: number) => {
+  form.value.fields?.forEach((el, index) => {
+    if (index === id) return;
+    el.issue_name_field = false;
+  });
+};
+
 const clear = () => {
   form.value = initialFormState;
   visible.value = 'all';
@@ -315,7 +324,7 @@ const refresh = async () => {
 };
 
 const getForm = async () => {
-  refresh();
+  await refresh();
   if (props.formSlug) {
     const data = await getFormAuth(props.formSlug);
     form.value = validateFormWithSlug(data);
