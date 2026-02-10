@@ -32,6 +32,17 @@
               </q-tooltip>
             </q-icon>
           </div>
+
+          <div v-if="canBeIssueNameField" class="centered-horisontally q-mr-md">
+            <q-toggle
+              v-model="computedValue.issue_name_field"
+              size="32px"
+              @update:model-value="
+                (val) => (val ? emits('setIssueNameField') : '')
+              "
+            />
+            Название задачи
+          </div>
         </div>
       </template>
 
@@ -163,6 +174,7 @@ const props = defineProps<{
   number: number;
   showArrow: boolean;
   allFields?: any[];
+  isAutoCreateProject?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -170,12 +182,22 @@ const emits = defineEmits<{
   deleteQuestion: [];
   upper: [];
   lower: [];
+  setIssueNameField: [];
 }>();
 
 //refs
 const isDepending = ref(!!props.modelValue.depend_on);
 
 //computeds
+const canBeIssueNameField = computed(() => {
+  return (
+    props.isAutoCreateProject &&
+    computedValue.value.type === 'input' &&
+    computedValue.value.required &&
+    !isDepending.value
+  );
+});
+
 const computedValue = computed({
   get: () => props.modelValue,
   set: (val) => emits('update:model-value', val),
@@ -252,6 +274,16 @@ const updateCheckbox = (el: any) => {
 };
 
 //hooks
+watch(
+  canBeIssueNameField,
+  (can) => {
+    if (!can) {
+      computedValue.value.issue_name_field = false;
+    }
+  },
+  { immediate: true },
+);
+
 watch(
   () => props.modelValue.depend_on,
   (val) => {

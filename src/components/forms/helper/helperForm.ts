@@ -158,6 +158,8 @@ export const validateFormWithSlug = (data) => {
         label: el.label,
         required: el.required,
         depend_on: el.depend_on || null,
+        issue_name_field:
+          el.type === 'input' ? (el.issue_name_field ?? false) : undefined,
         validate:
           el.type === 'date'
             ? undefined
