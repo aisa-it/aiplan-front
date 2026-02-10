@@ -44,6 +44,8 @@
                   class="base-input col"
                   :label="`Вариант ${index + 1}`"
                   dense
+                  :rules="[(val) => !!val?.trim() || 'Поле не может быть пустым']"
+                  lazy-rules
                 />
                 <q-btn
                   icon="close"
@@ -53,7 +55,7 @@
                   size="sm"
                   class="q-ml-sm"
                   @click="removeOption(index)"
-                  :disable="form.options!.length === 1"
+                  :disable="form.options?.length <= 0"
                 />
               </div>
               <q-btn
@@ -99,6 +101,7 @@
             />
             <q-btn
               :label="isEdit ? 'Сохранить' : 'Создать'"
+              :disable="!canSubmit"
               flat
               dense
               no-caps
@@ -137,6 +140,16 @@ const form = ref<PropertyTemplate>({
 
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+const hasEmptyOptions = computed(() => {
+  if (!isSelectType) return false;
+  if (isSelectType && form.value.options.length <= 0) return true;
+  return form.value.options?.some((opt: string) => !opt || opt.trim() === '') ?? false;
+});
+const canSubmit = computed(() => {
+  if (!form.value.name) return false;
+  if (isSelectType.value && hasEmptyOptions.value) return false;
+  return true;
+});
 
 //consts
 const typeOptions = [
