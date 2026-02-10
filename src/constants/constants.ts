@@ -26,7 +26,7 @@ export const RESTRICTED_URLS = [
   'admin-panel',
   'profile',
   'conference',
-  'mcp'
+  'mcp',
 ];
 
 export const STATES_TYPES = [
@@ -87,7 +87,7 @@ export const PROJECT_VIEWS = [
 export const PROJECT_IDENTIFIER_LENGTH = {
   MAX: 15,
   MIN: 3,
-}
+};
 
 export const SPRINT_VIEWS = [...PROJECT_VIEWS];
 
@@ -380,6 +380,10 @@ export const QUESTION_TYPE_FIELD_OPTIONS = [
   {
     label: 'Раскрывающийся список',
     type: 'multiselect',
+  },
+  {
+    label: 'Вложения',
+    type: 'attachment',
   },
 ];
 

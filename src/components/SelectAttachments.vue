@@ -86,7 +86,7 @@
       style="height: fit-content; position: relative"
     >
       <div
-        @scroll="scrollManager?.updateBtnVisible()"
+        @scroll="updateScrollState"
         ref="scrollContainer"
         class="row scroll-attachments scrollable-content"
       >
@@ -95,11 +95,7 @@
             padding="5px 5px"
             class="btn-scroll-attachments"
             @click="scroll(-300)"
-            :style="
-              !scrollManager?.scrollState.showLeftArrow
-                ? `visibility: hidden;`
-                : ``
-            "
+            :style="!showLeftArrow ? `visibility: hidden;` : ``"
           >
             <template v-slot:default>
               <q-icon size="25px" name="chevron_left" />
@@ -109,11 +105,7 @@
             padding="5px 5px"
             class="btn-scroll-attachments"
             @click="scroll(300)"
-            :style="
-              !scrollManager?.scrollState.showRightArrow
-                ? `visibility: hidden;`
-                : ``
-            "
+            :style="!showRightArrow ? `visibility: hidden;` : ``"
           >
             <template v-slot:default>
               <q-icon size="25px" name="chevron_right" />
@@ -123,25 +115,25 @@
 
         <div class="flex no-wrap">
           <template v-if="attachments.length || uploadsStates.length">
-            <SelectAttachmentsCard
-              v-for="row in attachments"
-              :key="row.id"
+            <FileUploaderCard
+              v-for="attachment in attachments"
+              :key="attachment.id"
               :isEdit="isEdit"
-              :row="row"
+              :file="attachment"
               class="inline-block"
-              @delete="handleDeleteClick(row)"
+              @copy-link="handleCopyLinkFile"
               @open="
-                () => {
-                  openDoc = true;
-                  file = row;
-                }
+                openDoc = true;
+                file = attachment;
               "
-            />
-            <SelectAttachmentsCard
+              @delete="() => handleDeleteClick(attachment)"
+            >
+            </FileUploaderCard>
+            <FileUploaderCard
               v-for="file of uploadsStates"
               :key="file.name"
               :isEdit="isEdit"
-              :row="{
+              :file="{
                 asset: {
                   name: file.name,
                   size: file.size || 0,
@@ -168,7 +160,8 @@
                   ? file.progress
                   : null
               "
-            />
+            >
+            </FileUploaderCard>
           </template>
           <template v-else>
             <q-skeleton
@@ -213,22 +206,18 @@
 
 <script setup lang="ts">
 //core
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  Ref,
-  ref,
-  watch,
-} from 'vue';
+import { computed, onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
+import { copyToClipboard } from 'quasar';
+
 //stores
 import { useProjectStore } from 'src/stores/project-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+
 //components
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
@@ -236,12 +225,17 @@ import DocPreviewDialog from './dialogs/DocPreviewDialog.vue';
 import AttachmentsListDialog from './dialogs/AttachmentsListDialog.vue';
 import DeleteAttachmentDialog from 'src/components/dialogs/DeleteAttachmentDialog.vue';
 import IssuesColorCountTitle from './IssuesColorCountTitle.vue';
-import SelectAttachmentsCard from './SelectAttachmentsCard.vue';
-//utils
-import { ScrollManager } from 'src/utils/scrollBtnManager';
-import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
+import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
 
+//utils
+import { useHorizontalScroll } from 'src/composables/useHorizontalScroll';
 import { setIntervalFunction } from 'src/utils/helpers';
+import { IAttachmentCard } from 'src/interfaces/files';
+import {
+  extractFilesFromEvent,
+  generateAttachmentShareLink,
+} from 'src/utils/files';
+
 //consts
 import {
   CANCELLED_ADD_ATTACHMENT,
@@ -249,12 +243,15 @@ import {
   SUCCESS_ADD_ATTACHMENT,
   SUCCESS_DELETE_ATTACHMENT,
   SUCCESS_DOWNLOAD_FILE,
+  SUCCESS_COPY_LINK_TO_CLIPBOARD,
+  ERROR_COPY_LINK_TO_CLIPBOARD,
 } from 'src/constants/notifications';
 import {
   MAX_SIZE_FILE,
   MAX_SIZE_FILE_VALUE,
   MAX_SIZE_FILE_UNIT,
 } from 'src/constants/aidocFiles';
+
 //types
 import { useTusUploader } from 'src/composables/useTusUploader';
 import AttachmentsInfo from './AttachmentsInfo.vue';
@@ -288,6 +285,9 @@ const uploader = useTusUploader({
   },
 });
 
+//core
+const route = useRoute();
+
 //stores
 const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
@@ -298,13 +298,12 @@ const { setNotificationView } = useNotificationStore();
 //storesToRefs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { currentProjectID } = storeToRefs(projectStore);
-const { currentIssueID } = storeToRefs(singleIssueStore);
+const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { selectedDocId } = storeToRefs(aiDocStore);
 
 //variables
 const file = ref();
-const scrollManager = ref<ScrollManager | null>(null);
-const scrollContainer = ref();
+const scrollContainer = ref<HTMLElement>();
 const rows = ref<any[]>([]);
 const loading = ref(false);
 const openDoc = ref(false);
@@ -405,9 +404,16 @@ const resetUploadStates = () => {
   uploader.resetTusStates();
 };
 
-const scroll = (direction: number) => {
-  scrollManager.value?.scroll(direction);
-};
+const {
+  showLeftArrow,
+  showRightArrow,
+  scroll,
+  updateScrollState,
+  init: initScroll,
+} = useHorizontalScroll(
+  scrollContainer,
+  computed(() => rows.value.length),
+);
 
 const getAttachments = async () => {
   if (props.draftMode) return;
@@ -462,23 +468,15 @@ const getCustomMessageOnNotify = (type: 'success' | 'error' | 'cancelled') => {
 };
 
 const handleFileList = (ev: Event) => {
-  let files: FileList | null = null;
+  const { validFiles, errors } = extractFilesFromEvent(
+    ev,
+    MAX_SIZE_FILE,
+    MAX_SIZE_FILE_VALUE,
+    MAX_SIZE_FILE_UNIT,
+  );
 
-  if ('dataTransfer' in ev && ev instanceof DragEvent) {
-    files = ev.dataTransfer?.files || null;
-  } else if (ev.target instanceof HTMLInputElement) {
-    files = ev.target.files;
-  }
-
-  if (!files || files.length === 0) return [];
-
-  const fileArray = Array.from(files);
-  const validFiles = fileArray.filter((file) => file.size <= MAX_SIZE_FILE);
-  const tooLargeFiles = fileArray.filter((file) => file.size > MAX_SIZE_FILE);
-
-  if (tooLargeFiles.length) {
-    tooLargeFiles.forEach((file) => {
-      const message = `Данный файл превышает максимальный размер ${MAX_SIZE_FILE_VALUE}${MAX_SIZE_FILE_UNIT}: ${file.name}`;
+  if (errors.length) {
+    errors.forEach((message) => {
       setNotificationView({
         open: true,
         type: 'error',
@@ -592,48 +590,49 @@ const handleDownload = async () => {
     loading.value = false;
   }
 };
+
+const handleCopyLinkFile = (file: IAttachmentCard) => {
+  try {
+    const link = generateAttachmentShareLink(
+      window.location.origin,
+      route.path.includes('aidoc') ? 'aidoc' : 'issue',
+      route.params.workspace as string,
+      route.path.includes('issue')
+        ? `${issueData.value?.project_detail?.identifier}-${issueData.value?.sequence_id}`
+        : (route.params.doc as string),
+      file.asset?.name,
+      file.asset.id,
+    );
+    copyToClipboard(link);
+    setNotificationView({
+      type: 'success',
+      open: true,
+      customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+    });
+  } catch (e) {
+    setNotificationView({
+      type: 'error',
+      open: true,
+      customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
+    });
+  }
+};
+
 //hooks
 
 const refreshCycle = ref();
 
 onMounted(async () => {
   await refresh();
-  scrollManager.value = new ScrollManager(scrollContainer.value, false);
-  scrollManager.value?.setResize();
-  if (
-    scrollManager.value?.scrollState.showLeftArrow ||
-    scrollManager.value?.scrollState.showRightArrow
-  ) {
-    mouseWheelScrollHandler(scrollContainer.value, false);
-  }
+  initScroll();
 
   refreshCycle.value = setIntervalFunction(getAttachments);
 });
 
 onBeforeUnmount(() => {
-  if (scrollManager.value) {
-    scrollManager.value.removeResize();
-  }
   abortController.abort();
-
   clearInterval(refreshCycle.value);
 });
-
-watch(
-  () => rows.value.length,
-  () =>
-    nextTick(() => {
-      scrollManager.value?.updateBtnVisible();
-      if (
-        scrollManager.value?.scrollState.showLeftArrow ||
-        scrollManager.value?.scrollState.showRightArrow
-      ) {
-        mouseWheelScrollHandler(scrollContainer.value, false);
-      } else {
-        scrollContainer.value.onwheel = null;
-      }
-    }),
-);
 
 watch(
   () => uploader.isAllUploaded.value,

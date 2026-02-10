@@ -1,5 +1,10 @@
 <template>
-  <q-dialog no-refocus @show="getInfo()" @hide="() => resetDialog()">
+  <q-dialog
+    v-bind="$attrs"
+    no-refocus
+    @show="getInfo()"
+    @hide="() => resetDialog()"
+  >
     <q-card class="fullscreen-dialog">
       <q-card-section v-if="!loading" class="q-pa-lg">
         <h6 class="form-header">{{ headContent }}</h6>
@@ -35,7 +40,7 @@
             class="form-answers"
           >
             <p class="form-answers_title">
-              {{ index + 1 + '. ' + a.label }}
+              {{ Number(index) + 1 + '. ' + a.label }}
             </p>
             <p v-if="a?.type === 'checkbox'">
               {{ a.value === true ? 'Да' : 'Нет' }}
@@ -79,24 +84,41 @@
             <p v-else-if="a?.type === 'date'">
               {{ a.value ? formatDate(a.value) : 'Нет ответа' }}
             </p>
+            <div v-else-if="a?.type === 'attachment'">
+              <div v-if="a.value" class="row q-col-gutter-sm">
+                <FileUploaderCard
+                  v-if="getAttachment(a.value)"
+                  :file="getAttachment(a.value)"
+                  :is-edit="false"
+                  @open="openPreview(getAttachment(a.value))"
+                  @download="downloadFile(getAttachment(a.value))"
+                  @copy-link="handleCopyLink(getAttachment(a.value))"
+                />
+              </div>
+            </div>
+            <p v-else>Нет ответа</p>
           </div>
         </div>
       </q-card-section>
       <div v-else class="loader-wrapper">
-        <DefaultLoader></DefaultLoader>
+        <DefaultLoader />
       </div>
     </q-card>
   </q-dialog>
+
+  <DocPreviewDialog v-model="isPreviewOpen" :file="previewFile" />
 </template>
 
 <script setup lang="ts">
 //core
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { copyToClipboard } from 'quasar';
 
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+import { useFormStore } from 'src/stores/form-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 //utils
 import aiplan from 'src/utils/aiplan';
@@ -107,6 +129,13 @@ import { getAnswer, getFormAuth } from 'src/components/forms/services/api';
 
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
+import FileUploaderCard from 'src/shared/components/file-uploader/FileUploaderCard.vue';
+import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
+import {
+  SUCCESS_COPY_LINK_TO_CLIPBOARD,
+  ERROR_COPY_LINK_TO_CLIPBOARD,
+} from 'src/constants/notifications';
 
 const props = defineProps<{
   answerId: number;
@@ -115,6 +144,7 @@ const props = defineProps<{
 
 //stores
 const workspaceStore = useWorkspaceStore();
+const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -123,6 +153,8 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const form = ref();
 const answer = ref();
 const loading = ref(true);
+const previewFile = ref<any>(null);
+const isPreviewOpen = ref(false);
 
 //computeds
 const headContent = computed(() => {
@@ -147,7 +179,9 @@ const getCurrentAnswer = async () => {
 };
 
 const getCurrentForm = async () => {
-  form.value = await getFormAuth(props.formSlug);
+  const storedForm = useFormStore().getFormBySlug(props.formSlug);
+  if (storedForm) form.value = storedForm;
+  else form.value = await getFormAuth(props.formSlug);
 };
 
 const getInfo = async () => {
@@ -159,6 +193,51 @@ const getInfo = async () => {
 
 const resetDialog = () => {
   loading.value = true;
+};
+
+const getAttachment = (id: string) => {
+  if (!answer.value?.attachments) return null;
+
+  return answer.value.attachments.find((a: any) => a.id === id);
+};
+
+const openPreview = (file: any) => {
+  previewFile.value = file;
+  isPreviewOpen.value = true;
+};
+
+const downloadFile = (file: any) => {
+  if (!file?.asset?.id) return;
+  const url = `/api/auth/file/${file.asset.id}`;
+  const link = document.createElement('a');
+  link.href = url;
+  if (file.asset.name) {
+    link.setAttribute('download', file.asset.name);
+  }
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const handleCopyLink = (file: any) => {
+  if (!file?.asset?.id) return;
+  const url = `${window.location.origin}/api/auth/file/${file.asset.id}`;
+
+  copyToClipboard(url)
+    .then(() => {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+      });
+    })
+    .catch(() => {
+      setNotificationView({
+        type: 'error',
+        open: true,
+        customMessage: ERROR_COPY_LINK_TO_CLIPBOARD,
+      });
+    });
 };
 </script>
 
