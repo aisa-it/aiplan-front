@@ -242,7 +242,7 @@ const isLoading = ref(false);
 //methods
 const setIssueNameField = (id: number) => {
   form.value.fields?.forEach((el, index) => {
-    if (index === id) return;
+    if (index === id || el.type !== 'input') return;
     el.issue_name_field = false;
   });
 };
