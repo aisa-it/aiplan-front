@@ -6,7 +6,9 @@
     @upload="handleUpload"
     @delete="handleDelete"
     @open="handleOpen"
+    :upload-btn-style="{ minHeight: '156px' }"
   />
+  <AttachmentsInfo class="q-mt-sm" />
   <DocPreviewDialog
     v-if="isPreviewOpen"
     v-model="isPreviewOpen"
@@ -17,6 +19,7 @@
 <script setup lang="ts">
 //core
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
 //api
 import { createFormAttachments } from 'src/components/forms/services/api';
@@ -24,10 +27,12 @@ import { createFormAttachments } from 'src/components/forms/services/api';
 //components
 import FileUploader from 'src/shared/components/file-uploader/FileUploader.vue';
 import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
+import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useFormStore } from 'src/stores/form-store';
+import { useUserStore } from 'src/stores/user-store';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -41,6 +46,8 @@ const emit = defineEmits(['update:modelValue']);
 //stores
 const { setNotificationView } = useNotificationStore();
 const formStore = useFormStore();
+const userStore = useUserStore();
+const { user } = storeToRefs(userStore);
 
 //refs
 const uploading = ref(false);
@@ -50,6 +57,17 @@ const previewFile = ref();
 //methods
 const handleUpload = async (file: File) => {
   uploading.value = true;
+
+  if (!user.value?.id) {
+    setNotificationView({
+      type: 'error',
+      customMessage: 'Для загрузки файла авторизуйтесь или зарегистрируйтесь',
+      open: true,
+    });
+    uploading.value = false;
+    return;
+  }
+
   try {
     const response = await createFormAttachments(
       props.workspaceSlug,
