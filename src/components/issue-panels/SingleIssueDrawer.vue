@@ -386,6 +386,7 @@
 
       <SelectLinks
         v-if="!hideSettings.includes('link_count')"
+        class="q-pt-md"
         :projectid="issueData.project"
         :issueid="issueData.id"
         :links="issueData.issue_link"
