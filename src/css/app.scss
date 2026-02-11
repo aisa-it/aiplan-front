@@ -609,10 +609,6 @@ h4 {
     gap: 20px;
     flex-wrap: nowrap;
     flex: none;
-
-    &.col-shrink {
-      flex-shrink: 1;
-    }
   }
 
   .chip {
@@ -635,7 +631,7 @@ h4 {
 
   &.q-tabs--scrollable.q-tabs--mobile-without-arrows {
     .q-tabs__arrow {
-      // display: none !important;
+      display: none !important;
     }
   }
 }
