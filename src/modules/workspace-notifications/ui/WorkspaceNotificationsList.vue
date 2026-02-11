@@ -9,7 +9,11 @@
         content-class="notifications__tabs-content"
       />
     </div>
-    <template v-if="groupedNotifications.length">
+    <div
+      v-if="groupedNotifications.length"
+      class="notifications__scroll-area"
+      @scroll="onScroll"
+    >
       <div
         v-for="([date, notifications], index) in groupedNotifications"
         :key="date"
@@ -21,7 +25,7 @@
           <span class="notifications__tabs-date col-12 body-2">{{ date }}</span>
           <q-btn
             v-if="index === 0 && currentTab === 0"
-            class="btn q-ml-md]"
+            class="btn q-ml-md"
             no-caps
             dense
             @click="onRead"
@@ -38,7 +42,7 @@
           class="col-12"
         />
       </div>
-    </template>
+    </div>
     <div v-else class="notifications__no-data">
       <span class="body-1">Уведомления не найдены</span>
     </div>
@@ -58,9 +62,15 @@ import { renderLongDateFormat } from 'src/utils/time';
 const props = defineProps<{
   readNotifications: NotificationsNotificationResponse[];
   unreadNotifications: NotificationsNotificationResponse[];
+  hasMoreUnread?: boolean;
+  hasMoreRead?: boolean;
 }>();
 
-const emits = defineEmits<{ getNotifications: []; read: [] }>();
+const emits = defineEmits<{
+  getNotifications: [];
+  read: [];
+  loadMore: [type: 'unread' | 'read'];
+}>();
 
 //constants
 const listTabs = [
@@ -76,6 +86,7 @@ const listTabs = [
 
 //state
 const currentTab = ref(0);
+const isLoadingMore = ref(false);
 
 //computed
 const groupedNotifications = computed(() => {
@@ -116,6 +127,25 @@ const handleGetNotifications = () => {
 const onRead = () => {
   emits('read');
 };
+
+const onScroll = (event: Event) => {
+  if (isLoadingMore.value) return;
+
+  const target = event.target as HTMLElement;
+  const isBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 50;
+
+  if (isBottom) {
+    const hasMore = currentTab.value === 0 ? props.hasMoreUnread : props.hasMoreRead;
+    
+    if (hasMore) {
+      isLoadingMore.value = true;
+      emits('loadMore', currentTab.value === 0 ? 'unread' : 'read');
+      setTimeout(() => {
+        isLoadingMore.value = false;
+      }, 300);
+    }
+  }
+};
 </script>
 <style scoped lang="scss">
 .notifications__list {
@@ -123,11 +153,18 @@ const onRead = () => {
   flex-direction: column;
   gap: 8px;
   max-height: 75vh;
-  overflow-y: auto;
   padding: 8px 24px;
   width: 100%;
   @media (max-width: 768px) {
     max-height: 35vh;
+  }
+}
+
+.notifications__scroll-area {
+  overflow-y: auto;
+  max-height: calc(75vh - 80px);
+  @media (max-width: 768px) {
+    max-height: calc(35vh - 80px);
   }
 }
 .notifications__no-data {

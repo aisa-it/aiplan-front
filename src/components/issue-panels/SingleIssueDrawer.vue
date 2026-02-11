@@ -7,7 +7,10 @@
     <q-separator class="issue-panel__separator" />
 
     <template v-if="issueData">
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('state')"
+      >
         <div class="col q-mb-sm">
           <div class="row items-center">
             <CheckStatusIcon class="issue-icon" /><span class="q-ml-sm">
@@ -36,7 +39,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('author')"
+      >
         <div class="col">
           <div class="row items-center">
             <UserIcon class="issue-icon" /><span class="q-ml-sm"> Автор </span>
@@ -72,7 +78,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('assignees')"
+      >
         <div class="col">
           <div class="row items-center">
             <UsersIcon class="issue-icon" />
@@ -100,7 +109,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('wathcers')"
+      >
         <div class="col">
           <div class="row items-center">
             <ObserveIcon class="issue-icon" />
@@ -126,7 +138,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('priority')"
+      >
         <div class="col">
           <div class="row items-center">
             <PriorityIcon class="issue-icon" />
@@ -159,7 +174,10 @@
 
       <q-separator class="q-mt-md issue-panel__separator" />
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('created_at')"
+      >
         <div class="col">
           <div class="row items-center">
             <CreateDateIcon :height="19" class="issue-icon" />
@@ -171,7 +189,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('target_date')"
+      >
         <div class="col">
           <div class="row items-center">
             <ExecuteDateIcon :height="19" class="issue-icon" />
@@ -198,7 +219,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('start_date')"
+      >
         <div class="col">
           <div class="row items-center">
             <StartDateIcon :height="19" class="issue-icon" />
@@ -210,7 +234,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('completed_at')"
+      >
         <div class="col">
           <div class="row items-center">
             <EndDateIcon :height="19" class="issue-icon" />
@@ -231,7 +258,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('sub_issues_count')"
+      >
         <div class="col">
           <div class="row items-center">
             <ParentIcon class="issue-icon" />
@@ -271,7 +301,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('blocker_issues')"
+      >
         <div class="col">
           <div class="row items-center">
             <AlertIcon :color="'rgb(236, 177, 104)'" class="issue-icon" />
@@ -297,7 +330,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('blocked_issues')"
+      >
         <div class="col">
           <div class="row items-center">
             <AlertIcon :color="'rgb(230, 111, 96)'" class="issue-icon" />
@@ -323,7 +359,10 @@
         </div>
       </div>
 
-      <div class="row q-pt-md centered-horisontally">
+      <div
+        class="row q-pt-md centered-horisontally"
+        v-if="!hideSettings.includes('sprint')"
+      >
         <div class="col">
           <div class="row items-center">
             <SprintIcon :is-dark="$q.dark.isActive" />
@@ -346,18 +385,21 @@
       <q-separator class="q-mt-md issue-panel__separator" />
 
       <SelectLinks
+        v-if="!hideSettings.includes('link_count')"
         :projectid="issueData.project"
         :issueid="issueData.id"
         :links="issueData.issue_link"
         :project="issueData.project_detail"
         :isDisabled="
-          hasPermissionByIssue(
+          !hasPermissionByIssue(
             issueData,
             issueData.project_detail ?? project,
             'change-issue-secondary',
           )
         "
-        @refresh="handleRefresh"
+        @add="handleLinkAdd"
+        @delete="handleLinkDelete"
+        @edit="handleLinkEdit"
       >
       </SelectLinks>
 
@@ -453,9 +495,15 @@ import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 
 // constants
-import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import {
+  SUCCESS_UPDATE_DATA,
+  SUCCESS_LINK_ADDING,
+  SUCCESS_LINK_EDITING,
+  SUCCESS_LINK_DELETING,
+} from 'src/constants/notifications';
 
 import { setIntervalFunction } from 'src/utils/helpers';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
@@ -481,12 +529,16 @@ const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
 
-const refreshCycle = ref();
-
 const { navigateToActivityPage } = useUserActivityNavigation();
 
-// functions
+const hideSettings = computed(() => {
+  return project.value?.hide_fields ?? [];
+});
 
+//refs
+const refreshCycle = ref();
+
+// functions
 const handleRefresh = async () => {
   await refresh();
   emits('refresh');
@@ -574,6 +626,60 @@ const getCompareText = () => {
   return `${captureTime}, ${dateToDays > 0 ? '+' : '-'}${msToRussianTime(
     Math.abs(getCompareDate.value),
   )}`;
+};
+
+const handleLinkAdd = async (link: DtoIssueLinkLight) => {
+  if (!currentWorkspaceSlug.value) return;
+  await singleIssueStore.issueLinkCreate(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    link.url,
+    link.title,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_ADDING,
+  });
+};
+
+const handleLinkDelete = async (linkID: string) => {
+  if (!currentWorkspaceSlug.value) return;
+  await singleIssueStore.issueLinkDelete(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    linkID,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_DELETING,
+  });
+};
+
+const handleLinkEdit = async (link: DtoIssueLinkLight) => {
+  if (!currentWorkspaceSlug.value || !link.id) return;
+  await singleIssueStore.issueLinkEdit(
+    currentWorkspaceSlug.value,
+    issueData.value.project ?? currentProjectID.value,
+    currentIssueID.value,
+    link.url,
+    link.title,
+    link.id,
+  );
+
+  await handleRefresh();
+  setNotificationView({
+    type: 'success',
+    open: true,
+    customMessage: SUCCESS_LINK_EDITING,
+  });
 };
 
 onMounted(() => {

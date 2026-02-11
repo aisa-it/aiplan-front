@@ -108,11 +108,11 @@
 
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
-      flat
+      :flat="!hasChanges"
+      :outline="!hasChanges"
       no-caps
-      outline
-      class="secondary-btn"
-      :disable="!isValidName || !isValidIdentifier"
+      :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+      :disable="!isValidName || !isValidIdentifier || !hasChanges"
       @click="onSubmit"
     >
       Сохранить
@@ -186,6 +186,7 @@ import { getUrlFile } from 'src/utils/helpers';
 // constants
 import { NETWORK_CHOICES } from 'src/constants/constants';
 import { PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
+import { PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
 
 // interfaces
 import { IProject } from 'src/interfaces/projects';
@@ -197,6 +198,9 @@ import {
   updateProjectLogo,
   deleteProjectLogo,
 } from '../../services/api';
+
+// composables
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 //routes
 const router = useRouter();
@@ -211,6 +215,7 @@ const { setNotificationView } = useNotificationStore();
 // store to refs
 const { project } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
 // vars
 const isDeleteOpen = ref(false);
 const isOpenUploadDialog = ref(false);
@@ -226,6 +231,20 @@ const selectNetworkRef = ref();
 const { getWidthStyle: selectNetworkWidth } =
   useResizeObserverSelect(selectNetworkRef);
 
+//computeds
+const { hasChanges, init } = useFormChanges(projectForm, {
+  transform: (val) => {
+    const unwrapValue = (v: any) => v?.value ?? v;
+    return {
+      name: val.name,
+      identifier: val.identifier,
+      public: unwrapValue(val.public),
+      emoji: unwrapValue(val.emoji),
+    };
+  },
+});
+
+//methods
 const updateStores = async () => {
   await Promise.all([
     projectStore.getProjectInfo(
@@ -294,9 +313,9 @@ const validateName = (val: string): boolean | string => {
 const validateIdentifier = (val: string): boolean | string => {
   isValidIdentifier.value = false;
   const minL =
-    val.trim().length >= 3 ||
-    'Идентификатор должен содержать 3 и более симолов';
-  const maxL = maxLength(val, 10);
+    val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
+    `Идентификатор должен содержать ${PROJECT_IDENTIFIER_LENGTH.MIN} и более симолов`;
+  const maxL = maxLength(val, PROJECT_IDENTIFIER_LENGTH.MAX);
   const upperCaseAndNumber = isUpperCaseAndNumber(val, 'Идентификатор');
 
   if (typeof minL === 'string') {
@@ -352,6 +371,7 @@ watch(
       projectForm.value = Object.assign({}, newValue);
       validateName(projectForm.value.name);
       validateIdentifier(projectForm.value.identifier);
+      init();
     }
   },
   {

@@ -175,7 +175,7 @@ const listTabs = computed(() => {
     },
     {
       name: 8,
-      label: 'Дополнительные параметры',
+      label: 'Параметры',
       allowedRoles: ['owner', 'admin'],
     },
   ];

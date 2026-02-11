@@ -26,7 +26,7 @@ export const RESTRICTED_URLS = [
   'admin-panel',
   'profile',
   'conference',
-  'mcp'
+  'mcp',
 ];
 
 export const STATES_TYPES = [
@@ -83,6 +83,11 @@ export const PROJECT_VIEWS = [
   { value: 'kanban', label: 'Доска' },
   { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
 ];
+
+export const PROJECT_IDENTIFIER_LENGTH = {
+  MAX: 15,
+  MIN: 3,
+};
 
 export const SPRINT_VIEWS = [...PROJECT_VIEWS];
 
@@ -375,6 +380,10 @@ export const QUESTION_TYPE_FIELD_OPTIONS = [
   {
     label: 'Раскрывающийся список',
     type: 'multiselect',
+  },
+  {
+    label: 'Вложения',
+    type: 'attachment',
   },
 ];
 

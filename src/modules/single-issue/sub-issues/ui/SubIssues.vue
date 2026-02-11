@@ -142,7 +142,7 @@ const getUrl = (value: DtoIssue) => {
 const removeChild = (id: string) => {
   updateIssueInfo(
     route.params.workspace as string,
-    props.project_detail.id ?? (route.params.project as string),
+    props.project_detail?.id ?? (route.params.project as string),
     id,
     {
       parent: null,

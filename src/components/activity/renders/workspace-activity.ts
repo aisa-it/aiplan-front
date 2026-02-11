@@ -98,13 +98,13 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
 
     case 'doc':
       if (activity.verb === 'created')
-        return `<span>создал(-а) документ ${getURLDoc(activity)}</span>`;
+        return `<span>создал(-а) документ ${getURLDoc(activity, 'new_entity_detail', activity.new_value)}</span>`;
       if (activity.verb === 'deleted')
         return `<span>удалил(-а) документ ${activity.old_value}</span>`;
       if (activity.verb === 'added')
-        return `<span>добавил(-а) дочерний документ "${activity.new_value}" в корневой</span>`;
-      if (activity.verb === 'remove')
-        return `<span>убрал(-а) дочерний документ "${activity.old_value}" из корневого`;
+        return `<span>добавил(-а) дочерний документ "${getURLDoc(activity, 'new_entity_detail', activity.new_value)}" в корневую папку</span>`;
+      if (activity.verb === 'removed')
+        return `<span>убрал(-а) дочерний документ "${getURLDoc(activity, 'old_entity_detail', activity.old_value)}" из корневой папки`;
 
     case 'doc_sort':
       return '<span>отсортировал(-а) список корневых документов';

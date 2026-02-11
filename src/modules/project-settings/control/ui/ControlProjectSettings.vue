@@ -61,42 +61,59 @@
     </div>
 
     <q-card-actions style="background-color: transparent" align="right">
-      <q-btn no-caps @click="onSubmit" class="secondary-btn"> Сохранить </q-btn>
+      <q-btn
+        no-caps
+        :flat="!hasChanges"
+        :outline="!hasChanges"
+        :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+        :disable="!hasChanges"
+        @click="onSubmit"
+      >
+        Сохранить
+      </q-btn>
     </q-card-actions>
   </div>
 </template>
 
 <script setup lang="ts">
+//core
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { computed, onBeforeMount, onMounted, ref } from 'vue';
 
+//stores
 import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUserStore } from 'stores/user-store';
 
+//types
 import { IProjectLeader } from 'src/interfaces/projects';
 import {
   DtoProject,
   DtoProjectMemberLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
+//components
 import LoadPage from 'src/pages/LoadPage.vue';
 import SelectAssignee from 'components/selects/SelectAssignee.vue';
 import SelectWatchers from 'components/selects/SelectWatchers.vue';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 
+//api
 import { updateProject } from '../../services/api';
+
+//composables
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 const route = useRoute();
 const rolesStore = useRolesStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 const { project } = storeToRefs(projectStore);
-const currentProject = ref(); 
-// TODO касается типизации project, в данном компоненте идёт нарушение контракта в угоду используемым компонентам типа селекта 
+const currentProject = ref();
+// TODO касается типизации project, в данном компоненте идёт нарушение контракта в угоду используемым компонентам типа селекта
 // FE project_lead является по контракту строкой, здесь же используется как объект
 // нужно или изменить селекты и логику получения информации об выбранном пользователе либо же создавать промежуточные стейты, а не переписывать переменные в нарушение контрактов
 const projectMembers = ref<DtoProjectMemberLight[]>();
@@ -111,6 +128,22 @@ const isLoading = computed(() => {
   return (
     projectMembers.value === undefined || currentProject.value === undefined
   );
+});
+
+const normalizeArray = (arr: any[]) => {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((val) => val?.member_id ?? val);
+};
+
+const { hasChanges, init } = useFormChanges(currentProject, {
+  transform: (val) => {
+    if (!val) return {};
+    return {
+      project_lead: val.project_lead?.value,
+      default_assignees: normalizeArray(val.default_assignees),
+      default_watchers: normalizeArray(val.default_watchers),
+    };
+  },
 });
 
 useMeta(() => {
@@ -169,6 +202,7 @@ async function refresh() {
   });
 
   setAnotherTitle(currentProject.value.name);
+  init();
 }
 
 onBeforeMount(async () => await userStore.getUserInfo());
