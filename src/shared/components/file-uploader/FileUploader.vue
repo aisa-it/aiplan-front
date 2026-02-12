@@ -14,6 +14,7 @@
       @dragleave.prevent="isDragIn = false"
       :class="{ isDragIn: isDragIn }"
       style="min-height: 50px"
+      :style="uploadBtnStyle"
     >
       <div v-if="!loading" class="flex items-center">
         <LinkIcon color="var(--primary)" />
@@ -58,6 +59,7 @@ import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 //types
 import { IAttachmentCard } from 'src/interfaces/files';
+import { StyleValue } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -70,6 +72,7 @@ const props = withDefaults(
       file: IAttachmentCard,
       onProgress: (progress: number) => void,
     ) => Promise<void>;
+    uploadBtnStyle?: StyleValue;
   }>(),
   {
     maxItems: false,

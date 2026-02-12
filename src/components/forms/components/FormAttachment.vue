@@ -6,6 +6,12 @@
     @upload="handleUpload"
     @delete="handleDelete"
     @open="handleOpen"
+    :upload-btn-style="{ minHeight: '156px' }"
+  />
+  <AttachmentsInfo
+    class="q-mt-sm"
+    :max-size-value="MAX_SIZE_FILE_VALUE"
+    :max-size-unit="MAX_SIZE_FILE_UNIT"
   />
   <DocPreviewDialog
     v-if="isPreviewOpen"
@@ -17,6 +23,7 @@
 <script setup lang="ts">
 //core
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
 //api
 import { createFormAttachments } from 'src/components/forms/services/api';
@@ -24,10 +31,12 @@ import { createFormAttachments } from 'src/components/forms/services/api';
 //components
 import FileUploader from 'src/shared/components/file-uploader/FileUploader.vue';
 import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
+import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useFormStore } from 'src/stores/form-store';
+import { useUserStore } from 'src/stores/user-store';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -41,6 +50,13 @@ const emit = defineEmits(['update:modelValue']);
 //stores
 const { setNotificationView } = useNotificationStore();
 const formStore = useFormStore();
+const userStore = useUserStore();
+const { user } = storeToRefs(userStore);
+
+//consts
+const MAX_SIZE_FILE_VALUE = 50;
+const MAX_SIZE_FILE_UNIT = 'мб';
+const MAX_SIZE_FILE = MAX_SIZE_FILE_VALUE * 1024 * 1024;
 
 //refs
 const uploading = ref(false);
@@ -50,6 +66,27 @@ const previewFile = ref();
 //methods
 const handleUpload = async (file: File) => {
   uploading.value = true;
+
+  if (file.size > MAX_SIZE_FILE) {
+    setNotificationView({
+      type: 'error',
+      customMessage: `Файл слишком большой. Максимальный размер ${MAX_SIZE_FILE_VALUE} ${MAX_SIZE_FILE_UNIT}`,
+      open: true,
+    });
+    uploading.value = false;
+    return;
+  }
+
+  if (!user.value?.id) {
+    setNotificationView({
+      type: 'error',
+      customMessage: 'Для загрузки файла авторизуйтесь или зарегистрируйтесь',
+      open: true,
+    });
+    uploading.value = false;
+    return;
+  }
+
   try {
     const response = await createFormAttachments(
       props.workspaceSlug,

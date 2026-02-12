@@ -65,12 +65,9 @@
         </div>
       </q-card-section>
 
-      <q-card-section
-        v-if="project"
-        :class="$q.screen.width > 720 ? 'row' : 'column'"
-      >
-        <div class="col">
-          <div class="row q-mb-sm centered-horisontally">
+      <q-card-section v-if="project" class="row q-col-gutter-x-md">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <PriorityIcon />
               <span class="q-ml-sm"> Приоритет </span>
@@ -81,70 +78,15 @@
               class="col centered-horisontally"
               label="Выберите приоритет"
               v-model:priority="priority"
-              :workspace-slug="currentWorkspaceSlug"
-              :projectid="project.id"
+              :workspace-slug="currentWorkspaceSlug || ''"
+              :projectid="project.id || ''"
               :new-issue="true"
             ></select-priority>
           </div>
-          <div class="row q-mb-sm centered-horisontally">
-            <div class="col centered-horisontally issue-selector-label">
-              <UserIcon />
-              <span class="q-ml-sm"> Исполнитель </span>
-            </div>
-            <UserIcon class="issue-selector-icon mr-12" />
-
-            <SelectAssignee
-              v-model:assigness="assigness"
-              :projectid="project.id"
-              :defaultAssignee="project.default_assignees_details"
-              :current-member="user"
-              :new-issue="true"
-              label="Выберите исполнителя"
-              class="col centered-horisontally"
-            ></SelectAssignee>
-          </div>
-          <div class="row q-mb-sm centered-horisontally">
-            <div class="col centered-horisontally issue-selector-label">
-              <ObserveIcon />
-              <span class="q-ml-sm"> Наблюдатель </span>
-            </div>
-            <ObserveIcon class="issue-selector-icon mr-12" />
-
-            <SelectWatchers
-              v-model:watchers="watchers"
-              :projectid="project.id"
-              :current-member="user"
-              :new-issue="true"
-              label="Выберите наблюдателя"
-              class="col centered-horisontally"
-            ></SelectWatchers>
-          </div>
-
-          <div
-            v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
-            class="row q-mb-sm centered-horisontally"
-          >
-            <div class="col centered-horisontally issue-selector-label">
-              <SprintIcon />
-              <span class="q-ml-sm"> Спринт </span>
-            </div>
-            <SprintIcon class="issue-selector-icon mr-12" />
-            <SelectSprints
-              v-model="sprints"
-              class="col centered-horisontally"
-              label="Выберите спринт"
-            />
-          </div>
-          <SelectLinks
-            :links="links"
-            @add="handleLinkAdd"
-            @delete="handleLinkDelete"
-            @edit="handleLinkEdit"
-          />
         </div>
-        <q-separator vertical class="q-mx-md" />
-        <div class="col">
-          <div class="row q-mb-sm centered-horisontally">
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <CheckStatusIcon />
               <span class="q-ml-sm"> Статус </span>
@@ -152,15 +94,37 @@
             <CheckStatusIcon class="issue-selector-icon mr-12" />
 
             <select-status
-              :projectid="project.id"
+              :projectid="project.id || ''"
               v-model:status="status"
-              @updateInitialStatus="(s) => (status = s)"
+              @updateInitialStatus="(s: any) => (status = s)"
               label="Выберите статус"
               class="col centered-horisontally"
             ></select-status>
           </div>
+        </div>
 
-          <div class="row q-mb-sm centered-horisontally">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <UserIcon />
+              <span class="q-ml-sm"> Исполнитель </span>
+            </div>
+            <UserIcon class="issue-selector-icon mr-12" />
+
+            <select-assignee
+              v-model:assigness="assigness"
+              :projectid="project.id || ''"
+              :defaultAssignee="project.default_assignees_details as any[]"
+              :current-member="user"
+              :new-issue="true"
+              label="Выберите исполнителя"
+              class="col centered-horisontally"
+            ></select-assignee>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <CalendarIcon />
               <span class="q-ml-sm"> Срок исполнения </span>
@@ -169,16 +133,37 @@
 
             <select-date
               v-model:date="date"
-              :workspace-id="currentWorkspaceSlug"
-              :project-id="project.id"
+              :workspace-id="currentWorkspaceSlug || ''"
+              :project-id="project.id || ''"
               :new-issue="true"
               :auto-update="autoupdateDate"
               placeholder="Выберите дату"
               class="col centered-horisontally"
             ></select-date>
           </div>
+        </div>
 
-          <div class="row q-mb-sm centered-horisontally">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <ObserveIcon />
+              <span class="q-ml-sm"> Наблюдатель </span>
+            </div>
+            <ObserveIcon class="issue-selector-icon mr-12" />
+
+            <select-watchers
+              v-model:watchers="watchers"
+              :projectid="project.id || ''"
+              :current-member="user"
+              :new-issue="true"
+              label="Выберите наблюдателя"
+              class="col centered-horisontally"
+            ></select-watchers>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <ShareIcon />
               <span class="q-ml-sm"> Родитель </span>
@@ -187,29 +172,62 @@
 
             <select-parent-issue
               v-model:issue="parent"
-              :projectid="project.id"
-              :project="project"
+              :projectid="project.id || ''"
+              :project="project as any"
               :isDisabled="true"
               :new-issue="true"
               class="col centered-horisontally"
             ></select-parent-issue>
           </div>
+        </div>
+
+        <div
+          v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
+          class="col-12 col-sm-6 q-mb-sm"
+        >
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <SprintIcon />
+              <span class="q-ml-sm"> Спринт </span>
+            </div>
+            <SprintIcon class="issue-selector-icon mr-12" />
+            <select-sprints
+              v-model="sprints"
+              class="col centered-horisontally"
+              label="Выберите спринт"
+            />
+          </div>
+        </div>
+
+        <div
+          :class="[
+            'q-mb-sm',
+            hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+              ? 'col-12 col-sm-6'
+              : 'col-12',
+          ]"
+        >
           <select-tags
-            v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
             v-model:tags="tags"
             :projectid="project.id"
             :isDisabled="true"
+            :is-full-width="
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+            "
           >
           </select-tags>
         </div>
-        <select-tags
-          v-if="!hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
-          v-model:tags="tags"
-          :projectid="project.id"
-          :isDisabled="true"
-          isFullWidth
-        >
-        </select-tags>
+        <div class="q-mb-sm col-12 order-last">
+          <select-links
+            :links="links"
+            @add="handleLinkAdd"
+            @delete="handleLinkDelete"
+            @edit="handleLinkEdit"
+            :is-full-width="
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+            "
+          />
+        </div>
       </q-card-section>
 
       <SelectAttachments
@@ -365,20 +383,20 @@ const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(issuesStore);
 
 //variables
-const projects = ref([]);
+const projects = ref<DtoProject[]>([]);
 const newIssueCardRef = ref<QCard>();
 const titleRef = ref();
-const project = ref(null);
+const project = ref<DtoProject | null>(null);
 const name = ref('');
 const description = ref('');
-const status = ref(null);
-const priority = ref(null);
-const assigness = ref([]);
-const watchers = ref([]);
-const sprints = ref([]);
-const tags = ref([]);
+const status = ref<any>(null);
+const priority = ref<any>(null);
+const assigness = ref<any[]>([]);
+const watchers = ref<any[]>([]);
+const sprints = ref<DtoSprintLight[]>([]);
+const tags = ref<any[]>([]);
 const date = ref(null);
-const parent = ref(null);
+const parent = ref<any>(null);
 const draft = ref(false);
 const selectedIssueTemplate = ref<any>(null);
 
@@ -594,7 +612,7 @@ const handleCreateSuccess = async (createdIssueData: any) => {
       ? getSuccessCreateSubissueMessage(link)
       : getSuccessCreateIssueMessage(
           link,
-          `${issue.project_detail.identifier}-${issue.sequence_id}`,
+          `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
         ),
   });
 
