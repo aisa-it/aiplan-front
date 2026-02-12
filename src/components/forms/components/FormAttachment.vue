@@ -8,7 +8,11 @@
     @open="handleOpen"
     :upload-btn-style="{ minHeight: '156px' }"
   />
-  <AttachmentsInfo class="q-mt-sm" />
+  <AttachmentsInfo
+    class="q-mt-sm"
+    :max-size-value="MAX_SIZE_FILE_VALUE"
+    :max-size-unit="MAX_SIZE_FILE_UNIT"
+  />
   <DocPreviewDialog
     v-if="isPreviewOpen"
     v-model="isPreviewOpen"
@@ -49,6 +53,11 @@ const formStore = useFormStore();
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
+//consts
+const MAX_SIZE_FILE_VALUE = 50;
+const MAX_SIZE_FILE_UNIT = 'мб';
+const MAX_SIZE_FILE = MAX_SIZE_FILE_VALUE * 1024 * 1024;
+
 //refs
 const uploading = ref(false);
 const isPreviewOpen = ref(false);
@@ -57,6 +66,16 @@ const previewFile = ref();
 //methods
 const handleUpload = async (file: File) => {
   uploading.value = true;
+
+  if (file.size > MAX_SIZE_FILE) {
+    setNotificationView({
+      type: 'error',
+      customMessage: `Файл слишком большой. Максимальный размер ${MAX_SIZE_FILE_VALUE} ${MAX_SIZE_FILE_UNIT}`,
+      open: true,
+    });
+    uploading.value = false;
+    return;
+  }
 
   if (!user.value?.id) {
     setNotificationView({
