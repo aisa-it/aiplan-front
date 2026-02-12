@@ -26,7 +26,9 @@
       v-else
       class="zoom-img-wrapper flex items-center justify-center"
       :class="{ document: isDocument, 'zoom-preview--loading': isImageLoading }"
-    >
+      @mouseup.right.capture.stop
+      @mousedown.right.capture.stop
+      >
       <ZoomImg
         ref="zoomImgRef"
         class="zoom-img-container flex items-center justify-center"
