@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="row q-pt-md">
+    <div class="row">
       <div class="col centered-horisontally">
         <div class="row items-center">
           <LinkIcon class="issue-icon" /> <span class="q-ml-sm">Ссылки</span>
@@ -9,10 +9,17 @@
       <div class="col flex justify-end">
         <q-btn
           v-if="isDemo ? isDemoUserValid() : !isDisabled"
-          class="btn-only-icon-sm"
+          class="btn btn-only-icon-sm self-center q-mt-xs q-ml-xs"
+          :style="isFullWidth ? 'flex-shrink: 0;' : ''"
+          no-caps
           @click="isLinkOpenDialog = true"
-          ><AddIcon
-        /></q-btn>
+        >
+          <div class="full-w centered-horisontally justify-between">
+            <span v-if="Screen.width > 720 && isFullWidth">Создать</span>
+            <AddIcon />
+            <q-tooltip v-if="!isFullWidth">Создать</q-tooltip>
+          </div>
+        </q-btn>
       </div>
     </div>
     <q-list class="q-mt-sm issue-links-wrapper">
@@ -112,6 +119,7 @@ import ConfirmDeleteLinkDialog from './dialogs/ConfirmDeleteLinkDialog.vue';
 
 //types
 import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Screen } from 'quasar';
 
 const props = defineProps({
   project: { type: Object, required: false },
@@ -126,6 +134,11 @@ const props = defineProps({
     default: () => [],
   },
   isDisabled: {
+    type: Boolean,
+    required: false,
+    default: () => false,
+  },
+  isFullWidth: {
     type: Boolean,
     required: false,
     default: () => false,
