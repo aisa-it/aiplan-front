@@ -3,7 +3,7 @@
     <div class="w-full text-center">
       <q-img
         class="login-panel__logo"
-        src="~assets/logo.svg"
+        :src="logo"
         style="width: 190px; overflow: visible"
       >
         <HatXmasIcon v-if="ny" class="hat-overlay" :width="50" :height="50" />
@@ -84,6 +84,7 @@ import { isEmail } from 'src/utils/validation';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
+import logo from 'src/assets/logo.svg'
 
 const api = useAiplanStore();
 const loaderStore = useLoaderStore();
