@@ -41,11 +41,11 @@
 </template>
 
 <script setup lang="ts">
-import { DefineComponent } from 'vue';
+import type { Component } from 'vue';
 
 export interface MenuActionItem {
   text: string;
-  icon?: DefineComponent;
+  icon?: Component;
   onClick: () => void;
   to?: string;
   show?: boolean;
