@@ -4,6 +4,7 @@ import { EventBus } from 'quasar';
 
 import { useUserStore } from 'src/stores/user-store';
 import { useFormStore } from 'src/stores/form-store';
+import { getFormList } from 'src/components/forms/services/api';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import { stopGlobalLoading } from 'src/composables/useGlobalLoader';
@@ -38,7 +39,9 @@ export const useUserLoadInfo = () => {
       workspaceInfo.value?.current_user_membership &&
       workspaceInfo.value?.current_user_membership.role === 15
     ) {
-      await formStore.getFormList(workspaceInfo.value?.slug as string);
+      await getFormList(workspaceInfo.value?.slug as string).then(
+        (res) => (formStore.forms = res),
+      );
     } else formStore.resetForms();
 
     stopGlobalLoading();

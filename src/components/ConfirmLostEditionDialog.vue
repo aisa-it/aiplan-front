@@ -32,21 +32,19 @@
   </q-dialog>
 </template>
 
-<script>
-export default {
-  setup(props, { emit }) {
-    const handleConfirm = () => {
-      emit('closeIssue');
-    };
-    const closeConfirm = () => {
-      emit('closeConfirm');
-    };
+<script setup lang="ts">
+import { ref } from 'vue';
 
-    return {
-      handleConfirm,
-      closeConfirm,
-    };
-  },
+const emit = defineEmits(['closeIssue', 'closeConfirm']);
+
+const dialogRef = ref(null);
+
+const handleConfirm = () => {
+  emit('closeIssue');
+};
+
+const closeConfirm = () => {
+  emit('closeConfirm');
 };
 </script>
 

@@ -31,6 +31,45 @@
             map-options
           />
 
+          <div v-if="isSelectType" class="q-mt-md">
+            <span class="text-grey-7">Варианты выбора:</span>
+            <div class="q-mt-sm">
+              <div
+                v-for="(_, index) in form.options"
+                :key="index"
+                class="row items-center q-mb-sm"
+              >
+                <q-input
+                  v-model="form.options![index]"
+                  class="base-input col"
+                  :label="`Вариант ${index + 1}`"
+                  dense
+                  :rules="[(val) => !!val?.trim() || 'Поле не может быть пустым']"
+                  lazy-rules
+                />
+                <q-btn
+                  icon="close"
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  class="q-ml-sm"
+                  @click="removeOption(index)"
+                  :disable="form.options?.length <= 0"
+                />
+              </div>
+              <q-btn
+                flat
+                dense
+                no-caps
+                icon="add"
+                label="Добавить вариант"
+                color="primary"
+                @click="addOption"
+              />
+            </div>
+          </div>
+
           <div>
             <span class="text-grey-7">Видимость:</span>
             <div class="row q-mt-sm">
@@ -62,6 +101,7 @@
             />
             <q-btn
               :label="isEdit ? 'Сохранить' : 'Создать'"
+              :disable="!canSubmit"
               flat
               dense
               no-caps
@@ -95,19 +135,47 @@ const form = ref<PropertyTemplate>({
   name: '',
   type: 'string',
   only_admin: true,
+  options: [],
 });
 
 const isEdit = computed(() => !!props.editItem);
+const isSelectType = computed(() => form.value.type === 'select');
+const hasEmptyOptions = computed(() => {
+  if (!isSelectType) return false;
+  if (isSelectType && form.value.options.length <= 0) return true;
+  return form.value.options?.some((opt: string) => !opt || opt.trim() === '') ?? false;
+});
+const canSubmit = computed(() => {
+  if (!form.value.name) return false;
+  if (isSelectType.value && hasEmptyOptions.value) return false;
+  return true;
+});
 
 //consts
 const typeOptions = [
   { label: 'Строка', value: 'string' },
   { label: 'Флаг', value: 'boolean' },
+  { label: 'Список', value: 'select' },
 ];
 
 //methods
 const onSubmit = () => {
-  emit('submit', { ...form.value });
+  const data = { ...form.value };
+  if (data.type !== 'select') {
+    delete data.options;
+  }
+  emit('submit', data);
+};
+
+const addOption = () => {
+  if (!form.value.options) {
+    form.value.options = [];
+  }
+  form.value.options.push('');
+};
+
+const removeOption = (index: number) => {
+  form.value.options?.splice(index, 1);
 };
 
 //lifecycle hooks
@@ -116,14 +184,27 @@ watch(
   (val) => {
     if (val) {
       if (props.editItem) {
-        form.value = { ...props.editItem };
+        form.value = { 
+          ...props.editItem,
+          options: props.editItem.options || [],
+        };
       } else {
         form.value = {
           name: '',
           type: 'string',
           only_admin: true,
+          options: [],
         };
       }
+    }
+  },
+);
+
+watch(
+  () => form.value.type,
+  (newType) => {
+    if (newType === 'select' && (!form.value.options || form.value.options.length === 0)) {
+      form.value.options = [''];
     }
   },
 );

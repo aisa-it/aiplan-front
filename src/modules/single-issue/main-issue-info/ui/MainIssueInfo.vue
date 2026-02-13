@@ -23,7 +23,7 @@
           <MenuIcon :width="18" :height="18" />
         </q-btn>
       </div>
-      <div class="q-mb-md">
+      <div class="q-mb-md" v-if="!hideSettings.includes('labels')">
         <div class="flex items-center">
           <q-chip
             v-for="t in issueData.label_details"
@@ -400,6 +400,10 @@ const handleAutoSave = async () => {
 };
 
 // computed
+const hideSettings = computed(() => {
+  return project.value?.hide_fields ?? [];
+});
+
 const isAdminOrAuthor = computed(() => {
   return hasPermissionByIssue(
     issueData.value,

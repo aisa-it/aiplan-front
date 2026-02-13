@@ -199,7 +199,7 @@ onMounted(() => {
 
 .tag-colored-board {
   position: relative;
-  padding-left: 8px;
+  box-sizing: border-box;
   
   :deep(.q-item) {
     border-left: 4px solid var(--tag-color) !important;

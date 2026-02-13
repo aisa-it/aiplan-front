@@ -26,6 +26,7 @@
           style="padding: 8px"
           clearable
           dense
+          autofocus
           label="Поиск"
           class="base-input"
           v-model="searchQuery"
@@ -63,6 +64,7 @@
           style="padding: 8px"
           dense
           clearable
+          autofocus
           label="Поиск"
           class="base-input"
           v-model="searchQuery"

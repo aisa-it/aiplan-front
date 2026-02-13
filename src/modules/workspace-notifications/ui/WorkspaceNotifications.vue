@@ -7,10 +7,13 @@
       v-model="isShowList"
       :unread-notifications="unreadNotifications"
       :read-notifications="readNotifications"
+      :has-more-unread="hasMoreUnread"
+      :has-more-read="hasMoreRead"
       @create="() => (isCreateOpen = true)"
       @update="getNotifications"
       @read="readAllNotifications"
       @hide="onHide"
+      @load-more="loadMore"
     />
   </WorkspaceNotificationsButton>
   <WorkspaceNotificationsCreateDialog v-model="isCreateOpen" />
@@ -48,6 +51,10 @@ const isCreateOpen = ref<boolean>(false);
 const isShowList = ref<boolean>(false);
 
 const userNotifications = ref<NotificationsNotificationResponse[]>([]);
+const hasMoreUnread = ref<boolean>(true);
+const hasMoreRead = ref<boolean>(true);
+const INITIAL_LIMIT = 100;
+const LOAD_MORE_LIMIT = 50;
 
 const notifications = computed<NotificationsNotificationResponse[]>(() => {
   return [...messages.value, ...userNotifications.value];
@@ -77,7 +84,43 @@ const readAllNotifications = async (): Promise<void> => {
 };
 
 const getNotifications = async (): Promise<void> => {
-  userNotifications.value = await getUserNotifications();
+  hasMoreUnread.value = true;
+  hasMoreRead.value = true;
+  userNotifications.value = await getUserNotifications({ limit: INITIAL_LIMIT, offset: 0 });
+};
+
+const loadMore = async (type: 'unread' | 'read'): Promise<void> => {
+  const isUnread = type === 'unread';
+  const offset = userNotifications.value.length;
+
+  const newNotifications = await getUserNotifications({ 
+    limit: LOAD_MORE_LIMIT, 
+    offset 
+  });
+
+  if (!newNotifications.length) {
+    if (isUnread) {
+      hasMoreUnread.value = false;
+    } else {
+      hasMoreRead.value = false;
+    }
+    return;
+  }
+
+  const hasNewNotificationsOfType = newNotifications.some(n => 
+    isUnread ? !n.viewed : n.viewed
+  );
+
+  if (!hasNewNotificationsOfType) {
+    if (isUnread) {
+      hasMoreUnread.value = false;
+    } else {
+      hasMoreRead.value = false;
+    }
+    return;
+  }
+
+  userNotifications.value = [...userNotifications.value, ...newNotifications];
 };
 
 const wsParser = (event: any) => {
