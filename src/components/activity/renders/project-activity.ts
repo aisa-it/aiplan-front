@@ -133,7 +133,7 @@ export function projectActivityRender(
         valToRole(+activity?.new_value)?.label
       }" ${workspaceSource}<span/>`;
 
-    case 'state':
+    case 'status':
       action = translateVerb(activity.verb);
       if (activity?.verb === 'created')
         value = ` статус "${activity?.new_value}" ${
@@ -258,12 +258,19 @@ export function projectActivityRender(
       if (activity.verb === 'deleted') {
         return `удалил(-а) шаблон задачи "${activity.old_value}"`;
       }
-    case 'template_template':
+      return;
+
     case 'template_name':
+      if (activity.verb === 'updated') {
+        return `<span>изменил(-а) название шаблона задачи с "${activity.old_value}" на "${activity.new_value}"</span>`;
+      }
+      return;
+
+    case 'template_template':
       if (activity.verb === 'updated') {
         return `изменил(-а) шаблон задачи "${activity.new_entity_detail.name}"`;
       }
-
+      return;
     default:
       break;
   }

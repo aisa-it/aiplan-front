@@ -1,0 +1,18 @@
+export const ATTACHMENT_SUPPORTED_FORMATS = [
+  'pdf',
+  'png',
+  'jpeg',
+  'jpg',
+  'mp4',
+  'mov',
+  'wmv',
+  'webm',
+  'mkv',
+  'gif',
+  'wav',
+  'aiff',
+  'ape',
+  'flac',
+  'mp3',
+  'ogg',
+];

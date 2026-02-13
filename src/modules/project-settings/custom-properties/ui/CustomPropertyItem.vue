@@ -55,6 +55,11 @@ defineEmits<{
 
 //methods
 const formatType = (type: string) => {
-  return type === 'string' ? 'Строка' : 'Флаг';
+  const typeMap: Record<string, string> = {
+    string: 'Строка',
+    boolean: 'Флаг',
+    select: 'Список',
+  };
+  return typeMap[type] || type;
 };
 </script>
