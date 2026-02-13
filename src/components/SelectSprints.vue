@@ -7,15 +7,9 @@
     map-options
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
-    :class="[
-      'base-selector-sm',
-      {
-        'adaptive-select': isAdaptiveSelect,
-        select_borderless: borderless,
-      },
-    ]"
+    :class="`${label ? 'base-selector' : 'base-selector-sm'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     :popup-content-style="selectSprintWidth"
-    :label="computedLabel"
+    :label="label"
     :disable="isDisabled"
     :modelValue="currentSprints"
     :option-label="(v) => v.name"
@@ -58,11 +52,14 @@
       </q-item>
     </template>
 
-    <template v-slot:selected>
-      <div v-if="!currentSprints?.length">Не выбран</div>
-      <div v-else>
-        {{ currentSprints.map((s) => s.name).join(', ') }}
-      </div>
+    <template v-if="!label" v-slot:selected>
+      <q-item-label class="q-ml-xs ellipsis">
+        {{
+          !currentSprints?.length
+            ? 'Не Выбран'
+            : currentSprints.map((s) => s.name).join(', ')
+        }}
+      </q-item-label>
     </template>
   </q-select>
 </template>
@@ -106,12 +103,9 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
-    borderless?: boolean;
   }>(),
   {
-    borderless: false,
     isDisabled: () => false,
-    label: () => 'Спринт',
     hideDropdownIcon: () => false,
   },
 );
@@ -135,10 +129,6 @@ const isOpen = ref(false);
 const isClearable = computed<boolean>(() => {
   return Boolean(props.currentSprints?.length);
 });
-
-const computedLabel = computed<string | undefined>(() =>
-  props.borderless ? undefined : props.label,
-);
 
 //composables
 const { getWidthStyle: selectSprintWidth } =
@@ -186,9 +176,4 @@ const handleUpdateSprints = async (
 };
 </script>
 
-<style scoped lang="scss">
-.select_borderless:deep(.q-field__inner) {
-  background-color: inherit;
-  border: none;
-}
-</style>
+<style scoped lang="scss"></style>

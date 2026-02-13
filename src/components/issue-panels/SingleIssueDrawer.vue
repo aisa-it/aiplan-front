@@ -373,6 +373,7 @@
           <SelectSprints
             class="issue-selector"
             :issueid="issueData.id"
+            :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
               !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')

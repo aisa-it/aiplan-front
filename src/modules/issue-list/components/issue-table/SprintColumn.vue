@@ -1,5 +1,5 @@
 <template>
-  <q-td :props="rowInfo" style="min-width: 200px">
+  <q-td :props="rowInfo" style="min-width: 200px; max-width: 200px">
     <div @click.stop>
       <SelectSprints
         :workspace-slug="rowInfo.row.workspace_detail?.slug"
@@ -12,7 +12,6 @@
             'change-issue-primary'
           )
         "
-        borderless
         @refresh="emits('refresh')"
       />
     </div>

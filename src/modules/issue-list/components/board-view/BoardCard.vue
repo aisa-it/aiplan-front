@@ -157,7 +157,6 @@
           'change-issue-primary',
         )
       "
-      borderless
       @refresh="
         () => {
           emits('updateTable', 'sprint', card, entity);
