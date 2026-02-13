@@ -5,13 +5,15 @@
     multiple
     :clearable="isClearable"
     map-options
-    class="base-selector"
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
-    :class="{
-      'adaptive-select': isAdaptiveSelect,
-      select_borderless: isInTable,
-    }"
+    :class="[
+      'base-selector-sm',
+      {
+        'adaptive-select': isAdaptiveSelect,
+        select_borderless: borderless,
+      },
+    ]"
     :popup-content-style="selectSprintWidth"
     :label="computedLabel"
     :disable="isDisabled"
@@ -55,6 +57,13 @@
         </q-item-section>
       </q-item>
     </template>
+
+    <template v-slot:selected>
+      <div v-if="!currentSprints?.length">Не выбран</div>
+      <div v-else>
+        {{ currentSprints.map((s) => s.name).join(', ') }}
+      </div>
+    </template>
   </q-select>
 </template>
 
@@ -97,10 +106,10 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
-    isInTable?: boolean;
+    borderless?: boolean;
   }>(),
   {
-    isInTable: false,
+    borderless: false,
     isDisabled: () => false,
     label: () => 'Спринт',
     hideDropdownIcon: () => false,
@@ -127,17 +136,11 @@ const isClearable = computed<boolean>(() => {
   return Boolean(props.currentSprints?.length);
 });
 
-const computedLabel = computed<string | undefined>(() => {
-  if (!props.isInTable) {
-    return props.label;
-  } else if (!props.currentSprints || props.currentSprints.length === 0) {
-    return 'Не выбран';
-  } else {
-    return undefined;
-  }
-});
+const computedLabel = computed<string | undefined>(() =>
+  props.borderless ? undefined : props.label,
+);
 
-//composibles
+//composables
 const { getWidthStyle: selectSprintWidth } =
   useResizeObserverSelect(selectSprintRef);
 
@@ -169,7 +172,11 @@ const handleUpdateSprints = async (
     const changedSprintId = String(sprint.id ?? '');
     const activeSprintId = String(sprintStore.sprint?.id ?? '');
 
-    if (changedSprintId && activeSprintId && changedSprintId === activeSprintId) {
+    if (
+      changedSprintId &&
+      activeSprintId &&
+      changedSprintId === activeSprintId
+    ) {
       sprintStore.triggerSprintRefresh();
     }
 

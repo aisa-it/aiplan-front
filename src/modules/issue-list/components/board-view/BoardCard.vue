@@ -149,7 +149,7 @@
     <SelectSprints
       :workspace-slug="card.workspace_detail?.slug"
       :issueid="card.id"
-      :model-value="card.sprints ?? []"
+      :current-sprints="card.sprints ?? []"
       :is-disabled="
         !rolesStore.hasPermissionByIssue(
           card,
@@ -157,7 +157,7 @@
           'change-issue-primary',
         )
       "
-      isInTable
+      borderless
       @refresh="
         () => {
           emits('updateTable', 'sprint', card, entity);
