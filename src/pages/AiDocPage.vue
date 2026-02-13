@@ -93,15 +93,6 @@
             :id="documentValue.id"
             ref="selectAttachments"
           />
-          <q-chip
-            v-if="documentValue.llm_content"
-            class="q-px-xs q-py-md hint-overlay"
-            dense
-            style="position: fixed; bottom: 8px; z-index: 9999"
-          >
-            <LLMIcon />
-            <span class="hint-overlay__text">Создано с помощью ИИ</span>
-          </q-chip>
           <div class="q-px-sm">
             <q-separator class="q-mt-sm" />
           </div>
@@ -163,7 +154,6 @@ import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
 import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
-import LLMIcon from 'src/components/icons/LLMIcon.vue';
 
 //composables
 const route = useRoute();
