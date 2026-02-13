@@ -4,7 +4,7 @@
     style="height: fit-content; position: relative; min-width: 100%"
   >
     <div
-      @scroll="scrollManager?.updateBtnVisible()"
+      @scroll="updateScrollState"
       ref="scrollContainer"
       class="row scroll-tabs scrollable-content"
     >
@@ -38,7 +38,7 @@
           class="btn-scroll-tabs"
           @click="scroll(-300)"
           :style="
-            !scrollManager?.scrollState.showLeftArrow
+            !showLeftArrow
               ? `visibility: hidden;`
               : ``
           "
@@ -52,7 +52,7 @@
           class="btn-scroll-tabs"
           @click="scroll(300)"
           :style="
-            !scrollManager?.scrollState.showRightArrow
+            !showRightArrow
               ? `visibility: hidden;`
               : ``
           "
@@ -67,20 +67,18 @@
 </template>
 
 <script setup lang="ts">
+// types
 import { ISettingsTab } from '../types/settings-tabs';
 
-//utils
-import { ScrollManager } from 'src/utils/scrollBtnManager';
-import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
+// core
 import {
-  onBeforeUnmount,
+  computed,
   onMounted,
   ref,
 } from 'vue';
 
-//variables
-const scrollManager = ref<ScrollManager | null>(null);
-const scrollContainer = ref();
+// composables
+import { useHorizontalScroll } from 'src/composables/useHorizontalScroll';
 
 const props = withDefaults(
   defineProps<{
@@ -98,45 +96,38 @@ defineEmits<{
   set: [currentTab: number];
 }>();
 
-const scroll = (direction: number) => {
-  scrollManager.value?.scroll(direction);
-};
+//variables
+const scrollContainer = ref<HTMLElement>();
 
-let timeout = ref<NodeJS.Timeout>();
+//computeds
+const tabsLength = computed(() => props.listTabs.length);
 
-const checkBtnsVisibility = () => {
-  if (!scrollContainer?.value?.clientWidth) {
-    if (timeout.value) {
-      clearTimeout(timeout.value);
-    }
-    timeout.value = setTimeout(() => {
-      checkBtnsVisibility();
-    }, 500);
-    return;
-  } else {
-    scrollManager.value?.updateBtnVisible();
-    if (
-      scrollManager.value?.scrollState.showLeftArrow ||
-      scrollManager.value?.scrollState.showRightArrow
-    ) {
-      mouseWheelScrollHandler(scrollContainer.value, false);
+const {
+  showLeftArrow,
+  showRightArrow,
+  scroll,
+  updateScrollState,
+  init: initScroll,
+} = useHorizontalScroll(
+  scrollContainer,
+  tabsLength,
+);
+
+let timeInterval = ref<NodeJS.Timeout>();
+
+const setScroll = () => {
+  timeInterval.value = setInterval(() => {
+    if (!scrollContainer?.value?.clientWidth) {
+      return;
     } else {
-      scrollContainer.value.onwheel = null;
+      clearInterval(timeInterval.value)
+      initScroll();
     }
-    clearTimeout(timeout.value);
-  }
-};
+  }, 500);
+}
 
 onMounted(async () => {
-  scrollManager.value = new ScrollManager(scrollContainer.value, false);
-  scrollManager.value?.setResize();
-  checkBtnsVisibility();
-});
-
-onBeforeUnmount(() => {
-  if (scrollManager.value) {
-    scrollManager.value.removeResize();
-  }
+  setScroll();
 });
 </script>
 
