@@ -140,4 +140,14 @@ export const allColumns = [
     },
     sortable: true,
   },
+  {
+    style: 'width: 10px',
+    name: 'sprint',
+    align: 'left',
+    label: 'Спринт',
+    field: (row: any) => {
+      return row.sprints;
+    },
+    sortable: false,
+  },
 ];

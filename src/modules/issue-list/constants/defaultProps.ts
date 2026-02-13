@@ -30,6 +30,7 @@ export const DEFAULT_VIEW_PROPS = {
     'linked_issues_count',
     'link_count',
     'attachment_count',
+    'sprint'
   ],
   page_size: 25,
   draft: true,
