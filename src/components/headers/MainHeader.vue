@@ -1,10 +1,10 @@
 <template>
   <q-header
     style="z-index: 1000"
-    :style="utilsStore.ny === true ? 'background-color: transparent' : ''"
+    :style="false ? 'background-color: transparent' : ''"
   >
     <q-toolbar
-      :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''"
+      :style="false ? 'margin-bottom: 20px' : ''"
       class="header text-grey-9 main-toolbar"
     >
       <q-btn flat dense round aria-label="Menu" @click="$emit('toggle')">

@@ -1,48 +1,26 @@
 <template>
-  <section class="pinned-issues">
-    <h6 class="pinned-issues__heading">Закрепленные задачи</h6>
-    <div
-      ref="scrollContainer"
-      class="pinned-issues__list row scroll-attachments scrollable-content"
-      @scroll="scrollManager?.updateBtnVisible()"
-    >
-      <div class="container-btn-scroll">
-        <q-btn
-          padding="5px 5px"
-          class="btn-scroll-attachments"
-          @click="scroll(-300)"
-          :style="
-            !scrollManager?.scrollState.showLeftArrow
-              ? `visibility: hidden;`
-              : ``
-          "
-        >
-          <template v-slot:default>
-            <q-icon size="25px" name="chevron_left" />
-          </template>
-        </q-btn>
-        <q-btn
-          padding="5px 5px"
-          class="btn-scroll-attachments"
-          @click="scroll(300)"
-          :style="
-            !scrollManager?.scrollState.showRightArrow
-              ? `visibility: hidden;`
-              : ``
-          "
-        >
-          <template v-slot:default>
-            <q-icon size="25px" name="chevron_right" />
-          </template>
-        </q-btn>
-      </div>
-
+  <section v-if="loading">
+    <div class="card-grid">
+      <q-skeleton v-for="i in 20" :key="i" height="125px" />
+    </div>
+  </section>
+  <section v-if="!loading">
+    <div v-if="pinnedIssues.length" class="card-grid">
       <PinnedIssueCard
-        v-for="card in props.pinnedIssues"
+        v-for="card in pinnedIssues"
         :key="card.id"
         :card="card"
         @open-preview="openPreview"
       />
+    </div>
+
+    <div
+      v-if="!pinnedIssues.length"
+      class="column flex-center"
+      style="width: 100%; height: calc(100vh - 148px)"
+    >
+      <DocumentIcon :width="56" :height="56" />
+      <h6>Нет закрепленных задач</h6>
     </div>
 
     <IssuePreview v-model="isPreview" @open="openIssue" @close="closePreview" />
@@ -50,44 +28,31 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { Screen } from 'quasar';
 import PinnedIssueCard from './PinnedIssueCard.vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 
-import { ScrollManager } from 'src/utils/scrollBtnManager';
-import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { useProjectStore } from 'src/stores/project-store';
+import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 
-const props = defineProps<{
-  pinnedIssues: any[];
-}>();
-
-const route = useRoute();
-const { user } = storeToRefs(useUserStore());
 const singleIssueStore = useSingleIssueStore();
+const { fetchPinnedIssues } = useIssuesStore();
+
+const { user } = storeToRefs(useUserStore());
+const { project } = storeToRefs(useProjectStore());
+const { pinnedIssues } = storeToRefs(useIssuesStore());
 const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
   storeToRefs(singleIssueStore);
 
-const scrollManager = ref<ScrollManager | null>(null);
-const scrollContainer = ref();
-const refreshCycle = ref();
-const abortController = new AbortController();
-
+const route = useRoute();
 const isMobile = computed(() => Screen.width <= 1200);
-const scroll = (direction: number): void => {
-  scrollManager.value?.scroll(direction);
-};
+const loading = ref(true);
 
 async function openPreview(id: string): Promise<void> {
   if (!route.params.workspace || !route.params.project) return;
@@ -122,87 +87,23 @@ async function openIssue(id: string): Promise<void> {
   );
 }
 
-onMounted(() => {
-  scrollManager.value = new ScrollManager(scrollContainer.value, false);
-  scrollManager.value?.setResize();
-  if (
-    scrollManager.value?.scrollState.showLeftArrow ||
-    scrollManager.value?.scrollState.showRightArrow
-  ) {
-    mouseWheelScrollHandler(scrollContainer.value, false);
+onMounted(async () => {
+  try {
+    loading.value = true;
+    await fetchPinnedIssues(project.value.id);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    setTimeout(() => (loading.value = false), 2000);
   }
-});
-
-onBeforeUnmount(() => {
-  if (scrollManager.value) {
-    scrollManager.value.removeResize();
-  }
-  abortController.abort();
-
-  clearInterval(refreshCycle.value);
-});
-
-watch(
-  () => props.pinnedIssues.length,
-  () =>
-    nextTick(() => {
-      scrollManager.value?.updateBtnVisible();
-      if (
-        scrollManager.value?.scrollState.showLeftArrow ||
-        scrollManager.value?.scrollState.showRightArrow
-      ) {
-        mouseWheelScrollHandler(scrollContainer.value, false);
-      } else {
-        scrollContainer.value.onwheel = null;
-      }
-    }),
-);
-
-watch(isMobile, () => {
-  if (isMobile.value) closePreview();
-});
-
-onBeforeUnmount(() => {
-  closePreview();
 });
 </script>
 
 <style scoped lang="scss">
-.pinned-issues {
-  &__heading {
-    margin-top: 0px !important;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 100%;
-    letter-spacing: 0.15px;
-  }
-
-  &__list {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
-  }
-}
-
-.scroll-attachments {
-  display: flex;
-  height: 155px;
-  overflow-x: auto;
-  flex-wrap: nowrap;
-  align-items: center;
-  padding: 0 2px;
-}
-
-.container-btn-scroll {
-  position: absolute;
-  left: 0;
-  right: 0;
-  display: flex;
-  visibility: hidden;
-  justify-content: space-between;
-
-  .btn-scroll-attachments {
-    margin: 0 8px;
-  }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+  gap: 24px;
+  padding: 24px;
 }
 </style>

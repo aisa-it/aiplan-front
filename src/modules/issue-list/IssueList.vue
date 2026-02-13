@@ -1,6 +1,6 @@
 <template>
   <q-card class="single-list relative" flat dense>
-    <q-card-section
+    <!-- <q-card-section
       class="row issue-list__header"
       :style="'padding: 12px 16px'"
     >
@@ -12,15 +12,15 @@
         :columns="projectStore.sortAllColumns"
         @update="load()"
       />
-    </q-card-section>
+    </q-card-section> -->
 
-    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
+    <!-- <q-card-section v-if="!issuesLoader && pinnedIssues.length">
       <PinnedIssueList
         :pinned-issues="pinnedIssues"
         :style="{ 'padding: 16px;': isGroupingEnabled }"
       />
     </q-card-section>
-    <q-separator />
+    <q-separator /> -->
 
     <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
       <component

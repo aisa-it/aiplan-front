@@ -2,7 +2,7 @@
   <q-scroll-area
     ref="scrollContainer"
     class="groupped-table"
-    :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
+    :class="ny ? 'scroll-container' : 'new-year-scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
@@ -35,7 +35,7 @@
         </template>
         <div
           :class="{
-            'tag-colored-table': groupBy === 'labels' && table.entity?.color
+            'tag-colored-table': groupBy === 'labels' && table.entity?.color,
           }"
           :style="
             groupBy === 'labels' && table.entity?.color
@@ -126,7 +126,7 @@ const updateGroupedIssues = async (status: any) => {
     (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group?.issues || !group || group?.issues.length === 0) {
+  if ((group && !group?.issues) || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -161,7 +161,7 @@ onMounted(() => {
 });
 
 watch(
-  () => [props.issues,props.issues?.length],
+  () => [props.issues, props.issues?.length],
   () => {
     refresh();
   },
@@ -170,7 +170,7 @@ watch(
 
 <style scoped lang="scss">
 .scroll-container {
-  height: calc(100vh - 105px);
+  height: calc(100vh - 148px);
   overflow-y: auto;
   contain: inherit;
 }

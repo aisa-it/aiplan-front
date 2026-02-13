@@ -4,7 +4,7 @@
     view="lHh Lpr lFf"
     style="max-height: 100%; max-width: 100%"
   >
-    <LightsNewYear v-if="utilsStore.ny === true"></LightsNewYear>
+    <LightsNewYear v-if="false"></LightsNewYear>
     <SnowFall v-if="utilsStore.ny === true && isSnowEnable" />
     <div>
       <MainHeader @toggle="toggleLeftDrawer()" />
