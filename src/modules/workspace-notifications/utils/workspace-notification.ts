@@ -16,6 +16,10 @@ export function workspaceNotificationRender(activity: any, detail: any) {
       action = translateVerb(activity.verb);
       return `${action} название пространства`;
 
+    case 'owner':
+      action = translateVerb(activity.verb);
+      return `${action} лидера пространства с ${getFullName(activity.old_entity_detail)} на ${getFullName(activity.new_entity_detail)}`;
+
     case 'description':
       action = translateVerb(activity.verb);
       return `${action} описание пространства`;

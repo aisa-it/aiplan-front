@@ -62,6 +62,7 @@
             >
             <EditIcon />
           </q-btn>
+          <LlmContentChip :show="!!issueData?.llm_content" />
         </div>
       </div>
       <q-card
@@ -215,6 +216,7 @@ import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 import { updateIssueInfo } from '../../services/api';
 import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useLockIssueInfo } from '../composables/useLockIssueInfo';
+import LlmContentChip from 'src/components/LlmContentChip.vue';
 
 defineOptions({
   directives: {
