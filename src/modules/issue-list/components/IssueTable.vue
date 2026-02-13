@@ -18,8 +18,8 @@
           v-for="col in columns"
           :key="col.name"
           :props="props"
-          :class="`${col.name.includes('count') ? 'count-column': ''}`"
-          >
+          :class="`${col.name.includes('count') ? 'count-column' : ''}`"
+        >
           {{ col.label }}
         </q-th>
       </q-tr>
@@ -38,18 +38,29 @@
 
     <template v-slot:body-cell-sequence_id="props">
       <SequenceIdColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-name="props">
       <NameColumn
         :row-info="props"
+        :hide-parent="
+          contextStore?.project?.hide_fields?.includes('sub_issues_count')
+        "
         @open-preview="
           (issue) =>
             emits('openPreview', issue, parsePagination(quasarPagination))
         "
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-priority="props">
@@ -57,7 +68,11 @@
         :row-info="props"
         @refresh="updateIssueField('priority', props.row, entity)"
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-state="props">
@@ -70,7 +85,11 @@
           }
         "
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-target_date="props">
@@ -78,32 +97,56 @@
         :row-info="props"
         @refresh="updateIssueField('targetDate', props.row, entity)"
       />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-created_at="props">
       <CreatedAtColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-updated_at="props">
       <UpdatedAtColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-author="props">
       <AuthorColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-assignees="props">
       <AssigneesColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-labels="props">
       <LabelsColumn :row-info="props" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-sprint="props">
@@ -113,22 +156,38 @@
 
     <template v-slot:body-cell-sub_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-linked_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'linked_issues_count'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-link_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'links'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
 
     <template v-slot:body-cell-attachment_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'attachments'" />
-      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+      <IssueContextMenu
+        :row="props.row"
+        :rowId="props.rowIndex"
+        @refresh="refreshTable"
+      />
     </template>
   </q-table>
 </template>
@@ -255,7 +314,7 @@ const handleClick = (row) => {
 
 const refreshTable = (isFullRefresh?: boolean) => {
   emits('refresh', parsePagination(quasarPagination.value), isFullRefresh);
-}
+};
 
 const getIssues = async (p: any, action = 'sorting') => {
   let isFullUpdate = action !== 'selectedPage' ? true : false;
@@ -286,7 +345,7 @@ const updateIssueField = (
   if (isGroupingEnabled.value === true) {
     emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
-  } else refreshTable()
+  } else refreshTable();
 };
 
 watchEffect(() => {
@@ -302,11 +361,11 @@ watch(
 </script>
 
 <style lang="scss">
-  th.count-column {
-    min-width: 95px;
-    max-width: 95px;
-    padding-right: 0;
-  }
+th.count-column {
+  min-width: 95px;
+  max-width: 95px;
+  padding-right: 0;
+}
 
 .my-sticky-column-table {
   thead tr:first-child th:first-child {

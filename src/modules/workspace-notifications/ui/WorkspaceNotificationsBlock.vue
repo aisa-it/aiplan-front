@@ -104,7 +104,7 @@ const isMessage = computed(
 
 const title = computed(() => {
   if (isMessage.value) return props.notificationRow?.data?.title;
-  if ( 
+  if (
     props.notificationRow?.data.entity_type === 'doc' ||
     props.notificationRow?.data.field === 'doc'
   )
@@ -141,32 +141,13 @@ function transform() {
     // if (props.notificationRow?.data?.field === 'start_date') {
     //   return 'начал(-а) выполнение задачи';
     // }
-    if (props.notificationRow?.data?.field === 'status') {
-      return `
-      поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 
-      <span>
-      <a
-        target="_blank"
-        style="
-          color: #3F76FF;
-          text-decoration: none;
-          font-weight: 400;
-        "
-        href="${props.notificationRow?.detail?.issue?.url}"
-      >
-        ${props.notificationRow?.detail?.project?.identifier}-${props.notificationRow?.detail?.issue?.sequence_id}
-        "${props.notificationRow?.detail?.issue?.name}"
-      </a>
-      <span/>
-      `;
-    }
     if (props.notificationRow?.data?.field === 'completed_at') {
       return 'завершил(-а) задачу';
     }
     if (props.notificationRow?.data?.field === 'form_answers') {
       return `
-      <span> 
-        прошёл(-ла) форму 
+      <span>
+        прошёл(-ла) форму
         <a
           target="_blank"
           style="

@@ -369,7 +369,7 @@ const settings = ref(false);
 const isDifferentProjectSelected = computed<boolean>(
   () =>
     selectedProject.value?.identifier !==
-    projectStore.currentProject.identifier,
+    projectStore.currentProject?.identifier,
 );
 const initialSettings = computed(() => ({
   state_detail: props.issue.state_detail,

@@ -39,7 +39,7 @@ export function issueNotificationRender(data: any, detail: any) {
                   ${link}
                 <span/>`;
 
-    case 'state':
+    case 'status':
       action = 'поменял(-а) статус на';
       value = data.new_value
         ? addSpaceIfCamelCase(data.new_value)
@@ -48,6 +48,7 @@ export function issueNotificationRender(data: any, detail: any) {
       return `<span>${action} "${value}" ${issue}
                 ${link}
                 <span/>`;
+
     case 'priority':
       action =
         data.new_value && data.new_value !== ''
@@ -177,10 +178,27 @@ export function issueNotificationRender(data: any, detail: any) {
       action = translateVerb(data.verb);
       value = 'ссылку';
       return `<span>${action} ${value} в задачe ${link}<span/>`;
+
+    case 'link_url':
+      action = translateVerb(data.verb);
+      value = 'ссылку';
+      return `<span>${action} ${value} в задачe ${link}<span/>`;
+
+    case 'link_title':
+      action = translateVerb(data.verb);
+      value = 'название ссылки';
+      return `<span>${action} ${value} в задачe ${link}<span/>`;
+
     case 'comment':
       action = translateVerb(data.verb);
       value = 'комментарий';
       return `<span>${action} ${value} в задачe ${link}<span/>`;
+
+    case 'label':
+      action = translateVerb(data.verb);
+      value = 'тег';
+      return `<span>${action} ${value} в задачe ${link}<span/>`;
+
     case 'project':
       const newProject = data.new_value
         ? `в проект ${customLink(data.new_entity_detail.url, data.new_entity_detail.name)}`
