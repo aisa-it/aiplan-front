@@ -119,6 +119,7 @@ import {
 
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useCalendarFiltersStore } from '../../store/filters-store';
 
 import type {
   DtoLabelLight,
@@ -169,6 +170,7 @@ watchEffect(() => {
 
 const { project } = storeToRefs(useProjectStore());
 const { workspaceInfo } = useWorkspaceStore();
+const calendarFiltersStore = useCalendarFiltersStore();
 
 const workspaceId = computed(() => workspaceInfo?.id ?? '');
 const projectId = computed(() => project.value?.id ?? '');
@@ -232,6 +234,11 @@ const setOnlyActive = (value: boolean, resetStates = false) => {
 };
 
 onMounted(async () => {
+  calendarFiltersStore.filters = {
+    workspaces: [workspaceId.value],
+    projects: [projectId.value],
+  };
+
   authorsSelect.load();
   assigneesSelect.load();
   watchersSelect.load();

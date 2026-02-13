@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { CalendarEventType } from '../types/calendar';
+import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export const useCalendarFiltersStore = defineStore('calendar-filters', {
   state: () => ({
@@ -9,6 +10,7 @@ export const useCalendarFiltersStore = defineStore('calendar-filters', {
       'completed',
       'canceled',
     ]),
+    filters: {} as TypesIssuesListFilters,
   }),
 
   getters: {
