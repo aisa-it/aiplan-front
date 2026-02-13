@@ -3,7 +3,7 @@
     <q-card
       :class="`prevent-click-issue-outside dialog ${isDesktop ? 'q-pa-lg' : 'q-pa-md'}`"
       v-click-outside:prevent-click-issue-outside="{
-        isAutoSave: true,
+        isAutoSave: isAutoSave,
       }"
     >
       <header class="dialog__header">
@@ -140,7 +140,7 @@ const props = defineProps<{
 
 const $q = useQuasar();
 const isDesktop = computed<boolean>(() => $q.platform.is?.desktop);
-const dialogRef = ref<QDialog | null>();
+const dialogRef = ref<QDialog | null>(null);
 
 const {
   leftDrawerOpen,
@@ -151,6 +151,7 @@ const {
 } = useDialogDrawers(isDesktop.value, true);
 
 const {
+  isAutoSave,
   currentFilter,
   checkedIssues,
   chosenTableColumns,

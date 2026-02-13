@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
 import { QDialog } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/core';
@@ -24,6 +24,7 @@ import {
   TypesIssuesListFilters,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IIssueSearchInfo, IIssueTableParams } from 'src/interfaces/tableIssue';
+import { useUserStore } from 'src/stores/user-store';
 
 // Диалоговое окно редактора для создания таблицы задач
 export const useTableIssueDialog = (
@@ -32,12 +33,15 @@ export const useTableIssueDialog = (
     savedTableData: { element: HTMLElement; params: IIssueTableParams } | null;
     classPrevent?: string;
   },
-  dialogRef: QDialog | null,
+  dialogRef: Ref<QDialog | null>,
 ) => {
   const filtersStore = useFiltersStore();
-  const { currentWorkspaceSlug, workspaceInfo } =
+  const { workspaceInfo } =
     storeToRefs(useWorkspaceStore());
   const { getIssueDataById } = useSingleIssueStore();
+
+const { user } = storeToRefs(useUserStore());
+  const isAutoSave = computed<boolean | undefined>(() => user.value?.view_props?.autoSave);
 
   const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
     search_query: '',
@@ -329,6 +333,7 @@ export const useTableIssueDialog = (
   );
 
   return {
+    isAutoSave,
     currentFilter,
     checkedIssues,
     chosenTableColumns,

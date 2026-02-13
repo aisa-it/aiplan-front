@@ -105,7 +105,6 @@
           ]"
           @click="handleClickEditor"
         />
-        <!-- TODO Вынести в отдельный компонент кнопки-всплывашки -->
         <q-btn
           v-if="hoveredTable && tableButtonPosition"
           :style="{
@@ -246,6 +245,7 @@ const emit = defineEmits([
   'isEditorEmpty',
   'toggle-fullscreen',
   'updateEditorDOM',
+  'preventAutosave',
 ]);
 
 const $q = useQuasar();
@@ -324,7 +324,9 @@ function onButtonMouseLeave(): void {
 }
 
 function updateTableButtonPosition(tableEl: HTMLElement): void {
-  const wrapper = tableEl.closest('.html-editor__wrapper') as HTMLElement | null;
+  const wrapper = tableEl.closest(
+    '.html-editor__wrapper',
+  ) as HTMLElement | null;
   if (!wrapper) return;
 
   const tableRect = tableEl.getBoundingClientRect();
@@ -587,6 +589,13 @@ watch(
       editorInstance.value.commands.setContent(content, { emitUpdate: false });
       refreshTocLinks();
     }
+  },
+);
+
+watch(
+  () => isIssueTableDialogOpen.value,
+  () => {
+    emit('preventAutosave');
   },
 );
 
