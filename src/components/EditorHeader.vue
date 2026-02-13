@@ -25,7 +25,8 @@
         @update:model-value="emit('update:modelValue', documentTitle)"
       >
       </q-input>
-      <div class="flex no-wrap" style="height: 32px">
+      <div class="flex no-wrap items-center" style="height: 32px">
+        <LlmContentChip :show="!!document?.llm_content" />
         <q-btn
           v-if="canEdit"
           class="btn-only-icon-sm"
@@ -252,6 +253,7 @@ import BinIcon from './icons/BinIcon.vue';
 import AidocWatchersDialog from './aidoc/AidocWatchersDialog.vue';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import LlmContentChip from './LlmContentChip.vue';
 
 const props = defineProps<{
   modelValue: string;
