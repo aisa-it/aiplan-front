@@ -1,5 +1,6 @@
 <template>
   <q-table
+    ref="issueTable"
     v-model:pagination="quasarPagination"
     binary-state-sort
     class="my-sticky-column-table table-bottom-reverse"
@@ -26,6 +27,9 @@
     </template>
 
     <template #bottom>
+      <div class="table-h-scroll" ref="hScroll">
+        <div class="table-h-scroll__content" />
+      </div>
       <PaginationDefault
         v-model:selected-page="quasarPagination.page"
         :rows-per-page="quasarPagination.rowsPerPage"
@@ -188,8 +192,17 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, ref, watch, watchEffect, computed } from 'vue';
-import { EventBus } from 'quasar';
+import {
+  inject,
+  ref,
+  watch,
+  watchEffect,
+  computed,
+  onMounted,
+  nextTick,
+  onBeforeUnmount,
+} from 'vue';
+import { EventBus, QTable } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -239,6 +252,54 @@ const props = defineProps([
   'columns',
   'contextType',
 ]);
+
+const hScroll = ref<HTMLElement | null>(null);
+const issueTable = ref<InstanceType<typeof QTable> | null>(null);
+
+onMounted(async () => {
+  await nextTick();
+
+  const rootEl = issueTable.value?.$el as HTMLElement | undefined;
+  if (!rootEl || !hScroll.value) return;
+
+  const middle = rootEl.querySelector('.q-table__middle') as HTMLElement | null;
+
+  const table = rootEl.querySelector('table') as HTMLElement | null;
+
+  if (!middle || !table) return;
+
+  const updateWidth = () => {
+    const tableWidth = table.scrollWidth;
+    const containerWidth = middle.clientWidth;
+
+    hScroll.value!.firstElementChild!.style.width = tableWidth + 'px';
+
+    hScroll.value!.style.display =
+      tableWidth - 20 > containerWidth ? 'block' : 'none';
+  };
+
+  updateWidth();
+
+  const onHScroll = () => {
+    middle.scrollLeft = hScroll.value!.scrollLeft;
+  };
+
+  const onMiddleScroll = () => {
+    hScroll.value!.scrollLeft = middle.scrollLeft;
+  };
+
+  hScroll.value.addEventListener('scroll', onHScroll);
+  middle.addEventListener('scroll', onMiddleScroll);
+
+  const resizeObserver = new ResizeObserver(updateWidth);
+  resizeObserver.observe(middle);
+
+  onBeforeUnmount(() => {
+    hScroll.value?.removeEventListener('scroll', onHScroll);
+    middle.removeEventListener('scroll', onMiddleScroll);
+    resizeObserver.disconnect();
+  });
+});
 
 const { fetchPinnedIssues } = useIssuesStore();
 const { project } = storeToRefs(useProjectStore());
@@ -389,5 +450,42 @@ th.count-column {
     z-index: 101;
     background-color: $color-shadow !important;
   }
+}
+</style>
+
+<style lang="scss" scoped>
+:deep(.q-table__container) {
+  overflow: auto;
+  height: calc(100vh - 212px);
+  position: relative;
+}
+
+:deep(.q-table__bottom) {
+  position: sticky;
+  bottom: 0;
+  background: $bg-color !important;
+  z-index: 100;
+}
+
+.table-h-scroll {
+  height: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: $bg-color;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: none;
+}
+
+.my-sticky-column-table:hover .table-h-scroll {
+  opacity: 1;
+}
+
+.table-h-scroll__content {
+  height: 1px;
+}
+
+:deep(.q-table__middle) {
+  overflow-x: hidden;
 }
 </style>
