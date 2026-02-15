@@ -322,3 +322,8 @@ export const getCityFromTimezone = (timezone: string) => {
   const cities = labelParts.slice(1).join('');
   return cities.split(',')[0];
 };
+
+export const getStringMonthYear = (date: string) => {
+  const formatDate = dayjs(date, 'YYYY-MM').format('MMMM YYYY');
+  return formatDate.charAt(0).toUpperCase() + formatDate.slice(1);
+};
