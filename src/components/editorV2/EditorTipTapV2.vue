@@ -25,6 +25,7 @@
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
       @enable-editing="$emit('enableEditing')"
       @toggle-fullscreen="$emit('toggle-fullscreen')"
+      @create-issue-table="openNewTableDialog"
     />
 
     <div class="html-editor__outer">
@@ -75,7 +76,8 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                        {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
+                      {{ !hasOwnNumeration(link.text) ? link.index + ' ' : ''
+                      }}{{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -103,6 +105,21 @@
           ]"
           @click="handleClickEditor"
         />
+        <q-btn
+          v-if="hoveredTable && tableButtonPosition"
+          :style="{
+            top: tableButtonPosition.top + 'px',
+            left: tableButtonPosition.left + 'px',
+          }"
+          class="html-editor__table-hover-button primary-btn"
+          dense
+          no-caps
+          @mouseenter="onButtonMouseEnter"
+          @mouseleave="onButtonMouseLeave"
+          @click="openTableDialog"
+        >
+          Изменить
+        </q-btn>
         <EditorTooltipMention
           :content="tooltipContentMention"
           :anchor="tooltipAnchorMention"
@@ -123,6 +140,11 @@
     <EditorAnchorDialog
       v-model="editAnchor"
       :editor-instance="editorInstance"
+    />
+    <EditorTableIssueDialog
+      v-model="isIssueTableDialogOpen"
+      :editor-instance="editorInstance"
+      :saved-table-data="currentEditingTableData"
     />
   </div>
 </template>
@@ -159,10 +181,12 @@ import {
 } from './utils/editorUtils';
 import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
+import EditorTableIssueDialog from './dialogs/EditorTableIssueDialog.vue';
 import aiplan from 'src/utils/aiplan';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
 import { useFloatScroll } from './composables/useFloatScroll';
+import { IIssueTableParams } from 'src/interfaces/tableIssue';
 
 // Interfaces
 interface IEditorV2Props {
@@ -221,6 +245,7 @@ const emit = defineEmits([
   'isEditorEmpty',
   'toggle-fullscreen',
   'updateEditorDOM',
+  'preventAutosave',
 ]);
 
 const $q = useQuasar();
@@ -246,8 +271,7 @@ const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
 
 useMenuHandler(tocPopupRef);
-const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
-
+const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -257,10 +281,89 @@ const editorExtensions = computed(() => getEditorExtensions(props));
 const hasOwnNumeration = (heading: string) => {
   const firstChar = heading[0];
   return /\d/.test(firstChar);
+};
+
+// Наведение на таблицу
+const hoveredTable = ref<HTMLElement | null>(null);
+const currentEditingTableData = ref<{
+  element: HTMLElement;
+  params: IIssueTableParams;
+} | null>(null);
+const issueTableData = ref<any>(null);
+const isIssueTableDialogOpen = ref<boolean>(false);
+
+const tableButtonPosition = ref<{ top: number; left: number } | null>(null);
+const isHoveringButton = ref<boolean>(false);
+const isHoveringTable = ref<boolean>(false);
+let hideButtonTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleHideButton(): void {
+  if (hideButtonTimeout) clearTimeout(hideButtonTimeout);
+  hideButtonTimeout = setTimeout(() => {
+    if (!isHoveringTable.value && !isHoveringButton.value) {
+      hoveredTable.value = null;
+      issueTableData.value = null;
+    }
+  }, 350);
 }
 
+function onButtonMouseEnter(): void {
+  isHoveringButton.value = true;
+  if (hideButtonTimeout) {
+    clearTimeout(hideButtonTimeout);
+    hideButtonTimeout = null;
+  }
+}
+
+function onButtonMouseLeave(): void {
+  isHoveringButton.value = false;
+  // Если ушли с кнопки и не на таблице — скрыть
+  if (!isHoveringTable.value) {
+    scheduleHideButton();
+  }
+}
+
+function updateTableButtonPosition(tableEl: HTMLElement): void {
+  const wrapper = tableEl.closest(
+    '.html-editor__wrapper',
+  ) as HTMLElement | null;
+  if (!wrapper) return;
+
+  const tableRect = tableEl.getBoundingClientRect();
+  const wrapperRect = wrapper.getBoundingClientRect();
+
+  const style = getComputedStyle(wrapper);
+  const paddingTop = parseFloat(style.paddingTop) || 0;
+  const paddingLeft = parseFloat(style.paddingLeft) || 0;
+
+  let top = tableRect.bottom - wrapperRect.top + 8 - paddingTop;
+  let left = tableRect.left - wrapperRect.left - paddingLeft;
+  top = Math.max(0, top);
+  left = Math.max(0, left);
+
+  tableButtonPosition.value = { top, left };
+}
+
+const openNewTableDialog = (): void => {
+  currentEditingTableData.value = null;
+  isIssueTableDialogOpen.value = true;
+};
+
+const openTableDialog = (): void => {
+  if (hoveredTable.value && issueTableData.value) {
+    currentEditingTableData.value = {
+      element: hoveredTable.value,
+      params: issueTableData.value,
+    };
+  } else {
+    currentEditingTableData.value = null;
+  }
+
+  isIssueTableDialogOpen.value = true;
+};
+
 // Попап с информацией о пользователе при наведении
-const handleMouseMove = (e: any) => {
+const handleMouseMove = (e: MouseEvent) => {
   const isMention = e.target.dataset.type === 'mention' && props.isMention;
   if (isMention) {
     handleMouseEnter(e);
@@ -273,9 +376,38 @@ const handleMouseMove = (e: any) => {
   if (props.canEdit && props.readOnlyEditor) {
     isShowEdit.value = true;
   }
+
+  // Таблица задач
+  if (!props.canEdit || props.readOnlyEditor) return;
+
+  const target = e.target as HTMLElement;
+  const tableEl = target.closest('.issue-table');
+
+  if (tableEl && editorInstance.value) {
+    // Парсинг зашитых данных
+    const rawParams = tableEl.getAttribute('data-issue-table-params');
+    issueTableData.value = rawParams
+      ? JSON.parse(decodeURIComponent(rawParams))
+      : null;
+
+    // Отображение кнопки "Изменить"
+    hoveredTable.value = tableEl;
+    isHoveringTable.value = true;
+
+    if (hideButtonTimeout) {
+      clearTimeout(hideButtonTimeout);
+      hideButtonTimeout = null;
+    }
+    updateTableButtonPosition(tableEl);
+  } else {
+    if (isHoveringTable.value) {
+      isHoveringTable.value = false;
+      scheduleHideButton();
+    }
+  }
 };
 
-const handleMouseLeave = (e: any) => {
+const handleMouseLeave = (e: MouseEvent) => {
   if (e?.toElement?.className !== 'mention-popup') {
     isTooltipMention.value = false;
   }
@@ -362,9 +494,7 @@ const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
   if (!editorInstance.value) return;
   const editor = editorInstance.value;
 
-  const element = editor.view.dom.querySelector(
-    `[data-toc-id="${link.id}"]`,
-  )
+  const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
 
   if (!element) return;
 
@@ -462,6 +592,13 @@ watch(
   },
 );
 
+watch(
+  () => isIssueTableDialogOpen.value,
+  () => {
+    emit('preventAutosave');
+  },
+);
+
 onMounted(() => createEditor());
 
 onBeforeUnmount(() => {
@@ -480,6 +617,11 @@ defineExpose({
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+
+  &__table-hover-button {
+    position: absolute;
+  }
 
   &__toolbar {
     overflow: hidden;
@@ -574,6 +716,12 @@ defineExpose({
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
+  }
+
+  &:deep(th[contenteditable='false']),
+  &:deep(td[contenteditable='false']) {
+    caret-color: transparent;
+    cursor: default;
   }
 }
 

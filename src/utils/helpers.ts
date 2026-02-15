@@ -223,6 +223,15 @@ export const parseText = (html: string) => {
     ?.replace(/>/g, '&gt;');
 };
 
+export const escapeHtml = (html: string): string => {
+  return html
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 // экранируем теги кроме <b></b>
 export const parseBoldText = (html: string) => {
   return parseText(html)

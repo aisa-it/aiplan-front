@@ -116,6 +116,7 @@
             (e: DragEvent) => (!isReadOnlyEditor ? handleDrop(e) : '')
           "
           @dragover.prevent
+          @prevent-autosave="preventAutoSave"
         />
       </div>
       <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
@@ -260,6 +261,7 @@ const autoSaveTimer = ref(300);
 const timerInterval = ref<NodeJS.Timeout | null>(null);
 
 const preventClickClass = 'prevent-click-issue-outside';
+const disableAutosave = ref<boolean>(false);
 const route = useRoute();
 
 const showTagsDialog = ref(false);
@@ -395,10 +397,18 @@ const handleEnableEdit = () => {
   });
 };
 
-const handleAutoSave = async () => {
-  if (isAutoSave.value && !isReadOnlyEditor.value) {
-    await handleUpdateTitleAndEditor();
+const handleAutoSave = async (): Promise<void> => {
+  if (!disableAutosave.value) {
+    if (isAutoSave.value && !isReadOnlyEditor.value) {
+      await handleUpdateTitleAndEditor();
+    }
+  } else {
+    disableAutosave.value = false;
   }
+};
+
+const preventAutoSave = (): void => {
+  disableAutosave.value = true;
 };
 
 // computed

@@ -96,7 +96,7 @@
       </q-btn>
 
       <q-btn
-        v-if="isCreateSprint && !isMobile"
+        v-if="(isCreateSprint || isTableIssues) && !isMobile"
         flat
         dense
         round
@@ -329,6 +329,7 @@ const props = defineProps<{
   selection?: 'single' | 'multiple' | 'none';
   isCreateSprint?: boolean;
   isMobile?: boolean;
+  isTableIssues?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -393,7 +394,7 @@ onMounted(() => {
 
 //methods
 const onRequest = async (p) => {
-  if (props.isCreateSprint && !filter.value) return;
+  if (((props.isCreateSprint || props.isTableIssues) && !filter.value )) return;
   loading.value = true;
   // TODO: удалять only_active из req, так как он будет отправляться в query
   let req = Object.assign((filter.value as any) ?? {}, {

@@ -10,7 +10,13 @@
       }
     "
   >
-    <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
+    <q-card
+      class="add-filters-card row prevent-click-issue-outside"
+      style="height: 80vh; max-width: 60vw"
+      v-click-outside:prevent-click-issue-outside="{
+        isAutoSave: true,
+      }"
+    >
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
           v-if="!isEdit"
@@ -98,6 +104,7 @@
               :popup-content-style="selectWorkspacesFilterWidth"
               :loading="loading"
               :search="search.workspaces"
+              :disabled="singleWorkspace"
               unavailable-text="Пространство недоступно"
               @search="handleSearchWorkspaces"
               @update="(e) => updateProjectList(e)"
@@ -288,10 +295,18 @@ import {
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
 
+import ClickOutside from 'src/directives/click-outside';
+
+defineOptions({
+  directives: {
+    ClickOutside,
+  },
+});
 type Members = 'authors' | 'assignees' | 'watchers';
 
 const props = defineProps<{
   currentFilter?: DtoSearchFilterFull | null;
+  singleWorkspace?: boolean;
 }>();
 
 const emits = defineEmits<{
