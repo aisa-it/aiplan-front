@@ -43,6 +43,7 @@
               no-caps
               outline
               label="Отменить"
+              style="width: 110px"
               class="secondary-btn"
               v-close-popup
             />
@@ -50,6 +51,7 @@
               no-caps
               unelevated
               label="Создать"
+              style="width: 110px"
               class="primary-btn"
               type="submit"
             />
