@@ -15,6 +15,7 @@
             :on-sortable-end="handleSortableEnd"
             class="nested"
           />
+          <li class="sortable-end"></li>
         </ul>
       </q-card-section>
       <q-card-actions align="right">
@@ -55,20 +56,22 @@ const hierarchyRoots = ref<DtoDocLightWithChildren[]>([]);
 const buildHierarchy = async (
   docs: DtoDocLight[],
 ): Promise<DtoDocLightWithChildren[]> => {
-  const result: DtoDocLightWithChildren[] = [];
-  for (const doc of docs) {
+  const promises = docs.map(async (doc) => {
     const item: DtoDocLightWithChildren = { ...doc };
+
     if (doc.has_child_docs && doc.id) {
       const childResponse = await docStore.getChildDocList(
         currentWorkspaceSlug.value!,
         doc.id,
       );
-      const children = await buildHierarchy(childResponse.data);
-      item.children = children;
+      item.children = await buildHierarchy(childResponse.data);
+    } else {
+      item.children = [];
     }
-    result.push(item);
-  }
-  return result;
+    return item;
+  });
+
+  return Promise.all(promises);
 };
 
 const loadHierarchy = async () => {
@@ -167,6 +170,7 @@ const initAllSortables = () => {
       fallbackOnBody: true,
       fallbackTolerance: 5,
       swapThreshold: 0.65,
+      emptyInsertThreshold: 30,
       preventOnFilter: true,
       onEnd: handleSortableEnd,
     });
@@ -186,11 +190,28 @@ const onDialogHide = () => {
 
 <style lang="scss" scoped>
 .nested {
-  cursor: grab;
   user-select: none;
 
   &:active {
     cursor: grabbing;
   }
 }
+
+.sortable {
+  margin-bottom: 0;
+  padding: 0 0 0 16px;
+  list-style-type: none;
+}
+
+:deep(.sortable-ghost) {
+  opacity: 0.5;
+  border-top: 2px solid var(--primary);
+}
+
+.sortable-end {
+  height: 12px;
+  list-style-type: none;
+  opacity: 0;
+}
+
 </style>

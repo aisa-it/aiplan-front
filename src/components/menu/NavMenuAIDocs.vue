@@ -55,7 +55,7 @@
                 </div>
                 <div class="flex items-center no-wrap q-pa-none">
                   <q-btn
-                    class="menu-link__btn q-ml-sm"
+                    class="menu-link__btn q-ml-sm q-mr-xs"
                     flat
                     :style="'min-height: 16px !important; min-width: 16px !important; padding: 0'"
                     @click.prevent.stop
@@ -107,7 +107,7 @@
                 </div>
                 <div class="flex align-center no-wrap">
                   <q-btn
-                    class="menu-link__btn q-ml-sm"
+                    class="menu-link__btn q-ml-sm q-mr-xs"
                     :class="{ 'favorite-btn--inactive': !prop.node.isFavorite }"
                     flat
                     :style="'min-height: 16px !important; min-width: 16px !important; padding: 0'"
@@ -208,6 +208,7 @@ import ManageAccountsIcon from '../icons/ManageAccountsIcon.vue';
 import VisibilityIcon from '../icons/VisibilityIcon.vue';
 import StarIcon from 'src/components/icons/StarIcon.vue';
 import DocumentIcon from '../icons/DocumentIcon.vue';
+import HierarchyIcon from '../icons/HierarchyIcon.vue';
 
 import { mapDocNode } from 'src/utils/tree';
 import {
@@ -471,7 +472,7 @@ const getHeaderMenuItems = () => {
       },
       {
         text: 'Изменить порядок иерархии',
-        icon: BellIcon,
+        icon: HierarchyIcon,
         onClick: () => openHierarchyDocDialog(),
       },
     ];
