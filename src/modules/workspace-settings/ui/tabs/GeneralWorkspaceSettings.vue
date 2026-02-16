@@ -554,11 +554,13 @@ const refreshInfo = async () => {
   );
   setAnotherTitle(computedWorkspaceInfo.value.name);
 
+  const owner = computedWorkspaceInfo.value?.owner;
+
   workspaceInfoForm.value.owner_id = leadWorkspaceOptions.value.find(
     (el) => el.value === computedWorkspaceInfo.value?.owner_id,
   ) ?? {
-    label: 'Не выбран',
-    value: null,
+    label: owner ? aiplan.UserName(owner).join(' ') : 'Не выбран',
+    value: owner?.id ?? null,
   };
   init();
 };
