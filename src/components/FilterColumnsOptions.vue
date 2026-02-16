@@ -134,9 +134,12 @@ const onDragEnd = () => {
   );
 };
 
-watch(props.columns, (newVal) => {
-  columnsSelector.value = [...newVal];
-});
+watch(
+  () => props.columns,
+  (newVal) => {
+    columnsSelector.value = [...newVal];
+  },
+);
 </script>
 <style lang="scss" scoped>
 [draggable='true'] {

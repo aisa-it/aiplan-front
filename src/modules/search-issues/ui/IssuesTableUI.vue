@@ -3,7 +3,7 @@
     :pagination="localPagination"
     v-model:selected="localSelected"
     :rows="rows"
-    :columns="visibleColumns"
+    :columns="columns"
     :loading="loading"
     :selection="selection"
     row-key="id"
@@ -174,7 +174,7 @@ import { parseBoldText } from 'src/utils/helpers';
 
 const props = defineProps<{
   rows: any[];
-  visibleColumns: any[];
+  columns: any[];
   loading: boolean;
 
   pagination?: {
@@ -186,6 +186,7 @@ const props = defineProps<{
   };
 
   paginationInsideMode?: boolean;
+  paginationRowsNumber?: number;
 
   selection?: 'single' | 'multiple' | 'none';
   selectedRows?: any[];
@@ -213,6 +214,17 @@ watch(
   () => props.pagination,
   (newP) => {
     if (newP) localPagination.value = newP;
+  },
+);
+
+watch(
+  () => props.paginationRowsNumber,
+  (val) => {
+    if (props.paginationInsideMode && val)
+      localPagination.value.rowsNumber = val;
+  },
+  {
+    immediate: true,
   },
 );
 

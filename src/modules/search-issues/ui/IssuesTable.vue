@@ -95,7 +95,7 @@
     />
 
     <GroupedTablesWrapper
-      v-if="!loading && group_by !== 'none' && rows?.issues"
+      v-if="!loading && rows?.length && group_by !== 'none'"
       :groups="rows"
       :group-by="group_by"
     >
@@ -110,6 +110,9 @@
             (v) => (checkedRows = [...(checkedRows ?? []), ...v])
           "
           @request="(p) => onRequestGroupTable(group, p)"
+          pagination-inside-mode
+          :pagination-rows-number="group.count"
+          class="table-in-groups"
         />
       </template>
     </GroupedTablesWrapper>
@@ -139,12 +142,12 @@
       </div>
     </div>
     <div
-      v-show="loading || rows?.length === 0 || !rows?.issues"
+      v-show="loading || rows?.length === 0"
       style="height: calc(90vh - 122px)"
       class="centered-horisontally justify-center"
     >
       <DefaultLoader v-if="loading" />
-      <h6 v-else-if="rows?.length === 0 || !rows?.issues">
+      <h6 v-else-if="rows?.length === 0">
         {{
           isCreateSprint
             ? 'Не найдено задач в данном пространстве'
@@ -262,9 +265,6 @@ function defineFiltersByEntity(entity): TypesIssuesListFilters {
 }
 
 const onRequestGroupTable = async (group, p) => {
-  console.log(p);
-  loading.value = true;
-
   let req = Object.assign((filter.value as any) ?? {}, {
     search_query: searchQuery.value,
   });
@@ -281,7 +281,6 @@ const onRequestGroupTable = async (group, p) => {
 
   group.issues = issues;
   group.count = count;
-  loading.value = false;
 };
 
 const onRequest = async (p) => {
@@ -327,6 +326,7 @@ const downloadZip = async (p) => {
       limit: p.rowsPerPage == 0 ? p.rowsNumber || 10 : p.rowsPerPage,
       light: true,
       only_active: filter.value?.only_active || false,
+      group_by: group_by.value !== 'none' ? group_by.value : undefined,
     };
 
     await exportIssues(req, pagination);
@@ -497,5 +497,14 @@ const columnsToShow = ref(columns.map((el) => el.name));
 
 :deep(.q-table__bottom) {
   min-height: 0;
+}
+
+.table-in-groups :deep(.q-table__middle) {
+  overflow: hidden;
+}
+
+:deep(.new-year-scroll-container),
+:deep(.scroll-container) {
+  height: calc(100vh - 200px);
 }
 </style>
