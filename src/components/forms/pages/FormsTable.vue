@@ -84,7 +84,7 @@
   <FormAnswers
     v-model="isFormAnswersOpen"
     :answerId="answerId"
-    :formSlug="route.params.formSlug"
+    :formSlug="String(route.params.formSlug)"
   />
 </template>
 
@@ -93,21 +93,21 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { QTableColumn, useMeta } from 'quasar';
+
 //utils
 import aiplan from 'src/utils/aiplan';
 import { parseText } from 'src/utils/helpers';
 import { formatDateTime } from 'src/utils/time';
-//stores
-import { useFormStore } from 'src/stores/form-store';
+
+//api
+import { getAnswers, getFormAuth } from 'src/components/forms/services/api';
+
 //components
 import AvatarImage from 'src/components/AvatarImage.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import FormAnswers from 'src/components/forms/dialogs/FormAnswers.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
-
-//stores
-const formStore = useFormStore();
 
 //composables
 const route = useRoute();
@@ -142,18 +142,14 @@ const refresh = async (props) => {
 
   loading.value = true;
 
-  const { data } = await formStore
-    .getFormAnswers(
-      route.params.workspace as string,
-      route.params.formSlug as string,
-      {
-        offset: offset,
-        limit: limit,
-        order_by: sortBy,
-        desc: descending,
-      },
-    )
-    .finally(() => (loading.value = false));
+  const data = await getAnswers(
+    route.params.workspace as string,
+    route.params.formSlug as string,
+    {
+      offset: offset,
+      limit: limit,
+    },
+  ).finally(() => (loading.value = false));
   pagination.value.rowsNumber = data.count;
   pagination.value.sortBy = sortBy;
   pagination.value.descending = descending;
@@ -164,13 +160,17 @@ const refresh = async (props) => {
 };
 
 const getCurrentForm = async () => {
-  const { data } = await formStore.getSettingsForm(route.params.formSlug, true);
+  if (!route.params.formSlug) return;
+  const data = await getFormAuth(String(route.params.formSlug));
   form.value = data;
 };
 
 const answerRender = (type: string, value: string | boolean) => {
   if (type === 'checkbox') {
     return value ? 'Да' : 'Нет';
+  }
+  if (type === 'attachment') {
+    return 'Вложение';
   }
   return parseText(value?.toString()) ?? 'Нет ответа';
 };
@@ -242,7 +242,6 @@ const columns: QTableColumn[] = [
     field: (row: any) => row?.fields,
     format: (fields) => {
       if (!fields) return '';
-
       const endTag = `<p class="q-ma-none file-date">и еще ${pluralQuestions(
         fields.length - 2,
       )}</p>`;

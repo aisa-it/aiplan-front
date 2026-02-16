@@ -2,12 +2,12 @@
   <div class="fullscreen login-wrapper">
     <div class="login-wrap">
       <div class="center-wrapper">
-        <q-img src="~assets/login-bg.svg" alt="login-hero" class="login-bg" />
+        <q-img :src="loginBg" alt="login-hero" class="login-bg" />
         <div class="flex column login-card justify-center">
           <div class="w-full text-center">
             <q-img
               class="login-panel__logo"
-              src="~assets/logo.svg"
+              :src="logo"
               style="width: 150px"
             />
           </div>
@@ -48,7 +48,6 @@
     >
       <AiplanVersion />
     </div>
-
   </div>
 </template>
 
@@ -63,6 +62,8 @@ import { useUtilsStore } from 'src/stores/utils-store';
 // components
 import AiplanVersion from 'src/components/AiplanVersion.vue';
 import RegisterPanel from 'src/components/RegisterPanel.vue';
+import logo from 'src/assets/logo.svg';
+import loginBg from 'src/assets/login-bg.svg';
 
 export default defineComponent({
   name: 'LoginPanel',
@@ -78,6 +79,8 @@ export default defineComponent({
 
     return {
       isSingUp,
+      logo,
+      loginBg,
     };
   },
 });

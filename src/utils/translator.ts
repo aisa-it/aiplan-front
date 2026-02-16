@@ -44,6 +44,8 @@ export const valToRole = (val: number) => {
       return { value: 10, label: 'Участник' };
     case 15:
       return { value: 15, label: 'Администратор' };
+    case 20:
+      return { value: 20, label: 'Никто' };
     default:
       return { value: 5, label: 'Гость' };
   }

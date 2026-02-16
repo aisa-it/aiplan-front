@@ -6,7 +6,7 @@
         flat
         style="padding: 0 4px; min-width: 100px;"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
-        >
+      >
         <span class="abbriviated-text" style="text-align: left; white-space: pre-wrap;">
           {{ rowInfo.value }}
         </span>
@@ -21,7 +21,7 @@
       </q-btn>
 
       <ParentIssueChip
-        v-if="isParent"
+        v-if="isParent && !hideParent"
         :row="rowInfo.row"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
@@ -45,6 +45,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
   rowInfo: any;
+  hideParent?: boolean;
 }>();
 const emits = defineEmits<{
   openPreview: [value: any];

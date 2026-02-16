@@ -109,7 +109,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/AccessDeniedPage.vue'),
   },
   {
-    path: '/f/:slug',
+    path: '/f/:workspaceSlug/:slug',
     component: () => import('src/components/forms/pages/FormPage.vue'),
   },
   {
