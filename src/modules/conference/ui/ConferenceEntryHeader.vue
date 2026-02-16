@@ -1,6 +1,6 @@
 <template>
   <div class="conference-entry-header">
-    <img src="~assets/logo.svg" style="width: 190px; overflow: visible" />
+    <img :src="logo" style="width: 190px; overflow: visible" />
     <span :class="isNight ? 'conference-night-text' : 'conference-text'"
       >Конференция</span
     >
@@ -8,6 +8,8 @@
 </template>
 
 <script setup lang="ts">
+import logo from 'src/assets/logo.svg';
+
 defineProps<{
   isNight: boolean;
 }>();

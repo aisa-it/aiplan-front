@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" persistent>
+  <q-dialog ref="dialogRef" :persistent="isPersistent">
     <NewIssuePanel
       v-if="workspaceProjects"
       :project_detail="project"
@@ -15,6 +15,7 @@
       @onCancel="handleClose"
       :isUserTextData="isUserTextData"
       @changeTextStatus="handleTextStatus"
+      v-model:loading="isLoading"
     />
 
     <NewProjectPanel
@@ -38,18 +39,19 @@
 
 <script lang="ts" setup>
 // core
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDialogPluginComponent } from 'quasar';
 
 // stores
-import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // components
 import NewIssuePanel from './NewIssuePanel.vue';
 import NewProjectPanel from './NewProjectPanel.vue';
 import ConfirmLostEditionDialog from './ConfirmLostEditionDialog.vue';
+
+//types
 import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{ parent?: string; project?: DtoProject }>();
@@ -60,26 +62,28 @@ const emit = defineEmits([
 ]);
 
 // plugins
-const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
-  useDialogPluginComponent();
+const { dialogRef, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
 // stores
-const api = useAiplanStore();
 const workspaceStore = useWorkspaceStore();
 
 // store to ref
-const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { workspaceProjects } = storeToRefs(workspaceStore);
 
-const data = ref({});
 const isUserTextData = ref(false);
 const isConfirm = ref(false);
+const isLoading = ref(true);
 
-const handleTextStatus = (status) => {
+const isPersistent = computed(() => {
+  return !isLoading.value;
+});
+
+const handleTextStatus = (status: boolean) => {
   isUserTextData.value = status;
 };
 
 const handleClose = () => {
-  if (isUserTextData.value) {
+  if (isUserTextData.value && !isLoading.value) {
     isConfirm.value = true;
   } else {
     onDialogCancel();

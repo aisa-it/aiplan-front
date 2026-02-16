@@ -41,17 +41,20 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+
 // services
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useFormStore } from 'src/stores/form-store';
+
 // components
 import NewProjectDialog from 'src/components/dialogs/NewProjectDialog.vue';
 import ImportJiraDialog from 'src/modules/import-jira/ui/ImportJiraDialog.vue';
 import FormDialog from '../forms/dialogs/FormDialog.vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
-//hooks
+//api
+import { getFormList } from 'src/components/forms/services/api';
 
 // stroes
 const utilsStore = useUtilsStore();
@@ -69,6 +72,9 @@ const isProjectCreateOpen = ref(false);
 const isFormCreateOpen = ref(false);
 
 const refreshForms = async () => {
-  formStore.getFormList(currentWorkspaceSlug.value);
+  if (!currentWorkspaceSlug.value) return;
+  getFormList(currentWorkspaceSlug.value).then(
+    (res) => (formStore.forms = res),
+  );
 };
 </script>
