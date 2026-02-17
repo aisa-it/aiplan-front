@@ -16,7 +16,7 @@
         flat
         style="padding: 0 4px"
         @click="() => handleClick()"
-        >
+      >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
         </span>
@@ -146,23 +146,26 @@
       </div>
     </div>
 
-    <SelectSprints
-      :workspace-slug="card.workspace_detail?.slug"
-      :issueid="card.id"
-      :current-sprints="card.sprints ?? []"
-      :is-disabled="
-        !rolesStore.hasPermissionByIssue(
-          card,
-          card.project_detail ?? project,
-          'change-issue-primary',
-        )
-      "
-      @refresh="
-        () => {
-          emits('updateTable', 'sprint', card, entity);
-        }
-      "
-    />
+    <div class="selectors">
+      <SelectSprints
+        :workspace-slug="card.workspace_detail?.slug"
+        :issueid="card.id"
+        :current-sprints="card.sprints ?? []"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            card,
+            card.project_detail ?? project,
+            'change-issue-primary',
+          )
+        "
+        class="selectors__single-selector"
+        @refresh="
+          () => {
+            emits('updateTable', 'sprint', card, entity);
+          }
+        "
+      />
+    </div>
 
     <div class="flex">
       <QuantityChip :type="'sub-issues'" :value="card?.sub_issues_count" />
@@ -273,5 +276,9 @@ const handleClick = () => {
   display: grid;
   gap: 12px;
   grid-template-columns: 1fr 1fr;
+
+  &__single-selector {
+    min-width: calc(50% + 12px);
+  }
 }
 </style>
