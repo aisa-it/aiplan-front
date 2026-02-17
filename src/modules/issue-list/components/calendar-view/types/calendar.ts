@@ -9,7 +9,7 @@ export interface MiniCalendarDay {
   isInHighlightedBorderEnd?: boolean;
 }
 
-export type CalendarEventType = 'created' | 'target' | 'completed' | 'canceled';
+export type CalendarEventType = 'created' | 'target' | 'completed';
 
 export type CalendarTransitionDirection = 'forward' | 'backward';
 
@@ -21,17 +21,15 @@ export interface CalendarEventFilter {
 
 export interface CalendarEvent {
   id: string;
-  issueId: string;
   type: CalendarEventType;
 
-  title: string;
   date: Date;
   color: string;
 
   issueData: {
     id: string;
     title: string;
-    indentifier: string;
+    identifier: string;
     sequence_id: number;
     issueUrl?: string;
     state_detail: DtoStateLight;

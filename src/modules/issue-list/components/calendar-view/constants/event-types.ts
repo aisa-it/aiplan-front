@@ -19,9 +19,4 @@ export const CALENDAR_EVENT_TYPES: Record<
     label: 'Дата завершения',
     color: '#F2994A',
   },
-  canceled: {
-    type: 'canceled',
-    label: 'Дата отмены',
-    color: '#DC3E3E',
-  },
 };

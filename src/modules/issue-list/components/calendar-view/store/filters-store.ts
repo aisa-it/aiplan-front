@@ -8,7 +8,6 @@ export const useCalendarFiltersStore = defineStore('calendar-filters', {
       'created',
       'target',
       'completed',
-      'canceled',
     ]),
     filters: {} as TypesIssuesListFilters,
   }),

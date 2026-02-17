@@ -2,7 +2,7 @@
   <div ref="containerRef" class="week-grid__events">
     <template v-for="(event, i) in events" :key="event.id">
       <EventItem
-        v-show="visibleCount === 0 || i < visibleCount"
+        v-if="visibleCount === 0 || i < visibleCount"
         :ref="(el) => (eventRefs[i] = el as EventItemInstance)"
         :event="event"
       />
@@ -60,14 +60,19 @@ onUnmounted(() => {
   }
 });
 
-watch(props.events, () => {
-  eventRefs.value = [];
-  nextTickCalculate();
-});
+watch(
+  () => props.events,
+  async () => {
+    visibleCount.value = props.events.length;
+    await nextTick();
+    calculate();
+  },
+  { flush: 'post' },
+);
 
 function nextTickCalculate() {
   visibleCount.value = 0;
-  nextTick(() => {
+  return nextTick(() => {
     calculate();
   });
 }

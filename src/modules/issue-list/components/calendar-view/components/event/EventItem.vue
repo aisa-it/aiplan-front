@@ -6,7 +6,8 @@
     @mouseenter="open"
     @mouseleave="scheduleClose"
   >
-    DIS-2 {{ event.title }}
+    {{ event.issueData.identifier }}-{{ event.issueData.sequence_id }}
+    {{ event.issueData.title }}
 
     <q-menu
       ref="menu"

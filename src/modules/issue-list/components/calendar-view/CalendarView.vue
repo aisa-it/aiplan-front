@@ -11,65 +11,23 @@
 import CalendarHeader from './layout/CalendarHeader.vue';
 import CalendarSidebar from './layout/CalendarSidebar.vue';
 import CalendarLayout from './layout/CalendarLayout.vue';
-import { mockCalendarEvents } from './mockData/mockCalendarEvents';
 import { useCalendarEventStore } from './store/calendar-event-store';
 import { useCalendarStore } from './store/calendar-store';
 import { useCalendarFiltersStore } from './store/filters-store';
-import { watch } from 'vue';
-import { api } from './services/api';
+import { watchEffect } from 'vue';
 
 const calendarEventStore = useCalendarEventStore();
 const calendarStore = useCalendarStore();
 const calendarFilterStore = useCalendarFiltersStore();
 
-calendarEventStore.setEvents(mockCalendarEvents);
-
-watch(
-  () => [
+watchEffect(async () => {
+  await calendarEventStore.loadEvents(
     calendarStore.visibleRange,
-    calendarFilterStore.enabledTypesArray.length,
+    calendarFilterStore.enabledTypesArray,
     calendarFilterStore.filters,
-  ],
-  async () => {
-    const { from, to } = calendarStore.visibleRange;
-
-    const issues = await api.getIssues(
-      {
-        //completed_at_from: from.getTime() / 1000,
-        created_at_from: from.getTime() / 1000,
-        //target_date_from: from.getTime() / 1000,
-
-        // completed_at_to: to.getTime() / 1000,
-        created_at_to: to.getTime() / 1000,
-        //target_date_to: to.getTime() / 1000,
-
-        ...calendarFilterStore.filters,
-      },
-      { limit: -1 },
-    );
-
-    console.log(issues);
-
-    // eventsStore.setEvents(
-    //   mapIssuesToCalendarEvents(issues),
-    // );
-  },
-  { immediate: true },
-);
+  );
+});
 </script>
-
-<!-- completed_at_from: from.getTime(),
-        created_at_from: from.getTime(),
-        target_date_from: from.getTime(),
-
-        completed_at_to: to.getTime(),
-        created_at_to: to.getTime(),
-        target_date_to: to.getTime(), -->
-
-<!-- completed_at_from?: string; completed_at_to?: string; created_at_from?: string;
-created_at_to?: string; start_date_from?: string; start_date_to?: string;
-target_date_from?: string; target_date_to?: string; updated_at_from?: string;
-updated_at_to?: string; -->
 
 <style scoped lang="scss">
 .calendar {
