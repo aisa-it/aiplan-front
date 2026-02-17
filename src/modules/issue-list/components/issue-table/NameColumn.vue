@@ -7,7 +7,7 @@
         style="padding: 0 4px; min-width: 100px;"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
       >
-        <span class="abbriviated-text" style="text-align: left; white-space: pre-wrap;">
+        <span class="abbriviated-text" style="text-align: left">
           {{ rowInfo.value }}
         </span>
         <HintTooltip> {{ rowInfo.value }}</HintTooltip>
@@ -25,7 +25,7 @@
         :row="rowInfo.row"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
-        style="align-self: center;"
+        style="align-self: center"
         @click.prevent.stop="emits('openPreview', rowInfo.row.parent_detail)"
       />
     </div>
@@ -63,21 +63,6 @@ const isParent = computed((): boolean => {
 <style scoped lang="scss">
 .name-row {
   padding: 8px 0px;
-  width: 400px;
-  max-width: 400px;
-  min-width: 400px;
-
-    @media screen and (max-width: 1920px) {
-      width: 300px;
-      max-width: 300px;
-      min-width: 300px;
-    }
-
-    @media screen and (max-width: 600px) {
-      width: 200px;
-      max-width: 200px;
-      min-width: 200px;
-    }
 
   &__wrapper {
     display: grid;

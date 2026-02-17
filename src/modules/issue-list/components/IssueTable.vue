@@ -384,6 +384,12 @@ th.count-column {
     min-width: 300px;
   }
 
+  @media screen and (max-width: 1200px) {
+    width: 250px;
+    max-width: 250px;
+    min-width: 250px;
+  }
+
   @media screen and (max-width: 600px) {
     width: 200px;
     max-width: 200px;
@@ -391,19 +397,7 @@ th.count-column {
   }
 }
 
-.sequence_id-column {
-  width: 130px;
-  max-width: 130px;
-  min-width: 130px;
-
-  @media screen and (max-width: 600px) {
-    width: 100px;
-    max-width: 100px;
-    min-width: 100px;
-  }
-}
-
-.name-column {
+.labels-column {
   width: 400px;
   max-width: 400px;
   min-width: 400px;
@@ -412,6 +406,12 @@ th.count-column {
     width: 300px;
     max-width: 300px;
     min-width: 300px;
+  }
+
+  @media screen and (max-width: 1200px) {
+    width: 250px;
+    max-width: 250px;
+    min-width: 250px;
   }
 
   @media screen and (max-width: 600px) {
