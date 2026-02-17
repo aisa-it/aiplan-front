@@ -3,12 +3,11 @@
     ref="selectSprintRef"
     dense
     multiple
-    clearable
+    :clearable="isClearable"
     map-options
-    class="base-selector"
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
-    :class="{ 'adaptive-select': isAdaptiveSelect }"
+    :class="`${label ? 'base-selector' : 'base-selector-sm'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     :popup-content-style="selectSprintWidth"
     :label="label"
     :disable="isDisabled"
@@ -52,13 +51,23 @@
         </q-item-section>
       </q-item>
     </template>
+
+    <template v-if="!label" v-slot:selected>
+      <q-item-label class="q-ml-xs ellipsis">
+        {{
+          !currentSprints?.length
+            ? 'Не Выбран'
+            : currentSprints.map((s) => s.name).join(', ')
+        }}
+      </q-item-label>
+    </template>
   </q-select>
 </template>
 
 <script lang="ts" setup>
 //core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 //utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
@@ -97,7 +106,6 @@ const props = withDefaults(
   }>(),
   {
     isDisabled: () => false,
-    label: () => 'Спринт',
     hideDropdownIcon: () => false,
   },
 );
@@ -118,7 +126,11 @@ const selectSprintRef = ref();
 const loading = ref(false);
 const isOpen = ref(false);
 
-//composibles
+const isClearable = computed<boolean>(() => {
+  return Boolean(props.currentSprints?.length);
+});
+
+//composables
 const { getWidthStyle: selectSprintWidth } =
   useResizeObserverSelect(selectSprintRef);
 
@@ -150,7 +162,11 @@ const handleUpdateSprints = async (
     const changedSprintId = String(sprint.id ?? '');
     const activeSprintId = String(sprintStore.sprint?.id ?? '');
 
-    if (changedSprintId && activeSprintId && changedSprintId === activeSprintId) {
+    if (
+      changedSprintId &&
+      activeSprintId &&
+      changedSprintId === activeSprintId
+    ) {
       sprintStore.triggerSprintRefresh();
     }
 
@@ -159,3 +175,5 @@ const handleUpdateSprints = async (
   }
 };
 </script>
+
+<style scoped lang="scss"></style>
