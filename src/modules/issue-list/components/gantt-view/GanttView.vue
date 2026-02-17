@@ -14,8 +14,7 @@
           <DefaultIssueList
             v-if="!isGroupingEnabled"
             :context-type="contextType"
-            @open-preview="openPreview"
-            @close-preview="closePreview"
+            @open-issue-preview="handleOpenPreview"
             @refresh-issue="refresh"
             style="width: 100%"
             :class="{
@@ -26,8 +25,7 @@
           <GroupedIssueList
             v-else
             :context-type="contextType"
-            @open-preview="openPreview"
-            @close-preview="closePreview"
+            @open-issue-preview="handleOpenPreview"
             style="height: 100%"
             :class="{
               'sprint-margin-grouped': contextType === 'sprint',
@@ -54,15 +52,24 @@ import DefaultIssueList from '../DefaultIssueList.vue';
 import GroupedIssueList from '../GroupedIssueList.vue';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useIssueContext } from '../../composables/useIssueContext';
+import { QuasarPagination } from '../../composables/useGroupedIssues';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   sprint?: DtoSprint;
   contextType: 'sprint' | 'project';
 }>();
 
-const issuesStore = useIssuesStore();
+const emits = defineEmits<{
+  openIssuePreview: [issue: DtoIssue, pagination: QuasarPagination, entity: any];
+  refreshIssue: [issues: DtoIssue[]];
+}>();
 
-const issues = shallowRef<any>([]);
+const issuesStore = useIssuesStore();
+const { isPreview } = storeToRefs(useSingleIssueStore());
+
+const issues = shallowRef<DtoIssue[]>([]);
 
 const { isGroupHide, contextProps, isGroupingEnabled } = useIssueContext(
   props.contextType,
@@ -81,14 +88,22 @@ const shiftHeight = computed(() => {
 });
 
 let oldSplitter = 50;
-const openPreview = () => {
-  oldSplitter = splitterModel.value;
-  splitterModel.value = 100;
+
+const handleOpenPreview = (issue: DtoIssue, pagination?: QuasarPagination, entity?: any) => {
+  emits('openIssuePreview', issue, pagination, entity);
 };
 
-const closePreview = () => {
-  splitterModel.value = oldSplitter;
-};
+watch(
+  () => isPreview.value,
+  () => {
+    if (isPreview.value) {
+      oldSplitter = splitterModel.value;
+      splitterModel.value = 100;
+    } else {
+      splitterModel.value = oldSplitter;
+    }
+  },
+);
 
 watch(
   () => [issuesStore.groupedIssueList, contextProps.value.group_tables_hide],

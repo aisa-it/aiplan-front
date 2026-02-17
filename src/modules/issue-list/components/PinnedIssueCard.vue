@@ -1,7 +1,7 @@
 <template>
   <div
     class="pinned-card elevator-1"
-    @click="emits('openPreview', card.sequence_id)"
+    @click="emits('openIssuePreview', card)"
   >
     <div class="pinned-card__header">
       <span class="pinned-card__issue-id">
@@ -90,17 +90,18 @@ import aiplan from 'src/utils/aiplan';
 import QuantityChip from 'src/components/QuantityChip.vue';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const { user } = storeToRefs(useUserStore());
 
-const props = defineProps<{ card: any }>();
+const props = defineProps<{ card: DtoIssue }>();
 const avatarText = aiplan.UserName;
 
 const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
+const emits = defineEmits(['refresh', 'updateTable', 'openIssuePreview']);
 
 const { navigateToActivityPage } = useUserActivityNavigation();
 </script>

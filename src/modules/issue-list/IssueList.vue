@@ -18,6 +18,7 @@
       <PinnedIssueList
         :pinned-issues="pinnedIssues"
         :style="{ 'padding: 16px;': isGroupingEnabled }"
+        @open-issue-preview="openIssuePreview"
       />
     </q-card-section>
     <q-separator />
@@ -25,10 +26,18 @@
     <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
       <component
         :is="currentIssueList"
+        ref="tableComponentRef"
         contextType="project"
         data-tour="issue-table"
+        @open-issue-preview="openIssuePreview"
       />
     </transition>
+    <IssuePreview
+      v-model="isPreview"
+      @open="openIssue"
+      @close="closeIssuePreview"
+      @refresh="handleRefreshRequest"
+    />
   </q-card>
   <GuidedTour
     v-if="
@@ -45,15 +54,21 @@
 
 <script setup lang="ts">
 // core
-import { is } from 'quasar';
+import { is, Screen, useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
+
 // stores
 import { useProjectStore } from 'src/stores/project-store';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { useUserStore } from 'src/stores/user-store';
 
 // components
 import ProjectFiltersList from './components/ProjectFiltersList.vue';
 import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 import PinnedIssueList from './components/PinnedIssueList.vue';
-
+import IssuePreview from '../single-issue/preview-issue/ui/IssuePreview.vue';
 import GuidedTour from '../guided-tours/GuidedTour.vue';
 import { steps, STEP_NUM } from 'src/modules/guided-tours/tutorials/tutorial2';
 
@@ -65,22 +80,28 @@ import {
   shallowRef,
   watch,
   watchEffect,
+  computed,
+  onBeforeUnmount,
 } from 'vue';
 
 // composables
 import { useLoadProjectInfo } from './composables/useLoadProjectInfo';
-import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from './composables/useDefaultIssues';
-import { useGroupedIssues } from './composables/useGroupedIssues';
-import { useIssuesStore } from 'src/stores/issues-store';
-import { useUserStore } from 'src/stores/user-store';
+import {
+  QuasarPagination,
+  useGroupedIssues,
+} from './composables/useGroupedIssues';
 
-const { getAllProjectInfo } = useLoadProjectInfo();
-const { onRequest } = useDefaultIssues('project');
-const { getGroupedIssues } = useGroupedIssues('project');
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const $q = useQuasar();
+const route = useRoute();
+
+const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
+  storeToRefs(useSingleIssueStore());
+const { getIssueData, openIssue } = useSingleIssueStore();
 
 const projectStore = useProjectStore();
-
 const {
   project,
   isGroupingEnabled,
@@ -91,11 +112,16 @@ const {
 } = storeToRefs(projectStore);
 
 const userStore = useUserStore();
-
 const { user } = storeToRefs(userStore);
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
+
+const { getAllProjectInfo } = useLoadProjectInfo();
+const { onRequest } = useDefaultIssues('project');
+const { getGroupedIssues } = useGroupedIssues('project');
+
+const isMobile = computed<boolean>(() => Screen.width <= 1200);
 
 const load = async () => {
   issuesLoader.value = true;
@@ -108,12 +134,62 @@ const load = async () => {
   issuesLoader.value = false;
 };
 
-onMounted(async () => {
-  pinnedIssues.value = [];
-  issuesLoader.value = true;
-  await getAllProjectInfo();
-  await load();
-  fetchPinnedIssues(project.value.id);
+async function handleOpenIssue(id: string): Promise<void> {
+  isPreview.value = false;
+  openIssue(id, user.value.theme?.open_in_new ? '_blank' : '_self');
+}
+
+async function openIssuePreview(
+  issue: DtoIssue,
+  pagination?: QuasarPagination,
+  entity?: any,
+) {
+  if (!route.params.workspace || !(issue.project ?? route.params.project))
+    return;
+
+  const id = String(issue.sequence_id);
+  if (isMobile.value) {
+    handleOpenIssue(id);
+    return;
+  } else if (currentIssueID.value === id && isPreview.value) return;
+  isPreview.value = false;
+  issueCommentsData.value = undefined;
+  issueActivitiesData.value = undefined;
+  currentIssueID.value = id;
+
+  await getIssueData(
+    route.params.workspace as string,
+    issue.project_detail?.identifier ?? (route.params.project as string),
+  );
+
+  if (
+    tableComponentRef.value &&
+    (tableComponentRef.value as any).setRefreshContext
+  ) {
+    (tableComponentRef.value as any).setRefreshContext(issue, pagination, entity);
+  }
+
+  isPreview.value = true;
+}
+
+async function closeIssuePreview(): Promise<void> {
+  if (!isPreview.value) return;
+  isPreview.value = false;
+  currentIssueID.value = '';
+}
+
+const tableComponentRef = ref<any | null>(null);
+const handleRefreshRequest = (isFullUpdate: boolean = false) => {
+  if (
+    tableComponentRef.value &&
+    (tableComponentRef.value as any).refreshByPreview
+  ) {
+    (tableComponentRef.value as any).refreshByPreview(isFullUpdate);
+  }
+};
+
+watch(isMobile, () => {
+  if (isMobile.value) closeIssuePreview();
 });
 
 watch(
@@ -125,6 +201,19 @@ watch(
     }
   },
 );
+
+onMounted(async () => {
+  pinnedIssues.value = [];
+  issuesLoader.value = true;
+  await getAllProjectInfo();
+  await load();
+  fetchPinnedIssues(project.value.id);
+});
+
+onBeforeUnmount(() => {
+  closeIssuePreview();
+});
+
 const components = {
   DefaultIssueList: defineAsyncComponent(
     () => import('./components/DefaultIssueList.vue'),

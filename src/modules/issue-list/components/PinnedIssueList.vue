@@ -41,86 +41,42 @@
         v-for="card in props.pinnedIssues"
         :key="card.id"
         :card="card"
-        @open-preview="openPreview"
+        @open-issue-preview="(issue) => emits('openIssuePreview', issue)"
       />
     </div>
-
-    <IssuePreview v-model="isPreview" @open="openIssue" @close="closePreview" />
   </section>
 </template>
 
 <script setup lang="ts">
 import {
-  computed,
   nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
   watch,
 } from 'vue';
-import { Screen } from 'quasar';
 import PinnedIssueCard from './PinnedIssueCard.vue';
-import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 
 import { ScrollManager } from 'src/utils/scrollBtnManager';
 import { mouseWheelScrollHandler } from 'src/utils/mouseWheelScrollHandler';
-import { useRoute } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useUserStore } from 'src/stores/user-store';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  pinnedIssues: any[];
+  pinnedIssues: DtoIssue[];
 }>();
 
-const route = useRoute();
-const { user } = storeToRefs(useUserStore());
-const singleIssueStore = useSingleIssueStore();
-const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
-  storeToRefs(singleIssueStore);
+const emits = defineEmits<{
+  openIssuePreview: [issue: DtoIssue];
+}>();
 
 const scrollManager = ref<ScrollManager | null>(null);
 const scrollContainer = ref();
 const refreshCycle = ref();
 const abortController = new AbortController();
 
-const isMobile = computed(() => Screen.width <= 1200);
 const scroll = (direction: number): void => {
   scrollManager.value?.scroll(direction);
 };
-
-async function openPreview(id: string): Promise<void> {
-  if (!route.params.workspace || !route.params.project) return;
-  if ((currentIssueID.value === id && isPreview.value) || isMobile.value) {
-    openIssue(id);
-    return;
-  }
-  isPreview.value = false;
-  issueCommentsData.value = undefined;
-  issueActivitiesData.value = undefined;
-  currentIssueID.value = id;
-
-  await singleIssueStore.getIssueData(
-    route.params.workspace as string,
-    route.params.project as string,
-  );
-  isPreview.value = true;
-}
-
-async function closePreview(): Promise<void> {
-  if (!isPreview.value) return;
-  isPreview.value = false;
-  currentIssueID.value = '';
-}
-
-async function openIssue(id: string): Promise<void> {
-  isPreview.value = false;
-
-  singleIssueStore.openIssue(
-    id,
-    user.value.theme?.open_in_new ? '_blank' : '_self',
-  );
-}
 
 onMounted(() => {
   scrollManager.value = new ScrollManager(scrollContainer.value, false);
@@ -157,14 +113,6 @@ watch(
       }
     }),
 );
-
-watch(isMobile, () => {
-  if (isMobile.value) closePreview();
-});
-
-onBeforeUnmount(() => {
-  closePreview();
-});
 </script>
 
 <style scoped lang="scss">

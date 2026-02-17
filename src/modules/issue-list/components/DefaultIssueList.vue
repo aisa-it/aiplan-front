@@ -7,7 +7,16 @@
       :loading="loadingTable"
       :context-type="contextType"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(row) => openPreview(row)"
+      @open-preview="
+        (row) =>
+          emits('openIssuePreview', row, {
+            page: 1,
+            rowsNumber: 0,
+            sortBy: contextProps?.filters?.order_by,
+            descending: contextProps?.filters?.orderDesc,
+            rowsPerPage: contextProps?.page_size ?? DEF_ROWS_PER_PAGE,
+          })
+      "
       @open-issue="
         (id, issue) =>
           openIssue(
@@ -25,28 +34,11 @@
       <DocumentIcon :width="56" :height="56" />
       <h6>Нет задач</h6>
     </div>
-    <IssuePreview
-      v-model="isPreview"
-      @refresh="
-        load(
-          parsePagination({
-            page: 1,
-            rowsNumber: 0,
-            sortBy: contextProps?.filters?.order_by,
-            descending: contextProps?.filters?.orderDesc,
-            rowsPerPage: contextProps?.page_size ?? DEF_ROWS_PER_PAGE,
-          }),
-        )
-      "
-      @open="openIssue"
-      @close="closePreview"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { Screen } from 'quasar';
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
@@ -55,7 +47,6 @@ import { useUserStore } from 'src/stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 
 import IssueTable from './IssueTable.vue';
-import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 
 import { useIssueContext } from '../composables/useIssueContext';
@@ -63,6 +54,7 @@ import { useDefaultIssues } from '../composables/useDefaultIssues';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { QuasarPagination } from '../composables/useGroupedIssues';
 
 const props = defineProps<{
   contextType: 'project' | 'sprint';
@@ -70,8 +62,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   refreshIssue: [issues: DtoIssue[]];
-  openPreview: [];
-  closePreview: [];
+  openIssuePreview: [issue: DtoIssue, pagination: QuasarPagination];
 }>();
 
 const { contextProps, updateProps } = useIssueContext(props.contextType);
@@ -85,11 +76,9 @@ const { onRequest } = useDefaultIssues(props.contextType);
 
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
-const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
-  storeToRefs(singleIssueStore);
+const { isPreview } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
-const isMobile = computed(() => Screen.width <= 1200);
 const issuesStore = useIssuesStore();
 const load = async (pagination) => {
   loadingTable.value = true;
@@ -117,55 +106,6 @@ async function openIssue(id: string, project: string) {
   );
 }
 
-async function openPreview(issue: DtoIssue) {
-  if (!route.params.workspace || !(issue.project ?? route.params.project))
-    return;
-
-  const id = String(issue.sequence_id);
-  if (isMobile.value) {
-    openIssue(
-      id,
-      issue.project_detail?.identifier ?? (route.params.project as string),
-    );
-    return;
-  } else if (currentIssueID.value === id && isPreview.value) return;
-
-  isPreview.value = false;
-  issueCommentsData.value = undefined;
-  issueActivitiesData.value = undefined;
-  currentIssueID.value = id;
-
-  await singleIssueStore.getIssueData(
-    route.params.workspace as string,
-    issue.project_detail?.identifier ?? (route.params.project as string),
-  );
-  emits('openPreview');
-  isPreview.value = true;
-}
-
-async function closePreview() {
-  emits('closePreview');
-  if (!isPreview.value) return;
-  isPreview.value = false;
-  currentIssueID.value = '';
-}
-
-function parsePagination(pagination) {
-  return {
-    only_count: false,
-    hide_sub_issues: contextProps.value.hideSubIssues ?? false,
-    draft: contextProps.value?.draft ?? true,
-    order_by: pagination.sortBy,
-    desc: pagination.descending,
-    offset:
-      (pagination.page - 1) *
-      (pagination.rowsPerPage == 0 ? 10 : pagination.rowsPerPage),
-    limit:
-      pagination.rowsPerPage == 0
-        ? pagination.rowsNumber || 10
-        : pagination.rowsPerPage,
-  };
-}
 watch(
   () => issuesStore.ungroupedIssueList,
   () => {
@@ -175,12 +115,4 @@ watch(
   },
   { immediate: true },
 );
-
-watch(isMobile, () => {
-  if (isMobile.value) closePreview();
-});
-
-onBeforeUnmount(() => {
-  closePreview();
-});
 </script>

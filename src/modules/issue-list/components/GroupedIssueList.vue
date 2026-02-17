@@ -10,8 +10,7 @@
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (issue, index, pagination, entity) =>
-          openPreview(issue, index, pagination, entity)
+        (issue, pagination, entity) => emits('openIssuePreview', issue, pagination, entity)
       "
       @open-issue="
         (id, issue) =>
@@ -32,8 +31,7 @@
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (issue, index, pagination, entity) =>
-          openPreview(issue, index, pagination, entity)
+        (issue, pagination, entity) => emits('openIssuePreview', issue, pagination, entity)
       "
       @open-issue="
         (id, issue) =>
@@ -52,19 +50,12 @@
       <DocumentIcon :width="56" :height="56" />
       <h6>Нет задач</h6>
     </div>
-    <IssuePreview
-      v-model="isPreview"
-      @refresh="refreshByPreview"
-      @open="openIssue"
-      @close="closePreview"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 // core
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import { Screen } from 'quasar';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
@@ -72,13 +63,15 @@ import { useRoute } from 'vue-router';
 import { useIssuesStore } from 'src/stores/issues-store';
 
 // components
-import { useGroupedIssues } from '../composables/useGroupedIssues';
+import {
+  QuasarPagination,
+  useGroupedIssues,
+} from '../composables/useGroupedIssues';
 
 // utils
 import GroupedTables from './table-view/GroupedTables.vue';
 import GroupedBoard from './board-view/GroupedBoard.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
-import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
 
@@ -92,8 +85,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   refreshIssues: [issues: DtoIssue[]];
-  openPreview: [];
-  closePreview: [];
+  openIssuePreview: [issue: DtoIssue, pagination: QuasarPagination, entity: any];
 }>();
 
 const { contextProps, issuesLoader, isKanbanEnabled, updateProps } =
@@ -107,13 +99,10 @@ const issuesStore = useIssuesStore();
 
 const singleIssueStore = useSingleIssueStore();
 
-const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData, issueData } =
-  storeToRefs(singleIssueStore);
+const { currentIssueID, isPreview, issueData } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const route = useRoute();
-
-const isMobile = computed(() => Screen.width <= 1200);
 
 // TODO типизировать
 const refreshReviewInfo = ref<{
@@ -150,11 +139,8 @@ async function refreshTable(
 
 async function load() {
   issuesLoader.value = true;
-
   await getGroupedIssues();
-
   issuesLoader.value = false;
-
   emits('refreshIssues', issuesStore.groupedIssueList);
 }
 
@@ -166,46 +152,6 @@ async function openIssue(id: string, project: string) {
     user.value.theme?.open_in_new ? '_blank' : '_self',
     project,
   );
-}
-
-async function openPreview(
-  issue: DtoIssue,
-  index?: number,
-  pagination?: any,
-  entity?: any,
-) {
-  if (!route.params.workspace || !(issue.project ?? route.params.project))
-    return;
-
-  const id = String(issue.sequence_id);
-  if (isMobile.value) {
-    openIssue(
-      id,
-      issue.project_detail?.identifier ?? (route.params.project as string),
-    );
-    return;
-  } else if (currentIssueID.value === id && isPreview.value) return;
-  isPreview.value = false;
-  issueCommentsData.value = undefined;
-  issueActivitiesData.value = undefined;
-  currentIssueID.value = id;
-
-  await singleIssueStore.getIssueData(
-    route.params.workspace as string,
-    issue.project_detail?.identifier ?? (route.params.project as string),
-  );
-
-  Object.assign(refreshReviewInfo.value, { index, pagination, entity });
-
-  emits('openPreview');
-  isPreview.value = true;
-}
-
-async function closePreview() {
-  emits('closePreview');
-  if (!isPreview.value) return;
-  isPreview.value = false;
-  currentIssueID.value = '';
 }
 
 function getRefreshReviewInfo(sequenceIdStr: string): void {
@@ -294,11 +240,20 @@ async function refreshByPreview(isFullUpdate = false) {
   }
 }
 
-watch(isMobile, () => {
-  if (isMobile.value) closePreview();
-});
+function setRefreshContext(issue: DtoIssue, pagination?: QuasarPagination, entity?: any) {
+  const id = String(issue.sequence_id);
+  getRefreshReviewInfo(id);
+  // Более актуальные параметры из эмита, если переданы
+  if (pagination) {
+    refreshReviewInfo.value.pagination = pagination;
+  }
+  if (entity) {
+    refreshReviewInfo.value.entity = entity;
+  }
+}
 
-onBeforeUnmount(() => {
-  closePreview();
+defineExpose({
+  refreshByPreview,
+  setRefreshContext,
 });
 </script>
