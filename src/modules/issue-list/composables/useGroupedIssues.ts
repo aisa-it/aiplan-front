@@ -90,27 +90,20 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         return filters;
       }
       case 'labels': {
-        if (entity?.id) {
-          filters = { labels: [entity.id] };
-        }
+        filters = { labels: [entity?.id || ''] };
         return filters;
       }
       case 'priority': {
-        if (entity) {
-          filters = { priorities: [entity] };
-        }
+        // Для "Без приоритета" и др. отправляем пустую строку
+        filters = { priorities: [entity || ''] };
         return filters;
       }
       case 'watchers': {
-        if (entity?.id) {
-          filters = { watchers: [entity.id] };
-        }
+        filters = { watchers: [entity?.id || ''] };
         return filters;
       }
       case 'assignees': {
-        if (entity?.id) {
-          filters = { assignees: [entity.id] };
-        }
+        filters = { assignees: [entity?.id || ''] };
         return filters;
       }
       case 'author': {
