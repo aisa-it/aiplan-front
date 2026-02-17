@@ -732,6 +732,13 @@ watch(
 .new-issue-card {
   min-width: 66vw !important;
 }
+
+:deep(.html-editor__container) {
+  min-height: 15rem;
+}
+:deep(.tiptap) {
+  min-height: 15rem;
+}
 @media screen and (max-width: 1350px) {
   .new-issue-card {
     min-width: calc(100vw - 200px) !important;
