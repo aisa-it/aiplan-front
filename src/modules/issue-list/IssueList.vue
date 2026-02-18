@@ -14,21 +14,40 @@
       />
     </q-card-section>
 
-    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
-      <PinnedIssueList
-        :pinned-issues="pinnedIssues"
-        :style="{ 'padding: 16px;': isGroupingEnabled }"
+    <q-tabs
+      v-model="tab"
+      dense
+      class="text-grey"
+      active-color="primary"
+      indicator-color="primary"
+      align="left"
+    >
+      <q-tab name="general" label="Основные" />
+      <q-tab
+        v-if="pinnedIssues.length"
+        name="pinned"
+        label="Закрепленные задачи"
       />
-    </q-card-section>
-    <q-separator />
+    </q-tabs>
 
-    <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
-      <component
-        :is="currentIssueList"
-        contextType="project"
-        data-tour="issue-table"
-      />
-    </transition>
+    <q-tab-panels v-model="tab">
+      <q-tab-panel name="general" style="height: 90vh">
+        <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
+          <component
+            :is="currentIssueList"
+            contextType="project"
+            data-tour="issue-table"
+            class="q-pt-sm"
+          />
+        </transition>
+      </q-tab-panel>
+
+      <q-tab-panel name="pinned" v-if="pinnedIssues.length">
+        <q-card-section>
+          <PinnedIssueList :pinned-issues="pinnedIssues" />
+        </q-card-section>
+      </q-tab-panel>
+    </q-tab-panels>
   </q-card>
   <GuidedTour
     v-if="
@@ -96,6 +115,8 @@ const { user } = storeToRefs(userStore);
 
 const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
 const { fetchPinnedIssues } = useIssuesStore();
+
+const tab = ref('general');
 
 const load = async () => {
   issuesLoader.value = true;
@@ -204,5 +225,17 @@ watchEffect(() => {
 .fade-element-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+</style>
+
+<style lang="scss" scoped>
+:deep(.q-tab__label) {
+  text-transform: none;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+:deep(.q-tab-panel) {
+  padding: 0;
 }
 </style>
