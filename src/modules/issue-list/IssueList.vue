@@ -13,7 +13,9 @@
         @update="load()"
       />
     </q-card-section>
-
+    <q-card-section v-if="!(isGroupingEnabled && !isKanbanEnabled && !isGanttDiagramm)">
+      <AnalyticsList :style="{ 'padding: 16px;': isGroupingEnabled }" />
+    </q-card-section>
     <q-card-section v-if="!issuesLoader && pinnedIssues.length">
       <PinnedIssueList
         :pinned-issues="pinnedIssues"
@@ -74,6 +76,7 @@ import { useDefaultIssues } from './composables/useDefaultIssues';
 import { useGroupedIssues } from './composables/useGroupedIssues';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useUserStore } from 'src/stores/user-store';
+import AnalyticsList from './components/analytics/AnalyticsList.vue';
 
 const { getAllProjectInfo } = useLoadProjectInfo();
 const { onRequest } = useDefaultIssues('project');
