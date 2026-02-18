@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watchEffect } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 
@@ -164,9 +164,17 @@ const emit = defineEmits<{
   (e: 'update:filters', value: CalendarFilters): void;
 }>();
 
-watchEffect(() => {
-  emit('update:filters', filters.value);
-});
+watch(
+  filters,
+  (newFilters) => {
+    calendarFiltersStore.filters = {
+      workspaces: [workspaceId.value],
+      projects: [projectId.value],
+      ...newFilters,
+    };
+  },
+  { deep: true },
+);
 
 const { project } = storeToRefs(useProjectStore());
 const { workspaceInfo } = useWorkspaceStore();

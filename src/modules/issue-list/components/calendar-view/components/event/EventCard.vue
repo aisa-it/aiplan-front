@@ -23,9 +23,9 @@
       </q-btn>
     </div>
 
-    <div class="event-card__row">
-      <div class="row q-pt-md centered-horisontally">
-        <div class="col q-mb-sm">
+    <div class="event-card__row q-mb-sm">
+      <div class="row items-center centered-horisontally">
+        <div class="col">
           <div class="row items-center">
             <CheckStatusIcon class="issue-icon" /><span class="q-ml-sm">
               Статус
@@ -49,19 +49,61 @@
             :states-from-cache="statesCache[project.id]"
             @set-status="(val) => (event.issueData.state_detail = val)"
             @refresh="handleRefresh"
+            @popup-show="$emit('statusPopup', true)"
+            @popup-hide="$emit('statusPopup', false)"
           />
         </div>
       </div>
     </div>
 
-    <div class="event-card__row">
-      <span>Дата создания</span>
-      {{ event.issueData?.created_at }}
+    <div class="event-card__row q-mb-sm">
+      <div class="row centered-horisontally">
+        <div class="col">
+          <div class="row items-center">
+            <CreateDateIcon :height="19" class="issue-icon" />
+            <span class="q-ml-sm">Дата создания</span>
+          </div>
+        </div>
+        <div class="col text-align-center">
+          {{ formatDateTime(event.issueData?.created_at) }}
+        </div>
+      </div>
     </div>
 
-    <div class="event-card__row">
-      <span>Срок выполнения</span>
-      {{ event.issueData?.target_date }}
+    <div class="event-card__row q-mb-sm">
+      <div class="row centered-horisontally">
+        <div class="col">
+          <div class="row items-center">
+            <ExecuteDateIcon :height="19" class="issue-icon" />
+            <span class="q-ml-sm">Срок исполнения</span>
+          </div>
+        </div>
+        <div class="col text-align-center">
+          {{
+            event.issueData?.target_date
+              ? formatDateTime(event.issueData?.target_date)
+              : '-'
+          }}
+        </div>
+      </div>
+    </div>
+
+    <div class="event-card__row q-mb-sm">
+      <div class="row centered-horisontally">
+        <div class="col">
+          <div class="row items-center">
+            <EndDateIcon :height="19" class="issue-icon" />
+            <span class="q-ml-sm">Дата завершения</span>
+          </div>
+        </div>
+        <div class="col text-align-center">
+          {{
+            event.issueData?.completed_at
+              ? formatDateTime(event.issueData?.completed_at)
+              : '-'
+          }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -73,6 +115,9 @@ import { CalendarEvent } from '../../types/calendar';
 import EditIcon from 'src/components/icons/EditIcon.vue';
 import CheckIcon from 'src/components/icons/CheckIcon.vue';
 import CheckStatusIcon from 'src/components/icons/CheckStatusIcon.vue';
+import CreateDateIcon from 'src/components/icons/CreateDateIcon.vue';
+import ExecuteDateIcon from 'src/components/icons/ExecuteDateIcon.vue';
+import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 
 import SelectStatus from 'src/components/SelectStatus.vue';
 
@@ -86,6 +131,8 @@ import { storeToRefs } from 'pinia';
 import { useCalendarEventStore } from '../../store/calendar-event-store';
 import { useCalendarStore } from '../../store/calendar-store';
 import { useCalendarFiltersStore } from '../../store/filters-store';
+
+import { formatDateTime } from 'src/utils/time';
 
 const calendarEventStore = useCalendarEventStore();
 const calendarStore = useCalendarStore();
@@ -104,6 +151,8 @@ import { SUCCESS_UPDATE_DATA, BASE_ERROR } from 'src/constants/notifications';
 const props = defineProps<{
   event: CalendarEvent;
 }>();
+
+defineEmits<{ statusPopup: [boolean] }>();
 
 const isEdit = ref(false);
 const newName = ref(props.event.issueData?.title);
@@ -174,6 +223,7 @@ watch(
   min-width: 0;
   word-break: break-word;
   line-height: 22px;
+  margin-bottom: 4px;
 }
 
 .icon {

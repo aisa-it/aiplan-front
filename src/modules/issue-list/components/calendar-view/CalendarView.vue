@@ -14,7 +14,7 @@ import CalendarLayout from './layout/CalendarLayout.vue';
 import { useCalendarEventStore } from './store/calendar-event-store';
 import { useCalendarStore } from './store/calendar-store';
 import { useCalendarFiltersStore } from './store/filters-store';
-import { watchEffect } from 'vue';
+import { watchEffect, onUnmounted } from 'vue';
 
 const calendarEventStore = useCalendarEventStore();
 const calendarStore = useCalendarStore();
@@ -26,6 +26,12 @@ watchEffect(async () => {
     calendarFilterStore.enabledTypesArray,
     calendarFilterStore.filters,
   );
+});
+
+onUnmounted(() => {
+  calendarEventStore.$reset();
+  calendarStore.$reset();
+  calendarFilterStore.$reset();
 });
 </script>
 

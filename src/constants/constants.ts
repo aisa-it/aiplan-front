@@ -82,7 +82,7 @@ export const PROJECT_VIEWS = [
   { value: 'list', label: 'Список' },
   { value: 'kanban', label: 'Доска' },
   { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
-  { value: 'calendar', label: 'Календарь' },
+  { value: 'calendar', label: 'Календарь', hideInMobile: true },
 ];
 
 export const SPRINT_VIEWS = [

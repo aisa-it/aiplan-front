@@ -1,30 +1,40 @@
 <template>
   <div ref="containerRef" class="week-grid__events">
-    <template v-for="(event, i) in events" :key="event.id">
-      <EventItem
-        v-if="visibleCount === 0 || i < visibleCount"
-        :ref="(el) => (eventRefs[i] = el as EventItemInstance)"
-        :event="event"
+    <template v-if="!isLoading">
+      <template v-for="(event, i) in events" :key="event.id">
+        <EventItem
+          v-if="visibleCount === 0 || i < visibleCount"
+          :ref="(el) => (eventRefs[i] = el as EventItemInstance)"
+          :event="event"
+        />
+      </template>
+
+      <MoreItem
+        v-if="hiddenCount > 0"
+        :hidden-count="hiddenCount"
+        :events="hiddenEvents"
+        :day="day"
+        :ref="(comp) => (moreRef = (comp as MoreItemInstance)?.el ?? null)"
       />
     </template>
-
-    <MoreItem
-      v-if="hiddenCount > 0"
-      :hidden-count="hiddenCount"
-      :events="hiddenEvents"
-      :day="day"
-      :ref="(comp) => (moreRef = (comp as MoreItemInstance)?.el ?? null)"
-    />
+    <template v-else>
+      <q-skeleton animation="blink" type="text" width="100%" height="32px" />
+      <q-skeleton animation="blink" type="text" width="100%" height="32px" />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick, computed, onUnmounted } from 'vue';
+
+import { useCalendarEventStore } from '../../store/calendar-event-store';
+
 import { CalendarEvent } from '../../types/calendar';
 import EventItem from '../event/EventItem.vue';
 import type EventItemComponent from '../event/EventItem.vue';
 import MoreItem from '../event//MoreItem.vue';
 import type MoreItemComponent from '../event//MoreItem.vue';
+import { storeToRefs } from 'pinia';
 
 type EventItemInstance = InstanceType<typeof EventItemComponent>;
 type MoreItemInstance = InstanceType<typeof MoreItemComponent>;
@@ -33,6 +43,8 @@ const props = defineProps<{
   events: CalendarEvent[];
   day: Date;
 }>();
+
+const { isLoading } = storeToRefs(useCalendarEventStore());
 
 const containerRef = ref<HTMLElement | null>(null);
 const eventRefs = ref<EventItemInstance[]>([]);
@@ -61,8 +73,9 @@ onUnmounted(() => {
 });
 
 watch(
-  () => props.events,
-  async () => {
+  isLoading,
+  async (val) => {
+    if (val) return;
     visibleCount.value = props.events.length;
     await nextTick();
     calculate();

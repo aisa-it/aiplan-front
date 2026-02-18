@@ -2,6 +2,9 @@
   <div
     ref="root"
     class="week-grid__event"
+    :class="{
+      darken: issueIdHighlight && issueIdHighlight !== event.issueData.id,
+    }"
     :style="{ backgroundColor: event.color }"
     @mouseenter="open"
     @mouseleave="scheduleClose"
@@ -17,7 +20,12 @@
       no-parent-event
       persistent
     >
-      <EventCard :event="event" @mouseenter="cancelClose" @mouseleave="close" />
+      <EventCard
+        :event="event"
+        @mouseenter="cancelClose"
+        @mouseleave="close"
+        @status-popup="(val) => (isStatusPopupOpen = val)"
+      />
     </q-menu>
   </div>
 </template>
@@ -28,27 +36,34 @@ import { ref } from 'vue';
 import { CalendarEvent } from '../../types/calendar';
 import EventCard from './EventCard.vue';
 
-defineProps<{ event: CalendarEvent }>();
+import { useCalendarEventStore } from '../../store/calendar-event-store';
+import { storeToRefs } from 'pinia';
+
+const props = defineProps<{ event: CalendarEvent }>();
 
 const root = ref<HTMLElement | null>(null);
+
+const { issueIdHighlight } = storeToRefs(useCalendarEventStore());
 
 defineExpose({
   el: root,
 });
 
 const menu = ref<any>();
+const isStatusPopupOpen = ref(false);
 let closeTimer: number | null = null;
 
 function open() {
   cancelClose();
   menu.value?.show(root.value);
-  // emitHover(true);
+  issueIdHighlight.value = props.event.issueData.id;
 }
 
 function scheduleClose() {
+  if (isStatusPopupOpen.value) return;
+  issueIdHighlight.value = null;
   closeTimer = window.setTimeout(() => {
     menu.value?.hide();
-    // emitHover(false);
   }, 120);
 }
 
@@ -60,9 +75,10 @@ function cancelClose() {
 }
 
 function close() {
+  if (isStatusPopupOpen.value) return;
+  issueIdHighlight.value = null;
   cancelClose();
   menu.value?.hide();
-  // emitHover(false);
 }
 </script>
 
@@ -78,5 +94,10 @@ function close() {
 
 .week-grid__event:hover {
   cursor: pointer;
+}
+
+.darken {
+  filter: brightness(0.6);
+  transition: 0.3s ease;
 }
 </style>

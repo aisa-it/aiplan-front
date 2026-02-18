@@ -5,10 +5,17 @@ import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contract
 import { api } from '../services/api';
 import { mapIssueToCalendarEvents } from '../utils/mapIssuesToEvents';
 
+interface CalendarEventsState {
+  events: CalendarEvent[];
+  isLoading: boolean;
+  issueIdHighlight: string | null;
+}
+
 export const useCalendarEventStore = defineStore('calendar-events', {
-  state: () => ({
+  state: (): CalendarEventsState => ({
     events: [] as CalendarEvent[],
     isLoading: false,
+    issueIdHighlight: null,
   }),
   getters: {
     eventsByDay: (state) => {
@@ -58,6 +65,7 @@ export const useCalendarEventStore = defineStore('calendar-events', {
       enabledTypesArray: CalendarEventType[],
       filters: TypesIssuesListFilters,
     ) {
+      this.isLoading = true;
       const { from, to } = visibleRange;
 
       let issuesCreated: CalendarEvent[] = [];
@@ -98,6 +106,7 @@ export const useCalendarEventStore = defineStore('calendar-events', {
       }
 
       this.setEvents([...issuesCreated, ...issuesTarget, ...issuesCompleted]);
+      this.isLoading = false;
     },
 
     clear() {
