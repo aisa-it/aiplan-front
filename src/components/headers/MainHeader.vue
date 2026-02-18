@@ -185,7 +185,7 @@ const breadCrumbsHistory = computed(() => {
       }`,
       logo: project.value?.logo,
       name: ` ${project.value?.name ?? ''}`,
-      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}/issues`,
+      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
     };
   else if (user.value && currentPath.includes('profile'))

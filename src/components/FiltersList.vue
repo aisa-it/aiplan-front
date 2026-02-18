@@ -237,8 +237,6 @@ const props = defineProps<{
   statuses: any[];
 }>();
 
-const emits = defineEmits(['update']);
-
 const q = useQuasar();
 
 const isMobile = computed(() => q.platform.is.mobile);

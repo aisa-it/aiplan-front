@@ -1,7 +1,7 @@
 <template>
-  <section class="pinned-issues">
+  <section class="pinned-issues" v-if="!loading">
     <PinnedIssueCard
-      v-for="card in props.pinnedIssues"
+      v-for="card in pinnedIssues"
       :key="card.id"
       :card="card"
       @open-preview="openPreview"
@@ -9,10 +9,23 @@
 
     <IssuePreview v-model="isPreview" @open="openIssue" @close="closePreview" />
   </section>
+
+  <section v-else class="pinned-issues">
+    <q-skeleton v-for="i in 10" :key="i" height="148px" />
+  </section>
+
+  <div
+    v-if="!loading && !pinnedIssues.length"
+    class="column flex-center"
+    style="width: 100%; height: calc(100vh - 148px)"
+  >
+    <DocumentIcon :width="56" :height="56" />
+    <h6>Нет закрепленных задач</h6>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, watch } from 'vue';
+import { computed, onBeforeUnmount, watch, onMounted, ref } from 'vue';
 import { Screen } from 'quasar';
 import PinnedIssueCard from './PinnedIssueCard.vue';
 import IssuePreview from 'src/modules/single-issue/preview-issue/ui/IssuePreview.vue';
@@ -21,9 +34,10 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 const props = defineProps<{
-  pinnedIssues: any[];
+  projectId: string;
 }>();
 
 const route = useRoute();
@@ -31,6 +45,19 @@ const { user } = storeToRefs(useUserStore());
 const singleIssueStore = useSingleIssueStore();
 const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData } =
   storeToRefs(singleIssueStore);
+const issuesStore = useIssuesStore();
+const { pinnedIssues } = storeToRefs(issuesStore);
+
+const loading = ref(false);
+
+onMounted(async () => {
+  try {
+    loading.value = true;
+    await issuesStore.fetchPinnedIssues(props.projectId);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const isMobile = computed(() => Screen.width <= 1200);
 
