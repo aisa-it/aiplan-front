@@ -38,19 +38,20 @@
           <MenuActions :items="getFormMenuItems(form)" @click.stop />
         </q-item>
       </q-list>
+
+      <FormDialog
+        v-model="isOpenEditingForm"
+        :form-slug="currentFormSlug"
+        @success-create="refresh"
+        @success-edit="refresh"
+      />
+      <DeleteFormDialog
+        v-model="isOpenDeletingForm"
+        :form="formToDelete!"
+        @success-delete="refresh"
+      />
     </template>
   </ExpansionItem>
-  <FormDialog
-    v-model="isOpenEditingForm"
-    :form-slug="currentFormSlug"
-    @success-create="refresh"
-    @success-edit="refresh"
-  />
-  <DeleteFormDialog
-    v-model="isOpenDeletingForm"
-    :form="formToDelete!"
-    @success-delete="refresh"
-  />
 </template>
 
 <script setup lang="ts">
@@ -61,6 +62,9 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useFormStore } from 'src/stores/form-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+
+//api
+import { getFormList } from 'src/components/forms/services/api';
 
 // components
 import LinkIcon from '../icons/LinkIcon.vue';
@@ -90,7 +94,10 @@ const currentFormSlug = ref<string | null>(null);
 const formToDelete = ref<IForms>();
 
 const refresh = async () => {
-  await formStore.getFormList(currentWorkspaceSlug.value);
+  if (!currentWorkspaceSlug.value) return;
+  await getFormList(currentWorkspaceSlug.value).then(
+    (res) => (formStore.forms = res),
+  );
 };
 
 const deleteForm = async (form: IForms) => {
@@ -104,7 +111,7 @@ const getFormMenuItems = (form: IForms) => {
       text: 'Редактировать форму',
       icon: EditIcon,
       onClick: () => {
-        currentFormSlug.value = form.slug;
+        currentFormSlug.value = form.slug ?? '';
         isOpenEditingForm.value = true;
       },
     },
@@ -112,8 +119,8 @@ const getFormMenuItems = (form: IForms) => {
       text: 'Скопировать ссылку',
       icon: LinkIcon,
       onClick: () => {
-        if (form?.slug) {
-          formStore.copyFormLink(form.slug);
+        if (form?.slug && currentWorkspaceSlug.value) {
+          formStore.copyFormLink(currentWorkspaceSlug.value, form.slug);
         }
       },
     },

@@ -2,7 +2,8 @@
 # yarn lockfile v1
 
 
-"@aisa-it/aiplan-api-ts@^1.114.0":
+
+"@aisa-it/aiplan-api-ts@^1.119.0":
   version "1.119.0"
   resolved "https://registry.yarnpkg.com/@aisa-it/aiplan-api-ts/-/aiplan-api-ts-1.119.0.tgz#dccb30c8c25927b93612335ff9de7c68782fcff2"
   integrity sha512-DOMNUsCJlkfHnQgZ0oxk1fGgPqWkW5r7P+YVpGaofmK/FQXwviopxiA51mJSsv+9z06VVBzzghb+bMYaG6645g==
@@ -2109,6 +2110,11 @@
     "@types/node" "*"
     "@types/send" "<1"
 
+"@types/sortablejs@^1.15.9":
+  version "1.15.9"
+  resolved "https://registry.npmjs.org/@types/sortablejs/-/sortablejs-1.15.9.tgz#82d2337f54d4db827914d80dee5cf65539ae3c8b"
+  integrity sha512-7HP+rZGE2p886PKV9c9OJzLBI6BBJu1O7lJGYnPyG3fS4/duUCcngkNCjsLwIMV+WMqANe3tt4irrXHSIe68OQ==
+
 "@types/trusted-types@^2.0.2":
   version "2.0.7"
   resolved "https://registry.npmjs.org/@types/trusted-types/-/trusted-types-2.0.7.tgz#baccb07a970b91707df3a3e8ba6896c57ead2d11"
@@ -2553,9 +2559,15 @@ axios@^1.13.1:
     proxy-from-env "^1.1.0"
 
 axios@^1.7.9:
+<<<<<<< HEAD
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
   integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
+=======
+  version "1.13.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.4.tgz#15d109a4817fb82f73aea910d41a2c85606076bc"
+  integrity sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==
+>>>>>>> dev
   dependencies:
     follow-redirects "^1.15.11"
     form-data "^4.0.5"
@@ -6024,6 +6036,11 @@ smob@^1.0.0:
   version "1.5.0"
   resolved "https://registry.npmjs.org/smob/-/smob-1.5.0.tgz#85d79a1403abf128d24d3ebc1cdc5e1a9548d3ab"
   integrity sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==
+
+sortablejs@^1.15.6:
+  version "1.15.6"
+  resolved "https://registry.npmjs.org/sortablejs/-/sortablejs-1.15.6.tgz#ff93699493f5b8ab8d828f933227b4988df1d393"
+  integrity sha512-aNfiuwMEpfBM/CN6LY0ibyhxPfPbyFeBTYJKCvzkJ2GkUpazIt3H+QIPAMHwqQ7tMKaHz1Qj+rJJCqljnf4p3A==
 
 "source-map-js@>=0.6.2 <2.0.0", source-map-js@^1.0.2, source-map-js@^1.2.1:
   version "1.2.1"

@@ -62,6 +62,7 @@
             dense
             no-caps
             class="secondary-btn q-mr-sm"
+            :style="{ width: isIssueTemplateSelected ? '140px' : '100px' }"
             label="Очистить"
             @click="handleClear"
             :disable="templatesLoading"
@@ -71,6 +72,7 @@
             dense
             no-caps
             class="primary-btn"
+            :style="{ width: isIssueTemplateSelected ? '140px' : '105px' }"
             :label="isIssueTemplateSelected ? 'Редактировать' : 'Сохранить'"
             @click="handleCreateIssueTemplate()"
             :disable="!name || templatesLoading || editorValue == '<p></p>'"

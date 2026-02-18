@@ -159,6 +159,20 @@ export const useProjectStore = defineStore('project-store', {
         });
     },
 
+    async updateProjectInfo(
+      workspaceSlug: string,
+      projectID: string,
+      projectInfo: DtoProject,
+    ) {
+      if (!workspaceSlug || !projectID) return;
+
+      await projectsApi
+        .updateProject(workspaceSlug, projectID, projectInfo)
+        .then(({ data }) => {
+          this.project = data;
+        });
+    },
+
     async createProject(
       workspaceSlug: string,
       data: AiplanCreateProjectRequest,

@@ -75,7 +75,7 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                      {{ link.index }} {{ link.text }}
+                        {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -162,6 +162,7 @@ import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import aiplan from 'src/utils/aiplan';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
+import { useFloatScroll } from './composables/useFloatScroll';
 
 // Interfaces
 interface IEditorV2Props {
@@ -245,12 +246,18 @@ const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
 
 useMenuHandler(tocPopupRef);
+const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
+
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
 provide('isEditorReadOnly', isReadOnly);
-
 const editorExtensions = computed(() => getEditorExtensions(props));
+
+const hasOwnNumeration = (heading: string) => {
+  const firstChar = heading[0];
+  return /\d/.test(firstChar);
+}
 
 // Попап с информацией о пользователе при наведении
 const handleMouseMove = (e: any) => {
@@ -322,10 +329,12 @@ function createEditor() {
       emit('update:modelValue', editorInstance.value?.getHTML());
       emit('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
+      floatScroll();
     },
     onCreate: () => {
       emit('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
+      floatScroll();
     },
     editorProps: getEditorProps(editorInstance, onCommentLink),
     classPrevent: props.classPrevent,
@@ -456,6 +465,7 @@ watch(
 onMounted(() => createEditor());
 
 onBeforeUnmount(() => {
+  clearFloatScroll();
   editorInstance.value?.destroy();
 });
 
@@ -487,7 +497,7 @@ defineExpose({
   }
 
   &__btn-edit {
-    display: none;
+    display: flex;
     width: 34px;
     box-sizing: border-box;
     padding: 6px 0;
@@ -502,10 +512,11 @@ defineExpose({
     position: sticky;
     top: 50px;
     z-index: 10;
+    visibility: hidden;
   }
 
   &__btn-edit--force {
-    display: flex !important;
+    visibility: visible;
   }
 
   &__btn-toc {

@@ -16,7 +16,7 @@
           class="html-editor__toc-link"
           @click.prevent="onItemClick(link)"
         >
-          {{ link.index }} {{ link.text }}
+          {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
         </a>
       </div>
     </div>
@@ -34,6 +34,11 @@ const props = defineProps(nodeViewProps);
 const links = ref(props.node.attrs.links);
 const readonly = inject('isEditorReadOnly', ref(true));
 const nodeWrapper = ref(null);
+
+const hasOwnNumeration = (heading) => {
+  const firstChar = heading[0];
+  return /\d/.test(firstChar);
+}
 
 const onItemClick = (link) => {
   if (props.editor && !props.editor.options.editable) {

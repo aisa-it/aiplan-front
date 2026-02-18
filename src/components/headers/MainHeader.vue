@@ -249,14 +249,6 @@ const breadCrumbsHistory = computed(() => {
 </script>
 
 <style lang="scss">
-.header {
-  background: $bg-surface;
-  box-shadow:
-    0 1px 0 0 $color-shadow,
-    0 2px 1px 0 $color-shadow,
-    0 4px 1px -1px $color-shadow,
-    0 0 1px 0 $color-shadow;
-}
 .breadcrumbs-title {
   text-overflow: ellipsis;
   white-space: nowrap;

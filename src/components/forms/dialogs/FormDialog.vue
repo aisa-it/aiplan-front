@@ -93,7 +93,10 @@
                 label="Система"
                 class="q-mr-md"
               />
-              <q-checkbox v-model="form.notification_channels.email" label="Email" />
+              <q-checkbox
+                v-model="form.notification_channels.email"
+                label="Email"
+              />
             </div>
           </div>
           <EditorTipTapV2
@@ -107,7 +110,7 @@
         </q-card-section>
         <q-card-section class="column q-pa-none q-mt-lg">
           <q-list>
-            <template v-for="(element, id) in form?.fields" :key="id">
+            <template v-for="(_, id) in form?.fields" :key="id">
               <AiFormItemBody
                 v-model="form.fields[id]"
                 @delete-question="deleteQuestion(id, form?.fields)"
@@ -115,6 +118,9 @@
                 @lower="lower(id, form?.fields)"
                 :number="id + 1"
                 :show-arrow="form?.fields?.length > 1"
+                :all-fields="form?.fields"
+                :is-auto-create-project="isAutoCreateProject"
+                @set-issue-name-field="setIssueNameField(id)"
               />
             </template>
           </q-list>
@@ -144,19 +150,22 @@
 </template>
 
 <script lang="ts" setup>
+//core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useQuasar } from 'quasar';
 
-import { useFormStore } from 'stores/form-store';
+//store
 import { useWorkspaceStore } from 'stores/workspace-store';
+
+// types
+import {
+  AiplanReqForm,
+  DtoProjectLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // utils
 import { isEmpty } from 'src/utils/validation';
-
-// component
-import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-import AddQuestionTypeField from 'src/components/forms/components/AddQuestionTypeField.vue';
-import { TIPTAP_TABS } from 'src/constants/tiptap';
 import {
   upper,
   lower,
@@ -169,9 +178,22 @@ import {
   validDate,
   getDate,
 } from 'src/components/forms/helper/helperForm';
+
+//api
+import {
+  createForm,
+  updateForm,
+  getFormAuth,
+} from 'src/components/forms/services/api';
+
+// constants
+import { TIPTAP_TABS } from 'src/constants/tiptap';
+
+// component
+import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import AddQuestionTypeField from 'src/components/forms/components/AddQuestionTypeField.vue';
 import FormsButton from '../components/formsButton.vue';
 import FormsDate from '../components/formsDate.vue';
-import { AiplanReqForm } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import AiFormItemBody from '../components/AiFormItemBody.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
@@ -183,29 +205,50 @@ const emits = defineEmits<{
   'success-create': [];
 }>();
 
-const formStore = useFormStore();
+//core
+const $q = useQuasar();
+
+//store
 const workspaceStore = useWorkspaceStore();
 
+//store to refs
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+//refs
 const dialogRef = ref();
 const formRef = ref();
 const formTitle = ref();
 
-const form = ref<AiplanReqForm>();
+const initialFormState = {
+  title: '',
+  description: '',
+  fields: [],
+  auth_require: false,
+  end_date: getDate(),
+  target_project_id: '',
+  notification_channels: {
+    telegram: false,
+    app: false,
+    email: false,
+  },
+};
+
+const form = ref<AiplanReqForm>(initialFormState);
 const visible = ref('all');
 const isAutoCreateProject = ref(false);
-const projects = ref([]);
+const projects = ref<DtoProjectLight[]>([]);
 const isLoading = ref(false);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+//methods
+const setIssueNameField = (id: number) => {
+  form.value.fields?.forEach((el, index) => {
+    if (index === id || el.type !== 'input') return;
+    el.issue_name_field = false;
+  });
+};
 
 const clear = () => {
-  form.value = {
-    title: '',
-    description: '',
-    fields: [],
-    auth_require: false,
-    end_date: getDate(),
-    target_project_id: '',
-  };
+  form.value = initialFormState;
   visible.value = 'all';
   isAutoCreateProject.value = false;
   form.value.notification_channels = {
@@ -221,8 +264,9 @@ const save = async () => {
       onError();
       return;
     }
-    if (formTitle.value.hasError) return;
+    if (formTitle.value.hasError || !form.value) return;
     isLoading.value = true;
+
     const requestBody = {
       title: form.value.title,
       description: form.value.description,
@@ -238,14 +282,16 @@ const save = async () => {
     };
 
     try {
+      if (!currentWorkspaceSlug.value) return;
+
       if (props.formSlug) {
-        await formStore.updateForm(
+        await updateForm(
           currentWorkspaceSlug.value,
           props.formSlug,
           requestBody,
         );
       } else {
-        await formStore.createForm(currentWorkspaceSlug.value, requestBody);
+        await createForm(currentWorkspaceSlug.value, requestBody);
       }
       onSuccess();
     } catch (e) {
@@ -264,23 +310,26 @@ const validateDate = (val: string) => {
 };
 
 const refresh = async () => {
+  if (!currentWorkspaceSlug.value) return;
   clear();
-  await workspaceStore
-    .getWorkspaceProjects(currentWorkspaceSlug.value as string)
-    .then((d) => {
-      projects.value = d.filter(
-        (project) => project?.current_user_membership?.role > 5,
-      );
-    });
+
+  const data = await workspaceStore.getWorkspaceProjects(
+    currentWorkspaceSlug.value,
+  );
+
+  if (data)
+    projects.value = data.filter(
+      (project) => (project?.current_user_membership?.role ?? 0) > 5,
+    );
 };
 
 const getForm = async () => {
-  refresh();
+  await refresh();
   if (props.formSlug) {
-    const { data } = await formStore.getSettingsForm(props.formSlug, true);
+    const data = await getFormAuth(props.formSlug);
     form.value = validateFormWithSlug(data);
     form.value.target_project_id = projects.value.find(
-      (el) => el.id === form.value.target_project_id,
+      (el) => el.id === form.value?.target_project_id,
     );
     visible.value = form.value.auth_require ? 'authorize' : 'all';
     isAutoCreateProject.value = form.value.target_project_id ? true : false;

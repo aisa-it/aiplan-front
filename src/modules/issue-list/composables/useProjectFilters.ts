@@ -122,6 +122,7 @@ export function useProjectFilters(emits?) {
     () => {
       if (is.object(projectProps.value)) {
         viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
+
         if (viewForm.value.issueView === 'kanban') {
           optionsGroup.value = optionsGroup.value.filter(
             (opt) => opt.value !== 'none',

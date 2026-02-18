@@ -178,6 +178,7 @@ const mobileTab = ref('issues');
 const filtersStore = useFiltersStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
+const sprintStore = useSprintStore();
 
 const currentFilter = ref<TypesIssuesListFilters | undefined | null>({
   workspaces: [workspaceStore.workspaceInfo?.id ?? ''],
@@ -233,7 +234,7 @@ const loadSprintIssues = async (sprintId: string) => {
   const ISSUES_LIMIT = 100;
 
   while (true) {
-    const response = await useSprintStore().getIssueList(
+    const response = await sprintStore.getIssueList(
       workspaceId,
       sprintId,
       {},
@@ -342,7 +343,9 @@ const updateSprintHandle = async (data: any) => {
     return;
   }
 
-  useSprintStore().triggerSprintRefresh();
+  if (sprintStore.sprint?.id && sprintStore.sprint.id === sprint.value?.id) {
+    sprintStore.triggerSprintRefresh();
+  }
 
   showNotification('success', 'Спринт обновлен');
 

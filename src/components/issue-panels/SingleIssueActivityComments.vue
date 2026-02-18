@@ -74,6 +74,7 @@
               class="secondary-btn"
               :class="isAutoSave ? preventClickClass : ''"
               no-caps
+              style="width: 100px"
               @click.prevent.stop="handleVisibleEditor"
             >
               Отмена
@@ -82,6 +83,7 @@
               :disable="isEmpty"
               v-if="!isSendComment"
               class="primary-btn"
+              style="width: 100px"
               :class="isAutoSave ? preventClickClass : ''"
               no-caps
               @click.prevent.stop="createComment"

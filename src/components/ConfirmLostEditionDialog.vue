@@ -15,6 +15,7 @@
           no-caps
           class="secondary-btn"
           label="Вернуться в задачу"
+          style="width: 170px"
           @click="closeConfirm"
         />
         <q-btn
@@ -23,6 +24,7 @@
           no-caps
           class="primary-btn"
           label="Закрыть"
+          style="width: 170px"
           @click="handleConfirm"
         />
       </q-card-actions>
@@ -30,21 +32,19 @@
   </q-dialog>
 </template>
 
-<script>
-export default {
-  setup(props, { emit }) {
-    const handleConfirm = () => {
-      emit('closeIssue');
-    };
-    const closeConfirm = () => {
-      emit('closeConfirm');
-    };
+<script setup lang="ts">
+import { ref } from 'vue';
 
-    return {
-      handleConfirm,
-      closeConfirm,
-    };
-  },
+const emit = defineEmits(['closeIssue', 'closeConfirm']);
+
+const dialogRef = ref(null);
+
+const handleConfirm = () => {
+  emit('closeIssue');
+};
+
+const closeConfirm = () => {
+  emit('closeConfirm');
 };
 </script>
 

@@ -6,17 +6,20 @@
     <q-btn
       no-caps
       class="secondary-btn q-mr-sm"
-      :style="$q.screen.lt.sm ? 'order: 1; width: 100%' : 'width: 95px'"
+      :style="{
+        width: $q.screen.lt.sm ? '100%' : isEdit ? '170px' : '100px',
+        order: $q.screen.lt.sm ? 1 : undefined,
+      }"
       label="Отмена"
       @click="emits('close')"
     />
     <q-btn
       no-caps
       class="primary-btn create-btn"
+      :style="{ width: $q.screen.lt.sm ? '100%' : isEdit ? '170px' : '100px' }"
       :class="$q.screen.lt.sm ? 'q-mb-sm' : ''"
       :label="isEdit ? 'Редактировать' : 'Создать'"
       :disabled="disable"
-      :style="$q.screen.lt.sm ? 'width: 100%' : 'width: 102px'"
       @click="emits('save')"
     />
   </q-card-section>

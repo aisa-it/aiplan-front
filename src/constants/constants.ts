@@ -91,6 +91,11 @@ export const SPRINT_VIEWS = [
   { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
 ];
 
+export const PROJECT_IDENTIFIER_LENGTH = {
+  MAX: 15,
+  MIN: 3,
+};
+
 export const GROUP_BY_OPTIONS = [
   { value: 'None', label: 'Нет' },
   { value: 'State', label: 'Статус' },
@@ -380,6 +385,10 @@ export const QUESTION_TYPE_FIELD_OPTIONS = [
   {
     label: 'Раскрывающийся список',
     type: 'multiselect',
+  },
+  {
+    label: 'Вложения',
+    type: 'attachment',
   },
 ];
 

@@ -1,5 +1,6 @@
 import { IPagination } from 'src/stores/issues-store';
 import { IProject } from './projects';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export interface IIssueLabel {
   id: string;
@@ -79,6 +80,7 @@ export interface IIssueData {
   state?: string;
   assignees_list?: string[];
   watchers_list?: string[];
+  issues_links?: DtoIssueLinkLight[];
 }
 
 export interface IIssueCommentUpdate {

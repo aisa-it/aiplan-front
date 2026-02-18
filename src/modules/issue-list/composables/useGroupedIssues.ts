@@ -90,27 +90,20 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         return filters;
       }
       case 'labels': {
-        if (entity?.id) {
-          filters = { labels: [entity.id] };
-        }
+        filters = { labels: [entity?.id || ''] };
         return filters;
       }
       case 'priority': {
-        if (entity) {
-          filters = { priorities: [entity] };
-        }
+        // Для "Без приоритета" и др. отправляем пустую строку
+        filters = { priorities: [entity || ''] };
         return filters;
       }
       case 'watchers': {
-        if (entity?.id) {
-          filters = { watchers: [entity.id] };
-        }
+        filters = { watchers: [entity?.id || ''] };
         return filters;
       }
       case 'assignees': {
-        if (entity?.id) {
-          filters = { assignees: [entity.id] };
-        }
+        filters = { assignees: [entity?.id || ''] };
         return filters;
       }
       case 'author': {
@@ -136,9 +129,34 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const response = await getIssue(filters, pagination);
 
     const data = response?.data?.issues;
-    issuesStore.groupedIssueList[index].issues =
-      Array.isArray(data) && data[0]?.issues ? data[0].issues : (data ?? []);
-    issuesStore.groupedIssueList[index].count = response?.data?.count ?? 0;
+    const issues =
+      Array.isArray(data) && data[0]?.issues ? data[0]?.issues : (data ?? []);
+    const count = response?.data?.count ?? 0;
+
+    const groups = issuesStore.groupedIssueList as any[];
+
+    const sameEntity = (a: any, b: any) => {
+      if (a?.id != null && b?.id != null) return a.id === b.id;
+      return a === b;
+    };
+
+    const targetIndex =
+      index != null && index >= 0
+        ? index
+        : groups.findIndex((g) => sameEntity(g?.entity, entity));
+
+    if (targetIndex < 0) {
+      groups.push({ entity, issues, count });
+      return;
+    }
+
+    if (!groups[targetIndex]) {
+      groups[targetIndex] = { entity, issues, count };
+      return;
+    }
+
+    groups[targetIndex].issues = issues;
+    groups[targetIndex].count = count;
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {

@@ -50,6 +50,7 @@ export function issueActivityRender(
           ? activity.project_detail?.identifier + '-' + activity.old_value
           : ''
       } ${workspaceSource}<span/>`;
+    case 'label':
     case 'labels':
       action = translateAction('labels', Boolean(activity.new_value));
       value = setValue(activity);
@@ -58,14 +59,6 @@ export function issueActivityRender(
                   ${link} ${workspaceSource}
                 <span/>`;
 
-    case 'state':
-      action = 'поменял(-а) статус на';
-      value = activity.new_entity_detail.name
-        ? addSpaceIfCamelCase(activity.new_value as string)
-        : 'Не выбрано';
-      return `<span>${action} "${value}" в задаче
-                ${link} ${workspaceSource}
-                <span/>`;
     case 'status':
       action = 'поменял(-а) статус на';
       value = activity.new_entity_detail.name
@@ -103,7 +96,7 @@ export function issueActivityRender(
       action = translateAction('issues', Boolean(activity.new_value));
       value = setValue(activity);
 
-      return `<span>${action} ${link} ${activity.verb === 'added' ? 'к спринту' : 'из спринта'} ${`<a target="_blank"
+      return `<span>${action} ${link} ${activity.verb === 'added' ? 'в спринт' : 'из спринта'} ${`<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${`/${activity.workspace_detail?.slug}/sprints/${entityDetail.id}`}>
                     "${entityDetail.name}"<a/>`}<span/>`;
@@ -191,6 +184,11 @@ export function issueActivityRender(
 
     case 'link_title':
       return `<span>изменил(-а) название ссылки с "${activity.old_value}" на "${activity.new_value}" в задачe ${link} ${workspaceSource}<span>`;
+
+    case 'label':
+      action = translateVerb(activity.verb as string);
+      return `<span>${action} тег в задачe ${link} ${workspaceSource}<span/>`;
+
     default:
       break;
   }

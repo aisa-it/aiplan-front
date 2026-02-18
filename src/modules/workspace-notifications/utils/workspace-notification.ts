@@ -16,6 +16,10 @@ export function workspaceNotificationRender(activity: any, detail: any) {
       action = translateVerb(activity.verb);
       return `${action} название пространства`;
 
+    case 'owner':
+      action = translateVerb(activity.verb);
+      return `${action} лидера пространства с ${getFullName(activity.old_entity_detail)} на ${getFullName(activity.new_entity_detail)}`;
+
     case 'description':
       action = translateVerb(activity.verb);
       return `${action} описание пространства`;
@@ -85,6 +89,20 @@ export function workspaceNotificationRender(activity: any, detail: any) {
             : activity.old_value
         }`;
       }
+
+    case 'sprint':
+      if (activity.verb === 'created') {
+        let link = '';
+        if (activity.new_entity_detail) {
+          link = `<a target="_blank"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    href=${activity.new_entity_detail.url}>${activity.new_value}</a>`;
+        }
+        return `создал(-а) спринт ${link ? link : activity.new_value}`;
+      }
+
+      if (activity.verb === 'deleted')
+        return `удалил(-а) спринт "${activity.old_value}"`;
 
     default:
       break;

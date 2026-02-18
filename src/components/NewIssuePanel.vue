@@ -5,7 +5,12 @@
     ]"
     ref="newIssueCardRef"
   >
-    <div class="relative-position">
+    <div v-show="!loading" class="relative-position">
+      <q-card-section class="row q-pa-sm">
+        <q-btn flat dense class="q-ml-auto" @click="emits('onCancel')">
+          <q-icon name="close" dense size="18px" />
+        </q-btn>
+      </q-card-section>
       <q-card-section>
         <div v-if="project" class="relative-position">
           <div class="row flex items-stretch content-stretch q-mb-xs">
@@ -60,12 +65,9 @@
         </div>
       </q-card-section>
 
-      <q-card-section
-        v-if="project"
-        :class="$q.screen.width > 720 ? 'row' : 'column'"
-      >
-        <div class="col">
-          <div class="row q-mb-sm centered-horisontally">
+      <q-card-section v-if="project" class="row q-col-gutter-x-md">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <PriorityIcon />
               <span class="q-ml-sm"> Приоритет </span>
@@ -76,48 +78,15 @@
               class="col centered-horisontally"
               label="Выберите приоритет"
               v-model:priority="priority"
-              :workspace-slug="currentWorkspaceSlug"
-              :projectid="project.id"
+              :workspace-slug="currentWorkspaceSlug || ''"
+              :projectid="project.id || ''"
               :new-issue="true"
             ></select-priority>
           </div>
-          <div class="row q-mb-sm centered-horisontally">
-            <div class="col centered-horisontally issue-selector-label">
-              <UserIcon />
-              <span class="q-ml-sm"> Исполнитель </span>
-            </div>
-            <UserIcon class="issue-selector-icon mr-12" />
-
-            <SelectAssignee
-              v-model:assigness="assigness"
-              :projectid="project.id"
-              :defaultAssignee="project.default_assignees_details"
-              :current-member="user"
-              :new-issue="true"
-              label="Выберите исполнителя"
-              class="col centered-horisontally"
-            ></SelectAssignee>
-          </div>
-          <div class="row q-mb-sm centered-horisontally">
-            <div class="col centered-horisontally issue-selector-label">
-              <ObserveIcon />
-              <span class="q-ml-sm"> Наблюдатель </span>
-            </div>
-            <ObserveIcon class="issue-selector-icon mr-12" />
-
-            <SelectWatchers
-              v-model:watchers="watchers"
-              :projectid="project.id"
-              :current-member="user"
-              :new-issue="true"
-              label="Выберите наблюдателя"
-              class="col centered-horisontally"
-            ></SelectWatchers>
-          </div>
         </div>
-        <q-separator vertical class="q-mx-md" />
-        <div class="col">
-          <div class="row q-mb-sm centered-horisontally">
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <CheckStatusIcon />
               <span class="q-ml-sm"> Статус </span>
@@ -125,15 +94,37 @@
             <CheckStatusIcon class="issue-selector-icon mr-12" />
 
             <select-status
-              :projectid="project.id"
+              :projectid="project.id || ''"
               v-model:status="status"
-              @updateInitialStatus="(s) => (status = s)"
+              @updateInitialStatus="(s: any) => (status = s)"
               label="Выберите статус"
               class="col centered-horisontally"
             ></select-status>
           </div>
+        </div>
 
-          <div class="row q-mb-sm centered-horisontally">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <UserIcon />
+              <span class="q-ml-sm"> Исполнитель </span>
+            </div>
+            <UserIcon class="issue-selector-icon mr-12" />
+
+            <select-assignee
+              v-model:assigness="assigness"
+              :projectid="project.id || ''"
+              :defaultAssignee="project.default_assignees_details as any[]"
+              :current-member="user"
+              :new-issue="true"
+              label="Выберите исполнителя"
+              class="col centered-horisontally"
+            ></select-assignee>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <CalendarIcon />
               <span class="q-ml-sm"> Срок исполнения </span>
@@ -142,16 +133,37 @@
 
             <select-date
               v-model:date="date"
-              :workspace-id="currentWorkspaceSlug"
-              :project-id="project.id"
+              :workspace-id="currentWorkspaceSlug || ''"
+              :project-id="project.id || ''"
               :new-issue="true"
               :auto-update="autoupdateDate"
               placeholder="Выберите дату"
               class="col centered-horisontally"
             ></select-date>
           </div>
+        </div>
 
-          <div class="row q-mb-sm centered-horisontally">
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <ObserveIcon />
+              <span class="q-ml-sm"> Наблюдатель </span>
+            </div>
+            <ObserveIcon class="issue-selector-icon mr-12" />
+
+            <select-watchers
+              v-model:watchers="watchers"
+              :projectid="project.id || ''"
+              :current-member="user"
+              :new-issue="true"
+              label="Выберите наблюдателя"
+              class="col centered-horisontally"
+            ></select-watchers>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <div class="row centered-horisontally">
             <div class="col centered-horisontally issue-selector-label">
               <ShareIcon />
               <span class="q-ml-sm"> Родитель </span>
@@ -160,20 +172,62 @@
 
             <select-parent-issue
               v-model:issue="parent"
-              :projectid="project.id"
-              :project="project"
+              :projectid="project.id || ''"
+              :project="project as any"
               :isDisabled="true"
               :new-issue="true"
               class="col centered-horisontally"
             ></select-parent-issue>
           </div>
         </div>
-        <select-tags
-          v-model:tags="tags"
-          :projectid="project.id"
-          :isDisabled="true"
+
+        <div
+          v-if="hasPermissionByWorkspace(workspaceInfo, 'change-sprint')"
+          class="col-12 col-sm-6 q-mb-sm"
         >
-        </select-tags>
+          <div class="row centered-horisontally">
+            <div class="col centered-horisontally issue-selector-label">
+              <SprintIcon />
+              <span class="q-ml-sm"> Спринт </span>
+            </div>
+            <SprintIcon class="issue-selector-icon mr-12" />
+            <select-sprints
+              v-model="sprints"
+              class="col centered-horisontally"
+              label="Выберите спринт"
+            />
+          </div>
+        </div>
+
+        <div
+          :class="[
+            'q-mb-sm',
+            hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+              ? 'col-12 col-sm-6'
+              : 'col-12',
+          ]"
+        >
+          <select-tags
+            v-model:tags="tags"
+            :projectid="project.id"
+            :isDisabled="true"
+            :is-full-width="
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+            "
+          >
+          </select-tags>
+        </div>
+        <div class="q-mb-sm col-12 order-last">
+          <select-links
+            :links="links"
+            @add="handleLinkAdd"
+            @delete="handleLinkDelete"
+            @edit="handleLinkEdit"
+            :is-full-width="
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+            "
+          />
+        </div>
       </q-card-section>
 
       <SelectAttachments
@@ -194,6 +248,7 @@
             dense
             no-caps
             class="secondary-btn q-mr-sm"
+            style="width: 100px"
             label="Отмена"
             @click="emits('onCancel')"
           />
@@ -202,6 +257,7 @@
             dense
             no-caps
             class="primary-btn"
+            style="width: 100px"
             label="Добавить"
             @click="create"
           >
@@ -209,10 +265,11 @@
           </q-btn>
         </div>
       </q-card-actions>
-      <q-inner-loading style="z-index: 99" :showing="loading">
-        <DefaultLoader />
-      </q-inner-loading>
     </div>
+    <q-inner-loading :showing="creationLoading">
+      <DefaultLoader />
+    </q-inner-loading>
+    <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
 
@@ -222,6 +279,10 @@ import { useRoute } from 'vue-router';
 import { ref, onMounted, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/vue-3';
+
+//api
+import { sprintIssuesUpdate } from 'src/modules/sprints/services/api';
+
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -230,6 +291,9 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useUserStore } from 'stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
+import { useRolesStore } from 'src/stores/roles-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { getIssueLink } from 'src/utils/links';
@@ -237,8 +301,10 @@ import {
   getSuccessCreateIssueMessage,
   getSuccessCreateSubissueMessage,
 } from 'src/utils/notifications';
+
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+
 // components
 import SelectDate from './SelectDate.vue';
 import SelectTags from './SelectTags.vue';
@@ -246,13 +312,23 @@ import SelectStatus from './SelectStatus.vue';
 import SelectPriority from './SelectPriority.vue';
 import SelectAssignee from './selects/SelectAssignee.vue';
 import SelectWatchers from './selects/SelectWatchers.vue';
-import DefaultLoader from './loaders/DefaultLoader.vue';
 import SelectParentIssue from './SelectParentIssue.vue';
-import PriorityIcon from './icons/PriorityIcon.vue';
 import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-template/ui/SelectSingleIssueTemplate.vue';
 import SelectAttachments from './SelectAttachments.vue';
+import SelectSprints from 'src/components/SelectSprints.vue';
+import SelectLinks from './SelectLinks.vue';
+import NewIssuePanelSkeleton from './NewIssuePanelSkeleton.vue';
+import DefaultLoader from './loaders/DefaultLoader.vue';
+
 //types
 import { QCard } from 'quasar';
+import {
+  AiplanRequestIssueIdList,
+  DtoIssueLinkLight,
+  DtoProject,
+  DtoSprintLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
 //icons
 import UserIcon from './icons/UserIcon.vue';
 import ObserveIcon from './icons/ObserveIcon.vue';
@@ -260,18 +336,21 @@ import CalendarIcon from './icons/CalendarIcon.vue';
 import ShareIcon from './icons/ShareIcon.vue';
 import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import SprintIcon from './icons/SprintIcon.vue';
+import PriorityIcon from './icons/PriorityIcon.vue';
 
 const props = defineProps<{
   project_detail?: DtoProject;
   parentissue?: string;
   isUserTextData?: boolean;
   isIssuesTemplate?: boolean;
+  loading?: boolean;
 }>();
 
 const emits = defineEmits<{
   onCancel: [];
   changeTextStatus: [status: boolean];
+  'update:loading': [status: boolean];
   ok: [];
 }>();
 
@@ -292,34 +371,39 @@ const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
 const issuesStore = useIssuesStore();
 const singleIssueStore = useSingleIssueStore();
+const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 
 //storesToRefs
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
 
 const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(issuesStore);
 
 //variables
-const projects = ref([]);
+const projects = ref<DtoProject[]>([]);
 const newIssueCardRef = ref<QCard>();
 const titleRef = ref();
-const project = ref(null);
+const project = ref<DtoProject | null>(null);
 const name = ref('');
 const description = ref('');
-const status = ref(null);
-const priority = ref(null);
-const assigness = ref([]);
-const watchers = ref([]);
-const tags = ref([]);
+const status = ref<any>(null);
+const priority = ref<any>(null);
+const assigness = ref<any[]>([]);
+const watchers = ref<any[]>([]);
+const sprints = ref<DtoSprintLight[]>([]);
+const tags = ref<any[]>([]);
 const date = ref(null);
-const parent = ref(null);
+const parent = ref<any>(null);
 const draft = ref(false);
 const selectedIssueTemplate = ref<any>(null);
-const loading = ref(true);
+
 const editorInstance = ref<Editor>();
 const autoupdateDate = ref<boolean>(true);
+const links = ref<DtoIssueLinkLight[]>([]);
+const creationLoading = ref(false);
 
 const selectAttachments = ref();
 
@@ -327,8 +411,18 @@ const selectAttachments = ref();
 const workspaceSlug = computed(() => {
   return (route.params.workspace as string) || currentWorkspaceSlug.value;
 });
+
 const projectId = computed(() => {
   return props.project_detail?.id ?? (route.params.project as string);
+});
+
+const loading = computed({
+  get() {
+    return props.loading;
+  },
+  set(val) {
+    emits('update:loading', val);
+  },
 });
 
 //methods
@@ -393,7 +487,46 @@ const handleDeleteTemplate = async (id: string) => {
   }
 };
 
-const create = async () => {
+const updateSprint = async (sprint: DtoSprintLight, issueid: string) => {
+  const data: AiplanRequestIssueIdList = {
+    issues_add: [issueid],
+  };
+
+  await sprintIssuesUpdate(
+    currentWorkspaceSlug.value ?? '',
+    sprint.id ?? '',
+    data,
+  ).catch((err) => {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: 'Ошибка при обновлении спринтов',
+    });
+    throw err;
+  });
+
+  sprintStore.triggerSprintRefresh();
+};
+
+const handleLinkAdd = (link: DtoIssueLinkLight) => {
+  links.value.push({
+    ...link,
+    created_at: new Date().toISOString(),
+  });
+};
+
+const handleLinkDelete = (id: string) => {
+  links.value = links.value.filter((l) => l.id !== id);
+};
+
+const handleLinkEdit = (link: DtoIssueLinkLight) => {
+  const index = links.value.findIndex((l) => l.id === link.id);
+  if (index !== -1) {
+    links.value[index] = { ...links.value[index], ...link };
+  }
+};
+
+const scrollOnInvalid = () => {
   titleRef.value.validate();
 
   if (titleRef.value.hasError) {
@@ -401,63 +534,95 @@ const create = async () => {
       top: 0,
       behavior: 'smooth',
     });
+    return true;
+  }
+  return false;
+};
+
+const create = async () => {
+  if (scrollOnInvalid()) {
     return;
   }
 
-  loading.value = true;
-  const content = await handleEditorValue(description.value);
-  const descriptionJson = editorInstance.value?.getJSON();
+  creationLoading.value = true;
   autoupdateDate.value = false;
-  await singleIssueStore
-    .createIssue(
-      currentWorkspaceSlug.value,
+
+  try {
+    const content = await handleEditorValue(description.value);
+    const descriptionJson = editorInstance.value?.getJSON();
+
+    const assigneeIds = (assigness.value as any[]).map((assignee) =>
+      assignee?.member_id ? assignee?.member_id : assignee,
+    );
+
+    const watcherIds = (watchers.value as any[]).map((watcher) =>
+      watcher?.member_id ? watcher?.member_id : watcher,
+    );
+
+    const tagIds = (tags.value as any[]).map((d) => d.id);
+    const parentId =
+      !!parent.value && parent.value?.id !== '' ? parent.value?.id : null;
+
+    const res = await singleIssueStore.createIssue(
+      workspaceSlug.value,
       project.value?.id,
       name.value,
       content,
       status.value ? status.value?.id : '',
       priority.value,
-      assigness.value.map((assignee) =>
-        assignee?.member_id ? assignee?.member_id : assignee,
-      ),
-      watchers.value.map((watcher) =>
-        watcher?.member_id ? watcher?.member_id : watcher,
-      ),
-      tags.value.map((d) => d.id),
+      assigneeIds,
+      watcherIds,
+      tagIds,
       date.value,
-      !!parent.value && parent.value?.id !== '' ? parent.value?.id : null,
+      parentId,
       draft.value,
       descriptionJson,
-    )
-    .then(async (res) => {
-      const issue = (
-        await singleIssueStore.getIssueDataById(
-          currentWorkspaceSlug.value,
-          project.value?.id,
-          res.data.id,
-        )
-      ).data;
+      links.value,
+    );
 
-      const link = getIssueLink(
-        currentWorkspaceSlug.value,
-        project.value?.identifier,
-        res.data.id,
-      );
-      setNotificationView({
-        open: true,
-        type: 'success',
-        customMessage: props.parentissue
-          ? getSuccessCreateSubissueMessage(link)
-          : getSuccessCreateIssueMessage(
-              link,
-              `${issue.project_detail.identifier}-${issue.sequence_id}`,
-            ),
-      });
-      await selectAttachments.value.uploadDraftAttachments(res.data.id);
-      emits('ok');
-    })
-    .catch(() => {
-      loading.value = false;
-    });
+    await handleCreateSuccess(res.data);
+  } catch (e) {
+    creationLoading.value = false;
+  }
+};
+
+const handleCreateSuccess = async (createdIssueData: any) => {
+  if (!workspaceSlug.value || !project.value?.id) {
+    creationLoading.value = false;
+    return;
+  }
+  const issue = (
+    await singleIssueStore.getIssueDataById(
+      workspaceSlug.value,
+      project.value?.id,
+      createdIssueData.id,
+    )
+  ).data;
+
+  const link = getIssueLink(
+    workspaceSlug.value,
+    project.value?.identifier,
+    createdIssueData.id,
+  );
+
+  setNotificationView({
+    open: true,
+    type: 'success',
+    customMessage: props.parentissue
+      ? getSuccessCreateSubissueMessage(link)
+      : getSuccessCreateIssueMessage(
+          link,
+          `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
+        ),
+  });
+
+  await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
+
+  sprints.value.forEach((sprint) => {
+    updateSprint(sprint, issue.id);
+  });
+
+  emits('ok');
 };
 
 const handleClearIssueTemplate = () => {
@@ -566,6 +731,13 @@ watch(
 <style scoped lang="scss">
 .new-issue-card {
   min-width: 66vw !important;
+}
+
+:deep(.html-editor__container) {
+  min-height: 15rem;
+}
+:deep(.tiptap) {
+  min-height: 15rem;
 }
 @media screen and (max-width: 1350px) {
   .new-issue-card {

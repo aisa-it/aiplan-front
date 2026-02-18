@@ -149,11 +149,13 @@ export default defineComponent({
         arr = arr.concat(data[n]);
       }
       states.value = arr;
-      if (arr.every((el) => el.id !== props.status?.id))
+
+      if (!props.status) {
         emit(
           'update-initial-status',
           arr.find((status) => status.default === true) || arr[0],
         );
+      }
     };
 
     const showNotification = (type: 'success' | 'error', msg?: string) => {

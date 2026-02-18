@@ -81,6 +81,7 @@ import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/da
 import { checkedUserNotifications } from 'src/modules/workspace-notifications/services/api';
 import { docNotificationRender } from '../utils/doc-notification';
 import { workspaceNotificationRender } from '../utils/workspace-notification';
+import { sprintNotificationRender } from '../utils/sprint-notification';
 
 const props = defineProps<{
   notificationRow: NotificationsNotificationResponse;
@@ -103,12 +104,13 @@ const isMessage = computed(
 
 const title = computed(() => {
   if (isMessage.value) return props.notificationRow?.data?.title;
-  if ( 
+  if (
     props.notificationRow?.data.entity_type === 'doc' ||
     props.notificationRow?.data.field === 'doc'
   )
     return 'АИДок';
   if (props.notificationRow?.data.entity_type === 'workspace') return 'Настройки пространства';
+  if (props.notificationRow?.data.entity_type === 'sprint') return props.notificationRow?.detail?.sprint?.name
 
   return props.notificationRow?.detail?.project?.name;
 });
@@ -136,35 +138,16 @@ function transform() {
     props.notificationRow?.type === 'activity' ||
     props.notificationRow?.type === 'comment'
   ) {
-    if (props.notificationRow?.data?.field === 'start_date') {
-      return 'начал(-а) выполнение задачи';
-    }
-    if (props.notificationRow?.data?.field === 'status') {
-      return `
-      поменял(-а) статус на "${props.notificationRow?.data?.new_value}" в задаче 
-      <span>
-      <a
-        target="_blank"
-        style="
-          color: #3F76FF;
-          text-decoration: none;
-          font-weight: 400;
-        "
-        href="${props.notificationRow?.detail?.issue?.url}"
-      >
-        ${props.notificationRow?.detail?.project?.identifier}-${props.notificationRow?.detail?.issue?.sequence_id}
-        "${props.notificationRow?.detail?.issue?.name}"
-      </a>
-      <span/>
-      `;
-    }
+    // if (props.notificationRow?.data?.field === 'start_date') {
+    //   return 'начал(-а) выполнение задачи';
+    // }
     if (props.notificationRow?.data?.field === 'completed_at') {
       return 'завершил(-а) задачу';
     }
     if (props.notificationRow?.data?.field === 'form_answers') {
       return `
-      <span> 
-        прошёл(-ла) форму 
+      <span>
+        прошёл(-ла) форму
         <a
           target="_blank"
           style="
@@ -185,6 +168,15 @@ function transform() {
       return issueNotificationRender(
         props.notificationRow?.data,
         props.notificationRow?.detail,
+      );
+    }
+
+    if (
+      props.notificationRow?.data?.entity_type === 'sprint'
+    ) {
+      return sprintNotificationRender(
+        props.notificationRow?.data,
+        props.notificationRow?.detail
       );
     }
 

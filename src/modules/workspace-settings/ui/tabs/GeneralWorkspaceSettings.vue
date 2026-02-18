@@ -44,6 +44,7 @@
             no-caps
             class="delete-btn q-mx-xs"
             @click="handleDeleteWorkspaceAvatar"
+            style="width: 99px"
           >
             Удалить
           </q-btn>
@@ -202,8 +203,10 @@
     <q-btn
       no-caps
       data-id="workspace-save-settings"
-      class="secondary-btn"
-      :disable="!isValidName"
+      :flat="!hasChanges"
+      :outline="!hasChanges"
+      :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
+      :disable="!isValidName || !hasChanges"
       @click="handleUpdateWorkspace"
     >
       Сохранить
@@ -348,7 +351,10 @@
           v-close-popup
           data-id="workspace-save-settings"
           class="secondary-btn"
-          :disable="!isValidName"
+          :disable="!isValidName || !hasChanges"
+          :flat="!hasChanges"
+          :outline="!hasChanges"
+          :class="hasChanges ? 'primary-btn' : 'secondary-btn'"
           @click="handleUpdateWorkspace"
         >
           Сохранить
@@ -385,6 +391,7 @@ import aiplan from 'src/utils/aiplan';
 
 // composables
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { useFormChanges } from 'src/composables/useFormChanges';
 
 // constants
 import {
@@ -406,13 +413,11 @@ import {
 } from 'src/modules/workspace-settings/ui/dialogs';
 import SelectLeader from 'components/selects/SelectLeader.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
-// import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
 const EditorTipTapV2 = defineAsyncComponent(
   () => import('src/components/editorV2/EditorTipTapV2.vue'),
 );
 
-import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
 
@@ -475,6 +480,27 @@ const canEdit = computed(() =>
   hasPermissionByWorkspace(computedWorkspaceInfo.value, 'ws-settings'),
 );
 
+const normalizeHtml = (html: string | undefined | null) => {
+  // Редактор автоматически добавляет точку с запятой в атрибуты style
+  // Поэтому удаляем точки с запятой внутри атрибутов style и пробелы для сравнения
+  if (!html) return '';
+
+  return html.replace(/style="[^"]*"/g, (match) =>
+    match.replace(/;/g, '').replace(/\s/g, ''),
+  );
+};
+
+const { hasChanges, init } = useFormChanges(workspaceInfoForm, {
+  transform: (val) => {
+    if (!val) return {};
+    return {
+      name: val.name,
+      description: normalizeHtml(val.description),
+      owner_id: val.owner_id?.value ?? val.owner_id,
+    };
+  },
+});
+
 onMounted(async () => {
   await refreshInfo();
   await refreshToken();
@@ -528,12 +554,15 @@ const refreshInfo = async () => {
   );
   setAnotherTitle(computedWorkspaceInfo.value.name);
 
+  const owner = computedWorkspaceInfo.value?.owner;
+
   workspaceInfoForm.value.owner_id = leadWorkspaceOptions.value.find(
     (el) => el.value === computedWorkspaceInfo.value?.owner_id,
   ) ?? {
-    label: 'Не выбран',
-    value: null,
+    label: owner ? aiplan.UserName(owner).join(' ') : 'Не выбран',
+    value: owner?.id ?? null,
   };
+  init();
 };
 
 const refreshToken = async () => {
@@ -655,7 +684,7 @@ const handleAvatarError = () => {
 
 const editor = ref<Editor | undefined>();
 // Текст в диалоговом окне
-const editorValueDialog = ref<string | undefined>();
+const editorValueDialog = ref<string>('');
 // Переключатель диалогового окна
 const isFullscreen = ref<boolean>(false);
 // EditorDOM

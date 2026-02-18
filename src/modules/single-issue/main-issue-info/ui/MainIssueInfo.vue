@@ -23,7 +23,7 @@
           <MenuIcon :width="18" :height="18" />
         </q-btn>
       </div>
-      <div class="q-mb-md">
+      <div class="q-mb-md" v-if="!hideSettings.includes('labels')">
         <div class="flex items-center">
           <q-chip
             v-for="t in issueData.label_details"
@@ -62,6 +62,7 @@
             >
             <EditIcon />
           </q-btn>
+          <LlmContentChip :show="!!issueData?.llm_content" />
         </div>
       </div>
       <q-card
@@ -117,14 +118,12 @@
           @dragover.prevent
         />
       </div>
-      <q-card-actions
-        v-if="isAdminOrAuthor && !isReadOnlyEditor"
-        align="right"
-      >
+      <q-card-actions v-if="isAdminOrAuthor && !isReadOnlyEditor" align="right">
         <q-btn
           class="secondary-btn"
           :class="isAutoSave ? preventClickClass : ''"
           no-caps
+          style="width: 103px"
           @click="handleUndoEdit"
         >
           Отмена
@@ -217,6 +216,7 @@ import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 import { updateIssueInfo } from '../../services/api';
 import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useLockIssueInfo } from '../composables/useLockIssueInfo';
+import LlmContentChip from 'src/components/LlmContentChip.vue';
 
 defineOptions({
   directives: {
@@ -402,6 +402,10 @@ const handleAutoSave = async () => {
 };
 
 // computed
+const hideSettings = computed(() => {
+  return project.value?.hide_fields ?? [];
+});
+
 const isAdminOrAuthor = computed(() => {
   return hasPermissionByIssue(
     issueData.value,

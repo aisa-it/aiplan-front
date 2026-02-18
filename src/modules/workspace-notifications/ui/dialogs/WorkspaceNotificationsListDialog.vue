@@ -29,8 +29,11 @@
         <WorkspaceNotificationsList
           :unread-notifications="unreadNotifications"
           :read-notifications="readNotifications"
+          :has-more-unread="hasMoreUnread"
+          :has-more-read="hasMoreRead"
           @getNotifications="onUpdate"
           @read="onRead"
+          @load-more="onLoadMore"
         />
       </q-item>
     </q-list>
@@ -54,6 +57,8 @@ import AddIcon from 'src/components/icons/AddIcon.vue';
 defineProps<{
   unreadNotifications: NotificationsNotificationResponse[];
   readNotifications: NotificationsNotificationResponse[];
+  hasMoreUnread?: boolean;
+  hasMoreRead?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -61,6 +66,7 @@ const emits = defineEmits<{
   create: [];
   update: [];
   read: [];
+  loadMore: [type: 'unread' | 'read'];
 }>();
 
 const userStore = useUserStore();
@@ -83,6 +89,10 @@ const onRead = () => {
 
 const onHide = () => {
   emits('hide');
+};
+
+const onLoadMore = (type: 'unread' | 'read') => {
+  emits('loadMore', type);
 };
 
 const isWorkspaceAdmin = computed(() => {

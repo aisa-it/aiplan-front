@@ -16,7 +16,7 @@
         flat
         style="padding: 0 4px"
         @click="() => handleClick()"
-        >
+      >
         <span class="abbriviated-text" style="text-align: left">
           {{ card?.name }}
         </span>
@@ -146,6 +146,27 @@
       </div>
     </div>
 
+    <div class="selectors">
+      <SelectSprints
+        :workspace-slug="card.workspace_detail?.slug"
+        :issueid="card.id"
+        :current-sprints="card.sprints ?? []"
+        :is-disabled="
+          !rolesStore.hasPermissionByIssue(
+            card,
+            card.project_detail ?? project,
+            'change-issue-primary',
+          )
+        "
+        class="selectors__single-selector"
+        @refresh="
+          () => {
+            emits('updateTable', 'sprint', card, entity);
+          }
+        "
+      />
+    </div>
+
     <div class="flex">
       <QuantityChip :type="'sub-issues'" :value="card?.sub_issues_count" />
       <QuantityChip
@@ -177,6 +198,7 @@ import { useIssueContext } from '../../composables/useIssueContext';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import SelectSprints from 'src/components/SelectSprints.vue';
 
 const { user } = storeToRefs(useUserStore());
 
@@ -194,7 +216,12 @@ const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits(['refresh', 'updateTable', 'openPreview', 'openIssue']);
+const emits = defineEmits([
+  'refresh',
+  'updateTable',
+  'openPreview',
+  'openIssue',
+]);
 const { statesCache } = storeToRefs(useStatesStore());
 const { contextProps } = useIssueContext(props.contextType);
 const { project } = storeToRefs(useProjectStore());
@@ -208,16 +235,15 @@ const handleClick = () => {
   if (clickCount.value === 1) {
     clickTimeout = setTimeout(() => {
       clickCount.value = 0;
-      emits('openPreview', props.card)
+      emits('openPreview', props.card);
     }, 250);
   } else if (clickCount.value === 2) {
     // Обработка двойного клика
     clickCount.value = 0;
     clearTimeout(clickTimeout);
-    emits('openIssue', props.card.sequence_id, props.card.project)
+    emits('openIssue', props.card.sequence_id, props.card.project);
   }
-}
-
+};
 </script>
 
 <style scoped lang="scss">
@@ -250,5 +276,9 @@ const handleClick = () => {
   display: grid;
   gap: 12px;
   grid-template-columns: 1fr 1fr;
+
+  &__single-selector {
+    min-width: calc(50% + 12px);
+  }
 }
 </style>

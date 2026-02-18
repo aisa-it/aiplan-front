@@ -8,7 +8,7 @@
     :rows-per-page-options="[10, 25, 50, 100]"
     class="table-bottom-reverse"
     @request="refresh"
-    @row-click="(_, row) => $router.push(`${row.id}/user-settings`)"
+    @row-click="(_, row) => router.push(`${row.id}/user-settings`)"
   >
     <template #pagination>
       <PaginationDefault
@@ -25,6 +25,18 @@
           :value="props.row.is_superuser"
           @change="handleUpdateUser(props.row.id, { is_superuser: $event })"
         />
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell="props">
+      <q-td class="user-row-td" :props="props">
+        <router-link
+          class="user-row-link"
+          :to="`${props.row.id}/user-settings`"
+          @click.stop
+        >
+          <span class="user-row-link__text">{{ props.value }}</span>
+        </router-link>
       </q-td>
     </template>
     
@@ -96,3 +108,24 @@ watch(searchQuery, (newVal) => {
   refresh({ pagination: pagination.value }, newVal);
 });
 </script>
+
+<style scoped>
+.user-row-td {
+  padding: 0 !important;
+}
+
+.user-row-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px 16px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.user-row-link__text {
+  width: 100%;
+}
+</style>

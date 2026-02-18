@@ -1205,7 +1205,8 @@ select:-ms-autofill {
   );
 }
 
-.scroll-attachments:hover .btn-scroll-attachments {
+.scroll-attachments:hover .btn-scroll-attachments,
+.scroll-tabs:hover .btn-scroll-tabs {
   opacity: 1;
   visibility: visible;
   background-color: $darkest-border-color;

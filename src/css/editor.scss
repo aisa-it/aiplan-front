@@ -689,8 +689,8 @@
 // редактор в модалке создания задачи
 .new-issue-card .html-editor .html-editor__wrapper .html-editor__container {
   @media screen and (max-height: 900px) {
-    height: 30vh;
-    min-height: 30vh;
+    height: 10vh;
+    min-height: 10vh;
     .tiptap {
       min-height: 100%;
     }
@@ -747,5 +747,28 @@
   h5,
   h6 {
     margin: 0 !important;
+  }
+}
+
+.float-scroll {
+  background: inherit;
+  padding-top: 6px;
+  opacity: 50%;
+  pointer-events: none;
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+
+  &:hover {
+    opacity: 100%;
+  }
+  &_track {
+    pointer-events: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 16px;
+  }
+  .float-scroll_track > div {
+    height: 1px;
   }
 }

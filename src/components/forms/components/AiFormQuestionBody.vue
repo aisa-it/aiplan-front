@@ -20,6 +20,7 @@
         <q-btn
           flat
           no-caps
+          size="16px"
           class="delete-btn-only-icon q-mb-sm"
           @click.stop="emits('deleteQuestion')"
         >
@@ -50,16 +51,25 @@
         </q-btn>
       </div>
     </div>
+    <slot name="dependency-config"></slot>
     <slot name="nested"></slot>
     <slot name="buttonAdd"></slot>
   </q-item-section>
 </template>
 
 <script setup lang="ts">
+//core
 import { computed } from 'vue';
+import { useQuasar } from 'quasar';
+
+//constants
 import { QUESTION_TYPE_FIELD_OPTIONS } from 'src/constants/constants';
+
+//icons
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import ArrowDown from 'src/components/icons/ArrowDown.vue';
+
+//utils
 import { isEmpty } from 'src/utils/validation';
 
 const props = defineProps<{
@@ -77,6 +87,10 @@ const emits = defineEmits<{
   lower: [];
 }>();
 
+//core
+const $q = useQuasar();
+
+//computed
 const computedValue = computed({
   get: () => props.modelValue,
   set: (val) => emits('update:model-value', val),

@@ -1,6 +1,6 @@
 <template>
   <div class="fullscreen login-wrapper">
-    <q-img src="~assets/login-bg.svg" alt="login-hero" class="login-bg" />
+    <q-img :src="loginBg" alt="login-hero" class="login-bg" />
 
     <div class="login-wrap">
       <div class="center-wrapper">
@@ -8,7 +8,7 @@
           <div class="w-full text-center">
             <q-img
               class="login-panel__logo"
-              src="~assets/logo.svg"
+              :src="logo"
               style="width: 150px; overflow: visible"
             >
               <HatXmasIcon
@@ -162,6 +162,8 @@ import {
   useGlobalLoading,
 } from 'src/composables/useGlobalLoader';
 import { useLoad } from 'src/composables/useLoad';
+import logo from 'src/assets/logo.svg';
+import loginBg from 'src/assets/login-bg.svg';
 
 const $q = useQuasar();
 const api = useAiplanStore();
