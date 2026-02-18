@@ -17,6 +17,7 @@
             @open-issue-preview="handleOpenPreview"
             @refresh-issue="refresh"
             style="width: 100%"
+            ref="activeListRef"
             :class="{
               'sprint-margin-default': contextType === 'sprint',
               'project-margin-default': contextType === 'project',
@@ -27,6 +28,7 @@
             :context-type="contextType"
             @open-issue-preview="handleOpenPreview"
             style="height: 100%"
+            ref="activeListRef" 
             :class="{
               'sprint-margin-grouped': contextType === 'sprint',
               'project-margin-grouped': contextType === 'project',
@@ -62,7 +64,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  openIssuePreview: [issue: DtoIssue, pagination: QuasarPagination, entity: any];
+  openIssuePreview: [issue: DtoIssue, pagination: QuasarPagination | undefined, entity: any];
   refreshIssue: [issues: DtoIssue[]];
 }>();
 
@@ -92,6 +94,25 @@ let oldSplitter = 50;
 const handleOpenPreview = (issue: DtoIssue, pagination?: QuasarPagination, entity?: any) => {
   emits('openIssuePreview', issue, pagination, entity);
 };
+
+const activeListRef = ref<InstanceType<typeof DefaultIssueList> | InstanceType<typeof GroupedIssueList> | null>(null);
+
+function setRefreshContext(issue: DtoIssue, pagination?: QuasarPagination, entity?: any) {
+  if (activeListRef.value && typeof (activeListRef.value as any).setRefreshContext === 'function') {
+    (activeListRef.value as any).setRefreshContext(issue, pagination, entity);
+  }
+}
+
+function refreshByPreview(isFullUpdate: boolean = false) {
+  if (activeListRef.value && typeof (activeListRef.value as any).refreshByPreview === 'function') {
+    (activeListRef.value as any).refreshByPreview(isFullUpdate);
+  }
+}
+
+defineExpose({
+  setRefreshContext,
+  refreshByPreview,
+});
 
 watch(
   () => isPreview.value,
@@ -129,6 +150,7 @@ watch(
   { immediate: true },
 );
 </script>
+
 <style lang="scss" scoped>
 .sprint-margin-default {
   margin-top: 91px;

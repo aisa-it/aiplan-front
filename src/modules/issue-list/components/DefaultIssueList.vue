@@ -76,10 +76,17 @@ const { onRequest } = useDefaultIssues(props.contextType);
 
 const loadingTable = ref(false);
 const singleIssueStore = useSingleIssueStore();
-const { isPreview } = storeToRefs(singleIssueStore);
+const { isPreview, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const issuesStore = useIssuesStore();
+
+const refreshContext = ref<{
+  pagination?: QuasarPagination;
+}>({
+  pagination: undefined,
+});
+
 const load = async (pagination) => {
   loadingTable.value = true;
   let props = JSON.parse(JSON.stringify(contextProps.value));
@@ -105,6 +112,44 @@ async function openIssue(id: string, project: string) {
     project,
   );
 }
+
+async function refreshByPreview(isFullUpdate: boolean = false) {
+  if (!currentIssueID.value) return;
+
+  if (isFullUpdate) {
+    await load({
+      page: 1,
+      rowsNumber: 0,
+      sortBy: contextProps?.filters?.order_by,
+      descending: contextProps?.filters?.orderDesc,
+      rowsPerPage: contextProps?.page_size ?? DEF_ROWS_PER_PAGE,
+    });
+  } else {
+    const currentPagination = {
+      limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
+      order_by: contextProps.value?.filters?.order_by || 'sequence_id',
+      desc: contextProps.value?.filters?.orderDesc || false,
+      page: 1,
+    };
+
+    await load(currentPagination);
+  }
+}
+
+function setRefreshContext(
+  issue: DtoIssue,
+  pagination?: QuasarPagination,
+  entity?: any,
+) {
+  refreshContext.value = {
+    pagination: pagination || refreshContext.value.pagination,
+  };
+}
+
+defineExpose({
+  refreshByPreview,
+  setRefreshContext,
+});
 
 watch(
   () => issuesStore.ungroupedIssueList,
