@@ -91,10 +91,10 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
 
     case 'owner':
       action = translateVerb(activity.verb);
-      return `<span>${action} лидера ${ofWorkspace} с "${userLabel(
+      return `<span>${action} лидера ${ofWorkspace} с ${userLabel(
         activity.old_entity_detail,
         activity.old_value,
-      )}" на "${userLabel(activity.new_entity_detail, activity.new_value)}" <span/>`;
+      )} на ${userLabel(activity.new_entity_detail, activity.new_value)} <span/>`;
 
     case 'doc':
       if (activity.verb === 'created')
