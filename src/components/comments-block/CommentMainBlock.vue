@@ -51,10 +51,20 @@
           Добавить комментарий
         </q-btn>
         <div class="flex gap-x-4 justify-end" v-if="isVisibleEditor">
-          <q-btn class="secondary-btn" no-caps @click="handleVisibleEditor">
+          <q-btn
+            class="secondary-btn"
+            no-caps
+            @click="handleVisibleEditor"
+            style="width: 110px"
+          >
             Отмена
           </q-btn>
-          <q-btn class="primary-btn" no-caps @click="createComment">
+          <q-btn
+            class="primary-btn"
+            no-caps
+            @click="createComment"
+            style="width: 110px"
+          >
             Добавить
           </q-btn>
         </div>
