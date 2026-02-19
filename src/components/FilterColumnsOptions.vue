@@ -9,37 +9,30 @@
     :options="columns"
     :option-label="(col) => col.label"
     :option-value="(col) => col.name"
-    @update:model-value="(val) => emits('update:columnsToShow', val)"
+    popup-content-class="columns-dnd-menu"
+    @popup-show="onPopupShow"
   >
-    <template v-slot:option="{ itemProps, opt, selected }">
+    <template #option="scope">
       <q-item
-        v-if="opt.name !== 'sequence_id'"
-        v-bind="itemProps"
-        class="selector-option__wrapper selector-option-columns__wrapper q-py-none"
-        :class="{
-          'drag-before': dragOverItem === opt.name + '__before',
-          'drag-after': dragOverItem === opt.name + '__after',
-        }"
-        :draggable="!isMobile"
-        @dragstart="(e) => onDragStart(e, opt)"
-        @dragenter.prevent="(e) => onDragEnter(e, opt)"
-        @dragend="onDragEnd"
-        @dragover="(e) => onDragOver(e, opt)"
+        v-if="scope.opt.name !== 'sequence_id'"
+        :key="scope.opt.name"
+        v-bind="scope.itemProps"
+        :data-id="scope.opt.name"
+        class="selector-option__wrapper draggable-item"
       >
         <q-item-section side>
           <q-checkbox
-            :model-value="selected"
-            @update:model-value="(val) => onToggle(opt.name, val)"
+            :model-value="scope.selected"
+            @update:model-value="(val) => onToggle(scope.opt.name, val)"
           />
         </q-item-section>
+
         <q-item-section>
-          <q-item-label>
-            {{ opt.label }}
-          </q-item-label>
+          {{ scope.opt.label }}
         </q-item-section>
 
-        <q-item-section side v-if="!isMobile">
-          <q-icon name="drag_indicator" />
+        <q-item-section side>
+          <q-icon name="drag_indicator" class="drag-handle" />
         </q-item-section>
       </q-item>
     </template>
@@ -47,125 +40,70 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from 'quasar';
-import { computed, ref, watch } from 'vue';
+import { ref, nextTick } from 'vue';
+import { useSortable } from 'src/composables/useSortable';
 
 const props = defineProps<{
   columns: any[];
   columnsToShow: string[];
 }>();
 
-const emits = defineEmits<{ 'update:columnsToShow': [string[]] }>();
+const emits = defineEmits<{
+  'update:columnsToShow': [string[]];
+}>();
+const sortableContainer = ref<HTMLElement | null>(null);
 
 function onToggle(name: string, checked: boolean) {
   const set = new Set(props.columnsToShow);
-
   checked ? set.add(name) : set.delete(name);
-
   emits('update:columnsToShow', [...set]);
 }
 
-const q = useQuasar();
+const { initSortable } = useSortable(sortableContainer, {
+  draggable: '.draggable-item',
+  handle: '.drag-handle',
+  ghostClass: 'sortable-ghost',
+  chosenClass: 'sortable-chosen',
+  animation: 150,
+  onEnd: ({ oldIndex, newIndex }) => {
+    if (oldIndex == null || newIndex == null) return;
+    if (oldIndex === newIndex) return;
 
-const isMobile = computed(() => q.platform.is.mobile);
+    const newOrder = [...props.columns];
 
-let draggedItem: any = null;
-const dragOverItem = ref<string | null>(null);
+    newOrder.splice(newIndex + 1, 0, newOrder.splice(oldIndex + 1, 1)[0]);
 
-const onDragStart = (event: DragEvent, item: any) => {
-  draggedItem = item;
-  event.dataTransfer?.setData('text/plain', item.name);
-  event.dataTransfer!.effectAllowed = 'move';
-};
-
-const onDragEnter = (event: DragEvent, targetItem: any) => {
-  event.preventDefault();
-
-  if (!draggedItem || draggedItem === targetItem) return;
-
-  dragOverItem.value = targetItem.name;
-};
-
-const onDragOver = (event: DragEvent, targetItem: any) => {
-  event.preventDefault();
-
-  const target = event.currentTarget as HTMLElement;
-  const rect = target.getBoundingClientRect();
-
-  const offset = event.clientY - rect.top;
-  const half = rect.height / 2;
-
-  if (offset > half) {
-    dragOverItem.value = targetItem.name + '__after';
-  } else {
-    dragOverItem.value = targetItem.name + '__before';
-  }
-};
-
-const columnsSelector = ref([...props.columns]);
-
-const onDragEnd = () => {
-  if (!dragOverItem.value || !draggedItem) {
-    draggedItem = null;
-    return;
-  }
-
-  const arr = columnsSelector.value;
-
-  const from = arr.findIndex((i) => i.name === draggedItem.name);
-
-  const [targetName, position] = dragOverItem.value.split('__');
-  let to = arr.findIndex((i) => i.name === targetName);
-
-  if (position === 'after') {
-    to += 1;
-  }
-
-  arr.splice(to, 0, arr.splice(from, 1)[0]);
-
-  draggedItem = null;
-  dragOverItem.value = null;
-
-  const newOrder = arr.map((c) => c.name);
-
-  emits(
-    'update:columnsToShow',
-    newOrder.filter((name) => props.columnsToShow.includes(name)),
-  );
-};
-
-watch(
-  () => props.columns,
-  (newVal) => {
-    columnsSelector.value = [...newVal];
+    emits(
+      'update:columnsToShow',
+      newOrder
+        .map((el) => el.name)
+        .filter((el) => props.columnsToShow.includes(el)),
+    );
   },
-);
+});
+
+async function onPopupShow() {
+  await nextTick();
+
+  const menu = document.querySelector(
+    '.columns-dnd-menu',
+  ) as HTMLElement | null;
+
+  if (!menu) return;
+
+  const list = menu.querySelector(
+    '.q-virtual-scroll__content',
+  ) as HTMLElement | null;
+  if (!list) return;
+
+  sortableContainer.value = list;
+  await initSortable();
+}
 </script>
-<style lang="scss" scoped>
-[draggable='true'] {
+
+<style scoped lang="scss">
+.drag-handle {
   cursor: grab;
-}
-
-.q-item.drag-over {
-  background: #f0f0f0;
-}
-
-.drag-over {
-  outline: 2px dashed #1976d2;
-  border-radius: 6px;
-}
-
-.drag-before {
-  border-top: 2px solid #1976d2;
-}
-
-.drag-after {
-  border-bottom: 2px solid #1976d2;
-}
-
-.drag-before,
-.drag-after {
-  border-radius: 4px;
 }
 
 .selector-option-columns__wrapper {
