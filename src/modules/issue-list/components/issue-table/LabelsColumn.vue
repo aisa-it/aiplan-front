@@ -1,5 +1,5 @@
 <template>
-  <q-td :props="rowInfo">
+  <q-td :props="rowInfo" class="labels-column" style="overflow: hidden">
     <div class="row no-wrap" style="gap: 4px">
       <q-badge
         v-for="l in rowInfo.value"
