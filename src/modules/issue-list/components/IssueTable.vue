@@ -149,6 +149,11 @@
       />
     </template>
 
+    <template v-slot:body-cell-sprint="props">
+      <SprintColumn :row-info="props" @refresh="updateIssueField('sprint', props.row, entity)"/>
+      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+    </template>
+
     <template v-slot:body-cell-sub_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
       <IssueContextMenu
@@ -209,6 +214,7 @@ import {
   UpdatedAtColumn,
   LabelsColumn,
   ChipCountColumn,
+  SprintColumn,
 } from './issue-table';
 
 import { useIssueContext } from '../composables/useIssueContext';
