@@ -60,8 +60,13 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'projects/:project/',
-            component: async () => import('pages/ProjectIssuesPage.vue'),
+            component: async () => import('pages/ProjectPage.vue'),
             children: [
+              {
+                path: '',
+                name: 'project-issues',
+                component: () => import('pages/ProjectIssuesPage.vue'),
+              },
               {
                 path: 'settings',
                 name: 'project-settings',
