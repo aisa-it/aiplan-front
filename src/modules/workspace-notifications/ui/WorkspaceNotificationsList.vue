@@ -5,7 +5,7 @@
         :current-tab="currentTab"
         :list-tabs="listTabs"
         @set="(val: number) => (currentTab = val)"
-        class="col-auto notifications__tabs"
+        tabs-class="col-auto notifications__tabs"
         content-class="notifications__tabs-content"
       />
     </div>
@@ -178,7 +178,7 @@ const onScroll = (event: Event) => {
   width: 100%;
 }
 
-.notifications__tabs {
+::v-deep(.notifications__tabs) {
   margin: 0px;
   width: 100%;
   justify-content: space-around;
