@@ -1,8 +1,8 @@
 <template>
-  <q-scroll-area
+  <div
     ref="scrollContainer"
     class="grouped-table"
-    :class="ny ? 'new-year-scroll-container' : 'scroll-container'"
+    :class="!ny ? 'new-year-scroll-container' : 'scroll-container'"
     :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
@@ -49,7 +49,7 @@
     </div>
 
     <div ref="observerTarget" class="observer-target" />
-  </q-scroll-area>
+  </div>
 </template>
 
 <script setup lang="ts">
