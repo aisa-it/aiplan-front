@@ -305,7 +305,7 @@ const visiblePages = computed(() => {
         label: visibleFields[0].label || 'Вопрос без названия',
         active: index === currentPage.value,
         passed: index < currentPage.value,
-        disabled: index > currentPage.value && !(isNextStep && canGoNext),
+        disabled: index > currentPage.value,
       };
     })
     .filter((page) => page !== null);
