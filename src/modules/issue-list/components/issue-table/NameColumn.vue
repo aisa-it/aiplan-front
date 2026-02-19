@@ -4,7 +4,7 @@
       <q-btn
         no-caps
         flat
-        style="padding: 0 4px"
+        style="padding: 0 4px; min-width: 100px;"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
       >
         <span class="abbriviated-text" style="text-align: left">
@@ -25,6 +25,7 @@
         :row="rowInfo.row"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
+        style="align-self: center"
         @click.prevent.stop="emits('openPreview', rowInfo.row.parent_detail)"
       />
     </div>
@@ -62,8 +63,6 @@ const isParent = computed((): boolean => {
 <style scoped lang="scss">
 .name-row {
   padding: 8px 0px;
-  max-width: 25rem;
-  min-width: 25rem;
 
   &__wrapper {
     display: grid;
@@ -71,7 +70,7 @@ const isParent = computed((): boolean => {
     gap: 16px;
   }
   &__wrapper:has(.parent-issue-chip) {
-    grid-template-columns: 80% 20%;
+    grid-template-columns: 1fr auto;
   }
 }
 </style>
