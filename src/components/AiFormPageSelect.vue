@@ -61,7 +61,7 @@ const props = defineProps({
 const emits = defineEmits(['update:modelValue']);
 
 const arr = ref([]);
-const isCollapsed = ref(false);
+const isCollapsed = ref(true);
 
 const updateValue = (val, index) => {
   arr.value = [...props.modelValue];
