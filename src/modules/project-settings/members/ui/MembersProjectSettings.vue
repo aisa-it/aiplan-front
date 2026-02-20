@@ -339,9 +339,23 @@ async function refresh() {
   );
   if (meInProject) me.value = meInProject;
 
-  await workspaceStore
-    .getWorkspaceMembers(currentWorkspaceSlug.value as string)
-    .then((res) => (wsMembers.value = res?.result || []));
+  // Получаем количество участников пространства
+  const membersCountResponse = await workspaceStore.getWorkspaceMembers(
+    currentWorkspaceSlug.value as string,
+    { offset: 0, limit: 0 },
+  );
+
+  // Запрашиваем всех участников пространства с лимитом равным общему количеству
+  if (membersCountResponse?.count) {
+    await workspaceStore
+      .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
+        offset: 0,
+        limit: membersCountResponse.count,
+      })
+      .then((res) => (wsMembers.value = res?.result || []));
+  } else {
+    wsMembers.value = [];
+  }
 
   setAnotherTitle(project.value.name);
 }

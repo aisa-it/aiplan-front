@@ -1,9 +1,8 @@
 <template>
-  <q-scroll-area
+  <div
     ref="scrollContainer"
     class="groupped-table"
     :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
-    :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
     <div v-for="(table, index) in issueList" :key="index">
@@ -63,7 +62,7 @@
       </q-expansion-item>
     </div>
     <div ref="observerTarget" class="observer-target"></div>
-  </q-scroll-area>
+  </div>
 </template>
 
 <script lang="ts" setup>

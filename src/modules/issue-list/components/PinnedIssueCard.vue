@@ -46,7 +46,9 @@
           :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
           :image="l?.avatar_id"
           :member="l"
-          @click.stop="navigateToActivityPage(props.card.assignee_details[n]?.id)"
+          @click.stop="
+            navigateToActivityPage(props.card.assignee_details[n]?.id)
+          "
         />
       </div>
 
@@ -112,10 +114,8 @@ const { navigateToActivityPage } = useUserActivityNavigation();
   justify-content: space-between;
   flex-shrink: 0;
   gap: 8px;
-  max-width: 387px;
   width: 100%;
-  max-height: 142px;
-  height: 100%;
+  height: 148px;
   padding: 12px;
   border-radius: 16px;
   border: 1px solid var(--dark-border-color);

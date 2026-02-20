@@ -513,7 +513,7 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
     let path = `/${route.params.workspace}`;
 
     if (route.params.project) {
-      path += `/projects/${route.params.project}/issues`;
+      path += `/projects/${route.params.project}`;
     }
 
     if (route.params.sprint) {

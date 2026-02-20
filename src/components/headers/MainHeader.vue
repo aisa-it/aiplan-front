@@ -119,6 +119,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 import { getUrlFile } from 'src/utils/helpers';
 
@@ -136,6 +137,7 @@ const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const aidocStore = useAiDocStore();
+const sprintStore = useSprintStore();
 
 // store to refs
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
@@ -143,6 +145,7 @@ const { user } = storeToRefs(userStore);
 const { project } = storeToRefs(projectStore);
 const { workspaceInfo } = storeToRefs(workspaceStore);
 const { selectedDocTitle } = storeToRefs(aidocStore);
+const { sprint } = storeToRefs(sprintStore);
 
 // vars
 const route = useRoute();
@@ -174,7 +177,13 @@ const breadCrumbsHistory = computed(() => {
       url: `/${workspaceInfo.value.slug}/aidoc`,
       type: 'aidoc',
     };
-  else if (project.value)
+  else if (currentPath[1] === 'sprints') {
+    existPath[1] = {
+      name: `${sprint.value?.name || ''}`,
+      url: `/${workspaceInfo.value?.slug}/sprints/${sprint.value?.id}`,
+      type: 'sprint',
+    };
+  } else if (project.value)
     existPath[1] = {
       icon: `${
         project.value?.emoji
@@ -185,7 +194,7 @@ const breadCrumbsHistory = computed(() => {
       }`,
       logo: project.value?.logo,
       name: ` ${project.value?.name ?? ''}`,
-      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}/issues`,
+      url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
     };
   else if (user.value && currentPath.includes('profile'))

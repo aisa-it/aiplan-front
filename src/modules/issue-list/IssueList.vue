@@ -1,37 +1,13 @@
 <template>
-  <q-card class="single-list relative" flat dense>
-    <q-card-section
-      class="row issue-list__header"
-      :style="'padding: 12px 16px'"
-      v-if="!isCalendar"
-    >
-      <IssuesListTitle />
-      <q-space />
+  <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
+    <component
+      :is="currentIssueList"
+      contextType="project"
+      data-tour="issue-table"
+      class="q-pt-sm"
+    />
+  </transition>
 
-      <ProjectFiltersList
-        v-if="is.object(projectProps)"
-        :columns="projectStore.sortAllColumns"
-        @update="load()"
-      />
-    </q-card-section>
-
-    <q-card-section v-if="!issuesLoader && pinnedIssues.length">
-      <PinnedIssueList
-        :pinned-issues="pinnedIssues"
-        :style="{ 'padding: 16px;': isGroupingEnabled }"
-      />
-    </q-card-section>
-    <q-separator />
-
-    <transition name="fade" mode="out-in" @after-enter="onIssueTableReady">
-      <component
-        :is="currentIssueList"
-        contextType="project"
-        data-tour="issue-table"
-        @update="load()"
-      />
-    </transition>
-  </q-card>
   <GuidedTour
     v-if="
       !issuesLoader &&
@@ -46,15 +22,8 @@
 </template>
 
 <script setup lang="ts">
-// core
-import { is } from 'quasar';
 // stores
 import { useProjectStore } from 'src/stores/project-store';
-
-// components
-import ProjectFiltersList from './components/ProjectFiltersList.vue';
-import IssuesListTitle from 'src/components/IssuesListTitle.vue';
-import PinnedIssueList from './components/PinnedIssueList.vue';
 
 import GuidedTour from '../guided-tours/GuidedTour.vue';
 import { steps, STEP_NUM } from 'src/modules/guided-tours/tutorials/tutorial2';
@@ -84,21 +53,18 @@ const { getGroupedIssues } = useGroupedIssues('project');
 const projectStore = useProjectStore();
 
 const {
-  project,
   isGroupingEnabled,
-  isCalendar,
   isGanttDiagramm,
   isKanbanEnabled,
+  isCalendar,
   issuesLoader,
-  projectProps,
 } = storeToRefs(projectStore);
 
 const userStore = useUserStore();
 
 const { user } = storeToRefs(userStore);
 
-const { refreshIssues, pinnedIssues } = storeToRefs(useIssuesStore());
-const { fetchPinnedIssues } = useIssuesStore();
+const { refreshIssues } = storeToRefs(useIssuesStore());
 
 const load = async () => {
   if (isCalendar.value) {
@@ -117,11 +83,9 @@ const load = async () => {
 };
 
 onMounted(async () => {
-  pinnedIssues.value = [];
   issuesLoader.value = true;
   await getAllProjectInfo();
   await load();
-  fetchPinnedIssues(project.value.id);
 });
 
 watch(
@@ -196,8 +160,8 @@ watchEffect(() => {
   }
 });
 
-watch(isCalendar, (newState, oldState) => {
-  if (!newState && oldState) load();
+watch(isCalendar, (newState) => {
+  if (!newState) load();
 });
 </script>
 
