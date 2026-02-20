@@ -10,9 +10,9 @@ export function parseCommentLink(href: string, title?: string) {
         projectIdentifier: parts[2],
         currentIssueId: parts[4],
         commentId: parts[5],
-        ...title && {
-          title: title
-        }
+        ...(title && {
+          title: title,
+        }),
       };
     }
 
@@ -22,9 +22,9 @@ export function parseCommentLink(href: string, title?: string) {
         slug: parts[0],
         docId: parts[2],
         commentId: parts[3],
-        ...title && {
-          title: title
-        }
+        ...(title && {
+          title: title,
+        }),
       };
     }
   } catch (e) {
@@ -38,7 +38,11 @@ export function parseIssueLink(href: string) {
   try {
     const url = new URL(href, window.location.origin);
     const parts = url.pathname.split('/').filter(Boolean);
-    if (parts.length === 5 && parts[1] === 'projects' && parts[3] === 'issues') {
+    if (
+      parts.length === 5 &&
+      parts[1] === 'projects' &&
+      parts[3] === 'issues'
+    ) {
       return {
         slug: parts[0],
         projectIdentifier: parts[2],
@@ -66,7 +70,8 @@ export function parseAttachmentLink(href: string) {
     const url = new URL(href, window.location.origin);
     const parts = url.pathname.split('/').filter(Boolean);
 
-    if (parts[0] !== 'api' && parts[1] !== 'auth' && parts[2] !== 'file') return null;
+    if (parts[0] !== 'api' && parts[1] !== 'auth' && parts[2] !== 'file')
+      return null;
 
     const type = url.searchParams.get('type');
     const slug = url.searchParams.get('slug');
@@ -103,12 +108,9 @@ export function getProjectLink(
   workspaceSlug: string,
   projectIdentifier: string,
 ) {
-  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}/issues`;
+  return `${location.protocol}//${location.host}/${workspaceSlug}/projects/${projectIdentifier}`;
 }
 
-export function getDocumentLink(
-  workspaceSlug: string,
-  docId: string,
-) {
+export function getDocumentLink(workspaceSlug: string, docId: string) {
   return `${location.protocol}//${location.host}/${workspaceSlug}/aidoc/${docId}`;
 }

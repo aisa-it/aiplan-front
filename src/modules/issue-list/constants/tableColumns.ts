@@ -21,7 +21,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'priority',
     align: 'left',
     label: 'Приоритет',
@@ -31,7 +30,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'state',
     align: 'left',
     label: 'Статус',
@@ -41,7 +39,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'target_date',
     align: 'left',
     label: 'Срок исполнения',
@@ -51,7 +48,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'created_at',
     align: 'left',
     label: 'Дата создания',
@@ -61,7 +57,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'updated_at',
     align: 'left',
     label: 'Последнее изменение',
@@ -71,7 +66,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'author',
     align: 'left',
     label: 'Автор',
@@ -81,7 +75,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'assignees',
     align: 'center',
     label: 'Исполнитель',
@@ -91,7 +84,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'labels',
     align: 'left',
     label: 'Теги',
@@ -101,7 +93,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'sub_issues_count',
     align: 'center',
     label: 'Подзадачи',
@@ -111,7 +102,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'linked_issues_count',
     align: 'center',
     label: 'Связи',
@@ -121,7 +111,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'link_count',
     align: 'center',
     label: 'Ссылки',
@@ -131,7 +120,6 @@ export const allColumns = [
     sortable: true,
   },
   {
-    style: 'width: 10px',
     name: 'attachment_count',
     align: 'center',
     label: 'Вложения',

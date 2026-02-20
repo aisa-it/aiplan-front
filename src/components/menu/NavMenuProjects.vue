@@ -23,7 +23,7 @@
           :emoji="project.emoji ?? ''"
           :link="`/${currentWorkspaceSlug || workspaceInfo?.slug}/projects/${
             project.identifier
-          }/issues`"
+          }`"
           :title="project.name"
           :id="project.id"
           :identifier="project.identifier"

@@ -102,8 +102,15 @@
       @refresh="(v) => refreshData(v)"
     />
 
-    <div class="handle-resize" @pointerdown="onPointerDown"></div>
   </q-drawer>
+
+  <Teleport to="body">
+    <div
+      class="handle-resize"
+      :style="{ left: `calc(100vw - ${adaptiveWidth}px)` }"
+      @pointerdown="onPointerDown"
+    ></div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -251,11 +258,11 @@ const members = ref([]);
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
   width: 6px;
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+  z-index: 9999;
 }
 
 .issue-drawer-preview {
