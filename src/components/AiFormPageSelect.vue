@@ -35,7 +35,12 @@
     </div>
     <div v-if="errorMessage" class="q-mb-sm">
       <div class="negative-text">
-        <span class="centered-horisontally" style="font-size: 11px; line-height: 1;"> {{ errorMessage }} </span>
+        <span
+          class="centered-horisontally"
+          style="font-size: 11px; line-height: 1"
+        >
+          {{ errorMessage }}
+        </span>
       </div>
     </div>
   </div>
@@ -59,7 +64,7 @@ const arr = ref([]);
 const isCollapsed = ref(true);
 
 const updateValue = (val, index) => {
-  arr.value = props.modelValue;
+  arr.value = [...props.modelValue];
   const uniqueVal = { value: val, index };
   const arrayIndex = arr.value.findIndex(
     (el) => el.index === index && el.value === val,
@@ -71,7 +76,11 @@ const updateValue = (val, index) => {
       arr.value.push(uniqueVal);
     }
   } else {
-    arr.value = [uniqueVal];
+    if (arrayIndex !== -1) {
+      arr.value = [];
+    } else {
+      arr.value = [uniqueVal];
+    }
   }
   emits(
     'update:modelValue',
