@@ -74,7 +74,7 @@ const handleDeleteIssue = async () => {
     )
     .then(() => {
       router.push(
-        `/${currentWorkspaceSlug.value}/projects/${issueData.value?.project ?? currentProjectID.value}/issues`,
+        `/${currentWorkspaceSlug.value}/projects/${issueData.value?.project ?? currentProjectID.value}`,
       );
       setNotificationView({
         open: true,
