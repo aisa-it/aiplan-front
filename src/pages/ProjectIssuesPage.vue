@@ -22,7 +22,7 @@
     </q-tabs>
 
     <q-tab-panels v-model="tab" keep-alive>
-      <q-tab-panel name="general" style="height: 90vh">
+      <q-tab-panel name="general" style="min-height: 80vh; height: 100%">
         <IssueList />
       </q-tab-panel>
 

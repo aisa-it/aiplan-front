@@ -39,7 +39,7 @@ onUnmounted(() => {
 .calendar {
   display: grid;
   grid-template-columns: 336px 1fr;
-  grid-template-rows: 64px minmax(0, calc(100vh - 136px));
+  grid-template-rows: 64px minmax(0, calc(100vh - 240px));
   //grid-template-rows: 64px 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
