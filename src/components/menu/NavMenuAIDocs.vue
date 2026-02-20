@@ -208,7 +208,7 @@ import ManageAccountsIcon from '../icons/ManageAccountsIcon.vue';
 import VisibilityIcon from '../icons/VisibilityIcon.vue';
 import StarIcon from 'src/components/icons/StarIcon.vue';
 import DocumentIcon from '../icons/DocumentIcon.vue';
-import HierarchyIcon from '../icons/HierarchyIcon.vue';
+import ParentIcon from '../icons/ParentIcon.vue';
 
 import { mapDocNode } from 'src/utils/tree';
 import {
@@ -472,7 +472,7 @@ const getHeaderMenuItems = () => {
       },
       {
         text: 'Изменить порядок иерархии',
-        icon: HierarchyIcon,
+        icon: ParentIcon,
         onClick: () => openHierarchyDocDialog(),
       },
     ];
