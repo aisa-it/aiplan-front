@@ -8,6 +8,7 @@
       @handle-delete="deleteComment(comment)"
       @handle-edit="editComment(comment)"
       @handle-reply="handleReply(comment)"
+      @handle-history="openCommentHistory(comment)"
       @add-reaction="handleAddReaction(comment, $event)"
       @delete-reaction="handleDeleteReaction(comment, $event)"
     />
@@ -23,6 +24,12 @@
       v-model="isOpenCommentDeleteDialog"
       :comment="issueComment"
       @on-delete="handleDeleteComment"
+    />
+    <CommentHistoryDialog
+      v-model="isOpenCommentHistoryDialog"
+      :comment="issueComment"
+      :members="members"
+      :context="'issue'"
     />
   </div>
 </template>
@@ -53,6 +60,7 @@ import {
 
 // interfaces
 import { IIssueCommentUpdate } from 'src/interfaces/issues';
+import CommentHistoryDialog from '../dialogs/CommentHistoryDialog.vue';
 
 const props = defineProps<{
   comments: any[];
@@ -78,6 +86,7 @@ const isMounted = ref<boolean>(true);
 const issueComment = ref<any>({});
 const isOpenCommentEditDialog = ref<boolean>(false);
 const isOpenCommentDeleteDialog = ref<boolean>(false);
+const isOpenCommentHistoryDialog = ref<boolean>(false);
 
 const isAutoSave = computed(() => {
   return !!user.value?.view_props?.autoSave;
@@ -94,6 +103,12 @@ const deleteComment = (comment: any) => {
   issueComment.value = {};
   issueComment.value = comment;
   isOpenCommentDeleteDialog.value = true;
+};
+
+const openCommentHistory = (comment: any) => {
+  issueComment.value = {};
+  issueComment.value = comment;
+  isOpenCommentHistoryDialog.value = true;
 };
 
 const handleUpdateComment = async (data: IIssueCommentUpdate) => {
