@@ -1,86 +1,44 @@
 <template>
-  <div
-    ref="scrollContainer"
-    class="groupped-table"
-    :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
-    @scroll="handleScroll"
+  <GroupedTablesWrapper
+    :groups="issues"
+    :group-by="groupBy"
+    :show-empty-groups="contextProps?.showEmptyGroups"
+    :is-group-open="(group) => !isGroupHide(group.entity?.id ?? group.entity)"
+    @toggle-group="
+      (group, opened) => setGroupHide(group.entity?.id ?? group.entity, opened)
+    "
   >
-    <div v-for="(table, index) in issueList" :key="index">
-      <q-item v-if="!table.issues?.length && contextProps?.showEmptyGroups">
-        <GroupedHeader
-          :entity="table?.entity"
-          :group-by="groupBy"
-          :badge-name="defineEntityName(table.entity, groupBy)"
-          :badge-color="table.entity?.color ?? undefined"
-          :issues-count="table?.count"
-      /></q-item>
-
-      <q-expansion-item
-        v-if="table?.count > 0"
-        :default-opened="!isGroupHide(table?.entity?.id || table.entity)"
-        @update:model-value="
-          (value) => setGroupHide(table?.entity?.id || table.entity, value)
+    <template #default="{ group, index }">
+      <IssueTable
+        :rows="group?.issues"
+        :rowsCount="group?.count"
+        :entity="group.entity"
+        @updateGroupedIssues="updateGroupedIssues"
+        @refresh="
+          (pagination, isFullUpdate) =>
+            refreshTable(index, pagination, isFullUpdate, group?.entity)
         "
-        class="gantt-margin"
-      >
-        <template #header>
-          <GroupedHeader
-            :entity="table?.entity"
-            :group-by="groupBy"
-            :badge-name="defineEntityName(table.entity, groupBy)"
-            :badge-color="table.entity?.color ?? undefined"
-            :issues-count="table?.count"
-          />
-        </template>
-        <div
-          :class="{
-            'tag-colored-table': groupBy === 'labels' && table.entity?.color
-          }"
-          :style="
-            groupBy === 'labels' && table.entity?.color
-              ? `--tag-color: ${table.entity.color}`
-              : ''
-          "
-        >
-          <IssueTable
-            :rows="table?.issues"
-            :rowsCount="table?.count"
-            :entity="table.entity"
-            @updateGroupedIssues="updateGroupedIssues"
-            @refresh="
-              (pagination, isFullUpdate) =>
-                refreshTable(index, pagination, isFullUpdate, table?.entity)
-            "
-            @open-preview="
-              (issue, pagination) =>
-                emits('openPreview', issue, index, pagination, table?.entity)
-            "
-            :context-type="contextType"
-            @open-issue="(id, issue) => emits('openIssue', id, issue)"
-          />
-        </div>
-      </q-expansion-item>
-    </div>
-    <div ref="observerTarget" class="observer-target"></div>
-  </div>
+        @open-preview="
+          (issue, pagination) =>
+            emits('openPreview', issue, index, pagination, group?.entity)
+        "
+        :context-type="contextType"
+        @open-issue="(id, issue) => emits('openIssue', id, issue)"
+      />
+    </template>
+  </GroupedTablesWrapper>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue';
-import { throttle } from 'quasar';
-import { storeToRefs } from 'pinia';
-
-import { useUtilsStore } from 'src/stores/utils-store';
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
-import GroupedHeader from '../ui/GroupedHeader.vue';
-
-import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
 import { useIssueContext } from '../../composables/useIssueContext';
 
 import { useGroupedIssues } from '../../composables/useGroupedIssues';
+
+import GroupedTablesWrapper from './GroupedTablesWrapper.vue';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -95,7 +53,6 @@ const emits = defineEmits([
   'openIssue',
 ]);
 
-const { ny } = storeToRefs(useUtilsStore());
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
@@ -105,24 +62,6 @@ const { getGroupedIssues } = useGroupedIssues(props.contextType);
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
 };
-
-const issueList = ref([]);
-const scrollContainer = ref(null);
-let generator;
-
-const handleScroll = throttle((info) => {
-  const { verticalPercentage } = info;
-  const threshold = 0.8; // 95% от конца списка  console.log(e, 'lol');
-
-  // if (!scrollContainer.value) return;
-  if (verticalPercentage < threshold) return;
-
-  const chunk = generator.next().value;
-
-  if (!chunk) return;
-
-  issueList.value.push(...chunk);
-}, 100);
 
 const updateGroupedIssues = async (status: any) => {
   if (!status) {
@@ -134,7 +73,7 @@ const updateGroupedIssues = async (status: any) => {
     (item: any) => item?.entity?.id === status.id,
   );
 
-  if (group && !group?.issues || !group || group?.issues.length === 0) {
+  if ((group && !group?.issues) || !group || group?.issues.length === 0) {
     const groupIndex = (props.issues as any[]).indexOf(group);
     const pagination = {
       only_count: false,
@@ -149,49 +88,4 @@ const updateGroupedIssues = async (status: any) => {
     await refreshTable(groupIndex, pagination, false, status);
   }
 };
-
-function* chunkGenerator(sourceArray, chunkSize = 10) {
-  for (let i = 0; i < sourceArray.length; i += chunkSize) {
-    yield sourceArray.slice(i, i + chunkSize);
-  }
-}
-
-const refresh = () => {
-  issueList.value = [];
-  generator = chunkGenerator(props.issues);
-  let chunk = generator.next().value;
-  if (!chunk) return;
-  issueList.value.push(...chunk);
-};
-
-onMounted(() => {
-  refresh();
-});
-
-watch(
-  () => [props.issues,props.issues?.length],
-  () => {
-    refresh();
-  },
-);
 </script>
-
-<style scoped lang="scss">
-.scroll-container {
-  height: calc(100vh - 105px);
-  overflow-y: auto;
-  contain: inherit;
-}
-.new-year-scroll-container {
-  height: calc(100vh - 135px);
-  overflow-y: auto;
-  contain: inherit;
-}
-
-.tag-colored-table {
-  :deep(.q-table) {
-    border-left: 4px solid var(--tag-color);
-    border-radius: 2px 0 0 2px;
-  }
-}
-</style>
