@@ -4,7 +4,10 @@
       <IssuesListTitle />
       <q-space />
 
-      <ProjectFiltersList :columns="projectStore.sortAllColumns" />
+      <ProjectFiltersList
+        v-if="!isCalendar"
+        :columns="projectStore.sortAllColumns"
+      />
     </div>
     <q-tabs
       v-model="tab"
@@ -19,7 +22,7 @@
     </q-tabs>
 
     <q-tab-panels v-model="tab" keep-alive>
-      <q-tab-panel name="general" style="height: 90vh">
+      <q-tab-panel name="general" style="min-height: 80vh; height: 100%">
         <IssueList />
       </q-tab-panel>
 
@@ -44,7 +47,7 @@ import IssueList from 'src/modules/issue-list/IssueList.vue';
 import PinnedIssueList from 'src/modules/issue-list/components/PinnedIssueList.vue';
 
 const projectStore = useProjectStore();
-const { project } = storeToRefs(projectStore);
+const { project, isCalendar } = storeToRefs(projectStore);
 const tab = ref('general');
 </script>
 

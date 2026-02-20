@@ -99,7 +99,7 @@ const props = defineProps<{
   options: any[];
   projects: any[];
   searchedOptions?: any[] | null;
-  loading: boolean;
+  loading?: boolean;
   popupContentStyle?: string;
   label: string;
   search: string;
