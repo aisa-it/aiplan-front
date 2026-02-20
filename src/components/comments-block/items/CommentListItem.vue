@@ -69,6 +69,16 @@
               dense
               flat
               size="8px"
+              @click.prevent.stop="handleOpenHistoryComment"
+            >
+              <q-icon name="history" dense size="18px" />
+              <HintTooltip> История изменений </HintTooltip>
+            </q-btn>
+            <q-btn
+              class="stamp-btn"
+              dense
+              flat
+              size="8px"
               @click.prevent.stop="copyFunc(comment.id)"
             >
               <LinkIcon :width="18" :height="18" />
@@ -140,6 +150,7 @@ const emit = defineEmits([
   'handle-edit',
   'handle-delete',
   'handle-reply',
+  'handle-history',
   'add-reaction',
   'delete-reaction',
 ]);
@@ -179,6 +190,13 @@ const handleClickReply = () => {
   isHoverMessageText.value = false;
 };
 
+const handleOpenHistoryComment = () => {
+  emit('handle-history');
+  isTouchReaction.value = false;
+  isTouchStart.value = false;
+  isHoverMessageText.value = false;
+};
+
 const handleTooltip = (detail: string): string => {
   return aiplan.UserName(detail).join(' ');
 };
@@ -202,8 +220,9 @@ const reactionList = computed(() => {
     const users = [];
 
     commentReactionsFilter.forEach((r) => {
-      const member = props.members.find((m) => r.user_id === m.member_id)
-        ?.member;
+      const member = props.members.find(
+        (m) => r.user_id === m.member_id,
+      )?.member;
 
       const user = {
         ...r,
