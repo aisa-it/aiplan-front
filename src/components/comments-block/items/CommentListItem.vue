@@ -27,7 +27,9 @@
           :reply-comment="comment.original_comment"
           :members="members"
         />
-
+        <h6 v-if="comment.actor_detail" class="chat-message__name">
+          {{ getFullName(comment.actor_detail) }}
+        </h6>
         <EditorTipTapV2
           :editor-id="'comment-editor-' + comment.id"
           :model-value="comment.comment_html"
@@ -129,6 +131,7 @@ import ReactionSelectEmoji from 'components/issue-panels/reaction/ReactionSelect
 import { useUserStore } from 'src/stores/user-store';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+import { getFullName } from 'src/utils/helpers';
 
 const props = defineProps({
   comment: { type: Object, required: true },
@@ -397,6 +400,12 @@ pre {
     z-index: 1;
     right: 0;
     left: auto;
+  }
+  
+  &__name {
+    margin: 7px 0 0 !important;
+    font-size: 14px;
+    line-height: 21px;
   }
 
   :deep(.q-message-container) {
