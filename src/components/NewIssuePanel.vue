@@ -61,6 +61,7 @@
             :get-members-for-mention="getProjectMembersForMention"
             is-mention
             editor-id="editor"
+            can-resize
           />
         </div>
       </q-card-section>
