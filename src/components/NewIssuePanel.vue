@@ -211,6 +211,7 @@
             v-model:tags="tags"
             :projectid="project.id"
             :isDisabled="true"
+            :can-create="isCreateTagAllowed"
             :is-full-width="
               !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
             "
@@ -338,6 +339,8 @@ import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
 import SprintIcon from './icons/SprintIcon.vue';
 import PriorityIcon from './icons/PriorityIcon.vue';
+// constants
+import { defineRole } from 'src/constants/roles';
 
 const props = defineProps<{
   project_detail?: DtoProject;
@@ -423,6 +426,15 @@ const loading = computed({
   set(val) {
     emits('update:loading', val);
   },
+});
+
+const isCreateTagAllowed = computed<boolean>(() => {
+  const currentRole = defineRole(project.value.current_user_membership?.role);
+  if (currentRole === 'member' || currentRole === 'guest') {
+    return false;
+  } else {
+    return true;
+  }
 });
 
 //methods
