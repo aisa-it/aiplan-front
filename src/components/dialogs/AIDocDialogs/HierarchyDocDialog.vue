@@ -13,7 +13,9 @@
             :key="item.id"
             :item="item"
             :on-sortable-end="handleSortableEnd"
+            :on-expand-request="handleExpandRequest"
             class="nested"
+            @sortable-refresh="initAllSortables"
           />
           <li class="sortable-end"></li>
         </ul>
@@ -45,6 +47,8 @@ import { DtoDocLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export interface DtoDocLightWithChildren extends DtoDocLight {
   children?: DtoDocLightWithChildren[];
+  isExpanded?: boolean;
+  isLoadingChildren?: boolean;
 }
 
 const workspaceStore = useWorkspaceStore();
@@ -74,17 +78,68 @@ const buildHierarchy = async (
   return Promise.all(promises);
 };
 
-const loadHierarchy = async () => {
+const updateHierarchy = async () => {
   if (!currentWorkspaceSlug.value) return;
 
   await docStore.getRootDocs(currentWorkspaceSlug.value);
-  hierarchyRoots.value = await buildHierarchy(docStore.rootDocs);
-};
 
-const updateHierarchy = async () => {
-  await loadHierarchy();
+  hierarchyRoots.value = docStore.rootDocs.map((doc) => ({
+    ...doc,
+    children: [],
+    isExpanded: false,
+    isLoadingChildren: false,
+  }));
+
   await nextTick();
   initAllSortables();
+};
+
+// Функция обработчик для раскрытия элемента
+const handleExpandRequest = async (itemId: string) => {
+  // Хэлпер для рекурсивного поиска элемента в дереве
+  const findAndLoad = async (
+    items: DtoDocLightWithChildren[],
+  ): Promise<void> => {
+    for (const item of items) {
+      if (item.id === itemId) {
+        if (item.children && item.children.length > 0) {
+          item.isExpanded = true;
+          return;
+        }
+
+        item.isLoadingChildren = true;
+
+        try {
+          const childResponse = await docStore.getChildDocList(
+            currentWorkspaceSlug.value as string,
+            item.id,
+          );
+
+          // Сохранение потомков вместе с флагами
+          item.children = childResponse.data.map((child) => ({
+            ...child,
+            children: [],
+            isExpanded: false,
+            isLoadingChildren: false,
+          }));
+
+          item.isExpanded = true;
+        } catch (e) {
+          console.error('Ошибка при загрузке вложенных документов', e);
+        } finally {
+          item.isLoadingChildren = false;
+        }
+        return;
+      }
+
+      // Рекурсивный поиск в детях, если они есть
+      if (item.children && item.children.length > 0) {
+        await findAndLoad(item.children);
+      }
+    }
+  };
+
+  await findAndLoad(hierarchyRoots.value);
 };
 
 const rootSortableRef = ref<HTMLElement | null>(null);
@@ -137,7 +192,8 @@ const handleSortableEnd = async (evt: any) => {
     );
     await updateHierarchy();
   } catch (error) {
-    console.error('Failed to move document', error);
+    console.error('Ошибка при перемещении документа', error);
+    await updateHierarchy();
   }
 };
 
@@ -170,7 +226,7 @@ const initAllSortables = () => {
       fallbackOnBody: true,
       fallbackTolerance: 5,
       swapThreshold: 0.65,
-      emptyInsertThreshold: 30,
+      emptyInsertThreshold: 10,
       preventOnFilter: true,
       onEnd: handleSortableEnd,
     });
@@ -213,5 +269,4 @@ const onDialogHide = () => {
   list-style-type: none;
   opacity: 0;
 }
-
 </style>

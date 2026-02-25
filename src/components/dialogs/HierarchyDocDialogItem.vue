@@ -25,6 +25,8 @@
           :key="child.id"
           :item="child"
           :on-sortable-end="onSortableEnd"
+          :on-expand-request="onExpandRequest"
+          @sortable-refresh="$emit('sortable-refresh')"
         />
       </ul>
     </q-slide-transition>
@@ -32,22 +34,38 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import type { DtoDocLightWithChildren } from './AIDocDialogs/HierarchyDocDialog.vue';
 
 const props = defineProps<{
   item: DtoDocLightWithChildren;
   onSortableEnd?: (evt: any) => Promise<void>;
+  onExpandRequest?: (id: string) => Promise<void>;
 }>();
 
-const isExpanded = ref<boolean>(true);
+const emit = defineEmits<{
+  (e: 'sortable-refresh'): void;
+}>();
+
+const isExpanded = ref<boolean>(false);
 
 const hasChildren = computed<boolean | undefined>(() => {
-  return props.item.children && props.item.children.length > 0;
+  return !!props.item.has_child_docs;
 });
 
-const toggleExpand = (): void => {
-  isExpanded.value = !isExpanded.value;
+const toggleExpand = async () => {
+  // Если дети уже загружены локально -> просто переключаем видимость
+  if (props.item.children && props.item.children.length > 0) {
+    isExpanded.value = !isExpanded.value;
+    return;
+  }
+
+  if (props.item.has_child_docs && props.onExpandRequest) {
+    await props.onExpandRequest(props.item.id!);
+    isExpanded.value = true;
+    await nextTick();
+    emit('sortable-refresh');
+  }
 };
 </script>
 
