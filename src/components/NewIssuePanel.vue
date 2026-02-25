@@ -61,6 +61,7 @@
             :get-members-for-mention="getProjectMembersForMention"
             is-mention
             editor-id="editor"
+            can-resize
           />
         </div>
       </q-card-section>
@@ -731,6 +732,13 @@ watch(
 <style scoped lang="scss">
 .new-issue-card {
   min-width: 66vw !important;
+}
+
+:deep(.html-editor__container) {
+  min-height: 15rem;
+}
+:deep(.tiptap) {
+  min-height: 15rem;
 }
 @media screen and (max-width: 1350px) {
   .new-issue-card {

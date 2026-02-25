@@ -23,8 +23,6 @@ defineProps<{
   columns: any[];
 }>();
 
-const emit = defineEmits(['update']);
-
 const {
   viewForm,
   optionsGroup,
@@ -35,5 +33,5 @@ const {
   onUpdate,
   refreshFilters,
   updateIssueView,
-} = useProjectFilters(emit);
+} = useProjectFilters();
 </script>

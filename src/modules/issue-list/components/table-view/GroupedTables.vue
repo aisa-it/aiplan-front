@@ -1,9 +1,8 @@
 <template>
-  <q-scroll-area
+  <div
     ref="scrollContainer"
     class="groupped-table"
     :class="!ny ? 'scroll-container' : 'new-year-scroll-container'"
-    :horizontal-thumb-style="{ height: '0px' }"
     @scroll="handleScroll"
   >
     <div v-for="(table, index) in issueList" :key="index">
@@ -63,7 +62,7 @@
       </q-expansion-item>
     </div>
     <div ref="observerTarget" class="observer-target"></div>
-  </q-scroll-area>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -80,6 +79,8 @@ import GroupedHeader from '../ui/GroupedHeader.vue';
 import { defineEntityName } from '../../utils/defineEntityName';
 import { IGroupedResponse } from '../../types';
 import { useIssueContext } from '../../composables/useIssueContext';
+
+import { useGroupedIssues } from '../../composables/useGroupedIssues';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -98,6 +99,8 @@ const { ny } = storeToRefs(useUtilsStore());
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
+
+const { getGroupedIssues } = useGroupedIssues(props.contextType);
 
 const refreshTable = (index, pagination, isFullUpdate, entity) => {
   emits('refreshTable', index, pagination, isFullUpdate, entity);
@@ -122,6 +125,11 @@ const handleScroll = throttle((info) => {
 }, 100);
 
 const updateGroupedIssues = async (status: any) => {
+  if (!status) {
+    getGroupedIssues();
+    return;
+  }
+
   const group = (props?.issues as any[]).find(
     (item: any) => item?.entity?.id === status.id,
   );

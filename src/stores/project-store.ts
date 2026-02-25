@@ -300,7 +300,7 @@ export const useProjectStore = defineStore('project-store', {
 
     projectLinkToClipboard(project_id: string) {
       navigator.clipboard.writeText(
-        `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${project_id}/issues`,
+        `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${project_id}`,
       );
     },
 

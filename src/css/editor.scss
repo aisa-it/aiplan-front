@@ -689,8 +689,8 @@
 // редактор в модалке создания задачи
 .new-issue-card .html-editor .html-editor__wrapper .html-editor__container {
   @media screen and (max-height: 900px) {
-    height: 30vh;
-    min-height: 30vh;
+    height: 10vh;
+    min-height: 10vh;
     .tiptap {
       min-height: 100%;
     }

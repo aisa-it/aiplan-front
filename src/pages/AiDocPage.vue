@@ -71,6 +71,7 @@
               :class="isAutoSave ? preventClickClass : ''"
               no-caps
               @click="handleUndoEdit"
+              style="width: 110px"
             >
               Отмена
             </q-btn>
@@ -79,6 +80,7 @@
               :class="isAutoSave ? preventClickClass : ''"
               no-caps
               @click="handleUpdateTitleAndEditor"
+              style="width: 110px"
             >
               Сохранить
             </q-btn>

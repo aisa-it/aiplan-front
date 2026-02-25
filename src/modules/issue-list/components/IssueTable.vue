@@ -18,7 +18,7 @@
           v-for="col in columns"
           :key="col.name"
           :props="props"
-          :class="`${col.name.includes('count') ? 'count-column' : ''}`"
+          :class="`${col.name.includes('count') ? 'count-column' : ''} ${col.name}-column`"
         >
           {{ col.label }}
         </q-th>
@@ -149,6 +149,11 @@
       />
     </template>
 
+    <template v-slot:body-cell-sprint="props">
+      <SprintColumn :row-info="props" @refresh="updateIssueField('sprint', props.row, entity)"/>
+      <IssueContextMenu :row="props.row" :rowId="props.rowIndex" @refresh="refreshTable" />
+    </template>
+
     <template v-slot:body-cell-sub_issues_count="props">
       <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
       <IssueContextMenu
@@ -209,6 +214,7 @@ import {
   UpdatedAtColumn,
   LabelsColumn,
   ChipCountColumn,
+  SprintColumn,
 } from './issue-table';
 
 import { useIssueContext } from '../composables/useIssueContext';
@@ -388,6 +394,66 @@ th.count-column {
     border: 0px;
     z-index: 101;
     background-color: $color-shadow !important;
+  }
+
+  .sequence_id-column {
+    width: 130px;
+    max-width: 130px;
+    min-width: 130px;
+
+    @media screen and (max-width: 600px) {
+      width: 100px;
+      max-width: 100px;
+      min-width: 100px;
+    }
+  }
+
+  .name-column {
+    width: 400px;
+    max-width: 400px;
+    min-width: 400px;
+
+    @media screen and (max-width: 1920px) {
+      width: 300px;
+      max-width: 300px;
+      min-width: 300px;
+    }
+
+    @media screen and (max-width: 1200px) {
+      width: 250px;
+      max-width: 250px;
+      min-width: 250px;
+    }
+
+    @media screen and (max-width: 600px) {
+      width: 200px;
+      max-width: 200px;
+      min-width: 200px;
+    }
+  }
+
+  .labels-column {
+    width: 400px;
+    max-width: 400px;
+    min-width: 400px;
+
+    @media screen and (max-width: 1920px) {
+      width: 300px;
+      max-width: 300px;
+      min-width: 300px;
+    }
+
+    @media screen and (max-width: 1200px) {
+      width: 250px;
+      max-width: 250px;
+      min-width: 250px;
+    }
+
+    @media screen and (max-width: 600px) {
+      width: 200px;
+      max-width: 200px;
+      min-width: 200px;
+    }
   }
 }
 </style>

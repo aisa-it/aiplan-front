@@ -12,12 +12,13 @@
         </span>
       </q-card-section>
       <q-card-actions align="right">
-        <CancelButton v-close-popup />
+        <CancelButton v-close-popup style="width: 110px" />
         <q-btn
           flat
           no-caps
           class="btn secondary-negative-btn"
           label="Удалить"
+          style="width: 110px"
           v-close-popup
           @click="handleDelete"
         />

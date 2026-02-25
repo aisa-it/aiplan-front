@@ -9,16 +9,18 @@
           dense
           v-model="searchQuery"
           @update:model-value="handleSearchLabels(searchQuery)"
+          :disable="isDisabled || loading"
         ></q-input>
         <q-btn
           v-if="!isDisabled"
+          :disable="isDisabled || loading"
           class="btn-only-icon-sm"
           @click="isFormTagNewOpen = !isFormTagNewOpen"
         >
           <AddIcon></AddIcon>
         </q-btn>
       </div>
-      <div class="issue-tags-wrapper q-pr-sm q-mb-md">
+      <div class="issue-tags-wrapper relative-position q-pr-sm q-mb-md">
         <div class="flex items-center q-mb-md">
           <q-chip
             v-for="t in currentTags"
@@ -46,16 +48,9 @@
             </span>
           </q-chip>
         </div>
-        <div
-          v-if="loading"
-          class="row justify-center full-w q-py-sm"
-          style="align-items: center"
-        >
-          <DefaultLoader :size="40" />
-        </div>
-        <div v-else>
-          <div v-if="labels.length">
-            <div v-for="t in labels" :key="t.id" class="q-mb-sm">
+        <div>
+          <div v-if="visibleLabels.length">
+            <div v-for="t in visibleLabels" :key="t.id" class="q-mb-sm">
               <q-checkbox
                 v-model="selectedTags"
                 :val="t.id"
@@ -74,10 +69,20 @@
         <q-btn unelevated class="secondary-btn" no-caps @click="closeDialog">
           Отмена
         </q-btn>
-        <q-btn unelevated class="primary-btn" no-caps @click="handleSaveTags">
+        <q-btn
+          unelevated
+          class="primary-btn"
+          no-caps
+          :disable="isDisabled || loading"
+          @click="handleSaveTags"
+        >
           Сохранить
         </q-btn>
       </q-card-actions>
+
+      <q-inner-loading :showing="loading">
+        <DefaultLoader :size="40" />
+      </q-inner-loading>
     </q-card>
 
     <FormTagNew
@@ -90,20 +95,33 @@
 </template>
 
 <script setup lang="ts">
+//core
 import { debounce } from 'quasar';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+
+//stores
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useNotificationStore } from 'stores/notification-store';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { storeToRefs } from 'pinia';
+
+//components
 import AddIcon from 'src/components/icons/AddIcon.vue';
 import FormTagNew from 'src/components/FormTagNew.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import HintTooltip from 'src/components/HintTooltip.vue';
+
+//interfaces
 import type { ITag } from 'src/interfaces/tags';
+import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+//constants
 import { BASE_ERROR_RULES } from 'src/constants/notifications';
+
+//composables
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   tags: ITag[];
@@ -118,8 +136,10 @@ const emit = defineEmits<{
   'update:tags': [tags: ITag[]];
 }>();
 
+//composables
 const { getCorrectColor } = usePalette();
 
+//stores
 const api = useAiplanStore();
 const route = useRoute();
 const projectStore = useProjectStore();
@@ -127,15 +147,19 @@ const { setNotificationView } = useNotificationStore();
 const singleIssueStore = useSingleIssueStore();
 const { currentIssueID } = storeToRefs(singleIssueStore);
 
-const labels = ref<ITag[]>([]);
+//refs
+const visibleLabels = ref<ITag[]>([]);
+const cachedLabels = ref<ITag[]>([]);
 const currentTags = ref<ITag[]>([]);
 const selectedTags = ref<string[]>([]);
 const isFormTagNewOpen = ref(false);
 const searchQuery = ref();
 const loading = ref(false);
 
+//computed
 const currentTagsId = computed(() => currentTags.value.map((tag) => tag.id));
 
+//methods
 const canRemoveTag = (tag: ITag) => {
   return !props.isDisabled || !props.tags.find((item) => item.id === tag.id);
 };
@@ -145,25 +169,36 @@ const isCheckboxDisabled = (tag: ITag) => {
 };
 
 const handleSearchLabels = debounce(async (query: string) => {
-  if (!query) return refresh(false);
+  if (!query) {
+    visibleLabels.value = cachedLabels.value;
+    return;
+  }
 
-  labels.value = [];
+  const queryLower = query.toLowerCase();
+  const localMatches = cachedLabels.value.filter(
+    (tag) => tag.name && tag.name.toLowerCase().includes(queryLower),
+  );
+
+  if (localMatches.length > 0) {
+    visibleLabels.value = localMatches;
+    return;
+  }
 
   loading.value = true;
   await projectStore
     .getProjectLabels(
       route.params.workspace,
       props.projectId ?? route.params.project,
-      query,
+      { search_query: query },
     )
     .then((data) => {
-      labels.value = data;
+      visibleLabels.value = data as unknown as ITag[];
       loading.value = false;
     })
     .catch(() => (loading.value = false));
 }, 700);
 
-const handleAddTag = (newTag: ITag) => {
+const handleAddTag = (newTag: ITag | DtoLabelLight) => {
   if (route.params?.issue) {
     api
       .issuePartialUpdate(
@@ -196,7 +231,8 @@ const refresh = async (resetTags = true) => {
       props.projectId ?? route.params.project,
     )
     .then((data) => {
-      labels.value = data;
+      visibleLabels.value = data as unknown as ITag[];
+      cachedLabels.value = data as unknown as ITag[];
     });
 };
 
