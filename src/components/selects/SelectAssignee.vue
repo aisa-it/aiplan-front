@@ -16,7 +16,10 @@
     :option-value="(v) => v.member?.id"
     :options="options"
     :virtual-scroll-slice-ratio-before="30"
-    @update:model-value="(e) => handleUpdateAssignees(e)"
+    @update:model-value="
+      (e) =>
+        debounced ? debouncedUpdateAssignees(e) : handleUpdateAssignees(e)
+    "
     @virtual-scroll="(e) => loadMembersOnScroll(e)"
   >
     <template v-slot:before-options>
@@ -127,7 +130,10 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
-import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProjectMemberLight,
+  DtoWorkspaceMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -141,6 +147,7 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     currentMember: any;
     isIssueTransfer?: boolean;
+    debounced?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -178,6 +185,12 @@ const assignessid = ref(
     : defAssignee.value && defAssignee.value.length
       ? defAssignee.value
       : null,
+);
+
+const DEBOUNCE_TIME = 1000;
+const debouncedUpdateAssignees = debounce(
+  (e: any) => handleUpdateAssignees(e),
+  DEBOUNCE_TIME,
 );
 
 //composibles
@@ -229,7 +242,6 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
       countMembers.value = d.count;
       members.value = [...members.value, ...d.result];
       myEntity.value = d.my_entity;
-
     })
     .finally(() => {
       loading.value = false;
