@@ -14,6 +14,7 @@
             :item="item"
             :on-sortable-end="handleSortableEnd"
             :on-expand-request="handleExpandRequest"
+            :expand-trigger="parentToExpandId"
             class="nested"
             @sortable-refresh="initAllSortables"
           />
@@ -56,6 +57,7 @@ const docStore = useAiDocStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const hierarchyRoots = ref<DtoDocLightWithChildren[]>([]);
+const parentToExpandId = ref<string | null>(null);
 
 const buildHierarchy = async (
   docs: DtoDocLight[],
@@ -153,11 +155,18 @@ const handleSortableEnd = async (evt: any) => {
   const docId = movedEl.dataset.id;
   if (!docId || !currentWorkspaceSlug.value) return;
 
-  // Родитель
-  let parentId: string | undefined;
+  // Новый родитель
+  let newParentId: string | undefined;
   const parentItem = evt.to.closest('.sortable-item');
   if (parentItem) {
-    parentId = parentItem.dataset.id;
+    newParentId = parentItem.dataset.id;
+  }
+
+  // Старый родитель
+  let oldParentId: string | undefined;
+  const oldParentItem = evt.from.closest('.sortable-item');
+  if (oldParentItem) {
+    oldParentId = oldParentItem.dataset.id;
   }
 
   // Соседние элементы
@@ -181,16 +190,30 @@ const handleSortableEnd = async (evt: any) => {
 
   destroyAllSortables();
 
-  // Отправка
   try {
     await docStore.moveDoc(
       currentWorkspaceSlug.value,
       docId,
-      parentId,
+      newParentId,
       prevId,
       nextId,
     );
     await updateHierarchy();
+
+    // Выбор элемента для раскрытия списка
+    let idToExpand: string | null = null;
+
+    if (newParentId) {
+      idToExpand = newParentId;
+    } else if (oldParentId) {
+      idToExpand = oldParentId;
+    }
+
+    if (idToExpand) {
+      parentToExpandId.value = idToExpand;
+      await nextTick();
+      parentToExpandId.value = null;
+    }
   } catch (error) {
     console.error('Ошибка при перемещении документа', error);
     await updateHierarchy();

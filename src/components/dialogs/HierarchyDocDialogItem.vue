@@ -1,22 +1,16 @@
 <template>
-  <li class="sortable-item" :data-id="item.id">
+  <li class="sortable-item" :data-id="item.id" @click.stop="toggleExpand">
     <div class="item-row">
-      <button
-        v-if="hasChildren"
-        class="toggle-btn"
-        type="button"
-        @click.stop="toggleExpand"
-      >
+      <div v-if="hasChildren" class="toggle-btn">
         <q-icon
           :name="'chevron_right'"
           :class="['toggle-icon', { 'toggle-icon_rotated': isExpanded }]"
           size="sm"
         />
-      </button>
-
+      </div>
       <div v-else class="spacer"></div>
-
       <p class="ellipsis item-title">{{ item.title }}</p>
+      <HintTooltip> {{ item.title }}</HintTooltip>
     </div>
     <q-slide-transition>
       <ul v-if="isExpanded" :class="['sortable', 'nested']">
@@ -24,6 +18,7 @@
           v-for="child in item.children"
           :key="child.id"
           :item="child"
+          :expand-trigger="expandTrigger"
           :on-sortable-end="onSortableEnd"
           :on-expand-request="onExpandRequest"
           @sortable-refresh="$emit('sortable-refresh')"
@@ -34,11 +29,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
+import HintTooltip from '../HintTooltip.vue';
 import type { DtoDocLightWithChildren } from './AIDocDialogs/HierarchyDocDialog.vue';
 
 const props = defineProps<{
   item: DtoDocLightWithChildren;
+  expandTrigger: string | null;
   onSortableEnd?: (evt: any) => Promise<void>;
   onExpandRequest?: (id: string) => Promise<void>;
 }>();
@@ -67,6 +64,16 @@ const toggleExpand = async () => {
     emit('sortable-refresh');
   }
 };
+
+// Раскрытие элементов
+watch(
+  () => props.expandTrigger,
+  (newVal) => {
+    if (newVal === props.item.id) {
+      toggleExpand();
+    }
+  },
+);
 </script>
 
 <style scoped lang="scss">
