@@ -406,5 +406,20 @@ export const useProjectStore = defineStore('project-store', {
         return props;
       } catch (e) {}
     },
+
+    async getProjectStats(
+      workspaceSlug: string,
+      projectID: string,
+      query?: {
+        include_assignee_stats?: boolean;
+        include_label_stats?: boolean;
+        include_sprint_stats?: boolean;
+        include_timeline?: boolean;
+      },
+    ) {
+      return (
+        await projectsApi.getProjectStats(workspaceSlug, projectID, query)
+      ).data;
+    },
   },
 });
