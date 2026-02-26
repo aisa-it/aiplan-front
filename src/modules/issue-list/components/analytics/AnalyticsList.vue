@@ -1,24 +1,34 @@
 <template>
   <section>
-    <q-select
-      v-model="mode"
-      class="select adaptive-select"
-      borderless
-      emit-value
-      map-options
-      :options="analyticsOptions"
-    />
-    <div v-if="!loading" class="issues-analytics">
-      <AnalyticsCard v-for="card in analyticsList" :card="card" />
-    </div>
-    <div v-else class="issues-analytics">
-      <q-skeleton v-for="i in 10" :key="i" height="148px" />
+    <div v-for="option in analyticsOptions">
+      <h6
+        v-if="!loading && analyticsList(option.value)?.length"
+        class="text-md"
+        style="margin: 16px 0 8px !important"
+      >
+        {{ option.label }}
+      </h6>
+      <h6 v-if="loading" style="margin: 16px 0 8px !important">
+        <q-skeleton height="22px" width="180px" />
+      </h6>
+      <div
+        v-if="!loading && analyticsList(option.value)?.length"
+        class="issues-analytics"
+      >
+        <AnalyticsCard
+          v-for="card in analyticsList(option.value)"
+          :card="card"
+        />
+      </div>
+      <div v-if="loading" class="issues-analytics q-my-md">
+        <q-skeleton v-for="i in getSkeletonRandom()" :key="i" height="46px" />
+      </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onActivated, ref } from 'vue';
+import { onActivated, ref } from 'vue';
 import { DtoProjectStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useProjectStore } from 'src/stores/project-store';
 import AnalyticsCard from './AnalyticsCard.vue';
@@ -82,7 +92,6 @@ const analyticsOptions = [
 ];
 
 const loading = ref(false);
-const mode = ref('issues');
 const stats = ref<DtoProjectStats | null>(null);
 
 const cards = (rows: [label: string, count: number][]): IAnalyticsCard[] =>
@@ -98,10 +107,10 @@ const formCard = (
   data: rows.map(([label, count]) => ({ label, count })),
 });
 
-const analyticsList = computed<IAnalyticsCard[]>(() => {
+const analyticsList = (mode: string): IAnalyticsCard[] => {
   if (!stats.value) return [];
 
-  switch (mode.value) {
+  switch (mode) {
     case 'issues':
       return cards([
         ['Всего', stats.value.issues?.total ?? 0],
@@ -189,7 +198,11 @@ const analyticsList = computed<IAnalyticsCard[]>(() => {
     default:
       return [];
   }
-});
+};
+
+const getSkeletonRandom = () => {
+  return Math.floor(Math.random() * (12 - 4)) + 4;
+};
 
 const refreshStats = async () => {
   if (!currentWorkspaceSlug.value) return;
@@ -209,7 +222,7 @@ onActivated(() => {
 <style scoped lang="scss">
 .issues-analytics {
   display: flex;
-  gap: 8px 16px;
+  gap: 8px;
   flex-wrap: wrap;
   > * {
     width: 260px;
