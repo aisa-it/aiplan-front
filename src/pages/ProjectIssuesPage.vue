@@ -16,6 +16,7 @@
     >
       <q-tab name="general" label="Основные" />
       <q-tab name="pinned" label="Закрепленные задачи" />
+      <q-tab name="analytics" label="Аналитика" />
     </q-tabs>
 
     <q-tab-panels v-model="tab" keep-alive>
@@ -27,6 +28,11 @@
         <q-card-section>
           <PinnedIssueList :projectId="project.id" />
         </q-card-section>
+      </q-tab-panel>
+      <q-tab-panel name="analytics">
+        <q-card-section>
+          <AnalyticsList :projectId="project.id"
+        /></q-card-section>
       </q-tab-panel>
     </q-tab-panels>
   </div>
@@ -42,6 +48,7 @@ import IssuesListTitle from 'src/components/IssuesListTitle.vue';
 import ProjectFiltersList from 'src/modules/issue-list/components/ProjectFiltersList.vue';
 import IssueList from 'src/modules/issue-list/IssueList.vue';
 import PinnedIssueList from 'src/modules/issue-list/components/PinnedIssueList.vue';
+import AnalyticsList from 'src/modules/issue-list/components/analytics/AnalyticsList.vue';
 
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);
