@@ -1,4 +1,7 @@
-import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProjectMemberLight,
+  DtoWorkspaceMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 /**
  * Фильтр списка пользователей.
@@ -8,7 +11,7 @@ import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
  */
 
 export const filterAvailableMembers = (
-  members: DtoWorkspaceMember[],
+  members: DtoWorkspaceMember[] | DtoProjectMemberLight[],
   modelValue?: any[],
 ) => {
   return members.filter(

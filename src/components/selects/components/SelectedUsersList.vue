@@ -16,12 +16,16 @@
 
 <script lang="ts" setup>
 //core
-import { defineProps, computed } from 'vue';
+import { computed } from 'vue';
 //utils
 import aiplan from 'src/utils/aiplan';
+import {
+  DtoProjectMemberLight,
+  DtoWorkspaceMemberLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  users: any[];
+  users: DtoProjectMemberLight[] | DtoWorkspaceMemberLight[];
   currentUser?: any;
 }>();
 
