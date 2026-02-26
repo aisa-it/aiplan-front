@@ -34,7 +34,7 @@
           :members="members"
         />
         <h6 v-if="comment.actor_detail" class="chat-message__name">
-          {{ getFullName(comment.actor_detail) }}
+          {{ getFullName(comment.actor_detail, 'comment') }}
         </h6>
         <EditorTipTapV2
           :editor-id="'message-editor-' + comment.id"
