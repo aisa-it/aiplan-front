@@ -13,7 +13,7 @@
       <HintTooltip> {{ item.title }}</HintTooltip>
     </div>
     <q-slide-transition>
-      <ul v-if="isExpanded" :class="['sortable', 'nested']">
+      <ul class="sortable nested">
         <HierarchyDocDialogItem
           v-for="child in item.children"
           :key="child.id"
