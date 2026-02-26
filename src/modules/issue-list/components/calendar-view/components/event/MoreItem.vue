@@ -55,7 +55,7 @@ defineExpose({
   padding: 16px 18px;
   width: 254px;
   max-height: 50vh;
-  overflow-y: hidden;
+  overflow-y: auto;
   border-radius: 16px;
 }
 
@@ -72,7 +72,6 @@ defineExpose({
 }
 
 .overflow-popup__header {
-  color: var(--text-brand-secondary);
   font-size: 16px;
   margin-bottom: 12px;
 

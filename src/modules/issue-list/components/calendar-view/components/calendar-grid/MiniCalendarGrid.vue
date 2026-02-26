@@ -75,8 +75,8 @@ function dayClasses(day: MiniCalendarDay) {
   background: rgba(63, 118, 255, 0.3);
 }
 .mini-calendar__day.is-today.is-highlighted-week::before {
-  width: calc(100% + 4px);
-  top: -2px;
+  width: calc(100% + 2px);
+  top: -1px;
 }
 
 .mini-calendar__day.is-highlighted-border {

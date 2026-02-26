@@ -68,6 +68,7 @@ const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
   text-overflow: ellipsis;
   white-space: nowrap;
   word-wrap: normal;
+  min-height: 32px;
 }
 
 .month-grid__cell.is-outside :deep(.day-header__number) {

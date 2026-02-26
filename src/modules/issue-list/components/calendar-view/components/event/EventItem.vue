@@ -8,6 +8,7 @@
     :style="{ backgroundColor: event.color }"
     @mouseenter="open"
     @mouseleave="scheduleClose"
+    @dblclick="openIssue"
   >
     {{ event.issueData.identifier }}-{{ event.issueData.sequence_id }}
     {{ event.issueData.title }}
@@ -37,6 +38,8 @@ import { CalendarEvent } from '../../types/calendar';
 import EventCard from './EventCard.vue';
 
 import { useCalendarEventStore } from '../../store/calendar-event-store';
+import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{ event: CalendarEvent }>();
@@ -44,6 +47,8 @@ const props = defineProps<{ event: CalendarEvent }>();
 const root = ref<HTMLElement | null>(null);
 
 const { issueIdHighlight } = storeToRefs(useCalendarEventStore());
+const { user } = storeToRefs(useUserStore());
+const singleIssueStore = useSingleIssueStore();
 
 defineExpose({
   el: root,
@@ -80,6 +85,14 @@ function close() {
   cancelClose();
   menu.value?.hide();
 }
+
+async function openIssue() {
+  singleIssueStore.openIssue(
+    props.event.issueData.id,
+    user.value.theme?.open_in_new ? '_blank' : '_self',
+    props.event.issueData.identifier,
+  );
+}
 </script>
 
 <style lang="scss" scoped>
@@ -89,7 +102,9 @@ function close() {
   color: white;
   line-height: 22px;
   word-wrap: break-word;
-  min-height: 32px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  user-select: none;
 }
 
 .week-grid__event:hover {

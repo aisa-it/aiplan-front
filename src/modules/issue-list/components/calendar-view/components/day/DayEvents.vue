@@ -58,7 +58,7 @@ const hiddenCount = computed(() =>
 
 const hiddenEvents = computed(() => props.events.slice(visibleCount.value));
 
-onMounted(() => {
+onMounted(async () => {
   if (!containerRef.value) return;
   ro.value = new ResizeObserver(nextTickCalculate);
   ro.value.observe(containerRef.value);
@@ -70,24 +70,34 @@ onUnmounted(() => {
     ro.value.disconnect();
     ro.value = null;
   }
+  eventRefs.value = [];
+  moreRef.value = null;
 });
 
 watch(
-  isLoading,
-  async (val) => {
-    if (val) return;
-    visibleCount.value = props.events.length;
-    await nextTick();
-    calculate();
+  () => props.events,
+  () => {
+    eventRefs.value = [];
+  },
+  { flush: 'pre' },
+);
+
+watch(
+  [isLoading, () => props.events.length],
+  async ([loading, eventCount]) => {
+    if (loading || !eventCount) return;
+    nextTickCalculate();
   },
   { flush: 'post' },
 );
 
-function nextTickCalculate() {
-  visibleCount.value = 0;
-  return nextTick(() => {
-    calculate();
-  });
+async function nextTickCalculate() {
+  if (isLoading.value || !props.events.length) return;
+  visibleCount.value = props.events.length;
+
+  await nextTick();
+
+  calculate();
 }
 
 function calculate() {
@@ -96,11 +106,13 @@ function calculate() {
   const containerHeight = containerRef.value.clientHeight;
   const moreHeight = moreRef.value?.offsetHeight ?? 0;
 
+  if (!containerHeight) return;
+
   let usedHeight = 16;
   let count = 0;
   const gap = 4;
 
-  for (const item of eventRefs.value) {
+  for (const item of eventRefs.value.filter(Boolean)) {
     const el = item?.el;
     if (!el) continue;
 

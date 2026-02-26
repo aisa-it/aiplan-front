@@ -14,19 +14,40 @@ import CalendarLayout from './layout/CalendarLayout.vue';
 import { useCalendarEventStore } from './store/calendar-event-store';
 import { useCalendarStore } from './store/calendar-store';
 import { useCalendarFiltersStore } from './store/filters-store';
-import { watchEffect, onUnmounted } from 'vue';
+import { useIssuesStore } from 'src/stores/issues-store';
+import { watch, computed, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 const calendarEventStore = useCalendarEventStore();
 const calendarStore = useCalendarStore();
 const calendarFilterStore = useCalendarFiltersStore();
 
-watchEffect(async () => {
-  await calendarEventStore.loadEvents(
-    calendarStore.visibleRange,
-    calendarFilterStore.enabledTypesArray,
-    calendarFilterStore.filters,
-  );
-});
+const { refreshIssues } = storeToRefs(useIssuesStore());
+
+const reloadKey = computed(() => ({
+  range: calendarStore.visibleRange,
+  types: calendarFilterStore.enabledTypesArray,
+  filters: calendarFilterStore.filters,
+  refresh: refreshIssues.value,
+}));
+
+watch(
+  reloadKey,
+  async (val) => {
+    if (
+      !calendarFilterStore.filters.projects?.length ||
+      !calendarFilterStore.filters.workspaces?.length
+    )
+      return;
+
+    await calendarEventStore.loadEvents(val.range, val.types, val.filters);
+
+    if (val.refresh) {
+      refreshIssues.value = false;
+    }
+  },
+  { deep: true },
+);
 
 onUnmounted(() => {
   calendarEventStore.$reset();
