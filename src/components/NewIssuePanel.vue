@@ -212,6 +212,7 @@
             v-model:tags="tags"
             :projectid="project.id"
             :isDisabled="true"
+            :can-create="hasPermissionByWorkspace(workspaceInfo, 'create-tag')"
             :is-full-width="
               !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
             "
