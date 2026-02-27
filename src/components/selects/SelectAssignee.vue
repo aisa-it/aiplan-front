@@ -127,7 +127,10 @@ import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 //components
 import AvatarImage from 'components/AvatarImage.vue';
 import SelectedUsersList from 'components/selects/components/SelectedUsersList.vue';
-import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProjectMemberLight,
+  DtoWorkspaceMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -141,6 +144,7 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     currentMember: any;
     isIssueTransfer?: boolean;
+    debounced?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -178,6 +182,12 @@ const assignessid = ref(
     : defAssignee.value && defAssignee.value.length
       ? defAssignee.value
       : null,
+);
+
+const DEBOUNCE_TIME = 1000;
+const debouncedUpdateAssignees = debounce(
+  (e: any, currentIds) => updateAssignees(e, currentIds),
+  DEBOUNCE_TIME,
 );
 
 //composibles
@@ -229,7 +239,6 @@ const refresh = async (searchQuery?: string, isSearch?: boolean) => {
       countMembers.value = d.count;
       members.value = [...members.value, ...d.result];
       myEntity.value = d.my_entity;
-
     })
     .finally(() => {
       loading.value = false;
@@ -248,9 +257,15 @@ const loadMembersOnScroll = async (e?: any) => {
   }
 };
 
-const handleUpdateAssignees = async (e) => {
+const handleUpdateAssignees = (e: any) => {
   const currentIds = assignessid;
   assignessid.value = e;
+  props.debounced
+    ? debouncedUpdateAssignees(e, currentIds)
+    : updateAssignees(e, currentIds);
+};
+
+const updateAssignees = (e: any, currentIds: any) => {
   if (props.issueid) {
     singleIssueStore
       .updateIssueData(
