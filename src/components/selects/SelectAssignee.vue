@@ -16,10 +16,7 @@
     :option-value="(v) => v.member?.id"
     :options="options"
     :virtual-scroll-slice-ratio-before="30"
-    @update:model-value="
-      (e) =>
-        debounced ? debouncedUpdateAssignees(e) : handleUpdateAssignees(e)
-    "
+    @update:model-value="(e) => handleUpdateAssignees(e)"
     @virtual-scroll="(e) => loadMembersOnScroll(e)"
   >
     <template v-slot:before-options>
@@ -189,7 +186,7 @@ const assignessid = ref(
 
 const DEBOUNCE_TIME = 1000;
 const debouncedUpdateAssignees = debounce(
-  (e: any) => handleUpdateAssignees(e),
+  (e: any, currentIds) => updateAssignees(e, currentIds),
   DEBOUNCE_TIME,
 );
 
@@ -260,9 +257,15 @@ const loadMembersOnScroll = async (e?: any) => {
   }
 };
 
-const handleUpdateAssignees = async (e) => {
+const handleUpdateAssignees = (e: any) => {
   const currentIds = assignessid;
   assignessid.value = e;
+  props.debounced
+    ? debouncedUpdateAssignees(e, currentIds)
+    : updateAssignees(e, currentIds);
+};
+
+const updateAssignees = (e: any, currentIds: any) => {
   if (props.issueid) {
     singleIssueStore
       .updateIssueData(
