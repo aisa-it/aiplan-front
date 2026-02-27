@@ -148,6 +148,14 @@ const rootSortableRef = ref<HTMLElement | null>(null);
 
 // Обработчик перемещения
 const handleSortableEnd = async (evt: any) => {
+  // Сброс перемещения для устранения рассинхрона с Vue DOM
+  evt.from.insertBefore(
+    evt.item,
+    evt.oldDraggableIndex !== undefined
+      ? evt.from.children[evt.oldDraggableIndex]
+      : null,
+  );
+
   if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
 
   // Элемент
@@ -258,6 +266,7 @@ const initAllSortables = () => {
 };
 
 const onDialogShow = async () => {
+  docStore.isHierarchyOpened = true;
   await updateHierarchy();
 };
 
