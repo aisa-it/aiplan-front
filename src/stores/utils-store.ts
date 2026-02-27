@@ -13,6 +13,7 @@ import {
   DtoReleaseNoteLight,
   DtoUserFeedback,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { isCurrentDateInMonthRange } from 'src/utils/time';
 
 const aiplan = useAiplanStore();
 const api = aiplan.api;
@@ -28,6 +29,7 @@ export const useUtilsStore = defineStore('utils-store', {
       isSingUp: false,
       version: '',
       ny: false,
+      wd: true,
       localVersion: localStorage.getItem('appVersion'),
       openReleaseNote: false,
       isEnabledJitsi: false,
@@ -44,9 +46,9 @@ export const useUtilsStore = defineStore('utils-store', {
           this.isSingUp = res.data.sign_up;
           this.version = res.data.version;
           this.ny = res.data.ny;
+          //this.wd = isCurrentDateInMonthRange(3, 6, 9); раскомментить после теста
           this.isEnabledJitsi = res.data.jitsi;
           this.isEnabledCaptcha = res.data.captcha;
-
           if (
             this.ny === true &&
             !localStorage.getItem('snow')?.includes('disable')
