@@ -161,6 +161,13 @@
             ></select-watchers>
           </div>
         </div>
+        <div class="col-12 col-sm-6 q-mb-sm">
+          <SelectProjectWatchers
+            v-model="watchers"
+            :project-id="project.id ?? ''"
+            @update:model-value="(val) => console.log(val)"
+          />
+        </div>
 
         <div class="col-12 col-sm-6 q-mb-sm">
           <div class="row centered-horisontally">
@@ -319,6 +326,8 @@ import SelectSprints from 'src/components/SelectSprints.vue';
 import SelectLinks from './SelectLinks.vue';
 import NewIssuePanelSkeleton from './NewIssuePanelSkeleton.vue';
 import DefaultLoader from './loaders/DefaultLoader.vue';
+
+import SelectProjectWatchers from './selects/SelectProjectWatchers.vue';
 
 //types
 import { QCard } from 'quasar';

@@ -3,7 +3,7 @@
     <span class="text-subtitle2">
       <template v-for="(user, index) in sortedUsers" :key="user.member?.id">
         <span
-          v-if="currentUser?.id === user.member?.id"
+          v-if="currentUser?.member?.id === user.member?.id"
           style="color: var(--primary); font-weight: 500"
           >Вы</span
         >
@@ -19,22 +19,23 @@
 import { computed } from 'vue';
 //utils
 import aiplan from 'src/utils/aiplan';
-import {
-  DtoProjectMemberLight,
-  DtoWorkspaceMemberLight,
-} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Member } from '../types/types';
 
 const props = defineProps<{
-  users: DtoProjectMemberLight[] | DtoWorkspaceMemberLight[];
-  currentUser?: any;
+  users: Member[];
+  currentUser?: Member;
 }>();
 
 //computeds
 const sortedUsers = computed(() => {
   if (!props.currentUser) return props.users;
   return [
-    ...props.users.filter((u) => u.member?.id === props.currentUser?.id),
-    ...props.users.filter((u) => u.member?.id !== props.currentUser?.id),
+    ...props.users.filter(
+      (u) => u.member?.id === props.currentUser?.member?.id,
+    ),
+    ...props.users.filter(
+      (u) => u.member?.id !== props.currentUser?.member?.id,
+    ),
   ];
 });
 //methods
