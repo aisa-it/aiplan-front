@@ -42,11 +42,10 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { VueFlow, useVueFlow, Handle, useConnection } from '@vue-flow/core';
+import { VueFlow, useVueFlow, Handle } from '@vue-flow/core';
 import { MarkerType } from '@vue-flow/core';
 import { useProjectStore } from 'src/stores/project-store';
 import { useRoute } from 'vue-router';
-import { BackgroundColor } from '@tiptap/extension-text-style';
 
 enum Position {
   Left = 'left',
@@ -59,17 +58,11 @@ const projectStore = useProjectStore();
 
 const isDragging = ref(false);
 const route = useRoute();
-// Инициализация VueFlow
-const {
-  addNodes,
-  addEdges,
-  onConnect,
-  onEdgeClick,
-  removeEdges,
-  onConnectEnd,
-  onNodeDragStop,
-  onConnectStart,
-} = useVueFlow();
+
+const { addEdges, onConnect, onEdgeClick, removeEdges } = useVueFlow();
+
+const nodes = ref([]);
+const edges = ref([]);
 
 onMounted(async () => {
   const data = await projectStore.getProjectStatuses(
@@ -77,7 +70,7 @@ onMounted(async () => {
     route.params.project as string,
   );
   let statuses = Object.values(data).flat();
-  console.log(statuses);
+
   statuses.forEach((s) => {
     nodes.value.push({
       id: s.id,
@@ -95,30 +88,6 @@ onMounted(async () => {
     });
   });
 });
-
-const nodes = ref([]);
-const edges = ref([
-  // {
-  //   id: 'e1-2',
-  //   source: '1',
-  //   target: '2',
-  //   type: 'smoothstep', // 👈 Плавные углы
-  //   sourceHandle: 'source-right-1',
-  //   targetHandle: 'target-left-2',
-  //   data: { label: 'Связь 1-2' },
-  //   markerEnd: { type: MarkerType.ArrowClosed, color: '#ff0072' },
-  // },
-  // {
-  //   id: 'e2-3',
-  //   source: '2',
-  //   target: '3',
-  //   type: 'smoothstep', // 👈 Плавные углы
-  //   sourceHandle: 'source-bottom-2',
-  //   targetHandle: 'target-top-3',
-  //   data: { label: 'Связь 2-3' },
-  //   markerEnd: { type: MarkerType.ArrowClosed, color: '#ff0072' },
-  // },
-]);
 
 onConnect((connection) => {
   if (draggingEdge.value) {
@@ -210,29 +179,6 @@ const startConnectionFromHandle = (
 
   isDragging.value = true;
 };
-
-// Обработка отмены перетаскивания
-const cancelDragging = () => {
-  if (draggingEdge.value) {
-    // Восстанавливаем исходное ребро, если соединение не было создано
-    const originalEdge = edges.value.find(
-      (e) => e.id === draggingEdge.value?.id,
-    );
-
-    if (originalEdge) {
-      addEdges(originalEdge);
-    }
-
-    draggingEdge.value = null;
-  }
-};
-
-// Добавляем обработчик клавиши Escape для отмены
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && draggingEdge.value) {
-    cancelDragging();
-  }
-});
 </script>
 
 <style>
