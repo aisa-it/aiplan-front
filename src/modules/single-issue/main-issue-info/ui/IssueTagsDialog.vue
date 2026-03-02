@@ -12,7 +12,7 @@
           :disable="isDisabled || loading"
         ></q-input>
         <q-btn
-          v-if="canCreateTags && !isDisabled"
+          v-if="canCreateTags"
           :disable="isDisabled || loading"
           class="btn-only-icon-sm"
           @click="isFormTagNewOpen = !isFormTagNewOpen"
@@ -131,7 +131,7 @@ const props = withDefaults(
     canCreateTags?: boolean;
   }>(),
   {
-    canCreateTags: true,
+    canCreateTags: false,
   },
 );
 
