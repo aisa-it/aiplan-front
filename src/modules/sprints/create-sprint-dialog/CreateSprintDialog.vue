@@ -291,7 +291,6 @@ const deleteIssueById = (id: string) => {
 };
 
 const handleClose = () => {
-  filtersStore.resetColumns();
   currentFilter.value = {};
   checkedIssues.value = [];
 };
