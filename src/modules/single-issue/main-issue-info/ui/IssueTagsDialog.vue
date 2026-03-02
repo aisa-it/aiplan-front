@@ -12,7 +12,7 @@
           :disable="isDisabled || loading"
         ></q-input>
         <q-btn
-          v-if="!isDisabled"
+          v-if="canCreateTags && !isDisabled"
           :disable="isDisabled || loading"
           class="btn-only-icon-sm"
           @click="isFormTagNewOpen = !isFormTagNewOpen"
@@ -123,11 +123,17 @@ import { BASE_ERROR_RULES } from 'src/constants/notifications';
 //composables
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
 
-const props = defineProps<{
-  tags: ITag[];
-  isDisabled?: boolean;
-  projectId?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    tags: ITag[];
+    isDisabled?: boolean;
+    projectId?: string;
+    canCreateTags?: boolean;
+  }>(),
+  {
+    canCreateTags: true,
+  },
+);
 
 const emit = defineEmits<{
   close: [];
