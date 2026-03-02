@@ -1,190 +1,78 @@
 <template>
-  <div class="flow-container">
-    <VueFlow
-      v-model:edges="edges"
-      v-model:nodes="nodes"
-      class="flow"
-      :default-viewport="{ x: 100, y: 200, zoom: 1 }"
-    >
-      <template #node-default="nodeProps">
-        <div class="custom-node">
-          {{ nodeProps.data.label }}
+  <div class="q-mt-md">
+    <q-btn no-caps class="secondary-btn" @click="isOpen = true">
+      Настроить бизнес процесс
+    </q-btn>
 
-          <Handle
-            type="source"
-            :id="`source-right-${nodeProps.id}`"
-            :position="Position.Right"
-            :connectable="true"
+    <q-dialog
+      v-model="isOpen"
+      maximized
+      @show="diagramVisible = true"
+      @hide="diagramVisible = false"
+    >
+      <q-card class="column no-wrap" style="width: 100%; height: 100%">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Бизнес процесс</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="q-pt-sm q-pb-none">
+          <q-banner rounded style="background: rgba(25,118,210,0.08); border: 1px solid rgba(25,118,210,0.25)">
+            <template #avatar>
+              <q-icon name="info" color="primary" size="sm" />
+            </template>
+            <p class="q-mb-xs">Укажите стрелками возможные переходы между статусами:</p>
+            <ul class="q-mb-none q-pl-md">
+              <li>Если в статус не ведут стрелки, в него можно перейти из любого другого статуса</li>
+              <li>Круг обозначает создание задачи</li>
+            </ul>
+          </q-banner>
+        </q-card-section>
+
+        <q-card-section class="col q-pa-none">
+          <WorkflowFlowDiagram
+            v-if="diagramVisible"
+            ref="diagramRef"
+            :initial-flow="project?.states_flow"
           />
-          <Handle
-            type="source"
-            :id="`source-bottom-${nodeProps.id}`"
-            :position="Position.Bottom"
-            :connectable="true"
-          />
-          <Handle
-            type="source"
-            :id="`source-left-${nodeProps.id}`"
-            :position="Position.Left"
-            :connectable="true"
-          />
-          <Handle
-            type="source"
-            :id="`source-top-${nodeProps.id}`"
-            :position="Position.Top"
-            :connectable="true"
-          />
-        </div>
-      </template>
-    </VueFlow>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat no-caps outline class="secondary-btn" label="Отменить" @click="onCancel" />
+          <q-btn no-caps class="primary-btn" label="Сохранить" @click="onSave" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { VueFlow, useVueFlow, Handle } from '@vue-flow/core';
-import { MarkerType } from '@vue-flow/core';
-import { useProjectStore } from 'src/stores/project-store';
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+import { useProjectStore } from 'src/stores/project-store';
+import WorkflowFlowDiagram from './WorkflowFlowDiagram.vue';
 
-enum Position {
-  Left = 'left',
-  Top = 'top',
-  Right = 'right',
-  Bottom = 'bottom',
-}
-
-const projectStore = useProjectStore();
-
-const isDragging = ref(false);
 const route = useRoute();
+const projectStore = useProjectStore();
+const { project } = storeToRefs(projectStore);
 
-const { addEdges, onConnect, onEdgeClick, removeEdges } = useVueFlow();
+const isOpen = ref(false);
+const diagramVisible = ref(false);
+const diagramRef = ref(null);
 
-const nodes = ref([]);
-const edges = ref([]);
+const onCancel = () => {
+  isOpen.value = false;
+};
 
-onMounted(async () => {
-  const data = await projectStore.getProjectStatuses(
+const onSave = async () => {
+  const flowData = diagramRef.value?.getFlowData();
+  await projectStore.updateProjectInfo(
     route.params.workspace as string,
     route.params.project as string,
+    { states_flow: flowData },
   );
-  let statuses = Object.values(data).flat();
-
-  statuses.forEach((s) => {
-    nodes.value.push({
-      id: s.id,
-      type: 'default',
-      position: {
-        x: Math.floor(Math.random() * 700),
-        y: Math.floor(Math.random() * 700),
-      },
-      style: {
-        backgroundColor: s.color,
-      },
-      data: {
-        label: s.name,
-      },
-    });
-  });
-});
-
-onConnect((connection) => {
-  if (draggingEdge.value) {
-    if (
-      connection.source === draggingEdge.value.sourceNodeId &&
-      connection.sourceHandle === draggingEdge.value.sourceHandleId
-    ) {
-      const newEdge = {
-        id: `e-${connection.source}-${connection.target}-${Date.now()}`,
-        source: connection.source,
-        target: connection.target,
-        type: 'smoothstep',
-        sourceHandle: connection.sourceHandle,
-        targetHandle: connection.targetHandle,
-        data: {
-          label: `Связь ${connection.source}-${connection.target}`,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: '#ff0072',
-        },
-      };
-
-      addEdges(newEdge);
-      setTimeout(() => {
-        isDragging.value = false;
-      }, 100);
-    }
-  } else if (isDragging.value === false) {
-    addEdges({
-      ...connection,
-      id: `e-${connection.source}-${connection.target}-${Date.now()}`,
-      type: 'smoothstep',
-      sourceHandle: connection.sourceHandle,
-      targetHandle: connection.targetHandle,
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        color: '#4a90e2',
-        width: 15,
-        height: 15,
-      },
-    });
-  }
-  draggingEdge.value = null;
-});
-
-const draggingEdge = ref();
-
-onEdgeClick(({ edge }) => {
-  console.log('Клик по ребру:', edge);
-
-  draggingEdge.value = {
-    id: edge.id,
-    sourceNodeId: edge.source,
-    sourceHandleId: edge.sourceHandle,
-    sourcePosition: { x: 0, y: 0 },
-  };
-
-  removeEdges(edge.id);
-
-  startConnectionFromHandle(edge.source, edge.sourceHandle);
-});
-
-const startConnectionFromHandle = (
-  nodeId: string,
-  handleId: string | null | undefined,
-) => {
-  const handleElement = document.querySelector(
-    `[data-handleid="${handleId}"][data-nodeid="${nodeId}"]`,
-  ) as HTMLElement;
-
-  if (handleElement) {
-    const rect = handleElement.getBoundingClientRect();
-    const flowRect = document
-      .querySelector('.flow-container')
-      ?.getBoundingClientRect();
-
-    if (flowRect) {
-      const mouseEvent = new MouseEvent('mousedown', {
-        bubbles: true,
-        cancelable: true,
-        clientX: rect.left + rect.width / 2,
-        clientY: rect.top + rect.height / 2,
-      });
-
-      handleElement.dispatchEvent(mouseEvent);
-    }
-  }
-
-  isDragging.value = true;
+  isOpen.value = false;
 };
 </script>
-
-<style>
-.flow-container {
-  width: 100%;
-  height: 100vh;
-  position: relative;
-}
-</style>
