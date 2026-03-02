@@ -115,7 +115,7 @@ const { navigateToActivityPage } = useUserActivityNavigation();
   flex-shrink: 0;
   gap: 8px;
   width: 100%;
-  height: 148px;
+  min-height: 148px;
   padding: 12px;
   border-radius: 16px;
   border: 1px solid var(--dark-border-color);
