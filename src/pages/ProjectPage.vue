@@ -15,14 +15,16 @@
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 import { useViewPropsStore } from 'src/stores/view-props-store';
 
 const router = useRouter();
 const projectStore = useProjectStore();
+const issuesStore = useIssuesStore();
 const viewProps = useViewPropsStore();
 const { currentProjectID, isLoadProjectInfo } = storeToRefs(projectStore);
 
@@ -43,4 +45,13 @@ const getCurrentProject = async () => {
 };
 
 onMounted(async () => await getCurrentProject());
+
+watch(
+  () => router.currentRoute.value.params.project,
+  () => {
+    viewProps.$reset();
+    issuesStore.$reset();
+    projectStore.$reset();
+  },
+);
 </script>
