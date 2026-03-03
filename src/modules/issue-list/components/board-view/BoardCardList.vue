@@ -3,7 +3,7 @@
     v-if="table.issues?.length"
     :class="[
       'board-item',
-      { 'tag-colored-board': groupBy === 'labels' && table.entity?.color }
+      { 'tag-colored-board': groupBy === 'labels' && table.entity?.color },
     ]"
     :style="
       groupBy === 'labels' && table.entity?.color
@@ -66,11 +66,13 @@
     </div>
   </q-expansion-item>
 
-  <q-item 
-    v-else 
+  <q-item
+    v-else
     :class="[
       'empty-board-item',
-      { 'tag-colored-board-empty': groupBy === 'labels' && table.entity?.color }
+      {
+        'tag-colored-board-empty': groupBy === 'labels' && table.entity?.color,
+      },
     ]"
     :style="
       groupBy === 'labels' && table.entity?.color
@@ -91,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, onBeforeUnmount, ref } from 'vue';
 import { EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';
 
@@ -161,16 +163,21 @@ const updateTable = (field, row, entity) => {
   updateCurrentTable(field, row, entity);
 };
 
-bus.on('updateIssueTable', (field, entityId) => {
+const handleUpdateIssueTable = (field, entityId) => {
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }
-});
+};
 
 onMounted(() => {
+  bus.on('updateIssueTable', handleUpdateIssueTable);
   isExpanded.value = isGroupHide(
     props?.table?.entity?.id || props?.table?.entity,
   );
+});
+
+onBeforeUnmount(() => {
+  bus.off('updateIssueTable', handleUpdateIssueTable);
 });
 </script>
 
@@ -200,11 +207,11 @@ onMounted(() => {
 .tag-colored-board {
   position: relative;
   box-sizing: border-box;
-  
+
   :deep(.q-item) {
     border-left: 4px solid var(--tag-color) !important;
   }
-  
+
   :deep(.board-card) {
     border-left: 4px solid var(--tag-color) !important;
   }

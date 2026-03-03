@@ -1,12 +1,11 @@
 <template>
   <div
-    ref="scrollContainer"
     class="grouped-table"
-    :class="!ny ? 'new-year-scroll-container' : 'scroll-container'"
+    :class="ny ? 'new-year-scroll-container' : ''"
     :horizontal-thumb-style="{ height: '0px' }"
-    @scroll="handleScroll"
+    ref="root"
   >
-    <div v-for="(group, index) in visibleGroups" :key="groupKey(group, index)">
+    <div v-for="(group, index) in groups" :key="groupKey(group, index)">
       <q-item v-if="!group.issues?.length && showEmptyGroups">
         <GroupedHeader
           :entity="group?.entity"
@@ -43,7 +42,17 @@
               : undefined
           "
         >
-          <slot :group="group" :index="index" />
+          <LazyVirtualMount
+            :scroll-container="scrollContainer"
+            :active="isOpen(group, index)"
+            :estimated-height="getEstimatedHeight(group?.issues?.length)"
+          >
+            <slot :group="group" :index="index" />
+
+            <template #fallback>
+              <TableListSkeleton />
+            </template>
+          </LazyVirtualMount>
         </div>
       </q-expansion-item>
     </div>
@@ -53,12 +62,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { throttle } from 'quasar';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
 import GroupedHeader from '../ui/GroupedHeader.vue';
 import { defineEntityName } from '../../utils/defineEntityName';
+import LazyVirtualMount from 'src/components/LazyVirtualMount.vue';
+import TableListSkeleton from '../skeletons/TableListSkeleton.vue';
 
 type Group = {
   entity: any;
@@ -77,28 +87,21 @@ const emits = defineEmits<{
   (e: 'toggle-group', group: Group, opened: boolean): void;
 }>();
 
-const { ny } = storeToRefs(useUtilsStore());
-const visibleGroups = ref<Group[]>([]);
-let generator: Generator<Group[], void, unknown> | null = null;
+const scrollContainer = ref();
+const root = ref<HTMLElement>();
 
-function* chunkGenerator(source: Group[], size = 10) {
-  for (let i = 0; i < source?.length; i += size) {
-    yield source.slice(i, i + size);
-  }
+const estimatedHeights = {
+  10: 630,
+  25: 1400,
+  50: 2770,
+} as const;
+
+function getEstimatedHeight(length?: number): number {
+  if (!length) return 300;
+  return estimatedHeights[length as keyof typeof estimatedHeights] ?? 300;
 }
 
-const refresh = () => {
-  visibleGroups.value = [];
-  generator = chunkGenerator(props.groups);
-  const chunk = generator.next().value;
-  if (chunk) visibleGroups.value.push(...chunk);
-};
-
-const handleScroll = throttle((info: any) => {
-  if (info.verticalPercentage < 0.8) return;
-  const chunk = generator?.next().value;
-  if (chunk) visibleGroups.value.push(...chunk);
-}, 100);
+const { ny } = storeToRefs(useUtilsStore());
 
 const localOpenState = ref<Record<string, boolean>>({});
 
@@ -121,18 +124,34 @@ const onToggle = (group: Group, index: number, opened: boolean) => {
   emits('toggle-group', group, opened);
 };
 
-onMounted(refresh);
+function getScrollParent(el: HTMLElement | null): HTMLElement | null {
+  if (!el) return null;
 
-watch(() => [props.groups, props.groups?.length], refresh);
+  let parent = el.parentElement;
+
+  while (parent) {
+    const style = window.getComputedStyle(parent);
+
+    const overflowY = style.overflowY;
+    const isScrollable =
+      overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay';
+
+    if (isScrollable && parent.scrollHeight > parent.clientHeight) {
+      return parent;
+    }
+
+    parent = parent.parentElement;
+  }
+
+  return null;
+}
+
+onMounted(() => {
+  scrollContainer.value = getScrollParent(root.value ?? null);
+});
 </script>
 
 <style scoped lang="scss">
-.scroll-container {
-  height: calc(100vh - 105px);
-  overflow-y: auto;
-  contain: inherit;
-}
-
 .new-year-scroll-container {
   height: calc(100vh - 135px);
   overflow-y: auto;
