@@ -46,6 +46,7 @@ function dayClasses(day: MiniCalendarDay) {
 
 .mini-calendar__day {
   height: 40px;
+  width: 43.28px;
   font-size: 16px;
   letter-spacing: 0.5px;
   display: flex;
@@ -75,8 +76,8 @@ function dayClasses(day: MiniCalendarDay) {
   background: rgba(63, 118, 255, 0.3);
 }
 .mini-calendar__day.is-today.is-highlighted-week::before {
-  width: calc(100% + 2px);
-  top: -1px;
+  width: calc(100% + 4px);
+  top: -2px;
 }
 
 .mini-calendar__day.is-highlighted-border {
