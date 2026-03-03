@@ -315,10 +315,6 @@ export const groupFieldsByDependency = (
     }
     levels[level].push({ ...field, originalIndex: index });
   });
-  console.log(
-    'er',
-    levels.filter((l) => l && l.length > 0),
-  );
   return levels.filter((l) => l && l.length > 0);
 };
 

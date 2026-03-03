@@ -104,6 +104,7 @@
               )
             "
             :current-member="user"
+            debounced
             @refresh="handleRefresh"
           ></SelectAssignee>
         </div>
@@ -133,6 +134,7 @@
                 'change-issue-basic',
               )
             "
+            debounced
             @refresh="handleRefresh"
           ></SelectWatchers>
         </div>

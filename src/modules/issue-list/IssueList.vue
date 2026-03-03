@@ -4,7 +4,6 @@
       :is="currentIssueList"
       contextType="project"
       data-tour="issue-table"
-      class="q-pt-sm"
     />
   </transition>
 

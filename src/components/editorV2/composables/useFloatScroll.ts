@@ -141,7 +141,7 @@ export function useFloatScroll(editor: Ref<Editor | null>) {
       if (reachedBottom) {
         scrollbar.style.position = 'absolute';
         scrollbar.style.top = '';
-        scrollbar.style.bottom = '0px';
+        scrollbar.style.bottom = '4px';
         scrollbar.style.transform = '';
         scrollbar.style.left = '0';
         scrollbar.style.right = '0';
