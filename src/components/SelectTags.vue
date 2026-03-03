@@ -187,7 +187,7 @@ const props = withDefaults(
     isFullWidth?: boolean;
     canCreate?: boolean;
   }>(),
-  { newIssue: () => true, canCreate: true },
+  { newIssue: () => true, canCreate: false },
 );
 const emits = defineEmits<{
   refresh: [];
