@@ -14,7 +14,17 @@ declare module '@vue/runtime-core' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'https://aiplan.aisa.ru' });
+const getBaseUrl = () => {
+  const viteUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } })
+    ?.env?.VITE_API_URL?.replace(/\/+$/, ''); // убираем все слэши в конце URL
+  const origin =
+    typeof window !== 'undefined' && window.location
+      ? window.location.origin
+      : undefined;
+  return viteUrl ?? origin;
+};
+
+const api = axios.create({ baseURL: getBaseUrl() });
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
