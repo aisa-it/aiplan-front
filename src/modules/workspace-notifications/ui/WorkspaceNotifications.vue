@@ -135,19 +135,19 @@ const loadMore = async (type: 'unread' | 'read'): Promise<void> => {
 const wsParser = (event: any) => {
   const data = JSON.parse(event.data);
 
-  if (data?.type !== 'message') return;
-
   unreadNotificationsCount.value = Math.min(
     unreadNotificationsCount.value + 1,
     100,
   );
 
-  setNotificationView({
-    open: true,
-    type: 'message',
-    customTitle: data.data.title,
-    customMessage: data.data.msg,
-  });
+  if (data?.type === 'message') {
+    setNotificationView({
+      open: true,
+      type: 'message',
+      customTitle: data.data.title,
+      customMessage: data.data.msg,
+    });
+  }
 
   if (isShowList.value) {
     getNotifications();
