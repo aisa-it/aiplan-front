@@ -14,6 +14,7 @@
         <div class="abbriviated-text">
           {{ props.card?.name }}
         </div>
+        <HintTooltip> {{ props.card?.name }}</HintTooltip>
         <q-badge
           v-if="props.card?.draft"
           floating
@@ -29,32 +30,34 @@
         <q-badge
           rounded
           class="q-mr-sm"
-          :style="{ backgroundColor: props.card.state_detail.color }"
+          :style="{ backgroundColor: props.card.state_detail?.color }"
           style="height: 12px; width: 12px"
         /><span class="word-wrap" style="width: 95%">
-          {{ props.card.state_detail.name }}
+          {{ props.card.state_detail?.name }}
         </span>
       </div>
 
-      <div v-if="props.card.assignee_details.length" style="padding-left: 10px">
+      <div
+        v-if="props.card.assignee_details?.length"
+        style="padding-left: 10px"
+      >
         <AvatarImage
-          v-for="(l, n) in props.card?.assignee_details"
-          :style="{ zIndex: props.card?.assignee_details?.length - n + 2 }"
+          v-for="(l, n) in filteredAssignees"
+          :style="{ zIndex: filteredAssignees.length - n + 2 }"
           class="overlapping"
-          :key="l?.name"
+          :key="l?.id"
           :tooltip="avatarText(l).join(' ')"
           :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
           :image="l?.avatar_id"
           :member="l"
-          @click.stop="
-            navigateToActivityPage(props.card.assignee_details[n]?.id)
-          "
+          @click.stop="navigateToActivityPage(filteredAssignees[n]?.id)"
         />
+        <AvatarImage v-if="extraAssignees > 0" class="overlapping" :text="'+' + extraAssignees" />
       </div>
 
       <AvatarImage
         v-else
-        :key="props.card.author_detail.id"
+        :key="props.card.author_detail?.id"
         :tooltip="avatarText(card.author_detail).join(' ')"
         :text="
           [
@@ -62,9 +65,9 @@
             avatarText(props.card.author_detail)[1]?.at(0),
           ].join(' ')
         "
-        :image="props.card.author_detail.avatar_id"
+        :image="props.card.author_detail?.avatar_id"
         :member="props.card.author_detail"
-        @click.stop="navigateToActivityPage(props.card.author_detail.id)"
+        @click.stop="navigateToActivityPage(props.card.author_detail?.id)"
       />
       <ParentIssueChip
         v-if="isParent"
@@ -92,19 +95,38 @@ import aiplan from 'src/utils/aiplan';
 import QuantityChip from 'src/components/QuantityChip.vue';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const props = defineProps<{ card: DtoIssueWithCount }>();
+const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
 
 const { user } = storeToRefs(useUserStore());
 
-const props = defineProps<{ card: any }>();
+const { navigateToActivityPage } = useUserActivityNavigation();
+
+const MAX_AVATARS = 3;
+
 const avatarText = aiplan.UserName;
+
+const filteredAssignees = computed(() => {
+  if (props.card.assignee_details) {
+    return [...props.card.assignee_details]
+      .sort((el) => (el.id === user.value.id ? -1 : 1))
+      .slice(0, MAX_AVATARS);
+  }
+  return [];
+});
+
+const extraAssignees = computed(() => {
+  if (props.card.assignee_details) {
+    return props.card.assignee_details.length - MAX_AVATARS;
+  }
+  return 0;
+});
 
 const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
-
-const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
-
-const { navigateToActivityPage } = useUserActivityNavigation();
 </script>
 
 <style scoped lang="scss">
@@ -142,6 +164,7 @@ const { navigateToActivityPage } = useUserActivityNavigation();
 
   &__chips {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
   }
