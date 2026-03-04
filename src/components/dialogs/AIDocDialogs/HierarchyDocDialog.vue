@@ -7,27 +7,58 @@
     <q-card class="inner-modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Иерархия документов</h6>
+
+        <div
+          v-if="pendingMoves.length > 0"
+          class="text-caption text-warning"
+        >
+          Перемещено документов: {{ pendingMoves.length }}
+        </div>
+
         <ul class="sortable" ref="rootSortableRef">
           <HierarchyDocDialogItem
             v-for="item in hierarchyRoots"
             :key="item.id"
             :item="item"
             :on-sortable-end="handleSortableEnd"
-            :on-expand-request="handleExpandRequest"
-            :expand-trigger="parentToExpandId"
             class="nested"
             @sortable-refresh="initAllSortables"
           />
           <li class="sortable-end"></li>
         </ul>
       </q-card-section>
+
       <q-card-actions align="right">
+        <q-btn
+          v-if="pendingMoves.length > 0"
+          flat
+          no-caps
+          label="Отмена"
+          class="btn"
+          color="negative"
+          @click="clearChanges"
+          :disable="isSaving"
+        />
+        <q-btn
+          v-if="pendingMoves.length > 0"
+          flat
+          no-caps
+          label="Сохранить"
+          class="btn primary-btn"
+          color="primary"
+          @click="saveChanges"
+          :loading="isSaving"
+        />
         <q-btn
           flat
           no-caps
-          label="Закрыть"
+          :label="
+            pendingMoves.length > 0 ? 'Закрыть без сохранения' : 'Закрыть'
+          "
           class="btn secondary-btn"
           v-close-popup
+          @click="closeWithoutSaving"
+          :disable="isSaving"
         />
       </q-card-actions>
     </q-card>
@@ -37,13 +68,10 @@
 <script lang="ts" setup>
 import { ref, nextTick } from 'vue';
 import Sortable from 'sortablejs';
-
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
-
 import HierarchyDocDialogItem from '../HierarchyDocDialogItem.vue';
-
 import { DtoDocLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export interface DtoDocLightWithChildren extends DtoDocLight {
@@ -52,19 +80,32 @@ export interface DtoDocLightWithChildren extends DtoDocLight {
   isLoadingChildren?: boolean;
 }
 
+interface MoveOperation {
+  docId: string;
+  newParentId: string | undefined;
+  prevId: string | undefined;
+  nextId: string | undefined;
+  oldIndex: number;
+  newIndex: number;
+  fromEl: HTMLElement;
+  toEl: HTMLElement;
+}
+
 const workspaceStore = useWorkspaceStore();
 const docStore = useAiDocStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const hierarchyRoots = ref<DtoDocLightWithChildren[]>([]);
-const parentToExpandId = ref<string | null>(null);
+const pendingMoves = ref<MoveOperation[]>([]);
+const isSaving = ref(false);
+const rootSortableRef = ref<HTMLElement | null>(null);
+let sortableInstances: Sortable[] = [];
 
 const buildHierarchy = async (
   docs: DtoDocLight[],
 ): Promise<DtoDocLightWithChildren[]> => {
   const promises = docs.map(async (doc) => {
     const item: DtoDocLightWithChildren = { ...doc };
-
     if (doc.has_child_docs && doc.id) {
       const childResponse = await docStore.getChildDocList(
         currentWorkspaceSlug.value!,
@@ -76,13 +117,11 @@ const buildHierarchy = async (
     }
     return item;
   });
-
   return Promise.all(promises);
 };
 
 const updateHierarchy = async () => {
   if (!currentWorkspaceSlug.value) return;
-
   await docStore.getRootDocs(currentWorkspaceSlug.value);
 
   hierarchyRoots.value = docStore.rootDocs.map((doc) => ({
@@ -96,88 +135,129 @@ const updateHierarchy = async () => {
   initAllSortables();
 };
 
-// Функция обработчик для раскрытия элемента
-const handleExpandRequest = async (itemId: string) => {
-  // Хэлпер для рекурсивного поиска элемента в дереве
-  const findAndLoad = async (
-    items: DtoDocLightWithChildren[],
-  ): Promise<void> => {
-    for (const item of items) {
-      if (item.id === itemId) {
-        if (item.children && item.children.length > 0) {
-          item.isExpanded = true;
-          return;
-        }
+// Рекурсивный поиск элемента по ID и обновление его состояния
+const findAndUpdateParent = (
+  items: DtoDocLightWithChildren[],
+  parentId: string,
+): boolean => {
+  for (const item of items) {
+    if (item.id === parentId) {
+      const hasRealChildren = !!item.children && item.children.length > 0;
+      item.has_child_docs = hasRealChildren;
 
-        item.isLoadingChildren = true;
-
-        try {
-          const childResponse = await docStore.getChildDocList(
-            currentWorkspaceSlug.value as string,
-            item.id,
-          );
-
-          // Сохранение потомков вместе с флагами
-          item.children = childResponse.data.map((child) => ({
-            ...child,
-            children: [],
-            isExpanded: false,
-            isLoadingChildren: false,
-          }));
-
-          item.isExpanded = true;
-        } catch (e) {
-          console.error('Ошибка при загрузке вложенных документов', e);
-        } finally {
-          item.isLoadingChildren = false;
-        }
-        return;
+      if (hasRealChildren) {
+        item.isExpanded = true;
+      } else {
+        // Если детей нет - сворачиваем и сбрасываем флаг загрузки
+        item.isExpanded = false;
+        item.isLoadingChildren = false;
+        item.children = [];
       }
+      return true;
+    }
 
-      // Рекурсивный поиск в детях, если они есть
-      if (item.children && item.children.length > 0) {
-        await findAndLoad(item.children);
+    if (item.children && item.children.length > 0) {
+      if (findAndUpdateParent(item.children, parentId)) {
+        return true;
       }
     }
-  };
-
-  await findAndLoad(hierarchyRoots.value);
+  }
+  return false;
 };
 
-const rootSortableRef = ref<HTMLElement | null>(null);
+// Функция синхронизация Vue DOM, повторяет перемещение элемента от Sortable DOM
+const syncItemPosition = (
+  items: DtoDocLightWithChildren[],
+  docId: string,
+  newParentId: string | undefined,
+  newIndex: number,
+) => {
+  // Находим элемент
+  let movedItem: DtoDocLightWithChildren | null = null;
+  const removeRecursive = (list: DtoDocLightWithChildren[]): boolean => {
+    const idx = list.findIndex((i) => i.id === docId);
+    if (idx !== -1) {
+      movedItem = list.splice(idx, 1)[0];
+      return true;
+    }
+    for (const item of list) {
+      if (item.children && removeRecursive(item.children)) return true;
+    }
+    return false;
+  };
 
-// Обработчик перемещения
-const handleSortableEnd = async (evt: any) => {
-  // Сброс перемещения для устранения рассинхрона с Vue DOM
-  evt.from.insertBefore(
-    evt.item,
-    evt.oldDraggableIndex !== undefined
-      ? evt.from.children[evt.oldDraggableIndex]
-      : null,
-  );
+  removeRecursive(items);
+  if (!movedItem) return;
 
+  // Вставляем элемент
+  if (!newParentId) {
+    // В корень
+    items.splice(newIndex, 0, movedItem);
+  } else {
+    // Внутрь родителя
+    const insertRecursive = (list: DtoDocLightWithChildren[]): boolean => {
+      for (const item of list) {
+        if (item.id === newParentId) {
+          if (!item.children) item.children = [];
+          // newIndex считается относительно детей родителя
+          item.children.splice(
+            newIndex,
+            0,
+            movedItem as DtoDocLightWithChildren,
+          );
+          return true;
+        }
+        if (item.children && insertRecursive(item.children)) return true;
+      }
+      return false;
+    };
+    insertRecursive(items);
+  }
+};
+
+// Обработчик перемещения Sortable
+const handleSortableEnd = (evt: any) => {
+  // Предотвращаем перенос, если идет сохранение
+  if (isSaving.value) {
+    evt.preventDefault();
+    return;
+  }
+
+  // Поиск элемента, проверка возможности перемещения
   if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
-
-  // Элемент
   const movedEl = evt.item as HTMLElement;
   const docId = movedEl.dataset.id;
-  if (!docId || !currentWorkspaceSlug.value) return;
+  if (!docId || !currentWorkspaceSlug.value) {
+    evt.preventDefault();
+    return;
+  }
 
-  // Новый родитель
+  // Определяем нового родителя
   let newParentId: string | undefined;
   const parentItem = evt.to.closest('.sortable-item');
   if (parentItem) {
     newParentId = parentItem.dataset.id;
   }
 
-  // Старый родитель
+  // Определяем старого родителя
   let oldParentId: string | undefined;
-  const oldParentItem = evt.from.closest('.sortable-item');
-  if (oldParentItem) {
-    oldParentId = oldParentItem.dataset.id;
+  const oldParentLi = evt.from.parentElement?.closest('.sortable-item');
+  if (oldParentLi) {
+    oldParentId = oldParentLi.dataset.id;
   }
 
-  // Соседние элементы
+  // Синхронизация DOM Vue и Sortable
+  syncItemPosition(hierarchyRoots.value, docId, newParentId, evt.newIndex);
+
+  // Обновление состояний старого и нового родителей (заменяет точку на > и наоборот)
+  if (newParentId) {
+    findAndUpdateParent(hierarchyRoots.value, newParentId);
+  }
+  if (oldParentId) {
+    findAndUpdateParent(hierarchyRoots.value, oldParentId);
+  }
+
+  // Определяем соседей для вычисления порядка
   const siblings = Array.from(evt.to.children).filter(
     (el): el is HTMLElement =>
       el instanceof HTMLElement &&
@@ -185,7 +265,6 @@ const handleSortableEnd = async (evt: any) => {
       el !== movedEl,
   );
   const newIndex = evt.newIndex ?? 0;
-
   let prevId: string | undefined;
   let nextId: string | undefined;
 
@@ -196,40 +275,68 @@ const handleSortableEnd = async (evt: any) => {
     nextId = siblings[newIndex]?.dataset.id;
   }
 
-  destroyAllSortables();
+  // Сохранение операции
+  pendingMoves.value.push({
+    docId,
+    newParentId,
+    prevId,
+    nextId,
+    oldIndex: evt.oldIndex,
+    newIndex: evt.newIndex,
+    fromEl: evt.from,
+    toEl: evt.to,
+  });
+};
+
+// Функции диалогового окна
+
+const clearChanges = async () => {
+  pendingMoves.value = [];
+  await updateHierarchy();
+};
+
+const saveChanges = async () => {
+  if (pendingMoves.value.length === 0) return;
+  isSaving.value = true;
 
   try {
-    await docStore.moveDoc(
-      currentWorkspaceSlug.value,
-      docId,
-      newParentId,
-      prevId,
-      nextId,
-    );
-    await updateHierarchy();
-
-    // Выбор элемента для раскрытия списка
-    let idToExpand: string | null = null;
-
-    if (newParentId) {
-      idToExpand = newParentId;
-    } else if (oldParentId) {
-      idToExpand = oldParentId;
+    // Выполняем перемещения по очереди
+    for (const move of pendingMoves.value) {
+      await docStore.moveDoc(
+        currentWorkspaceSlug.value!,
+        move.docId,
+        move.newParentId,
+        move.prevId,
+        move.nextId,
+      );
     }
-
-    if (idToExpand) {
-      parentToExpandId.value = idToExpand;
-      await nextTick();
-      parentToExpandId.value = null;
-    }
+    clearChanges();
   } catch (error) {
-    console.error('Ошибка при перемещении документа', error);
-    await updateHierarchy();
+    console.error('Ошибка при сохранении иерархии', error);
+    clearChanges();
+  } finally {
+    isSaving.value = false;
   }
 };
 
-// Создание и чистка экземпляров сортировки. При каждом перемещении элемента дерево DOM перестраивается
-let sortableInstances: Sortable[] = [];
+const closeWithoutSaving = () => {
+  if (pendingMoves.value.length > 0) {
+    pendingMoves.value = [];
+  }
+};
+
+const onDialogShow = () => {
+  docStore.isHierarchyOpened = true;
+  clearChanges();
+};
+
+const onDialogHide = () => {
+  destroyAllSortables();
+  docStore.isHierarchyOpened = false;
+  pendingMoves.value = [];
+};
+
+// Функции Sortable
 
 const destroyAllSortables = () => {
   sortableInstances.forEach((s) => s.destroy());
@@ -240,7 +347,7 @@ const initAllSortables = () => {
   destroyAllSortables();
 
   const rootEl = rootSortableRef.value;
-  if (!rootEl || !handleSortableEnd) return;
+  if (!rootEl) return;
 
   const allLists = [
     rootEl,
@@ -263,16 +370,6 @@ const initAllSortables = () => {
     });
     sortableInstances.push(sortable);
   });
-};
-
-const onDialogShow = async () => {
-  docStore.isHierarchyOpened = true;
-  await updateHierarchy();
-};
-
-const onDialogHide = () => {
-  destroyAllSortables();
-  docStore.isHierarchyOpened = false;
 };
 </script>
 
@@ -297,8 +394,15 @@ const onDialogHide = () => {
 }
 
 .sortable-end {
-  height: 12px;
+  margin-top: 24px;
+  height: 1px;
   list-style-type: none;
   opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+:deep(.sortable-chosen) {
+  z-index: 9999 !important;
 }
 </style>

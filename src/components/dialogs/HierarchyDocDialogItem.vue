@@ -12,37 +12,42 @@
       <p class="ellipsis item-title">{{ item.title }}</p>
       <HintTooltip> {{ item.title }}</HintTooltip>
     </div>
-    <q-slide-transition>
-      <ul class="sortable nested">
-        <HierarchyDocDialogItem
-          v-for="child in item.children"
-          :key="child.id"
-          :item="child"
-          :expand-trigger="expandTrigger"
-          :on-sortable-end="onSortableEnd"
-          :on-expand-request="onExpandRequest"
-          @sortable-refresh="$emit('sortable-refresh')"
-        />
-      </ul>
-    </q-slide-transition>
+
+    <ul
+      :style="{ maxHeight: isExpanded ? '9000px' : '0' }"
+      class="sortable nested"
+    >
+      <HierarchyDocDialogItem
+        v-for="child in item.children"
+        :key="child.id"
+        :item="child"
+        :on-sortable-end="onSortableEnd"
+        @sortable-refresh="emit('sortable-refresh')"
+      />
+    </ul>
   </li>
 </template>
 
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useAiDocStore } from 'src/stores/aidoc-store';
 import HintTooltip from '../HintTooltip.vue';
 import type { DtoDocLightWithChildren } from './AIDocDialogs/HierarchyDocDialog.vue';
 
 const props = defineProps<{
   item: DtoDocLightWithChildren;
-  expandTrigger: string | null;
-  onSortableEnd?: (evt: any) => Promise<void>;
-  onExpandRequest?: (id: string) => Promise<void>;
+  onSortableEnd?: (evt: any) => void;
 }>();
 
 const emit = defineEmits<{
   (e: 'sortable-refresh'): void;
 }>();
+
+const workspaceStore = useWorkspaceStore();
+const docStore = useAiDocStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const isExpanded = ref<boolean>(false);
 
@@ -50,29 +55,56 @@ const hasChildren = computed<boolean | undefined>(() => {
   return !!props.item.has_child_docs;
 });
 
+// Догрузка вложенных документов
+const loadChildren = async (itemId: string) => {
+  if (props.item.children && props.item.children.length > 0) return;
+
+  props.item.isLoadingChildren = true;
+  try {
+    const childResponse = await docStore.getChildDocList(
+      currentWorkspaceSlug.value as string,
+      itemId,
+    );
+    props.item.children = childResponse.data.map((child) => ({
+      ...child,
+      children: [],
+      isExpanded: false,
+      isLoadingChildren: false,
+    }));
+  } catch (e) {
+    console.error('Ошибка при загрузке вложенных документов', e);
+  } finally {
+    props.item.isLoadingChildren = false;
+  }
+};
+
+// Разворот вложенных документов
 const toggleExpand = async () => {
-  // Если дети уже загружены локально -> просто переключаем видимость
   if (props.item.children && props.item.children.length > 0) {
     isExpanded.value = !isExpanded.value;
+    // Синхронизирация флага в объекте данных, чтобы родительское дерево знало о состоянии
+    props.item.isExpanded = isExpanded.value;
     return;
   }
 
-  if (props.item.has_child_docs && props.onExpandRequest) {
-    await props.onExpandRequest(props.item.id!);
-    isExpanded.value = true;
+  if (props.item.has_child_docs) {
+    await loadChildren(props.item.id as string);
     await nextTick();
+    isExpanded.value = true;
+    props.item.isExpanded = true;
     emit('sortable-refresh');
   }
 };
 
-// Раскрытие элементов
+// Синхронизация состояния раскрытия
 watch(
-  () => props.expandTrigger,
+  () => props.item.isExpanded,
   (newVal) => {
-    if (newVal === props.item.id) {
-      toggleExpand();
+    if (newVal !== undefined && newVal !== isExpanded.value) {
+      isExpanded.value = newVal;
     }
   },
+  { immediate: true },
 );
 </script>
 
@@ -101,6 +133,7 @@ watch(
 .nested {
   list-style-type: none;
   user-select: none;
+  overflow: hidden;
 
   &:active {
     cursor: grabbing;
