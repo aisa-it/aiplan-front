@@ -19,6 +19,12 @@ export enum NotUpdated {
   Nav,
 }
 
+export interface MockSprintFolder {
+  id: string;
+  name: string;
+  sprints: string[];
+}
+
 export const useSprintStore = defineStore('sprint-store', {
   state: () => {
     return {
@@ -28,6 +34,7 @@ export const useSprintStore = defineStore('sprint-store', {
       refreshSprintData: false,
       notUpdated: [] as NotUpdated[],
       sprintsList: [] as DtoSprintLight[],
+      sprintFolders: [] as MockSprintFolder[],
     };
   },
 
@@ -173,7 +180,70 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     async getSprintsList(wsSlug: string) {
-      return this.sprintsList = await getSprints(wsSlug)
-    }
+      if (wsSlug) {
+        this.loadSprintFolders(wsSlug);
+      }
+      return (this.sprintsList = await getSprints(wsSlug));
+    },
+
+    loadSprintFolders(wsSlug: string) {
+      const stored = localStorage.getItem(`sprint_folders_${wsSlug}`);
+      if (stored) {
+        try {
+          this.sprintFolders = JSON.parse(stored);
+        } catch (e) {
+          this.sprintFolders = [];
+        }
+      } else {
+        this.sprintFolders = [];
+      }
+    },
+
+    saveSprintFolders(wsSlug: string) {
+      localStorage.setItem(
+        `sprint_folders_${wsSlug}`,
+        JSON.stringify(this.sprintFolders),
+      );
+    },
+
+    createSprintFolder(wsSlug: string, name: string) {
+      const newFolder: MockSprintFolder = {
+        id: `folder_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        name,
+        sprints: [],
+      };
+      this.sprintFolders.push(newFolder);
+      this.saveSprintFolders(wsSlug);
+      return newFolder;
+    },
+
+    deleteSprintFolder(wsSlug: string, folderId: string) {
+      const index = this.sprintFolders.findIndex((f) => f.id === folderId);
+      if (index !== -1) {
+        if (this.sprintFolders[index].sprints.length > 0) {
+          throw new Error('Cannot delete folder containing sprints');
+        }
+        this.sprintFolders.splice(index, 1);
+        this.saveSprintFolders(wsSlug);
+      }
+    },
+
+    moveSprintToFolder(
+      wsSlug: string,
+      sprintId: string,
+      folderId: string | null,
+    ) {
+      this.sprintFolders.forEach((folder) => {
+        folder.sprints = folder.sprints.filter((id) => id !== sprintId);
+      });
+
+      if (folderId) {
+        const folder = this.sprintFolders.find((f) => f.id === folderId);
+        if (folder && !folder.sprints.includes(sprintId)) {
+          folder.sprints.push(sprintId);
+        }
+      }
+      this.saveSprintFolders(wsSlug);
+    },
   },
 });
