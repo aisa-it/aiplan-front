@@ -301,8 +301,12 @@ const onRequest = async (p) => {
     only_active: filter.value?.only_active || false,
     group_by: group_by.value !== 'none' ? group_by.value : undefined,
   });
+  let filteredIssues = issues;
+  if (group_by.value !== 'none') {
+    filteredIssues = issues.filter((el) => el.issues);
+  }
   rows.value = [];
-  rows.value = issues;
+  rows.value = filteredIssues;
   pagination.value.rowsNumber = count;
   pagination.value.rowsPerPage = limit;
   pagination.value.page = p.page;
