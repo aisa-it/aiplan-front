@@ -46,7 +46,7 @@ export const useUtilsStore = defineStore('utils-store', {
           this.isSingUp = res.data.sign_up;
           this.version = res.data.version;
           this.ny = res.data.ny;
-          //this.wd = isCurrentDateInMonthRange(3, 6, 9); раскомментить после теста
+          this.wd = isCurrentDateInMonthRange(3, 5, 9);
           this.isEnabledJitsi = res.data.jitsi;
           this.isEnabledCaptcha = res.data.captcha;
           if (
