@@ -58,7 +58,7 @@ const { roles } = storeToRefs(useRolesStore());
 const { project } = storeToRefs(projectStore);
 
 // tabs
-const projectSettingsTab = ref(7);
+const projectSettingsTab = ref(0);
 
 const route = useRoute();
 
