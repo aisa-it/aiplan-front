@@ -1,127 +1,140 @@
 <template>
-  <q-table
-    v-model:pagination="quasarPagination"
-    binary-state-sort
-    class="my-sticky-column-table table-bottom-reverse"
-    row-key="sequence_id"
-    flat
-    :loading="loadingTable"
-    :rows="rows"
-    :columns="columns"
-    @row-contextmenu.prevent="onRowContextMenu"
-    @row-click="(_, row) => handleClick(row)"
-    @request="(e) => getIssues(e.pagination)"
-  >
-    <template v-slot:header="props">
-      <q-tr :props="props">
-        <q-th
-          v-for="col in columns"
-          :key="col.name"
-          :props="props"
-          :class="`${col.name.includes('count') ? 'count-column' : ''} ${col.name}-column`"
-        >
-          {{ col.label }}
-        </q-th>
-      </q-tr>
-    </template>
+  <div class="issue-table-wrapper" ref="wrapper">
+    <q-table
+      ref="issueTable"
+      v-model:pagination="quasarPagination"
+      binary-state-sort
+      class="my-sticky-column-table table-bottom-reverse hide-native-bottom"
+      row-key="sequence_id"
+      flat
+      :loading="loadingTable"
+      :rows="rows"
+      :columns="columns"
+      @row-contextmenu.prevent="onRowContextMenu"
+      @row-click="(_, row) => handleClick(row)"
+      @request="(e) => getIssues(e.pagination)"
+    >
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th
+            v-for="col in columns"
+            :key="col.name"
+            :props="props"
+            :class="`${col.name.includes('count') ? 'count-column' : ''} ${col.name}-column`"
+          >
+            {{ col.label }}
+          </q-th>
+        </q-tr>
+      </template>
 
-    <template #bottom>
-      <PaginationDefault
-        v-model:selected-page="quasarPagination.page"
-        :rows-per-page="quasarPagination.rowsPerPage"
-        :rows-per-page-options="[10, 25, 50]"
-        :rows-number="quasarPagination.rowsNumber"
-        show-rows-per-page
-        @request="(pagination, action) => getIssues(pagination, action)"
-      />
-    </template>
+      <template #bottom> </template>
 
-    <template v-slot:body-cell-sequence_id="props">
-      <SequenceIdColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-sequence_id="props">
+        <SequenceIdColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-name="props">
-      <NameColumn
-        :row-info="props"
-        :hide-parent="
-          contextStore?.project?.hide_fields?.includes('sub_issues_count')
-        "
-        @open-preview="
-          (issue) =>
-            emits('openPreview', issue, parsePagination(quasarPagination))
-        "
-      />
-    </template>
+      <template v-slot:body-cell-name="props">
+        <NameColumn
+          :row-info="props"
+          :hide-parent="
+            contextStore?.project?.hide_fields?.includes('sub_issues_count')
+          "
+          @open-preview="
+            (issue) =>
+              emits('openPreview', issue, parsePagination(quasarPagination))
+          "
+        />
+      </template>
 
-    <template v-slot:body-cell-priority="props">
-      <PriorityColumn
-        :row-info="props"
-        @refresh="updateIssueField('priority', props.row, entity)"
-      />
-    </template>
+      <template v-slot:body-cell-priority="props">
+        <PriorityColumn
+          :row-info="props"
+          @refresh="updateIssueField('priority', props.row, entity)"
+        />
+      </template>
 
-    <template v-slot:body-cell-state="props">
-      <StatusColumn
-        :row-info="props"
-        @refresh="
-          (status) => {
-            props.row.state_detail = status;
-            updateIssueField('state', props.row, entity, status);
-          }
-        "
-      />
-    </template>
+      <template v-slot:body-cell-state="props">
+        <StatusColumn
+          :row-info="props"
+          @refresh="
+            (status) => {
+              props.row.state_detail = status;
+              updateIssueField('state', props.row, entity, status);
+            }
+          "
+        />
+      </template>
 
-    <template v-slot:body-cell-target_date="props">
-      <TargetDateColumn
-        :row-info="props"
-        @refresh="updateIssueField('targetDate', props.row, entity)"
-      />
-    </template>
+      <template v-slot:body-cell-target_date="props">
+        <TargetDateColumn
+          :row-info="props"
+          @refresh="updateIssueField('targetDate', props.row, entity)"
+        />
+      </template>
 
-    <template v-slot:body-cell-created_at="props">
-      <CreatedAtColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-created_at="props">
+        <CreatedAtColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-updated_at="props">
-      <UpdatedAtColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-updated_at="props">
+        <UpdatedAtColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-author="props">
-      <AuthorColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-author="props">
+        <AuthorColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-assignees="props">
-      <AssigneesColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-assignees="props">
+        <AssigneesColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-labels="props">
-      <LabelsColumn :row-info="props" />
-    </template>
+      <template v-slot:body-cell-labels="props">
+        <LabelsColumn :row-info="props" />
+      </template>
 
-    <template v-slot:body-cell-sprint="props">
-      <SprintColumn
-        :row-info="props"
-        @refresh="updateIssueField('sprint', props.row, entity)"
-      />
-    </template>
+      <template v-slot:body-cell-sprint="props">
+        <SprintColumn
+          :row-info="props"
+          @refresh="updateIssueField('sprint', props.row, entity)"
+        />
+      </template>
 
-    <template v-slot:body-cell-sub_issues_count="props">
-      <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
-    </template>
+      <template v-slot:body-cell-sub_issues_count="props">
+        <ChipCountColumn :row-info="props" :chip-name="'sub-issues'" />
+      </template>
 
-    <template v-slot:body-cell-linked_issues_count="props">
-      <ChipCountColumn :row-info="props" :chip-name="'linked_issues_count'" />
-    </template>
+      <template v-slot:body-cell-linked_issues_count="props">
+        <ChipCountColumn :row-info="props" :chip-name="'linked_issues_count'" />
+      </template>
 
-    <template v-slot:body-cell-link_count="props">
-      <ChipCountColumn :row-info="props" :chip-name="'links'" />
-    </template>
+      <template v-slot:body-cell-link_count="props">
+        <ChipCountColumn :row-info="props" :chip-name="'links'" />
+      </template>
 
-    <template v-slot:body-cell-attachment_count="props">
-      <ChipCountColumn :row-info="props" :chip-name="'attachments'" />
-    </template>
-  </q-table>
+      <template v-slot:body-cell-attachment_count="props">
+        <ChipCountColumn :row-info="props" :chip-name="'attachments'" />
+      </template>
+    </q-table>
+
+    <div class="sticky-bottom">
+      <div class="table-h-scroll" ref="hScroll">
+        <div class="table-h-scroll__content" />
+      </div>
+
+      <div class="table-bottom-reverse">
+        <div class="q-table__bottom row items-center">
+          <PaginationDefault
+            v-model:selected-page="quasarPagination.page"
+            :rows-per-page="quasarPagination.rowsPerPage"
+            :rows-per-page-options="[10, 25, 50]"
+            :rows-number="quasarPagination.rowsNumber"
+            show-rows-per-page
+            @request="(pagination, action) => getIssues(pagination, action)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 
   <IssueContextMenu
     :row="contextRow"
@@ -139,8 +152,9 @@ import {
   computed,
   onMounted,
   onBeforeUnmount,
+  nextTick,
 } from 'vue';
-import { EventBus } from 'quasar';
+import { EventBus, QTable } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -286,12 +300,57 @@ const handleUpdateIssueTable = (field, entityId) => {
   }
 };
 
-onMounted(() => {
+const issueTable = ref<InstanceType<typeof QTable> | null>(null);
+const hScroll = ref<HTMLElement | null>(null);
+let middle: HTMLElement | null = null;
+
+const getMiddle = () =>
+  issueTable.value?.$el.querySelector('.q-table__middle') as HTMLElement;
+
+const updateWidth = () => {
+  const middle = getMiddle();
+  const table = middle?.querySelector('table');
+
+  if (!middle || !table || !hScroll.value) return;
+
+  const tableWidth = table.scrollWidth;
+  const containerWidth = middle.clientWidth;
+
+  hScroll.value.firstElementChild!.style.width = tableWidth + 'px';
+
+  hScroll.value.style.display = tableWidth > containerWidth ? 'block' : 'none';
+};
+
+const onHScroll = () => {
+  if (!middle) return;
+  middle.scrollLeft = hScroll.value!.scrollLeft;
+};
+
+const onMiddleScroll = () => {
+  if (!middle) return;
+  hScroll.value!.scrollLeft = middle.scrollLeft;
+};
+
+onMounted(async () => {
   bus.on('updateIssueTable', handleUpdateIssueTable);
+
+  await nextTick();
+
+  middle = getMiddle();
+  if (!middle || !hScroll.value) return;
+
+  updateWidth();
+
+  hScroll.value.addEventListener('scroll', onHScroll);
+  middle.addEventListener('scroll', onMiddleScroll);
+
+  new ResizeObserver(updateWidth).observe(middle);
 });
 
 onBeforeUnmount(() => {
   bus.off('updateIssueTable', handleUpdateIssueTable);
+  hScroll.value?.removeEventListener('scroll', onHScroll);
+  middle?.removeEventListener('scroll', onMiddleScroll);
 });
 
 const updateIssueField = (
@@ -415,6 +474,56 @@ th.count-column {
       max-width: 200px;
       min-width: 200px;
     }
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+:deep(.hide-native-bottom .q-table__bottom) {
+  min-height: auto;
+  height: 0 !important;
+  padding: 0 !important;
+}
+
+:deep(.q-table__middle) {
+  overflow-x: hidden;
+}
+
+.issue-table-wrapper {
+  position: relative;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: end;
+}
+
+.sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 200;
+  background: $bg-color;
+}
+
+.table-h-scroll {
+  height: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.issue-table-wrapper:hover .table-h-scroll {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  :deep(.q-table__middle) {
+    overflow-x: auto;
+  }
+
+  .table-h-scroll {
+    display: none !important;
   }
 }
 </style>
