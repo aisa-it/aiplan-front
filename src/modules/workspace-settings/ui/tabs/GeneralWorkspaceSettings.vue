@@ -150,7 +150,7 @@
       <q-input
         class="base-input"
         dense
-        prefix="https://aiplan.aisa.ru/"
+        :prefix="workspaceBaseUrl"
         v-model="workspaceInfoForm.slug"
         disable
         style="margin: 0.375em 0"
@@ -452,6 +452,17 @@ const { hasPermission, hasPermissionByWorkspace } = useRolesStore();
 const { isDemo } = storeToRefs(utilsStore);
 const { workspaceToken } = storeToRefs(settingsStore);
 const workspaceInfoForm = ref({} as typeof computedWorkspaceInfo.value);
+
+const workspaceBaseUrl = computed(() => {
+  const viteUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } })
+    ?.env?.VITE_API_URL?.replace(/\/+$/, ''); // убираем все слэши в конце URL
+  const origin =
+    typeof window !== 'undefined' && window.location
+      ? window.location.origin
+      : '';
+  const base = viteUrl ?? origin;
+  return base ? `${base}/` : '';
+});
 
 // флаги для открытия диалогов
 const isImportOpen = ref<boolean>(false);
