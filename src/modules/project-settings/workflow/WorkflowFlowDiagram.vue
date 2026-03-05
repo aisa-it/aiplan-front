@@ -136,11 +136,21 @@ onMounted(async () => {
     });
   });
 
+  const handleId = (side: string, nodeId: string) => `source-${side}-${nodeId}`;
+  const toFullHandle = (sideOrFull: string, nodeId: string, defaultSide: string): string => {
+    if (!sideOrFull) return handleId(defaultSide, nodeId);
+    return sideOrFull.startsWith('source-') ? sideOrFull : handleId(sideOrFull, nodeId);
+  };
+
   props.initialFlow?.edges?.forEach((e) => {
+    const source = e.source ?? '';
+    const target = e.target ?? '';
     edges.value.push({
-      id: e.id ?? `e-${e.source}-${e.target}`,
-      source: e.source ?? '',
-      target: e.target ?? '',
+      id: e.id ?? `e-${source}-${target}`,
+      source,
+      target,
+      sourceHandle: toFullHandle(e.sourceHandle, source, 'right'),
+      targetHandle: toFullHandle(e.targetHandle, target, 'left'),
       type: 'smoothstep',
       markerEnd: { type: MarkerType.ArrowClosed, color: '#4a90e2', width: 15, height: 15 },
     });
@@ -244,11 +254,17 @@ const getFlowData = (): TypesStatesFlowGraph => ({
     type: n.type,
     position: n.position,
   })),
-  edges: edges.value.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-  })),
+  edges: edges.value.map((e) => {
+    const toSide = (h: string | undefined): string | undefined =>
+      h?.startsWith('source-') ? h.split('-')[1] : h
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      sourceHandle: toSide(e.sourceHandle),
+      targetHandle: toSide(e.targetHandl),
+    };
+  }),
 });
 
 defineExpose({ getFlowData });
