@@ -224,4 +224,3 @@ watchEffect(() => {
   padding-left: 0;
 }
 </style>
-ц
