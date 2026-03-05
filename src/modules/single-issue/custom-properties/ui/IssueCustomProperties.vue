@@ -47,6 +47,32 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'link'">
+            <q-input
+              class="base-input"
+              :model-value="prop.value || ''"
+              @update:model-value="
+                (val) => {
+                  prop.value = val;
+                  updateValue(prop, val);
+                }
+              "
+              debounce="1000"
+              dense
+              placeholder="https://example.com"
+            >
+              <template #append v-if="prop.value">
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="open_in_new"
+                  :to="prop.value"
+                />
+              </template>
+            </q-input>
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
