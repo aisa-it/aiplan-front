@@ -53,9 +53,11 @@ import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useProjectStore } from 'src/stores/project-store';
 import WorkflowFlowDiagram from './WorkflowFlowDiagram.vue';
+import { useNotificationStore } from 'src/stores/notification-store';
 
 const route = useRoute();
 const projectStore = useProjectStore();
+const { setNotificationView } = useNotificationStore();
 const { project } = storeToRefs(projectStore);
 
 const isOpen = ref(false);
@@ -68,11 +70,21 @@ const onCancel = () => {
 
 const onSave = async () => {
   const flowData = diagramRef.value?.getFlowData();
-  await projectStore.updateProjectInfo(
-    route.params.workspace as string,
-    route.params.project as string,
-    { states_flow: flowData },
-  );
-  isOpen.value = false;
+  try {
+    await projectStore.updateProjectInfo(
+      route.params.workspace as string,
+      route.params.project as string,
+      { states_flow: flowData },
+    );
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Бизнес процесс успешно сохранен',
+    });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isOpen.value = false;
+  }
 };
 </script>

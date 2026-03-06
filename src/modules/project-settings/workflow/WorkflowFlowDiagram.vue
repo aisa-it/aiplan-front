@@ -136,10 +136,10 @@ onMounted(async () => {
     });
   });
 
-  const handleId = (side: string, nodeId: string) => `source-${side}-${nodeId}`;
-  const toFullHandle = (sideOrFull: string, nodeId: string, defaultSide: string): string => {
-    if (!sideOrFull) return handleId(defaultSide, nodeId);
-    return sideOrFull.startsWith('source-') ? sideOrFull : handleId(sideOrFull, nodeId);
+  const handleId = (side: string, nodeId: string) => `${side}-${nodeId}`;
+  const toFullHandle = (sideOrFull: string, nodeId: string): string => {
+    if (!sideOrFull) return '';
+    return handleId(sideOrFull, nodeId);
   };
 
   props.initialFlow?.edges?.forEach((e) => {
@@ -149,8 +149,8 @@ onMounted(async () => {
       id: e.id ?? `e-${source}-${target}`,
       source,
       target,
-      sourceHandle: toFullHandle(e.sourceHandle, source, 'right'),
-      targetHandle: toFullHandle(e.targetHandle, target, 'left'),
+      sourceHandle: toFullHandle(e.source_handle ?? '', source),
+      targetHandle: toFullHandle(e.target_handle ?? '', target),
       type: 'smoothstep',
       markerEnd: { type: MarkerType.ArrowClosed, color: '#4a90e2', width: 15, height: 15 },
     });
@@ -255,14 +255,14 @@ const getFlowData = (): TypesStatesFlowGraph => ({
     position: n.position,
   })),
   edges: edges.value.map((e) => {
-    const toSide = (h: string | undefined): string | undefined =>
-      h?.startsWith('source-') ? h.split('-')[1] : h
+    const toSide = (h: string | undefined | null): string =>
+      h?.split('-').slice(0, 2).join('-') ?? '';
     return {
       id: e.id,
       source: e.source,
       target: e.target,
-      sourceHandle: toSide(e.sourceHandle),
-      targetHandle: toSide(e.targetHandl),
+      source_handle: toSide(e.sourceHandle),
+      target_handle: toSide(e.targetHandle),
     };
   }),
 });
