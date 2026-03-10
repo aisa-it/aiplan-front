@@ -48,29 +48,24 @@
           </div>
 
           <div v-else-if="prop.type === 'link'">
-            <q-input
-              class="base-input"
-              :model-value="prop.value || ''"
-              @update:model-value="
-                (val) => {
-                  prop.value = val;
-                  updateValue(prop, val);
-                }
-              "
-              debounce="1000"
-              dense
-              placeholder="https://example.com"
-            >
-              <template #append v-if="prop.value">
-                <q-btn
-                  flat
-                  dense
-                  round
-                  icon="open_in_new"
-                  :to="prop.value"
-                />
-              </template>
-            </q-input>
+            <LinkItem
+              :link="{
+                id: prop.id,
+                title: prop.name,
+                url: prop.value,
+              }"
+              disableDelete
+              @update="isLinkOpenDialog = true; linkToUpdate = {
+                id: prop.id,
+                title: prop.name,
+                url: prop.value,
+              }"
+            />
+            <LinkDialog
+              v-model="isLinkOpenDialog"
+              :link="linkToUpdate"
+              @edit="(link) => updateValue(prop, link)"
+            />
           </div>
 
           <div v-else>
@@ -121,6 +116,8 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 //components
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
+import LinkItem from 'src/components/LinkItem.vue';
+import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 
 //props
 const props = defineProps<{
@@ -137,7 +134,8 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 //variables
 const properties = ref<DtoIssueProperty[]>([]);
 const isLoading = ref(false);
-
+const isLinkOpenDialog = ref(false);
+const linkToUpdate = ref();
 //methods
 const fetchData = async () => {
   if (!props.issueId) return;

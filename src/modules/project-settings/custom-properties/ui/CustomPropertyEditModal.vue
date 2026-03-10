@@ -179,7 +179,10 @@ const onSubmit = () => {
     delete data.options;
   }
   if (data.type === 'link') {
-    data.link_url = linkUrl.value;
+    data.link = {
+      url: linkUrl.value,
+      name: '',
+    };
   }
   emit('submit', data);
 };
