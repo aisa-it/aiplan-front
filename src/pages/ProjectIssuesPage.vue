@@ -40,10 +40,7 @@
     </q-tabs>
 
     <q-tab-panels v-model="tab" keep-alive>
-      <q-tab-panel
-        name="general"
-        style="min-height: 80vh; height: 100%; overflow-y: hidden"
-      >
+      <q-tab-panel name="general" style="min-height: 80vh; height: 100%">
         <IssueList />
       </q-tab-panel>
 
@@ -94,5 +91,11 @@ const tab = ref('general');
 
 :deep(.q-tab-panel) {
   padding: 0;
+}
+
+:deep(.q-panel-parent),
+:deep(.q-panel),
+:deep(.q-tab-panel) {
+  overflow: visible !important;
 }
 </style>

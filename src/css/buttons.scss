@@ -263,34 +263,6 @@
   }
 }
 
-.btn-select {
-  transition: all 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: transparent;
-  .q-focus-helper {
-    display: none;
-    background: none;
-  }
-
-  &:hover,
-  &:focus-visible {
-    border: 1px solid $primary;
-    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .q-ripple {
-    display: none;
-  }
-
-  &[aria-expanded='true'] {
-    border: 1px solid $primary;
-    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  &[disabled] {
-    border-color: $text-color;
-  }
-}
-
 // переписанные стили кнопок vue3-zoomer
 .controls-btn {
   color: $text-color;

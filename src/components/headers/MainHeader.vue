@@ -102,6 +102,7 @@
       <q-toolbar-title v-else>АИПлан</q-toolbar-title>
       <SearchPanel />
     </q-toolbar>
+    <FlowerLine v-if="utilsStore.wd" />
   </q-header>
 </template>
 
@@ -129,6 +130,7 @@ import SearchPanel from 'src/components/search-panel/SearchPanel.vue';
 import HomeIcon from 'src/components/icons/HomeIcon.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
+import FlowerLine from 'src/components/FlowerLine.vue';
 
 // stores
 const userStore = useUserStore();

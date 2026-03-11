@@ -26,8 +26,11 @@
       >
         {{ workspaceInfo?.name }}
       </h5>
-      <div v-if="ny" class="workspace-tree-wrapper">
+      <div v-if="ny" class="workspace-designe-logo-wrapper">
         <q-img fit="contain" :src="newYearTree" style="width: 250px" />
+      </div>
+      <div v-if="wd" class="workspace-designe-logo-wrapper">
+        <q-img fit="contain" :src="womanDayLogo" style="width: 250px" />
       </div>
       <q-separator style="width: 100%" />
 
@@ -95,6 +98,7 @@ import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import GuidedTour from 'src/modules/guided-tours/GuidedTour.vue';
 import { steps, STEP_NUM } from 'src/modules/guided-tours/tutorials/tutorial1';
 import newYearTree from 'src/assets/newYearTree.svg';
+import womanDayLogo from 'src/assets/woman-day-logo.png';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -116,7 +120,7 @@ const { hasPermissionByWorkspace } = useRolesStore();
 const utilsStore = useUtilsStore();
 
 //storesToRefs
-const { ny } = storeToRefs(utilsStore);
+const { ny, wd } = storeToRefs(utilsStore);
 const { generalLoader } = storeToRefs(loaderStore);
 const { workspaceInfo, workspaceProjects } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
@@ -150,7 +154,7 @@ watch(
 :deep(.html-editor .tiptap) {
   min-height: auto;
 }
-.workspace-tree-wrapper {
+.workspace-designe-logo-wrapper {
   display: flex;
   justify-content: center;
   padding: 20px 0px 20px 15px;
