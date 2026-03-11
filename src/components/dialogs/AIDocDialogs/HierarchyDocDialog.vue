@@ -1,6 +1,7 @@
 <template>
   <q-dialog
     class="doc-hierarchy-dialog"
+    :persistent="isSaving"
     @show="onDialogShow"
     @hide="onDialogHide"
   >
@@ -27,35 +28,22 @@
 
       <q-card-actions align="right">
         <q-btn
-          v-if="pendingMoves.length > 0"
           flat
           no-caps
           label="Отмена"
           class="btn"
           color="negative"
           @click="clearChanges"
-          :disable="isSaving"
+          :disable="!isSaving"
         />
         <q-btn
-          v-if="pendingMoves.length > 0"
           flat
           no-caps
           label="Сохранить"
           class="btn primary-btn"
           color="primary"
           @click="saveChanges"
-          :loading="isSaving"
-        />
-        <q-btn
-          flat
-          no-caps
-          :label="
-            pendingMoves.length > 0 ? 'Закрыть без сохранения' : 'Закрыть'
-          "
-          class="btn secondary-btn"
-          v-close-popup
-          @click="closeWithoutSaving"
-          :disable="isSaving"
+          :disable="!isSaving"
         />
       </q-card-actions>
     </q-card>
@@ -63,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, nextTick, onBeforeUnmount } from 'vue';
+import { ref, nextTick, onBeforeUnmount, watch } from 'vue';
 import Sortable from 'sortablejs';
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -214,12 +202,6 @@ const syncItemPosition = (
 
 // Обработчик перемещения Sortable
 const handleSortableEnd = (evt: any) => {
-  // Предотвращаем перенос, если идет сохранение
-  if (isSaving.value) {
-    evt.preventDefault();
-    return;
-  }
-
   // Поиск элемента, проверка возможности перемещения
   if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
   const movedEl = evt.item as HTMLElement;
@@ -295,11 +277,12 @@ const handleSortableEnd = (evt: any) => {
 const clearChanges = async () => {
   pendingMoves.value = [];
   await updateHierarchy();
+  isSaving.value = false;
 };
 
 const saveChanges = async () => {
   if (pendingMoves.value.length === 0) return;
-  isSaving.value = true;
+  isSaving.value = false;
 
   try {
     // Выполняем перемещения по очереди
@@ -318,12 +301,6 @@ const saveChanges = async () => {
     clearChanges();
   } finally {
     isSaving.value = false;
-  }
-};
-
-const closeWithoutSaving = () => {
-  if (pendingMoves.value.length > 0) {
-    pendingMoves.value = [];
   }
 };
 
@@ -359,7 +336,18 @@ const initAllSortables = () => {
 
   allLists.forEach((list) => {
     const sortable = new Sortable(list as HTMLElement, {
-      group: 'sortable',
+      group: {
+        name: 'sortable',
+        put: (
+          to: Sortable,
+        ) => {
+          // Запрет на дроп в свернутый список
+          if (to.el.classList.contains('sortable-collapsed')) {
+            return false;
+          }
+          return true;
+        },
+      },
       draggable: '.sortable-item',
       ghostClass: 'sortable-ghost',
       animation: 150,
@@ -378,6 +366,15 @@ const initAllSortables = () => {
 onBeforeUnmount(() => {
   destroyAllSortables();
 });
+
+watch(
+  () => pendingMoves.value.length,
+  (newWalue) => {
+    if (newWalue > 0) {
+      isSaving.value = true;
+    }
+  },
+);
 </script>
 
 <style lang="scss" scoped>

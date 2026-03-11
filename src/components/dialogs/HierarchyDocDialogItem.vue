@@ -15,7 +15,10 @@
 
     <ul
       :style="{ maxHeight: `${adaptiveMaxHeight}px` }"
-      class="sortable nested"
+      :class="[
+        'sortable nested',
+        { 'sortable-collapsed': hasChildren && !isExpanded },
+      ]"
     >
       <HierarchyDocDialogItem
         v-for="child in item.children"
