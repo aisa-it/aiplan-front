@@ -10,7 +10,7 @@
       </q-card-section>
       <q-card-section
         v-if="commentHistoryList.length"
-        class="history-comments__list"
+        class="history-comments__list visible-scroll"
       >
         <CommentHistoryItem
           v-for="(oldComment, index) in commentHistoryList"
@@ -97,6 +97,17 @@ watch(
 
   &__list {
     background-image: var(--bg-activities-pattern);
+    max-height: 70vh;
+    overflow-y: auto;
   }
+}
+
+.visible-scroll {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
 }
 </style>
