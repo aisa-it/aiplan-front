@@ -129,7 +129,7 @@
     </q-select>
 
     <q-btn
-      v-if="isDisabled === true && newIssue"
+      v-if="canCreate && isDisabled && newIssue"
       class="btn btn-only-icon-sm self-center q-mt-xs q-ml-xs"
       :style="isFullWidth ? 'flex-shrink: 0;' : ''"
       no-caps
@@ -185,8 +185,9 @@ const props = withDefaults(
     isDisabled?: boolean;
     newIssue?: boolean;
     isFullWidth?: boolean;
+    canCreate?: boolean;
   }>(),
-  { newIssue: () => true },
+  { newIssue: () => true, canCreate: false },
 );
 const emits = defineEmits<{
   refresh: [];

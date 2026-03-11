@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from 'src/stores/project-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 import {
@@ -12,11 +13,13 @@ import {
   NEW_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
 
-export function useProjectFilters(emits?) {
+export function useProjectFilters() {
   const route = useRoute();
   const projectStore = useProjectStore();
   const { projectProps, issuesLoader, getStatusesAsArray } =
     storeToRefs(projectStore);
+
+  const { refreshIssues } = storeToRefs(useIssuesStore());
 
   const viewForm = ref(DEFAULT_VIEW_PROPS);
   const optionsGroup = ref(NEW_GROUP_BY_OPTIONS);
@@ -73,7 +76,7 @@ export function useProjectFilters(emits?) {
 
       viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
       await nextTick();
-      emits?.('update', projectProps.value?.filters?.group_by);
+      refreshIssues.value = true;
     } finally {
       issuesLoader.value = false;
     }

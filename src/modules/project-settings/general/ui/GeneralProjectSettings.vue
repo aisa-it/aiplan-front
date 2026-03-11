@@ -106,6 +106,20 @@
     </div>
   </div>
 
+  <div class="row mobile-block q-mt-md">
+    <div class="col">
+      <h4 class="text-lg font-semibold text-brand-base">
+        Разрешить удаление задач
+      </h4>
+      <p class="text-sm text-brand-secondary">
+        Разрешить удаление задач в проекте
+      </p>
+    </div>
+    <div class="col q-mt-xs flex items-center">
+      <q-toggle v-model="projectForm.issue_deletion_allowed" />
+    </div>
+  </div>
+
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
       :flat="!hasChanges"
@@ -240,6 +254,7 @@ const { hasChanges, init } = useFormChanges(projectForm, {
       identifier: val.identifier,
       public: unwrapValue(val.public),
       emoji: unwrapValue(val.emoji),
+      issue_deletion_allowed: val.issue_deletion_allowed,
     };
   },
 });
@@ -286,6 +301,7 @@ async function onSubmit() {
     identifier: projectForm.value.identifier,
     public: projectForm.value.public.value || false,
     emoji: projectForm.value.emoji.value,
+    issue_deletion_allowed: projectForm.value.issue_deletion_allowed,
   };
 
   await updateThisProject(payload);

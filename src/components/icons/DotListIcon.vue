@@ -26,6 +26,7 @@ export default defineComponent({
     color: {
       type: String,
       required: false,
+      default: () => 'currentColor',
     },
     width: {
       type: Number,

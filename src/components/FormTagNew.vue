@@ -54,83 +54,95 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+//core
 import { useRoute } from 'vue-router';
-import { computed, defineComponent, ref } from 'vue';
-import { useAiplanStore } from 'src/stores/aiplan-store';
+import { computed, ref } from 'vue';
+import { QDialog } from 'quasar';
+
+//icons
 import CloseIcon from './icons/CloseIcon.vue';
 import AddIcon from './icons/AddIcon.vue';
+
+//components
 import ColorPicker from 'src/modules/project-settings/labels/components/ColorPicker.vue';
+
+//composables
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
 
-export default defineComponent({
-  name: 'FormTagNew',
-  emits: ['close', 'add'],
-  props: ['projectId', 'workspaceId'],
-  components: { CloseIcon, AddIcon, ColorPicker },
-  setup(props, { emit }) {
-    const { getRandomColorFromPalette } = usePalette();
-    const api = useAiplanStore();
-    const route = useRoute();
-    const name = ref('');
-    const color = ref(getRandomColorFromPalette());
-    const isTagExistError = ref(false);
-    const showError = ref(false);
-    const myModal = ref(null);
+//services
+import { createProjectLabel } from 'src/modules/project-settings/labels/services/api';
 
-    const errorMessage = computed(() => {
-      if (showError.value) {
-        if (isTagExistError.value) {
-          return 'Данный тег уже существует в проекте';
-        } else if (name.value.length === 0) {
-          return 'Введите название';
-        }
-      }
-      return '';
-    });
+//types
+import { DtoLabelLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-    const clearFields = () => {
-      name.value = '';
-      color.value = getRandomColorFromPalette();
-      isTagExistError.value = false;
-    };
+const props = defineProps<{
+  projectId?: string;
+  workspaceId?: string;
+}>();
 
-    return {
-      onSubmit() {
-        showError.value = false;
-        api
-          .issueLabelCreate(
-            props.workspaceId ?? route.params.workspace,
-            props.projectId ?? route.params.project,
-            name.value,
-            color.value,
-          )
-          .then((d) => {
-            emit('add', d.data);
-            name.value = '';
-            color.value = '#000000';
-            isTagExistError.value = false;
-            myModal.value.hide();
-          })
-          .catch((error) => {
-            if (error.response && error.response.status === 409) {
-              isTagExistError.value = true; // Устанавливаем только при конфликте
-              showError.value = true;
-            } else {
-              console.error('Произошла ошибка при создании тега', error);
-            }
-          });
-      },
-      errorMessage,
-      showError,
-      color,
-      name,
-      api,
-      clearFields,
-      myModal,
-      ColorPicker,
-    };
-  },
+const emit = defineEmits<{
+  close: [];
+  add: [tag: DtoLabelLight];
+}>();
+
+//composables
+const { getRandomColorFromPalette } = usePalette();
+
+//core
+const route = useRoute();
+
+//refs
+const name = ref('');
+const color = ref(getRandomColorFromPalette());
+const isTagExistError = ref(false);
+const showError = ref(false);
+const myModal = ref<QDialog>();
+
+//computed
+const errorMessage = computed(() => {
+  if (showError.value) {
+    if (isTagExistError.value) {
+      return 'Данный тег уже существует в проекте';
+    } else if (name.value.length === 0) {
+      return 'Введите название';
+    }
+  }
+  return '';
 });
+
+//methods
+const clearFields = () => {
+  name.value = '';
+  color.value = getRandomColorFromPalette();
+  isTagExistError.value = false;
+};
+
+const onSubmit = () => {
+  showError.value = false;
+  createProjectLabel(
+    props.workspaceId ?? (route.params.workspace as string),
+    props.projectId ?? (route.params.project as string),
+    {
+      name: name.value,
+      color: color.value,
+    },
+  )
+    .then((d) => {
+      emit('add', d);
+      name.value = '';
+      color.value = '#000000';
+      isTagExistError.value = false;
+      myModal.value?.hide();
+    })
+    .catch((error) => {
+      if (error.response && error.response.status === 409) {
+        isTagExistError.value = true;
+        showError.value = true;
+      } else {
+        console.error('Произошла ошибка при создании тега', error);
+      }
+    });
+};
 </script>
 <style></style>

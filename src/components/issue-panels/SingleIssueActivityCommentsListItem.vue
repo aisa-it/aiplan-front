@@ -33,7 +33,9 @@
           :reply-comment="comment.original_comment"
           :members="members"
         />
-
+        <h6 v-if="comment.actor_detail" class="chat-message__name">
+          {{ getFullName(comment.actor_detail, 'comment') }}
+        </h6>
         <EditorTipTapV2
           :editor-id="'message-editor-' + comment.id"
           :model-value="comment.comment_html"
@@ -153,7 +155,7 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 // utils
 import aiplan from 'src/utils/aiplan';
 import { formatDateTimeWithDay } from 'src/utils/time';
-
+import { getFullName } from 'src/utils/helpers';
 // components
 import EditIcon from '../icons/EditIcon.vue';
 import CloseIcon from '../icons/CloseIcon.vue';
@@ -468,6 +470,12 @@ pre {
     z-index: 1;
     right: 0;
     left: auto;
+  }
+
+  &__name {
+    margin: 7px 0 0 !important;
+    font-size: 14px;
+    line-height: 21px;
   }
 
   :deep(.q-message-container) {

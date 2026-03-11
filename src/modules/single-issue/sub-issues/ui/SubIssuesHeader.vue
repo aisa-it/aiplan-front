@@ -11,10 +11,9 @@
       </h6>
     </div>
     <StatusLinearProgressBar
-      v-if="props.stateDistribution"
+      v-if="(stats.all_issues || 0) > 0"
       class="q-ml-sm"
-      :issues="props.subIssues"
-      :stateDistribution="props.stateDistribution"
+      :stats="stats"
     />
     <AddSubIssueButton
       :projectid="projectid ?? route.params.project"
@@ -36,7 +35,10 @@ import IssuesHeaderWrapper from 'src/modules/single-issue/ui/components/IssuesHe
 import StatusLinearProgressBar from 'src/components/progress-bars/StatusLinearProgressBar.vue';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { storeToRefs } from 'pinia';
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProject,
+  TypesSprintStats,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const route = useRoute();
 
@@ -62,6 +64,39 @@ const { currentIssueID } = storeToRefs(singleIssueStore);
 const refresh = () => {
   emits('refresh');
 };
+const stats = computed((): TypesSprintStats => {
+  const res: TypesSprintStats = {
+    completed: 0,
+    cancelled: 0,
+    in_progress: 0,
+    pending: 0,
+    all_issues: 0,
+  };
+
+  if (!props.subIssues || props.subIssues.length === 0) {
+    return res;
+  }
+
+  props.subIssues.forEach((issue) => {
+    switch (issue.state_detail?.group) {
+      case 'completed':
+        res.completed = (res.completed || 0) + 1;
+        break;
+      case 'cancelled':
+        res.cancelled = (res.cancelled || 0) + 1;
+        break;
+      case 'started':
+        res.in_progress = (res.in_progress || 0) + 1;
+        break;
+      default:
+        res.pending = (res.pending || 0) + 1;
+        break;
+    }
+    res.all_issues = (res.all_issues || 0) + 1;
+  });
+
+  return res;
+});
 </script>
 
 <style scoped lang="scss">

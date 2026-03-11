@@ -43,12 +43,10 @@
 
 <script lang="ts" setup>
 // core
-import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { getSubIssues } from 'src/modules/single-issue/sub-issues/services/api';
 // constants
 
@@ -75,16 +73,20 @@ const props = defineProps<{
   };
 }>();
 
-const userStore = useUserStore();
-const singleIssueStore = useSingleIssueStore();
+//core
 const route = useRoute();
-const { user } = storeToRefs(userStore);
+
+//store
+const singleIssueStore = useSingleIssueStore();
 const { currentIssueID } = storeToRefs(singleIssueStore);
+
+//refs
 const subIssues = ref();
 const stateDistribution = ref();
 const manualSortMode = ref(false);
 const isExpanded = ref(true);
 
+//methods
 const refresh = async () => {
   if (!currentIssueID.value) return;
   const { data } = await getSubIssues(

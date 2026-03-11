@@ -300,7 +300,7 @@ export const useProjectStore = defineStore('project-store', {
 
     projectLinkToClipboard(project_id: string) {
       navigator.clipboard.writeText(
-        `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${project_id}/issues`,
+        `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/projects/${project_id}`,
       );
     },
 
@@ -405,6 +405,21 @@ export const useProjectStore = defineStore('project-store', {
         this.projectProps = props;
         return props;
       } catch (e) {}
+    },
+
+    async getProjectStats(
+      workspaceSlug: string,
+      projectID: string,
+      query?: {
+        include_assignee_stats?: boolean;
+        include_label_stats?: boolean;
+        include_sprint_stats?: boolean;
+        include_timeline?: boolean;
+      },
+    ) {
+      return (
+        await projectsApi.getProjectStats(workspaceSlug, projectID, query)
+      ).data;
     },
   },
 });

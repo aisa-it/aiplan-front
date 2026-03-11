@@ -41,6 +41,15 @@
         <SettingsButton
           @click.stop="$router.push(`${props.row.slug}/workspace-settings`)"
         />
+        <q-btn
+          flat
+          dense
+          class="q-ml-sm"
+          style="font-size: 14px"
+          @click.stop="openDeleteDialog(props.row)"
+        >
+          <BinIcon color="#DC3E3E" />
+        </q-btn>
       </q-td>
     </template>
 
@@ -55,34 +64,88 @@
       </div>
     </template>
   </q-table>
+
+  <DeleteWsDialog
+    v-model="isDeleteDialogOpen"
+    :workspace="workspaceToDelete"
+    @success="onDeleteSuccess"
+    @error="onDeleteError"
+  />
 </template>
 
 <script setup lang="ts">
-import { toRefs, watch } from 'vue';
+//core
+import { toRefs, watch, ref } from 'vue';
 
+//stores
+import { useNotificationStore } from 'src/stores/notification-store';
+
+//types
+import { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+//config
+import { columns } from '../columnConfig';
+
+//api
+import { api } from '../services/api';
+
+//composables
+import { useTableWithPagination } from '../../composables/useTableWithPagination';
+import { useTableRowClick } from '../../composables/useTableRowClick';
+
+//icons
+import BinIcon from 'src/components/icons/BinIcon.vue';
+
+//components
 import AvatarImage from 'src/components/AvatarImage.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import SettingsButton from '../../ui/SettingsButton.vue';
-
-import { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-
-import { columns } from '../columnConfig';
-
-import { api } from '../services/api';
-
-import { useTableWithPagination } from '../../composables/useTableWithPagination';
-import { useTableRowClick } from '../../composables/useTableRowClick';
+import DeleteWsDialog from '../components/ui/DeleteWsDialog.vue';
 
 const props = defineProps<{ searchQuery: string | undefined }>();
 
 const { searchQuery } = toRefs(props);
 
+//stores
+const { setNotificationView } = useNotificationStore();
+
+//composables
 const { loading, rows, pagination, refresh } =
   useTableWithPagination<DtoWorkspaceWithCount>(api.getWorkspaces);
 
 const { onRowClick } = useTableRowClick();
+
+//ref
+const isDeleteDialogOpen = ref(false);
+const workspaceToDelete = ref<DtoWorkspaceWithCount>();
+
+//methods
+const openDeleteDialog = (workspace: DtoWorkspaceWithCount) => {
+  workspaceToDelete.value = workspace;
+  isDeleteDialogOpen.value = true;
+};
+
+const onDeleteSuccess = () => {
+  isDeleteDialogOpen.value = false;
+  workspaceToDelete.value = undefined;
+  setNotificationView({
+    open: true,
+    type: 'success',
+    customMessage: 'Пространство успешно удалено',
+  });
+  refresh({ pagination: pagination.value }, searchQuery.value);
+};
+
+const onDeleteError = () => {
+  isDeleteDialogOpen.value = false;
+  setNotificationView({
+    open: true,
+    type: 'error',
+    customMessage: 'Ошибка при удалении пространства',
+  });
+};
 
 watch(searchQuery, (newVal) => {
   refresh({ pagination: pagination.value }, newVal);

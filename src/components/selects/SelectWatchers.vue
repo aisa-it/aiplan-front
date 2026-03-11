@@ -153,6 +153,7 @@ const props = withDefaults(
     currentMember: any;
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
+    debounced?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -201,6 +202,17 @@ const pagination = {
   desc: false,
   search_query: '',
 };
+
+const DEBOUNCE_TIME = 1000;
+const debouncedProjectWatchersUpdate = debounce(
+  (e: any) => updateProjectWatchers(e),
+  DEBOUNCE_TIME,
+);
+
+const debouncedDocWatchersUpdate = debounce(
+  (e: any) => updateDocWatchers(e),
+  DEBOUNCE_TIME,
+);
 
 //computeds
 const options = computed(() => {
@@ -333,9 +345,11 @@ const updateDocWatchers = async (e: any) => {
 const handleUpdateWatchers = async (e) => {
   watcherid.value = e;
   if (props.projectid) {
-    updateProjectWatchers(e);
+    props.debounced
+      ? debouncedProjectWatchersUpdate(e)
+      : updateProjectWatchers(e);
   } else {
-    updateDocWatchers(e);
+    props.debounced ? debouncedDocWatchersUpdate(e) : updateDocWatchers(e);
   }
 };
 

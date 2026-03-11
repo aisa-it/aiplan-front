@@ -77,11 +77,6 @@ h6 {
   position: relative;
   margin-left: -10px;
 }
-.overlapping-kanban {
-  background-color: $bg-color;
-  position: relative;
-  margin-left: -10px;
-}
 
 .chat-message {
   .q-message-text {
@@ -771,25 +766,11 @@ thead th {
     0px 2px 1px -1px #0a0d2433,
     0px 0px 1px 0px #0a0d2433;
 }
-.elevator-6 {
-  box-shadow:
-    0px 1px 18px 0px #0a0d241f,
-    0px 6px 10px 0px #0a0d2424,
-    0px 3px 5px -1px #0a0d2433,
-    0px 0px 1px 0px #0a0d2433;
-}
 .elevator-14 {
   box-shadow:
     0px 5px 26px 4px #0a0d241f,
     0px 14px 21px 2px#0A0D2424,
     0px 7px 9px -4px #0a0d2433,
-    0px 0px 1px 0px #0a0d2433;
-}
-.elevator-24 {
-  box-shadow:
-    0px 9px 46px 8px #0a0d241f,
-    0px 24px 38px 3px#0A0D2424,
-    0px 11px 15px -7px #0a0d2433,
     0px 0px 1px 0px #0a0d2433;
 }
 // --------------------- date-picker ---------------------
@@ -962,12 +943,6 @@ select:-ms-autofill {
   }
 }
 
-.draggable-modal {
-  border-radius: 8px;
-  border: 4px solid $bg-color;
-  background-color: $bg-color;
-}
-
 .level-0 {
   background-color: $heatmap-level-0;
 }
@@ -1112,22 +1087,6 @@ select:-ms-autofill {
   background-color: $bg-color;
   box-shadow: -1px 5px 5px 5px rgba(0, 0, 0, 0.15);
 }
-.border-form {
-  border: 1px solid #8b8b98;
-  border-radius: 4px;
-  padding-left: 10px;
-  padding-right: 1px;
-  transition:
-    border 0.5s ease,
-    transform 0.3s ease;
-}
-
-.border-form:focus-within {
-  border: 1px solid #0058b6 !important;
-}
-.border-form:hover {
-  border: 1px solid white;
-}
 .notification-date__popup {
   @media (max-width: 768px) {
     background-color: $bg-color;
@@ -1142,15 +1101,6 @@ select:-ms-autofill {
   padding: 8px 10px;
   background-color: $bg-color;
   border: 1px solid $dark-border-color;
-}
-.create-notification-btn {
-  border: none !important;
-  @media (max-width: 768px) {
-    border: 1px solid $info !important;
-    height: 40px;
-    width: 40px;
-    padding: 0;
-  }
 }
 .dragging-state {
   opacity: 0.8;
