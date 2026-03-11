@@ -4,18 +4,15 @@
     @show="onDialogShow"
     @hide="onDialogHide"
   >
-    <q-card class="inner-modal-card">
+    <q-card class="doc-hierarchy-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Иерархия документов</h6>
 
-        <div
-          v-if="pendingMoves.length > 0"
-          class="text-caption text-warning"
-        >
+        <div v-if="pendingMoves.length > 0" class="text-caption text-warning">
           Перемещено документов: {{ pendingMoves.length }}
         </div>
 
-        <ul class="sortable" ref="rootSortableRef">
+        <ul class="sortable visible-scroll" ref="rootSortableRef">
           <HierarchyDocDialogItem
             v-for="item in hierarchyRoots"
             :key="item.id"
@@ -66,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onBeforeUnmount } from 'vue';
 import Sortable from 'sortablejs';
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -286,6 +283,11 @@ const handleSortableEnd = (evt: any) => {
     fromEl: evt.from,
     toEl: evt.to,
   });
+
+  // Обновление дерева sortables для корректности данных + возможность вкладывать элементы в только что перенесенные
+  nextTick(() => {
+    initAllSortables();
+  });
 };
 
 // Функции диалогового окна
@@ -334,6 +336,7 @@ const onDialogHide = () => {
   destroyAllSortables();
   docStore.isHierarchyOpened = false;
   pendingMoves.value = [];
+  hierarchyRoots.value = [];
 };
 
 // Функции Sortable
@@ -371,9 +374,27 @@ const initAllSortables = () => {
     sortableInstances.push(sortable);
   });
 };
+
+onBeforeUnmount(() => {
+  destroyAllSortables();
+});
 </script>
 
 <style lang="scss" scoped>
+.visible-scroll {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
+}
+
+.doc-hierarchy-card {
+  border-radius: 16px;
+  padding: 8px;
+}
+
 .nested {
   user-select: none;
 
@@ -384,8 +405,13 @@ const initAllSortables = () => {
 
 .sortable {
   margin-bottom: 0;
-  padding: 0 0 0 16px;
+  padding: 0;
   list-style-type: none;
+  max-height: 50vh;
+  max-width: 70vh;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 :deep(.sortable-ghost) {

@@ -14,7 +14,7 @@
     </div>
 
     <ul
-      :style="{ maxHeight: isExpanded ? '9000px' : '0' }"
+      :style="{ maxHeight: `${adaptiveMaxHeight}px` }"
       class="sortable nested"
     >
       <HierarchyDocDialogItem
@@ -53,6 +53,14 @@ const isExpanded = ref<boolean>(false);
 
 const hasChildren = computed<boolean | undefined>(() => {
   return !!props.item.has_child_docs;
+});
+
+const adaptiveMaxHeight = computed<number>(() => {
+  if (!isExpanded.value) {
+    return hasChildren.value ? 0 : 33;
+  } else {
+    return 9000;
+  }
 });
 
 // Догрузка вложенных документов
