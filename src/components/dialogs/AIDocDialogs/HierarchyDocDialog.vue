@@ -338,9 +338,7 @@ const initAllSortables = () => {
     const sortable = new Sortable(list as HTMLElement, {
       group: {
         name: 'sortable',
-        put: (
-          to: Sortable,
-        ) => {
+        put: (to: Sortable) => {
           // Запрет на дроп в свернутый список
           if (to.el.classList.contains('sortable-collapsed')) {
             return false;
@@ -390,6 +388,12 @@ watch(
 .doc-hierarchy-card {
   border-radius: 16px;
   padding: 8px;
+  width: 70vw;
+  overflow: hidden;
+
+  @media screen and (width < 600px) {
+    width: 90vw;
+  }
 }
 
 .nested {
@@ -405,10 +409,8 @@ watch(
   padding: 0;
   list-style-type: none;
   max-height: 50vh;
-  max-width: 70vh;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: auto;
 }
 
 :deep(.sortable-ghost) {

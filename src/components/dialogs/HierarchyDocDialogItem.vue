@@ -121,14 +121,19 @@ watch(
 
 <style scoped lang="scss">
 .sortable {
+  padding-left: 16px;
+
   &-item {
     list-style-type: none;
+    width: fit-content;
+    min-width: 100%;
   }
 }
 
 .item-title {
   padding: 2px 8px 2px 16px;
   margin-bottom: 8px;
+  max-width: 480px;
 }
 
 .item-row {
