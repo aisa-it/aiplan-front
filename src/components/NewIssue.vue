@@ -1,36 +1,49 @@
 <template>
-  <q-btn
-    :class="Screen.width > 720 ? 'primary-btn-sm' : 'primary-btn-only-icon-sm'"
-    flat
-    dense
-    no-caps
-    no-wrap
-    :disable="isDisabled"
-    @click="addIssue"
-    data-tour="create-issue"
-    :style="activeGuid === 1 ? { opacity: '1 !important' } : {}"
-  >
-    <AddIcon :color="'#fff'" />
-    <span v-if="Screen.width > 720"> Создать </span>
-    <HintTooltip v-if="!isAIDoc && workspaceProjects.length === 0">
-      Создать задачу можно только если есть хотя бы один проект
-    </HintTooltip>
-  </q-btn>
-  <NewIssueDialog
-    v-if="isNewIssueDialogOpened"
-    v-model="isNewIssueDialogOpened"
-    @on-project-created="isProjectCreateOpen = true"
-    @update="refreshIssues = true"
-  />
-  <NewProjectDialog v-if="isProjectCreateOpen" v-model="isProjectCreateOpen" />
-  <CreateDocPageDialog v-if="isDocCreateOpen" v-model="isDocCreateOpen" />
+  <template v-if="!isDialog">
+    <q-btn
+      :class="(isMobile || Screen.width <= 720) ? 'primary-btn-only-icon-sm q-mr-sm' : 'primary-btn-sm'"
+      flat
+      dense
+      no-caps
+      no-wrap
+      :disable="isDisabled"
+      @click="addIssue"
+      data-tour="create-issue"
+      :style="activeGuid === 1 ? { opacity: '1 !important' } : {}"
+    >
+      <AddIcon :color="'#fff'" />
+      <span v-if="!isMobile && Screen.width > 720"> Создать </span>
+      <HintTooltip v-if="!isAIDoc && workspaceProjects.length === 0">
+        Создать задачу можно только если есть хотя бы один проект
+      </HintTooltip>
+    </q-btn>
+    <NewIssueDialog
+      v-if="!isMobile && isNewIssueDialogOpened"
+      v-model="isNewIssueDialogOpened"
+      @on-project-created="isProjectCreateOpen = true"
+      @update="refreshIssues = true"
+    />
+    <NewProjectDialog v-if="!isMobile && isProjectCreateOpen" v-model="isProjectCreateOpen" />
+    <CreateDocPageDialog v-if="!isMobile && isDocCreateOpen" v-model="isDocCreateOpen" />
+  </template>
+  <template v-else>
+    <NewIssueDialog
+      v-if="isNewIssueDialogOpened"
+      v-model="isNewIssueDialogOpened"
+      @on-project-created="isProjectCreateOpen = true"
+      @update="refreshIssues = true"
+      @hide="closeDialog"
+    />
+    <NewProjectDialog v-if="isProjectCreateOpen" v-model="isProjectCreateOpen" @hide="emit('closeDialog')" />
+    <CreateDocPageDialog v-if="isDocCreateOpen" v-model="isDocCreateOpen" @hide="closeDialog" />
+  </template>
 </template>
 
 <script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, toRef, watch } from 'vue';
 import { useRoute } from 'vue-router';
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -59,6 +72,16 @@ const isProjectCreateOpen = ref(false);
 const isDocCreateOpen = ref(false);
 const isNewIssueDialogOpened = ref(false);
 
+const props = defineProps<{
+  isMobile?: boolean;
+  isDialog?: boolean;
+  showDialog?: boolean;
+}>();
+
+const emit = defineEmits(['closeDialog', 'setDisable']);
+
+const isMobile = toRef(props.isMobile);
+
 // computed
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 
@@ -85,4 +108,22 @@ const addIssue = () => {
     isNewIssueDialogOpened.value = true;
   }
 };
+
+const closeDialog = () => {
+  emit('closeDialog');
+};
+
+watch(() => props.showDialog, () => {
+  if (props.showDialog) {
+    addIssue();
+  }
+});
+
+watch(() => isDisabled.value, () => {
+  emit('setDisable', isDisabled.value)
+})
+
+onMounted(() => {
+  emit('setDisable', isDisabled.value)
+})
 </script>

@@ -39,7 +39,7 @@
 
 <script lang="ts" setup>
 // core
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDialogPluginComponent } from 'quasar';
 
@@ -59,6 +59,7 @@ const emit = defineEmits([
   ...useDialogPluginComponent.emits,
   'update',
   'onProjectCreated',
+  'hide',
 ]);
 
 // plugins
@@ -98,4 +99,8 @@ const createProject = () => {
   onDialogCancel();
   emit('onProjectCreated');
 };
+
+onBeforeUnmount(() => {
+  emit('hide');
+});
 </script>
