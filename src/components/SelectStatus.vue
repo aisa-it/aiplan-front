@@ -13,7 +13,13 @@
     :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     :style="{ width: isAdaptiveSelect ? '' : '160px' }"
     dense
-    @popup-show="() => refresh()"
+    @popup-show="
+      () => {
+        refresh();
+        $emit('popup-show');
+      }
+    "
+    @popup-hide="$emit('popup-hide')"
   >
     <template v-slot:option="scope">
       <q-item
@@ -107,7 +113,14 @@ export default defineComponent({
     isDisabled: { type: Boolean, required: false, default: () => false },
     label: { type: String, required: false, default: () => '' },
   },
-  emits: ['setStatus', 'update-initial-status', 'update:status', 'refresh'],
+  emits: [
+    'setStatus',
+    'update-initial-status',
+    'update:status',
+    'refresh',
+    'popup-show',
+    'popup-hide',
+  ],
   setup(props, { emit }) {
     const api = useAiplanStore();
     const statesStore = useStatesStore();
