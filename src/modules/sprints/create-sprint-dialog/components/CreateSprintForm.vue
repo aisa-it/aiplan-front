@@ -50,6 +50,7 @@
       <p class="q-mb-md">Цель спринта:</p>
       <EditorTipTapV2
         v-model="description"
+        :disableImages="true"
         editor-id="create-sprint-editor"
         class="issue-panel__editor col-auto q-mb-lg"
         :class="{ 'is-mobile': isMobile }"
