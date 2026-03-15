@@ -399,6 +399,24 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       );
     },
 
+    async getIssueCommentHistory(
+      projectId: string,
+      issueId: string,
+      commentId: string,
+      offset?: number,
+      limit?: number,
+    ) {
+      return await api.get(
+        `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params['workspace']}/projects/${projectId}/issues/${issueId}/comments/${commentId}/history`,
+        {
+          params: {
+            offset: offset,
+            limit: limit,
+          },
+        },
+      );
+    },
+
     // ------------- Exact issue activities -------------
 
     async getIssueActivitiesList(

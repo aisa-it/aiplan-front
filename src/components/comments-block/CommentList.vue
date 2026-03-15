@@ -11,6 +11,7 @@
         @handle-delete="changeCommit(comment, 'delete')"
         @handle-edit="changeCommit(comment, 'edit')"
         @handle-reply="handleReply(comment)"
+        @handle-history="openCommentHistory(comment)"
         @add-reaction="handleAddReaction(comment, $event)"
         @delete-reaction="handleDeleteReaction(comment, $event)"
       />
@@ -28,6 +29,12 @@
       :comment="currentCommitUsage"
       @on-delete="handleDeleteComment()"
     />
+    <CommentHistoryDialog
+      v-model="isOpenCommentHistoryDialog"
+      :comment="currentCommitUsage"
+      :members="members"
+      :context="'doc'"
+    />
   </q-list>
 </template>
 
@@ -35,6 +42,7 @@
 import { ref } from 'vue';
 import CommentEditDialog from './dialogs/CommentEditDialog.vue';
 import CommentDeleteDialog from './dialogs/CommentDeleteDialog.vue';
+import CommentHistoryDialog from '../dialogs/CommentHistoryDialog.vue';
 import CommentListItem from './items/CommentListItem.vue';
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { useAiDocStore } from 'src/stores/aidoc-store';
@@ -57,8 +65,9 @@ const emit = defineEmits([
 
 const aidocStore = useAiDocStore();
 
-const isOpenCommentEditDialog = ref(false);
-const isOpenCommentDeleteDialog = ref(false);
+const isOpenCommentEditDialog = ref<boolean>(false);
+const isOpenCommentDeleteDialog = ref<boolean>(false);
+const isOpenCommentHistoryDialog = ref<boolean>(false);
 const currentChangeCommitId = ref();
 const currentCommitUsage = ref({});
 
@@ -95,6 +104,12 @@ const handleDeleteComment = async () => {
     commentId: currentChangeCommitId.value,
   };
   emit('deleteCommit', deleteBody);
+};
+
+const openCommentHistory = (comment: any) => {
+  currentCommitUsage.value = {};
+  currentCommitUsage.value = comment;
+  isOpenCommentHistoryDialog.value = true;
 };
 
 const handleAddReaction = async (comment: any, reaction: string) => {
