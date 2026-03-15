@@ -31,6 +31,16 @@
             map-options
           />
 
+          <div v-if="isLinkType" class="q-mt-md">
+            <q-input
+              v-model="linkUrl"
+              class="base-input"
+              label="Ссылка (URL)"
+              placeholder="https://example.com"
+              dense
+            />
+          </div>
+
           <div v-if="isSelectType" class="q-mt-md">
             <span class="text-grey-7">Варианты выбора:</span>
             <div class="q-mt-sm">
@@ -140,6 +150,9 @@ const form = ref<PropertyTemplate>({
 
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+const isLinkType = computed(() => form.value.type === 'link');
+
+const linkUrl = ref('');
 const hasEmptyOptions = computed(() => {
   if (!isSelectType) return false;
   if (isSelectType && form.value.options.length <= 0) return true;
@@ -156,6 +169,7 @@ const typeOptions = [
   { label: 'Строка', value: 'string' },
   { label: 'Флаг', value: 'boolean' },
   { label: 'Список', value: 'select' },
+  { label: 'Ссылка', value: 'link' },
 ];
 
 //methods
@@ -163,6 +177,12 @@ const onSubmit = () => {
   const data = { ...form.value };
   if (data.type !== 'select') {
     delete data.options;
+  }
+  if (data.type === 'link') {
+    data.link = {
+      url: linkUrl.value,
+      name: '',
+    };
   }
   emit('submit', data);
 };
@@ -184,10 +204,11 @@ watch(
   (val) => {
     if (val) {
       if (props.editItem) {
-        form.value = { 
+        form.value = {
           ...props.editItem,
           options: props.editItem.options || [],
         };
+        linkUrl.value = props.editItem.link_url ?? ''
       } else {
         form.value = {
           name: '',
@@ -195,6 +216,7 @@ watch(
           only_admin: true,
           options: [],
         };
+        linkUrl.value = '';
       }
     }
   },

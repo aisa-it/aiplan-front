@@ -47,6 +47,27 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'link'">
+            <LinkItem
+              :link="{
+                id: prop.id,
+                title: prop.name,
+                url: prop.value,
+              }"
+              disableDelete
+              @update="isLinkOpenDialog = true; linkToUpdate = {
+                id: prop.id,
+                title: prop.name,
+                url: prop.value,
+              }"
+            />
+            <LinkDialog
+              v-model="isLinkOpenDialog"
+              :link="linkToUpdate"
+              @edit="(link) => updateValue(prop, link)"
+            />
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
@@ -95,6 +116,8 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 //components
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
+import LinkItem from 'src/components/LinkItem.vue';
+import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 
 //props
 const props = defineProps<{
@@ -111,7 +134,8 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 //variables
 const properties = ref<DtoIssueProperty[]>([]);
 const isLoading = ref(false);
-
+const isLinkOpenDialog = ref(false);
+const linkToUpdate = ref();
 //methods
 const fetchData = async () => {
   if (!props.issueId) return;
