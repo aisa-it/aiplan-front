@@ -159,7 +159,6 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       },
       stopRefresh?: boolean,
     ): Promise<DtoProjectLight[] | void> {
-      console.log(workspaceSlug);
       if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
       return projectsApi.getProjectList(workspaceSlug, filters).then((res) => {
