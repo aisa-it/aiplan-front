@@ -20,7 +20,7 @@
   >
     <template v-slot:before-options>
       <SearchInput
-        v-if="offSearch"
+        v-if="!offSearch"
         v-model="searchQuery"
         @update:model-value="searchMembers"
       />
@@ -36,7 +36,7 @@
 
     <template v-slot:no-option>
       <SearchInput
-        v-if="offSearch"
+        v-if="!offSearch"
         v-model="searchQuery"
         @update:model-value="searchMembers"
       />
@@ -57,12 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 import {
   DaoPaginationResponse,
   DtoProjectMemberLight,
+  DtoUserLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { filterAvailableMembers } from 'src/utils/filters';
 import { debounce } from 'quasar';
@@ -70,7 +71,7 @@ import SelectedUsersList from './components/SelectedUsersList.vue';
 import { Member, Pagination } from './types/types';
 import UserCard from './components/UserCard.vue';
 import { memberFullName } from './helpers/helpers';
-import SearchInput from '../SearchInput.vue';
+import SearchInput from './components/SearchInput.vue';
 
 type Members = Member[];
 
@@ -80,7 +81,8 @@ const props = defineProps<{
   isDisabled?: boolean;
   offPinCurrentUser?: boolean;
   offSearch?: boolean;
-  modelValue: DtoProjectMemberLight[];
+  modelValue: Members;
+  defaultMembers?: DtoUserLight[];
   refreshMembersFunc: (
     pagination: Pagination,
     searchQuery?: string,
@@ -90,7 +92,7 @@ const props = defineProps<{
       })
     | undefined
   >;
-  onChange?: (members: Member[]) => Promise<void> | void;
+  onChange?: (members: Members) => Promise<void> | void;
 }>();
 
 const emits = defineEmits<{
@@ -146,9 +148,9 @@ const selectedMembers = computed({
   get() {
     return props.modelValue;
   },
-  set(newMembersId) {
-    if (!newMembersId) return;
-    emits('update:modelValue', newMembersId);
+  set(newMembers) {
+    if (!newMembers) return;
+    emits('update:modelValue', newMembers);
     emits('refresh');
   },
 });
@@ -172,9 +174,19 @@ const options = computed(() => {
     selectedMembers.value,
   );
 
-  if (searchQuery.value) return activeMembers;
+  const selectedIds = new Set(selectedMembers.value.map((m) => m.member?.id));
 
-  return pinCurrentUserInMembersList(activeMembers);
+  const selected = activeMembers.filter((m) => selectedIds.has(m.member?.id));
+
+  const unselected = activeMembers.filter(
+    (m) => !selectedIds.has(m.member?.id),
+  );
+
+  const result = [...selected, ...unselected];
+
+  if (searchQuery.value) return result;
+
+  return pinCurrentUserInMembersList(result);
 });
 
 const selectWatcherRef = ref();
@@ -195,7 +207,28 @@ const loadMembersOnScroll = async (e?: any) => {
   }
 };
 
-onMounted(() => {
-  refresh();
+function applyDefaultMembers() {
+  const ids = new Set(props.defaultMembers.map((u) => u.id));
+
+  selectedMembers.value = members.value.filter((m) => ids.has(m.member?.id));
+}
+
+onMounted(async () => {
+  await refresh();
+  applyDefaultMembers();
 });
+
+watch(
+  () => props.defaultMembers,
+  () => {
+    applyDefaultMembers();
+  },
+);
+
+watch(
+  () => props.refreshMembersFunc,
+  () => {
+    refresh();
+  },
+);
 </script>

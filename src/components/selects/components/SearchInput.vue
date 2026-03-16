@@ -7,7 +7,7 @@
       autofocus
       label="Поиск"
       class="base-input"
-      v-model="modelValue"
+      :model-value="modelValue"
       @update:model-value="
         (newModelValue) => emits('update:modelValue', String(newModelValue))
       "
