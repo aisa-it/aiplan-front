@@ -11,11 +11,11 @@
         rounded
         class="chat-message__avatar"
         :class="{ 'chat-message__avatar-author': isAuthor }"
-        :tooltip="handleTooltip(comment.actor_update)"
-        :text="handleTooltipText(comment.actor_update)"
-        :image="comment.actor_update.avatar_id"
+        :tooltip="handleTooltip(comment.actor_update!)"
+        :text="handleTooltipText(comment.actor_update!)"
+        :image="comment.actor_update?.avatar_id"
         :member="comment.actor_update"
-        @click="navigateToActivityPage(comment.actor_update.id)"
+        @click="navigateToActivityPage(comment.actor_update?.id)"
       />
     </template>
 
@@ -23,7 +23,7 @@
       <div class="chat-message-wrapper">
         <EditorTipTapV2
           :editor-id="'message-editor-' + comment.comment_id"
-          :model-value="comment.comment_html"
+          :model-value="comment.comment_html ? comment.comment_html : ''"
           :can-edit="false"
           read-only-editor
           :members="members"
@@ -33,8 +33,8 @@
     </template>
 
     <template v-slot:stamp>
-      <p class="stamp-text"
-        >{{ formatDateTimeWithDay(comment.created_at) }}
+      <p v-if="comment.created_at" class="stamp-text">
+        {{ formatDateTimeWithDay(comment.created_at) }}
         <span v-if="edited">изменено</span>
         <HintTooltip>{{
           formatDateTimeWithDay(comment.created_at)
@@ -56,12 +56,16 @@ import aiplan from 'src/utils/aiplan';
 import { formatDateTimeWithDay } from 'src/utils/time';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
-import type { IIssueCommentHistory } from '../dialogs/CommentHistoryDialog.vue';
-import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoCommentHistory,
+  DtoProjectMember,
+  DtoProjectMemberLight,
+  DtoUserLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  comment: IIssueCommentHistory;
-  members?: any[];
+  comment: DtoCommentHistory;
+  members?: DtoProjectMember[] | DtoProjectMemberLight[];
   edited: boolean;
 }>();
 
@@ -70,7 +74,7 @@ const { user } = useUserStore();
 const { navigateToActivityPage } = useUserActivityNavigation();
 
 const isAuthor = computed(() => {
-  return user.id === props.comment.actor_update.id;
+  return user.id === props.comment.actor_update?.id;
 });
 
 const handleTooltip = (detail: DtoUserLight): string => {

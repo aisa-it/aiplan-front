@@ -107,7 +107,6 @@ const handleDeleteComment = async () => {
 };
 
 const openCommentHistory = (comment: any) => {
-  currentCommitUsage.value = {};
   currentCommitUsage.value = comment;
   isOpenCommentHistoryDialog.value = true;
 };

@@ -128,15 +128,12 @@ export const useAiDocStore = defineStore('aidoc-store', {
       offset?: number,
       limit?: number,
     ) {
-      return await api.get(
-        `/api/auth/workspaces/${workspaceSlug}/doc/${docId}/comments/${commentId}/history`,
-        {
-          params: {
-            offset: offset,
-            limit: limit,
-          },
-        },
-      );
+      return (
+        await docApi.getDocCommentUpdateList(workspaceSlug, docId, commentId, {
+          offset: offset,
+          limit: limit,
+        })
+      ).data;
     },
 
     async copyComment(comment_id: string) {
