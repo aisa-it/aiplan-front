@@ -1,12 +1,12 @@
 <template>
-  <div class="q-mt-md">
-    <q-card class="column no-wrap" style="width: 100%">
-      <q-card-section class="row items-center q-pb-none">
+  <div class="workflow-tab">
+    <q-card class="workflow-tab__card column no-wrap">
+      <q-card-section class="row items-center q-pa-none">
         <div class="text-h6">Бизнес процесс</div>
         <q-space />
       </q-card-section>
 
-      <q-card-section class="q-pt-sm q-pb-none">
+      <q-card-section v-if="!isMobile" class="q-pt-sm q-pb-none">
         <q-banner
           rounded
           style="
@@ -27,7 +27,7 @@
         </q-banner>
       </q-card-section>
 
-      <q-card-section class="q-pa-none" style="height: 70vh; min-height: 520px">
+      <q-card-section class="workflow-tab__diagram q-pa-none">
         <WorkflowFlowDiagram ref="diagramRef" :initial-flow="project?.states_flow" />
       </q-card-section>
 
@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useProjectStore } from 'src/stores/project-store';
@@ -47,14 +48,17 @@ import WorkflowFlowDiagram from './WorkflowFlowDiagram.vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 const route = useRoute();
+const $q = useQuasar();
 const projectStore = useProjectStore();
 const { setNotificationView } = useNotificationStore();
 const { project } = storeToRefs(projectStore);
 
-const diagramRef = ref(null);
+const isMobile = $q.platform.is.mobile && Screen.lt.md;
+
+const diagramRef = ref<InstanceType<typeof WorkflowFlowDiagram> | null>(null);
 
 const onSave = async () => {
-  const flowData = diagramRef.value?.getFlowData();
+  const flowData = diagramRef.value?.getFlowData?.();
   try {
     await projectStore.updateProjectInfo(
       route.params.workspace as string,
@@ -71,3 +75,31 @@ const onSave = async () => {
   }
 };
 </script>
+
+<style scoped>
+.workflow-tab {
+  width: 100%;
+  height: calc(100vh - 250px);
+  overflow: hidden;
+  display: flex;
+}
+
+.workflow-tab__card {
+  width: 100%;
+  height: 100%;
+}
+
+.workflow-tab__diagram {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (max-width: 384px) {
+  .workflow-tab {
+    width: 100%;
+    height: calc(100vh - 270px);
+    overflow: hidden;
+    display: flex;
+  }
+}
+</style>
