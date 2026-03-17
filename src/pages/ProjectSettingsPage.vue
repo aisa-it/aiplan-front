@@ -128,6 +128,14 @@ const activeTab = computed(() => {
             'src/modules/project-settings/custom-properties/ui/CustomPropertiesSettings.vue'
           ),
       );
+
+    case 9:
+      return asyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/workflow/WorkflowProjectSettings.vue'
+          ),
+      );
     default:
       return asyncImport(
         () =>
@@ -176,6 +184,10 @@ const listTabs = computed(() => {
       name: 8,
       label: 'Параметры',
       allowedRoles: ['owner', 'admin'],
+    },
+    {
+      name: 9,
+      label: 'Бизнес-процессы',
     },
   ];
 

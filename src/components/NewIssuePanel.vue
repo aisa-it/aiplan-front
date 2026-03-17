@@ -193,10 +193,11 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              v-model="sprints"
+              :model-value="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-            />
+              @update-selected ="updateCurrentSprints"
+              />
           </div>
         </div>
 
@@ -306,6 +307,7 @@ import {
 
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+import { useRouter } from 'vue-router';
 
 // components
 import SelectDate from './SelectDate.vue';
@@ -358,6 +360,7 @@ const emits = defineEmits<{
 
 //composables
 const route = useRoute();
+const router = useRouter();
 const {
   options: templatesOptions,
   loading: loadingTemplates,
@@ -380,9 +383,9 @@ const { hasPermissionByWorkspace } = useRolesStore();
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
-
 const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(issuesStore);
+const { sprint } = storeToRefs(sprintStore);
 
 //variables
 const projects = ref<DtoProject[]>([]);
@@ -395,7 +398,7 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>([]);
+const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -631,6 +634,10 @@ const handleClearIssueTemplate = () => {
   editorInstance.value?.chain().focus().clearContent();
   selectedIssueTemplate.value = null;
 };
+
+const updateCurrentSprints = (value: DtoSprintLight[]) => {
+  sprints.value = value;
+}
 
 //hooks
 onMounted(async () => {
