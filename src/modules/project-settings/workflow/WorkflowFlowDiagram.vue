@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { VueFlow, useVueFlow, Handle, type Node, type Edge } from '@vue-flow/core';
 import { MarkerType } from '@vue-flow/core';
 import { useProjectStore } from 'src/stores/project-store';
@@ -91,10 +91,12 @@ const projectStore = useProjectStore();
 const isDragging = ref(false);
 const route = useRoute();
 
-const { addEdges, onConnect, onEdgeClick, removeEdges } = useVueFlow();
+const { addEdges, onConnect, removeEdges, onEdgeDoubleClick } = useVueFlow();
 
 const nodes = ref<Node[]>([]);
 const edges = ref<Edge[]>([]);
+
+const CIRCLE_NODE_ID = '00000000-0000-0000-0000-000000000000';
 
 onMounted(async () => {
   const data = await projectStore.getProjectStatuses(
@@ -114,9 +116,9 @@ onMounted(async () => {
   };
 
   nodes.value.push({
-    id: '00000000-0000-0000-0000-000000000000',
+    id: CIRCLE_NODE_ID,
     type: 'circle',
-    position: getSavedPosition('00000000-0000-0000-0000-000000000000') ?? (() => {
+    position: getSavedPosition(CIRCLE_NODE_ID) ?? (() => {
       const el = document.querySelector('.flow-container');
       return { x: (el?.clientWidth ?? 800) / 2.2, y: (el?.clientHeight ?? 300) / 4 };
     })(),
@@ -158,6 +160,13 @@ onMounted(async () => {
 });
 
 onConnect((connection) => {
+  // Запрещаем соединение "в направлении кружка" (кружок не может быть target).
+  if (connection.target === CIRCLE_NODE_ID) {
+    draggingEdge.value = null;
+    isDragging.value = false;
+    return;
+  }
+
   if (draggingEdge.value) {
     if (
       connection.source === draggingEdge.value.sourceNodeId &&
@@ -204,9 +213,7 @@ onConnect((connection) => {
 
 const draggingEdge = ref();
 
-onEdgeClick(({ edge }) => {
-  console.log('Клик по ребру:', edge);
-
+onEdgeDoubleClick(({ edge }) => {
   draggingEdge.value = {
     id: edge.id,
     sourceNodeId: edge.source,
@@ -216,7 +223,9 @@ onEdgeClick(({ edge }) => {
 
   removeEdges(edge.id);
 
-  startConnectionFromHandle(edge.source, edge.sourceHandle);
+  nextTick(() => {
+    startConnectionFromHandle(edge.source, edge.sourceHandle);
+  });
 });
 
 const startConnectionFromHandle = (
