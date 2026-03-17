@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, inject, onMounted, computed } from 'vue';
+import { ref, watch, inject, onMounted, onBeforeMount, computed } from 'vue';
 import ArrowUp from './icons/ArrowUp.vue';
 import { EventBus, Screen } from 'quasar';
 import { useExpansionItemResize } from 'src/composables/useExpansionItemResize';
@@ -92,10 +92,16 @@ const toggleDropdown = () => {
   isExpanded.value = !isExpanded.value;
 };
 
+const handleOpen = (name) => {
+  if (name !== props.itemName) isExpanded.value = false;
+};
+
 onMounted(() => {
-  bus.on('open', (name) => {
-    if (name !== props.itemName) isExpanded.value = false;
-  });
+  bus.on('open', handleOpen);
+});
+
+onBeforeMount(() => {
+  bus.off('open', handleOpen);
 });
 
 const defineClass = () => {

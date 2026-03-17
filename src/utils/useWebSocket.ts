@@ -1,75 +1,132 @@
-import { ref } from 'vue';
+import { onUnmounted } from 'vue';
 
 export function useWebSocket(wsUrl: string) {
-  const socket = ref<WebSocket | null>(null);
-  const isConnected = ref(false);
-  const reconnectInterval = 5000;
-  const messages = ref<any[]>([]);
-  let currentUrl = wsUrl;
-  if (window.location.protocol === 'http:') {
-    currentUrl = currentUrl.replace('wss://', 'ws://');
+  let socket: WebSocket | null = null;
+  let reconnectTimer: number | null = null;
+
+  let retryCount = 0;
+  const MAX_RETRIES = 5;
+  const BASE_DELAY = 2000;
+
+  let isManuallyClosed = false;
+
+  const initialUrl = wsUrl;
+  let currentUrl = normalizeUrl(wsUrl);
+
+  let onMessageFunc: ((event: MessageEvent) => void) | null = null;
+
+  function normalizeUrl(url: string) {
+    if (window.location.protocol === 'http:') {
+      return url.replace('wss://', 'ws://');
+    }
+    return url;
   }
 
-  function connect(parser: (event: any) => void) {
-    if (isConnected.value || socket.value) return;
+  function fallbackToWs() {
+    if (currentUrl.startsWith('wss://')) {
+      currentUrl = currentUrl.replace('wss://', 'ws://');
+      console.log(`WebSocket fallback to ${currentUrl}`);
+      return true;
+    }
+    return false;
+  }
 
-    socket.value = new WebSocket(currentUrl);
+  function cleanupSocket() {
+    if (!socket) return;
 
-    socket.value.onopen = () => {
-      isConnected.value = true;
+    socket.onopen = null;
+    socket.onmessage = null;
+    socket.onerror = null;
+    socket.onclose = null;
+  }
+
+  function connect(onMessage: (event: MessageEvent) => void) {
+    if (socket) return;
+    if (retryCount >= MAX_RETRIES) {
+      console.warn('WebSocket max retries reached, stop reconnecting');
+      return;
+    }
+
+    onMessageFunc = onMessage;
+
+    isManuallyClosed = false;
+    socket = new WebSocket(currentUrl);
+
+    socket.onopen = () => {
+      retryCount = 0;
       console.log('WebSocket open');
     };
 
-    socket.value.onmessage = (event) => {
-      if (event.data) {
-        try {
-          const message = parser(event);
-          messages.value.unshift(message);
-        } catch {
-          return;
-        }
+    socket.onmessage = onMessage;
+
+    socket.onclose = (event) => {
+      console.log('WebSocket close', event.reason);
+
+      cleanupSocket();
+      socket = null;
+
+      if (!isManuallyClosed) {
+        scheduleReconnect(onMessage);
       }
     };
 
-    socket.value.onclose = (event) => {
-      isConnected.value = false;
-      console.log('WebSocket close', event.reason);
-      socket.value = null;
-    };
-
-    socket.value.onerror = (error) => {
+    socket.onerror = (error) => {
       console.error('Error WebSocket:', error);
 
-      if (currentUrl.startsWith('wss://')) {
-        currentUrl = currentUrl.replace('wss://', 'ws://');
-        console.log(`WebSocket fallback to ${currentUrl}`);
+      cleanupSocket();
+
+      if (fallbackToWs()) {
+        socket?.close();
+        return;
       }
 
-      socket.value?.close();
-      setTimeout(() => {
-        connect(parser);
-      }, reconnectInterval);
+      socket?.close();
     };
+  }
+
+  function scheduleReconnect(onMessage: (event: MessageEvent) => void) {
+    if (reconnectTimer) return;
+
+    retryCount++;
+
+    const delay = BASE_DELAY * retryCount;
+
+    reconnectTimer = window.setTimeout(() => {
+      reconnectTimer = null;
+      connect(onMessage);
+    }, delay);
   }
 
   function disconnect() {
-    if (socket.value) {
-      socket.value.close();
-      socket.value = null;
-      isConnected.value = false;
-      currentUrl = wsUrl;
+    isManuallyClosed = true;
+
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+
+    cleanupSocket();
+    socket?.close();
+    socket = null;
+    currentUrl = normalizeUrl(initialUrl);
+  }
+
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      disconnect();
+    } else {
+      if (onMessageFunc) connect(onMessageFunc);
     }
   }
 
-  function clear() {
-    messages.value = [];
-  }
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  onUnmounted(() => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    disconnect();
+  });
 
   return {
-    socket,
-    messages,
-    isConnected,
-    clear,
     connect,
     disconnect,
   };

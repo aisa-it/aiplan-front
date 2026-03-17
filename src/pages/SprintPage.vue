@@ -15,6 +15,20 @@
           @update="load()"
         />
       </q-card-section>
+      <q-card-section
+        v-if="sprint?.description"
+        class="issue-list__header"
+        :style="!ny ? 'padding: 0 16px 12px' : 'padding: 0 16px 12px'"
+      >
+        <EditorTipTapV2
+          editor-id="sprint-description"
+          :model-value="sprint.description"
+          :read-only-editor="true"
+          :can-edit="false"
+          class="sprint-description-editor"
+          style="border: 0"
+        />
+      </q-card-section>
       <q-separator />
       <transition name="fade" mode="out-in">
         <component
@@ -40,6 +54,7 @@ import {
 } from 'vue';
 
 import { getSprint } from 'src/modules/sprints/services/api';
+import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
 import SprintFiltersList from 'src/modules/issue-list/components/SprintFiltersList.vue';
 import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
@@ -188,3 +203,24 @@ watchEffect(() => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.sprint-description-editor {
+  padding: 0;
+}
+
+.sprint-description-editor :deep(.html-editor) {
+  padding: 0;
+}
+
+.sprint-description-editor :deep(.html-editor__container) {
+  min-height: auto !important;
+  max-height: none !important;
+  padding: 0;
+}
+
+.sprint-description-editor :deep(.tiptap) {
+  min-height: auto;
+  padding-left: 0;
+}
+</style>

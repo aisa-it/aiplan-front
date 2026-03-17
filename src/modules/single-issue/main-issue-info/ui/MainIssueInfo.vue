@@ -149,6 +149,13 @@
             'change-issue-secondary',
           )
         "
+        :can-create-tags="
+          hasPermissionByIssue(
+            issueData,
+            issueData.project_detail ?? project,
+            'create-tag',
+          )
+        "
         @close="showTagsDialog = !showTagsDialog"
         @refresh="refresh"
       />

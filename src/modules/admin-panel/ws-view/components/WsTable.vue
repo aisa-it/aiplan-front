@@ -45,10 +45,10 @@
           flat
           dense
           class="q-ml-sm"
-          style="font-size: 14px; color: gray"
+          style="font-size: 14px"
           @click.stop="openDeleteDialog(props.row)"
         >
-          <BinIcon />
+          <BinIcon color="#DC3E3E" />
         </q-btn>
       </q-td>
     </template>
