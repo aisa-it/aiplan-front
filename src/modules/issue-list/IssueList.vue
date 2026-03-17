@@ -51,8 +51,13 @@ const { getGroupedIssues } = useGroupedIssues('project');
 
 const projectStore = useProjectStore();
 
-const { isGroupingEnabled, isGanttDiagramm, isKanbanEnabled, issuesLoader } =
-  storeToRefs(projectStore);
+const {
+  isGroupingEnabled,
+  isGanttDiagramm,
+  isKanbanEnabled,
+  isCalendar,
+  issuesLoader,
+} = storeToRefs(projectStore);
 
 const userStore = useUserStore();
 
@@ -61,6 +66,11 @@ const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
 const load = async () => {
+  if (isCalendar.value) {
+    issuesLoader.value = false;
+    return;
+  }
+
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
@@ -80,6 +90,7 @@ onMounted(async () => {
 watch(
   () => refreshIssues.value,
   async () => {
+    if (isCalendar.value) return;
     if (refreshIssues.value === true) {
       await load();
       refreshIssues.value = false;
@@ -95,6 +106,12 @@ const components = {
   ),
   GanttView: defineAsyncComponent(
     () => import('src/modules/issue-list/components/gantt-view/GanttView.vue'),
+  ),
+  CalendarView: defineAsyncComponent(
+    () =>
+      import(
+        'src/modules/issue-list/components/calendar-view/CalendarView.vue'
+      ),
   ),
   TableListSkeleton: defineAsyncComponent(
     () => import('./components/skeletons/TableListSkeleton.vue'),
@@ -125,6 +142,11 @@ watchEffect(() => {
       return;
     }
 
+    if (isCalendar.value) {
+      currentIssueList.value = components.CalendarView;
+      return;
+    }
+
     if (isGroupingEnabled.value) {
       currentIssueList.value = components.GroupedIssueList;
       return;
@@ -136,6 +158,10 @@ watchEffect(() => {
       ? components.BoardListSkeleton
       : components.TableListSkeleton;
   }
+});
+
+watch(isCalendar, (newState) => {
+  if (!newState) load();
 });
 </script>
 
