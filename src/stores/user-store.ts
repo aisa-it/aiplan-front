@@ -13,7 +13,6 @@ import {
   TypesActivityTable,
   DtoUserLight,
   DtoProjectLight,
-  DtoProjectFavorites,
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
@@ -29,7 +28,6 @@ interface IUserState {
   userActivity: DaoPaginationResponse;
   userActivityMap: TypesActivityTable;
   userProjects: DtoProjectLight[];
-  userFavouriteProjets: DtoProjectFavorites[];
   authToken: string;
 }
 
@@ -41,7 +39,6 @@ export const useUserStore = defineStore('user-store', {
       userActivity: {} as DaoPaginationResponse,
       userActivityMap: {} as TypesActivityTable,
       userProjects: [] as DtoProjectLight[],
-      userFavouriteProjets: [] as DtoProjectFavorites[],
       authToken: undefined as unknown as string,
     };
   },
@@ -144,14 +141,6 @@ export const useUserStore = defineStore('user-store', {
         this.userProjects = filters ? this.userProjects : res.data;
         return res.data;
       });
-    },
-
-    async getFavouriteProjects(workspaceSlug: string): Promise<void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
-
-      await projectsApi
-        .getFavoriteProjects(workspaceSlug)
-        .then((res) => (this.userFavouriteProjets = res.data));
     },
 
     async addProjectToFavorites(

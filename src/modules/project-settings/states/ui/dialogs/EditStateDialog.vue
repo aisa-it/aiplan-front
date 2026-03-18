@@ -105,7 +105,6 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const form = ref(
   props.currentState ? JSON.parse(JSON.stringify(props.currentState)) : {},
 );
-const myDialog = ref(null);
 
 function resetDialog() {
   form.value = JSON.parse(JSON.stringify(props.currentState));
@@ -121,6 +120,7 @@ const onClose = (type: 'error' | 'success', msg?: string) => {
 
 const handleSubmit = async () => {
   form.value.group = form.value.group.value;
+  form.value.default = form.value.default || null
   await updateState(
     currentWorkspaceSlug.value || '',
     currentProjectID.value,

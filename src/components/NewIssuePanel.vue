@@ -61,6 +61,7 @@
             :get-members-for-mention="getProjectMembersForMention"
             is-mention
             editor-id="editor"
+            can-resize
           />
         </div>
       </q-card-section>
@@ -188,9 +189,10 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              v-model="sprints"
+              :model-value="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
+              @update-selected="updateCurrentSprints"
             />
           </div>
         </div>
@@ -207,6 +209,7 @@
             v-model:tags="tags"
             :projectid="project.id"
             :isDisabled="true"
+            :can-create="hasPermissionByWorkspace(workspaceInfo, 'create-tag')"
             :is-full-width="
               !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
             "
@@ -300,6 +303,7 @@ import {
 
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+import { useRouter } from 'vue-router';
 
 // components
 import SelectDate from './SelectDate.vue';
@@ -352,6 +356,7 @@ const emits = defineEmits<{
 
 //composables
 const route = useRoute();
+const router = useRouter();
 const {
   options: templatesOptions,
   loading: loadingTemplates,
@@ -373,8 +378,8 @@ const { hasPermissionByWorkspace } = useRolesStore();
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
-
 const { refreshIssues } = storeToRefs(issuesStore);
+const { sprint } = storeToRefs(sprintStore);
 
 //variables
 const projects = ref<DtoProject[]>([]);
@@ -387,7 +392,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<Member[]>([]);
 const watchers = ref<Member[]>([]);
-const sprints = ref<DtoSprintLight[]>([]);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -622,6 +629,10 @@ const handleCreateSuccess = async (createdIssueData: any) => {
 const handleClearIssueTemplate = () => {
   editorInstance.value?.chain().focus().clearContent();
   selectedIssueTemplate.value = null;
+};
+
+const updateCurrentSprints = (value: DtoSprintLight[]) => {
+  sprints.value = value;
 };
 
 //hooks

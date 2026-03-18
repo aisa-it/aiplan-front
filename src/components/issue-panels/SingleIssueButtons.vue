@@ -57,13 +57,7 @@
           <HintTooltip>Экспортировать в PDF</HintTooltip>
         </q-btn>
         <q-btn
-          v-if="
-            hasPermissionByIssue(
-              issueData,
-              issueData.project_detail ?? project,
-              'delete-issue',
-            )
-          "
+          v-if="canDeleteIssue"
           class="delete-btn-only-icon"
           no-caps
           @click="isDeletingOpen = true"
@@ -89,7 +83,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -120,7 +114,7 @@ const emits = defineEmits<{ refresh: [isFullRefresh?: boolean] }>();
 // stores
 const { setNotificationView } = useNotificationStore();
 const projectStore = useProjectStore();
-const { hasPermissionByIssue } = useRolesStore();
+const { hasPermissionByIssue, hasPermissionByProject } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const api = useAiplanStore();
@@ -134,6 +128,16 @@ const { currentIssueID, issueData, issueExportPDFLink } =
 // vars
 const isDeletingOpen = ref(false);
 const isTransferOpen = ref(false);
+
+const canDeleteIssue = computed(() => {
+  const proj = issueData.value?.project_detail ?? project.value;
+  if (proj?.issue_deletion_allowed === false) {
+    return (
+      hasPermissionByProject(proj, 'delete-issue')
+    );
+  }
+  return hasPermissionByIssue(issueData.value, proj, 'delete-issue');
+});
 
 const switchDraft = async () => {
   await api

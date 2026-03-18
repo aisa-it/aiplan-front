@@ -147,6 +147,9 @@ export function getFullName(member?: DtoUserLight, type?: string) {
   if (!member.is_onboarded && type === 'form')
     return member.last_name + ' ' + member.first_name;
 
+  if (!member.is_onboarded && type === 'comment')
+    return member.first_name + ' ' + member.last_name;
+
   if (!member.is_onboarded) return member.email;
 
   return member.first_name + ' ' + member.last_name;

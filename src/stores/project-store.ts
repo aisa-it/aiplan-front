@@ -75,6 +75,10 @@ export const useProjectStore = defineStore('project-store', {
       return this.projectProps?.issueView === 'gantt_chart';
     },
 
+    isCalendar(): boolean | undefined {
+      return this.projectProps?.issueView === 'calendar';
+    },
+
     isKanbanEnabled(): boolean | undefined {
       return this.projectProps?.issueView === 'kanban';
     },
@@ -405,6 +409,21 @@ export const useProjectStore = defineStore('project-store', {
         this.projectProps = props;
         return props;
       } catch (e) {}
+    },
+
+    async getProjectStats(
+      workspaceSlug: string,
+      projectID: string,
+      query?: {
+        include_assignee_stats?: boolean;
+        include_label_stats?: boolean;
+        include_sprint_stats?: boolean;
+        include_timeline?: boolean;
+      },
+    ) {
+      return (
+        await projectsApi.getProjectStats(workspaceSlug, projectID, query)
+      ).data;
     },
   },
 });

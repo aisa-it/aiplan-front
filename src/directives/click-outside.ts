@@ -14,6 +14,10 @@ export default {
         return;
       }
 
+      if (!document.documentElement.contains(target)) {
+        return;
+      }
+
       if (!(el === target || el.contains(target))) {
         const isClickInsideExcludedElement =
           target.closest(classPrevent) ||

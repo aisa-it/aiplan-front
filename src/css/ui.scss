@@ -56,40 +56,6 @@ body h5 {
   letter-spacing: 0.25px;
 }
 
-// --------- BUTTONS ---------
-// nav nenu dotted button
-.more-dotted-button {
-  height: 14px;
-  min-height: 14px;
-  max-height: 14px;
-  font-size: 10px;
-  padding: 0;
-}
-
-.btn-select {
-  transition: all 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: transparent;
-  .q-focus-helper {
-    display: none;
-    background: none;
-  }
-
-  &:hover,
-  &:focus-visible {
-    border: 1px solid $primary;
-    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .q-ripple {
-    display: none;
-  }
-
-  &[aria-expanded='true'] {
-    border: 1px solid $primary;
-    transition: border-color 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
 .selector-popup {
   border-radius: $radius;
   border: 1px solid $border-color;
@@ -163,10 +129,6 @@ body h5 {
 }
 
 // ---------- BARS / LISTS ---------
-.projects-lists-inner {
-  height: calc(80vh);
-}
-
 .nav-menu-bottom-bar {
   height: calc(100vh - 96px - 50px);
   display: flex;

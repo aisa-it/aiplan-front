@@ -168,7 +168,7 @@ export const renderShortDate = (date: string | Date, placeholder?: string) => {
   const day = date.getDate();
   const month = months[date.getMonth()];
 
-  return isNaN(date.getTime()) ? placeholder ?? 'N/A' : `${day} ${month}`;
+  return isNaN(date.getTime()) ? (placeholder ?? 'N/A') : `${day} ${month}`;
 };
 
 export const renderShortTime = (date: string | Date) => {
@@ -321,4 +321,22 @@ export const getCityFromTimezone = (timezone: string) => {
   const labelParts = tz.label.split(' ');
   const cities = labelParts.slice(1).join('');
   return cities.split(',')[0];
+};
+
+export const getStringMonthYear = (date: string) => {
+  const formatDate = dayjs(date, 'YYYY-MM').format('MMMM YYYY');
+  return formatDate.charAt(0).toUpperCase() + formatDate.slice(1);
+};
+
+export const isCurrentDateInMonthRange = (
+  month: number,
+  fromDay: number,
+  toDay: number,
+): boolean => {
+  const now = dayjs();
+
+  const currentMonth = now.month() + 1;
+  const currentDay = now.date();
+
+  return currentMonth === month && currentDay >= fromDay && currentDay <= toDay;
 };

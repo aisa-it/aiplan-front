@@ -1,9 +1,5 @@
 <template>
-  <q-dialog
-    ref="dialogRef"
-    @show="refresh"
-    @hide="() => filtersStore.resetColumns()"
-  >
+  <q-dialog ref="dialogRef" @show="refresh">
     <q-card class="search-filters-card row scrollable-content">
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
