@@ -1,6 +1,6 @@
 <template>
 <q-item class="issue-link-card">
-  <HintTooltip>
+  <HintTooltip v-if="link.title && link.url">
       {{ link.title }} <br />
       {{ link.url }}</HintTooltip
   >

@@ -51,14 +51,14 @@
             <LinkItem
               :link="{
                 id: prop.id,
-                title: prop.name,
-                url: prop.value,
+                title: prop.value?.name,
+                url: prop.value?.url,
               }"
               disableDelete
               @update="isLinkOpenDialog = true; linkToUpdate = {
                 id: prop.id,
-                title: prop.name,
-                url: prop.value,
+                title: prop.value?.name,
+                url: prop.value?.url,
               }"
             />
             <LinkDialog
@@ -161,13 +161,16 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
       props.projectId,
       props.issueId,
       prop.template_id as string,
-      newValue,
+      prop.type === 'link' ? { url: newValue.url, name: newValue.title } : newValue,
     );
     setNotificationView({
       open: true,
       type: 'success',
       customMessage: 'Параметр сохранен',
     });
+    if (prop.type === 'link') {
+      fetchData()
+    }
   } catch (e) {
     console.error(e);
     setNotificationView({
