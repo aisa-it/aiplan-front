@@ -2,7 +2,7 @@
   <q-select
     ref="selectWatcherRef"
     dense
-    multiple
+    :multiple="!offMultiple"
     clearable
     map-options
     class="base-selector"
@@ -13,7 +13,7 @@
     :virtual-scroll-slice-ratio-before="30"
     @virtual-scroll="(e) => loadMembersOnScroll(e)"
     :loading="isLoading"
-    v-model="selectedMembers"
+    v-model="internalValue"
     :option-label="(v) => memberFullName(v.member)"
     :option-value="(v) => v.member?.id"
     :options="options"
@@ -28,10 +28,7 @@
     </template>
 
     <template v-slot:selected>
-      <SelectedUsersList
-        :users="props.modelValue"
-        :currentUser="currentMember ?? undefined"
-      />
+      <SelectedUsersList :users="props.modelValue" :currentUser="user" />
     </template>
 
     <template v-slot:no-option>
@@ -47,10 +44,7 @@
     <template v-slot:option="scope">
       <UserCard v-bind="scope.itemProps" :member="scope.opt.member" />
       <q-separator
-        v-if="
-          !offPinCurrentUser &&
-          currentMember?.member?.id === scope.opt.member?.id
-        "
+        v-if="!offPinCurrentUser && user.id === scope.opt.member?.id"
       />
     </template>
   </q-select>
@@ -58,20 +52,24 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
+import { debounce } from 'quasar';
+
+import SearchInput from './components/SearchInput.vue';
+import UserCard from './components/UserCard.vue';
+import SelectedUsersList from './components/SelectedUsersList.vue';
+
+import { useUserStore } from 'src/stores/user-store';
 
 import {
   DaoPaginationResponse,
   DtoProjectMemberLight,
   DtoUserLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { filterAvailableMembers } from 'src/utils/filters';
-import { debounce } from 'quasar';
-import SelectedUsersList from './components/SelectedUsersList.vue';
 import { Member, Pagination } from './types/types';
-import UserCard from './components/UserCard.vue';
+
+import { filterAvailableMembers } from 'src/utils/filters';
 import { memberFullName } from './helpers/helpers';
-import SearchInput from './components/SearchInput.vue';
+import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 type Members = Member[];
 
@@ -81,8 +79,9 @@ const props = defineProps<{
   isDisabled?: boolean;
   offPinCurrentUser?: boolean;
   offSearch?: boolean;
+  offMultiple?: boolean;
   modelValue: Members;
-  defaultMembers?: DtoUserLight[];
+  defaultMembers?: DtoUserLight[] | Members;
   refreshMembersFunc: (
     pagination: Pagination,
     searchQuery?: string,
@@ -115,7 +114,7 @@ const searchQuery = ref('');
 let membersCount = 0;
 
 const members = ref<Members>([]);
-let currentMember = ref<Member | null>(null);
+const { user } = useUserStore();
 
 const refresh = async () => {
   isLoading.value = true;
@@ -126,7 +125,6 @@ const refresh = async () => {
 
     members.value = data.result;
     membersCount = data.count ?? 0;
-    currentMember.value = data.my_entity as Member;
   } finally {
     isLoading.value = false;
   }
@@ -148,23 +146,43 @@ const selectedMembers = computed({
   get() {
     return props.modelValue;
   },
-  set(newMembers) {
+  async set(newMembers) {
     if (!newMembers) return;
+
     emits('update:modelValue', newMembers);
+
+    if (props.onChange) {
+      await props.onChange(newMembers);
+    }
+
     emits('refresh');
+  },
+});
+
+const internalValue = computed({
+  get() {
+    if (props.offMultiple) return selectedMembers.value?.[0] ?? null;
+    return selectedMembers.value;
+  },
+  set(newValue) {
+    if (!newValue) return (selectedMembers.value = []);
+
+    if (!Array.isArray(newValue)) {
+      selectedMembers.value = [newValue];
+      return;
+    }
+    selectedMembers.value = newValue;
   },
 });
 
 const pinCurrentUserInMembersList = (membersList: Members) => {
   if (props.offPinCurrentUser) return membersList;
 
-  if (!currentMember.value) return membersList;
+  if (!user) return membersList;
 
   return [
-    currentMember.value,
-    ...membersList.filter(
-      (el) => el?.member?.id !== currentMember.value?.member?.id,
-    ),
+    ...membersList.filter((el) => el?.member?.id == user.id),
+    ...membersList.filter((el) => el?.member?.id !== user.id),
   ];
 };
 
@@ -174,7 +192,7 @@ const options = computed(() => {
     selectedMembers.value,
   );
 
-  const selectedIds = new Set(selectedMembers.value.map((m) => m.member?.id));
+  const selectedIds = new Set(selectedMembers.value?.map((m) => m.member?.id));
 
   const selected = activeMembers.filter((m) => selectedIds.has(m.member?.id));
 
@@ -202,14 +220,20 @@ const loadMembersOnScroll = async (e?: any) => {
     e.index === e.to &&
     e.to < membersCount
   ) {
-    pagination.offset = pagination.offset + 15;
+    pagination.offset = (pagination?.offset ?? 0) + 15;
     await refresh();
   }
 };
 
 function applyDefaultMembers() {
-  const ids = new Set(props.defaultMembers.map((u) => u.id));
+  if (!props.defaultMembers) return;
 
+  if ('member_id' in props.defaultMembers[0]) {
+    selectedMembers.value = [...props.defaultMembers];
+    return;
+  }
+
+  const ids = new Set(props.defaultMembers.map((u) => u.id));
   selectedMembers.value = members.value.filter((m) => ids.has(m.member?.id));
 }
 

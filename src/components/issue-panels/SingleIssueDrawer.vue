@@ -91,11 +91,9 @@
         <div
           class="col flex rounded-borders issue-panel__assignees issue-panel__q-select-wrapper"
         >
-          <SelectAssignee
+          <SelectMembers
             class="issue-selector"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :assigness="assignees"
+            :model-value="assignees"
             :isDisabled="
               !hasPermissionByIssue(
                 issueData,
@@ -103,9 +101,11 @@
                 'change-issue-basic',
               )
             "
-            :current-member="user"
+            :label="assigneeLable"
+            :refresh-members-func="assigneeFetchMembers"
+            :on-change="assagneeUpdate"
             @refresh="handleRefresh"
-          ></SelectAssignee>
+          />
         </div>
       </div>
 
@@ -120,12 +120,9 @@
           </div>
         </div>
         <div class="col flex rounded-borders issue-panel__q-select-wrapper">
-          <SelectWatchers
+          <SelectMembers
             class="issue-selector"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
-            :watchers="watchers"
-            :current-member="user"
+            :model-value="watchers"
             :isDisabled="
               !hasPermissionByIssue(
                 issueData,
@@ -133,8 +130,11 @@
                 'change-issue-basic',
               )
             "
+            :label="watchersLable"
+            :refresh-members-func="watchersFetchMembers"
+            :on-change="watchersUpdate"
             @refresh="handleRefresh"
-          ></SelectWatchers>
+          />
         </div>
       </div>
 
@@ -456,6 +456,8 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useIssueWatchers } from '../selects/composables/useIssueWatchers';
+import { useIssueAssignee } from '../selects/composables/useIssueAssignee';
 
 // utils
 import aiplan from 'src/utils/aiplan';
@@ -473,8 +475,7 @@ import IssueCustomProperties from 'src/modules/single-issue/custom-properties/ui
 import SelectDate from 'src/components/SelectDate.vue';
 import SelectLinks from 'src/components/SelectLinks.vue';
 import SelectStatus from 'src/components/SelectStatus.vue';
-import SelectAssignee from 'components/selects/SelectAssignee.vue';
-import SelectWatchers from 'components/selects/SelectWatchers.vue';
+import SelectMembers from '../selects/SelectMembers.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
 import SelectParentIssue from 'src/components/SelectParentIssue.vue';
 import SelectBlockIssues from 'src/components/SelectBlockIssues.vue';
@@ -539,6 +540,16 @@ const hideSettings = computed(() => {
 
 //refs
 const refreshCycle = ref();
+const {
+  label: watchersLable,
+  fetchMembers: watchersFetchMembers,
+  update: watchersUpdate,
+} = useIssueWatchers(issueData.value.project, issueData.value.id);
+const {
+  label: assigneeLable,
+  fetchMembers: assigneeFetchMembers,
+  update: assagneeUpdate,
+} = useIssueAssignee(issueData.value.project, issueData.value.id);
 
 // functions
 const handleRefresh = async () => {

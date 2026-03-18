@@ -115,7 +115,7 @@
               label="Выберите исполнителя"
               class="col centered-horisontally"
               :refresh-members-func="fetchProjectMembers"
-              :default-members="project.default_assignees_details as Member[]"
+              :default-members="project.default_assignees_details"
             />
           </div>
         </div>
@@ -153,6 +153,7 @@
               label="Выберите наблюдателя"
               class="col centered-horisontally"
               :refresh-members-func="fetchProjectMembers"
+              :default-members="project.default_watchers_details"
             />
           </div>
         </div>
