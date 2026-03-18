@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { debounce } from 'quasar';
 
 import SearchInput from './components/SearchInput.vue';
@@ -142,20 +142,27 @@ const searchMembers = debounce(async () => {
   await refresh();
 }, 700);
 
+const debouncedOnChange = debounce(async (members: Members) => {
+  await props.onChange?.(members);
+  emits('refresh');
+}, 1500);
+
+const localMembers = ref<Members>([]);
+
 const selectedMembers = computed({
   get() {
-    return props.modelValue;
+    return localMembers.value;
   },
   async set(newMembers) {
     if (!newMembers) return;
 
+    console.log(newMembers);
+
+    localMembers.value = newMembers;
+
     emits('update:modelValue', newMembers);
 
-    if (props.onChange) {
-      await props.onChange(newMembers);
-    }
-
-    emits('refresh');
+    debouncedOnChange(newMembers);
   },
 });
 
@@ -255,4 +262,17 @@ watch(
     refresh();
   },
 );
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    localMembers.value = [...val];
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(() => {
+  debouncedOnChange?.cancel?.();
+  searchMembers?.cancel?.();
+});
 </script>
