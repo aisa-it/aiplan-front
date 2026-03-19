@@ -8,13 +8,10 @@
     />
     <template v-if="isMobile">
       <q-btn
-        class="menu-link__btn"
+        class="secondary-btn-only-icon-sm"
         :flat="true"
         :dense="false"
         :icon="'more_horiz'"
-        :style="
-          'min-height: 18px !important; min-width: 18px; font-size: 12px; padding: 0; color: gray;'
-        "
         @click.stop.prevent
       >
         <q-menu fit auto-close>

@@ -1,7 +1,7 @@
 <template>
   <template v-if="!isDialog">
     <q-btn
-      :class="(isMobile || Screen.width <= 720) ? 'primary-btn-only-icon-sm q-mr-sm' : 'primary-btn-sm'"
+      :class="`${Screen.width <= 720 ? 'primary-btn-only-icon-sm q-mr-sm' : 'primary-btn-sm'} ${isMobile ? 'mobile-btn' : ''}`"
       flat
       dense
       no-caps
@@ -127,3 +127,12 @@ onMounted(() => {
   emit('setDisable', isDisabled.value)
 })
 </script>
+
+<style scoped lang="scss">
+  .mobile-btn {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0 !important;
+    margin-left: 2px;
+  }
+</style>

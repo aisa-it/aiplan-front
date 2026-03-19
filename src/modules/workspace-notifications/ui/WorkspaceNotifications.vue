@@ -4,7 +4,8 @@
       :count="unreadNotificationsCount"
       :is-show="!isShowList"
       :is-mobile="isMobile"
-    >
+      :style="isMobile ? 'left: -2px; top: 2px;' : ''"
+      >
       <WorkspaceNotificationsListDialog
         v-if="!isMobile"
         v-model="isShowList"
