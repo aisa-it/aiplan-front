@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 import { CalendarEvent } from '../../types/calendar';
 import EventCard from './EventCard.vue';
@@ -43,6 +43,8 @@ import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{ event: CalendarEvent }>();
+
+const emits = defineEmits<{ isOpen: [boolean] }>();
 
 const root = ref<HTMLElement | null>(null);
 
@@ -61,6 +63,7 @@ let closeTimer: number | null = null;
 function open() {
   cancelClose();
   menu.value?.show(root.value);
+  emits('isOpen', true);
   issueIdHighlight.value = props.event.issueData.id;
 }
 
@@ -69,6 +72,7 @@ function scheduleClose() {
   issueIdHighlight.value = null;
   closeTimer = window.setTimeout(() => {
     menu.value?.hide();
+    emits('isOpen', false);
   }, 120);
 }
 
@@ -84,6 +88,7 @@ function close() {
   issueIdHighlight.value = null;
   cancelClose();
   menu.value?.hide();
+  emits('isOpen', false);
 }
 
 async function openIssue() {
@@ -93,6 +98,10 @@ async function openIssue() {
     props.event.issueData.identifier,
   );
 }
+
+onUnmounted(() => {
+  emits('isOpen', false);
+});
 </script>
 
 <style lang="scss" scoped>
