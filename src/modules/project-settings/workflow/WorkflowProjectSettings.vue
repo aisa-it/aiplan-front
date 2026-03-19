@@ -31,7 +31,8 @@
         <WorkflowFlowDiagram ref="diagramRef" :initial-flow="project?.states_flow" />
       </q-card-section>
 
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions align="right" class="q-pa-md q-gutter-sm">
+        <q-btn no-caps class="secondary-btn" label="Отмена" @click="onCancel" />
         <q-btn no-caps class="primary-btn" label="Сохранить" @click="onSave" />
       </q-card-actions>
     </q-card>
@@ -65,6 +66,7 @@ const onSave = async () => {
       route.params.project as string,
       { states_flow: flowData },
     );
+    diagramRef.value?.commitFlowSnapshot();
     setNotificationView({
       open: true,
       type: 'success',
@@ -73,6 +75,10 @@ const onSave = async () => {
   } catch (error) {
     console.error(error);
   }
+};
+
+const onCancel = () => {
+  diagramRef.value?.resetFlow?.();
 };
 </script>
 

@@ -96,6 +96,9 @@ const { addEdges, onConnect, removeEdges, onEdgeDoubleClick } = useVueFlow();
 const nodes = ref<Node[]>([]);
 const edges = ref<Edge[]>([]);
 
+const initialNodes = ref<Node[]>([]);
+const initialEdges = ref<Edge[]>([]);
+
 const CIRCLE_NODE_ID = '00000000-0000-0000-0000-000000000000';
 
 onMounted(async () => {
@@ -157,11 +160,25 @@ onMounted(async () => {
       markerEnd: { type: MarkerType.ArrowClosed, color: '#4a90e2', width: 15, height: 15 },
     });
   });
+
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
 });
+
+const hasEdgeBetween = (source?: string | null, target?: string | null) => {
+  if (!source || !target) return false;
+  return edges.value.some((e) => e.source === source && e.target === target);
+};
 
 onConnect((connection) => {
   // Запрещаем соединение "в направлении кружка" (кружок не может быть target).
   if (connection.target === CIRCLE_NODE_ID) {
+    draggingEdge.value = null;
+    isDragging.value = false;
+    return;
+  }
+
+  if (hasEdgeBetween(connection.source, connection.target)) {
     draggingEdge.value = null;
     isDragging.value = false;
     return;
@@ -276,7 +293,20 @@ const getFlowData = (): TypesStatesFlowGraph => ({
   }),
 });
 
-defineExpose({ getFlowData });
+const resetFlow = () => {
+  draggingEdge.value = null;
+  isDragging.value = false;
+
+  nodes.value = initialNodes.value;
+  edges.value = initialEdges.value;
+};
+
+const commitFlowSnapshot = () => {
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
+};
+
+defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
 </script>
 
 <style>
