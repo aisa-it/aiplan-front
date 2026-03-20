@@ -49,7 +49,7 @@ const months = computed(() =>
 .calendar-year {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  overflow-y: auto;
+  overflow: auto;
 }
 
 .calendar-yer__item {

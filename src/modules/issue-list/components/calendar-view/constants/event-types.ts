@@ -7,7 +7,7 @@ export const CALENDAR_EVENT_TYPES: Record<
   created: {
     type: 'created',
     label: 'Дата создания',
-    color: '#26B5CE',
+    color: '#3F76FF',
   },
   target: {
     type: 'target',
