@@ -285,35 +285,65 @@ export const CustomImagePlugin = ResizeImage.extend({
               if (html.includes('<table')) {
                 return false;
               }
-              const hasFiles =
-                event.clipboardData &&
-                event.clipboardData.files &&
-                event.clipboardData.files.length;
+              const hasFiles = event.clipboardData?.files?.length;
 
-              if (!hasFiles) {
-                return false;
+              // Стандартная вставка изображения не из редактора
+              if (hasFiles) {
+                const images = Array.from(event.clipboardData.files).filter(
+                  (file) => /image/i.test(file.type),
+                );
+                if (images.length === 0) {
+                  return false;
+                }
+
+                event.preventDefault();
+                const { schema } = view.state;
+
+                images.forEach((image) => {
+                  processImageFile(image, schema, (node) => {
+                    const transaction =
+                      view.state.tr.replaceSelectionWith(node);
+                    view.dispatch(transaction);
+                  });
+                });
+                return true;
               }
 
-              const images = Array.from(event.clipboardData.files).filter(
-                (file) => /image/i.test(file.type),
+              // Вставка из редактора в редактор
+              const pastedHtml = new DOMParser().parseFromString(
+                html,
+                'text/html',
+              );
+              const images = Array.from(
+                pastedHtml.querySelectorAll('img[src]'),
               );
 
-              if (images.length === 0) {
-                return false;
+              if (images.length > 0) {
+                event.preventDefault();
+                const { schema } = view.state;
+
+                images.forEach((img) => {
+                  const src = img.getAttribute('src');
+                  if (!src) return;
+                  const alt = img.getAttribute('alt') || '';
+                  
+                  // Автоматическая конвертация в base64. При вставке и сохранении будет создана отдельная ссылка на изображение на сервере
+                  fetch(src)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                      const file = new File([blob], alt, {
+                        type: blob.type || 'image/png',
+                      });
+
+                      processImageFile(file, schema, (node) => {
+                        view.dispatch(view.state.tr.replaceSelectionWith(node));
+                      });
+                    });
+                });
+                return true;
               }
 
-              event.preventDefault();
-
-              const { schema } = view.state;
-
-              images.forEach((image) => {
-                processImageFile(image, schema, (node) => {
-                  const transaction = view.state.tr.replaceSelectionWith(node);
-                  view.dispatch(transaction);
-                });
-              });
-
-              return true;
+              return false;
             },
           },
         },

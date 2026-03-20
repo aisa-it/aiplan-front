@@ -1,21 +1,41 @@
 <template>
-  <WorkspaceNotificationsButton
-    :count="unreadNotificationsCount"
-    :is-show="!isShowList"
-  >
+  <template v-if="!isDialog" >
+    <WorkspaceNotificationsButton
+      :count="unreadNotificationsCount"
+      :is-show="!isShowList"
+      :is-mobile="isMobile"
+      :style="isMobile ? 'left: -2px; top: 2px;' : ''"
+      >
+      <WorkspaceNotificationsListDialog
+        v-if="!isMobile"
+        v-model="isShowList"
+        :unread-notifications="unreadNotifications"
+        :read-notifications="readNotifications"
+        :has-more-unread="hasMoreUnread"
+        :has-more-read="hasMoreRead"
+        @create="() => (isCreateOpen = true)"
+        @update="getNotifications"
+        @read="readAllNotifications"
+        @load-more="loadMore"
+        @hide="onHide"
+      />
+    </WorkspaceNotificationsButton>
+  </template>
+  <template v-else>
     <WorkspaceNotificationsListDialog
       v-model="isShowList"
       :unread-notifications="unreadNotifications"
       :read-notifications="readNotifications"
       :has-more-unread="hasMoreUnread"
       :has-more-read="hasMoreRead"
+      :is-show-list="isShowList"
       @create="() => (isCreateOpen = true)"
       @update="getNotifications"
       @read="readAllNotifications"
       @load-more="loadMore"
       @hide="onHide"
     />
-  </WorkspaceNotificationsButton>
+  </template>
   <WorkspaceNotificationsCreateDialog v-model="isCreateOpen" />
 </template>
 
@@ -43,6 +63,14 @@ const wsUrl = `wss://${window.location.hostname}/api/auth/ws/notifications/`;
 const ws = useWebSocket(wsUrl);
 
 const { setNotificationView } = useNotificationStore();
+
+const props = defineProps<{
+  showDialog?: boolean;
+  isDialog?: boolean;
+  isMobile?: boolean;
+}>();
+
+const emit = defineEmits(['closeDialog']);
 
 const isCreateOpen = ref<boolean>(false);
 const isShowList = ref<boolean>(false);
@@ -94,6 +122,7 @@ const onHide = () => {
   );
   hasMoreUnread.value = true;
   hasMoreRead.value = true;
+  emit('closeDialog');
 };
 
 const hasNewNotifications = ref(false);
@@ -135,19 +164,19 @@ const loadMore = async (type: 'unread' | 'read'): Promise<void> => {
 const wsParser = (event: any) => {
   const data = JSON.parse(event.data);
 
-  if (data?.type !== 'message') return;
-
   unreadNotificationsCount.value = Math.min(
     unreadNotificationsCount.value + 1,
     100,
   );
 
-  setNotificationView({
-    open: true,
-    type: 'message',
-    customTitle: data.data.title,
-    customMessage: data.data.msg,
-  });
+  if (data?.type === 'message') {
+    setNotificationView({
+      open: true,
+      type: 'message',
+      customTitle: data.data.title,
+      customMessage: data.data.msg,
+    });
+  }
 
   if (isShowList.value) {
     getNotifications();
@@ -170,5 +199,9 @@ watch(isShowList, async (open) => {
     await getNotifications();
     hasNewNotifications.value = false;
   }
+});
+
+watch(() => props.showDialog, () => {
+  isShowList.value = props.showDialog;
 });
 </script>

@@ -70,10 +70,10 @@ export function sprintNotificationRender(data: any, detail: any) {
     case 'issues':
     case 'issue':
       if (data?.verb === 'added') {
-        return `добавил(-а) задачу ${issueLink || ''} в спринт ${sprintLink || ''}`;
+        return `добавил(-а) в спринт ${sprintLink || ''} задачу ${issueLink || ''}`;
       }
       if (data?.verb === 'removed') {
-        return `убрал(-а) задачу ${issueLink || ''} из спринта ${sprintLink || ''}`;
+        return `убрал(-а) из спринта ${sprintLink || ''} задачу ${issueLink || ''}`;
       }
       break;
 

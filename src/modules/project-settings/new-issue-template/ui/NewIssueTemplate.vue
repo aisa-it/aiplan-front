@@ -88,13 +88,18 @@
         <DefaultLoader />
       </q-inner-loading>
     </q-card>
+    <ConfirmLostEditionTemplate
+      v-model="showDialog"
+      @close-edition="handleCloseEdition"
+      @back-to-edition="handleBackToEdition"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteLeave, RouteLocationNormalizedGeneric } from 'vue-router';
 import { ref, onMounted, watch, computed } from 'vue';
 import { Editor } from '@tiptap/vue-3';
 // stores
@@ -116,9 +121,16 @@ import { QCard, Screen } from 'quasar';
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
 import AddIcon from 'src/components/icons/AddIcon.vue';
+import ConfirmLostEditionTemplate from 'src/modules/project-settings/new-issue-template/ui/ConfirmLostEditionTemplate.vue';
+
+const props = defineProps<{
+  openDialog: boolean;
+}>();
+const emit = defineEmits(['setRestriction', 'backToEdition']);
 
 //composables
 const route = useRoute();
+const router = useRouter();
 const {
   options,
   loading: templatesLoading,
@@ -146,6 +158,11 @@ const name = ref('');
 const editorValue = ref('');
 const issueTemplate = ref<any>(null);
 const editorInstance = ref<Editor>();
+const showDialog = ref<boolean>(false);
+const isContentUnsaved = ref<boolean>(false);
+const isNameUnsaved = ref<boolean>(false);
+const pendingRoute = ref<RouteLocationNormalizedGeneric | null>();
+const isLeavingTabRestricted = ref<boolean>(false);
 
 //computeds
 const workspaceSlug = computed(() => {
@@ -158,6 +175,7 @@ const isIssueTemplateSelected = computed(() => {
   return issueTemplate.value && issueTemplate.value.id;
 });
 const isMobile = computed(() => Screen.width <= 720);
+const areUnsavedData = computed(() => (isContentUnsaved.value || isNameUnsaved.value));
 
 //methods
 const handleCreateIssueTemplate = async () => {
@@ -219,6 +237,9 @@ const handleCreateIssueTemplate = async () => {
       editorValue.value = issueTemplate.value?.template || '';
       name.value = issueTemplate.value?.name || '';
     }
+
+    savedContent.value = issueTemplate.value?.template || '';
+    savedName.value = issueTemplate.value?.name || '';
   }
 };
 
@@ -241,6 +262,13 @@ const getEditorInstance = (editor: Editor) => {
   editorInstance.value = editor;
 };
 
+const resetSavedData = () => {
+  savedContent.value = '<p></p>';
+  savedName.value = '';
+  isContentUnsaved.value = false;
+  isNameUnsaved.value = false;
+}
+
 const handleClear = () => {
   issueTemplate.value = null;
 
@@ -248,16 +276,64 @@ const handleClear = () => {
     editorInstance.value?.chain().focus().clearContent().run();
   }
   name.value = '';
+
+  resetSavedData();
 };
 
+const handleBackToEdition = () => {
+  showDialog.value = false;
+  pendingRoute.value = null;
+  emit('backToEdition');
+}
+
+const handleCloseEdition = () => {
+  showDialog.value = false;
+  isLeavingTabRestricted.value = false;
+
+  if (pendingRoute.value) {
+    router.push(pendingRoute.value);
+  }
+  emit('setRestriction', false)
+}
+
+const savedContent = ref<string | null>();
+const savedName = ref<string | null>();
+
 //hooks
-onMounted(() => {
+onMounted(async () => {
   fetchTemplates(workspaceSlug.value, projectId.value, true);
+
+  if (issueTemplate.value) {
+    savedName.value = issueTemplate.value.name;
+    savedContent.value = issueTemplate.value.template;
+  } else {
+    savedName.value = name.value;
+    savedContent.value = editorValue.value || '<p></p>';
+  }
+});
+
+onBeforeRouteLeave(async (to, _, next) => {
+  if (areUnsavedData.value) {
+    if (!isLeavingTabRestricted.value) {
+      if (pendingRoute.value) {
+        next();
+        pendingRoute.value = null;
+      } else {
+        next(false);
+      }
+    } else {
+      showDialog.value = true;
+      pendingRoute.value = to;
+      next(false);
+    }
+  } else {
+    next();
+  }
 });
 
 watch(
   () => issueTemplate.value,
-  (newTemplate) => {
+  async (newTemplate) => {
     if (newTemplate && newTemplate.template && editorInstance.value) {
       editorInstance.value
         .chain()
@@ -266,10 +342,38 @@ watch(
         .insertContent(newTemplate.template)
         .run();
       name.value = newTemplate.name || '';
+
+      savedContent.value = editorValue.value;
+      savedName.value = name.value;
+
+      isContentUnsaved.value = false;
+      isNameUnsaved.value = false;
+
+    } else {
+      resetSavedData();
     }
   },
 );
+
+watch(() => name.value, (newName) => {
+  isNameUnsaved.value = newName !== savedName.value;
+});
+
+watch(() => editorValue.value, (newContent) => {
+  isContentUnsaved.value = newContent !== savedContent.value;
+});
+
+watch(() => areUnsavedData.value, () => {
+  emit('setRestriction', areUnsavedData.value);
+  isLeavingTabRestricted.value = areUnsavedData.value;
+});
+
+watch(() => props.openDialog, () => {
+  showDialog.value = props.openDialog;
+})
+
 </script>
+
 <style lang="scss" scoped>
 .new-issue-template-сard {
   width: 100%;

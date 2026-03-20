@@ -36,6 +36,7 @@
               : [breadCrumbsHistory[breadCrumbsHistory.length - 1]]"
             :key="index"
             :to="crumb?.url"
+            @click="crumb?.click?.()"
           >
             <HomeIcon
               v-if="!workspaceInfo?.logo && crumb?.type === 'workspace'"
@@ -85,7 +86,7 @@
             <span
               v-show="crumb?.name"
               :style="`max-width: calc((100vw - ${
-                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 250
+                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 150
               }px) / ${
                 Screen.width > 600 ? breadCrumbsHistory.length : 1
               }) !important`"
@@ -102,6 +103,7 @@
       <q-toolbar-title v-else>АИПлан</q-toolbar-title>
       <SearchPanel />
     </q-toolbar>
+    <FlowerLine v-if="utilsStore.wd" />
   </q-header>
 </template>
 
@@ -129,6 +131,7 @@ import SearchPanel from 'src/components/search-panel/SearchPanel.vue';
 import HomeIcon from 'src/components/icons/HomeIcon.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
+import FlowerLine from 'src/components/FlowerLine.vue';
 
 // stores
 const userStore = useUserStore();
@@ -196,6 +199,7 @@ const breadCrumbsHistory = computed(() => {
       name: ` ${project.value?.name ?? ''}`,
       url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
+      click: () => singleIssueStore.closePreview(),
     };
   else if (user.value && currentPath.includes('profile'))
     existPath[1] = {
