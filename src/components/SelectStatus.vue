@@ -206,6 +206,7 @@ export default defineComponent({
             },
           )
           .then(() => {
+            refresh()
             useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
             showNotification('success');
             emit('setStatus', state);
