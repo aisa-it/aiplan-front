@@ -106,8 +106,6 @@ import newYearTree from 'src/assets/newYearTree.svg';
 import womanDayText from 'src/assets/woman-day-text.png';
 
 const route = useRoute();
-const q = useQuasar();
-
 const utilsStore = useUtilsStore();
 
 const q = useQuasar();
