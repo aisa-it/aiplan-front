@@ -96,6 +96,9 @@ const { addEdges, onConnect, removeEdges, onEdgeDoubleClick } = useVueFlow();
 const nodes = ref<Node[]>([]);
 const edges = ref<Edge[]>([]);
 
+const initialNodes = ref<Node[]>([]);
+const initialEdges = ref<Edge[]>([]);
+
 const CIRCLE_NODE_ID = '00000000-0000-0000-0000-000000000000';
 
 onMounted(async () => {
@@ -104,6 +107,10 @@ onMounted(async () => {
     route.params.project as string,
   );
   let statuses = Object.values(data).flat();
+
+  // Рассчет исходной точки X для дефолтного расположения статусов
+  const flowEl = document.querySelector('.flow-container') as HTMLElement | null;
+  const columnX = (flowEl?.clientWidth ?? 800) / 2 + 50;
 
   const savedNodes = props.initialFlow?.nodes ?? [];
 
@@ -125,14 +132,12 @@ onMounted(async () => {
     data: { label: '' },
   });
 
-  statuses.forEach((s) => {
+  statuses.forEach((s, idx) => {
     nodes.value.push({
       id: s.id ?? '',
       type: 'default',
-      position: getSavedPosition(s.id ?? '') ?? {
-        x: Math.floor(Math.random() * 700),
-        y: Math.floor(Math.random() * 700),
-      },
+      position:
+        getSavedPosition(s.id ?? '') ?? { x: columnX, y: statuses.length + 20 + idx * 50 },
       style: { backgroundColor: s.color },
       data: { label: s.name },
     });
@@ -157,11 +162,25 @@ onMounted(async () => {
       markerEnd: { type: MarkerType.ArrowClosed, color: '#4a90e2', width: 15, height: 15 },
     });
   });
+
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
 });
+
+const hasEdgeBetween = (source?: string | null, target?: string | null) => {
+  if (!source || !target) return false;
+  return edges.value.some((e) => e.source === source && e.target === target);
+};
 
 onConnect((connection) => {
   // Запрещаем соединение "в направлении кружка" (кружок не может быть target).
   if (connection.target === CIRCLE_NODE_ID) {
+    draggingEdge.value = null;
+    isDragging.value = false;
+    return;
+  }
+
+  if (hasEdgeBetween(connection.source, connection.target)) {
     draggingEdge.value = null;
     isDragging.value = false;
     return;
@@ -276,7 +295,20 @@ const getFlowData = (): TypesStatesFlowGraph => ({
   }),
 });
 
-defineExpose({ getFlowData });
+const resetFlow = () => {
+  draggingEdge.value = null;
+  isDragging.value = false;
+
+  nodes.value = initialNodes.value;
+  edges.value = initialEdges.value;
+};
+
+const commitFlowSnapshot = () => {
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
+};
+
+defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
 </script>
 
 <style>
@@ -287,10 +319,40 @@ defineExpose({ getFlowData });
 }
 
 .circle-node {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  border: 3px solid #888;
+  border: 4px solid #888;
   background: transparent;
+}
+
+.flow-container .vue-flow__handle {
+  width: 10px;
+  height: 10px;
+}
+
+.flow-container .circle-node .vue-flow__handle {
+  width: 10px;
+  height: 10px;
+}
+
+.flow-container .vue-flow__handle-bottom {
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
+.flow-container .vue-flow__handle-top {
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.flow-container .vue-flow__handle-left {
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+.flow-container .vue-flow__handle-right {
+  right: 0;
+  transform: translate(50%, -50%);
 }
 </style>
