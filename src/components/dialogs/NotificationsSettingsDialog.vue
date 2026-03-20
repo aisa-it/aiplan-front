@@ -28,6 +28,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_email"
                 :memberSettings="settings.notification_settings_email"
+                :disable="user.settings?.email_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_email')
@@ -76,6 +77,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_tg"
                 :memberSettings="settings.notification_settings_tg"
+                :disable="user.settings?.telegram_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_tg')
@@ -115,6 +117,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_app"
                 :memberSettings="settings.notification_settings_app"
+                :disable="user.settings?.app_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_app')
@@ -152,10 +155,15 @@
         </transition>
       </q-card-section>
       <q-card-actions class="notification-btns" align="right">
-        <q-btn no-caps class="secondary-btn notification-btn" v-close-popup
+        <q-btn
+          :disable="isButtonDisabled"
+          no-caps
+          class="secondary-btn notification-btn"
+          v-close-popup
           >Отмена</q-btn
         >
         <q-btn
+          :disable="isButtonDisabled"
           no-caps
           class="primary-btn notification-btn"
           @click="handleSaveSettings()"
@@ -176,12 +184,13 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 // stores
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUserStore } from 'src/stores/user-store';
 
 import SettingList from './NotificationsSettings/SettingList.vue';
 import AidocNotificationsSettings from '../aidoc/AidocNotificationsSettings.vue';
@@ -193,6 +202,7 @@ import DefaultLoader from '../loaders/DefaultLoader.vue';
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
+const { user } = storeToRefs(useUserStore());
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -203,6 +213,18 @@ const props = defineProps<{
 
 const dialogRef = ref();
 const tab = ref('email');
+
+const isButtonDisabled = computed<boolean>(() => {
+  if (
+    (user.value.settings?.email_notification_mute && tab.value === 'email') ||
+    (user.value.settings?.telegram_notification_mute && tab.value === 'tg') ||
+    (user.value.settings?.app_notification_mute && tab.value === 'app')
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+});
 
 const settings = ref({
   notification_author_settings_email: {},
@@ -241,7 +263,7 @@ const loadSettings = async () => {
   } else {
     await getProjectUser();
   }
-}
+};
 
 const getProjectUser = async () => {
   if (!props.project?.id) return;

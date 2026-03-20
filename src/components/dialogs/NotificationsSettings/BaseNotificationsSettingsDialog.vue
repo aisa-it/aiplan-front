@@ -31,6 +31,7 @@
               <AdminSettingsList
                 :settings="settings[tab.field]"
                 :settingsList="settingsList"
+                :disable="isNotificationsDisabled"
                 @update="
                   (updatedField: { field: string; value: boolean }) =>
                     setCurrentSetting(updatedField, tab.field)
@@ -43,10 +44,15 @@
         </transition>
       </q-card-section>
       <q-card-actions class="notification-btns" align="right">
-        <q-btn no-caps class="secondary-btn notification-btn" v-close-popup
+        <q-btn
+          :disable="isNotificationsDisabled"
+          no-caps
+          class="secondary-btn notification-btn"
+          v-close-popup
           >Отмена</q-btn
         >
         <q-btn
+          :disable="isNotificationsDisabled"
           no-caps
           class="primary-btn notification-btn"
           @click="handleSaveSettings()"
@@ -65,12 +71,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
+import { storeToRefs } from 'pinia';
+import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
 import DefaultLoader from '../../loaders/DefaultLoader.vue';
 import AdminSettingsList from './AdminSettingsList.vue';
+
+const { user } = storeToRefs(useUserStore());
 
 const loading = ref(false);
 const onLoad = () => getUserSettings();
@@ -82,6 +92,18 @@ const props = defineProps<{
 }>();
 
 const tab = ref('email');
+
+const isNotificationsDisabled = computed<boolean>(() => {
+  if (
+    (user.value.settings?.email_notification_mute && tab.value === 'email') ||
+    (user.value.settings?.telegram_notification_mute && tab.value === 'tg') ||
+    (user.value.settings?.app_notification_mute && tab.value === 'app')
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+});
 
 const tabsConfig = [
   {
