@@ -85,7 +85,7 @@
             <span
               v-show="crumb?.name"
               :style="`max-width: calc((100vw - ${
-                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 250
+                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 150
               }px) / ${
                 Screen.width > 600 ? breadCrumbsHistory.length : 1
               }) !important`"
