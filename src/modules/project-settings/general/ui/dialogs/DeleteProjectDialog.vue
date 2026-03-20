@@ -39,7 +39,6 @@ import { toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -65,7 +64,6 @@ const emits = defineEmits<{
 
 const { currentProject: current_project } = toRefs(props);
 
-const userStore = useUserStore();
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
@@ -76,28 +74,22 @@ const router = useRouter();
 
 const handleDeleteProject = async () => {
   emits('startLoading');
-  await deleteProject(
-    currentWorkspaceSlug.value as string,
-    currentProjectID.value,
-  )
-    .then(async () => {
-      await workspaceStore.getWorkspaceProjects(
-        currentWorkspaceSlug.value as string,
-      );
-      await userStore.getFavouriteProjects(
-        currentWorkspaceSlug.value as string,
-      );
+  try {
+    await deleteProject(
+      currentWorkspaceSlug.value as string,
+      currentProjectID.value,
+    );
 
-      router.push(`/${currentWorkspaceSlug.value}/`);
-      project.value = null;
+    router.push(`/${currentWorkspaceSlug.value}/`);
+    project.value = null;
 
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DELETE_PROJECT,
-      });
-    })
-
-    .finally(() => emits('endLoading'));
+    setNotificationView({
+      type: 'success',
+      open: true,
+      customMessage: SUCCESS_DELETE_PROJECT,
+    });
+  } finally {
+    emits('endLoading');
+  }
 };
 </script>

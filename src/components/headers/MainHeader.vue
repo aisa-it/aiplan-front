@@ -36,6 +36,7 @@
               : [breadCrumbsHistory[breadCrumbsHistory.length - 1]]"
             :key="index"
             :to="crumb?.url"
+            @click="crumb?.click?.()"
           >
             <HomeIcon
               v-if="!workspaceInfo?.logo && crumb?.type === 'workspace'"
@@ -198,6 +199,7 @@ const breadCrumbsHistory = computed(() => {
       name: ` ${project.value?.name ?? ''}`,
       url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
+      click: () => singleIssueStore.closePreview(),
     };
   else if (user.value && currentPath.includes('profile'))
     existPath[1] = {
