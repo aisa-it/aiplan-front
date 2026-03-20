@@ -14,7 +14,10 @@ const api = new (withInterceptors(Sprint))();
 export const getSprints = async (
   workspaceSlug: string,
 ): Promise<DtoSprintLight[]> => {
-  return api.getSprintList(workspaceSlug).then((res) => res.data);
+  //FIXME в будущем поправить под логику работы с папками спринтов
+  return api.getSprintList(workspaceSlug).then((res: any) => {
+    return res.data?.flatMap((item: any) => item.sprints || [item]) ?? [];
+  });
 };
 
 export const getSprint = async (
