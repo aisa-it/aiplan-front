@@ -149,10 +149,10 @@ const onScroll = async (event: Event) => {
 
   const target = event.target as HTMLElement;
   const isBottom =
-    target.scrollHeight - target.scrollTop - target.clientHeight < 100;
+    target.scrollHeight - target.scrollTop - target.clientHeight < 200;
 
   if (isBottom) {
-    const hasMore = (pagination.offset || 0) < countIssues.value;
+    const hasMore = pinnedIssues.value.length < countIssues.value;
 
     if (hasMore) {
       isLoadingMore.value = true;
