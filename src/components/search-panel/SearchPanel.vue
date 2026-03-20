@@ -16,6 +16,21 @@
       >
         <q-menu fit auto-close>
           <q-list>
+            <q-item v-if="!route.path.includes('admin-panel')"
+              class="items-center" clickable @click="() => isCreateDialog = true" :disable="isCreateIssueDisabled" >
+              <NewIssue is-mobile @set-disable="(value) => isCreateIssueDisabled = value"/>
+              <span>Создать</span>
+            </q-item>
+            <q-item
+              class="items-center" clickable @click="isSearchOpened = true">
+              <SearchButton is-mobile />
+              <span>Поиск</span>
+            </q-item>
+            <q-item
+              class="items-center" clickable @click="() => openNotifications = true">
+              <WorkspaceNotifications is-mobile />
+              <span>Уведомления</span>
+            </q-item>
             <q-item
               class="items-center"
               clickable
@@ -32,21 +47,6 @@
                 </q-btn
                 >
                 <span>Конференция</span>
-            </q-item>
-            <q-item
-              class="items-center" clickable @click="() => openNotifications = true">
-              <WorkspaceNotifications is-mobile />
-              <span>Уведомления</span>
-            </q-item>
-            <q-item
-              class="items-center" clickable @click="isSearchOpened = true">
-              <SearchButton is-mobile />
-              <span>Поиск</span>
-            </q-item>
-            <q-item v-if="!route.path.includes('admin-panel')"
-              class="items-center" clickable @click="() => isCreateDialog = true" :disable="isCreateIssueDisabled" >
-              <NewIssue is-mobile @set-disable="(value) => isCreateIssueDisabled = value"/>
-              <span>Создать</span>
             </q-item>
           </q-list>
         </q-menu>
