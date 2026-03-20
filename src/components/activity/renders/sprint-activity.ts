@@ -27,8 +27,6 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
 
     case 'issue':
     case 'issues': {
-      action = translateAction('issues', Boolean(activity.new_value));
-
       const issueEntity =
         activity?.verb === 'removed'
           ? activity?.old_entity_detail
@@ -48,9 +46,9 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
             ? `"${issueName}"`
             : '';
 
-      return `<span>${action} ${issueLink || ''} ${
-        activity?.verb === 'added' ? 'в спринт' : 'из спринта'
-      } ${sprintLink}<span/>`;
+      return `<span>${
+        activity?.verb === 'removed' ? 'убрал(-а) из спринта' : 'добавил(-а) в спринт'
+      } ${sprintLink} задачу ${issueLink || ''} <span/>`;
     }
 
     case 'watchers':

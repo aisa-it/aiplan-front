@@ -16,6 +16,7 @@
     :option-value="(v) => v.id"
     :options="sprintsList"
     :loading="loading || isLoading"
+    @update:model-value="handleUpdateSelected"
     @popup-show="() => (isOpen = true)"
     @popup-hide="() => (isOpen = false)"
     @add="(sprint) => handleUpdateSprints(sprint.value, ACTIONS.ADD)"
@@ -110,7 +111,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(['refresh', 'update-selected']);
 
 //stores
 const workspaceStore = useWorkspaceStore();
@@ -174,6 +175,10 @@ const handleUpdateSprints = async (
     emit('refresh');
   }
 };
+
+const handleUpdateSelected = (value: DtoSprintLight[]) => {
+  emit('update-selected', value);
+}
 </script>
 
 <style scoped lang="scss"></style>

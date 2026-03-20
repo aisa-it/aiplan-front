@@ -267,7 +267,6 @@ const updateStores = async () => {
       project.value.id,
     ),
     workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string),
-    userStore.getFavouriteProjects(currentWorkspaceSlug.value as string),
   ]);
   router.replace({
     name: 'project-settings',

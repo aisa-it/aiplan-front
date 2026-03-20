@@ -110,7 +110,7 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   > * {
     @media (min-width: 768px) {
-      flex: 0 0 calc((100% - 16px) / 3);
+      width: calc((100% - 16px) / 3);
     }
   }
 }

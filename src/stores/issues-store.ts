@@ -8,7 +8,7 @@ import {
 
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoIssueWithCount, TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const issuesApi = new (withInterceptors(Issues))();
 
@@ -57,7 +57,7 @@ export const useIssuesStore = defineStore('issues-store', {
       groupedIssueList: [],
       groupByIssues: '',
       ungroupedIssueList: [],
-      pinnedIssues: [] as any[],
+      pinnedIssues: [] as DtoIssueWithCount[],
     };
   },
   actions: {
