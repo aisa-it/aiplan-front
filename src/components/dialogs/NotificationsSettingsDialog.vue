@@ -156,7 +156,6 @@
       </q-card-section>
       <q-card-actions class="notification-btns" align="right">
         <q-btn
-          :disable="isButtonDisabled"
           no-caps
           class="secondary-btn notification-btn"
           v-close-popup
