@@ -136,17 +136,29 @@ export const useProjectStore = defineStore('project-store', {
 
       await projectsApi
         .getProject(workspaceSlug, projectID)
-        .then((res) => {
+        .then(async (res) => {
           this.project = res.data;
+
+          const meData = await this.getCurrentMembership(
+            workspaceSlug,
+            projectID,
+          );
+
+          this.project.current_user_membership = {
+            role: meData?.role,
+            member_id: meData?.member_id,
+          };
 
           // TODO обновление publick и emoji нарушает типизацию
           this.project.public = valToNet(this.project.public);
           this.project.emoji = getProjectEmojiViaCode(this.project.emoji);
 
-          rolesStore.defineProjectRole(res?.data);
+          rolesStore.defineProjectRole(this.project);
 
           // Проверяем есть ли доступ к проекту
-          if (!rolesStore.hasPermissionByProject(res.data, 'show-project')) {
+          if (
+            !rolesStore.hasPermissionByProject(this.project, 'show-project')
+          ) {
             window.location.href = '/access-denied';
           }
         })
@@ -170,6 +182,10 @@ export const useProjectStore = defineStore('project-store', {
         .updateProject(workspaceSlug, projectID, projectInfo)
         .then(({ data }) => {
           this.project = data;
+          this.project.current_user_membership = {
+            role: this.meInProject?.role,
+            member_id: this.meInProject?.member_id,
+          };
         });
     },
 
@@ -310,19 +326,27 @@ export const useProjectStore = defineStore('project-store', {
 
     // ----------------------------- ME IN PROJECT -----------------------------
 
+    async getCurrentMembership(
+      workspaceSlug: string,
+      projectID: string,
+    ): Promise<DtoProjectMember> {
+      return await projectsApi
+        .getProjectCurrentMembership(workspaceSlug, projectID)
+        .then((res) => res.data);
+    },
+
     async getMeInProject(
       workspaceSlug: string,
       projectID: string,
     ): Promise<DtoProjectMember | undefined> {
       if (!projectID) return;
 
-      return projectsApi
-        .getProjectMemberMe(workspaceSlug, projectID)
+      return this.getCurrentMembership(workspaceSlug, projectID)
         .then((res) => {
-          this.meInProject = res.data;
+          this.meInProject = res;
 
           // решение для старых вариантов группировок, подменяем здесь значения на новые
-          const props = res.data.view_props;
+          const props = res.view_props;
           if (
             Object.keys(PARSED_GROUP).includes(
               props?.filters?.group_by as string,
@@ -340,7 +364,7 @@ export const useProjectStore = defineStore('project-store', {
           props.hideSubIssues = props.hideSubIssues ?? false;
 
           this.projectProps = props || null;
-          return res.data;
+          return res;
         })
         .catch((err) => {
           if (err.response.status == 404) {

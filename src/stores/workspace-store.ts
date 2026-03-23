@@ -61,8 +61,14 @@ export const useWorkspaceStore = defineStore('workspace-store', {
 
       return workspaceApi
         .getWorkspace(workspaceSlug)
-        .then((res) => {
+        .then(async (res) => {
           this.workspaceInfo = res.data;
+
+          const meData = await this.getMeInWorkspace(workspaceSlug);
+          this.workspaceInfo.current_user_membership = {
+            role: meData?.role,
+            member_id: meData?.member_id,
+          };
 
           // вычисление роли - лучше не трогать
           //TODO: убрать и добавить членство юзера в запрос выше
@@ -75,7 +81,10 @@ export const useWorkspaceStore = defineStore('workspace-store', {
 
           // Проверяем есть ли доступ к рабочему пространству
           if (
-            !rolesStore.hasPermissionByWorkspace(res.data, 'show-ws') &&
+            !rolesStore.hasPermissionByWorkspace(
+              this.workspaceInfo,
+              'show-ws',
+            ) &&
             !isInAdminPanel
           ) {
             window.location.href = '/access-denied';
@@ -223,12 +232,13 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         .then((res) => res.data);
     },
 
-    async getWorkspaceNotifications(
+    async getMeInWorkspace(
       workspaceSlug: string,
     ): Promise<DtoWorkspaceMember | void> {
       if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-      return (await workspaceApi.getWorkspaceMemberMe(workspaceSlug)).data;
+      return (await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug))
+        .data;
     },
 
     async setAiDocNotificationSettings(
