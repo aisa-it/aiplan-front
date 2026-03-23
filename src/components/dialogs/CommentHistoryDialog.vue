@@ -18,9 +18,17 @@
             :members="members"
           />
         </div>
-        <q-inner-loading v-else :showing="loading">
-          <DefaultLoader />
-        </q-inner-loading>
+        <div v-else class="history-comments__skeletons">
+          <div v-for="n in 3" :key="n" class="history-comments__skeleton">
+            <q-skeleton
+              type="rect"
+              class="q-mb-md"
+              height="64px"
+              width="250px"
+            />
+            <q-skeleton type="circle" />
+          </div>
+        </div>
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -34,8 +42,6 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 
 import CommentHistoryItem from '../issue-panels/CommentHistoryItem.vue';
-import DefaultLoader from '../loaders/DefaultLoader.vue';
-
 import {
   DtoCommentHistory,
   DtoDocComment,
@@ -104,6 +110,19 @@ const clearCommentHistory = () => {
     background-image: var(--bg-activities-pattern);
     max-height: 70vh;
     overflow-y: auto;
+  }
+
+  &__skeletons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__skeleton {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 12px;
   }
 }
 
