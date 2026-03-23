@@ -86,7 +86,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
         this.newRootDoc?.id,
       );
       await this.getRootDocs(workspaceSlug);
-      return this.newRootDoc?.id
+      return this.newRootDoc?.id;
     },
 
     async createComment(data) {
@@ -121,6 +121,21 @@ export const useAiDocStore = defineStore('aidoc-store', {
       return (await docApi.getDocComment(workspaceSlug, docId, commentId)).data;
     },
 
+    async getDocCommentHistory(
+      workspaceSlug: string,
+      docId: string,
+      commentId: string,
+      offset?: number,
+      limit?: number,
+    ) {
+      return (
+        await docApi.getDocCommentUpdateList(workspaceSlug, docId, commentId, {
+          offset: offset,
+          limit: limit,
+        })
+      ).data;
+    },
+
     async copyComment(comment_id: string) {
       const baseUrl = this.aidocLink;
       const link = `${baseUrl}/${comment_id}`;
@@ -142,7 +157,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
         this.newChildrenDoc?.id,
       );
       await this.getRootDocs(workspaceSlug);
-      return this.newChildrenDoc?.id
+      return this.newChildrenDoc?.id;
     },
 
     async moveDoc(
