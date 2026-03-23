@@ -21,6 +21,7 @@
     "
     @popup-hide="$emit('popup-hide')"
   >
+    <template v-slot:no-option></template>
     <template v-slot:option="scope">
       <q-item
         clickable
@@ -63,7 +64,7 @@
 <script lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch, onMounted } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -206,7 +207,7 @@ export default defineComponent({
             },
           )
           .then(() => {
-            refresh()
+            refresh();
             useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
             showNotification('success');
             emit('setStatus', state);
@@ -229,9 +230,6 @@ export default defineComponent({
       () => props.status,
       () => (open.value = props.status),
     );
-    onMounted(() => {
-      refresh();
-    });
     return {
       api,
       open,
