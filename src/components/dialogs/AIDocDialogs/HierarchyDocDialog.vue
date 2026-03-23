@@ -1,85 +1,49 @@
 <template>
-  <q-dialog class="doc-hierarchy-dialog" @hide="onHideDialog">
-    <q-card class="inner-modal-card">
+  <q-dialog
+    class="doc-hierarchy-dialog"
+    :persistent="isSaving"
+    @show="onDialogShow"
+    @hide="onDialogHide"
+  >
+    <q-card class="doc-hierarchy-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Иерархия документов</h6>
-        <div class="tree-wrapper">
-          <div
-            v-if="isMobile"
-            class="tree-drop-dragged-item"
-            :class="{ hidden: !currentTouchLocation }"
-          >
-            {{ currentItem?.title }}
-          </div>
-          <q-tree
-            id="tree"
-            ref="treeRef"
-            :nodes="treeNode"
-            node-key="id"
-            label-key="title"
-            :expanded="expandedNodes"
-            @update:expanded="(nodes) => (expandedNodes = [...nodes])"
-            @lazy-load="lazyLoad"
-          >
-            <template v-slot:default-header="prop">
-              <div
-                :id="prop.node.id"
-                class="tree-drop-helper tree-drop-helper-top"
-                :class="{
-                  'tree-drop-helper--active': isHelperActive(
-                    prop.node.id,
-                    'tree-drop-helper-top',
-                  ),
-                }"
-                @dragover="handleDragOver($event)"
-                @dragenter="onDragEnter($event)"
-                @dragleave="onDragLeave($event)"
-                @drop="handleDrop($event)"
-                @touchend="handleDrop($event)"
-              ></div>
-              <div
-                :id="prop.node.id"
-                class="tree-custom-header"
-                :draggable="isDraggable ? true : false"
-                @mousedown="startDragging($event)"
-                @dragstart="handleDragStart($event)"
-                @dragover="handleDragOver($event)"
-                @drop="handleDrop($event)"
-                @dragend="handleDragEnd($event)"
-                @touchmove="handleTouchMove($event)"
-                @touchend="handleDrop($event)"
-                @touchcancel="handleTouchCancel()"
-              >
-                {{ prop.node.title }}
-              </div>
-              <HintTooltip max-width="300px">{{ prop.node.title }}</HintTooltip>
-              <div
-                v-if="prop.node.isLastItem"
-                :id="prop.node.id"
-                class="tree-drop-helper tree-drop-helper-bottom"
-                :class="{
-                  'tree-drop-helper--active': isHelperActive(
-                    prop.node.id,
-                    'tree-drop-helper-bottom',
-                  ),
-                }"
-                @dragover="handleDragOver($event)"
-                @dragenter="onDragEnter($event)"
-                @dragleave="onDragLeave($event)"
-                @drop="handleDrop($event)"
-                @touchend="handleDrop($event)"
-              ></div>
-            </template>
-          </q-tree>
+
+        <div v-if="pendingMoves.length > 0" class="text-caption text-warning">
+          Перемещено документов: {{ pendingMoves.length }}
         </div>
+
+        <ul class="sortable visible-scroll" ref="rootSortableRef">
+          <HierarchyDocDialogItem
+            v-for="item in hierarchyRoots"
+            :key="item.id"
+            :item="item"
+            :on-sortable-end="handleSortableEnd"
+            class="nested"
+            @sortable-refresh="initAllSortables"
+          />
+          <li class="sortable-end"></li>
+        </ul>
       </q-card-section>
+
       <q-card-actions align="right">
         <q-btn
           flat
           no-caps
-          label="Закрыть"
-          class="btn secondary-btn"
-          v-close-popup
+          label="Отмена"
+          class="btn"
+          color="negative"
+          @click="clearChanges"
+          :disable="!isSaving"
+        />
+        <q-btn
+          flat
+          no-caps
+          label="Сохранить"
+          class="btn primary-btn"
+          color="primary"
+          @click="saveChanges"
+          :disable="!isSaving"
         />
       </q-card-actions>
     </q-card>
@@ -87,361 +51,383 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, nextTick, onBeforeUnmount, watch } from 'vue';
+import Sortable from 'sortablejs';
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useNotificationStore } from 'stores/notification-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
-import { QTree, useQuasar } from 'quasar';
-import { IDocTreeNode } from 'src/interfaces/docs';
-import { mapDocNode } from 'src/utils/tree';
+import HierarchyDocDialogItem from '../HierarchyDocDialogItem.vue';
+import { DtoDocLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-interface IDocTreeNodeSort extends IDocTreeNode {
-  isLastItem?: boolean;
-  children?: [];
+export interface DtoDocLightWithChildren extends DtoDocLight {
+  children?: DtoDocLightWithChildren[];
+  isExpanded?: boolean;
+  isLoadingChildren?: boolean;
 }
 
-// stores
+interface MoveOperation {
+  docId: string;
+  newParentId: string | undefined;
+  prevId: string | undefined;
+  nextId: string | undefined;
+  oldIndex: number;
+  newIndex: number;
+  fromEl: HTMLElement;
+  toEl: HTMLElement;
+}
+
 const workspaceStore = useWorkspaceStore();
 const docStore = useAiDocStore();
-const { setNotificationView } = useNotificationStore();
-// store to refs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { rootDocs } = storeToRefs(docStore);
 
-const $q = useQuasar();
-const treeRef = ref<QTree | null>();
-const treeNode = ref<IDocTreeNodeSort[]>([]);
-const isDraggable = ref(false);
-const currentItemId = ref('');
-const currentItem = ref();
-const currentTouchLocation = ref();
-const currentTarget = ref();
-const expandedNodes = ref<string[]>([]);
-const nodesToExpand = ref<string[]>([]);
+const hierarchyRoots = ref<DtoDocLightWithChildren[]>([]);
+const pendingMoves = ref<MoveOperation[]>([]);
+const isSaving = ref(false);
+const rootSortableRef = ref<HTMLElement | null>(null);
+let sortableInstances: Sortable[] = [];
 
-const isMobile = computed(() => $q.platform.is.mobile);
-
-const handleTouchMove = (event: any) => {
-  event.preventDefault();
-  currentTouchLocation.value = event.targetTouches[0];
-  currentItemId.value = event?.target?.id;
-  currentItem.value = treeRef.value?.getNodeByKey(currentItemId.value);
-  currentTarget.value = document.elementFromPoint(
-    currentTouchLocation.value?.pageX,
-    currentTouchLocation.value?.pageY,
-  );
-  const docTitle = document.querySelector('.tree-drop-dragged-item');
-  docTitle.style.left = currentTouchLocation.value.pageX + 'px';
-  docTitle.style.top = currentTouchLocation.value.pageY + 'px';
-};
-
-const handleTouchCancel = () => {
-  resetData();
-};
-
-const startDragging = (event: MouseEvent) => {
-  if (!event?.target?.id) return;
-  currentItemId.value = event?.target?.id;
-  currentItem.value = treeRef.value?.getNodeByKey(currentItemId.value);
-  isDraggable.value = true;
-};
-
-const handleDragStart = (event: any) => {
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/plain', '');
-  event.currentTarget.classList.add('dragging-state');
-};
-
-const handleDragOver = (event: DragEvent) => {
-  event.preventDefault();
-  if (currentItemId.value !== event?.target?.id)
-    event.dataTransfer.dropEffect = 'move';
-};
-
-const onDragEnter = (event: DragEvent) => {
-  event?.target?.classList.add('tree-drop-helper--active');
-};
-
-const onDragLeave = (event: DragEvent) => {
-  event?.target?.classList.remove('tree-drop-helper--active');
-};
-
-const isTargetChild = (folder: any, target: string) => {
-  if (folder?.children) {
-    for (let child of folder.children) {
-      if (child.id === target) {
-        return child;
-      }
-      const res = isTargetChild(child, target);
-      if (res) return res;
-    }
-  }
-};
-
-const moveDoc = async (event: any) => {
-  let reqParentId: string | null = null;
-  let reqPrevId: string | null = null;
-  let reqNextId: string | null = null;
-
-  const targetEl = isMobile.value ? currentTarget.value : event?.target;
-  targetEl?.classList.remove('tree-drop-helper--active');
-
-  const targetId = targetEl?.id;
-  if (!targetId) {
-    resetData();
-    return;
-  }
-  const parentId = treeRef.value?.getNodeByKey(targetId)?.parentId;
-  let targetFolder = [];
-
-  const isChild = isTargetChild(currentItem.value, targetId);
-  if (isChild) {
-    setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage: 'Невозможно переместить документ в его же дочерний',
-    });
-    resetData();
-    return;
-  }
-
-  if (parentId) {
-    targetFolder = treeRef.value?.getNodeByKey(parentId).children;
-  } else {
-    targetFolder = rootDocs.value;
-  }
-  const targetIndex = targetFolder.findIndex((doc) => doc.id === targetId);
-  const currentIndex = targetFolder.findIndex(
-    (doc) => doc.id === currentItemId.value,
-  );
-
-  if (
-    currentItemId.value === targetId ||
-    (currentIndex !== -1 &&
-      targetIndex === currentIndex + 1 &&
-      targetEl?.classList.contains('tree-drop-helper-top'))
-  ) {
-    resetData();
-    return;
-  }
-
-  if (targetEl?.classList.contains('tree-drop-helper')) {
-    if (parentId) {
-      reqParentId = parentId;
-    }
-
-    if (targetIndex === 0) {
-      reqNextId = targetId;
-    } else if (targetIndex === targetFolder.length - 1) {
-      reqPrevId = targetFolder[targetIndex - 1].id;
-      if (!targetEl?.classList.contains('tree-drop-helper-bottom')) {
-        reqNextId = targetId;
-      }
+const buildHierarchy = async (
+  docs: DtoDocLight[],
+): Promise<DtoDocLightWithChildren[]> => {
+  const promises = docs.map(async (doc) => {
+    const item: DtoDocLightWithChildren = { ...doc };
+    if (doc.has_child_docs && doc.id) {
+      const childResponse = await docStore.getChildDocList(
+        currentWorkspaceSlug.value!,
+        doc.id,
+      );
+      item.children = await buildHierarchy(childResponse.data);
     } else {
-      reqPrevId = targetFolder[targetIndex - 1].id;
-      reqNextId = targetId;
+      item.children = [];
+    }
+    return item;
+  });
+  return Promise.all(promises);
+};
+
+const updateHierarchy = async () => {
+  if (!currentWorkspaceSlug.value) return;
+  await docStore.getRootDocs(currentWorkspaceSlug.value);
+
+  hierarchyRoots.value = docStore.rootDocs.map((doc) => ({
+    ...doc,
+    children: [],
+    isExpanded: false,
+    isLoadingChildren: false,
+  }));
+
+  await nextTick();
+  initAllSortables();
+};
+
+// Рекурсивный поиск элемента по ID и обновление его состояния
+const findAndUpdateParent = (
+  items: DtoDocLightWithChildren[],
+  parentId: string,
+): boolean => {
+  for (const item of items) {
+    if (item.id === parentId) {
+      const hasRealChildren = !!item.children && item.children.length > 0;
+      item.has_child_docs = hasRealChildren;
+
+      if (hasRealChildren) {
+        item.isExpanded = true;
+      } else {
+        // Если детей нет - сворачиваем и сбрасываем флаг загрузки
+        item.isExpanded = false;
+        item.isLoadingChildren = false;
+        item.children = [];
+      }
+      return true;
     }
 
-    if (targetIndex !== 0 && targetIndex !== targetFolder.length - 1) {
-      reqPrevId = targetFolder[targetIndex - 1].id;
-      reqNextId = targetId;
-    } else if (targetIndex === 0) {
-      reqNextId = targetId;
-    } else if (targetIndex === targetFolder.length - 1) {
-      if (targetEl?.classList.contains('tree-drop-helper-bottom')) {
-        reqPrevId = targetFolder[targetIndex].id;
-      } else {
-        reqPrevId = targetFolder[targetIndex - 1].id;
+    if (item.children && item.children.length > 0) {
+      if (findAndUpdateParent(item.children, parentId)) {
+        return true;
       }
     }
-  } else if (targetEl?.classList.contains('tree-custom-header')) {
-    reqParentId = targetId;
-    if (currentItemId.value === reqParentId) return;
   }
-
-  await docStore.moveDoc(
-    currentWorkspaceSlug.value,
-    currentItemId.value,
-    reqParentId,
-    reqPrevId,
-    reqNextId,
-  );
-  resetData();
-  nodesToExpand.value = [...expandedNodes.value];
-  await getRootDocs();
-  for (const id of nodesToExpand.value) {
-    const node = treeRef.value?.getNodeByKey(id);
-    if (node) treeRef.value?.setExpanded(id, true);
-  }
+  return false;
 };
 
-const handleDrop = async (event: any) => {
-  event?.target?.classList.remove('tree-drop-helper--active');
-  try {
-    moveDoc(event);
-  } catch {
-  } finally {
-    resetData();
-  }
-};
-
-const handleDragEnd = async (event: any) => {
-  event?.currentTarget?.classList.remove('dragging-state');
-};
-
-const getRootDocs = async () => {
-  if (currentWorkspaceSlug?.value) {
-    await docStore.getRootDocs(currentWorkspaceSlug.value);
-  }
-};
-
-const lazyLoad = async ({
-  key,
-  done,
-}: {
-  key: string;
-  done: (children?: readonly any[]) => void;
-}) => {
-  if (!currentWorkspaceSlug || !currentWorkspaceSlug.value) return;
-  const children = (
-    await docStore.getChildDocList(currentWorkspaceSlug.value, key)
-  ).data;
-  done(
-    children.map(mapDocNode).map((doc, index) => {
-      return {
-        ...doc,
-        parentId: key,
-        isLastItem: children.length - 1 === index,
-      };
-    }),
-  );
-  for (const el of children) {
-    if (el.has_child_docs && el.id && nodesToExpand.value.includes(el.id)) {
-      const node = treeRef.value?.getNodeByKey(el.id);
-      if (node) treeRef.value?.setExpanded(el.id, true);
+// Функция синхронизация Vue DOM, повторяет перемещение элемента от Sortable DOM
+const syncItemPosition = (
+  items: DtoDocLightWithChildren[],
+  docId: string,
+  newParentId: string | undefined,
+  newIndex: number,
+) => {
+  // Находим элемент
+  let movedItem: DtoDocLightWithChildren | null = null;
+  const removeRecursive = (list: DtoDocLightWithChildren[]): boolean => {
+    const idx = list.findIndex((i) => i.id === docId);
+    if (idx !== -1) {
+      movedItem = list.splice(idx, 1)[0];
+      return true;
     }
+    for (const item of list) {
+      if (item.children && removeRecursive(item.children)) return true;
+    }
+    return false;
+  };
+
+  removeRecursive(items);
+  if (!movedItem) return;
+
+  // Вставляем элемент
+  if (!newParentId) {
+    // В корень
+    items.splice(newIndex, 0, movedItem);
+  } else {
+    // Внутрь родителя
+    const insertRecursive = (list: DtoDocLightWithChildren[]): boolean => {
+      for (const item of list) {
+        if (item.id === newParentId) {
+          if (!item.children) item.children = [];
+          // newIndex считается относительно детей родителя
+          item.children.splice(
+            newIndex,
+            0,
+            movedItem as DtoDocLightWithChildren,
+          );
+          return true;
+        }
+        if (item.children && insertRecursive(item.children)) return true;
+      }
+      return false;
+    };
+    insertRecursive(items);
   }
 };
 
-const onHideDialog = () => {
-  expandedNodes.value = [];
-  nodesToExpand.value = [];
-  docStore.isHierarchyOpened = false;
-};
+// Обработчик перемещения Sortable
+const handleSortableEnd = (evt: any) => {
+  // Поиск элемента, проверка возможности перемещения
+  if (evt.oldIndex === evt.newIndex && evt.from === evt.to) return;
+  const movedEl = evt.item as HTMLElement;
+  const docId = movedEl.dataset.id;
+  if (!docId || !currentWorkspaceSlug.value) {
+    evt.preventDefault();
+    return;
+  }
 
-const isHelperActive = (helperId: string, helperClass: string) => {
-  return (
-    isMobile.value &&
-    helperId === currentTarget.value?.id &&
-    currentTarget.value?.classList.contains(helperClass)
+  // Определяем нового родителя
+  let newParentId: string | undefined;
+  const parentItem = evt.to.closest('.sortable-item');
+  if (parentItem) {
+    newParentId = parentItem.dataset.id;
+  }
+
+  // Определяем старого родителя
+  let oldParentId: string | undefined;
+  const oldParentLi = evt.from.parentElement?.closest('.sortable-item');
+  if (oldParentLi) {
+    oldParentId = oldParentLi.dataset.id;
+  }
+
+  // Синхронизация DOM Vue и Sortable
+  syncItemPosition(hierarchyRoots.value, docId, newParentId, evt.newIndex);
+
+  // Обновление состояний старого и нового родителей (заменяет точку на > и наоборот)
+  if (newParentId) {
+    findAndUpdateParent(hierarchyRoots.value, newParentId);
+  }
+  if (oldParentId) {
+    findAndUpdateParent(hierarchyRoots.value, oldParentId);
+  }
+
+  // Определяем соседей для вычисления порядка
+  const siblings = Array.from(evt.to.children).filter(
+    (el): el is HTMLElement =>
+      el instanceof HTMLElement &&
+      el.classList.contains('sortable-item') &&
+      el !== movedEl,
   );
+  const newIndex = evt.newIndex ?? 0;
+  let prevId: string | undefined;
+  let nextId: string | undefined;
+
+  if (newIndex > 0) {
+    prevId = siblings[newIndex - 1]?.dataset.id;
+  }
+  if (newIndex < siblings.length) {
+    nextId = siblings[newIndex]?.dataset.id;
+  }
+
+  // Сохранение операции
+  pendingMoves.value.push({
+    docId,
+    newParentId,
+    prevId,
+    nextId,
+    oldIndex: evt.oldIndex,
+    newIndex: evt.newIndex,
+    fromEl: evt.from,
+    toEl: evt.to,
+  });
+
+  // Обновление дерева sortables для корректности данных + возможность вкладывать элементы в только что перенесенные
+  nextTick(() => {
+    initAllSortables();
+  });
 };
 
-const resetData = () => {
-  isDraggable.value = false;
-  currentItem.value = null;
-  currentItemId.value = '';
-  currentTouchLocation.value = null;
-  currentTarget.value = null;
+// Функции диалогового окна
+
+const clearChanges = async () => {
+  pendingMoves.value = [];
+  await updateHierarchy();
+  isSaving.value = false;
 };
+
+const saveChanges = async () => {
+  if (pendingMoves.value.length === 0) return;
+  isSaving.value = false;
+
+  try {
+    // Выполняем перемещения по очереди
+    for (const move of pendingMoves.value) {
+      await docStore.moveDoc(
+        currentWorkspaceSlug.value!,
+        move.docId,
+        move.newParentId,
+        move.prevId,
+        move.nextId,
+      );
+    }
+    clearChanges();
+  } catch (error) {
+    console.error('Ошибка при сохранении иерархии', error);
+    clearChanges();
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+const onDialogShow = () => {
+  docStore.isHierarchyOpened = true;
+  clearChanges();
+};
+
+const onDialogHide = () => {
+  destroyAllSortables();
+  docStore.isHierarchyOpened = false;
+  pendingMoves.value = [];
+  hierarchyRoots.value = [];
+};
+
+// Функции Sortable
+
+const destroyAllSortables = () => {
+  sortableInstances.forEach((s) => s.destroy());
+  sortableInstances = [];
+};
+
+const initAllSortables = () => {
+  destroyAllSortables();
+
+  const rootEl = rootSortableRef.value;
+  if (!rootEl) return;
+
+  const allLists = [
+    rootEl,
+    ...Array.from(rootEl.querySelectorAll('.sortable')),
+  ];
+
+  allLists.forEach((list) => {
+    const sortable = new Sortable(list as HTMLElement, {
+      group: {
+        name: 'sortable',
+        put: (to: Sortable) => {
+          // Запрет на дроп в свернутый список
+          if (to.el.classList.contains('sortable-collapsed')) {
+            return false;
+          }
+          return true;
+        },
+      },
+      draggable: '.sortable-item',
+      ghostClass: 'sortable-ghost',
+      animation: 150,
+      forceFallback: true,
+      fallbackOnBody: true,
+      fallbackTolerance: 5,
+      swapThreshold: 0.65,
+      emptyInsertThreshold: 10,
+      preventOnFilter: true,
+      onEnd: handleSortableEnd,
+    });
+    sortableInstances.push(sortable);
+  });
+};
+
+onBeforeUnmount(() => {
+  destroyAllSortables();
+});
 
 watch(
-  () => rootDocs.value,
-  (newVal) => {
-    if (newVal.length) {
-      treeNode.value = newVal.map(mapDocNode);
-      treeNode.value[treeNode.value.length - 1].isLastItem = true;
+  () => pendingMoves.value.length,
+  (newWalue) => {
+    if (newWalue > 0) {
+      isSaving.value = true;
     }
   },
-  { deep: true },
 );
-
-onMounted(async () => {
-  await getRootDocs();
-});
 </script>
 
-<style lang="scss">
-.doc-hierarchy-dialog {
-  .tree-wrapper {
-    width: 100%;
-    max-width: 600px;
+<style lang="scss" scoped>
+.visible-scroll {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
+}
+
+.doc-hierarchy-card {
+  border-radius: 16px;
+  padding: 8px;
+  width: 70vw;
+  overflow: hidden;
+
+  @media screen and (width < 600px) {
+    width: 90vw;
   }
-  .q-tree__node {
-    overflow: hidden;
-    padding-bottom: 0;
+}
+
+.nested {
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
   }
-  .q-tree__node--parent {
-    padding-bottom: 4px;
-    &
-      > .q-tree__node-header
-      > .q-tree__node-header-content
-      .tree-drop-helper-bottom {
-      z-index: 2;
-      left: 0;
-    }
-  }
-  .q-tree__node--child {
-    margin-bottom: 6px;
-  }
-  .q-focus-helper {
-    display: none;
-  }
-  .q-tree__node-header {
-    position: static !important;
-  }
-  .tree-drop-helper {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    left: -30px;
-    width: 130%;
-    height: 14px;
-    &:before {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 2px;
-      background-color: $border-color;
-      opacity: 0;
-      visibility: hidden;
-    }
-  }
-  .tree-drop-helper-top {
-    top: -6px;
-  }
-  .tree-drop-helper-bottom {
-    bottom: -6px;
-  }
-  .tree-drop-helper--active {
-    &:before {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-  .tree-custom-header {
-    max-width: 250px;
-    color: $text-color;
-    background-color: transparent !important;
-    cursor: default;
-  }
-  .tree-drop-dragged-item {
-    position: fixed;
-    max-width: 250px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    transform: translate(-50%, -50%);
-    opacity: 0.5;
-  }
-  @media screen and (min-width: 768px) {
-    .q-tree__node-header:hover {
-      background-color: $hover-color;
-    }
-    .tree-custom-header {
-      max-width: 550px;
-    }
-  }
+}
+
+.sortable {
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+  max-height: 50vh;
+  width: 100%;
+  overflow: auto;
+}
+
+:deep(.sortable-ghost) {
+  opacity: 0.5;
+  border-top: 2px solid var(--primary);
+}
+
+.sortable-end {
+  margin-top: 24px;
+  height: 1px;
+  list-style-type: none;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+:deep(.sortable-chosen) {
+  z-index: 9999 !important;
 }
 </style>
