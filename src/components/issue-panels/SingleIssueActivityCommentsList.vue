@@ -8,6 +8,7 @@
       @handle-delete="deleteComment(comment)"
       @handle-edit="editComment(comment)"
       @handle-reply="handleReply(comment)"
+      @handle-history="openCommentHistory(comment)"
       @add-reaction="handleAddReaction(comment, $event)"
       @delete-reaction="handleDeleteReaction(comment, $event)"
     />
@@ -23,6 +24,12 @@
       v-model="isOpenCommentDeleteDialog"
       :comment="issueComment"
       @on-delete="handleDeleteComment"
+    />
+    <CommentHistoryDialog
+      v-model="isOpenCommentHistoryDialog"
+      :comment="issueComment"
+      :members="members"
+      :context="'issue'"
     />
   </div>
 </template>
@@ -44,6 +51,7 @@ import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import IssueCommentEditDialog from '../dialogs/IssueDialogs/IssueCommentEditDialog.vue';
 import IssueCommentDeleteDialog from '../dialogs/IssueDialogs/IssueCommentDeleteDialog.vue';
 import SingleIssueActivityCommentsListItem from './SingleIssueActivityCommentsListItem.vue';
+import CommentHistoryDialog from '../dialogs/CommentHistoryDialog.vue';
 
 // constants
 import {
@@ -53,17 +61,24 @@ import {
 
 // interfaces
 import { IIssueCommentUpdate } from 'src/interfaces/issues';
+import {
+  DtoIssueComment,
+  DtoProjectMember,
+  DtoProjectMemberLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  comments: any[];
-  members: any[];
+  comments: DtoIssueComment[];
+  members: DtoProjectMember[] | DtoProjectMemberLight[];
   workspaceSlug: string;
-  getMembersForMention: (search: string) => Promise<any[] | void>;
+  getMembersForMention: (
+    search: string,
+  ) => Promise<DtoProjectMember[] | DtoProjectMemberLight[] | void>;
 }>();
 
 const emits = defineEmits<{
   refresh: [];
-  'handle-reply': [comment: any];
+  'handle-reply': [comment: DtoIssueComment];
 }>();
 
 // store
@@ -75,25 +90,32 @@ const { user } = storeToRefs(userStore);
 
 // vars
 const isMounted = ref<boolean>(true);
-const issueComment = ref<any>({});
+const issueComment = ref<DtoIssueComment | {}>({});
 const isOpenCommentEditDialog = ref<boolean>(false);
 const isOpenCommentDeleteDialog = ref<boolean>(false);
+const isOpenCommentHistoryDialog = ref<boolean>(false);
 
-const isAutoSave = computed(() => {
+const isAutoSave = computed<boolean>(() => {
   return !!user.value?.view_props?.autoSave;
 });
 
 // function
-const editComment = (comment: any) => {
+const editComment = (comment: DtoIssueComment) => {
   issueComment.value = {};
   issueComment.value = comment;
   isOpenCommentEditDialog.value = true;
 };
 
-const deleteComment = (comment: any) => {
+const deleteComment = (comment: DtoIssueComment) => {
   issueComment.value = {};
   issueComment.value = comment;
   isOpenCommentDeleteDialog.value = true;
+};
+
+const openCommentHistory = (comment: DtoIssueComment) => {
+  issueComment.value = {};
+  issueComment.value = comment;
+  isOpenCommentHistoryDialog.value = true;
 };
 
 const handleUpdateComment = async (data: IIssueCommentUpdate) => {
@@ -138,13 +160,16 @@ const handleDeleteComment = async () => {
     );
 };
 
-const handleAddReaction = async (comment: any, reaction: string) => {
+const handleAddReaction = async (
+  comment: DtoIssueComment,
+  reaction: string,
+) => {
   await singleIssueStore
     .issueCommentAddReaction(
       props.workspaceSlug,
-      comment.project_id,
-      comment.issue_id,
-      comment.id,
+      comment.project_id as string,
+      comment.issue_id as string,
+      comment.id as string,
       reaction,
     )
     .then(() => {
@@ -152,13 +177,16 @@ const handleAddReaction = async (comment: any, reaction: string) => {
     });
 };
 
-const handleDeleteReaction = async (comment: any, reactionValue: string) => {
+const handleDeleteReaction = async (
+  comment: DtoIssueComment,
+  reactionValue: string,
+) => {
   await singleIssueStore
     .issueCommentDeleteReaction(
       props.workspaceSlug,
-      comment.project_id,
-      comment.issue_id,
-      comment.id,
+      comment.project_id as string,
+      comment.issue_id as string,
+      comment.id as string,
       reactionValue,
     )
     .then(() => {
@@ -166,7 +194,7 @@ const handleDeleteReaction = async (comment: any, reactionValue: string) => {
     });
 };
 
-const getComments = (comments: Array<any>) => {
+const getComments = (comments: DtoIssueComment[]): DtoIssueComment[] => {
   let list = comments;
   if (isMounted.value && comments.length > 10) {
     list = list.slice(0, 10);
@@ -175,7 +203,7 @@ const getComments = (comments: Array<any>) => {
   return list;
 };
 
-const handleReply = (comment: any) => {
+const handleReply = (comment: DtoIssueComment) => {
   emits('handle-reply', comment);
 };
 
