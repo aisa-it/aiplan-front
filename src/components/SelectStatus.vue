@@ -64,7 +64,7 @@
 <script lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -215,6 +215,12 @@ export default defineComponent({
           });
       }
     };
+
+    onMounted(() => {
+      if (!props.issueid) {
+        refresh();
+      }
+    });
 
     watch(
       () => props.projectid,
