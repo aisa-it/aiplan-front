@@ -103,6 +103,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
   },
 
   actions: {
+    closePreview() {
+      this.isPreview = false;
+      this.currentIssueID = '';
+    },
     async getIssueData(workspaceSlug: string, projectID: string) {
       await api
         .get(
