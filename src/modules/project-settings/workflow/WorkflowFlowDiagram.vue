@@ -313,7 +313,7 @@ const commitFlowSnapshot = () => {
 defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
 </script>
 
-<style>
+<style lang="scss">
 .flow-container {
   width: 100%;
   height: 100%;
@@ -328,9 +328,25 @@ defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
   background: transparent;
 }
 
+.flow-container .vue-flow__node-default,
+.flow-container .vue-flow__node-default.selected,
+.flow-container .vue-flow__node-default.selected:hover,
+.flow-container .vue-flow__node-default:focus,
+.flow-container .vue-flow__node-default:focus-visible,
+.flow-container .vue-flow__node-default.selectable:hover {
+  border: none;
+  box-shadow: none;
+}
+
 .flow-container .vue-flow__handle {
   width: 10px;
   height: 10px;
+  border: none;
+  background: #000;
+}
+
+.body--dark .flow-container .vue-flow__handle {
+  background: $gray;
 }
 
 .flow-container .circle-node .vue-flow__handle {
