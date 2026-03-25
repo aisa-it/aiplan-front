@@ -13,7 +13,7 @@
       >
         {{ el.title }}
         <q-toggle
-          :model-value="el.value"
+          :model-value="localToggles[el.key]"
           size="32px"
           @update:model-value="el.update"
         />
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from 'src/stores/user-store';
@@ -57,11 +57,14 @@ import {
   hoursToNanoseconds,
   nanosecondsToHours,
 } from 'src/utils/hoursToNanoseconds';
+import { debounce } from 'quasar';
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const { setNotificationView } = useNotificationStore();
+
+const localToggles = ref<Record<string, boolean>>({});
 
 const notificationOptions: {
   text: string;
@@ -102,7 +105,25 @@ const changeNotificationSettings = async (data: TypesUserSettings) => {
       },
     })
     .then(() => showNotification('success', SUCCESS_UPDATE_DATA))
-    .catch(() => showNotification('error', BASE_ERROR));
+    .catch(() => {
+      showNotification('error', BASE_ERROR);
+      updateLocalToggles();
+    });
+};
+
+const debouncedChangeNotificationSettings = debounce(
+  (data: TypesUserSettings) => {
+    changeNotificationSettings(data);
+  },
+  1000,
+);
+
+const updateLocalToggles = () => {
+  if (!user.value?.settings) return;
+  toggleConfig.forEach((item) => {
+    const key = item.key;
+    localToggles.value[key] = !user.value.settings![key];
+  });
 };
 
 const toggleConfig = [
@@ -114,11 +135,18 @@ const toggleConfig = [
 const toggles = computed(() =>
   toggleConfig.map((el) => ({
     title: el.title,
-    value: !user.value?.settings?.[el.key],
-    update: (newValue: boolean) =>
-      changeNotificationSettings({ [el.key]: !newValue }),
+    key: el.key,
+    value: localToggles.value[el.key],
+    update: (newValue: boolean) => {
+      localToggles.value[el.key] = newValue;
+      debouncedChangeNotificationSettings({ [el.key]: !newValue });
+    },
   })),
 );
+
+onMounted(() => updateLocalToggles());
+
+watch(() => user.value?.settings, updateLocalToggles);
 
 watch(
   () => user.value?.settings?.deadline_notification,
