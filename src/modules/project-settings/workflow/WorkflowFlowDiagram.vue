@@ -342,7 +342,7 @@ defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
   width: 10px;
   height: 10px;
   border: none;
-  background: #000;
+  background:$dark-gray;
 }
 
 .body--dark .flow-container .vue-flow__handle {
