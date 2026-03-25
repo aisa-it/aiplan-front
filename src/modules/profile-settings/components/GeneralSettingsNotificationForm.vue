@@ -64,7 +64,14 @@ const { user } = storeToRefs(userStore);
 
 const { setNotificationView } = useNotificationStore();
 
-const localToggles = ref<Record<string, boolean>>({});
+const localToggles = ref<Partial<TypesUserSettings>>({});
+const pendingTogglesChanges = ref<Partial<TypesUserSettings>>({});
+
+const toggleConfig = [
+  { title: 'Email', key: 'email_notification_mute' as const },
+  { title: 'Telegram', key: 'telegram_notification_mute' as const },
+  { title: 'Система', key: 'app_notification_mute' as const },
+];
 
 const notificationOptions: {
   text: string;
@@ -104,19 +111,22 @@ const changeNotificationSettings = async (data: TypesUserSettings) => {
         ...data,
       },
     })
-    .then(() => showNotification('success', SUCCESS_UPDATE_DATA))
+    .then(() => {
+      showNotification('success', SUCCESS_UPDATE_DATA);
+      pendingTogglesChanges.value = {};
+    })
     .catch(() => {
       showNotification('error', BASE_ERROR);
+      pendingTogglesChanges.value = {};
       updateLocalToggles();
     });
 };
 
-const debouncedChangeNotificationSettings = debounce(
-  (data: TypesUserSettings) => {
-    changeNotificationSettings(data);
-  },
-  1000,
-);
+const debouncedChangeNotificationSettings = debounce(() => {
+  if (Object.keys(pendingTogglesChanges.value).length > 0) {
+    changeNotificationSettings(pendingTogglesChanges.value);
+  }
+}, 1000);
 
 const updateLocalToggles = () => {
   if (!user.value?.settings) return;
@@ -126,12 +136,6 @@ const updateLocalToggles = () => {
   });
 };
 
-const toggleConfig = [
-  { title: 'Email', key: 'email_notification_mute' as const },
-  { title: 'Telegram', key: 'telegram_notification_mute' as const },
-  { title: 'Система', key: 'app_notification_mute' as const },
-];
-
 const toggles = computed(() =>
   toggleConfig.map((el) => ({
     title: el.title,
@@ -139,7 +143,8 @@ const toggles = computed(() =>
     value: localToggles.value[el.key],
     update: (newValue: boolean) => {
       localToggles.value[el.key] = newValue;
-      debouncedChangeNotificationSettings({ [el.key]: !newValue });
+      pendingTogglesChanges.value[el.key] = !newValue;
+      debouncedChangeNotificationSettings();
     },
   })),
 );
