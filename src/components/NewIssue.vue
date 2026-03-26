@@ -23,8 +23,14 @@
       @on-project-created="isProjectCreateOpen = true"
       @update="refreshIssues = true"
     />
-    <NewProjectDialog v-if="!isMobile && isProjectCreateOpen" v-model="isProjectCreateOpen" />
-    <CreateDocPageDialog v-if="!isMobile && isDocCreateOpen" v-model="isDocCreateOpen" />
+    <NewProjectDialog
+      v-if="!isMobile && isProjectCreateOpen"
+      v-model="isProjectCreateOpen"
+    />
+    <CreateDocPageDialog
+      v-if="!isMobile && isDocCreateOpen"
+      v-model="isDocCreateOpen"
+    />
   </template>
   <template v-else>
     <NewIssueDialog
@@ -34,8 +40,16 @@
       @update="refreshIssues = true"
       @hide="closeDialog"
     />
-    <NewProjectDialog v-if="isProjectCreateOpen" v-model="isProjectCreateOpen" @hide="emit('closeDialog')" />
-    <CreateDocPageDialog v-if="isDocCreateOpen" v-model="isDocCreateOpen" @hide="closeDialog" />
+    <NewProjectDialog
+      v-if="isProjectCreateOpen"
+      v-model="isProjectCreateOpen"
+      @hide="emit('closeDialog')"
+    />
+    <CreateDocPageDialog
+      v-if="isDocCreateOpen"
+      v-model="isDocCreateOpen"
+      @hide="closeDialog"
+    />
   </template>
 </template>
 
@@ -64,7 +78,8 @@ const workspaceStore = useWorkspaceStore();
 
 // refs from stores
 const { refreshIssues } = storeToRefs(issuesStore);
-const { workspaceProjects, workspaceInfo } = storeToRefs(workspaceStore);
+const { workspaceProjects, workspaceInfo, meInWorkspace } =
+  storeToRefs(workspaceStore);
 const { activeGuid } = storeToRefs(useGuiderStore());
 
 // local state
@@ -85,9 +100,7 @@ const isMobile = toRef(props.isMobile);
 // computed
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 
-const currentWorkspaceRole = computed(
-  () => workspaceInfo.value?.current_user_membership?.role,
-);
+const currentWorkspaceRole = computed(() => meInWorkspace?.value?.role ?? 0);
 
 const isDisabled = computed(() => {
   return (
@@ -113,26 +126,32 @@ const closeDialog = () => {
   emit('closeDialog');
 };
 
-watch(() => props.showDialog, () => {
-  if (props.showDialog) {
-    addIssue();
-  }
-});
+watch(
+  () => props.showDialog,
+  () => {
+    if (props.showDialog) {
+      addIssue();
+    }
+  },
+);
 
-watch(() => isDisabled.value, () => {
-  emit('setDisable', isDisabled.value)
-})
+watch(
+  () => isDisabled.value,
+  () => {
+    emit('setDisable', isDisabled.value);
+  },
+);
 
 onMounted(() => {
-  emit('setDisable', isDisabled.value)
-})
+  emit('setDisable', isDisabled.value);
+});
 </script>
 
 <style scoped lang="scss">
-  .mobile-btn {
-    min-width: 30px;
-    min-height: 30px;
-    padding: 0 !important;
-    margin-left: 2px;
-  }
+.mobile-btn {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0 !important;
+  margin-left: 2px;
+}
 </style>

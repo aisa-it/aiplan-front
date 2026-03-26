@@ -31,6 +31,7 @@ const api = new HttpClient();
 interface RootStore {
   currentWorkspaceSlug: string | null;
   workspaceInfo?: DtoWorkspace;
+  meInWorkspace?: DtoWorkspaceMember;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
   workspaceUsers: DtoWorkspaceMember[];
@@ -64,10 +65,11 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         .then(async (res) => {
           this.workspaceInfo = res.data;
 
-          const meData = await this.getMeInWorkspace(workspaceSlug);
+          this.meInWorkspace =
+            (await this.getMeInWorkspace(workspaceSlug)) ?? undefined;
           this.workspaceInfo.current_user_membership = {
-            role: meData?.role,
-            member_id: meData?.member_id,
+            role: this.meInWorkspace?.role,
+            member_id: this.meInWorkspace?.member_id,
           };
 
           // вычисление роли - лучше не трогать

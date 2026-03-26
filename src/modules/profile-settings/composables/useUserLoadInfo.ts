@@ -16,7 +16,8 @@ export const useUserLoadInfo = () => {
   const workspaceStore = useWorkspaceStore();
 
   const { user, userWorkspaces } = storeToRefs(userStore);
-  const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+  const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
+    storeToRefs(workspaceStore);
 
   const bus = inject('bus') as EventBus;
 
@@ -36,8 +37,9 @@ export const useUserLoadInfo = () => {
 
     if (
       workspaceInfo &&
-      workspaceInfo.value?.current_user_membership &&
-      workspaceInfo.value?.current_user_membership.role === 15
+      meInWorkspace &&
+      meInWorkspace.value &&
+      meInWorkspace.value?.role === 15
     ) {
       await getFormList(workspaceInfo.value?.slug as string).then(
         (res) => (formStore.forms = res),

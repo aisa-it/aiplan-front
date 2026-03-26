@@ -1,12 +1,11 @@
 <template>
-  <q-page class="flex justify-center" :class="!ny ? 'items-center' : 'items-start'">
+  <q-page
+    class="flex justify-center"
+    :class="!ny ? 'items-center' : 'items-start'"
+  >
     <div class="flex flex-col items-center">
-      <div v-if="ny" style="padding: 40px 0px;">
-        <q-img
-          fit="contain"
-          :src="newYearTree"
-          style="width: 250px"
-        />
+      <div v-if="ny" style="padding: 40px 0px">
+        <q-img fit="contain" :src="newYearTree" style="width: 250px" />
       </div>
       <AIDocIcon :width="120" :height="120" />
       <span style="font-size: 25px">{{
@@ -56,7 +55,7 @@ const workspaceStore = useWorkspaceStore();
 const utilsStore = useUtilsStore();
 
 //storesToRefs
-const { workspaceInfo } = storeToRefs(workspaceStore);
+const { meInWorkspace } = storeToRefs(workspaceStore);
 const { ny } = storeToRefs(utilsStore);
 
 //variables
@@ -65,8 +64,8 @@ const documentValue = ref({});
 
 //computeds
 const currentUserRole = computed(() => {
-  if (!workspaceInfo || !workspaceInfo.value) return 0;
-  return workspaceInfo.value?.current_user_membership?.role ?? 0;
+  if (!meInWorkspace || !meInWorkspace.value) return 0;
+  return meInWorkspace.value?.role ?? 0;
 });
 
 //methods

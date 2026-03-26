@@ -69,7 +69,13 @@
                     <HintTooltip>Убрать из избранного</HintTooltip>
                   </q-btn>
                   <MenuActions
-                    :items="getAidocMenuItems(item.doc_id, item.doc?.short_url, item.doc)"
+                    :items="
+                      getAidocMenuItems(
+                        item.doc_id,
+                        item.doc?.short_url,
+                        item.doc,
+                      )
+                    "
                     @click.stop
                   />
                 </div>
@@ -124,7 +130,13 @@
                     <HintTooltip v-else>Добавить в избранное</HintTooltip>
                   </q-btn>
                   <MenuActions
-                    :items="getAidocMenuItems(prop.node.id, prop.node.doc?.short_url, prop.node)"
+                    :items="
+                      getAidocMenuItems(
+                        prop.node.id,
+                        prop.node.doc?.short_url,
+                        prop.node,
+                      )
+                    "
                     @click.stop
                   />
                 </div>
@@ -155,7 +167,10 @@
         @refresh="getDocInfo(docInfo.id)"
       />
 
-      <NotificationsSettingsDialog v-model="isNotificationsSettingsOpen" is-aidoc-page />
+      <NotificationsSettingsDialog
+        v-model="isNotificationsSettingsOpen"
+        is-aidoc-page
+      />
     </template>
   </ExpansionItem>
 </template>
@@ -214,7 +229,7 @@ const userStore = useUserStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 // store to refs
-const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, meInWorkspace } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
 const {
   rootDocs,
@@ -238,7 +253,7 @@ const docInfo = ref({});
 const loading = ref(false);
 
 const currentUserRole = computed(() => {
-  return workspaceInfo.value?.current_user_membership?.role ?? 0;
+  return meInWorkspace?.value?.role ?? 0;
 });
 
 const isAdminOrAuthor = computed(() => {
