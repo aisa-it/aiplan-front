@@ -1,7 +1,7 @@
 <template>
   <ExpansionItem
     full-open
-    :is-expanding="sprints.length > 0"
+     :is-expanding="sprints.length > 0"
     itemName="sprints"
   >
     <template v-slot:header>
@@ -20,59 +20,34 @@
       </div>
     </template>
     <template v-slot:content>
-      <q-list
-        v-if="sprints.length > 0"
-        :style="{
-          overflow: 'scroll',
-        }"
-        class="scrollable-content"
+      <q-tree
+        :nodes="filteredSprints"
+        node-key="id"
+        label-key="name"
+        children-key="sprints"
       >
-        <q-expansion-item
-          v-for="folder in parsedSprints.folders"
-          :key="folder.id"
-          class="q-list--sprint-folder q-mb-sm"
-          dense
-          dense-toggle
-        >
-          <template v-slot:header>
-            <q-item-section avatar style="min-width: 0; padding-right: 8px">
-              <q-icon
-                name="folder"
-                size="20px"
-                :color="$q.dark.isActive ? 'grey-4' : 'grey-7'"
-              />
-            </q-item-section>
-            <q-item-section class="text-subtitle2" style="font-weight: 500">
-              {{ folder.name }}
-            </q-item-section>
-          </template>
-
-          <q-item
-            v-for="sprint in folder.items"
-            :key="sprint.id"
-            class="menu-link__item row items-center q-pl-xl"
+        <template v-slot:default-header="prop">
+          <q-item v-if="prop.node.stats"
+            class="menu-link__item row items-center"
             style="padding-top: 0; padding-bottom: 0"
             tag="a"
             target="_self"
-            :active="route.params.sprint === sprint.id"
+            :active="route.params.sprint === prop.node.id"
             :to="`/${currentWorkspaceSlug || workspaceInfo?.slug}/sprints/${
-              sprint.id
+              prop.node.id
             }`"
           >
             <q-item-section avatar>
               <StatusCircularProgressBar
                 style="width: 24px"
-                :stats="sprint.stats ?? {}"
+                :stats="prop.node.stats ?? {}"
               />
             </q-item-section>
             <q-item-section>
               <q-item-label class="abbriviated-text">
-                {{ sprint.name }}
+                {{ prop.node.name }}
                 {{
-                  getSprintDates(
-                    sprint?.start_date ?? '',
-                    sprint?.end_date ?? '',
-                  )
+                  getSprintDates(prop.node?.start_date ?? '', prop.node?.end_date ?? '')
                 }}
               </q-item-label>
               <HintTooltip
@@ -80,55 +55,52 @@
                 self="bottom start"
                 :offset="[0, 42]"
               >
-                {{ sprint.name }}
+                {{ prop.node.name }}
               </HintTooltip>
             </q-item-section>
             <MenuActions
               v-if="hasPermission('show-sprint-popup')"
-              :items="getSprintMenuItems(sprint)"
+              :items="getSprintMenuItems(prop.node)"
             />
           </q-item>
-        </q-expansion-item>
 
-        <q-item
-          v-for="sprint in parsedSprints.root"
-          :key="sprint.id"
-          class="menu-link__item row items-center"
-          style="padding-top: 0; padding-bottom: 0"
-          tag="a"
-          target="_self"
-          :active="route.params.sprint === sprint.id"
-          :to="`/${currentWorkspaceSlug || workspaceInfo?.slug}/sprints/${
-            sprint.id
-          }`"
-        >
-          <q-item-section avatar>
-            <StatusCircularProgressBar
-              style="width: 24px"
-              :stats="sprint.stats ?? {}"
+          <q-item v-else
+            class="menu-link__item row items-center"
+            clickable
+            @click="() => console.log(prop.node)"
+          >
+            <q-item-section avatar style="min-width: 0; padding-right: 8px">
+              <q-icon
+                name="folder"
+                size="20px"
+                :color="$q.dark.isActive ? 'grey-7' : 'grey-4'"
+              />
+            </q-item-section>
+            <q-item-section class="tree-custom-header__name" style="font-weight: 500">
+              {{ prop.node.name }}
+            </q-item-section>
+            <MenuActions
+              v-if="hasPermission('show-sprint-popup') && getFolderMenuItems(prop.node)"
+              :items="getFolderMenuItems(prop.node)"
             />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="abbriviated-text">
-              {{ sprint.name }}
-              {{
-                getSprintDates(sprint?.start_date ?? '', sprint?.end_date ?? '')
-              }}
-            </q-item-label>
-            <HintTooltip
-              anchor="bottom start"
-              self="bottom start"
-              :offset="[0, 42]"
-            >
-              {{ sprint.name }}
-            </HintTooltip>
-          </q-item-section>
-          <MenuActions
-            v-if="hasPermission('show-sprint-popup')"
-            :items="getSprintMenuItems(sprint)"
-          />
-        </q-item>
-      </q-list>
+          </q-item>
+        </template>
+      </q-tree>
+      <CreateFolderDialog
+        v-model="openCreateFolder"
+        @success="refreshSprints"
+      />
+      <DeleteFolderDialog
+        v-model="openDeleteFolder"
+        :folder-id="folderIdForDelete"
+        @success="successDeleteHandle('folder')"
+      />
+      <EditFolderDialog
+        v-model="openEditFolder"
+        :sprint="sprintIdForManageFolder"
+        @update-sprints="refreshSprints"
+        @reopen="reopen"
+      />
       <CreateSprintDialog
         v-model="openCreateSprint"
         @update-sprints="refreshSprints"
@@ -142,7 +114,7 @@
       <DeleteSprintDialog
         v-model="isDeleteDialogOpen"
         :sprint="sprintForDelete"
-        @success="successDeleteHandle"
+        @success="successDeleteHandle('sprint')"
       />
       <SprintNotificationsSettingsDialog v-model="openSprintNotifications" />
       <ManageSprintFolderDialog
@@ -175,7 +147,7 @@ import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteS
 import SprintNotificationsSettingsDialog from 'src/modules/sprints/notifications-dialog/SprintNotificationsSettingsDialog.vue';
 import ManageSprintFolderDialog from 'src/modules/sprints/manage-sprint-folder-dialog/ManageSprintFolderDialog.vue';
 
-import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoSprint, DtoSprintFolder, DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import SettingsIcon from '../icons/SettingsIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
@@ -185,6 +157,10 @@ import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
 import AddIcon from '../icons/AddIcon.vue';
 import FolderIcon from '../icons/FolderIcon.vue';
+import CreateFolderDialog from 'src/modules/sprints/create-folder-dialog/CreateFolderDialog.vue';
+import DeleteFolderDialog from 'src/modules/sprints/delete-folder-dialog/DeleteFolderDialog.vue';
+import EditFolderDialog from 'src/modules/sprints/edit-folder-dialog/EditFolderDialog.vue';
+import { ROOT_FOLDER_ID } from 'src/constants/constants';
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
@@ -193,53 +169,43 @@ const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { sprintFolders } = storeToRefs(sprintStore);
 
 const route = useRoute();
-const sprints = ref([] as DtoSprintLight[]);
-
-const parsedSprints = computed(() => {
-  const result = {
-    root: [] as DtoSprintLight[],
-    folders: [] as { id: string; name: string; items: DtoSprintLight[] }[],
-  };
-
-  const foldersMap: Record<
-    string,
-    { id: string; name: string; items: DtoSprintLight[] }
-  > = {};
-  sprintFolders.value.forEach((folder) => {
-    foldersMap[folder.id] = { id: folder.id, name: folder.name, items: [] };
-  });
-
-  sprints.value.forEach((sprint) => {
-    const folderId = sprintFolders.value.find((f) =>
-      f.sprints.includes(sprint.id as string),
-    )?.id;
-    if (folderId && foldersMap[folderId]) {
-      foldersMap[folderId].items.push(sprint);
-    } else {
-      result.root.push(sprint);
-    }
-  });
-
-  result.folders = Object.values(foldersMap);
-  return result;
-});
-
+const sprints = ref([] as DtoSprintFolder[]);
 const openCreateSprint = ref(false);
+const openCreateFolder = ref(false);
+const openDeleteFolder = ref(false);
+const openEditFolder = ref(false);
 const openEditSprint = ref(false);
 const sprintIdForEdit = ref<string>('');
-const sprintIdForManageFolder = ref<string>('');
+const folderIdForDelete = ref<string>('');
+const sprintIdForManageFolder = ref<DtoSprintLight>();
 const openManageFolderSprint = ref(false);
 const sprintForDelete = ref<DtoSprintLight | null>(null);
 const isDeleteDialogOpen = ref(false);
 const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
+const canCreateSprintFolder = computed(() => hasPermission('edit-sprint-folders'));
+const canDeleteSprintFolder = computed(() => hasPermission('edit-sprint-folders'));
 
-onMounted(async () => {
-  if (!currentWorkspaceSlug.value) return;
-  refreshSprints();
+const sprintFolders = computed(() =>
+  sprints.value?.filter((item) => item.id !== ROOT_FOLDER_ID)
+  // sprints.value
+);
+const rootSprints = computed(() =>
+  sprints.value?.find((item) => item.id === ROOT_FOLDER_ID)?.sprints
+);
+const filteredSprints = computed(() => {
+  let items = [];
+  console.log('sprintFolders: ', sprintFolders.value)
+  if (sprintFolders.value) {
+    items.push(...sprintFolders.value)
+  }
+  console.log('rootSprints: ', rootSprints.value)
+  if (rootSprints.value) {
+    items.push(...rootSprints.value);
+  }
+  return items;
 });
 
 const refreshSprints = async () => {
@@ -262,9 +228,17 @@ const showNotification = (type: 'success' | 'error', msg?: string) => {
   });
 };
 
-const successDeleteHandle = async () => {
-  sprintForDelete.value = null;
-  showNotification('success', 'Спринт удален');
+const successDeleteHandle = async (item: string) => {
+  switch (item) {
+    case 'sprint':
+      sprintForDelete.value = null;
+      showNotification('success', 'Спринт удален');
+      break;
+    case 'folder':
+      folderIdForDelete.value = '';
+      showNotification('success', 'Папка удалена');
+      break;
+  }
   await refreshSprints();
 };
 
@@ -293,13 +267,13 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
     },
   ];
 
-  if (hasPermission('create-sprint')) {
+  if (hasPermission('edit-sprint-folders')) {
     items.unshift({
       text: 'Добавить к папке...',
       icon: FolderIcon,
       onClick: () => {
-        sprintIdForManageFolder.value = sprint.id as string;
-        openManageFolderSprint.value = true;
+        sprintIdForManageFolder.value = sprint;
+        openEditFolder.value = true;
       },
     });
   }
@@ -307,7 +281,29 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
   return items;
 };
 
-const headerMenuItems = computed(() => [
+const getFolderMenuItems = (folder: DtoSprintFolder) => {
+  if (!folder.sprints || folder.sprints?.length === 0) {
+    return [{
+      text: 'Удалить папку',
+      icon: BinIcon,
+      onClick: () => {
+        folderIdForDelete.value = folder.id as string;
+        openDeleteFolder.value = true;
+      },
+      show: canDeleteSprintFolder.value,
+    },]
+  } else return;
+};
+
+const headerMenuItems = computed(() => ([
+  {
+    text: 'Создать папку',
+    icon: AddIcon as any,
+    onClick: () => {
+      openCreateFolder.value = true;
+    },
+    show: canCreateSprintFolder.value,
+  },
   {
     text: 'Создать спринт',
     icon: AddIcon as any,
@@ -323,7 +319,12 @@ const headerMenuItems = computed(() => [
       openSprintNotifications.value = true;
     },
   },
-]);
+]));
+
+onMounted(async () => {
+  if (!currentWorkspaceSlug.value) return;
+  refreshSprints();
+});
 
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;
@@ -339,4 +340,21 @@ watch(
     }
   },
 );
+
+watch(
+  () => sprintStore.sprintsList,
+  () => {
+    sprints.value = sprintStore.sprintsList;
+  }
+)
 </script>
+<style scoped lang="scss">
+ :deep(.q-tree__node--child) {
+  padding-left: 0;
+
+  &::before {
+    content: none;
+    display: none;
+  }
+ }
+</style>

@@ -2,8 +2,10 @@ import {
   AiplanRequestIssueIdList,
   AiplanRequestSprint,
   AiplanRequestUserIdList,
+  DtoRequestSprintFolder,
   DtoSprint,
   DtoSprintLight,
+  DtoSprintFolder,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Sprint } from '@aisa-it/aiplan-api-ts/src/Sprint';
@@ -13,7 +15,7 @@ const api = new (withInterceptors(Sprint))();
 
 export const getSprints = async (
   workspaceSlug: string,
-): Promise<DtoSprintLight[]> => {
+): Promise<DtoSprintFolder[]> => {
   return api.getSprintList(workspaceSlug).then((res) => res.data);
 };
 
@@ -30,6 +32,28 @@ export const createSprint = async (
 ): Promise<DtoSprint> => {
   return api.createSprint(workspaceSlug, data).then((res) => res.data);
 };
+
+export const createSprintFolder = async (
+  workspaceSlug: string,
+  data: DtoRequestSprintFolder,
+) => {
+  return api.addSprintFolders(workspaceSlug, data).then((res) => res.data);
+}
+
+export const deleteSprintFolder = async (
+  workspaceSlug: string,
+  sprintFolderId: string,
+) => {
+  return api.deleteSprintFolders(workspaceSlug, sprintFolderId).then((res) => res.data);
+}
+
+export const updateSprintFolder = async (
+  workspaceSlug: string,
+  sprintFolderId: string,
+  data: DtoRequestSprintFolder,
+) => {
+  return api.updateSprintFolders(workspaceSlug, sprintFolderId, data).then((res) => res.data);
+}
 
 export const sprintIssuesUpdate = async (
   workspaceSlug: string,

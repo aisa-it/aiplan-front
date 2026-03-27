@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import {
   DtoSprint,
+  DtoSprintFolder,
   DtoSprintLight,
   TypesIssuesListFilters,
   TypesViewProps,
@@ -34,7 +35,7 @@ export const useSprintStore = defineStore('sprint-store', {
       refreshSprintData: false,
       notUpdated: [] as NotUpdated[],
       sprintsList: [] as DtoSprintLight[],
-      sprintFolders: [] as MockSprintFolder[],
+      sprintFolders: [] as DtoSprintFolder[],
     };
   },
 
