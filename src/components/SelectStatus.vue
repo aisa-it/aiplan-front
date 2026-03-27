@@ -76,13 +76,25 @@ import {
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
-import { useIssuesStatesFlowStore } from 'src/stores/issues-states-flow-store';
+import {
+  useIssuesStatesFlowStore,
+} from 'src/stores/issues-states-flow-store';
 
 // utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 // interfaces
 import { IState } from 'src/interfaces/states';
+
+function isStatesFromCacheEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (a == null || b == null) return a == b;
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
 
 export default defineComponent({
   name: 'SelectStatus',
@@ -229,7 +241,11 @@ export default defineComponent({
 
     watch(
       () => props.statesFromCache,
-      () => refresh(),
+      (newVal, oldVal) => {
+        if (!isStatesFromCacheEqual(newVal, oldVal)) {
+          refresh();
+        }
+      },
     );
 
     watch(
