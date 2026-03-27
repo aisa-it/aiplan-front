@@ -169,7 +169,8 @@ const { hasPermission } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
-const { workspaceInfo, workspaceUsers } = storeToRefs(workspaceStore);
+const { workspaceInfo, workspaceUsers, meInWorkspace } =
+  storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
 const { ny } = storeToRefs(utilsStore);
 
@@ -213,7 +214,7 @@ const preventClickClass = 'prevent-click-issue-outside';
 
 //computeds
 const currentUserRole = computed(() => {
-  return workspaceInfo.value?.current_user_membership?.role ?? 0;
+  return meInWorkspace?.value?.role ?? 0;
 });
 
 const canEdit = computed(() => {

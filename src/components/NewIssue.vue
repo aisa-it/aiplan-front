@@ -78,8 +78,7 @@ const workspaceStore = useWorkspaceStore();
 
 // refs from stores
 const { refreshIssues } = storeToRefs(issuesStore);
-const { workspaceProjects, workspaceInfo, meInWorkspace } =
-  storeToRefs(workspaceStore);
+const { workspaceProjects, meInWorkspace } = storeToRefs(workspaceStore);
 const { activeGuid } = storeToRefs(useGuiderStore());
 
 // local state

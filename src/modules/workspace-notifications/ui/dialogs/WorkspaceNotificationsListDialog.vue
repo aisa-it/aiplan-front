@@ -46,7 +46,6 @@ import { computed } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 //interfaces
 import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -69,11 +68,8 @@ const emits = defineEmits<{
   loadMore: [type: 'unread' | 'read'];
 }>();
 
-const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
-
-const { userWorkspaces } = storeToRefs(userStore);
-const { workspaceInfo } = storeToRefs(workspaceStore);
+const { meInWorkspace } = storeToRefs(workspaceStore);
 
 const onCreate = () => {
   emits('create');
@@ -96,10 +92,7 @@ const onLoadMore = (type: 'unread' | 'read') => {
 };
 
 const isWorkspaceAdmin = computed(() => {
-  const role = userWorkspaces.value.find(
-    (workspace) => workspace.id === workspaceInfo?.value?.id,
-  )?.current_user_membership?.role;
-  return role && role >= 15;
+  return (meInWorkspace?.value?.role ?? 0) >= 15;
 });
 </script>
 

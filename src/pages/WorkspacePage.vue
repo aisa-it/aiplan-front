@@ -51,7 +51,8 @@ const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 
 const { project } = storeToRefs(projectStore);
-const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo, meInWorkspace } =
+  storeToRefs(workspaceStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 
 //refs
@@ -80,10 +81,7 @@ const refresh = async () => {
       workspaceStore.getWorkspaceProjects(slug),
     ]);
 
-    if (
-      workspaceInfo.value.current_user_membership &&
-      workspaceInfo.value.current_user_membership?.role === 15
-    ) {
+    if (meInWorkspace?.value?.role === 15) {
       await getFormList(slug)
         .then((res) => (formStore.forms = res))
         .catch(() => formStore.resetForms());

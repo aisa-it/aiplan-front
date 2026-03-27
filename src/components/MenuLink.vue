@@ -143,7 +143,7 @@ const props = withDefaults(
 
 // stores
 const userStore = useUserStore();
-const { hasPermissionByProject } = useRolesStore();
+const { hasPermissionByProject, getProjectRole } = useRolesStore();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -210,7 +210,7 @@ const getProjectMenuItems = () => {
     },
   });
 
-  if (props.project?.current_user_membership.role === 15) {
+  if (getProjectRole(props.project?.id) === 15) {
     items.push({
       text: 'Уведомления проекта',
       icon: UnmutedIcon,

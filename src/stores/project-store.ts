@@ -48,7 +48,7 @@ export const useProjectStore = defineStore('project-store', {
       project: undefined as unknown as any,
       projectLabels: [] as DtoLabelLight[],
       projectMembers: [] as DtoProjectMemberLight[],
-      currentProjectID: '', // TODO нигде не обновляется, хотя используется в setProjectInfo
+      currentProjectID: '',
       meInProject: {} as DtoProjectMember,
       isLoadProjectInfo: false,
       errorLoadProjects: false,
@@ -116,21 +116,6 @@ export const useProjectStore = defineStore('project-store', {
   },
 
   actions: {
-    setProjectInfo() {
-      this.project = workspaceProjects.value.find(
-        (e: any) => e.id == this.currentProjectID,
-      );
-
-      if (this.project) {
-        this.project.public = valToNet(this.project.public);
-        this.project.emoji = getProjectEmojiViaCode(
-          this.project.emoji?.value ?? this.project.emoji,
-        );
-      }
-
-      rolesStore.defineProjectRole(this.project);
-    },
-
     async getProjectInfo(workspaceSlug: string, projectID: string) {
       if (!workspaceSlug || !projectID) return;
 
@@ -139,21 +124,16 @@ export const useProjectStore = defineStore('project-store', {
         .then(async (res) => {
           this.project = res.data;
 
-          const meData = await this.getCurrentMembership(
+          this.meInProject = await this.getCurrentMembership(
             workspaceSlug,
             projectID,
           );
-
-          this.project.current_user_membership = {
-            role: meData?.role,
-            member_id: meData?.member_id,
-          };
 
           // TODO обновление publick и emoji нарушает типизацию
           this.project.public = valToNet(this.project.public);
           this.project.emoji = getProjectEmojiViaCode(this.project.emoji);
 
-          rolesStore.defineProjectRole(this.project);
+          rolesStore.defineProjectRole(this.meInProject);
 
           // Проверяем есть ли доступ к проекту
           if (
@@ -182,10 +162,6 @@ export const useProjectStore = defineStore('project-store', {
         .updateProject(workspaceSlug, projectID, projectInfo)
         .then(({ data }) => {
           this.project = data;
-          this.project.current_user_membership = {
-            role: this.meInProject?.role,
-            member_id: this.meInProject?.member_id,
-          };
         });
     },
 

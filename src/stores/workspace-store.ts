@@ -67,10 +67,6 @@ export const useWorkspaceStore = defineStore('workspace-store', {
 
           this.meInWorkspace =
             (await this.getMeInWorkspace(workspaceSlug)) ?? undefined;
-          this.workspaceInfo.current_user_membership = {
-            role: this.meInWorkspace?.role,
-            member_id: this.meInWorkspace?.member_id,
-          };
 
           // вычисление роли - лучше не трогать
           //TODO: убрать и добавить членство юзера в запрос выше

@@ -133,13 +133,7 @@
 
 <script setup lang="ts">
 // core
-import {
-  computed,
-  onBeforeMount,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue';
+import { computed, onBeforeMount, onUnmounted, ref, watch } from 'vue';
 
 // store
 import { storeToRefs } from 'pinia';
@@ -187,7 +181,7 @@ const projectStore = useProjectStore();
 const { user } = userStore;
 const { project } = storeToRefs(projectStore);
 const { issueData } = storeToRefs(singleIssueStore);
-const { hasPermissionByIssue, hasPermission } = useRolesStore();
+const { hasPermissionByIssue, hasPermission, getProjectRole } = useRolesStore();
 
 // vars
 const isUpdateComment = ref<boolean>(false);
@@ -202,11 +196,11 @@ const isAuthor = computed(() => {
   return user.id === props.comment.actor_id;
 });
 
-const roleInProject = computed(() => project.value
-    ? project.value?.current_user_membership?.role : issueData.value.project_detail?.current_user_membership?.role)
-
 const canDeleteComment = computed(
-  () => isAuthor.value || hasPermission('delete-issue-comment') && roleInProject.value > 5,
+  () =>
+    isAuthor.value ||
+    (hasPermission('delete-issue-comment') &&
+      getProjectRole(issueData.value.project) > 5),
 );
 
 const reactionList = computed(() => {
@@ -221,8 +215,9 @@ const reactionList = computed(() => {
     const users = [];
 
     commentReactionsFilter.forEach((r) => {
-      const member = props.members.find((m) => r.user_id === m.member_id)
-        ?.member;
+      const member = props.members.find(
+        (m) => r.user_id === m.member_id,
+      )?.member;
 
       const user = {
         ...r,

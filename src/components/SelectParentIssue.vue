@@ -35,6 +35,8 @@ import { useWorkspaceStore } from 'stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { useUserStore } from 'src/stores/user-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // components
 import SelectIssueDialog from 'src/components/dialogs/IssueDialogs/SelectIssueDialog.vue';
@@ -68,6 +70,8 @@ const issueStore = useSingleIssueStore();
 const issuesStore = useIssuesStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
+const { user } = storeToRefs(useUserStore());
+const { getProjectRole } = useRolesStore();
 
 const bus = inject('bus') as EventBus;
 
@@ -119,10 +123,7 @@ const onRequest = async (params: IIssueSelectRequest) => {
     const filters = {
       search_query: params.search_query,
       only_active: false,
-      authors:
-        props.project?.current_user_membership?.role !== 15
-          ? [props.project?.current_user_membership?.member_id]
-          : [],
+      authors: getProjectRole(props.project?.id) !== 15 ? [user.value.id] : [],
     };
     const { offset, limit, order_by, desc } = params;
     await issuesStore

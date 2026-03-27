@@ -103,6 +103,7 @@ import { ref, watch, PropType } from 'vue';
 
 // stores
 import { useUtilsStore } from 'src/stores/utils-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // utils
 import { formatDateTime } from 'src/utils/time';
@@ -149,6 +150,7 @@ const emit = defineEmits(['add', 'delete', 'edit']);
 
 // stores
 const utilsStore = useUtilsStore();
+const roleStore = useRolesStore();
 // store to refs
 const { isDemo } = storeToRefs(utilsStore);
 
@@ -158,13 +160,7 @@ const isLinkOpenDialog = ref(false);
 const linkToDelete = ref();
 const linkToUpdate = ref<DtoIssueLinkLight | undefined>();
 
-const isDemoUserValid = () => {
-  if (
-    (props.project?.current_user_membership?.role ?? props.project?.role) >= 15
-  )
-    return true;
-  return false;
-};
+const isDemoUserValid = () => roleStore.getProjectRole(props.project?.id) >= 15;
 
 const deleteLink = async (linkID: string) => {
   emit('delete', linkID);

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { storeToRefs } from 'pinia';
-import { useAiplanStore } from './aiplan-store';
 import { useUserStore } from './user-store';
+import { useWorkspaceStore } from './workspace-store';
+import { useProjectStore } from './project-store';
 import {
   defineRole,
   checkPermission,
@@ -10,11 +11,11 @@ import {
   checkPermissionByIssue,
 } from 'src/constants/roles';
 
-const api = useAiplanStore();
-
 const userStore = useUserStore();
 
-const { user, userWorkspaces } = storeToRefs(userStore);
+const { user, userWorkspaces, userProjects } = storeToRefs(userStore);
+const { workspaceInfo, meInWorkspace } = storeToRefs(useWorkspaceStore());
+const { project, meInProject } = storeToRefs(useProjectStore());
 
 export const useRolesStore = defineStore('roles-store', {
   state: () => {
@@ -27,13 +28,23 @@ export const useRolesStore = defineStore('roles-store', {
     };
   },
 
-  getters: {
-    isOwnerProject() {
-      return api.me?.id === api.currentProject?.created_by;
-    },
-  },
-
   actions: {
+    getWsRole(workspaceID: string): number {
+      if (workspaceID === workspaceInfo?.value?.id)
+        return meInWorkspace?.value?.role ?? 0;
+      return (
+        userWorkspaces.value.find((ws) => ws.id === workspaceID)
+          ?.current_user_membership?.role ?? 0
+      );
+    },
+    getProjectRole(projectID: string): number {
+      if (projectID === project?.value?.id)
+        return meInProject?.value?.role ?? 0;
+      return (
+        userProjects.value.find((project) => project.id === projectID)
+          ?.current_user_membership?.role ?? 0
+      );
+    },
     // set types
     defineWorkspaceRole(currenWs: any) {
       if (currenWs?.owner_id === user.value?.id)

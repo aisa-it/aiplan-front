@@ -38,7 +38,7 @@
         </q-input>
         <q-space />
         <q-btn
-          v-if="canLeaveProject"
+          v-if="user.is_superuser"
           no-caps
           class="delete-btn q-mr-sm"
           @click="isLeaveProject = true"
@@ -224,12 +224,6 @@ const isLeaveProject = ref(false);
 const isInviteOpen = ref(false);
 const isDeleteOpen = ref(false);
 const searchQuery = ref<string>();
-const canLeaveProject = computed(
-  () =>
-    user.value?.is_superuser &&
-    project.value?.current_user_membership?.member_id === user.value.id &&
-    project.value?.current_user_membership?.id,
-);
 
 const columns = [
   {
