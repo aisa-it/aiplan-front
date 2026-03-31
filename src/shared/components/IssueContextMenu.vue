@@ -8,11 +8,13 @@
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
-        v-if="!isPinned"
+        v-if="!props.row?.pinned"
         clickable
         v-close-popup
         @click="
-          pinIssue(props.row, workspaceSlug, project.identifier, project.id)
+          pinAndUnpinIssue(() =>
+            pinIssue(props.row, workspaceSlug, project.identifier),
+          )
         "
       >
         <q-item-section thumbnail class="q-px-md">
@@ -25,7 +27,9 @@
         clickable
         v-close-popup
         @click="
-          unpinIssue(props.row, workspaceSlug, project.identifier, project.id)
+          pinAndUnpinIssue(() =>
+            unpinIssue(props.row, workspaceSlug, project.identifier),
+          )
         "
       >
         <q-item-section thumbnail class="q-px-md">
@@ -131,9 +135,10 @@ import PinIcon from 'src/components/icons/PinIcon.vue';
 import UnpinIcon from 'src/components/icons/UnpinIcon.vue';
 import SprintIcon from 'src/components/icons/SprintIcon.vue';
 import ParentIcon from 'src/components/icons/ParentIcon.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  row: object | null;
+  row: DtoIssue | null;
   anchorEvent?: MouseEvent | null;
 }>();
 
@@ -152,7 +157,6 @@ const menuProps = computed(() => {
 const { sprintsList } = storeToRefs(useSprintStore());
 const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = useIssuesStore();
-const { pinnedIssues } = storeToRefs(useIssuesStore());
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
@@ -163,14 +167,10 @@ const workspaceSlug = computed<string>(() => {
   return route.params.workspace as string;
 });
 
-let issueLink = props.row?.short_url;
+let issueLink = computed(() => props.row?.short_url ?? '');
 const isDeletingOpen = ref<boolean>(false);
 const isTransferOpen = ref<boolean>(false);
 const isManageSprintsOpen = ref<boolean>(false);
-
-const isPinned = computed<boolean>(() => {
-  return pinnedIssues.value?.some((issue) => issue.id === props.row?.id);
-});
 
 const isAdmin = computed(() => {
   return hasPermission('create-sprint');
@@ -178,18 +178,18 @@ const isAdmin = computed(() => {
 
 const copyIssueLink = (): void => {
   try {
-    navigator.clipboard.writeText(issueLink);
+    navigator.clipboard.writeText(issueLink.value);
   } catch {
     console.error('Произошла ошибка при копировании ссылки');
   }
 };
 
 const openInNewTab = (): void => {
-  window.open(issueLink, '_blank');
+  window.open(issueLink.value, '_blank');
 };
 
 const openInNewWindow = (): void => {
-  window.open(issueLink, '_blank', 'popup');
+  window.open(issueLink.value, '_blank', 'popup');
 };
 
 const copyIssueTitle = (): void => {
@@ -200,6 +200,13 @@ const copyIssueTitle = (): void => {
   } catch {
     console.error('Произошла ошибка при копировании названия');
   }
+};
+
+const pinAndUnpinIssue = async (func: () => Promise<void>) => {
+  try {
+    await func();
+    if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
+  } catch {}
 };
 
 const transferIssue = (): void => {
@@ -240,7 +247,6 @@ watch(
       menuRef.value.hide();
       await nextTick();
       menuRef.value.show(evt);
-      issueLink = props.row?.short_url;
     }
   },
 );
