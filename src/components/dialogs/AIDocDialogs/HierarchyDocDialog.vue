@@ -31,7 +31,7 @@
           flat
           no-caps
           label="Отмена"
-          class="btn"
+          class="btn secondary-btn"
           color="negative"
           @click="clearChanges"
           :disable="!isSaving"

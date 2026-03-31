@@ -15,10 +15,28 @@
         dense
         type="textarea"
       />
-      <q-btn v-if="!isEdit" @click="isEdit = true" flat dense class="icon">
+      <q-btn
+        v-if="!isEdit"
+        @click="
+          isEdit = true;
+          $emit('statusPopupOrEditName', true);
+        "
+        flat
+        dense
+        class="icon"
+      >
         <EditIcon :width="24" :height="24" />
       </q-btn>
-      <q-btn v-else @click="saveNewName" flat dense class="icon">
+      <q-btn
+        v-else
+        @click="
+          saveNewName();
+          $emit('statusPopupOrEditName', false);
+        "
+        flat
+        dense
+        class="icon"
+      >
         <CheckIcon :width="24" :height="24" />
       </q-btn>
     </div>
@@ -49,8 +67,8 @@
             :states-from-cache="statesCache[project.id]"
             @set-status="(val) => (event.issueData.state_detail = val)"
             @refresh="handleRefresh"
-            @popup-show="$emit('statusPopup', true)"
-            @popup-hide="$emit('statusPopup', false)"
+            @popup-show="$emit('statusPopupOrEditName', true)"
+            @popup-hide="$emit('statusPopupOrEditName', false)"
           />
         </div>
       </div>
@@ -152,7 +170,7 @@ const props = defineProps<{
   event: CalendarEvent;
 }>();
 
-defineEmits<{ statusPopup: [boolean] }>();
+defineEmits<{ statusPopupOrEditName: [boolean] }>();
 
 const isEdit = ref(false);
 const newName = ref(props.event.issueData?.title);
