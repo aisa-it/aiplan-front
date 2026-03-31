@@ -4,6 +4,7 @@
     :label="label"
     class="base-input"
     mask="##.##.####-##.##.####"
+    clearable
     dense
     @update:model-value="onInputChange"
   >
@@ -11,12 +12,13 @@
       <q-icon name="event" class="cursor-pointer">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
           <q-date
-            v-model="internalRange"
+            :model-value="internalRange"
             range
             mask="DD.MM.YYYY"
             :min="minDate"
             :max="maxDate"
             today-btn
+            @update:model-value="handleDateSelection"
           >
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Закрыть" color="primary" flat />
@@ -64,16 +66,23 @@ const maxDate = dayjs()
   .endOf('year')
   .format('DD.MM.YYYY');
 
-const internalRange = computed<DateRange>({
+const internalRange = computed<DateRange | string>({
   get: () => {
     if (!props.modelValue) return { from: '', to: '' };
+    const { from, to } = props.modelValue;
+
+    // Выбран один день
+    if (from && to && from === to) {
+      return from;
+    }
+    // Выбран диапазон
     return {
-      from: props.modelValue.from || '',
-      to: props.modelValue.to || '',
+      from: from || '',
+      to: to || '',
     };
   },
   set: (val) => {
-    emit('update:modelValue', val);
+    emit('update:modelValue', val as DateRange);
   },
 });
 
@@ -85,5 +94,22 @@ function onInputChange(value: string | number | null) {
   const input = String(value ?? '');
   const [from, to] = input.split('-').map((v) => v.trim());
   emit('update:modelValue', { from, to });
+}
+
+// Обработка входящего значения для превью даты в календаре
+function handleDateSelection(val: DateRange | string) {
+  if (typeof val === 'string') {
+    // Выбран один день
+    internalRange.value = {
+      from: val,
+      to: val,
+    };
+  } else {
+    // Выбран интервал
+    internalRange.value = {
+      from: val.from || '',
+      to: val.to || val.from || '',
+    };
+  }
 }
 </script>
