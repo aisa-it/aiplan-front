@@ -201,6 +201,26 @@
               "
             >
             </q-select>
+            <RangeDateFilter
+              v-model="creationDates"
+              :label="'Дата создания'"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              v-model="deadlineDates"
+              :label="'Срок исполнения'"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              v-model="startDates"
+              :label="'Дата начала'"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              v-model="endDates"
+              :label="'Дата завершения'"
+              class="q-mb-sm"
+            />
             <div class="action-content">
               <div class="action-content_left">
                 <q-checkbox v-model="filter.public" label="Публичный" />
@@ -274,6 +294,7 @@ import {
   SelectEntityFilter,
   SelectStatesFilter,
   SelectLabelsFilter,
+  RangeDateFilter,
 } from './selects';
 import { getFilters } from 'src/modules/search-issues/services/api';
 
@@ -328,6 +349,11 @@ const searchedLabels = ref<any[] | null>(null);
 const searchedStates = ref<any[] | null>(null);
 const searchedWs = ref<any[] | null>(null);
 const searchedProjects = ref<any[] | null>(null);
+
+const creationDates = ref();
+const deadlineDates = ref();
+const startDates = ref();
+const endDates = ref();
 
 const members = ref<Record<Members, any[]>>({
   authors: [],
