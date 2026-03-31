@@ -48,13 +48,18 @@
       </div>
 
       <p class="q-mb-md">Цель спринта:</p>
-      <EditorTipTapV2
-        v-model="description"
-        editor-id="create-sprint-editor"
-        class="issue-panel__editor col-auto q-mb-lg"
+      <div
+        class="create-sprint-editor-host col-auto q-mb-lg"
         :class="{ 'is-mobile': isMobile }"
-        style="height: 312px; width: 100%"
-      />
+      >
+        <EditorTipTapV2
+          v-model="description"
+          :excluded-tabs="[TIPTAP_TABS.drawio]"
+          :disableImages="true"
+          editor-id="create-sprint-editor"
+          style="height: 100%; width: 100%"
+        />
+      </div>
 
       <div class="tasks-wrapper column no-wrap">
         <div class="centered-horisontally q-mb-sm">
@@ -102,6 +107,7 @@ import { useUserStore } from 'src/stores/user-store';
 import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+import { TIPTAP_TABS } from 'src/constants/tiptap';
 import SelectSprintIssues from './SelectSprintIssues.vue';
 
 import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
@@ -285,23 +291,58 @@ watch(
   display: block !important;
 }
 
-.issue-panel__editor {
+.create-sprint-editor-host {
+  height: 312px;
   width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  :deep(.html-editor) {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  :deep(.html-editor__outer) {
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  :deep(.html-editor__wrapper) {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   :deep(.html-editor__container) {
-    min-height: 259px;
-    height: 259px;
+    flex: 1 1 0;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: 100%;
     width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .tiptap {
-      min-height: 259px;
+      flex: 1 1 0;
+      min-height: 0 !important;
+      height: auto !important;
       width: 100%;
+      overflow-y: auto;
     }
   }
-}
 
-.is-mobile {
-  :deep(.html-editor__outer) {
-    max-width: calc(100% - 47px);
+  &.is-mobile {
+    :deep(.html-editor__outer) {
+      max-width: calc(100% - 47px);
+    }
   }
 }
 

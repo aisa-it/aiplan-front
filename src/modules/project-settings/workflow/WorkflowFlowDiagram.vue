@@ -1,0 +1,376 @@
+<template>
+  <div class="flow-container">
+    <VueFlow
+      v-model:edges="edges"
+      v-model:nodes="nodes"
+      class="flow"
+      :default-viewport="{ x: 100, y: 200, zoom: 1 }"
+    >
+      <template #node-default="nodeProps">
+        <div class="custom-node">
+          <span class="text-weight-bold">{{ nodeProps.data.label }}</span>
+
+          <Handle
+            type="source"
+            :id="`source-right-${nodeProps.id}`"
+            :position="Position.Right"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-bottom-${nodeProps.id}`"
+            :position="Position.Bottom"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-left-${nodeProps.id}`"
+            :position="Position.Left"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-top-${nodeProps.id}`"
+            :position="Position.Top"
+            :connectable="true"
+          />
+        </div>
+      </template>
+
+      <template #node-circle="nodeProps">
+        <div class="circle-node">
+          <Handle
+            type="source"
+            :id="`source-right-${nodeProps.id}`"
+            :position="Position.Right"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-bottom-${nodeProps.id}`"
+            :position="Position.Bottom"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-left-${nodeProps.id}`"
+            :position="Position.Left"
+            :connectable="true"
+          />
+          <Handle
+            type="source"
+            :id="`source-top-${nodeProps.id}`"
+            :position="Position.Top"
+            :connectable="true"
+          />
+        </div>
+      </template>
+    </VueFlow>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { nextTick, onMounted, ref } from 'vue';
+import { VueFlow, useVueFlow, Handle, type Node, type Edge } from '@vue-flow/core';
+import { MarkerType } from '@vue-flow/core';
+import { useProjectStore } from 'src/stores/project-store';
+import { useRoute } from 'vue-router';
+import { orderStateGroups } from 'src/utils/helpers';
+import type { TypesStatesFlowGraph } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const props = defineProps<{ initialFlow?: TypesStatesFlowGraph | null }>();
+
+enum Position {
+  Left = 'left',
+  Top = 'top',
+  Right = 'right',
+  Bottom = 'bottom',
+}
+
+const projectStore = useProjectStore();
+
+const isDragging = ref(false);
+const route = useRoute();
+
+const { addEdges, onConnect, removeEdges, onEdgeDoubleClick } = useVueFlow();
+
+const nodes = ref<Node[]>([]);
+const edges = ref<Edge[]>([]);
+
+const initialNodes = ref<Node[]>([]);
+const initialEdges = ref<Edge[]>([]);
+
+const CIRCLE_NODE_ID = '00000000-0000-0000-0000-000000000000';
+
+onMounted(async () => {
+  const data = await projectStore.getProjectStatuses(
+    route.params.workspace as string,
+    route.params.project as string,
+  );
+  const ordered = orderStateGroups(data);
+  const statuses = Object.keys(ordered).flatMap((key) => ordered[key]);
+
+  // Рассчет исходной точки X для дефолтного расположения статусов
+  const flowEl = document.querySelector('.flow-container') as HTMLElement | null;
+  const columnX = (flowEl?.clientWidth ?? 800) / 2 + 50;
+
+  const savedNodes = props.initialFlow?.nodes ?? [];
+
+  const getSavedPosition = (id: string) => {
+    const saved = savedNodes.find((n) => n.id === id);
+    if (saved?.position?.x != null && saved?.position?.y != null) {
+      return { x: saved.position.x, y: saved.position.y };
+    }
+    return null;
+  };
+
+  nodes.value.push({
+    id: CIRCLE_NODE_ID,
+    type: 'circle',
+    position: getSavedPosition(CIRCLE_NODE_ID) ?? (() => {
+      const el = document.querySelector('.flow-container');
+      return { x: (el?.clientWidth ?? 800) / 2.2, y: (el?.clientHeight ?? 300) / 4 };
+    })(),
+    data: { label: '' },
+  });
+
+  statuses.forEach((s, idx) => {
+    nodes.value.push({
+      id: s.id ?? '',
+      type: 'default',
+      position:
+        getSavedPosition(s.id ?? '') ?? { x: columnX, y: statuses.length + 20 + idx * 50 },
+      style: { backgroundColor: s.color },
+      data: { label: s.name },
+    });
+  });
+
+  const handleId = (side: string, nodeId: string) => `${side}-${nodeId}`;
+  const toFullHandle = (sideOrFull: string, nodeId: string): string => {
+    if (!sideOrFull) return '';
+    return handleId(sideOrFull, nodeId);
+  };
+
+  props.initialFlow?.edges?.forEach((e) => {
+    const source = e.source ?? '';
+    const target = e.target ?? '';
+    edges.value.push({
+      id: e.id ?? `e-${source}-${target}`,
+      source,
+      target,
+      sourceHandle: toFullHandle(e.source_handle ?? '', source),
+      targetHandle: toFullHandle(e.target_handle ?? '', target),
+      type: 'smoothstep',
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#4a90e2', width: 15, height: 15 },
+    });
+  });
+
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
+});
+
+const hasEdgeBetween = (source?: string | null, target?: string | null) => {
+  if (!source || !target) return false;
+  return edges.value.some((e) => e.source === source && e.target === target);
+};
+
+onConnect((connection) => {
+  // Запрещаем соединение "в направлении кружка" (кружок не может быть target).
+  if (connection.target === CIRCLE_NODE_ID) {
+    draggingEdge.value = null;
+    isDragging.value = false;
+    return;
+  }
+
+  if (hasEdgeBetween(connection.source, connection.target)) {
+    draggingEdge.value = null;
+    isDragging.value = false;
+    return;
+  }
+
+  if (draggingEdge.value) {
+    if (
+      connection.source === draggingEdge.value.sourceNodeId &&
+      connection.sourceHandle === draggingEdge.value.sourceHandleId
+    ) {
+      const newEdge = {
+        id: `e-${connection.source}-${connection.target}-${Date.now()}`,
+        source: connection.source,
+        target: connection.target,
+        type: 'smoothstep',
+        sourceHandle: connection.sourceHandle,
+        targetHandle: connection.targetHandle,
+        data: {
+          label: `Связь ${connection.source}-${connection.target}`,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#ff0072',
+        },
+      };
+
+      addEdges(newEdge);
+      setTimeout(() => {
+        isDragging.value = false;
+      }, 100);
+    }
+  } else if (isDragging.value === false) {
+    addEdges({
+      ...connection,
+      id: `e-${connection.source}-${connection.target}-${Date.now()}`,
+      type: 'smoothstep',
+      sourceHandle: connection.sourceHandle,
+      targetHandle: connection.targetHandle,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#4a90e2',
+        width: 15,
+        height: 15,
+      },
+    });
+  }
+  draggingEdge.value = null;
+});
+
+const draggingEdge = ref();
+
+onEdgeDoubleClick(({ edge }) => {
+  draggingEdge.value = {
+    id: edge.id,
+    sourceNodeId: edge.source,
+    sourceHandleId: edge.sourceHandle,
+    sourcePosition: { x: 0, y: 0 },
+  };
+
+  removeEdges(edge.id);
+
+  nextTick(() => {
+    startConnectionFromHandle(edge.source, edge.sourceHandle);
+  });
+});
+
+const startConnectionFromHandle = (
+  nodeId: string,
+  handleId: string | null | undefined,
+) => {
+  const handleElement = document.querySelector(
+    `[data-handleid="${handleId}"][data-nodeid="${nodeId}"]`,
+  ) as HTMLElement;
+
+  if (handleElement) {
+    const rect = handleElement.getBoundingClientRect();
+    const flowRect = document
+      .querySelector('.flow-container')
+      ?.getBoundingClientRect();
+
+    if (flowRect) {
+      const mouseEvent = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+      });
+
+      handleElement.dispatchEvent(mouseEvent);
+    }
+  }
+
+  isDragging.value = true;
+};
+
+const getFlowData = (): TypesStatesFlowGraph => ({
+  nodes: nodes.value.map((n) => ({
+    id: n.id,
+    type: n.type,
+    position: n.position,
+  })),
+  edges: edges.value.map((e) => {
+    const toSide = (h: string | undefined | null): string =>
+      h?.split('-').slice(0, 2).join('-') ?? '';
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      source_handle: toSide(e.sourceHandle),
+      target_handle: toSide(e.targetHandle),
+    };
+  }),
+});
+
+const resetFlow = () => {
+  draggingEdge.value = null;
+  isDragging.value = false;
+
+  nodes.value = initialNodes.value;
+  edges.value = initialEdges.value;
+};
+
+const commitFlowSnapshot = () => {
+  initialNodes.value = nodes.value;
+  initialEdges.value = edges.value;
+};
+
+defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
+</script>
+
+<style lang="scss">
+.flow-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.circle-node {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid #888;
+  background: transparent;
+}
+
+.flow-container .vue-flow__node-default,
+.flow-container .vue-flow__node-default.selected,
+.flow-container .vue-flow__node-default.selected:hover,
+.flow-container .vue-flow__node-default:focus,
+.flow-container .vue-flow__node-default:focus-visible,
+.flow-container .vue-flow__node-default.selectable:hover {
+  border: none;
+  box-shadow: none;
+}
+
+.flow-container .vue-flow__handle {
+  width: 10px;
+  height: 10px;
+  border: none;
+  background:$dark-gray;
+}
+
+.body--dark .flow-container .vue-flow__handle {
+  background: $gray;
+}
+
+.flow-container .circle-node .vue-flow__handle {
+  width: 10px;
+  height: 10px;
+}
+
+.flow-container .vue-flow__handle-bottom {
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
+.flow-container .vue-flow__handle-top {
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.flow-container .vue-flow__handle-left {
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+
+.flow-container .vue-flow__handle-right {
+  right: 0;
+  transform: translate(50%, -50%);
+}
+</style>
