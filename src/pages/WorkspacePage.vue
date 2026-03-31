@@ -22,7 +22,7 @@ import { ref, watch, onBeforeMount } from 'vue';
 
 //stores
 import { useFormStore } from 'src/stores/form-store';
-
+import { useRolesStore } from 'src/stores/roles-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -49,10 +49,10 @@ const workspaceStore = useWorkspaceStore();
 const statesStore = useStatesStore();
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
+const { getWsRole } = useRolesStore();
 
 const { project } = storeToRefs(projectStore);
-const { currentWorkspaceSlug, workspaceInfo, meInWorkspace } =
-  storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 
 //refs
@@ -81,7 +81,7 @@ const refresh = async () => {
       workspaceStore.getWorkspaceProjects(slug),
     ]);
 
-    if (meInWorkspace?.value?.role === 15) {
+    if (getWsRole(currentWorkspaceSlug.value ?? '') === 15) {
       await getFormList(slug)
         .then((res) => (formStore.forms = res))
         .catch(() => formStore.resetForms());

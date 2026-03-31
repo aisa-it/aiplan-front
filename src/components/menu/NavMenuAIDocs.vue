@@ -227,9 +227,9 @@ const workspaceStore = useWorkspaceStore();
 const docStore = useAiDocStore();
 const userStore = useUserStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermission } = useRolesStore();
+const { hasPermission, getWsRole } = useRolesStore();
 // store to refs
-const { currentWorkspaceSlug, meInWorkspace } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
 const {
   rootDocs,
@@ -252,9 +252,9 @@ const isNotificationsSettingsOpen = ref<boolean>(false);
 const docInfo = ref({});
 const loading = ref(false);
 
-const currentUserRole = computed(() => {
-  return meInWorkspace?.value?.role ?? 0;
-});
+const currentUserRole = computed(() =>
+  getWsRole(currentWorkspaceSlug.value ?? ''),
+);
 
 const isAdminOrAuthor = computed(() => {
   return (

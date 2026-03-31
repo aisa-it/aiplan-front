@@ -107,7 +107,10 @@ import { sortStates } from 'src/utils/sort';
 import { getRandomEmoji } from 'src/utils/helpers';
 
 // constants
-import { NETWORK_CHOICES, PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
+import {
+  NETWORK_CHOICES,
+  PROJECT_IDENTIFIER_LENGTH,
+} from 'src/constants/constants';
 import { PROJECT_EMOJIS, PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
 import { SUCCESS_PROJECT_CREATE } from 'src/constants/notifications';
 
@@ -232,6 +235,7 @@ const createNewProject = async () => {
     .then(async () => {
       await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
       await userStore.getUserProjects();
+      await userStore.getUserProjectsMemberships();
     });
 };
 watch(

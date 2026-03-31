@@ -1,6 +1,5 @@
-import { defineStore, storeToRefs } from 'pinia';
+import { defineStore } from 'pinia';
 import { useRolesStore } from './roles-store';
-import { useUserStore } from './user-store';
 import {
   AiplanCreateWorkspaceRequest,
   DaoPaginationResponse,
@@ -21,8 +20,6 @@ import {
 } from '@aisa-it/aiplan-api-ts/src/http-client';
 
 const rolesStore = useRolesStore();
-const userStore = useUserStore();
-const { userWorkspaces } = storeToRefs(userStore);
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
 
@@ -65,17 +62,9 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         .then(async (res) => {
           this.workspaceInfo = res.data;
 
-          this.meInWorkspace =
-            (await this.getMeInWorkspace(workspaceSlug)) ?? undefined;
+          await this.getMeInWorkspace(workspaceSlug);
 
-          // вычисление роли - лучше не трогать
-          //TODO: убрать и добавить членство юзера в запрос выше
-          userStore.getUserWorkspaces().then(() => {
-            const ws = userWorkspaces.value.find(
-              (elem) => elem.slug === res.data.slug,
-            );
-            rolesStore.defineWorkspaceRole(ws);
-          });
+          rolesStore.defineWorkspaceRole(this.meInWorkspace);
 
           // Проверяем есть ли доступ к рабочему пространству
           if (
@@ -235,8 +224,10 @@ export const useWorkspaceStore = defineStore('workspace-store', {
     ): Promise<DtoWorkspaceMember | void> {
       if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-      return (await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug))
-        .data;
+      const res =
+        await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
+
+      return (this.meInWorkspace = res.data);
     },
 
     async setAiDocNotificationSettings(

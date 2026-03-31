@@ -165,12 +165,11 @@ const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
 const aidocStore = useAiDocStore();
 const utilsStore = useUtilsStore();
-const { hasPermission } = useRolesStore();
+const { hasPermission, getWsRole } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
-const { workspaceInfo, workspaceUsers, meInWorkspace } =
-  storeToRefs(workspaceStore);
+const { workspaceInfo, workspaceUsers } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(userStore);
 const { ny } = storeToRefs(utilsStore);
 
@@ -213,9 +212,9 @@ const preventClickClass = 'prevent-click-issue-outside';
 // ];
 
 //computeds
-const currentUserRole = computed(() => {
-  return meInWorkspace?.value?.role ?? 0;
-});
+const currentUserRole = computed(() =>
+  getWsRole(workspaceInfo?.value?.id ?? ''),
+);
 
 const canEdit = computed(() => {
   return (

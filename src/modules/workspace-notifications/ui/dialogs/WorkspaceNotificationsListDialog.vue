@@ -47,6 +47,7 @@ import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 // stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 //interfaces
 import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 // components
@@ -69,7 +70,8 @@ const emits = defineEmits<{
 }>();
 
 const workspaceStore = useWorkspaceStore();
-const { meInWorkspace } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { getWsRole } = useRolesStore();
 
 const onCreate = () => {
   emits('create');
@@ -91,9 +93,9 @@ const onLoadMore = (type: 'unread' | 'read') => {
   emits('loadMore', type);
 };
 
-const isWorkspaceAdmin = computed(() => {
-  return (meInWorkspace?.value?.role ?? 0) >= 15;
-});
+const isWorkspaceAdmin = computed(
+  () => getWsRole(currentWorkspaceSlug.value ?? '') >= 15,
+);
 </script>
 
 <style lang="scss" scoped>

@@ -136,6 +136,8 @@ onBeforeMount(async () => {
     userStore.getUserInfo(),
     userStore.getUserWorkspaces(),
     userStore.getUserProjects(),
+    userStore.getUserWorkspacesMemberships(),
+    userStore.getUserProjectsMemberships(),
   ]);
 
   bus.emit('successLoadUserInfo');

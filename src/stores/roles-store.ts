@@ -10,10 +10,21 @@ import {
   checkPermissionByProject,
   checkPermissionByIssue,
 } from 'src/constants/roles';
+import {
+  DtoIssue,
+  DtoProjectMember,
+  DtoWorkspace,
+  DtoWorkspaceMember,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const userStore = useUserStore();
 
-const { user, userWorkspaces, userProjects } = storeToRefs(userStore);
+const {
+  user,
+  userWorkspaces,
+  userWorkspacesMemberships,
+  userProjectsMemberships,
+} = storeToRefs(userStore);
 const { workspaceInfo, meInWorkspace } = storeToRefs(useWorkspaceStore());
 const { project, meInProject } = storeToRefs(useProjectStore());
 
@@ -30,39 +41,44 @@ export const useRolesStore = defineStore('roles-store', {
 
   actions: {
     getWsRole(workspaceID: string): number {
-      if (workspaceID === workspaceInfo?.value?.id)
+      if (
+        workspaceID === workspaceInfo?.value?.id ||
+        workspaceID === workspaceInfo?.value?.slug
+      )
         return meInWorkspace?.value?.role ?? 0;
-      return (
-        userWorkspaces.value.find((ws) => ws.id === workspaceID)
-          ?.current_user_membership?.role ?? 0
-      );
+      return userWorkspacesMemberships.value[workspaceID]?.role ?? 0;
     },
+
+    getWsNameRole(meInWs: DtoWorkspaceMember) {
+      // if (currenWs?.owner_id === user.value?.id)
+      //   return 'owner';
+      return defineRole(meInWs.role ?? 0);
+    },
+
+    // set types
+    defineWorkspaceRole(meInWs: DtoWorkspaceMember) {
+      return (this.roles.workspace = this.getWsNameRole(meInWs));
+    },
+
     getProjectRole(projectID: string): number {
       if (projectID === project?.value?.id)
         return meInProject?.value?.role ?? 0;
-      return (
-        userProjects.value.find((project) => project.id === projectID)
-          ?.current_user_membership?.role ?? 0
-      );
+      return userProjectsMemberships.value[projectID]?.role ?? 0;
     },
-    // set types
-    defineWorkspaceRole(currenWs: any) {
-      if (currenWs?.owner_id === user.value?.id)
-        return (this.roles.workspace = 'owner');
 
-      this.roles.workspace = defineRole(
-        currenWs?.current_user_membership?.role,
-      );
+    getProjectNameRole(meInProject: DtoProjectMember) {
+      // if (project?.created_by === user.value.id)
+      //   return (this.roles.project = 'owner');
+      return defineRole(meInProject.role ?? 0);
     },
-    // set types
-    defineProjectRole(project: any) {
-      if (project?.created_by === user.value.id)
-        return (this.roles.project = 'owner');
 
-      this.roles.project = defineRole(project?.current_user_membership?.role);
-    },
     // set types
-    defineIssueRole(issueData: any) {
+    defineProjectRole(meInProject: DtoProjectMember) {
+      return (this.roles.project = this.getProjectNameRole(meInProject));
+    },
+
+    // set types
+    defineIssueRole(issueData: DtoIssue) {
       if (!user.value?.id) {
         return userStore.getUserInfo().then(() => {
           this.defineIssueRole(issueData);
@@ -86,23 +102,21 @@ export const useRolesStore = defineStore('roles-store', {
 
       return checkPermission(this.roles, action);
     },
+
     // set types
-    hasPermissionByWorkspace(ws: any, action: string) {
+    hasPermissionByWorkspace(ws: DtoWorkspace, action: string) {
       let role = '';
-      if (ws?.owner_id === user.value?.id) role = 'owner';
-      else role = defineRole(ws?.current_user_membership?.role);
+
+      if (ws.id === workspaceInfo?.value?.id && meInWorkspace?.value)
+        role = this.getWsNameRole(meInWorkspace?.value);
+      else
+        role = this.getWsNameRole(
+          userWorkspacesMemberships.value[ws?.id ?? ''],
+        );
 
       return checkPermissionByWs(role, action);
     },
-    hasPermissionByFavoriteWorkspace(ws: any, allws: any, action: string) {
-      let role = '';
 
-      if (ws?.owner_id === user.value?.id) role = 'owner';
-      const currentInAllWs = allws.find((el: any) => el.id === ws?.id);
-      role = defineRole(currentInAllWs?.current_user_membership?.role);
-
-      return checkPermissionByWs(role, action);
-    },
     // set types
     hasPermissionByProject(project: any, action: string) {
       let role = '';
@@ -111,6 +125,7 @@ export const useRolesStore = defineStore('roles-store', {
 
       return checkPermissionByProject(role, action);
     },
+
     hasPermissionByIssue(issue: any, project: any, action: string) {
       const ws = userWorkspaces.value.find(
         (ws) => ws.slug === issue.workspace_detail?.slug,
@@ -137,6 +152,7 @@ export const useRolesStore = defineStore('roles-store', {
       if (issue?.author_detail?.id === user.value.id) issue_role = 'author';
       return checkPermissionByIssue(ws_role, project_role, issue_role, action);
     },
+
     // set types
     hasPermissionProjectMemberChange(member: any, memberToEdit: any) {
       if (
@@ -148,6 +164,7 @@ export const useRolesStore = defineStore('roles-store', {
       if (this.roles.project === 'owner' || this.roles.project === 'admin')
         return true;
     },
+
     // set types
     hasPermissionWsMemberChange(member: any, memberToEdit: any, ws: any) {
       if (

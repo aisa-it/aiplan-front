@@ -38,6 +38,7 @@ import { storeToRefs } from 'pinia';
 //stores
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 //components
 import HierarchyDocDialog from './dialogs/AIDocDialogs/HierarchyDocDialog.vue';
 //icons
@@ -55,7 +56,8 @@ const workspaceStore = useWorkspaceStore();
 const utilsStore = useUtilsStore();
 
 //storesToRefs
-const { meInWorkspace } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { getWsRole } = useRolesStore();
 const { ny } = storeToRefs(utilsStore);
 
 //variables
@@ -63,10 +65,9 @@ const showHierarchyDialog = ref(false);
 const documentValue = ref({});
 
 //computeds
-const currentUserRole = computed(() => {
-  if (!meInWorkspace || !meInWorkspace.value) return 0;
-  return meInWorkspace.value?.role ?? 0;
-});
+const currentUserRole = computed(() =>
+  getWsRole(currentWorkspaceSlug?.value ?? ''),
+);
 
 //methods
 const openHierarchyDocDialog = () => {

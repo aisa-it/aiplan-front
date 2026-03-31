@@ -16,6 +16,8 @@ import {
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
+  DtoWorkspaceMember,
+  DtoProjectMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const usersApi = new (withInterceptors(Users))();
@@ -29,6 +31,8 @@ interface IUserState {
   userActivityMap: TypesActivityTable;
   userProjects: DtoProjectLight[];
   authToken: string;
+  userWorkspacesMemberships: Record<string, DtoWorkspaceMember>;
+  userProjectsMemberships: Record<string, DtoProjectMember>;
 }
 
 export const useUserStore = defineStore('user-store', {
@@ -40,6 +44,8 @@ export const useUserStore = defineStore('user-store', {
       userActivityMap: {} as TypesActivityTable,
       userProjects: [] as DtoProjectLight[],
       authToken: undefined as unknown as string,
+      userWorkspacesMemberships: {},
+      userProjectsMemberships: {},
     };
   },
   getters: {
@@ -140,6 +146,29 @@ export const useUserStore = defineStore('user-store', {
       return usersApi.getCurrentUserAllProjectList(filters).then((res) => {
         this.userProjects = filters ? this.userProjects : res.data;
         return res.data;
+      });
+    },
+
+    async getUserWorkspacesMemberships() {
+      const wsMemberships = await usersApi
+        .getCurrentUserWorkspaceMemberships([])
+        .then((res) => res.data);
+      this.userWorkspacesMemberships = {};
+      wsMemberships.forEach((el) => {
+        if (el.workspace_id)
+          this.userWorkspacesMemberships[el.workspace_id] = el;
+      });
+    },
+
+    async getUserProjectsMemberships() {
+      const projectMemberships = await usersApi
+        .getCurrentUserProjectMemberships([])
+        .then((res) => res.data);
+      this.userProjectsMemberships = {};
+      projectMemberships.forEach((el) => {
+        if (el.project_id) {
+          this.userProjectsMemberships[el.project_id] = el;
+        }
       });
     },
 

@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { EventBus } from 'quasar';
 
 import { useUserStore } from 'src/stores/user-store';
+import { useRolesStore } from 'src/stores/roles-store';
 import { useFormStore } from 'src/stores/form-store';
 import { getFormList } from 'src/components/forms/services/api';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -15,9 +16,10 @@ export const useUserLoadInfo = () => {
   const formStore = useFormStore();
   const workspaceStore = useWorkspaceStore();
 
+  const { getWsRole } = useRolesStore();
+
   const { user, userWorkspaces } = storeToRefs(userStore);
-  const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
-    storeToRefs(workspaceStore);
+  const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
   const bus = inject('bus') as EventBus;
 
@@ -35,13 +37,8 @@ export const useUserLoadInfo = () => {
 
     currentWorkspaceSlug.value = workspaceInfo?.value?.slug as string;
 
-    if (
-      workspaceInfo &&
-      meInWorkspace &&
-      meInWorkspace.value &&
-      meInWorkspace.value?.role === 15
-    ) {
-      await getFormList(workspaceInfo.value?.slug as string).then(
+    if (getWsRole(currentWorkspaceSlug.value ?? '') === 15) {
+      await getFormList(currentWorkspaceSlug.value).then(
         (res) => (formStore.forms = res),
       );
     } else formStore.resetForms();
