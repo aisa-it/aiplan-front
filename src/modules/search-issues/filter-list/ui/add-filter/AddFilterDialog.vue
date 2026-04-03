@@ -202,23 +202,41 @@
             >
             </q-select>
             <RangeDateFilter
-              v-model="creationDates"
-              :label="'Дата создания'"
+              :model-value="{
+                from: filter.filter.created_at_from || '',
+                to: filter.filter.created_at_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('created_at', val)"
+              label="Дата создания"
               class="q-mb-sm"
             />
             <RangeDateFilter
-              v-model="deadlineDates"
-              :label="'Срок исполнения'"
+              :model-value="{
+                from: filter.filter.target_date_from || '',
+                to: filter.filter.target_date_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('target_date', val)"
+              label="Срок исполнения"
               class="q-mb-sm"
             />
             <RangeDateFilter
-              v-model="startDates"
-              :label="'Дата начала'"
+              :model-value="{
+                from: filter.filter.start_date_from || '',
+                to: filter.filter.start_date_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('start_date', val)"
+              label="Дата начала"
               class="q-mb-sm"
             />
             <RangeDateFilter
-              v-model="endDates"
-              :label="'Дата завершения'"
+              :model-value="{
+                from: filter.filter.completed_at_from || '',
+                to: filter.filter.completed_at_to || '',
+              }"
+              @update:model-value="
+                (val) => updateDateField('completed_at', val)
+              "
+              label="Дата завершения"
               class="q-mb-sm"
             />
             <div class="action-content">
@@ -243,7 +261,7 @@
                   no-caps
                   class="secondary-btn"
                   style="width: 110px"
-                  @click="emits('saveTempFilter', filter)"
+                  @click="applyTempFilter"
                   v-close-popup
                   >Применить</q-btn
                 >
@@ -308,6 +326,12 @@ import {
 } from '../../services/api';
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type Members = 'authors' | 'assignees' | 'watchers';
 
@@ -349,11 +373,6 @@ const searchedLabels = ref<any[] | null>(null);
 const searchedStates = ref<any[] | null>(null);
 const searchedWs = ref<any[] | null>(null);
 const searchedProjects = ref<any[] | null>(null);
-
-const creationDates = ref();
-const deadlineDates = ref();
-const startDates = ref();
-const endDates = ref();
 
 const members = ref<Record<Members, any[]>>({
   authors: [],
@@ -411,6 +430,16 @@ const INIT_FILTER = {
     assignees: [],
     workspaces: [],
     priorities: [],
+    created_at_from: '',
+    created_at_to: '',
+    updated_at_from: '',
+    updated_at_to: '',
+    start_date_from: '',
+    start_date_to: '',
+    target_date_from: '',
+    target_date_to: '',
+    completed_at_from: '',
+    completed_at_to: '',
   },
 } as IFilter;
 
@@ -591,25 +620,110 @@ const filterMember = () => {
   });
 };
 
+// Запись значений диапазонов дат в фильтр
+const updateDateField = (
+  prefix: 'created_at' | 'target_date' | 'start_date' | 'completed_at',
+  range: { from: string; to: string },
+) => {
+  if (!range) return;
+  (filter.value.filter as any)[`${prefix}_from`] = range.from || '';
+  (filter.value.filter as any)[`${prefix}_to`] = range.to || '';
+};
+
+const convertDatesToTimestamp = (filterData: IFilter): IFilter => {
+  const payload = JSON.parse(JSON.stringify(filterData)) as IFilter;
+
+  const dateKeys: (keyof typeof payload.filter)[] = [
+    'created_at_from',
+    'created_at_to',
+    'updated_at_from',
+    'updated_at_to',
+    'start_date_from',
+    'start_date_to',
+    'target_date_from',
+    'target_date_to',
+    'completed_at_from',
+    'completed_at_to',
+  ];
+
+  dateKeys.forEach((key) => {
+    const val = payload.filter[key];
+
+    if (val && typeof val === 'string' && val.trim() !== '') {
+      if (dayjs(val).isValid()) {
+        (payload.filter as any)[key] = dayjs(val).unix().toString();
+      } else {
+        (payload.filter as any)[key] = '';
+      }
+    } else {
+      (payload.filter as any)[key] = '';
+    }
+  });
+
+  return payload;
+};
+
+// const convertDatesToISO = (filterData: IFilter): IFilter => {
+//   const payload = JSON.parse(JSON.stringify(filterData)) as IFilter;
+
+//   const dateKeys: (keyof typeof payload.filter)[] = [
+//     'created_at_from',
+//     'created_at_to',
+//     'updated_at_from',
+//     'updated_at_to',
+//     'start_date_from',
+//     'start_date_to',
+//     'target_date_from',
+//     'target_date_to',
+//     'completed_at_from',
+//     'completed_at_to',
+//   ];
+
+//   dateKeys.forEach((key) => {
+//     const val = payload.filter[key];
+
+//     if (val && typeof val === 'string' && val.trim() !== '') {
+//       const parsedDate = dayjs.utc(val, 'DD.MM.YYYY', true);
+
+//       if (parsedDate.isValid()) {
+//         (payload.filter as any)[key] = parsedDate.startOf('day').toISOString();
+//       } else {
+//         (payload.filter as any)[key] = '';
+//       }
+//     } else {
+//       (payload.filter as any)[key] = '';
+//     }
+//   });
+
+//   return payload;
+// };
+
 // ---------------------- Saving & Editing ----------------------
+
+const applyTempFilter = () => {
+  const preparedFilter = convertDatesToTimestamp(filter.value);
+  emits('saveTempFilter', preparedFilter);
+};
 
 const handleSaveFilter = async () => {
   nameRef.value.validate();
   if (nameRef.value.hasError) return;
 
+  const preparedFilter = convertDatesToTimestamp(filter.value);
+
   if (!isEdit.value) {
-    await createSearchFilter(filter.value);
+    await createSearchFilter(preparedFilter);
     refreshFilters();
     emits('refresh');
     dialogRef.value.hide();
     return;
   }
 
-  let filterBody = {
-    name: filter.value.name,
-    description: filter.value.description,
-    filter: filter.value.filter,
-    public: filter.value.public,
+  const filterBody = {
+    name: preparedFilter.name,
+    description: preparedFilter.description,
+    filter: preparedFilter.filter,
+    public: preparedFilter.public,
   };
 
   await updateFilter(props.currentFilter?.id, filterBody).then(() => {
