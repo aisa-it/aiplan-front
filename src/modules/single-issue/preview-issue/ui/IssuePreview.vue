@@ -64,25 +64,13 @@
         :projectid="issueData.project"
         :project="issueData.project_detail"
         :issueid="issueData.id"
-        :is-disabled="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'add-sub-issue',
-          )
-        "
+        :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
       />
       <LinkedIssuesPanel :project_detail="issueData.project_detail" />
 
       <SelectAttachments
         entityType="issue"
-        :is-edit="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
+        :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
         :upload-attachment-func="uploadAttachments"
@@ -101,7 +89,6 @@
       style="top: 62px"
       @refresh="(v) => refreshData(v)"
     />
-
   </q-drawer>
 
   <Teleport to="body">

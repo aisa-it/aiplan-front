@@ -7,6 +7,7 @@ import {
   DtoStateLight,
   DtoWorkspace,
   DtoWorkspaceMember,
+  DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
@@ -19,7 +20,6 @@ import {
   RequestParams,
 } from '@aisa-it/aiplan-api-ts/src/http-client';
 
-const rolesStore = useRolesStore();
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
 
@@ -28,7 +28,7 @@ const api = new HttpClient();
 interface RootStore {
   currentWorkspaceSlug: string | null;
   workspaceInfo?: DtoWorkspace;
-  meInWorkspace?: DtoWorkspaceMember;
+  meInWorkspace: DtoWorkspaceMemberWithOwner;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
   workspaceUsers: DtoWorkspaceMember[];
@@ -47,6 +47,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       foundUsers: [],
       allWorkspaceStates: undefined,
       stopRefresh: false,
+      meInWorkspace: {} as DtoWorkspaceMemberWithOwner,
     };
   },
 
@@ -60,6 +61,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       return workspaceApi
         .getWorkspace(workspaceSlug)
         .then(async (res) => {
+          const rolesStore = useRolesStore();
           this.workspaceInfo = res.data;
 
           await this.getMeInWorkspace(workspaceSlug);
@@ -221,7 +223,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
 
     async getMeInWorkspace(
       workspaceSlug: string,
-    ): Promise<DtoWorkspaceMember | void> {
+    ): Promise<DtoWorkspaceMemberWithOwner | void> {
       if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
       const res =

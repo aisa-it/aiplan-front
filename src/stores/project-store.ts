@@ -14,16 +14,13 @@ import {
   DtoProject,
   DtoProjectMember,
   DtoProjectMemberLight,
+  DtoProjectMemberWithLead,
   DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { allColumns } from 'src/modules/issue-list/constants/tableColumns';
 import axios from 'axios';
 import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
-
-const workspaceStore = useWorkspaceStore();
-const { workspaceProjects } = storeToRefs(workspaceStore);
-const rolesStore = useRolesStore();
 
 const projectsApi = new (withInterceptors(Projects))();
 const usersApi = new (withInterceptors(Users))();
@@ -33,7 +30,7 @@ interface IProjectState {
   projectLabels: DtoLabelLight[];
   projectMembers: DtoProjectMemberLight[];
   currentProjectID: string;
-  meInProject: DtoProjectMember;
+  meInProject: DtoProjectMemberWithLead;
   isLoadProjectInfo: boolean;
   errorLoadProjects: boolean;
   projectProps: TypesViewProps | null;
@@ -49,7 +46,7 @@ export const useProjectStore = defineStore('project-store', {
       projectLabels: [] as DtoLabelLight[],
       projectMembers: [] as DtoProjectMemberLight[],
       currentProjectID: '',
-      meInProject: {} as DtoProjectMember,
+      meInProject: {} as DtoProjectMemberWithLead,
       isLoadProjectInfo: false,
       errorLoadProjects: false,
       projectProps: null,
@@ -60,6 +57,9 @@ export const useProjectStore = defineStore('project-store', {
 
   getters: {
     currentProject(): any {
+      const workspaceStore = useWorkspaceStore();
+      const { workspaceProjects } = storeToRefs(workspaceStore);
+
       const projectID = this.router.currentRoute.value.params['project'];
       return workspaceProjects.value.find(
         (e: any) => e.id == projectID || e.identifier === projectID,
@@ -122,6 +122,7 @@ export const useProjectStore = defineStore('project-store', {
       await projectsApi
         .getProject(workspaceSlug, projectID)
         .then(async (res) => {
+          const rolesStore = useRolesStore();
           this.project = res.data;
 
           this.meInProject = await this.getCurrentMembership(

@@ -31,7 +31,7 @@
               :projectid="props.project_id"
               :status="issueSettings.state_detail"
               :isDisabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-status')
+                !hasPermissionByIssue(issueData, 'change-issue-status')
               "
               isAdaptiveSelect
               :states-from-cache="statesCache[issueData?.project]"
@@ -65,7 +65,7 @@
               :projectid="props.project_id"
               :assigness="issueSettings.assignees"
               :isDisabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               :current-member="user"
               isAdaptiveSelect
@@ -94,11 +94,7 @@
               :current-member="user"
               isAdaptiveSelect
               :isDisabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  issueData.project_detail ?? project,
-                  'change-issue-basic',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               @update:watchers="
                 (val) => {
@@ -127,11 +123,7 @@
               :priority="issueSettings.priority"
               isAdaptiveSelect
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               @update:priority="
                 (val) => {
@@ -161,11 +153,7 @@
               :date="issueSettings.target_date"
               :issue="issueData"
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               :style="{ padding: 0 }"
               @update:date="
@@ -246,7 +234,6 @@ const workspaceStore = useWorkspaceStore();
 const { statesCache } = storeToRefs(statesStore);
 
 // store to refs
-const { project } = storeToRefs(projectStore);
 const { user } = storeToRefs(userStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 

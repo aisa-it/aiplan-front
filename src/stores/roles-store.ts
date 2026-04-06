@@ -12,21 +12,16 @@ import {
 } from 'src/constants/roles';
 import {
   DtoIssue,
-  DtoProjectMember,
+  DtoProject,
+  DtoProjectMemberWithLead,
   DtoWorkspace,
-  DtoWorkspaceMember,
+  DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const userStore = useUserStore();
 
-const {
-  user,
-  userWorkspaces,
-  userWorkspacesMemberships,
-  userProjectsMemberships,
-} = storeToRefs(userStore);
-const { workspaceInfo, meInWorkspace } = storeToRefs(useWorkspaceStore());
-const { project, meInProject } = storeToRefs(useProjectStore());
+const { user, userWorkspacesMemberships, userProjectsMemberships } =
+  storeToRefs(userStore);
 
 export const useRolesStore = defineStore('roles-store', {
   state: () => {
@@ -40,41 +35,60 @@ export const useRolesStore = defineStore('roles-store', {
   },
 
   actions: {
-    getWsRole(workspaceID: string): number {
+    getWsMembership(workspaceID: string) {
+      const { workspaceInfo, meInWorkspace } = storeToRefs(useWorkspaceStore());
       if (
         workspaceID === workspaceInfo?.value?.id ||
         workspaceID === workspaceInfo?.value?.slug
       )
-        return meInWorkspace?.value?.role ?? 0;
-      return userWorkspacesMemberships.value[workspaceID]?.role ?? 0;
+        return meInWorkspace?.value;
+      return userWorkspacesMemberships.value[workspaceID];
     },
 
-    getWsNameRole(meInWs: DtoWorkspaceMember) {
-      // if (currenWs?.owner_id === user.value?.id)
-      //   return 'owner';
-      return defineRole(meInWs.role ?? 0);
+    getWsRole(workspaceID: string): number {
+      return this.getWsMembership(workspaceID)?.role ?? 0;
+    },
+
+    getWsNameRole(meInWs: DtoWorkspaceMemberWithOwner) {
+      if (meInWs?.is_workspace_owner) return 'owner';
+      return defineRole(meInWs?.role ?? 0);
     },
 
     // set types
-    defineWorkspaceRole(meInWs: DtoWorkspaceMember) {
+    defineWorkspaceRole(meInWs: DtoWorkspaceMemberWithOwner) {
       return (this.roles.workspace = this.getWsNameRole(meInWs));
     },
 
-    getProjectRole(projectID: string): number {
-      if (projectID === project?.value?.id)
-        return meInProject?.value?.role ?? 0;
-      return userProjectsMemberships.value[projectID]?.role ?? 0;
+    getProjectMembership(projectID: string) {
+      const { project, meInProject } = storeToRefs(useProjectStore());
+      if (projectID === project?.value?.id) return meInProject?.value;
+      return userProjectsMemberships.value[projectID];
     },
 
-    getProjectNameRole(meInProject: DtoProjectMember) {
-      // if (project?.created_by === user.value.id)
-      //   return (this.roles.project = 'owner');
-      return defineRole(meInProject.role ?? 0);
+    getProjectRole(projectID: string): number {
+      return this.getProjectMembership(projectID)?.role ?? 0;
+    },
+
+    getProjectNameRole(meInProject: DtoProjectMemberWithLead) {
+      if (meInProject?.is_project_lead) return 'owner';
+      return defineRole(meInProject?.role ?? 0);
     },
 
     // set types
-    defineProjectRole(meInProject: DtoProjectMember) {
+    defineProjectRole(meInProject: DtoProjectMemberWithLead) {
       return (this.roles.project = this.getProjectNameRole(meInProject));
+    },
+
+    getIssueNameRole(issue: DtoIssue): string {
+      const isAssignee = issue?.assignee_details?.find(
+        (assignee) => assignee.id == user.value.id,
+      );
+
+      if (isAssignee) return 'assignee';
+
+      if (issue?.author_detail?.id === user.value.id) return 'author';
+
+      return '';
     },
 
     // set types
@@ -84,16 +98,8 @@ export const useRolesStore = defineStore('roles-store', {
           this.defineIssueRole(issueData);
         });
       }
-      if (issueData?.author_detail?.id === user.value?.id)
-        return (this.roles.issue = 'author');
 
-      if (
-        issueData?.assignee_details?.find(
-          (assignee) => assignee.id == user.value?.id,
-        )
-      )
-        this.roles.issue = 'assignee';
-      else this.roles.issue = '';
+      return (this.roles.issue = this.getIssueNameRole(issueData));
     },
 
     hasPermission(action: string) {
@@ -103,57 +109,32 @@ export const useRolesStore = defineStore('roles-store', {
       return checkPermission(this.roles, action);
     },
 
-    // set types
     hasPermissionByWorkspace(ws: DtoWorkspace, action: string) {
-      let role = '';
-
-      if (ws.id === workspaceInfo?.value?.id && meInWorkspace?.value)
-        role = this.getWsNameRole(meInWorkspace?.value);
-      else
-        role = this.getWsNameRole(
-          userWorkspacesMemberships.value[ws?.id ?? ''],
-        );
-
+      const role = this.getWsNameRole(this.getWsMembership(ws?.id ?? ''));
       return checkPermissionByWs(role, action);
     },
 
-    // set types
-    hasPermissionByProject(project: any, action: string) {
-      let role = '';
-      if (project.project_lead === user.value?.id) role = 'owner';
-      else role = defineRole(project?.current_user_membership?.role);
-
+    hasPermissionByProject(project: DtoProject, action: string) {
+      const role = this.getProjectNameRole(
+        this.getProjectMembership(project?.id ?? ''),
+      );
       return checkPermissionByProject(role, action);
     },
 
-    hasPermissionByIssue(issue: any, project: any, action: string) {
-      const ws = userWorkspaces.value.find(
-        (ws) => ws.slug === issue.workspace_detail?.slug,
+    hasPermissionByIssue(issue: DtoIssue, action: string) {
+      const ws_role = this.getWsNameRole(
+        this.getWsMembership(issue?.workspace ?? ''),
       );
-      const ws_role = defineRole(ws?.current_user_membership?.role);
 
-      const project_role = defineRole(project?.current_user_membership?.role);
+      const project_role = this.getProjectNameRole(
+        this.getProjectMembership(issue?.project ?? ''),
+      );
 
-      let issue_role = '';
+      const issue_role = this.getIssueNameRole(issue);
 
-      if (
-        (ws_role === 'guest' && project_role === 'guest') ||
-        project_role === 'guest'
-      )
-        return false;
-
-      if (
-        issue?.assignee_details?.find(
-          (assignee) => assignee.id == user.value.id,
-        )
-      )
-        issue_role = 'assignee';
-
-      if (issue?.author_detail?.id === user.value.id) issue_role = 'author';
       return checkPermissionByIssue(ws_role, project_role, issue_role, action);
     },
 
-    // set types
     hasPermissionProjectMemberChange(member: any, memberToEdit: any) {
       if (
         member?.member_id === memberToEdit?.member_id ||
@@ -165,7 +146,6 @@ export const useRolesStore = defineStore('roles-store', {
         return true;
     },
 
-    // set types
     hasPermissionWsMemberChange(member: any, memberToEdit: any, ws: any) {
       if (
         member?.id === memberToEdit?.member_id ||
