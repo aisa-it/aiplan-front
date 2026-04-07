@@ -406,6 +406,28 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       );
     },
 
+    async getIssueCommentHistory(
+      workspaceSlug: string,
+      projectId: string,
+      issueId: string,
+      commentId: string,
+      offset?: number,
+      limit?: number,
+    ) {
+      return (
+        await issuesApi.getIssueCommentUpdateList(
+          workspaceSlug,
+          projectId,
+          issueId,
+          commentId,
+          {
+            offset: offset,
+            limit: limit,
+          },
+        )
+      ).data;
+    },
+
     // ------------- Exact issue activities -------------
 
     async getIssueActivitiesList(

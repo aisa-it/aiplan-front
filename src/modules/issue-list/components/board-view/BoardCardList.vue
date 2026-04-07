@@ -97,7 +97,6 @@ import { inject, onMounted, onBeforeUnmount, ref } from 'vue';
 import { EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';
 
-import { useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
 
 import GroupedHeader from '../ui/GroupedHeader.vue';
@@ -123,7 +122,6 @@ const props = defineProps<{
 
 const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
 
-const { fetchPinnedIssues } = useIssuesStore();
 const { project } = storeToRefs(useProjectStore());
 
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
@@ -158,8 +156,6 @@ const toggleList = async (entity, value) => {
 };
 
 const updateTable = (field, row, entity) => {
-  if (props.contextType === 'project' && project.value.id)
-    fetchPinnedIssues(project.value.id);
   updateCurrentTable(field, row, entity);
 };
 

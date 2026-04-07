@@ -8,7 +8,7 @@
     >
       <template #node-default="nodeProps">
         <div class="custom-node">
-          {{ nodeProps.data.label }}
+          <span class="text-weight-bold">{{ nodeProps.data.label }}</span>
 
           <Handle
             type="source"
@@ -75,6 +75,7 @@ import { VueFlow, useVueFlow, Handle, type Node, type Edge } from '@vue-flow/cor
 import { MarkerType } from '@vue-flow/core';
 import { useProjectStore } from 'src/stores/project-store';
 import { useRoute } from 'vue-router';
+import { orderStateGroups } from 'src/utils/helpers';
 import type { TypesStatesFlowGraph } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{ initialFlow?: TypesStatesFlowGraph | null }>();
@@ -106,7 +107,8 @@ onMounted(async () => {
     route.params.workspace as string,
     route.params.project as string,
   );
-  let statuses = Object.values(data).flat();
+  const ordered = orderStateGroups(data);
+  const statuses = Object.keys(ordered).flatMap((key) => ordered[key]);
 
   // Рассчет исходной точки X для дефолтного расположения статусов
   const flowEl = document.querySelector('.flow-container') as HTMLElement | null;
@@ -311,7 +313,7 @@ const commitFlowSnapshot = () => {
 defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
 </script>
 
-<style>
+<style lang="scss">
 .flow-container {
   width: 100%;
   height: 100%;
@@ -326,9 +328,25 @@ defineExpose({ getFlowData, resetFlow, commitFlowSnapshot });
   background: transparent;
 }
 
+.flow-container .vue-flow__node-default,
+.flow-container .vue-flow__node-default.selected,
+.flow-container .vue-flow__node-default.selected:hover,
+.flow-container .vue-flow__node-default:focus,
+.flow-container .vue-flow__node-default:focus-visible,
+.flow-container .vue-flow__node-default.selectable:hover {
+  border: none;
+  box-shadow: none;
+}
+
 .flow-container .vue-flow__handle {
   width: 10px;
   height: 10px;
+  border: none;
+  background:$dark-gray;
+}
+
+.body--dark .flow-container .vue-flow__handle {
+  background: $gray;
 }
 
 .flow-container .circle-node .vue-flow__handle {

@@ -43,7 +43,7 @@
                 :key="item.id"
                 clickable
                 class="favorites-docs__item"
-                :to="`/${$route.params.workspace}/aidoc/${item.doc_id}`"
+                :to="`/${route.params.workspace}/aidoc/${item.doc_id}`"
                 @click="onSelect(item.doc_id)"
               >
                 <div class="favorites-docs__name q-pa-none">
@@ -55,7 +55,7 @@
                 </div>
                 <div class="flex items-center no-wrap q-pa-none">
                   <q-btn
-                    class="menu-link__btn q-ml-sm"
+                    class="menu-link__btn q-ml-sm q-mr-xs"
                     flat
                     :style="'min-height: 16px !important; min-width: 16px !important; padding: 0'"
                     @click.prevent.stop
@@ -97,7 +97,7 @@
             <template v-slot:default-header="prop">
               <q-item
                 class="tree-custom-header justify-between q-pa-none"
-                :active="prop.key === $route.params.doc"
+                :active="prop.key === route.params.doc"
               >
                 <div class="tree-custom-header__name">
                   <span>{{ prop.node.title }}</span>
@@ -107,7 +107,7 @@
                 </div>
                 <div class="flex align-center no-wrap">
                   <q-btn
-                    class="menu-link__btn q-ml-sm"
+                    class="menu-link__btn q-ml-sm q-mr-xs"
                     :class="{ 'favorite-btn--inactive': !prop.node.isFavorite }"
                     flat
                     :style="'min-height: 16px !important; min-width: 16px !important; padding: 0'"
@@ -171,6 +171,10 @@
         v-model="isNotificationsSettingsOpen"
         is-aidoc-page
       />
+      <HierarchyDocDialog
+        v-if="filterBy === 'docs'"
+        v-model="isHierarchyDialogOpen"
+      />
     </template>
   </ExpansionItem>
 </template>
@@ -188,10 +192,25 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'stores/notification-store';
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-
-import { IDocTreeNode } from 'src/interfaces/docs';
-import { mapDocNode } from 'src/utils/tree';
 import { findObjectByValue } from 'src/stores/recursionObject';
+
+import ExpansionItem from '../ExpansionItem.vue';
+import MenuActions from './MenuActions.vue';
+
+import AidocRulesDialog from 'src/components/aidoc/AidocRulesDialog.vue';
+import AidocWatchersDialog from 'src/components/aidoc/AidocWatchersDialog.vue';
+import NotificationsSettingsDialog from '../dialogs/NotificationsSettingsDialog.vue';
+import HierarchyDocDialog from '../dialogs/AIDocDialogs/HierarchyDocDialog.vue';
+
+import BellIcon from '../icons/BellIcon.vue';
+import LinkIcon from '../icons/LinkIcon.vue';
+import ManageAccountsIcon from '../icons/ManageAccountsIcon.vue';
+import VisibilityIcon from '../icons/VisibilityIcon.vue';
+import StarIcon from 'src/components/icons/StarIcon.vue';
+import DocumentIcon from '../icons/DocumentIcon.vue';
+import ParentIcon from '../icons/ParentIcon.vue';
+
+import { mapDocNode } from 'src/utils/tree';
 import {
   SUCCESS_ADD_DOC_TO_FAVORITE,
   SUCCESS_REMOVE_DOC_FROM_FAVORITE,
@@ -200,17 +219,7 @@ import {
   SUCCESS_COPY_LINK_TO_CLIPBOARD,
   SUCCESS_UPDATE_DOCUMENT,
 } from 'src/constants/notifications';
-import StarIcon from 'src/components/icons/StarIcon.vue';
-import ExpansionItem from '../ExpansionItem.vue';
-import DocumentIcon from '../icons/DocumentIcon.vue';
-import AidocRulesDialog from 'src/components/aidoc/AidocRulesDialog.vue';
-import AidocWatchersDialog from 'src/components/aidoc/AidocWatchersDialog.vue';
-import NotificationsSettingsDialog from '../dialogs/NotificationsSettingsDialog.vue';
-import MenuActions from './MenuActions.vue';
-import BellIcon from '../icons/BellIcon.vue';
-import LinkIcon from '../icons/LinkIcon.vue';
-import ManageAccountsIcon from '../icons/ManageAccountsIcon.vue';
-import VisibilityIcon from '../icons/VisibilityIcon.vue';
+import { IDocTreeNode } from 'src/interfaces/docs';
 
 const emits = defineEmits<{
   updateFavoriteState: [id: string, state: boolean];
@@ -249,6 +258,7 @@ const treeNode = ref<IDocTreeNode[]>([]);
 const isRulesDialogOpen = ref<boolean>(false);
 const isWatchersDialogOpen = ref<boolean>(false);
 const isNotificationsSettingsOpen = ref<boolean>(false);
+const isHierarchyDialogOpen = ref<boolean>(false);
 const docInfo = ref({});
 const loading = ref(false);
 
@@ -402,6 +412,11 @@ const openWatchersDialog = async (id: string) => {
   isWatchersDialogOpen.value = true;
 };
 
+const openHierarchyDocDialog = (): void => {
+  isHierarchyDialogOpen.value = true;
+  docStore.isHierarchyOpened = true;
+};
+
 const updateDocument = async (roles = {}) => {
   try {
     await docStore.updateDocument(
@@ -446,15 +461,32 @@ const copyLink = async (short_url: string | undefined, document: any) => {
 };
 
 const getHeaderMenuItems = () => {
-  return [
-    {
-      text: 'Настроить уведомления',
-      icon: BellIcon,
-      onClick: () => {
-        isNotificationsSettingsOpen.value = true;
+  if (props.filterBy === 'docs') {
+    return [
+      {
+        text: 'Настроить уведомления',
+        icon: BellIcon,
+        onClick: () => {
+          isNotificationsSettingsOpen.value = true;
+        },
       },
-    },
-  ];
+      {
+        text: 'Изменить порядок иерархии',
+        icon: ParentIcon,
+        onClick: () => openHierarchyDocDialog(),
+      },
+    ];
+  } else {
+    return [
+      {
+        text: 'Настроить уведомления',
+        icon: BellIcon,
+        onClick: () => {
+          isNotificationsSettingsOpen.value = true;
+        },
+      },
+    ];
+  }
 };
 
 const getAidocMenuItems = (

@@ -1,7 +1,7 @@
 <template>
   <q-table
     flat
-    class="q-my-md q-px-none table-bottom-reverse"
+    class="q-my-xs q-px-none table-bottom-reverse"
     :columns="columns"
     :rows="rows"
     row-key="user"
@@ -22,6 +22,7 @@
     </template>
 
     <template v-slot:top>
+      <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">Пользователей в пространстве:  {{ usersCount }}</p>
       <div class="flex q-table__title q-mr-sm">Пользователи</div>
       <q-input
         label="Поиск"
@@ -247,6 +248,7 @@ const isInviteOpen = ref(false);
 const isLeaveWorkspace = ref(false);
 const isConfirmDelOpen = ref(false);
 const searchQuery = ref();
+const usersCount = ref<number | undefined>(0);
 
 const metadata = ref({
   title: 'Загрузка...',
@@ -322,6 +324,7 @@ async function onRequest(p: any) {
       pagination.value.descending = descending;
       rows.value = res?.result || [];
       loading.value = false;
+      usersCount.value = res?.count;
     });
 }
 

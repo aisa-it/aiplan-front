@@ -23,6 +23,7 @@
               Если в статус не ведут стрелки, в него можно перейти из любого другого статуса
             </li>
             <li>Круг обозначает создание задачи</li>
+            <li>Указанные переходы не распространяются на администраторов проекта</li>
           </ul>
         </q-banner>
       </q-card-section>
@@ -32,8 +33,18 @@
       </q-card-section>
 
       <q-card-actions align="right" class="q-pa-md q-gutter-sm">
-        <q-btn no-caps class="secondary-btn" label="Отмена" @click="onCancel" />
-        <q-btn no-caps class="primary-btn" label="Сохранить" @click="onSave" />
+        <q-btn
+          no-caps
+          class="secondary-btn workflow-tab__action-btn"
+          label="Отмена"
+          @click="onCancel"
+        />
+        <q-btn
+          no-caps
+          class="primary-btn workflow-tab__action-btn"
+          label="Сохранить"
+          @click="onSave"
+        />
       </q-card-actions>
     </q-card>
   </div>
@@ -98,6 +109,10 @@ const onCancel = () => {
 .workflow-tab__diagram {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+.workflow-tab__action-btn {
+  width: 110px;
 }
 
 @media (max-width: 384px) {

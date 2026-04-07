@@ -77,6 +77,16 @@
               dense
               flat
               size="8px"
+              @click.prevent.stop="handleOpenHistoryComment"
+            >
+              <q-icon name="history" dense size="18px" />
+              <HintTooltip> История изменений </HintTooltip>
+            </q-btn>
+            <q-btn
+              class="stamp-btn"
+              dense
+              flat
+              size="8px"
               @click.prevent.stop="
                 singleIssueStore.issueСommentsLinkToClipboard(comment.id)
               "
@@ -164,6 +174,7 @@ const emits = defineEmits<{
   'handle-edit': [];
   'handle-delete': [];
   'handle-reply': [];
+  'handle-history': [];
   'add-reaction': [value: string];
   'delete-reaction': [value: string];
 }>();
@@ -250,6 +261,13 @@ const handleDeleteComment = () => {
 
 const handleClickReply = () => {
   emits('handle-reply');
+  isTouchReaction.value = false;
+  isTouchStart.value = false;
+  isHoverMessageText.value = false;
+};
+
+const handleOpenHistoryComment = () => {
+  emits('handle-history');
   isTouchReaction.value = false;
   isTouchStart.value = false;
   isHoverMessageText.value = false;

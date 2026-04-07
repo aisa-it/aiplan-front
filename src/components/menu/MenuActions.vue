@@ -13,26 +13,23 @@
     <q-menu>
       <q-list :style="'min-width: 225px; !important;'">
         <template v-for="(item, index) in items" :key="index">
-          <q-item v-if="item.show !== false">
-            <q-btn
-              class="menu-link__settings-btn full-w"
-              flat
-              dense
-              no-caps
-              v-close-popup
-              :to="item.to"
-              :style="'font-size: 12px;'"
-              @click="item.onClick"
-            >
-              <component
-                :is="item.icon"
-                v-if="item.icon"
-                :width="16"
-                :height="16"
-                class="q-mr-sm"
-              />
-              <span>{{ item.text }}</span>
-            </q-btn>
+          <q-item
+            v-if="item.show !== false"
+            :to="item.to"
+            class="menu-link__item"
+            dense
+            clickable
+            v-close-popup
+            @click="item.onClick"
+          >
+            <component
+              :is="item.icon"
+              v-if="item.icon"
+              :width="16"
+              :height="16"
+              class="q-mr-sm"
+            />
+            <span class="menu-link__item-text">{{ item.text }}</span>
           </q-item>
         </template>
       </q-list>
@@ -41,11 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { DefineComponent } from 'vue';
+import type { Component } from 'vue';
 
 export interface MenuActionItem {
   text: string;
-  icon?: DefineComponent;
+  icon?: Component;
   onClick: () => void;
   to?: string;
   show?: boolean;
@@ -68,3 +65,17 @@ withDefaults(
 );
 </script>
 
+<style scoped lang="scss">
+.menu-link {
+  &__item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 8px 16px;
+  }
+
+  &__item-text {
+    font-size: 12px;
+  }
+}
+</style>

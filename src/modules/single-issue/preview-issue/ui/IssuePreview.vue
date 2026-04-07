@@ -111,7 +111,6 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useIssuesStore } from 'src/stores/issues-store';
 
 // directives
 import clickOutside from 'src/directives/click-outside';
@@ -154,7 +153,6 @@ const { hasPermissionByIssue } = useRolesStore();
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { fetchPinnedIssues } = useIssuesStore();
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
@@ -174,7 +172,6 @@ const hideSettings = computed(() => {
 });
 
 const refreshData = (args?: any): void => {
-  fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
   emits('refresh', args);
 };
 
@@ -191,17 +188,11 @@ const uploadAttachments = async (
 ) => {
   await aiplanStore
     .issueAttachmentsUpload(ev, issueData.value.id, onProgress)
-    ?.then(() =>
-      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
-    );
 };
 
 const deleteAttachment = async (attachmentId: string) => {
   await aiplanStore
     .issueAttachmentDelete(currentIssueID.value, attachmentId)
-    ?.then(() =>
-      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
-    );
 };
 
 // заменить на сервис после обновления апи
