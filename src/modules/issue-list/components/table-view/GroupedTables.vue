@@ -19,8 +19,15 @@
             refreshTable(index, pagination, isFullUpdate, group?.entity)
         "
         @open-preview="
-          (issue, pagination) =>
-            emits('openPreview', issue, index, pagination, group?.entity)
+          (issue, pagination, isParent) =>
+            emits(
+              'openPreview',
+              issue,
+              index,
+              pagination,
+              group?.entity,
+              isParent,
+            )
         "
         :context-type="contextType"
         @open-issue="(id, issue) => emits('openIssue', id, issue)"

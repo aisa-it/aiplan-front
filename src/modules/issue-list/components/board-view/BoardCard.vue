@@ -35,7 +35,7 @@
         :row="card"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
-        @click.prevent.stop="emits('openPreview', card.parent_detail)"
+        @click.prevent.stop="emits('openPreview', card, true)"
       />
     </div>
 

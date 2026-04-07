@@ -4,7 +4,7 @@
       <q-btn
         no-caps
         flat
-        style="padding: 0 4px; min-width: 100px;"
+        style="padding: 0 4px; min-width: 100px"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
       >
         <span class="abbriviated-text" style="text-align: left">
@@ -26,7 +26,7 @@
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
         style="align-self: center"
-        @click.prevent.stop="emits('openPreview', rowInfo.row.parent_detail)"
+        @click.prevent.stop="emits('openPreview', rowInfo.row)"
       />
     </div>
   </q-td>

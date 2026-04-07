@@ -58,7 +58,13 @@
             (field, row, entity) => updateTable(field, row, entity)
           "
           @openPreview="
-            (id) => emits('openPreview', id, parsePagination(quasarPagination))
+            (id, isParent) =>
+              emits(
+                'openPreview',
+                id,
+                parsePagination(quasarPagination),
+                isParent,
+              )
           "
           @open-issue="(id, project) => emits('openIssue', id, project)"
         />
