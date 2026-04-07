@@ -79,12 +79,14 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import {
   useIssuesStatesFlowStore,
 } from 'src/stores/issues-states-flow-store';
+import { useProjectStatesFlowStore } from 'src/stores/project-states-flow-store';
 
 // utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 // interfaces
 import { IState } from 'src/interfaces/states';
+import type { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 function isStatesFromCacheEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
@@ -142,6 +144,7 @@ export default defineComponent({
     const singleIssueStore = useSingleIssueStore();
     const { setNotificationView } = useNotificationStore();
     const issuesStatesFlowStore = useIssuesStatesFlowStore();
+    const projectStatesFlowStore = useProjectStatesFlowStore();
 
     const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -165,19 +168,29 @@ export default defineComponent({
       }
       // Ограничиваем список переходов по бизнес-процессу (если ручка доступна).
       // Фолбэк: если ручка недоступна/пусто/ошибка — показываем все статусы.
-      if (props.issueid && currentWorkspaceSlug.value) {
+      if (currentWorkspaceSlug.value) {
         try {
-          const available = await issuesStatesFlowStore.getAvailableStates(
-            currentWorkspaceSlug.value,
-            props.projectid,
-            props.issueid,
-          );
-          const allowedIds = new Set(
-            Object.values(available ?? {}).map((s) => s.id),
-          );
-          if (allowedIds.size) {
-            const currentId = (props.status)?.id;
-            arr = arr.filter((s) => allowedIds.has(s.id) || s.id === currentId);
+          if (props.issueid) {
+            const available = await issuesStatesFlowStore.getAvailableStates(
+              currentWorkspaceSlug.value,
+              props.projectid,
+              props.issueid,
+            );
+            arr = filterStatesByAllowedTransitions(
+              arr,
+              available,
+              props.status?.id,
+            );
+          } else {
+            const available = await projectStatesFlowStore.getAvailableStatesNewIssue(
+              currentWorkspaceSlug.value,
+              props.projectid,
+            );
+            arr = filterStatesByAllowedTransitions(
+              arr,
+              available,
+              props.status?.id,
+            );
           }
         } catch (e) {
           // ignore
@@ -194,6 +207,18 @@ export default defineComponent({
       }
     };
 
+    const filterStatesByAllowedTransitions = (
+      states: IState[],
+      available: DtoStateLight[],
+      currentStatusId: string | undefined,
+    ) => {
+      const allowedIds = new Set(available.map((s) => s.id));
+      if (!allowedIds.size) return states;
+      return states.filter(
+        (s) => allowedIds.has(s.id) || s.id === currentStatusId,
+      );
+    };
+    
     const showNotification = (type: 'success' | 'error', msg?: string) => {
       setNotificationView({
         open: true,
