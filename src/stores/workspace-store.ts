@@ -104,6 +104,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         desc?: boolean;
         search_query?: string;
       },
+      isInitState = true,
     ): Promise<
       | (DaoPaginationResponse & {
           result?: DtoWorkspaceMember[];
@@ -115,6 +116,8 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       return workspaceApi
         .getWorkspaceMemberList(workspaceSlug, data)
         .then((res) => {
+          if (!isInitState) return res.data;
+
           !data?.search_query
             ? (this.workspaceUsers = res.data.result)
             : (this.foundUsers = res.data.result);

@@ -24,7 +24,9 @@
       </template>
 
       <template v-slot:top>
-        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">Пользователей в проекте:  {{ usersCount }}</p>
+        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">
+          Пользователей в проекте: {{ usersCount }}
+        </p>
         <div class="flex q-table__title q-mr-sm">Пользователи</div>
         <q-input
           label="Поиск"
@@ -342,23 +344,12 @@ async function refresh() {
   );
   if (meInProject) me.value = meInProject;
 
-  // Получаем количество участников пространства
-  const membersCountResponse = await workspaceStore.getWorkspaceMembers(
-    currentWorkspaceSlug.value as string,
-    { offset: 0, limit: 0 },
-  );
-
-  // Запрашиваем всех участников пространства с лимитом равным общему количеству
-  if (membersCountResponse?.count) {
-    await workspaceStore
-      .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
-        offset: 0,
-        limit: membersCountResponse.count,
-      })
-      .then((res) => (wsMembers.value = res?.result || []));
-  } else {
-    wsMembers.value = [];
-  }
+  await workspaceStore
+    .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
+      offset: 0,
+      limit: -1,
+    })
+    .then((res) => (wsMembers.value = res?.result ?? []));
 
   setAnotherTitle(project.value.name);
 }
