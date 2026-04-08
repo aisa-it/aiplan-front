@@ -41,12 +41,7 @@
           "
           @open-preview="
             (issue) =>
-              emits(
-                'openPreview',
-                issue,
-                parsePagination(quasarPagination),
-                true,
-              )
+              emits('openPreview', issue, parsePagination(quasarPagination))
           "
         />
       </template>

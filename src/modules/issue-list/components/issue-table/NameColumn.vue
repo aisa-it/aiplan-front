@@ -26,7 +26,15 @@
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
         style="align-self: center"
-        @click.prevent.stop="emits('openPreview', rowInfo.row)"
+        @click.prevent.stop="
+          emits('openPreview', {
+            ...rowInfo.row.parent_detail,
+            project_detail: {
+              identifier: rowInfo.row.project_detail.identifier,
+            },
+            project: rowInfo.row.project,
+          })
+        "
       />
     </div>
   </q-td>

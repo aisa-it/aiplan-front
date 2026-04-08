@@ -10,15 +10,8 @@
             refreshTable(index, pagination, isFullUpdate, table.entity)
         "
         @open-preview="
-          (issue, pagination, isParent) =>
-            emits(
-              'openPreview',
-              issue,
-              index,
-              pagination,
-              table?.entity,
-              isParent,
-            )
+          (issue, pagination) =>
+            emits('openPreview', issue, index, pagination, table?.entity)
         "
         @open-issue="(id, project) => emits('openIssue', id, project)"
       />

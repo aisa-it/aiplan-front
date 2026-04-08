@@ -10,8 +10,8 @@
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (issue, index, pagination, entity, isParent) =>
-          openPreview(issue, index, pagination, entity, isParent)
+        (issue, index, pagination, entity) =>
+          openPreview(issue, index, pagination, entity)
       "
       @open-issue="
         (id, issue) =>
@@ -32,8 +32,8 @@
           refreshTable(index, pagination, isFullUpdate, entity)
       "
       @open-preview="
-        (issue, index, pagination, entity, isParent) =>
-          openPreview(issue, index, pagination, entity, isParent)
+        (issue, index, pagination, entity) =>
+          openPreview(issue, index, pagination, entity)
       "
       @open-issue="
         (id, issue) =>
@@ -178,14 +178,11 @@ async function openPreview(
   index?: number,
   pagination?: any,
   entity?: any,
-  isParent = false,
 ) {
   if (!route.params.workspace || !(issue.project ?? route.params.project))
     return;
 
-  const id = String(
-    !isParent ? issue.sequence_id : issue.parent_detail?.sequence_id,
-  );
+  const id = String(issue.sequence_id);
   if (isMobile.value) {
     openIssue(
       id,

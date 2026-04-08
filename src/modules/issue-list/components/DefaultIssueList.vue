@@ -7,7 +7,7 @@
       :loading="loadingTable"
       :context-type="contextType"
       @refresh="(pagination) => load(pagination)"
-      @open-preview="(row, _, isParent) => openPreview(row, isParent)"
+      @open-preview="(row) => openPreview(row)"
       @open-issue="
         (id, issue) =>
           openIssue(
@@ -117,13 +117,11 @@ async function openIssue(id: string, project: string) {
   );
 }
 
-async function openPreview(issue: DtoIssue, isParent?: boolean) {
+async function openPreview(issue: DtoIssue) {
   if (!route.params.workspace || !(issue.project ?? route.params.project))
     return;
 
-  const id = String(
-    !isParent ? issue.sequence_id : issue.parent_detail?.sequence_id,
-  );
+  const id = String(issue.sequence_id);
   if (isMobile.value) {
     openIssue(
       id,
