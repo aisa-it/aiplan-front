@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import {
   DtoSprint,
+  DtoSprintFolder,
   DtoSprintLight,
   TypesIssuesListFilters,
   TypesViewProps,
@@ -19,6 +20,12 @@ export enum NotUpdated {
   Nav,
 }
 
+export interface MockSprintFolder {
+  id: string;
+  name: string;
+  sprints: string[];
+}
+
 export const useSprintStore = defineStore('sprint-store', {
   state: () => {
     return {
@@ -28,6 +35,7 @@ export const useSprintStore = defineStore('sprint-store', {
       refreshSprintData: false,
       notUpdated: [] as NotUpdated[],
       sprintsList: [] as DtoSprintLight[],
+      sprintFolders: [] as DtoSprintFolder[],
     };
   },
 
@@ -173,7 +181,7 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     async getSprintsList(wsSlug: string) {
-      return this.sprintsList = await getSprints(wsSlug)
-    }
+      return (this.sprintsList = await getSprints(wsSlug));
+    },
   },
 });

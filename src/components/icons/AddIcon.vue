@@ -1,6 +1,6 @@
 <template>
   <svg
-    viewBox="0 0 24 24"
+    :viewBox="viewBox"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     :width="width"
@@ -37,6 +37,11 @@ export default defineComponent({
       required: false,
       default: () => 24,
     },
+    viewBox: {
+      type: String,
+      required: false,
+      default: () => '0 0 24 24'
+    }
   },
 });
 </script>

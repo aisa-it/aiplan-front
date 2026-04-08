@@ -1,9 +1,10 @@
 import {
-  AiplanRequestIssueIdList,
-  AiplanRequestSprint,
-  AiplanRequestUserIdList,
+  DtoRequestIssueIdList,
+  DtoRequestSprint,
+  DtoRequestUserIdList,
+  DtoRequestSprintFolder,
   DtoSprint,
-  DtoSprintLight,
+  DtoSprintFolder,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Sprint } from '@aisa-it/aiplan-api-ts/src/Sprint';
@@ -13,11 +14,8 @@ const api = new (withInterceptors(Sprint))();
 
 export const getSprints = async (
   workspaceSlug: string,
-): Promise<DtoSprintLight[]> => {
-  //FIXME в будущем поправить под логику работы с папками спринтов
-  return api.getSprintList(workspaceSlug).then((res: any) => {
-    return res.data?.flatMap((item: any) => item.sprints || [item]) ?? [];
-  });
+): Promise<DtoSprintFolder[]> => {
+  return api.getSprintList(workspaceSlug).then((res) => res.data);
 };
 
 export const getSprint = async (
@@ -29,15 +27,37 @@ export const getSprint = async (
 
 export const createSprint = async (
   workspaceSlug: string,
-  data: AiplanRequestSprint,
+  data: DtoRequestSprint,
 ): Promise<DtoSprint> => {
   return api.createSprint(workspaceSlug, data).then((res) => res.data);
 };
 
+export const createSprintFolder = async (
+  workspaceSlug: string,
+  data: DtoRequestSprintFolder,
+) => {
+  return api.addSprintFolders(workspaceSlug, data).then((res) => res.data);
+}
+
+export const deleteSprintFolder = async (
+  workspaceSlug: string,
+  sprintFolderId: string,
+) => {
+  return api.deleteSprintFolders(workspaceSlug, sprintFolderId).then((res) => res.data);
+}
+
+export const updateSprintFolder = async (
+  workspaceSlug: string,
+  sprintFolderId: string,
+  data: DtoRequestSprintFolder,
+) => {
+  return api.updateSprintFolders(workspaceSlug, sprintFolderId, data).then((res) => res.data);
+}
+
 export const sprintIssuesUpdate = async (
   workspaceSlug: string,
   sprintId: string,
-  data: AiplanRequestIssueIdList,
+  data: DtoRequestIssueIdList,
 ): Promise<void> => {
   return api
     .sprintIssuesUpdate(workspaceSlug, sprintId, data)
@@ -47,7 +67,7 @@ export const sprintIssuesUpdate = async (
 export const sprintWatchersUpdate = async (
   workspaceSlug: string,
   sprintId: string,
-  data: AiplanRequestUserIdList,
+  data: DtoRequestUserIdList,
 ): Promise<void> => {
   return api
     .sprintWatchersUpdate(workspaceSlug, sprintId, data)
@@ -57,7 +77,7 @@ export const sprintWatchersUpdate = async (
 export const sprintUpdate = async (
   workspaceSlug: string,
   sprintId: string,
-  data: AiplanRequestSprint,
+  data: DtoRequestSprint,
 ) => {
   return api
     .updateSprint(workspaceSlug, sprintId, data)
