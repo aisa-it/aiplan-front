@@ -17,11 +17,14 @@ import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 import axios from 'axios';
 import { NON_VALIDATED_ROUTES } from 'src/constants/constants';
 import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
+import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 
 const aiplan = useAiplanStore();
 const rolesStore = useRolesStore();
 const { setNotificationView } = useNotificationStore();
 const api = aiplan.api;
+const issuesApi = new (withInterceptors(Issues))();
 
 //TODO: придумать лучшее решение, исключив обработку 404
 const shitApi = axios.create({ baseURL: '', withCredentials: true });
@@ -100,6 +103,10 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
   },
 
   actions: {
+    closePreview() {
+      this.isPreview = false;
+      this.currentIssueID = '';
+    },
     async getIssueData(workspaceSlug: string, projectID: string) {
       await api
         .get(
@@ -397,6 +404,28 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
         `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params['workspace']}/projects/${projectId}/issues/${issueId}/sub-issues`,
         data,
       );
+    },
+
+    async getIssueCommentHistory(
+      workspaceSlug: string,
+      projectId: string,
+      issueId: string,
+      commentId: string,
+      offset?: number,
+      limit?: number,
+    ) {
+      return (
+        await issuesApi.getIssueCommentUpdateList(
+          workspaceSlug,
+          projectId,
+          issueId,
+          commentId,
+          {
+            offset: offset,
+            limit: limit,
+          },
+        )
+      ).data;
     },
 
     // ------------- Exact issue activities -------------

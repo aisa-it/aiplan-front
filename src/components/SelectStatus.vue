@@ -21,6 +21,7 @@
     "
     @popup-hide="$emit('popup-hide')"
   >
+    <template v-slot:no-option></template>
     <template v-slot:option="scope">
       <q-item
         clickable
@@ -63,7 +64,7 @@
 <script lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch, onMounted } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -75,6 +76,7 @@ import {
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useIssuesStatesFlowStore } from 'src/stores/issues-states-flow-store';
 
 // utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
@@ -127,6 +129,7 @@ export default defineComponent({
     const workspaceStore = useWorkspaceStore();
     const singleIssueStore = useSingleIssueStore();
     const { setNotificationView } = useNotificationStore();
+    const issuesStatesFlowStore = useIssuesStatesFlowStore();
 
     const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -148,6 +151,27 @@ export default defineComponent({
       for (const n in data) {
         arr = arr.concat(data[n]);
       }
+      // Ограничиваем список переходов по бизнес-процессу (если ручка доступна).
+      // Фолбэк: если ручка недоступна/пусто/ошибка — показываем все статусы.
+      if (props.issueid && currentWorkspaceSlug.value) {
+        try {
+          const available = await issuesStatesFlowStore.getAvailableStates(
+            currentWorkspaceSlug.value,
+            props.projectid,
+            props.issueid,
+          );
+          const allowedIds = new Set(
+            Object.values(available ?? {}).map((s) => s.id),
+          );
+          if (allowedIds.size) {
+            const currentId = (props.status)?.id;
+            arr = arr.filter((s) => allowedIds.has(s.id) || s.id === currentId);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
       states.value = arr;
 
       if (!props.status) {
@@ -172,6 +196,7 @@ export default defineComponent({
       if (!props.issueid) {
         emit('update:status', state);
       } else {
+        if (!currentWorkspaceSlug.value) return;
         await singleIssueStore
           .updateIssueData(
             currentWorkspaceSlug.value,
@@ -182,6 +207,7 @@ export default defineComponent({
             },
           )
           .then(() => {
+            refresh();
             useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
             showNotification('success');
             emit('setStatus', state);
@@ -189,6 +215,12 @@ export default defineComponent({
           });
       }
     };
+
+    onMounted(() => {
+      if (!props.issueid) {
+        refresh();
+      }
+    });
 
     watch(
       () => props.projectid,
@@ -204,9 +236,6 @@ export default defineComponent({
       () => props.status,
       () => (open.value = props.status),
     );
-    onMounted(() => {
-      refresh();
-    });
     return {
       api,
       open,

@@ -2,7 +2,12 @@
   <div class="week-grid__more" ref="root">
     Ещё {{ hiddenCount }}
 
-    <q-menu ref="popap" anchor="bottom left" self="top left">
+    <q-menu
+      ref="popap"
+      anchor="bottom left"
+      self="top left"
+      :persistent="openedItems.size > 0"
+    >
       <div class="overflow-popup">
         <div class="overflow-popup__header">
           <DayHeader :day="day" border-none />
@@ -18,7 +23,12 @@
         </div>
 
         <div class="overflow-popup__list">
-          <EventItem v-for="event in events" :key="event.id" :event="event" />
+          <EventItem
+            v-for="event in events"
+            :key="event.id"
+            :event="event"
+            @is-open="(val) => handleOpen(event.id, val)"
+          />
         </div>
       </div>
     </q-menu>
@@ -38,7 +48,16 @@ defineProps<{
 }>();
 
 const root = ref<HTMLElement>();
+const openedItems = ref(new Set<string>());
 const popap = ref();
+
+function handleOpen(id: string, isOpen: boolean) {
+  if (isOpen) {
+    openedItems.value.add(id);
+  } else {
+    openedItems.value.delete(id);
+  }
+}
 
 defineExpose({
   el: root,
