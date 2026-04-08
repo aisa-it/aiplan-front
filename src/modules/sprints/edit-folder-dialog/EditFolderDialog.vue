@@ -8,120 +8,97 @@
     >
       <q-card-section class="column q-pt-none">
         <h6 class="q-ma-md">Добавить спринт {{ sprint?.name }} к папке:</h6>
-        <div class="folders">
-          <div v-if="!loading && sprintFolders.length > 0">
-            <q-list>
-              <q-item
-                v-for="folder in foldersForRename"
-                :key="folder?.id"
-                clickable
+        <div v-if="!loading && sprintFolders.length > 0">
+          <q-list>
+            <q-item
+              v-for="folder in foldersForRename"
+              :key="folder?.id"
+              clickable
+            >
+              <q-item-section
+                class="no-wrap centered-horisontally"
+                :active="
+                  !!folder?.sprints?.find((item) => item.id === sprint.id)
+                "
               >
-                <q-item-section
-                  class="no-wrap centered-horisontally"
-                  :active="
-                    !!folder?.sprints?.find((item) => item.id === sprint.id)
-                  "
-                >
-                  <q-radio
-                    dense
-                    v-model="selectedFolderId"
-                    :val="folder.id"
-                    :class="{ 'full-w': folderIdForEdit !== folder?.id }"
-                  >
-                    <span
-                      v-if="folderIdForEdit !== folder?.id"
-                      class="full-w centered-horisontally"
-                    >
-                      {{ folder?.name }}
-                    </span>
-                  </q-radio>
-                  <q-input
-                    v-if="folderIdForEdit === folder?.id"
-                    v-model="folder.name"
-                    class="base-textarea full-w"
-                    dense
-                    autogrow
-                    autofocus
-                    hide-bottom-space
-                    :rules="[
-                      (val) =>
-                        (val.trim() && val.trim().length > 0) ||
-                        'Необходимо ввести название',
-                    ]"
-                    @click.stop
-                    @touchstart.stop
-                  >
-                    <template v-slot:append> </template>
-                  </q-input>
-                  <q-btn
-                    flat
-                    dense
-                    @click="
-                      () => {
-                        folderIdForEdit = folder?.id as string;
-                      }
-                    "
-                  >
-                    <EditIcon :width="16" :height="16"></EditIcon>
-                    <HintTooltip>Переименовать папку</HintTooltip>
-                  </q-btn>
-                  <q-btn
-                    flat
-                    dense
-                    :disable="!!folder?.sprints && folder.sprints.length !== 0"
-                    @click="
-                      () => {
-                        folderIdForDelete = folder?.id as string;
-                        openDeleteFolder = true;
-                      }
-                    "
-                  >
-                    <HintTooltip
-                      v-if="!folder?.sprints || folder.sprints.length === 0"
-                      >Удалить папку</HintTooltip
-                    >
-                    <HintTooltip v-else
-                      >Удалить можно только пустую папку</HintTooltip
-                    >
-
-                    <BinIcon color="#DC3E3E" :width="16" :height="16"></BinIcon>
-                  </q-btn>
-                </q-item-section>
-              </q-item>
-              <q-item clickable>
                 <q-radio
                   dense
                   v-model="selectedFolderId"
-                  :val="rootFolderId"
-                  class="full-w"
-                  color="grey-7"
+                  :val="folder.id"
+                  :class="{ 'full-w': folderIdForEdit !== folder?.id }"
                 >
-                  <span class="full-w centered-horisontally"> Без папки </span>
+                  <span
+                    v-if="folderIdForEdit !== folder?.id"
+                    class="full-w centered-horisontally"
+                  >
+                    {{ folder?.name }}
+                  </span>
                 </q-radio>
-              </q-item>
-              <q-item clickable>
+                <q-input
+                  v-if="folderIdForEdit === folder?.id"
+                  v-model="folder.name"
+                  class="base-textarea full-w"
+                  dense
+                  autogrow
+                  autofocus
+                  hide-bottom-space
+                  :rules="[
+                    (val) =>
+                      (val.trim() && val.trim().length > 0) ||
+                      'Необходимо ввести название',
+                  ]"
+                  @click.stop
+                  @touchstart.stop
+                >
+                  <template v-slot:append> </template>
+                </q-input>
                 <q-btn
-                  class="menu-link__settings-btn full-w q-pa-none"
                   flat
                   dense
-                  no-caps
                   @click="
                     () => {
-                      openCreateFolder = true;
+                      folderIdForEdit = folder?.id as string;
                     }
                   "
                 >
-                  <AddIcon
-                    :width="20"
-                    :height="20"
-                    class="q-mr-sm"
-                    :view-box="'2 2 20 20'"
-                  />
-                  <span>Создать папку</span>
+                  <EditIcon :width="16" :height="16"></EditIcon>
+                  <HintTooltip>Переименовать папку</HintTooltip>
                 </q-btn>
-              </q-item>
-            </q-list>
-          </div>
+                <q-btn
+                  flat
+                  dense
+                  :disable="!!folder?.sprints && folder.sprints.length !== 0"
+                  @click="
+                    () => {
+                      folderIdForDelete = folder?.id as string;
+                      openDeleteFolder = true;
+                    }
+                  "
+                >
+                  <HintTooltip
+                    v-if="!folder?.sprints || folder.sprints.length === 0"
+                    >Удалить папку</HintTooltip
+                  >
+                  <HintTooltip v-else
+                    >Удалить можно только пустую папку</HintTooltip
+                  >
+
+                  <BinIcon color="#DC3E3E" :width="16" :height="16"></BinIcon>
+                </q-btn>
+              </q-item-section>
+            </q-item>
+            <q-item clickable>
+              <q-radio
+                dense
+                v-model="selectedFolderId"
+                :val="ROOT_FOLDER_ID"
+                class="full-w"
+                color="grey-7"
+              >
+                <span class="full-w centered-horisontally"> Без папки </span>
+              </q-radio>
+            </q-item>
+          </q-list>
         </div>
         <div
           v-if="loading || (!loading && sprintFolders.length == 0)"
@@ -134,10 +111,30 @@
             :size="2"
             unit="em"
           />
-          <div v-if="!loading && sprintFolders.length == 0" class="self-center">
-            <h6>Нет папок</h6>
-          </div>
         </div>
+        <q-list>
+          <q-item clickable>
+            <q-btn
+              class="menu-link__settings-btn full-w q-pa-none"
+              flat
+              dense
+              no-caps
+              @click="
+                () => {
+                  openCreateFolder = true;
+                }
+              "
+            >
+              <AddIcon
+                :width="20"
+                :height="20"
+                class="q-mr-sm"
+                :view-box="'2 2 20 20'"
+              />
+              <span>Создать папку</span>
+            </q-btn>
+          </q-item>
+        </q-list>
         <CreateFolderDialog
           v-model="openCreateFolder"
           @success="refreshSprints"
@@ -215,10 +212,6 @@ const loading = ref(false);
 
 const sprintFolders = computed(() =>
   sprints.value?.filter((item) => item.id !== ROOT_FOLDER_ID),
-);
-
-const rootFolderId = computed(
-  () => sprints.value?.find((folder) => folder.id === ROOT_FOLDER_ID)?.id,
 );
 
 const foldersForRename = ref<FolderForRename[]>(
