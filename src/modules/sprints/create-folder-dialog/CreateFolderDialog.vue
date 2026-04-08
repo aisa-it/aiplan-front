@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { createSprintFolder } from '../services/api';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
@@ -42,7 +41,6 @@ import CancelButton from 'src/components/buttons/CancelButton.vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { ref } from 'vue';
 
-// const props = defineProps<{ folderName: string }>();
 const emits = defineEmits<{ success: []; error: [] }>();
 
 const { setNotificationView } = useNotificationStore();

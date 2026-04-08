@@ -6,29 +6,31 @@
       :style="{ 'overflow: auto;': !isDesktop }"
       container
     >
-      <q-card-section
-        class="column q-pt-none"
-      >
+      <q-card-section class="column q-pt-none">
         <h6 class="q-ma-md">Добавить спринт {{ sprint?.name }} к папке:</h6>
-        {{ console.log('sprintFolders: ', sprintFolders) }}
         <div class="folders">
-          <div
-            v-if="!loading && sprintFolders.length > 0"
-            >
+          <div v-if="!loading && sprintFolders.length > 0">
             <q-list>
-              <q-item v-for="folder in foldersForRename" :key="folder?.id" clickable>
-                <q-item-section class="no-wrap centered-horisontally"
-                  :active="!!folder?.sprints?.find((item) => item.id === sprint.id)"
+              <q-item
+                v-for="folder in foldersForRename"
+                :key="folder?.id"
+                clickable
+              >
+                <q-item-section
+                  class="no-wrap centered-horisontally"
+                  :active="
+                    !!folder?.sprints?.find((item) => item.id === sprint.id)
+                  "
                 >
                   <q-radio
                     dense
-                    v-model="selectedFolder"
-                    :val="folder"
-                    :class="{'full-w': folderIdForEdit !== folder?.id}"
+                    v-model="selectedFolderId"
+                    :val="folder.id"
+                    :class="{ 'full-w': folderIdForEdit !== folder?.id }"
                   >
                     <span
                       v-if="folderIdForEdit !== folder?.id"
-                      class=" full-w centered-horisontally"
+                      class="full-w centered-horisontally"
                     >
                       {{ folder?.name }}
                     </span>
@@ -43,7 +45,8 @@
                     hide-bottom-space
                     :rules="[
                       (val) =>
-                        (val.trim() && val.trim().length > 0) || 'Необходимо ввести название',
+                        (val.trim() && val.trim().length > 0) ||
+                        'Необходимо ввести название',
                     ]"
                     @click.stop
                     @touchstart.stop
@@ -66,13 +69,20 @@
                     flat
                     dense
                     :disable="!!folder?.sprints && folder.sprints.length !== 0"
-                    @click="() => {
-                      folderIdForDelete = folder?.id as string;
-                      openDeleteFolder = true;
-                    }"
+                    @click="
+                      () => {
+                        folderIdForDelete = folder?.id as string;
+                        openDeleteFolder = true;
+                      }
+                    "
                   >
-                    <HintTooltip v-if="!folder?.sprints || folder.sprints.length === 0">Удалить папку</HintTooltip>
-                    <HintTooltip v-else>Удалить можно только пустую папку</HintTooltip>
+                    <HintTooltip
+                      v-if="!folder?.sprints || folder.sprints.length === 0"
+                      >Удалить папку</HintTooltip
+                    >
+                    <HintTooltip v-else
+                      >Удалить можно только пустую папку</HintTooltip
+                    >
 
                     <BinIcon color="#DC3E3E" :width="16" :height="16"></BinIcon>
                   </q-btn>
@@ -81,16 +91,12 @@
               <q-item clickable>
                 <q-radio
                   dense
-                  v-model="selectedFolder"
-                  :val="rootFolder"
+                  v-model="selectedFolderId"
+                  :val="rootFolderId"
                   class="full-w"
                   color="grey-7"
                 >
-                  <span
-                    class=" full-w centered-horisontally"
-                  >
-                    Без папки
-                  </span>
+                  <span class="full-w centered-horisontally"> Без папки </span>
                 </q-radio>
               </q-item>
               <q-item clickable>
@@ -99,14 +105,18 @@
                   flat
                   dense
                   no-caps
-                  @click="() => { openCreateFolder = true }"
-                  >
+                  @click="
+                    () => {
+                      openCreateFolder = true;
+                    }
+                  "
+                >
                   <AddIcon
                     :width="20"
                     :height="20"
                     class="q-mr-sm"
                     :view-box="'2 2 20 20'"
-                    />
+                  />
                   <span>Создать папку</span>
                 </q-btn>
               </q-item>
@@ -118,7 +128,12 @@
           class="column justify-center"
           style="height: 90%"
         >
-          <DefaultLoader v-if="loading" class="self-center" :size="2" unit="em" />
+          <DefaultLoader
+            v-if="loading"
+            class="self-center"
+            :size="2"
+            unit="em"
+          />
           <div v-if="!loading && sprintFolders.length == 0" class="self-center">
             <h6>Нет папок</h6>
           </div>
@@ -135,7 +150,11 @@
       </q-card-section>
       <q-card-actions align="right">
         <SaveButton v-close-popup style="width: 110px" @click="handleSave" />
-        <CancelButton v-close-popup style="width: 110px" @click="resetFoldersForEdition"/>
+        <CancelButton
+          v-close-popup
+          style="width: 110px"
+          @click="resetFoldersForEdition"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -159,17 +178,16 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import { useSprintStore } from '../stores/sprint-store';
 
 import {
+  DtoRequestSprintFolder,
   DtoSprintFolder,
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { ROOT_FOLDER_ID } from 'src/constants/constants';
-import { sprintUpdate, updateSprintFolder } from 'src/modules/sprints/services/api';
-
-const emits = defineEmits<{
-  updateSprints: [];
-  reopen: [id: string];
-}>();
+import {
+  sprintUpdate,
+  updateSprintFolder,
+} from 'src/modules/sprints/services/api';
 
 const props = defineProps<{
   sprint: DtoSprintLight;
@@ -179,11 +197,8 @@ const q = useQuasar();
 
 const isDesktop = computed(() => q.platform.is?.desktop);
 
-interface FolderForRename {
-  id: string;
-  name: string;
-  oldName: string;
-  sprints: DtoSprintLight[];
+interface FolderForRename extends DtoSprintFolder {
+  oldName?: string;
 }
 
 const openCreateFolder = ref(false);
@@ -199,26 +214,29 @@ const sprints = ref([] as DtoSprintFolder[]);
 const loading = ref(false);
 
 const sprintFolders = computed(() =>
-  sprints.value?.filter((item) => item.id !== ROOT_FOLDER_ID)
-  // sprints.value
+  sprints.value?.filter((item) => item.id !== ROOT_FOLDER_ID),
 );
 
-const rootFolder = computed(() =>
-  sprints.value?.find((folder) => folder.id === ROOT_FOLDER_ID)
+const rootFolderId = computed(
+  () => sprints.value?.find((folder) => folder.id === ROOT_FOLDER_ID)?.id,
 );
 
-const foldersForRename = ref<FolderForRename[]>(sprintFolders.value.map((folder) => ({
-  id: folder.id as string,
-  name: folder.name as string,
-  oldName: folder.name as string,
-  sprints: folder.sprints || [],
-})));
+const foldersForRename = ref<FolderForRename[]>(
+  sprintFolders.value.map((folder) => ({
+    id: folder.id as string,
+    name: folder.name as string,
+    oldName: folder.name as string,
+    sprints: folder.sprints || [],
+  })),
+);
 
-const defaultFolder = computed(() => {
-  return sprints.value.find((folder) => folder.sprints?.some((sprint) => sprint.id === props.sprint?.id));
+const defaultFolderId = computed(() => {
+  return sprints.value.find((folder) =>
+    folder.sprints?.some((sprint) => sprint.id === props.sprint?.id),
+  )?.id;
 });
 
-const selectedFolder = ref<DtoSprintFolder | undefined>(defaultFolder.value);
+const selectedFolderId = ref<string | undefined>(defaultFolderId.value);
 
 const handleClose = () => {
   folderIdForEdit.value = '';
@@ -234,8 +252,8 @@ const showNotification = (type: 'success' | 'error', msg?: string) => {
 };
 
 const resetFoldersForEdition = () => {
-  if (selectedFolder.value) {
-    selectedFolder.value = defaultFolder.value;
+  if (selectedFolderId.value) {
+    selectedFolderId.value = defaultFolderId.value;
   }
   if (folderIdForEdit.value) {
     folderIdForEdit.value = '';
@@ -243,7 +261,7 @@ const resetFoldersForEdition = () => {
   if (folderIdForDelete.value) {
     folderIdForDelete.value = '';
   }
-}
+};
 
 const successDeleteHandle = async () => {
   resetFoldersForEdition();
@@ -255,12 +273,11 @@ const refreshSprints = async () => {
   sprints.value = await sprintStore.getSprintsList(
     workspaceStore.currentWorkspaceSlug as string,
   );
-  console.log('sprints.value: ', sprints.value)
 };
 
 const transferSprintHandle = async (newFolderId: string) => {
   const data = {
-    "sprint_folder_id": newFolderId,
+    sprint_folder_id: newFolderId,
   };
 
   try {
@@ -276,55 +293,53 @@ const transferSprintHandle = async (newFolderId: string) => {
   showNotification('success', 'Спринт добавлен в папку');
 };
 
-// TODO: Ждёт aiplan-api-ts
 const renameFolderHandle = async (folder: FolderForRename) => {
-    if (folder.name !== folder.oldName) {
-      console.log('oldName: ', folder.oldName);
-      console.log('newName: ', folder.name);
-      const data = {
-        name: folder.name,
-      };
-      try {
-        await updateSprintFolder(
-          workspaceStore.currentWorkspaceSlug || '',
-          folder.id,
-          data,
-        )
-      } catch {
-        showNotification('error', 'Ошибка переименования папки');
-        return;
-      }
-      showNotification('success', 'Папка создана');
-      resetFoldersForEdition();
-      await refreshSprints();
+  if (folder.name !== folder.oldName) {
+    const data: DtoRequestSprintFolder = {
+      name: folder.name,
+    };
+    try {
+      await updateSprintFolder(
+        workspaceStore.currentWorkspaceSlug || '',
+        folder.id as string,
+        data,
+      );
+    } catch {
+      showNotification('error', 'Ошибка переименования папки');
+      return;
     }
-  };
+    const successMessage = `Имя папки "${folder.oldName}" изменено на "${folder.name}"`;
+    showNotification('success', successMessage);
+    resetFoldersForEdition();
+    await refreshSprints();
+  }
+};
 
 const handleSave = async () => {
   // Перемещение в/из папки
-  if (selectedFolder.value !== defaultFolder.value) {
-    await transferSprintHandle(selectedFolder.value?.id as string);
-    selectedFolder.value = defaultFolder.value;
+  if (selectedFolderId.value !== defaultFolderId.value) {
+    await transferSprintHandle(selectedFolderId.value as string);
+    selectedFolderId.value = defaultFolderId.value;
   }
 
   // Переименование
-  foldersForRename.value.forEach((folder) => renameFolderHandle(folder))
+  foldersForRename.value.forEach((folder) => renameFolderHandle(folder));
 
   if (folderIdForEdit.value) {
     folderIdForEdit.value = '';
   }
-}
+};
 
 onMounted(async () => {
   if (!workspaceStore.currentWorkspaceSlug) return;
   refreshSprints();
-})
+});
 
 watch(
   () => sprintStore.sprintsList,
   () => {
     sprints.value = sprintStore.sprintsList;
-  }
+  },
 );
 
 watch(
@@ -344,31 +359,31 @@ watch(
   },
 );
 
-watch (
-  () => defaultFolder.value,
-  () => selectedFolder.value = defaultFolder.value,
-)
-
-watch (
-  () => sprintFolders.value,
-  () => foldersForRename.value = sprintFolders.value.map((folder) => ({
-  id: folder.id as string,
-  name: folder.name as string,
-  oldName: folder.name as string,
-  sprints: folder.sprints || [],
-}))
+watch(
+  () => defaultFolderId.value,
+  () => (selectedFolderId.value = defaultFolderId.value),
 );
 
+watch(
+  () => sprintFolders.value,
+  () =>
+    (foldersForRename.value = sprintFolders.value.map((folder) => ({
+      id: folder.id as string,
+      name: folder.name as string,
+      oldName: folder.name as string,
+      sprints: folder.sprints || [],
+    }))),
+);
 </script>
 
 <style scoped lang="scss">
-  :deep(.q-radio--dense .q-radio__label) {
-    padding-left: 8px;
-  }
+:deep(.q-radio--dense .q-radio__label) {
+  padding-left: 8px;
+}
 
-  :deep(.q-card__section--vert) {
-    padding-left: 0;
-    padding-top: 0;
-    padding-right: 0;
-  }
+:deep(.q-card__section--vert) {
+  padding-left: 0;
+  padding-top: 0;
+  padding-right: 0;
+}
 </style>
