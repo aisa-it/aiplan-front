@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { useAiplanStore } from './aiplan-store';
 import { getStatesList } from 'src/utils/helpers';
-import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
+import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
+import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 
+const statesApi = new (withInterceptors(Projects))();
 const aiplan = useAiplanStore();
-const api = aiplan.api;
 
 export const useStatesStore = defineStore('states', {
   state: () => {
@@ -35,9 +36,7 @@ export const useStatesStore = defineStore('states', {
       );
     },
     async getStatesByProject(workspaceSLug: string, projectID: string) {
-      return api.get(
-        `${API_WORKSPACES_PREFIX}/${workspaceSLug}/projects/${projectID}/states/`,
-      );
+      return statesApi.getStateList(workspaceSLug,projectID)
     },
     setDraggingState(state: string) {
       this.draggingState = state
