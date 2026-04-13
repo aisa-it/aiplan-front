@@ -103,7 +103,7 @@ async function nextTickCalculate() {
 function calculate() {
   if (!containerRef.value) return;
 
-  const containerHeight = containerRef.value.clientHeight;
+  const containerHeight = containerRef.value.clientHeight - 0.5;
   const moreHeight = moreRef.value?.offsetHeight ?? 0;
 
   if (!containerHeight) return;
@@ -118,7 +118,7 @@ function calculate() {
 
     const h = el.offsetHeight;
 
-    if (usedHeight + h + gap + moreHeight > containerHeight) break;
+    if (usedHeight + h + 2 * gap + moreHeight > containerHeight) break;
 
     usedHeight += h + gap;
     count++;
