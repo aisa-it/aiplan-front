@@ -327,7 +327,9 @@ async function onRequest(p: any) {
       pagination.value.descending = descending;
       rows.value = res?.result || [];
       loading.value = false;
-      usersCount.value = res?.count;
+      if (!searchQuery.value) {
+        usersCount.value = res?.count;
+      }
     });
 }
 
