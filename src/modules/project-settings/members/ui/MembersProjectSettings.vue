@@ -3,7 +3,7 @@
   <div v-else>
     <q-table
       flat
-      class="q-my-md q-px-none table-bottom-reverse"
+      class="q-my-xs q-px-none table-bottom-reverse"
       :columns="columns"
       :rows="rows"
       row-key="user"
@@ -24,6 +24,7 @@
       </template>
 
       <template v-slot:top>
+        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">Пользователей в проекте:  {{ usersCount }}</p>
         <div class="flex q-table__title q-mr-sm">Пользователи</div>
         <q-input
           label="Поиск"
@@ -224,6 +225,7 @@ const isLeaveProject = ref(false);
 const isInviteOpen = ref(false);
 const isDeleteOpen = ref(false);
 const searchQuery = ref<string>();
+const usersCount = ref<number | undefined>(0);
 const canLeaveProject = computed(
   () =>
     user.value?.is_superuser &&
@@ -327,6 +329,7 @@ async function onRequest(p: { pagination: IQuasarPaginationValues }) {
         pagination.value.descending = descending;
         rows.value = res.result;
         loading.value = false;
+        usersCount.value = res?.count;
       }
     });
 }

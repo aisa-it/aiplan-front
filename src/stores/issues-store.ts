@@ -8,7 +8,10 @@ import {
 
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
-import { DtoIssueSearchResult, TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssueSearchResult,
+  TypesIssuesListFilters,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const issuesApi = new (withInterceptors(Issues))();
 
@@ -151,41 +154,39 @@ export const useIssuesStore = defineStore('issues-store', {
       } catch {}
     },
 
-    async fetchPinnedIssues(projectID: string, query?: IQuery): Promise<DtoIssueSearchResult> {
+    async fetchPinnedIssues(
+      projectID: string,
+      query?: IQuery,
+    ): Promise<DtoIssueSearchResult> {
       const response = await this.getIssueList(
         { projects: [projectID] },
         { ...query, only_pinned: true },
       );
-      return response.data
+      return response.data;
     },
 
     async pinIssue(
       issue: any,
       workspaceSlug: string,
       projectIdentifier: string,
-      projectID: string,
     ): Promise<void> {
-      await api.post(
+      return await api.post(
         `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/pin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
-      await this.fetchPinnedIssues(projectID);
     },
 
     async unpinIssue(
       issue: any,
       workspaceSlug: string,
       projectIdentifier: string,
-      projectID: string,
     ): Promise<void> {
-      await api.post(
+      return await api.post(
         `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/unpin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
-
-      await this.fetchPinnedIssues(projectID);
     },
   },
 });
