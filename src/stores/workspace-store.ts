@@ -1,6 +1,5 @@
-import { defineStore, storeToRefs } from 'pinia';
+import { defineStore } from 'pinia';
 import { useRolesStore } from './roles-store';
-import { useUserStore } from './user-store';
 import {
   AiplanCreateWorkspaceRequest,
   DaoPaginationResponse,
@@ -8,6 +7,7 @@ import {
   DtoStateLight,
   DtoWorkspace,
   DtoWorkspaceMember,
+  DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
@@ -20,9 +20,6 @@ import {
   RequestParams,
 } from '@aisa-it/aiplan-api-ts/src/http-client';
 
-const rolesStore = useRolesStore();
-const userStore = useUserStore();
-const { userWorkspaces } = storeToRefs(userStore);
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
 
@@ -31,6 +28,7 @@ const api = new HttpClient();
 interface RootStore {
   currentWorkspaceSlug: string | null;
   workspaceInfo?: DtoWorkspace;
+  meInWorkspace: DtoWorkspaceMemberWithOwner;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
   workspaceUsers: DtoWorkspaceMember[];
@@ -49,6 +47,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       foundUsers: [],
       allWorkspaceStates: undefined,
       stopRefresh: false,
+      meInWorkspace: {} as DtoWorkspaceMemberWithOwner,
     };
   },
 
@@ -61,21 +60,20 @@ export const useWorkspaceStore = defineStore('workspace-store', {
 
       return workspaceApi
         .getWorkspace(workspaceSlug)
-        .then((res) => {
+        .then(async (res) => {
+          const rolesStore = useRolesStore();
           this.workspaceInfo = res.data;
 
-          // вычисление роли - лучше не трогать
-          //TODO: убрать и добавить членство юзера в запрос выше
-          userStore.getUserWorkspaces().then(() => {
-            const ws = userWorkspaces.value.find(
-              (elem) => elem.slug === res.data.slug,
-            );
-            rolesStore.defineWorkspaceRole(ws);
-          });
+          await this.getMeInWorkspace(workspaceSlug);
+
+          rolesStore.defineWorkspaceRole(this.meInWorkspace);
 
           // Проверяем есть ли доступ к рабочему пространству
           if (
-            !rolesStore.hasPermissionByWorkspace(res.data, 'show-ws') &&
+            !rolesStore.hasPermissionByWorkspace(
+              this.workspaceInfo,
+              'show-ws',
+            ) &&
             !isInAdminPanel
           ) {
             window.location.href = '/access-denied';
@@ -223,12 +221,15 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         .then((res) => res.data);
     },
 
-    async getWorkspaceNotifications(
+    async getMeInWorkspace(
       workspaceSlug: string,
-    ): Promise<DtoWorkspaceMember | void> {
+    ): Promise<DtoWorkspaceMemberWithOwner | void> {
       if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-      return (await workspaceApi.getWorkspaceMemberMe(workspaceSlug)).data;
+      const res =
+        await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
+
+      return (this.meInWorkspace = res.data);
     },
 
     async setAiDocNotificationSettings(

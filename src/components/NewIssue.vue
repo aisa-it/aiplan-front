@@ -23,8 +23,14 @@
       @on-project-created="isProjectCreateOpen = true"
       @update="refreshIssues = true"
     />
-    <NewProjectDialog v-if="!isMobile && isProjectCreateOpen" v-model="isProjectCreateOpen" />
-    <CreateDocPageDialog v-if="!isMobile && isDocCreateOpen" v-model="isDocCreateOpen" />
+    <NewProjectDialog
+      v-if="!isMobile && isProjectCreateOpen"
+      v-model="isProjectCreateOpen"
+    />
+    <CreateDocPageDialog
+      v-if="!isMobile && isDocCreateOpen"
+      v-model="isDocCreateOpen"
+    />
   </template>
   <template v-else>
     <NewIssueDialog
@@ -34,8 +40,16 @@
       @update="refreshIssues = true"
       @hide="closeDialog"
     />
-    <NewProjectDialog v-if="isProjectCreateOpen" v-model="isProjectCreateOpen" @hide="emit('closeDialog')" />
-    <CreateDocPageDialog v-if="isDocCreateOpen" v-model="isDocCreateOpen" @hide="closeDialog" />
+    <NewProjectDialog
+      v-if="isProjectCreateOpen"
+      v-model="isProjectCreateOpen"
+      @hide="emit('closeDialog')"
+    />
+    <CreateDocPageDialog
+      v-if="isDocCreateOpen"
+      v-model="isDocCreateOpen"
+      @hide="closeDialog"
+    />
   </template>
 </template>
 
@@ -48,6 +62,7 @@ import { useRoute } from 'vue-router';
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 import { useGuiderStore } from 'src/modules/guided-tours/guider-store';
 // components
 import AddIcon from 'src/components/icons/AddIcon.vue';
@@ -61,10 +76,11 @@ const route = useRoute();
 // stores
 const issuesStore = useIssuesStore();
 const workspaceStore = useWorkspaceStore();
+const { getWsRole, getProjectRole } = useRolesStore();
 
 // refs from stores
 const { refreshIssues } = storeToRefs(issuesStore);
-const { workspaceProjects, workspaceInfo } = storeToRefs(workspaceStore);
+const { workspaceProjects, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { activeGuid } = storeToRefs(useGuiderStore());
 
 // local state
@@ -85,17 +101,13 @@ const isMobile = toRef(props.isMobile);
 // computed
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 
-const currentWorkspaceRole = computed(
-  () => workspaceInfo.value?.current_user_membership?.role,
-);
-
 const isDisabled = computed(() => {
   return (
-    (isAIDoc.value && currentWorkspaceRole.value < 10) ||
+    (isAIDoc.value && getWsRole(currentWorkspaceSlug?.value ?? '') < 10) ||
     (!isAIDoc.value &&
       (workspaceProjects.value.length === 0 ||
         !workspaceProjects.value.find(
-          (project) => project?.current_user_membership?.role > 5,
+          (project) => getProjectRole(project.id ?? '') > 5,
         )))
   );
 });
@@ -113,26 +125,32 @@ const closeDialog = () => {
   emit('closeDialog');
 };
 
-watch(() => props.showDialog, () => {
-  if (props.showDialog) {
-    addIssue();
-  }
-});
+watch(
+  () => props.showDialog,
+  () => {
+    if (props.showDialog) {
+      addIssue();
+    }
+  },
+);
 
-watch(() => isDisabled.value, () => {
-  emit('setDisable', isDisabled.value)
-})
+watch(
+  () => isDisabled.value,
+  () => {
+    emit('setDisable', isDisabled.value);
+  },
+);
 
 onMounted(() => {
-  emit('setDisable', isDisabled.value)
-})
+  emit('setDisable', isDisabled.value);
+});
 </script>
 
 <style scoped lang="scss">
-  .mobile-btn {
-    min-width: 30px;
-    min-height: 30px;
-    padding: 0 !important;
-    margin-left: 2px;
-  }
+.mobile-btn {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0 !important;
+  margin-left: 2px;
+}
 </style>

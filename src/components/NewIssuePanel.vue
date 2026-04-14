@@ -196,8 +196,8 @@
               :model-value="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -378,7 +378,7 @@ const issuesStore = useIssuesStore();
 const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
@@ -398,7 +398,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -434,10 +436,11 @@ const loading = computed({
 const refresh = async () => {
   loading.value = true;
   await workspaceStore
-    .getWorkspaceProjects(currentWorkspaceSlug.value)
+    .getWorkspaceProjects(currentWorkspaceSlug.value as string)
     .then((d) => {
+      if (!d) return;
       projects.value = d.filter(
-        (project) => project?.current_user_membership?.role > 5,
+        (project) => getProjectRole(project.id ?? '') > 5,
       );
       if (project.value == null) {
         if (route.params?.project || props.project_detail?.id) {
@@ -637,7 +640,7 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {

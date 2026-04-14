@@ -155,10 +155,7 @@
         </transition>
       </q-card-section>
       <q-card-actions class="notification-btns" align="right">
-        <q-btn
-          no-caps
-          class="secondary-btn notification-btn"
-          v-close-popup
+        <q-btn no-caps class="secondary-btn notification-btn" v-close-popup
           >Отмена</q-btn
         >
         <q-btn
@@ -267,50 +264,50 @@ const loadSettings = async () => {
 const getProjectUser = async () => {
   if (!props.project?.id) return;
   await projectStore
-    .getMeInProject(currentWorkspaceSlug.value, props.project?.id)
+    .getMeInProject(currentWorkspaceSlug.value as string, props.project?.id)
     .then((data) => {
       settings.value.notification_author_settings_email = {
-        ...data.notification_author_settings_email,
+        ...data?.notification_author_settings_email,
       };
       settings.value.notification_author_settings_tg = {
-        ...data.notification_author_settings_tg,
+        ...data?.notification_author_settings_tg,
       };
       settings.value.notification_settings_email = {
-        ...data.notification_settings_email,
+        ...data?.notification_settings_email,
       };
       settings.value.notification_settings_tg = {
-        ...data.notification_settings_tg,
+        ...data?.notification_settings_tg,
       };
       settings.value.notification_settings_app = {
-        ...data.notification_settings_app,
+        ...data?.notification_settings_app,
       };
       settings.value.notification_author_settings_app = {
-        ...data.notification_author_settings_app,
+        ...data?.notification_author_settings_app,
       };
     });
 };
 
 const getAidocNotificationsSettings = async (): Promise<void> => {
   await workspaceStore
-    .getWorkspaceNotifications(currentWorkspaceSlug.value)
+    .getMeInWorkspace(currentWorkspaceSlug.value as string)
     .then((data) => {
       aidocSettings.value.notification_author_settings_email = {
-        ...data.notification_author_settings_email,
+        ...data?.notification_author_settings_email,
       };
       aidocSettings.value.notification_author_settings_tg = {
-        ...data.notification_author_settings_tg,
+        ...data?.notification_author_settings_tg,
       };
       aidocSettings.value.notification_author_settings_app = {
-        ...data.notification_author_settings_app,
+        ...data?.notification_author_settings_app,
       };
       aidocSettings.value.notification_settings_email = {
-        ...data.notification_settings_email,
+        ...data?.notification_settings_email,
       };
       aidocSettings.value.notification_settings_tg = {
-        ...data.notification_settings_tg,
+        ...data?.notification_settings_tg,
       };
       aidocSettings.value.notification_settings_app = {
-        ...data.notification_settings_app,
+        ...data?.notification_settings_app,
       };
     });
 };
@@ -319,7 +316,7 @@ const handleSaveSettings = async () => {
   if (props.project) {
     await projectStore
       .setProjectNotificationSettings(
-        currentWorkspaceSlug.value,
+        currentWorkspaceSlug.value as string,
         props.project.id,
         settings.value,
       )
@@ -333,7 +330,7 @@ const handleSaveSettings = async () => {
   } else {
     await workspaceStore
       .setAiDocNotificationSettings(
-        currentWorkspaceSlug.value,
+        currentWorkspaceSlug.value as string,
         aidocSettings.value,
       )
       .then(() => {

@@ -52,13 +52,7 @@
           }"
         />
         <div
-          v-if="
-            hasPermissionByIssue(
-              issueData,
-              issueData.project_detail ?? project,
-              'add-comment',
-            )
-          "
+          v-if="hasPermissionByIssue(issueData, 'add-comment')"
           class="q-my-sm"
         >
           <q-btn
@@ -249,7 +243,6 @@ const aidocStore = useAiDocStore();
 // store to refs
 const { user } = storeToRefs(userStore);
 const { hasPermission } = useRolesStore();
-const { project } = storeToRefs(projectStore);
 const { currentProjectID, projectMembers } = storeToRefs(projectStore);
 const { issueCommentsData, issueData, currentIssueID } =
   storeToRefs(singleIssueStore);

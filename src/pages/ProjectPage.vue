@@ -20,12 +20,10 @@ import { onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useIssuesStore } from 'src/stores/issues-store';
-import { useViewPropsStore } from 'src/stores/view-props-store';
 
 const router = useRouter();
 const projectStore = useProjectStore();
 const issuesStore = useIssuesStore();
-const viewProps = useViewPropsStore();
 const { currentProjectID, isLoadProjectInfo } = storeToRefs(projectStore);
 
 const getCurrentProject = async () => {
@@ -40,7 +38,6 @@ const getCurrentProject = async () => {
     router.currentRoute.value.params.workspace as string,
     router.currentRoute.value.params.project as string,
   );
-  await viewProps.getProjectProps();
   isLoadProjectInfo.value = false;
 };
 
@@ -49,7 +46,6 @@ onMounted(async () => await getCurrentProject());
 watch(
   () => router.currentRoute.value.params.project,
   () => {
-    viewProps.$reset();
     issuesStore.$reset();
     projectStore.$reset();
   },

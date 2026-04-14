@@ -142,20 +142,8 @@
         v-model="showTagsDialog"
         :tags="issueData.label_details"
         :project-id="issueData.project"
-        :isDisabled="
-          !hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
-        :can-create-tags="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'create-tag',
-          )
-        "
+        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary')"
+        :can-create-tags="hasPermissionByIssue(issueData, 'create-tag')"
         @close="showTagsDialog = !showTagsDialog"
         @refresh="refresh"
       />
@@ -414,11 +402,7 @@ const hideSettings = computed(() => {
 });
 
 const isAdminOrAuthor = computed(() => {
-  return hasPermissionByIssue(
-    issueData.value,
-    issueData.value.project_detail ?? project.value,
-    'change-issue-primary',
-  );
+  return hasPermissionByIssue(issueData.value, 'change-issue-primary');
 });
 
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);

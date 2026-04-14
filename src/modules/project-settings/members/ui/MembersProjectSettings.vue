@@ -24,7 +24,9 @@
       </template>
 
       <template v-slot:top>
-        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">Пользователей в проекте:  {{ usersCount }}</p>
+        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">
+          Пользователей в проекте: {{ usersCount }}
+        </p>
         <div class="flex q-table__title q-mr-sm">Пользователи</div>
         <q-input
           label="Поиск"
@@ -39,7 +41,7 @@
         </q-input>
         <q-space />
         <q-btn
-          v-if="canLeaveProject"
+          v-if="user.is_superuser"
           no-caps
           class="delete-btn q-mr-sm"
           @click="isLeaveProject = true"
@@ -157,7 +159,7 @@
 // core
 import { useMeta, debounce } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -226,12 +228,6 @@ const isInviteOpen = ref(false);
 const isDeleteOpen = ref(false);
 const searchQuery = ref<string>();
 const usersCount = ref<number | undefined>(0);
-const canLeaveProject = computed(
-  () =>
-    user.value?.is_superuser &&
-    project.value?.current_user_membership?.member_id === user.value.id &&
-    project.value?.current_user_membership?.id,
-);
 
 const columns = [
   {

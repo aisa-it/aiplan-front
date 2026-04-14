@@ -49,11 +49,7 @@
         :priority="card?.priority ?? 'Нет'"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         @refresh="
           () => {
@@ -71,11 +67,7 @@
         :date="card?.target_date"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         @refresh="emits('updateTable', 'targetDate', card, entity)"
       />
@@ -91,11 +83,7 @@
         :issue="card"
         :states-from-cache="statesCache[card.project]"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-status',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-status')
         "
         @refresh="
           (status) => {
@@ -152,11 +140,7 @@
         :issueid="card.id"
         :current-sprints="card.sprints ?? []"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         class="selectors__single-selector"
         @refresh="

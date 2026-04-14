@@ -273,33 +273,6 @@ export const useAiplanStore = defineStore('aiplan', {
       );
     },
 
-    // ------------- Me in project -------------
-    async projectMemberMe() {
-      if (!this.router.currentRoute.value.params['project']) return;
-      return api
-        .get(
-          `${API_WORKSPACES_PREFIX}/${this.router.currentRoute.value.params['workspace']}/projects/${this.router.currentRoute.value.params['project']}/project-members/me/`,
-        )
-        .then((response) => response?.data)
-        .catch((error) => {
-          throw error?.response;
-        });
-    },
-
-    async getMyProjectViewProps() {
-      return this.projectMemberMe()
-        .then((res) => {
-          return res?.view_props;
-        })
-        .catch((error) => {
-          throw error;
-        });
-    },
-
-    async setMyViewProps(props: IProjectView) {
-      return api.post(`${API_USERS_ME_PREFIX}/view-props/`, props);
-    },
-
     // ------------- Project labels -------------
     async getProjectLabels(): Promise<IIssueLabel[]> {
       if (

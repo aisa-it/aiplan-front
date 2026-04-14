@@ -6,11 +6,7 @@
         v-model:is-expanded="isExpanded"
         :linked-issues-count="linkedIssues.length"
         :has-permission-by-issue="
-          hasPermissionByIssue(
-            issueData,
-            props.project_detail ?? project,
-            'add-linked-issue',
-          )
+          hasPermissionByIssue(issueData, 'add-linked-issue')
         "
       />
     </template>
@@ -18,11 +14,7 @@
       :project_detail="props.project_detail"
       v-model:linked-issues="linkedIssues"
       :has-permission-by-issue="
-        hasPermissionByIssue(
-          issueData,
-          props.project_detail ?? project,
-          'add-linked-issue',
-        )
+        hasPermissionByIssue(issueData, 'add-linked-issue')
       "
       @remove-issue="removeIssue"
     />
@@ -41,7 +33,7 @@
       </h6>
 
       <q-btn
-        v-if="hasPermissionByIssue(issueData, project, 'add-linked-issue')"
+        v-if="hasPermissionByIssue(issueData, 'add-linked-issue')"
         no-caps
         class="btn-only-icon-sm q-ml-sm"
         @click="() => (isOpenAdditionLinkedIssue = true)"
