@@ -154,9 +154,11 @@ const menuProps = computed(() => {
   return isControlled.value ? {} : { 'context-menu': true };
 });
 
+const issuesStore = useIssuesStore();
 const { sprintsList } = storeToRefs(useSprintStore());
 const { project } = storeToRefs(useProjectStore());
-const { pinIssue, unpinIssue } = useIssuesStore();
+const { pinIssue, unpinIssue } = issuesStore;
+const { refreshIssues } = storeToRefs(issuesStore);
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
@@ -206,6 +208,8 @@ const pinAndUnpinIssue = async (func: () => Promise<void>) => {
   try {
     await func();
     if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
+    refreshIssues.value = true;
+    emit('refresh');
   } catch {}
 };
 
