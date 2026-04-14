@@ -34,6 +34,7 @@
         :class-prevent="classPrevent"
         :isMobile="isMobile"
       />
+      <EditorTableIssueButton :editor-instance="editorInstance" @create-issue-table="$emit('create-issue-table')"/>
     </div>
   </transition>
 </template>
@@ -47,6 +48,7 @@ import { computed } from 'vue';
 import { ICONS } from 'src/utils/icons';
 import EditorSelectTable from './EditorSelectTable.vue';
 import EditorTableFillButton from './EditorTableFillButton.vue';
+import EditorTableIssueButton from './EditorTableIssueButton.vue';
 
 const props = defineProps<{
   editorInstance: Editor;
@@ -54,6 +56,8 @@ const props = defineProps<{
   classPrevent?: string;
   isMobile?: boolean;
 }>();
+
+const emit = defineEmits(['create-issue-table']);
 
 const operationMenuTable = computed(() => {
   return {

@@ -314,6 +314,7 @@
         :isMobile="isMobile"
         class="html-editor__toolbar-secondary"
         :class-prevent="classPrevent"
+        @create-issue-table="$emit('create-issue-table')"
       />
     </div>
   </div>
@@ -380,6 +381,7 @@ const emits = defineEmits([
   'enableEditing',
   'toggleFormatSample',
   'toggle-fullscreen',
+  'create-issue-table',
 ]);
 
 //hooks

@@ -1,10 +1,10 @@
 import StarterKit from '@tiptap/starter-kit';
-import {Table} from '@tiptap/extension-table';
+import { Table, TableView } from '@tiptap/extension-table';
 import { Color } from '@tiptap/extension-color';
 import TableRow from '@tiptap/extension-table-row';
 import TaskList from '@tiptap/extension-task-list';
 import TableCell from '@tiptap/extension-table-cell';
-import {TextStyle} from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import { FontSize } from 'tiptap-extension-font-size';
 import FontFamily from '@tiptap/extension-font-family';
@@ -39,7 +39,31 @@ import { CommentLinkMention } from 'src/utils/commentLinkEditor';
 import { IssueLinkMention } from 'src/utils/issueLinkEditor';
 import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 import { TableOfContentsCustom } from 'src/utils/tableOfContents';
+import { NonEditableCellPlugin } from './nonEditableTableCell';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
+
+class CustomTableView extends TableView {
+  constructor(node: Node, cellMinWidth: number) {
+    super(node, cellMinWidth);
+    this.applyAttributes();
+  }
+
+  applyAttributes() {
+    Object.entries(this.node.attrs).forEach(([key, value]) => {
+      if (value != null) {
+        this.table.setAttribute(key, String(value));
+      } else {
+        this.table.removeAttribute(key);
+      }
+    });
+  }
+
+  update(node: Node) {
+    super.update(node);
+    this.applyAttributes();
+    return true;
+  }
+}
 
 export const getEditorExtensions = (props) => {
   const { mention } = useMention(props.getMembersForMention);
@@ -69,6 +93,36 @@ export const getEditorExtensions = (props) => {
     Table.configure({
       resizable: true,
       cellMinWidth: 25,
+    }).extend({
+      addOptions() {
+        return {
+          ...this.parent?.(),
+          View: CustomTableView,
+        };
+      },
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          class: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('class'),
+            renderHTML: (attributes) => {
+              return { class: attributes.class };
+            },
+          },
+          'data-issue-table-params': {
+            default: null,
+            parseHTML: (element) =>
+              element.getAttribute('data-issue-table-params'),
+            renderHTML: (attributes) => {
+              return {
+                'data-issue-table-params':
+                  attributes['data-issue-table-params'],
+              };
+            },
+          },
+        };
+      },
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],
@@ -106,6 +160,16 @@ export const getEditorExtensions = (props) => {
               };
             },
           },
+          editable: {
+            default: true,
+            parseHTML: (element) =>
+              element.getAttribute('contenteditable') !== 'false',
+            renderHTML: (attributes) => {
+              return {
+                contenteditable: attributes.editable ? null : 'false',
+              };
+            },
+          },
         };
       },
     }),
@@ -132,6 +196,16 @@ export const getEditorExtensions = (props) => {
               if (!attributes.backgroundColor) return {};
               return {
                 style: `background-color: ${attributes.backgroundColor} !important;`,
+              };
+            },
+          },
+          editable: {
+            default: true,
+            parseHTML: (element) =>
+              element.getAttribute('contenteditable') !== 'false',
+            renderHTML: (attributes) => {
+              return {
+                contenteditable: attributes.editable ? null : 'false',
               };
             },
           },
@@ -178,10 +252,10 @@ export const getEditorExtensions = (props) => {
         allowBase64: true,
       }),
     );
-  } 
+  }
   // else {
-    // TODO: расширение блокировало вставку текста с переносами, потом разобраться
-    // extensions.push(DisableImagesExtension);
+  // TODO: расширение блокировало вставку текста с переносами, потом разобраться
+  // extensions.push(DisableImagesExtension);
   // }
 
   if (props.showHeadings) {
@@ -195,6 +269,8 @@ export const getEditorExtensions = (props) => {
       TableOfContentsCustom,
     );
   }
+
+  extensions.push(NonEditableCellPlugin);
 
   return extensions;
 };

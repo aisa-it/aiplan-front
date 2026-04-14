@@ -15,7 +15,7 @@
         v-if="currentFilter"
         no-caps
         class="secondary-btn full-w"
-        @click="
+        @click.stop="
           () => {
             currentFilter = null;
             emits('update-filter', {});
@@ -105,6 +105,7 @@
   <AddFilterDialog
     v-model="isOpenAddingFilter"
     :current-filter="filterToEdit"
+    :single-workspace="singleWorkspace"
     @save-temp-filter="
       (filter) => {
         emits('update-filter', filter?.filter);
@@ -163,6 +164,10 @@ import ConfirmDeleteFilterDialog from 'src/modules/search-issues/filter-list/ui/
 //services
 import { getMyFilters, getFilterById } from '../../services/api';
 
+const props = defineProps<{
+  singleWorkspace? : boolean;
+}>()
+
 const emits = defineEmits<{
   'update-filter': [value?: TypesIssuesListFilters];
 }>();
@@ -201,7 +206,6 @@ onMounted(async () => {
 <style scoped lang="scss">
 .filters {
   position: relative;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }

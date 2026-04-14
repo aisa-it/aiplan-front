@@ -13,6 +13,7 @@
     :get-members-for-mention="getProjectMembersForMention"
     @get-editor="getEditor"
     @enable-editing="handleToggleEdit"
+    @prevent-autosave="emits('preventAutosave')"
   />
 </template>
 
@@ -40,7 +41,7 @@ const { projectMembers } = storeToRefs(projectStore);
 const { issueData } = storeToRefs(singleIssueStore);
 const { ny } = storeToRefs(utilsStore);
 
-const emits = defineEmits(['toggleEdit', 'getEditor']);
+const emits = defineEmits(['toggleEdit', 'getEditor', 'preventAutosave']);
 const props = defineProps(['isReadonly', 'isAutosave', 'isAllowedToEdit']);
 
 // vars
