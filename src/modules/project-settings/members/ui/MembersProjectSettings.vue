@@ -301,7 +301,10 @@ async function onRequest(p: { pagination: IQuasarPaginationValues }) {
       },
     )
     .then((res) => {
-      if (res) allProjectMembers.value = res.result;
+      if (res) {
+        allProjectMembers.value = res.result;
+        usersCount.value = res?.count;
+      };
     });
 
   await projectStore
@@ -325,7 +328,6 @@ async function onRequest(p: { pagination: IQuasarPaginationValues }) {
         pagination.value.descending = descending;
         rows.value = res.result;
         loading.value = false;
-        usersCount.value = res?.count;
       }
     });
 }
