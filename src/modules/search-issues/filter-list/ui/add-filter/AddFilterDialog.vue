@@ -633,70 +633,50 @@ const updateDateField = (
 const convertDatesToTimestamp = (filterData: IFilter): IFilter => {
   const payload = JSON.parse(JSON.stringify(filterData)) as IFilter;
 
-  const dateKeys: (keyof typeof payload.filter)[] = [
-    'created_at_from',
-    'created_at_to',
-    'updated_at_from',
-    'updated_at_to',
-    'start_date_from',
-    'start_date_to',
-    'target_date_from',
-    'target_date_to',
-    'completed_at_from',
-    'completed_at_to',
-  ];
+  const datePrefixes = [
+    'created_at',
+    'updated_at',
+    'start_date',
+    'target_date',
+    'completed_at',
+  ] as const;
 
-  dateKeys.forEach((key) => {
-    const val = payload.filter[key];
+  const parseDate = (value: unknown) => {
+    if (!value || typeof value !== 'string' || value.trim() === '') return null;
 
-    if (val && typeof val === 'string' && val.trim() !== '') {
-      if (dayjs(val).isValid()) {
-        (payload.filter as any)[key] = dayjs(val).unix().toString();
-      } else {
-        (payload.filter as any)[key] = '';
+    const strictDate = dayjs(value, 'DD.MM.YYYY', true);
+    if (strictDate.isValid()) return strictDate;
+
+    const fallbackDate = dayjs(value);
+    return fallbackDate.isValid() ? fallbackDate : null;
+  };
+
+  datePrefixes.forEach((prefix) => {
+    const fromKey = `${prefix}_from` as keyof typeof payload.filter;
+    const toKey = `${prefix}_to` as keyof typeof payload.filter;
+
+    const fromDate = parseDate(payload.filter[fromKey]);
+    const toDate = parseDate(payload.filter[toKey]);
+
+    (payload.filter as any)[fromKey] = fromDate
+      ? fromDate.startOf('day').unix()
+      : undefined;
+
+    if (toDate) {
+      let toTimestamp = toDate.startOf('day').unix();
+
+      if (fromDate && fromDate.isSame(toDate, 'day')) {
+        toTimestamp += 86400 - 1; // Время от 00:00 до 23:59 того же дня
       }
+
+      (payload.filter as any)[toKey] = toTimestamp;
     } else {
-      (payload.filter as any)[key] = '';
+      (payload.filter as any)[toKey] = undefined;
     }
   });
 
   return payload;
 };
-
-// const convertDatesToISO = (filterData: IFilter): IFilter => {
-//   const payload = JSON.parse(JSON.stringify(filterData)) as IFilter;
-
-//   const dateKeys: (keyof typeof payload.filter)[] = [
-//     'created_at_from',
-//     'created_at_to',
-//     'updated_at_from',
-//     'updated_at_to',
-//     'start_date_from',
-//     'start_date_to',
-//     'target_date_from',
-//     'target_date_to',
-//     'completed_at_from',
-//     'completed_at_to',
-//   ];
-
-//   dateKeys.forEach((key) => {
-//     const val = payload.filter[key];
-
-//     if (val && typeof val === 'string' && val.trim() !== '') {
-//       const parsedDate = dayjs.utc(val, 'DD.MM.YYYY', true);
-
-//       if (parsedDate.isValid()) {
-//         (payload.filter as any)[key] = parsedDate.startOf('day').toISOString();
-//       } else {
-//         (payload.filter as any)[key] = '';
-//       }
-//     } else {
-//       (payload.filter as any)[key] = '';
-//     }
-//   });
-
-//   return payload;
-// };
 
 // ---------------------- Saving & Editing ----------------------
 
