@@ -23,12 +23,12 @@
       </div>
     </div>
     <q-list class="q-mt-sm issue-links-wrapper">
-      <LinkItem 
+      <LinkItem
         v-for="link in links"
         :key="link.id"
         :link="link"
         :isDisabled="isDisabled"
-        @update:link="openLinkDialog"
+        @update="openLinkDialog"
         @delete="openDeleteLinkDialog"
       />
     </q-list>
