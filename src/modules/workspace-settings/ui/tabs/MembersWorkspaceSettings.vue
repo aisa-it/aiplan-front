@@ -37,10 +37,7 @@
       </q-input>
       <q-space />
       <q-btn
-        v-if="
-          user?.is_superuser &&
-          computedWorkspaceInfo?.current_user_membership?.member_id === user.id
-        "
+        v-if="user?.is_superuser"
         no-caps
         style="width: 95px"
         class="delete-btn q-mr-sm"
@@ -327,7 +324,9 @@ async function onRequest(p: any) {
       pagination.value.descending = descending;
       rows.value = res?.result || [];
       loading.value = false;
-      usersCount.value = res?.count;
+      if (!searchQuery.value) {
+        usersCount.value = res?.count;
+      }
     });
 }
 

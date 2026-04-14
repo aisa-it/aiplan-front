@@ -124,10 +124,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { storeToRefs } from 'pinia';
 import AvatarImage from 'src/components/AvatarImage.vue';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 interface Action {
   key: string;
@@ -156,14 +157,13 @@ const props = defineProps<{
 const emit = defineEmits(['update:roles', 'update:modelValue']);
 
 const currentRole = ref<Roles | null>(null);
+const workspaceMmebers = ref<DtoWorkspaceMember[]>([]);
 
 const workspaceStore = useWorkspaceStore();
-const { workspaceUsers } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const availableMembers = computed(() => {
-  return workspaceUsers.value.filter((user) => {
-    return user.member?.is_onboarded;
-  });
+  return workspaceMmebers.value.filter((user) => user.member?.is_onboarded);
 });
 
 const availableRoles: Role[] = [
@@ -261,7 +261,14 @@ const saveChanges = () => {
   updateModelValue(false);
 };
 
-watch(workspaceUsers, () => {
+onMounted(async () => {
+  const res = await workspaceStore.getWorkspaceMembers(
+    currentWorkspaceSlug.value as string,
+    { offset: 0, limit: -1, order_by: 'id', desc: false },
+    false,
+  );
+  if (!res) return;
+  workspaceMmebers.value = res.result;
   getUsersBySearch();
 });
 

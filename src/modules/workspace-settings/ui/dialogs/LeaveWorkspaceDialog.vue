@@ -72,17 +72,20 @@ const leaveWorkspace = async () => {
     props.members?.find((member: any) => member.member_id === user.value.id)
       ?.id,
   ).then(async () => {
-    await userStore.getUserWorkspaces().then(() => {
-      if (props.isInAdminPanel) {
-        emit('refreshData');
-      } else {
-        router.push(
-          userWorkspaces.value.length
-            ? `/${userWorkspaces.value[0]?.slug}`
-            : '/no-workspace',
-        );
-      }
-    });
+    await Promise.all([
+      userStore.getUserWorkspaces(),
+      userStore.getUserWorkspacesMemberships(),
+      userStore.getUserProjectsMemberships(),
+    ]);
+    if (props.isInAdminPanel) {
+      emit('refreshData');
+    } else {
+      router.push(
+        userWorkspaces.value.length
+          ? `/${userWorkspaces.value[0]?.slug}`
+          : '/no-workspace',
+      );
+    }
     setNotificationView({
       open: true,
       type: 'success',

@@ -31,7 +31,7 @@
           flat
           no-caps
           label="Отмена"
-          class="btn secondary-btn"
+          class="btn secondary-btn doc-hierarchy-btn"
           color="negative"
           @click="clearChanges"
           :disable="!isSaving"
@@ -40,7 +40,7 @@
           flat
           no-caps
           label="Сохранить"
-          class="btn primary-btn"
+          class="btn primary-btn doc-hierarchy-btn"
           color="primary"
           @click="saveChanges"
           :disable="!isSaving"
@@ -394,6 +394,10 @@ watch(
   @media screen and (width < 600px) {
     width: 90vw;
   }
+}
+
+.doc-hierarchy-btn {
+  min-width: 103px !important;
 }
 
 .nested {

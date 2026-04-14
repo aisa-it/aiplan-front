@@ -9,6 +9,7 @@
       :key="card.id"
       :card="card"
       @open-preview="openPreview"
+      @refresh="previewRefresh"
     />
 
     <IssuePreview

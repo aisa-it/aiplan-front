@@ -7,11 +7,7 @@
         :status="rowInfo.row.state_detail"
         :issue="rowInfo.row"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(
-            rowInfo.row,
-            rowInfo.row.project_detail ?? project,
-            'change-issue-status',
-          )
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status')
         "
         :states-from-cache="statesCache[rowInfo.row.project]"
         @set-status="(val: any) => emits('refresh', val)"
@@ -27,7 +23,6 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
 import { useStatesStore } from 'src/stores/states-store';
-import { useProjectStore } from 'src/stores/project-store';
 
 // components
 import SelectStatus from 'src/components/SelectStatus.vue';
@@ -38,6 +33,5 @@ defineProps<{
 
 const emits = defineEmits(['refresh']);
 const rolesStore = useRolesStore();
-const { project } = storeToRefs(useProjectStore());
 const { statesCache } = storeToRefs(useStatesStore());
 </script>
