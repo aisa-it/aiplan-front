@@ -36,7 +36,10 @@
           >
             <DefaultLoader />
           </div>
-          <q-card-section v-show="!globalLoading" class="scrollable-content">
+          <q-card-section
+            v-show="!globalLoading"
+            class="scrollable-content visible-scroll"
+          >
             <div
               class="row items-center justify-between centered-horisontally q-mb-sm"
             >
@@ -916,6 +919,19 @@ watch(
   @media (max-width: 760px) {
     min-width: 95% !important;
   }
+}
+
+.visible-scroll {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+  overflow-y: auto;
+  height: 76vh;
+  margin: 16px 8px 16px 0;
+  padding: 0 12px 0 16px;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
 }
 
 :deep(.q-textarea) {
