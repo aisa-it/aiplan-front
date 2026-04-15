@@ -10,7 +10,7 @@
       }
     "
   >
-    <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
+    <q-card class="add-filters-card row" style="height: 72vh; max-width: 60vw">
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
           v-if="!isEdit"
@@ -24,7 +24,7 @@
         >
           <AddFiltersList @set-filter="(value) => editFilter(value)" />
         </q-drawer>
-        <q-page-container class="scrollable-content">
+        <q-page-container class="visible-scroll">
           <div
             v-show="globalLoading"
             class="row justify-center items-center"
@@ -38,7 +38,7 @@
           </div>
           <q-card-section
             v-show="!globalLoading"
-            class="scrollable-content visible-scroll"
+            class="visible-scroll-content"
           >
             <div
               class="row items-center justify-between centered-horisontally q-mb-sm"
@@ -922,16 +922,17 @@ watch(
 }
 
 .visible-scroll {
-  scrollbar-width: auto !important;
-  scrollbar-color: auto !important;
-  overflow-y: auto;
-  height: 76vh;
-  margin: 16px 8px 16px 0;
-  padding: 0 12px 0 16px;
+  overflow-y: scroll;
+  height: calc(72vh - 32px);
+  margin: 16px 8px;
 }
 
 .visible-scroll::-webkit-scrollbar {
   display: block !important;
+}
+
+.visible-scroll-content {
+  padding: 0 12px;
 }
 
 :deep(.q-textarea) {
