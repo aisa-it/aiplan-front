@@ -37,6 +37,8 @@ export default defineComponent({
     onBeforeMount(async () => {
       workspaceStore.$reset();
       await userStore.getUserWorkspaces();
+      await userStore.getUserWorkspacesMemberships();
+      await userStore.getUserProjectsMemberships();
       await userStore.getUserInfo();
     });
 

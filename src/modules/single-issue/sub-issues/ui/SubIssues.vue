@@ -7,11 +7,7 @@
       label="Ручная сортировка"
       v-show="
         props.subIssues.length > 1 &&
-        hasPermissionByIssue(
-          issueData,
-          props.project_detail ?? project,
-          'change-issue-primary',
-        )
+        hasPermissionByIssue(issueData, 'change-issue-primary')
       "
     />
     <q-list class="issue-subtask__list" dense bordered separator>
@@ -88,7 +84,6 @@ import { computed } from 'vue';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 // api
@@ -98,13 +93,11 @@ import { SUCCESS_DELETE_SUBISSUE } from 'src/constants/notifications';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const userStore = useUserStore();
-const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 const { hasPermissionByIssue } = useRolesStore();
 const { setNotificationView } = useNotificationStore();
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(userStore);
-const { project } = storeToRefs(projectStore);
 
 const route = useRoute();
 const props = defineProps(['subIssues', 'manualSortMode', 'project_detail']);
@@ -159,11 +152,7 @@ const removeChild = (id: string) => {
 };
 
 const canDelete = (subIssue: DtoIssue): boolean => {
-  return !!hasPermissionByIssue(
-    subIssue,
-    props.project_detail ?? project.value,
-    'change-issue-primary',
-  );
+  return !!hasPermissionByIssue(subIssue, 'change-issue-primary');
 };
 </script>
 

@@ -136,6 +136,8 @@ onBeforeMount(async () => {
     userStore.getUserInfo(),
     userStore.getUserWorkspaces(),
     userStore.getUserProjects(),
+    userStore.getUserWorkspacesMemberships(),
+    userStore.getUserProjectsMemberships(),
   ]);
 
   bus.emit('successLoadUserInfo');
@@ -166,6 +168,10 @@ onBeforeMount(async () => {
       `${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
     );
   }
+
+  leftDrawerOpen.value =
+    Boolean(JSON.parse(localStorage.getItem('leftDrawerOpen') as string)) ??
+    true;
 });
 
 onUnmounted(() => {
@@ -200,5 +206,6 @@ const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+  localStorage.setItem('leftDrawerOpen', String(leftDrawerOpen.value));
 };
 </script>

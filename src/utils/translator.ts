@@ -105,12 +105,12 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import aiplan from 'src/utils/aiplan';
 
 const statesStore = useStatesStore();
-const workspaceStore = useWorkspaceStore();
 
 const { statesCache } = storeToRefs(statesStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 export const logsRUS = (val: string, error?: [], target_project?: string) => {
+  const workspaceStore = useWorkspaceStore();
+  const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
   const projectStore = useProjectStore();
   const { project, currentProjectID, projectLabels, projectMembers } =
     storeToRefs(projectStore);

@@ -107,8 +107,13 @@ const issuesStore = useIssuesStore();
 
 const singleIssueStore = useSingleIssueStore();
 
-const { currentIssueID, isPreview, issueCommentsData, issueActivitiesData, issueData } =
-  storeToRefs(singleIssueStore);
+const {
+  currentIssueID,
+  isPreview,
+  issueCommentsData,
+  issueActivitiesData,
+  issueData,
+} = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(useUserStore());
 
 const route = useRoute();

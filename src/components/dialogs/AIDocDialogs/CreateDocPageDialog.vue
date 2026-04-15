@@ -225,7 +225,10 @@ import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Member } from 'src/components/selects/types/types';
 import { MemberToIdArray } from 'src/components/selects/helpers/helpers';
 
-const emit = defineEmits<{ successCreate: [] }>();
+const emit = defineEmits<{
+  successCreate: [];
+  hide: [];
+}>();
 
 //core
 const route = useRoute();
@@ -547,6 +550,7 @@ watch(
 
 onBeforeUnmount(() => {
   clearExpandedCache();
+  emit('hide');
 });
 
 onMounted(() => {

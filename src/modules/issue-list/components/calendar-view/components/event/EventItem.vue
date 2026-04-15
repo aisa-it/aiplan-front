@@ -25,14 +25,16 @@
         :event="event"
         @mouseenter="cancelClose"
         @mouseleave="close"
-        @status-popup="(val) => (isStatusPopupOpen = val)"
+        @status-popup-or-edit-name="
+          (val) => (isStatusPopupOpenOrEditName = val)
+        "
       />
     </q-menu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 import { CalendarEvent } from '../../types/calendar';
 import EventCard from './EventCard.vue';
@@ -43,6 +45,8 @@ import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{ event: CalendarEvent }>();
+
+const emits = defineEmits<{ isOpen: [boolean] }>();
 
 const root = ref<HTMLElement | null>(null);
 
@@ -55,20 +59,22 @@ defineExpose({
 });
 
 const menu = ref<any>();
-const isStatusPopupOpen = ref(false);
+const isStatusPopupOpenOrEditName = ref(false);
 let closeTimer: number | null = null;
 
 function open() {
   cancelClose();
   menu.value?.show(root.value);
+  emits('isOpen', true);
   issueIdHighlight.value = props.event.issueData.id;
 }
 
 function scheduleClose() {
-  if (isStatusPopupOpen.value) return;
+  if (isStatusPopupOpenOrEditName.value) return;
   issueIdHighlight.value = null;
   closeTimer = window.setTimeout(() => {
     menu.value?.hide();
+    emits('isOpen', false);
   }, 120);
 }
 
@@ -80,10 +86,11 @@ function cancelClose() {
 }
 
 function close() {
-  if (isStatusPopupOpen.value) return;
+  if (isStatusPopupOpenOrEditName.value) return;
   issueIdHighlight.value = null;
   cancelClose();
   menu.value?.hide();
+  emits('isOpen', false);
 }
 
 async function openIssue() {
@@ -93,6 +100,10 @@ async function openIssue() {
     props.event.issueData.identifier,
   );
 }
+
+onUnmounted(() => {
+  emits('isOpen', false);
+});
 </script>
 
 <style lang="scss" scoped>

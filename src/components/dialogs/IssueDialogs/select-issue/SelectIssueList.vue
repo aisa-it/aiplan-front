@@ -113,10 +113,7 @@ const { hasPermissionByIssue } = useRolesStore();
 
 const rows = ref<IIssueLabel[]>([]);
 const canSelectedIssues = (data: IIssueLabel) => {
-  return (
-    props.allAllowed ||
-    hasPermissionByIssue(data, props.project, 'change-issue-primary')
-  );
+  return props.allAllowed || hasPermissionByIssue(data, 'change-issue-primary');
 };
 
 const onSelect = (e: any[]) => {

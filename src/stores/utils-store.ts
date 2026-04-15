@@ -29,7 +29,7 @@ export const useUtilsStore = defineStore('utils-store', {
       isSingUp: false,
       version: '',
       ny: false,
-      wd: true,
+      wd: false,
       localVersion: localStorage.getItem('appVersion'),
       openReleaseNote: false,
       isEnabledJitsi: false,

@@ -81,7 +81,7 @@
         :value="props.card?.attachment_count"
       />
     </div>
-    <IssueContextMenu :row="props.card" unpin />
+    <IssueContextMenu :row="props.card" unpin @refresh="emits('refresh')"/>
   </div>
 </template>
 

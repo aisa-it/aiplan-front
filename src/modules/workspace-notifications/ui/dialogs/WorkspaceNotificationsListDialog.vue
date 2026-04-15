@@ -46,8 +46,8 @@ import { computed } from 'vue';
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 //interfaces
 import { NotificationsNotificationResponse } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 // components
@@ -69,11 +69,9 @@ const emits = defineEmits<{
   loadMore: [type: 'unread' | 'read'];
 }>();
 
-const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
-
-const { userWorkspaces } = storeToRefs(userStore);
-const { workspaceInfo } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { getWsRole } = useRolesStore();
 
 const onCreate = () => {
   emits('create');
@@ -95,12 +93,9 @@ const onLoadMore = (type: 'unread' | 'read') => {
   emits('loadMore', type);
 };
 
-const isWorkspaceAdmin = computed(() => {
-  const role = userWorkspaces.value.find(
-    (workspace) => workspace.id === workspaceInfo?.value?.id,
-  )?.current_user_membership?.role;
-  return role && role >= 15;
-});
+const isWorkspaceAdmin = computed(
+  () => getWsRole(currentWorkspaceSlug.value ?? '') >= 15,
+);
 </script>
 
 <style lang="scss" scoped>

@@ -140,6 +140,7 @@ const form = ref<PropertyTemplate>({
 
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+
 const hasEmptyOptions = computed(() => {
   if (!isSelectType) return false;
   if (isSelectType && form.value.options.length <= 0) return true;
@@ -156,6 +157,7 @@ const typeOptions = [
   { label: 'Строка', value: 'string' },
   { label: 'Флаг', value: 'boolean' },
   { label: 'Список', value: 'select' },
+  { label: 'Ссылка', value: 'link' },
 ];
 
 //methods
@@ -184,7 +186,7 @@ watch(
   (val) => {
     if (val) {
       if (props.editItem) {
-        form.value = { 
+        form.value = {
           ...props.editItem,
           options: props.editItem.options || [],
         };

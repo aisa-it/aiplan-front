@@ -43,6 +43,7 @@ const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 48px repeat(6, minmax(120px, 1fr));
   height: 100%;
+  overflow: auto;
 }
 
 .month-grid__header {

@@ -8,11 +8,7 @@
         :date="rowInfo.row.target_date"
         :issue="rowInfo.row"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            rowInfo.row,
-            rowInfo.row.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary')
         "
         @refresh="emits('refresh')"
       ></SelectDate>
@@ -21,12 +17,8 @@
 </template>
 
 <script setup lang="ts">
-// core
-import { storeToRefs } from 'pinia';
-
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
-import { useProjectStore } from 'src/stores/project-store';
 // components
 import SelectDate from 'src/components/SelectDate.vue';
 
@@ -36,5 +28,4 @@ defineProps<{
 
 const emits = defineEmits(['refresh']);
 const rolesStore = useRolesStore();
-const { project } = storeToRefs(useProjectStore());
 </script>

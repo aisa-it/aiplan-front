@@ -26,11 +26,7 @@
             :issue="issueData"
             :status="issueData.state_detail"
             :isDisabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-status',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-status')
             "
             :states-from-cache="statesCache[issueData?.project]"
             @set-status="(val) => (issueData.state_detail = val)"
@@ -93,6 +89,7 @@
         >
           <SelectMembers
             class="issue-selector"
+<<<<<<< HEAD
             :model-value="assignees"
             :isDisabled="
               !hasPermissionByIssue(
@@ -104,6 +101,14 @@
             :label="assigneeLable"
             :refresh-members-func="assigneeFetchMembers"
             :on-change="assagneeUpdate"
+=======
+            :projectid="issueData.project"
+            :issueid="issueData.id"
+            :assigness="assignees"
+            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
+            :current-member="user"
+            debounced
+>>>>>>> dev
             @refresh="handleRefresh"
           />
         </div>
@@ -126,7 +131,6 @@
             :isDisabled="
               !hasPermissionByIssue(
                 issueData,
-                issueData.project_detail ?? project,
                 'change-issue-basic',
               )
             "
@@ -159,11 +163,7 @@
             :priority="issueData.priority"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @update:priority="(val) => (issueData.priority = val)"
             @refresh="handleRefresh"
@@ -208,11 +208,7 @@
             :date="issueData.target_date"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -276,22 +272,14 @@
             :issue="issueData.parent_detail"
             :project="issueData.project_detail ?? project"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           ></SelectParentIssue>
           <q-btn
             v-if="
               issueData.parent_detail &&
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             class="btn-only-icon-sm q-ml-xs"
             style="padding: 0 3px"
@@ -319,11 +307,7 @@
             :issues="issueData.blocker_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -348,11 +332,7 @@
             :issues="issueData.blocked_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -392,13 +372,7 @@
         :issueid="issueData.id"
         :links="issueData.issue_link"
         :project="issueData.project_detail"
-        :isDisabled="
-          !hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
+        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary')"
         @add="handleLinkAdd"
         @delete="handleLinkDelete"
         @edit="handleLinkEdit"

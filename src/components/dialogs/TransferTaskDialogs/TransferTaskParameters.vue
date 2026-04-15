@@ -31,7 +31,7 @@
               :projectid="props.project_id"
               :status="issueSettings.state_detail"
               :isDisabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-status')
+                !hasPermissionByIssue(issueData, 'change-issue-status')
               "
               isAdaptiveSelect
               :states-from-cache="statesCache[issueData?.project]"
@@ -66,11 +66,7 @@
               label="Исполнитель"
               isAdaptiveSelect
               :isDisabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  issueData.project_detail ?? project,
-                  'change-issue-basic',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               :refresh-members-func="fetchMembers"
             />
@@ -92,11 +88,7 @@
               label="Наблюдатель"
               isAdaptiveSelect
               :isDisabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  issueData.project_detail ?? project,
-                  'change-issue-basic',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               :refresh-members-func="fetchMembers"
             />
@@ -121,11 +113,7 @@
               :priority="issueSettings.priority"
               isAdaptiveSelect
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               @update:priority="
                 (val) => {
@@ -155,11 +143,7 @@
               :date="issueSettings.target_date"
               :issue="issueData"
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               :style="{ padding: 0 }"
               @update:date="
@@ -240,7 +224,6 @@ const workspaceStore = useWorkspaceStore();
 const { statesCache } = storeToRefs(statesStore);
 
 // store to refs
-const { project } = storeToRefs(projectStore);
 const { user } = storeToRefs(userStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
