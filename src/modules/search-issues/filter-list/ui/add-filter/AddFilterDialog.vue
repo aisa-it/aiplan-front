@@ -719,23 +719,7 @@ const searchFilterProjectsList = async (
   );
 
   await Promise.all(requests).then(
-    (res) =>
-      (filteredProjectsList = res.flat().filter((pr) => {
-        if (!pr) return;
-        if (pr?.current_user_membership?.role > 5 || user.value.is_superuser) {
-          return pr;
-        } else
-          return {
-            id: pr.id,
-            name: pr.name,
-            workspace: pr.workspace,
-            identifier: pr.identifier,
-            current_user_membership: pr.current_user_membership,
-            url: pr.url,
-            cover_image: pr.cover_image,
-            indetifier: pr.indetifier,
-          };
-      })),
+    (res) => (filteredProjectsList = res.flat()),
   );
   return filteredProjectsList;
 };

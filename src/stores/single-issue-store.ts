@@ -17,8 +17,8 @@ import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 import axios from 'axios';
 import { NON_VALIDATED_ROUTES } from 'src/constants/constants';
 import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
+import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 
 const aiplan = useAiplanStore();
 const rolesStore = useRolesStore();
@@ -108,20 +108,20 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       this.currentIssueID = '';
     },
     async getIssueData(workspaceSlug: string, projectID: string) {
-      await api
-        .get(
-          `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectID}/issues/${this.currentIssueID}/`,
-        )
-        .then(async (res) => {
-          this.issueData = await res.data;
-          // вычисление роли - лучше не трогать
-          rolesStore.defineIssueRole(res.data);
-        })
-        .catch((err) => {
-          if (err.response.status == 404) {
-            this.router.replace('/not-found');
-          }
-        });
+      try {
+        const res = await issuesApi.getIssue(
+          workspaceSlug,
+          projectID,
+          this.currentIssueID,
+        );
+
+        this.issueData = res.data;
+        rolesStore.defineIssueRole(this.issueData);
+      } catch (err: any) {
+        if (err?.response?.status == 404) {
+          this.router.replace('/not-found');
+        }
+      }
     },
 
     // TODO при рефакторинге слить с предущим методом, вынеся из него запись полученной задачи в стейт стора

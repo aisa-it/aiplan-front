@@ -103,6 +103,8 @@ export default defineComponent({
       userStore.getUserInfo().then(async () => {
         router.push('/');
         await userStore.getUserWorkspaces();
+        await userStore.getUserWorkspacesMemberships();
+        await userStore.getUserProjectsMemberships();
         await workspaceStore.getWorkspaceInfo(currentWorkspaceSlug.value);
         await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
       });

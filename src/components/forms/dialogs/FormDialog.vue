@@ -157,6 +157,7 @@ import { useQuasar } from 'quasar';
 
 //store
 import { useWorkspaceStore } from 'stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // types
 import {
@@ -210,6 +211,7 @@ const $q = useQuasar();
 
 //store
 const workspaceStore = useWorkspaceStore();
+const { getProjectRole } = useRolesStore();
 
 //store to refs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -319,7 +321,7 @@ const refresh = async () => {
 
   if (data)
     projects.value = data.filter(
-      (project) => (project?.current_user_membership?.role ?? 0) > 5,
+      (project) => getProjectRole(project.id ?? '') > 5,
     );
 };
 
