@@ -13,7 +13,7 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            pinIssue(props.row, workspaceSlug, project.identifier),
+            pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
           )
         "
       >
@@ -28,7 +28,7 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            unpinIssue(props.row, workspaceSlug, project.identifier),
+            unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
           )
         "
       >
@@ -210,7 +210,15 @@ const pinAndUnpinIssue = async (func: () => Promise<void>) => {
     if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
     refreshIssues.value = true;
     emit('refresh');
-  } catch {}
+  } catch (err) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage:
+      'Произошла ошибка при закреплении/откреплении задачи',
+    });
+    throw err;
+  }
 };
 
 const transferIssue = (): void => {
