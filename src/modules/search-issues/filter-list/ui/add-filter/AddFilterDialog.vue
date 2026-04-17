@@ -10,7 +10,7 @@
       }
     "
   >
-    <q-card class="add-filters-card row" style="height: 80vh; max-width: 60vw">
+    <q-card class="add-filters-card row" style="height: 72vh; max-width: 60vw">
       <q-layout view="hHh Lpr lff" container>
         <q-drawer
           v-if="!isEdit"
@@ -24,7 +24,7 @@
         >
           <AddFiltersList @set-filter="(value) => editFilter(value)" />
         </q-drawer>
-        <q-page-container class="scrollable-content">
+        <q-page-container class="visible-scroll">
           <div
             v-show="globalLoading"
             class="row justify-center items-center"
@@ -36,7 +36,10 @@
           >
             <DefaultLoader />
           </div>
-          <q-card-section v-show="!globalLoading" class="scrollable-content">
+          <q-card-section
+            v-show="!globalLoading"
+            class="visible-scroll-content"
+          >
             <div
               class="row items-center justify-between centered-horisontally q-mb-sm"
             >
@@ -201,6 +204,44 @@
               "
             >
             </q-select>
+            <RangeDateFilter
+              :model-value="{
+                from: filter.filter.created_at_from || '',
+                to: filter.filter.created_at_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('created_at', val)"
+              label="Дата создания"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              :model-value="{
+                from: filter.filter.target_date_from || '',
+                to: filter.filter.target_date_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('target_date', val)"
+              label="Срок исполнения"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              :model-value="{
+                from: filter.filter.start_date_from || '',
+                to: filter.filter.start_date_to || '',
+              }"
+              @update:model-value="(val) => updateDateField('start_date', val)"
+              label="Дата начала"
+              class="q-mb-sm"
+            />
+            <RangeDateFilter
+              :model-value="{
+                from: filter.filter.completed_at_from || '',
+                to: filter.filter.completed_at_to || '',
+              }"
+              @update:model-value="
+                (val) => updateDateField('completed_at', val)
+              "
+              label="Дата завершения"
+              class="q-mb-sm"
+            />
             <div class="action-content">
               <div class="action-content_left">
                 <q-checkbox v-model="filter.public" label="Публичный" />
@@ -223,7 +264,7 @@
                   no-caps
                   class="secondary-btn"
                   style="width: 110px"
-                  @click="emits('saveTempFilter', filter)"
+                  @click="applyTempFilter"
                   v-close-popup
                   >Применить</q-btn
                 >
@@ -274,6 +315,7 @@ import {
   SelectEntityFilter,
   SelectStatesFilter,
   SelectLabelsFilter,
+  RangeDateFilter,
 } from './selects';
 import { getFilters } from 'src/modules/search-issues/services/api';
 
@@ -287,6 +329,12 @@ import {
 } from '../../services/api';
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type Members = 'authors' | 'assignees' | 'watchers';
 
@@ -385,6 +433,16 @@ const INIT_FILTER = {
     assignees: [],
     workspaces: [],
     priorities: [],
+    created_at_from: '',
+    created_at_to: '',
+    updated_at_from: '',
+    updated_at_to: '',
+    start_date_from: '',
+    start_date_to: '',
+    target_date_from: '',
+    target_date_to: '',
+    completed_at_from: '',
+    completed_at_to: '',
   },
 } as IFilter;
 
@@ -565,25 +623,90 @@ const filterMember = () => {
   });
 };
 
+// Запись значений диапазонов дат в фильтр
+const updateDateField = (
+  prefix: 'created_at' | 'target_date' | 'start_date' | 'completed_at',
+  range: { from: string; to: string },
+) => {
+  if (!range) return;
+  (filter.value.filter as any)[`${prefix}_from`] = range.from || '';
+  (filter.value.filter as any)[`${prefix}_to`] = range.to || '';
+};
+
+const convertDatesToTimestamp = (filterData: IFilter): IFilter => {
+  const payload = JSON.parse(JSON.stringify(filterData)) as IFilter;
+
+  const datePrefixes = [
+    'created_at',
+    'updated_at',
+    'start_date',
+    'target_date',
+    'completed_at',
+  ] as const;
+
+  const parseDate = (value: unknown) => {
+    if (!value || typeof value !== 'string' || value.trim() === '') return null;
+
+    const strictDate = dayjs(value, 'DD.MM.YYYY', true);
+    if (strictDate.isValid()) return strictDate;
+
+    const fallbackDate = dayjs(value);
+    return fallbackDate.isValid() ? fallbackDate : null;
+  };
+
+  datePrefixes.forEach((prefix) => {
+    const fromKey = `${prefix}_from` as keyof typeof payload.filter;
+    const toKey = `${prefix}_to` as keyof typeof payload.filter;
+
+    const fromDate = parseDate(payload.filter[fromKey]);
+    const toDate = parseDate(payload.filter[toKey]);
+
+    (payload.filter as any)[fromKey] = fromDate
+      ? fromDate.startOf('day').unix()
+      : undefined;
+
+    if (toDate) {
+      let toTimestamp = toDate.startOf('day').unix();
+
+      if (fromDate && fromDate.isSame(toDate, 'day')) {
+        toTimestamp += 86400 - 1; // Время от 00:00 до 23:59 того же дня
+      }
+
+      (payload.filter as any)[toKey] = toTimestamp;
+    } else {
+      (payload.filter as any)[toKey] = undefined;
+    }
+  });
+
+  return payload;
+};
+
 // ---------------------- Saving & Editing ----------------------
+
+const applyTempFilter = () => {
+  const preparedFilter = convertDatesToTimestamp(filter.value);
+  emits('saveTempFilter', preparedFilter);
+};
 
 const handleSaveFilter = async () => {
   nameRef.value.validate();
   if (nameRef.value.hasError) return;
 
+  const preparedFilter = convertDatesToTimestamp(filter.value);
+
   if (!isEdit.value) {
-    await createSearchFilter(filter.value);
+    await createSearchFilter(preparedFilter);
     refreshFilters();
     emits('refresh');
     dialogRef.value.hide();
     return;
   }
 
-  let filterBody = {
-    name: filter.value.name,
-    description: filter.value.description,
-    filter: filter.value.filter,
-    public: filter.value.public,
+  const filterBody = {
+    name: preparedFilter.name,
+    description: preparedFilter.description,
+    filter: preparedFilter.filter,
+    public: preparedFilter.public,
   };
 
   await updateFilter(props.currentFilter?.id, filterBody).then(() => {
@@ -780,6 +903,20 @@ watch(
   @media (max-width: 760px) {
     min-width: 95% !important;
   }
+}
+
+.visible-scroll {
+  overflow-y: scroll;
+  height: calc(72vh - 32px);
+  margin: 16px 8px;
+}
+
+.visible-scroll::-webkit-scrollbar {
+  display: block !important;
+}
+
+.visible-scroll-content {
+  padding: 0 12px;
 }
 
 :deep(.q-textarea) {
