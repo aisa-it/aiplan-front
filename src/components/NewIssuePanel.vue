@@ -623,9 +623,11 @@ const handleCreateSuccess = async (createdIssueData: any) => {
 
   await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
 
-  sprints.value.forEach((sprint) => {
-    updateSprint(sprint, issue.id);
-  });
+  if (hasPermissionByWorkspace(workspaceInfo?.value, 'change-sprint')) {
+    sprints.value.forEach((sprint) => {
+      updateSprint(sprint, issue.id);
+    });
+  }
 
   emits('ok');
 };
