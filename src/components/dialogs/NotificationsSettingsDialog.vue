@@ -28,6 +28,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_email"
                 :memberSettings="settings.notification_settings_email"
+                :disable="user.settings?.email_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_email')
@@ -76,6 +77,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_tg"
                 :memberSettings="settings.notification_settings_tg"
+                :disable="user.settings?.telegram_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_tg')
@@ -115,6 +117,7 @@
                 :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_app"
                 :memberSettings="settings.notification_settings_app"
+                :disable="user.settings?.app_notification_mute"
                 @updateTelegram="
                   (value) =>
                     setCurrentSetting(value, 'notification_settings_app')
@@ -156,6 +159,7 @@
           >Отмена</q-btn
         >
         <q-btn
+          :disable="isButtonDisabled"
           no-caps
           class="primary-btn notification-btn"
           @click="handleSaveSettings()"
@@ -176,12 +180,13 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 // stores
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUserStore } from 'src/stores/user-store';
 
 import SettingList from './NotificationsSettings/SettingList.vue';
 import AidocNotificationsSettings from '../aidoc/AidocNotificationsSettings.vue';
@@ -193,6 +198,7 @@ import DefaultLoader from '../loaders/DefaultLoader.vue';
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
+const { user } = storeToRefs(useUserStore());
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -203,6 +209,18 @@ const props = defineProps<{
 
 const dialogRef = ref();
 const tab = ref('email');
+
+const isButtonDisabled = computed<boolean>(() => {
+  if (
+    (user.value.settings?.email_notification_mute && tab.value === 'email') ||
+    (user.value.settings?.telegram_notification_mute && tab.value === 'tg') ||
+    (user.value.settings?.app_notification_mute && tab.value === 'app')
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+});
 
 const settings = ref({
   notification_author_settings_email: {},
@@ -241,55 +259,55 @@ const loadSettings = async () => {
   } else {
     await getProjectUser();
   }
-}
+};
 
 const getProjectUser = async () => {
   if (!props.project?.id) return;
   await projectStore
-    .getMeInProject(currentWorkspaceSlug.value, props.project?.id)
+    .getMeInProject(currentWorkspaceSlug.value as string, props.project?.id)
     .then((data) => {
       settings.value.notification_author_settings_email = {
-        ...data.notification_author_settings_email,
+        ...data?.notification_author_settings_email,
       };
       settings.value.notification_author_settings_tg = {
-        ...data.notification_author_settings_tg,
+        ...data?.notification_author_settings_tg,
       };
       settings.value.notification_settings_email = {
-        ...data.notification_settings_email,
+        ...data?.notification_settings_email,
       };
       settings.value.notification_settings_tg = {
-        ...data.notification_settings_tg,
+        ...data?.notification_settings_tg,
       };
       settings.value.notification_settings_app = {
-        ...data.notification_settings_app,
+        ...data?.notification_settings_app,
       };
       settings.value.notification_author_settings_app = {
-        ...data.notification_author_settings_app,
+        ...data?.notification_author_settings_app,
       };
     });
 };
 
 const getAidocNotificationsSettings = async (): Promise<void> => {
   await workspaceStore
-    .getWorkspaceNotifications(currentWorkspaceSlug.value)
+    .getMeInWorkspace(currentWorkspaceSlug.value as string)
     .then((data) => {
       aidocSettings.value.notification_author_settings_email = {
-        ...data.notification_author_settings_email,
+        ...data?.notification_author_settings_email,
       };
       aidocSettings.value.notification_author_settings_tg = {
-        ...data.notification_author_settings_tg,
+        ...data?.notification_author_settings_tg,
       };
       aidocSettings.value.notification_author_settings_app = {
-        ...data.notification_author_settings_app,
+        ...data?.notification_author_settings_app,
       };
       aidocSettings.value.notification_settings_email = {
-        ...data.notification_settings_email,
+        ...data?.notification_settings_email,
       };
       aidocSettings.value.notification_settings_tg = {
-        ...data.notification_settings_tg,
+        ...data?.notification_settings_tg,
       };
       aidocSettings.value.notification_settings_app = {
-        ...data.notification_settings_app,
+        ...data?.notification_settings_app,
       };
     });
 };
@@ -298,7 +316,7 @@ const handleSaveSettings = async () => {
   if (props.project) {
     await projectStore
       .setProjectNotificationSettings(
-        currentWorkspaceSlug.value,
+        currentWorkspaceSlug.value as string,
         props.project.id,
         settings.value,
       )
@@ -312,7 +330,7 @@ const handleSaveSettings = async () => {
   } else {
     await workspaceStore
       .setAiDocNotificationSettings(
-        currentWorkspaceSlug.value,
+        currentWorkspaceSlug.value as string,
         aidocSettings.value,
       )
       .then(() => {

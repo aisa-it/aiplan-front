@@ -157,7 +157,6 @@ import {
 import { EventBus, QTable } from 'quasar';
 import { storeToRefs } from 'pinia';
 
-import { useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
 
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
@@ -206,7 +205,6 @@ const props = defineProps([
   'contextType',
 ]);
 
-const { fetchPinnedIssues } = useIssuesStore();
 const { project } = storeToRefs(useProjectStore());
 
 const {
@@ -359,9 +357,6 @@ const updateIssueField = (
   entity?: any,
   status?: any,
 ) => {
-  if (props.contextType === 'project' && project.value.id)
-    fetchPinnedIssues(project.value.id);
-
   if (isGroupingEnabled.value === true) {
     emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);

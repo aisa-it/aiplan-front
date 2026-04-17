@@ -2,13 +2,9 @@ import { useRoute } from 'vue-router';
 
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
-import { useViewPropsStore } from 'src/stores/view-props-store';
-import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
 
 const projectStore = useProjectStore();
-const viewProps = useViewPropsStore();
-const { currentProjectID, isLoadProjectInfo, projectProps } =
-  storeToRefs(projectStore);
+const { currentProjectID, isLoadProjectInfo } = storeToRefs(projectStore);
 
 export const useLoadProjectInfo = () => {
   const route = useRoute();
@@ -25,9 +21,6 @@ export const useLoadProjectInfo = () => {
       route.params.workspace as string,
       route.params.project as string,
     );
-  };
-  const getProps = async () => {
-    await viewProps.getProjectProps();
   };
 
   const getStatuses = async () => {
@@ -61,7 +54,6 @@ export const useLoadProjectInfo = () => {
     await getLabels();
     await getMembers();
 
-    await getProps();
     isLoadProjectInfo.value = false;
   };
 

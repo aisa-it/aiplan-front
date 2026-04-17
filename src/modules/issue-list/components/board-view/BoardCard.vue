@@ -35,7 +35,13 @@
         :row="card"
         :target="user.theme?.open_in_new ? '_blank' : '_self'"
         class="parent-issue-chip"
-        @click.prevent.stop="emits('openPreview', card.parent_detail)"
+        @click.prevent.stop="
+          emits('openPreview', {
+            ...card.parent_detail,
+            project_detail: { identifier: card.project_detail.identifier },
+            project: card.project,
+          })
+        "
       />
     </div>
 
@@ -49,11 +55,7 @@
         :priority="card?.priority ?? 'Нет'"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         @refresh="
           () => {
@@ -71,11 +73,7 @@
         :date="card?.target_date"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         @refresh="emits('updateTable', 'targetDate', card, entity)"
       />
@@ -91,11 +89,7 @@
         :issue="card"
         :states-from-cache="statesCache[card.project]"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card?.project_detail ?? project,
-            'change-issue-status',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-status')
         "
         @refresh="
           (status) => {
@@ -152,11 +146,7 @@
         :issueid="card.id"
         :current-sprints="card.sprints ?? []"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(
-            card,
-            card.project_detail ?? project,
-            'change-issue-primary',
-          )
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
         class="selectors__single-selector"
         @refresh="

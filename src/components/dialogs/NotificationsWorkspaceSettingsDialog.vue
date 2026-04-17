@@ -6,9 +6,7 @@
   >
     <template #header>
       <h6 class="q-mb-sm q-mt-sm">
-        Настройка уведомлений пространства "{{
-          props.workspace.name
-        }}"
+        Настройка уведомлений пространства "{{ props.workspace.name }}"
       </h6>
     </template>
   </BaseNotificationsSettingsDialog>
@@ -26,15 +24,12 @@ const props = defineProps<{
   workspace: DtoWorkspaceWithCount;
 }>();
 
-
-const workspaceStore = useWorkspaceStore()
+const workspaceStore = useWorkspaceStore();
 
 const getUserSettings = async () => {
   if (!props.workspace.slug) return;
 
-  return workspaceStore.getWorkspaceNotifications(
-    props.workspace.slug as string,
-  );
+  return workspaceStore.getMeInWorkspace(props.workspace.slug as string);
 };
 
 const saveUserSettings = async (settings: any) => {

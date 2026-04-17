@@ -13,10 +13,11 @@ import {
   TypesActivityTable,
   DtoUserLight,
   DtoProjectLight,
-  DtoProjectFavorites,
   AiplanUserUpdateRequest,
   AiplanPasswordResponse,
   DtoEntityActivityFull,
+  DtoWorkspaceMember,
+  DtoProjectMember,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const usersApi = new (withInterceptors(Users))();
@@ -29,8 +30,9 @@ interface IUserState {
   userActivity: DaoPaginationResponse;
   userActivityMap: TypesActivityTable;
   userProjects: DtoProjectLight[];
-  userFavouriteProjets: DtoProjectFavorites[];
   authToken: string;
+  userWorkspacesMemberships: Record<string, DtoWorkspaceMember>;
+  userProjectsMemberships: Record<string, DtoProjectMember>;
 }
 
 export const useUserStore = defineStore('user-store', {
@@ -41,8 +43,9 @@ export const useUserStore = defineStore('user-store', {
       userActivity: {} as DaoPaginationResponse,
       userActivityMap: {} as TypesActivityTable,
       userProjects: [] as DtoProjectLight[],
-      userFavouriteProjets: [] as DtoProjectFavorites[],
       authToken: undefined as unknown as string,
+      userWorkspacesMemberships: {},
+      userProjectsMemberships: {},
     };
   },
   getters: {
@@ -146,12 +149,27 @@ export const useUserStore = defineStore('user-store', {
       });
     },
 
-    async getFavouriteProjects(workspaceSlug: string): Promise<void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    async getUserWorkspacesMemberships() {
+      const wsMemberships = await usersApi
+        .getCurrentUserWorkspaceMemberships([])
+        .then((res) => res.data);
+      this.userWorkspacesMemberships = {};
+      wsMemberships.forEach((el) => {
+        if (el.workspace_id)
+          this.userWorkspacesMemberships[el.workspace_id] = el;
+      });
+    },
 
-      await projectsApi
-        .getFavoriteProjects(workspaceSlug)
-        .then((res) => (this.userFavouriteProjets = res.data));
+    async getUserProjectsMemberships() {
+      const projectMemberships = await usersApi
+        .getCurrentUserProjectMemberships([])
+        .then((res) => res.data);
+      this.userProjectsMemberships = {};
+      projectMemberships.forEach((el) => {
+        if (el.project_id) {
+          this.userProjectsMemberships[el.project_id] = el;
+        }
+      });
     },
 
     async addProjectToFavorites(

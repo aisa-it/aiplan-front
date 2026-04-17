@@ -606,14 +606,8 @@ const transfer = async () => {
 };
 
 const filterProject = (val: string, update: any) => {
-  const options = (workspaceProjects.value as IProject[]).filter(
-    (project) =>
-      project?.current_user_membership ||
-      rolesStore.hasPermissionByIssue(
-        props.issue.id,
-        projectStore.project,
-        'transfer-issue',
-      ),
+  const options = (workspaceProjects.value as IProject[]).filter((project) =>
+    rolesStore.hasPermissionByProject(project, 'transfer-issue'),
   );
 
   if (val === '') {

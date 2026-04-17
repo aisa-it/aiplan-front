@@ -47,12 +47,6 @@
       </q-item-section>
       <q-space />
 
-      <MutedIcon
-        v-if="isMutedProject(id)"
-        :width="16"
-        :height="16"
-        class="q-mr-sm"
-      />
       <div style="display: flex; align-items: center">
         <q-btn
           v-if="hasPermissionByProject(project, 'add-to-fav')"
@@ -75,7 +69,9 @@
           <HintTooltip v-else>Добавить в избранное</HintTooltip>
         </q-btn>
         <MenuActions
-          v-if="project && hasPermissionByProject(project, 'show-project-popup')"
+          v-if="
+            project && hasPermissionByProject(project, 'show-project-popup')
+          "
           :items="getProjectMenuItems()"
         />
       </div>
@@ -108,7 +104,6 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import AvatarImage from './AvatarImage.vue';
 import LinkIcon from './icons/LinkIcon.vue';
 import UnmutedIcon from './icons/UnmutedIcon.vue';
-import MutedIcon from './icons/MutedIcon.vue';
 
 import SettingsIcon from './icons/SettingsIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
@@ -148,13 +143,13 @@ const props = withDefaults(
 
 // stores
 const userStore = useUserStore();
-const { hasPermissionByProject } = useRolesStore();
+const { hasPermissionByProject, getProjectRole } = useRolesStore();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
 // store to refs
-const { currentWorkspaceSlug, workspaceProjects } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const router = useRouter();
 const route = useRoute();
@@ -162,17 +157,6 @@ const route = useRoute();
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
 const selectedProject = ref();
-const isMutedProject = (projectID: string) => {
-  let notifications = workspaceProjects.value.find(
-    (project) => project.id === projectID,
-  )?.current_user_membership?.notification_settings;
-  let isMuted = false;
-
-  for (let n in notifications) {
-    if (notifications[n] === true) return (isMuted = true);
-  }
-  return isMuted;
-};
 
 // functions
 
@@ -226,7 +210,7 @@ const getProjectMenuItems = () => {
     },
   });
 
-  if (props.project?.current_user_membership.role === 15) {
+  if (getProjectRole(props.project?.id) === 15) {
     items.push({
       text: 'Уведомления проекта',
       icon: UnmutedIcon,

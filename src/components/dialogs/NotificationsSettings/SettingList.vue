@@ -1,6 +1,9 @@
 <template>
   <q-card class="setting-card">
-    <div class="sub-text q-ml-sm q-my-sm"><slot name="subtitle"></slot></div>
+    <div class="sub-text q-ml-sm q-my-sm">
+      <p v-if="disable" class="text-warning q-mb-sm">Уведомления данного типа отключены глобально в профиле</p>
+      <slot name="subtitle"></slot>
+    </div>
     <div class="notification-header">
       <div style="font-size: 14px; font-weight: 600">Название</div>
       <span style="text-align: center">Автор</span>
@@ -16,6 +19,7 @@
         <q-checkbox
           class="justify-center"
           v-model="emailAllSettings"
+          :disable="disable"
           @update:model-value="
             () => {
               setAllSettings(authorSetting, emailAllSettings);
@@ -26,6 +30,7 @@
         <q-checkbox
           class="justify-center"
           v-model="telegramAllSettings"
+          :disable="disable"
           @update:model-value="
             () => {
               setAllSettings(memberSettings, telegramAllSettings);
@@ -39,6 +44,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_name"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -46,6 +52,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_name"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -56,6 +63,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_desc"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -63,6 +71,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_desc"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -73,6 +82,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_state"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -80,6 +90,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_state"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -91,6 +102,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_assignees"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -98,6 +110,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_assignees"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -108,6 +121,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_watchers"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -115,6 +129,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_watchers"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -125,6 +140,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_priority"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -132,6 +148,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_priority"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -142,6 +159,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_issue_new"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -149,6 +167,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_issue_new"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -159,6 +178,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_parent"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -166,6 +186,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_parent"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -176,6 +197,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_blocks"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -183,6 +205,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_blocks"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -193,6 +216,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_blockedBy"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -200,6 +224,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_blockedBy"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -210,6 +235,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_targetDate"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -217,6 +243,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_targetDate"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -227,6 +254,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_labels"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -234,6 +262,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_labels"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -244,6 +273,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_links"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -251,6 +281,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_links"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -261,6 +292,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_comments"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -268,6 +300,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_comments"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -278,6 +311,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_attachments"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -285,6 +319,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_attachments"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -295,6 +330,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_issue_transfer"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -302,6 +338,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_issue_transfer"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -312,6 +349,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_sub_issue"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -319,6 +357,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_sub_issue"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -329,6 +368,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_linked"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -336,6 +376,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_linked"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -346,6 +387,7 @@
         <q-checkbox
           class="justify-center"
           v-model="authorSetting.disable_deadline"
+          :disable="disable"
           @update:model-value="
             emits('updateEmail', invertedSettings(authorSetting))
           "
@@ -353,6 +395,7 @@
         <q-checkbox
           class="justify-center"
           v-model="memberSettings.disable_deadline"
+          :disable="disable"
           @update:model-value="
             emits('updateTelegram', invertedSettings(memberSettings))
           "
@@ -378,7 +421,12 @@ const emits = defineEmits<{
   updateEmail: [value: IProjectNotificationSettings];
 }>();
 
-const props = defineProps(['project', 'authorSettings', 'memberSettings']);
+const props = defineProps([
+  'project',
+  'authorSettings',
+  'memberSettings',
+  'disable',
+]);
 
 const emailAllSettings = ref(false);
 const telegramAllSettings = ref(false);

@@ -14,16 +14,13 @@ import {
   DtoProject,
   DtoProjectMember,
   DtoProjectMemberLight,
+  DtoProjectMemberWithLead,
   DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { allColumns } from 'src/modules/issue-list/constants/tableColumns';
 import axios from 'axios';
 import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
-
-const workspaceStore = useWorkspaceStore();
-const { workspaceProjects } = storeToRefs(workspaceStore);
-const rolesStore = useRolesStore();
 
 const projectsApi = new (withInterceptors(Projects))();
 const usersApi = new (withInterceptors(Users))();
@@ -33,7 +30,7 @@ interface IProjectState {
   projectLabels: DtoLabelLight[];
   projectMembers: DtoProjectMemberLight[];
   currentProjectID: string;
-  meInProject: DtoProjectMember;
+  meInProject: DtoProjectMemberWithLead;
   isLoadProjectInfo: boolean;
   errorLoadProjects: boolean;
   projectProps: TypesViewProps | null;
@@ -48,8 +45,8 @@ export const useProjectStore = defineStore('project-store', {
       project: undefined as unknown as any,
       projectLabels: [] as DtoLabelLight[],
       projectMembers: [] as DtoProjectMemberLight[],
-      currentProjectID: '', // TODO нигде не обновляется, хотя используется в setProjectInfo
-      meInProject: {} as DtoProjectMember,
+      currentProjectID: '',
+      meInProject: {} as DtoProjectMemberWithLead,
       isLoadProjectInfo: false,
       errorLoadProjects: false,
       projectProps: null,
@@ -60,6 +57,9 @@ export const useProjectStore = defineStore('project-store', {
 
   getters: {
     currentProject(): any {
+      const workspaceStore = useWorkspaceStore();
+      const { workspaceProjects } = storeToRefs(workspaceStore);
+
       const projectID = this.router.currentRoute.value.params['project'];
       return workspaceProjects.value.find(
         (e: any) => e.id == projectID || e.identifier === projectID,
@@ -73,6 +73,10 @@ export const useProjectStore = defineStore('project-store', {
     },
     isGanttDiagramm(): boolean | undefined {
       return this.projectProps?.issueView === 'gantt_chart';
+    },
+
+    isCalendar(): boolean | undefined {
+      return this.projectProps?.issueView === 'calendar';
     },
 
     isKanbanEnabled(): boolean | undefined {
@@ -112,37 +116,30 @@ export const useProjectStore = defineStore('project-store', {
   },
 
   actions: {
-    setProjectInfo() {
-      this.project = workspaceProjects.value.find(
-        (e: any) => e.id == this.currentProjectID,
-      );
-
-      if (this.project) {
-        this.project.public = valToNet(this.project.public);
-        this.project.emoji = getProjectEmojiViaCode(
-          this.project.emoji?.value ?? this.project.emoji,
-        );
-      }
-
-      rolesStore.defineProjectRole(this.project);
-    },
-
     async getProjectInfo(workspaceSlug: string, projectID: string) {
       if (!workspaceSlug || !projectID) return;
 
       await projectsApi
         .getProject(workspaceSlug, projectID)
-        .then((res) => {
+        .then(async (res) => {
+          const rolesStore = useRolesStore();
           this.project = res.data;
+
+          this.meInProject = await this.getCurrentMembership(
+            workspaceSlug,
+            projectID,
+          );
 
           // TODO обновление publick и emoji нарушает типизацию
           this.project.public = valToNet(this.project.public);
           this.project.emoji = getProjectEmojiViaCode(this.project.emoji);
 
-          rolesStore.defineProjectRole(res?.data);
+          rolesStore.defineProjectRole(this.meInProject);
 
           // Проверяем есть ли доступ к проекту
-          if (!rolesStore.hasPermissionByProject(res.data, 'show-project')) {
+          if (
+            !rolesStore.hasPermissionByProject(this.project, 'show-project')
+          ) {
             window.location.href = '/access-denied';
           }
         })
@@ -306,19 +303,27 @@ export const useProjectStore = defineStore('project-store', {
 
     // ----------------------------- ME IN PROJECT -----------------------------
 
+    async getCurrentMembership(
+      workspaceSlug: string,
+      projectID: string,
+    ): Promise<DtoProjectMember> {
+      return await projectsApi
+        .getProjectCurrentMembership(workspaceSlug, projectID)
+        .then((res) => res.data);
+    },
+
     async getMeInProject(
       workspaceSlug: string,
       projectID: string,
     ): Promise<DtoProjectMember | undefined> {
       if (!projectID) return;
 
-      return projectsApi
-        .getProjectMemberMe(workspaceSlug, projectID)
+      return this.getCurrentMembership(workspaceSlug, projectID)
         .then((res) => {
-          this.meInProject = res.data;
+          this.meInProject = res;
 
           // решение для старых вариантов группировок, подменяем здесь значения на новые
-          const props = res.data.view_props;
+          const props = res.view_props;
           if (
             Object.keys(PARSED_GROUP).includes(
               props?.filters?.group_by as string,
@@ -336,7 +341,7 @@ export const useProjectStore = defineStore('project-store', {
           props.hideSubIssues = props.hideSubIssues ?? false;
 
           this.projectProps = props || null;
-          return res.data;
+          return res;
         })
         .catch((err) => {
           if (err.response.status == 404) {

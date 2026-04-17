@@ -36,6 +36,7 @@
               : [breadCrumbsHistory[breadCrumbsHistory.length - 1]]"
             :key="index"
             :to="crumb?.url"
+            @click="crumb?.click?.()"
           >
             <HomeIcon
               v-if="!workspaceInfo?.logo && crumb?.type === 'workspace'"
@@ -85,7 +86,7 @@
             <span
               v-show="crumb?.name"
               :style="`max-width: calc((100vw - ${
-                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 250
+                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 150
               }px) / ${
                 Screen.width > 600 ? breadCrumbsHistory.length : 1
               }) !important`"
@@ -198,6 +199,7 @@ const breadCrumbsHistory = computed(() => {
       name: ` ${project.value?.name ?? ''}`,
       url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
+      click: () => singleIssueStore.closePreview(),
     };
   else if (user.value && currentPath.includes('profile'))
     existPath[1] = {
@@ -223,7 +225,7 @@ const breadCrumbsHistory = computed(() => {
               issueData.value?.parent_detail.sequence_id
             : ''
         } `,
-        url: `/${workspaceInfo.value.slug}/projects/${project.value?.identifier || project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
+        url: `/${workspaceInfo.value.slug}/projects/${issueData.value?.project_detail.identifier ?? project.value?.identifier ?? project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
 
         type: 'issue',
       };

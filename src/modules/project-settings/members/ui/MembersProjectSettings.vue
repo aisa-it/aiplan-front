@@ -3,7 +3,7 @@
   <div v-else>
     <q-table
       flat
-      class="q-my-md q-px-none table-bottom-reverse"
+      class="q-my-xs q-px-none table-bottom-reverse"
       :columns="columns"
       :rows="rows"
       row-key="user"
@@ -24,6 +24,9 @@
       </template>
 
       <template v-slot:top>
+        <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">
+          Пользователей в проекте: {{ usersCount }}
+        </p>
         <div class="flex q-table__title q-mr-sm">Пользователи</div>
         <q-input
           label="Поиск"
@@ -38,7 +41,7 @@
         </q-input>
         <q-space />
         <q-btn
-          v-if="canLeaveProject"
+          v-if="user.is_superuser"
           no-caps
           class="delete-btn q-mr-sm"
           @click="isLeaveProject = true"
@@ -156,7 +159,7 @@
 // core
 import { useMeta, debounce } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -224,12 +227,7 @@ const isLeaveProject = ref(false);
 const isInviteOpen = ref(false);
 const isDeleteOpen = ref(false);
 const searchQuery = ref<string>();
-const canLeaveProject = computed(
-  () =>
-    user.value?.is_superuser &&
-    project.value?.current_user_membership?.member_id === user.value.id &&
-    project.value?.current_user_membership?.id,
-);
+const usersCount = ref<number | undefined>(0);
 
 const columns = [
   {
@@ -303,7 +301,10 @@ async function onRequest(p: { pagination: IQuasarPaginationValues }) {
       },
     )
     .then((res) => {
-      if (res) allProjectMembers.value = res.result;
+      if (res) {
+        allProjectMembers.value = res.result;
+        usersCount.value = res?.count;
+      };
     });
 
   await projectStore
@@ -339,23 +340,12 @@ async function refresh() {
   );
   if (meInProject) me.value = meInProject;
 
-  // Получаем количество участников пространства
-  const membersCountResponse = await workspaceStore.getWorkspaceMembers(
-    currentWorkspaceSlug.value as string,
-    { offset: 0, limit: 0 },
-  );
-
-  // Запрашиваем всех участников пространства с лимитом равным общему количеству
-  if (membersCountResponse?.count) {
-    await workspaceStore
-      .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
-        offset: 0,
-        limit: membersCountResponse.count,
-      })
-      .then((res) => (wsMembers.value = res?.result || []));
-  } else {
-    wsMembers.value = [];
-  }
+  await workspaceStore
+    .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
+      offset: 0,
+      limit: -1,
+    })
+    .then((res) => (wsMembers.value = res?.result ?? []));
 
   setAnotherTitle(project.value.name);
 }
