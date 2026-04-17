@@ -132,3 +132,14 @@ const handleDeleteFromMyFilters = async (filter_id?: string) => {
   });
 };
 </script>
+
+<style scoped lang="scss">
+.scrollable-content {
+  scrollbar-width: auto !important;
+  scrollbar-color: auto !important;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  display: block !important;
+}
+</style>

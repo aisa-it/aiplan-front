@@ -63,6 +63,7 @@ import { useDefaultIssues } from '../composables/useDefaultIssues';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { QuasarPagination } from 'src/modules/issue-list/composables/useGroupedIssues';
 
 const props = defineProps<{
   contextType: 'project' | 'sprint';
@@ -150,9 +151,10 @@ async function closePreview() {
   currentIssueID.value = '';
 }
 
-function parsePagination(pagination) {
+function parsePagination(pagination: QuasarPagination) {
   return {
     only_count: false,
+    only_active: contextProps.value?.showOnlyActive,
     hide_sub_issues: contextProps.value.hideSubIssues ?? false,
     draft: contextProps.value?.draft ?? true,
     order_by: pagination.sortBy,
