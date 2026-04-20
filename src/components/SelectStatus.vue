@@ -61,10 +61,10 @@
   </q-select>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 // store
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -76,175 +76,171 @@ import {
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
-import { useIssuesStatesFlowStore } from 'src/stores/issues-states-flow-store';
+import {
+  useIssuesStatesFlowStore,
+} from 'src/stores/issues-states-flow-store';
+import { useProjectStatesFlowStore } from 'src/stores/project-states-flow-store';
 
 // utils
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
 
 // interfaces
 import { IState } from 'src/interfaces/states';
+import type { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { isObjectsEqual } from 'src/utils/helpers';
 
-export default defineComponent({
+defineOptions({
   name: 'SelectStatus',
-  props: {
-    projectid: {
-      type: String,
-      required: true,
-    },
-    issueid: {
-      type: String,
-      required: false,
-    },
-    status: {
-      type: Object,
-      required: false,
-    },
-    issue: {
-      type: Object,
-      required: false,
-    },
-    statesFromCache: {
-      type: Object,
-      required: false,
-    },
-    isAdaptiveSelect: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    isDisabled: { type: Boolean, required: false, default: () => false },
-    label: { type: String, required: false, default: () => '' },
-  },
-  emits: [
-    'setStatus',
-    'update-initial-status',
-    'update:status',
-    'refresh',
-    'popup-show',
-    'popup-hide',
-  ],
-  setup(props, { emit }) {
-    const api = useAiplanStore();
-    const statesStore = useStatesStore();
-    const workspaceStore = useWorkspaceStore();
-    const singleIssueStore = useSingleIssueStore();
-    const { setNotificationView } = useNotificationStore();
-    const issuesStatesFlowStore = useIssuesStatesFlowStore();
-
-    const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-
-    const states = ref<IState[]>([]);
-    const open = ref();
-
-    const selectStatusRef = ref();
-    const { getWidthStyle: selectStatusWidth } =
-      useResizeObserverSelect(selectStatusRef);
-
-    const refresh = async () => {
-      const { data } = props.issue?.project_detail
-        ? { data: props.statesFromCache }
-        : await statesStore.getStatesByProject(
-            currentWorkspaceSlug.value,
-            props.projectid,
-          );
-      let arr: any = [];
-      for (const n in data) {
-        arr = arr.concat(data[n]);
-      }
-      // Ограничиваем список переходов по бизнес-процессу (если ручка доступна).
-      // Фолбэк: если ручка недоступна/пусто/ошибка — показываем все статусы.
-      if (props.issueid && currentWorkspaceSlug.value) {
-        try {
-          const available = await issuesStatesFlowStore.getAvailableStates(
-            currentWorkspaceSlug.value,
-            props.projectid,
-            props.issueid,
-          );
-          const allowedIds = new Set(
-            Object.values(available ?? {}).map((s) => s.id),
-          );
-          if (allowedIds.size) {
-            const currentId = (props.status)?.id;
-            arr = arr.filter((s) => allowedIds.has(s.id) || s.id === currentId);
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      states.value = arr;
-
-      if (!props.status) {
-        emit(
-          'update-initial-status',
-          arr.find((status) => status.default === true) || arr[0],
-        );
-      }
-    };
-
-    const showNotification = (type: 'success' | 'error', msg?: string) => {
-      setNotificationView({
-        open: true,
-        type: type,
-        customMessage: msg,
-      });
-    };
-
-    const issueStateUpdate = async (state: IState) => {
-      if (state.id === props.status?.id) return;
-
-      if (!props.issueid) {
-        emit('update:status', state);
-      } else {
-        if (!currentWorkspaceSlug.value) return;
-        await singleIssueStore
-          .updateIssueData(
-            currentWorkspaceSlug.value,
-            props.projectid,
-            props.issueid,
-            {
-              state: state.id,
-            },
-          )
-          .then(() => {
-            refresh();
-            useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
-            showNotification('success');
-            emit('setStatus', state);
-            emit('refresh');
-          });
-      }
-    };
-
-    onMounted(() => {
-      if (!props.issueid) {
-        refresh();
-      }
-    });
-
-    watch(
-      () => props.projectid,
-      () => refresh(),
-    );
-
-    watch(
-      () => props.statesFromCache,
-      () => refresh(),
-    );
-
-    watch(
-      () => props.status,
-      () => (open.value = props.status),
-    );
-    return {
-      api,
-      open,
-      states,
-      refresh,
-      selectStatusRef,
-      issueStateUpdate,
-      selectStatusWidth,
-    };
-  },
 });
+
+const props = 
+  defineProps<{
+    projectid: string;
+    issueid?: string;
+    status?: {
+      id?: string;
+      color?: string;
+      name?: string;
+    };
+    issue?: {
+      project_detail?: unknown;
+    };
+    statesFromCache?: Record<string, IState[]>;
+    isAdaptiveSelect?: boolean;
+    isDisabled?: boolean;
+    label?: string;
+  }>();
+
+const emit = defineEmits([
+  'setStatus',
+  'update-initial-status',
+  'update:status',
+  'refresh',
+  'popup-show',
+  'popup-hide',
+]);
+
+useAiplanStore();
+const statesStore = useStatesStore();
+const workspaceStore = useWorkspaceStore();
+const singleIssueStore = useSingleIssueStore();
+const { setNotificationView } = useNotificationStore();
+const issuesStatesFlowStore = useIssuesStatesFlowStore();
+const projectStatesFlowStore = useProjectStatesFlowStore();
+
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+const states = ref<IState[]>([]);
+const open = ref();
+
+const selectStatusRef = ref();
+useResizeObserverSelect(selectStatusRef);
+
+const refresh = async () => {
+  const workspaceSlug = currentWorkspaceSlug.value;
+  const { data } = props.issue?.project_detail
+    ? { data: props.statesFromCache }
+    : await statesStore.getStatesByProject(workspaceSlug, props.projectid);
+  let arr: IState[] = [];
+  for (const n in data) {
+    arr = arr.concat(data[n]);
+  }
+  // Ограничиваем список переходов по бизнес-процессу (если ручка доступна).
+  // Фолбэк: если ручка недоступна/пусто/ошибка — показываем все статусы.
+  if (currentWorkspaceSlug.value) {
+    try {
+      if (props.issueid) {
+        const available = await issuesStatesFlowStore.getAvailableStates(
+          currentWorkspaceSlug.value,
+          props.projectid,
+          props.issueid,
+        );
+        arr = filterStatesByAllowedTransitions(arr, available, props.status?.id);
+      } else {
+        const available = await projectStatesFlowStore.getAvailableStatesNewIssue(
+          currentWorkspaceSlug.value,
+          props.projectid,
+        );
+        arr = filterStatesByAllowedTransitions(arr, available, props.status?.id);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  states.value = arr;
+
+  if (!props.status) {
+    emit(
+      'update-initial-status',
+      arr.find((status) => status.default === true) || arr[0],
+    );
+  }
+};
+
+const filterStatesByAllowedTransitions = (
+  states: IState[],
+  available: DtoStateLight[],
+  currentStatusId: string | undefined,
+) => {
+  const allowedIds = new Set(available.map((s) => s.id));
+  if (!allowedIds.size) return states;
+  return states.filter(
+    (s) => allowedIds.has(s.id) || s.id === currentStatusId,
+  );
+};
+
+const showNotification = (type: 'success' | 'error', msg?: string) => {
+  setNotificationView({
+    open: true,
+    type: type,
+    customMessage: msg,
+  });
+};
+
+const issueStateUpdate = async (state: IState) => {
+  if (state.id === props.status?.id) return;
+
+  if (!props.issueid) {
+    emit('update:status', state);
+  } else {
+    if (!currentWorkspaceSlug.value) return;
+    await singleIssueStore
+      .updateIssueData(currentWorkspaceSlug.value, props.projectid, props.issueid, {
+        state: state.id,
+      })
+      .then(() => {
+        refresh();
+        useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
+        showNotification('success');
+        emit('setStatus', state);
+        emit('refresh');
+      });
+  }
+};
+
+onMounted(() => {
+  if (!props.issueid) {
+    refresh();
+  }
+});
+
+watch(
+  () => props.projectid,
+  () => refresh(),
+);
+
+watch(
+  () => props.statesFromCache,
+  (newVal, oldVal) => {
+    if (!isObjectsEqual(newVal, oldVal)) {
+      refresh();
+    }
+  },
+);
+
+watch(
+  () => props.status,
+  () => (open.value = props.status),
+);
 </script>
