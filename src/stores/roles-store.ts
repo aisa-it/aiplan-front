@@ -133,13 +133,6 @@ export const useRolesStore = defineStore('roles-store', {
 
       const issue_role = this.getIssueNameRole(issue);
 
-      if (issue.name === 'екуц') {
-        console.log('issue: ', issue)
-        console.log(action)
-        console.log('ws_role: ', ws_role)
-        console.log('project_role: ', project_role)
-        console.log('issue_role: ', issue_role)
-      }
       return checkPermissionByIssue(ws_role, project_role, issue_role, action);
     },
 
