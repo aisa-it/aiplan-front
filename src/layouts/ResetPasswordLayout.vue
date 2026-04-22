@@ -6,22 +6,12 @@
   </q-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { useMeta } from 'quasar';
 
 import ResetPasswordPage from 'src/pages/ResetPasswordPage.vue';
 
-export default defineComponent({
-  name: 'ResetPasswordLayout',
-  components: {
-    ResetPasswordPage,
-  },
-  setup() {
-    useMeta({
-      title: 'АИПлан | Инструмент управления проектами.',
-    });
-    return {};
-  },
+useMeta({
+  title: 'АИПлан | Инструмент управления проектами.',
 });
 </script>
