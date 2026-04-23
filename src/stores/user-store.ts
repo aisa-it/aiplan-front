@@ -177,8 +177,7 @@ export const useUserStore = defineStore('user-store', {
       project: AiplanAddProjectToFavoritesRequest,
     ): Promise<void> {
       await projectsApi
-        .addProjectToFavorites(workspaceSlug, project)
-        .then(async () => await this.getFavouriteProjects(workspaceSlug));
+        .addProjectToFavorites(workspaceSlug, project);
     },
 
     async removeProjectFromFavorites(
@@ -186,8 +185,7 @@ export const useUserStore = defineStore('user-store', {
       projectID: string,
     ): Promise<void> {
       await projectsApi
-        .removeProjectFromFavorites(workspaceSlug, projectID)
-        .then(async () => await this.getFavouriteProjects(workspaceSlug));
+        .removeProjectFromFavorites(workspaceSlug, projectID);
     },
 
     async setNameFromOnboard(data: DtoUser): Promise<DtoUser | any> {

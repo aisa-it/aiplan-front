@@ -114,6 +114,8 @@ import MenuActions from './menu/MenuActions.vue';
 import {
   SUCCESS_ADD_TO_FAVORITE,
   SUCCESS_REMOVE_FROM_FAVORITE,
+  ERROR_REMOVE_FROM_FAVORITE,
+  ERROR_ADD_TO_FAVORITE,
 } from 'src/constants/notifications';
 import StarIcon from './icons/StarIcon.vue';
 
@@ -169,7 +171,15 @@ const addToFavorites = async (projectID: string) => {
         type: 'success',
         customMessage: SUCCESS_ADD_TO_FAVORITE,
       });
-      workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
+      workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string);
+    })
+    .catch((error) => {
+      console.error(error);
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage: ERROR_ADD_TO_FAVORITE,
+      });
     });
 };
 
@@ -183,6 +193,14 @@ const removeFromFavorites = async (projectID: string) => {
         customMessage: SUCCESS_REMOVE_FROM_FAVORITE,
       });
       workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string);
+    })
+    .catch((error) => {
+      console.error(error);
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage: ERROR_REMOVE_FROM_FAVORITE,
+      });
     });
 };
 
