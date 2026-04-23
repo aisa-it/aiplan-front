@@ -124,6 +124,18 @@ const loadAllData = async () => {
 };
 const bus = inject('bus') as EventBus;
 
+const STORAGE_KEY = 'leftDrawerOpen';
+
+const syncDrawerFromStorage = (e: StorageEvent) => {
+  if (e.key === STORAGE_KEY) {
+    try {
+      leftDrawerOpen.value = JSON.parse(e.newValue as string);
+    } catch {
+      leftDrawerOpen.value = false;
+    }
+  }
+};
+
 onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
 
@@ -169,13 +181,15 @@ onBeforeMount(async () => {
     );
   }
 
-  leftDrawerOpen.value =
-    Boolean(JSON.parse(localStorage.getItem('leftDrawerOpen') as string)) ??
-    true;
+  const stored = localStorage.getItem(STORAGE_KEY);
+  leftDrawerOpen.value = stored ? JSON.parse(stored) : true;
+
+  window.addEventListener('storage', syncDrawerFromStorage);
 });
 
 onUnmounted(() => {
   clearInterval(refreshInterval.value);
+  window.removeEventListener('storage', syncDrawerFromStorage);
 });
 
 watch(
@@ -206,6 +220,6 @@ const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
-  localStorage.setItem('leftDrawerOpen', String(leftDrawerOpen.value));
+  localStorage.setItem(STORAGE_KEY, String(leftDrawerOpen.value));
 };
 </script>
