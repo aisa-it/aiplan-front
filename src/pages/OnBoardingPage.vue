@@ -95,9 +95,9 @@
   </q-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
@@ -118,136 +118,112 @@ import {
 // constants
 import { ERROR_IDENTITY_USER } from 'src/constants/notifications';
 
-export default defineComponent({
-  name: 'OnBoardingPage',
-  setup() {
-    // router
-    const router = useRouter();
+const router = useRouter();
 
-    // stores
-    const api = useAiplanStore();
-    const userStore = useUserStore();
-    const utilsStore = useUtilsStore();
-    const { botURL } = storeToRefs(utilsStore);
+// stores
+const api = useAiplanStore();
+const userStore = useUserStore();
+const utilsStore = useUtilsStore();
+const { botURL } = storeToRefs(utilsStore);
 
-    // store to refs
-    const { user, userWorkspaces } = storeToRefs(userStore);
+// store to refs
+const { user, userWorkspaces } = storeToRefs(userStore);
 
-    // vars
-    const lastName = ref();
-    const firstName = ref();
-    const username = ref();
+// vars
+const lastName = ref();
+const firstName = ref();
+const username = ref();
 
-    const me = ref<{
-      last_name: string;
-      first_name: string;
-      username: string;
-      telegram_id?: number | null;
-    }>({
-      last_name: '',
-      first_name: '',
-      username: '',
-      telegram_id: null,
-    });
-    const isErrorUserName = ref<boolean>(false);
-    const errorMessageUserName = ref<string>('');
+const me = ref<{
+  last_name: string;
+  first_name: string;
+  username: string;
+  telegram_id?: number | null;
+}>({
+  last_name: '',
+  first_name: '',
+  username: '',
+  telegram_id: null,
+});
+const isErrorUserName = ref<boolean>(false);
+const errorMessageUserName = ref<string>('');
 
-    function openTgLink() {
-      window.open(botURL.value, '_blank', 'noopener,noreferrer');
-    }
+function openTgLink() {
+  window.open(botURL.value, '_blank', 'noopener,noreferrer');
+}
 
-    watch(
-      () => user.value,
-      () => {
-        me.value = {
-          last_name: user.value?.last_name ?? '',
-          first_name: user.value?.first_name ?? '',
-          username: user.value?.username ?? '',
-          telegram_id: user.value?.telegram_id,
-        };
-
-        isErrorUserName.value = false;
-        errorMessageUserName.value = '';
-      },
-    );
-
-    const goForward = async () => {
-      await userStore
-        .getUserWorkspaces()
-        .then(() =>
-          router.replace(
-            `/${
-              user.value?.last_workspace_slug ||
-              userWorkspaces.value[0]?.slug ||
-              'no-workspace'
-            }`,
-          ),
-        );
+watch(
+  () => user.value,
+  () => {
+    me.value = {
+      last_name: user.value?.last_name ?? '',
+      first_name: user.value?.first_name ?? '',
+      username: user.value?.username ?? '',
+      telegram_id: user.value?.telegram_id,
     };
 
-    const handleSaveName = async () => {
-      lastName.value.validate();
-      firstName.value.validate();
-      username.value.validate();
-
-      me.value.telegram_id
-        ? (me.value.telegram_id = Number(me.value.telegram_id))
-        : (me.value.telegram_id = null);
-
-      if (
-        firstName.value.hasError &&
-        lastName.value.hasError &&
-        username.value.hasError &&
-        (me.value.telegram_id as unknown as any).hasError
-      )
-        return;
-
-      await api
-        .setNameFromOnboard(me.value)
-        .then(async () => {
-          await goForward();
-        })
-        .catch(async (err) => {
-          if (err.response.status === 409 && err.response.data.code === 6002) {
-            isErrorUserName.value = true;
-            errorMessageUserName.value = ERROR_IDENTITY_USER;
-            return;
-          }
-
-          err.response.status === 304 ? await goForward() : null;
-        });
-    };
-
-    const handleUpdateUserName = () => {
-      isErrorUserName.value = false;
-      errorMessageUserName.value = '';
-    };
-
-    onMounted(async () => {
-      await userStore.getUserInfo().then((data) => {
-        return data;
-      });
-      await utilsStore.getNotificationBotUrl();
-    });
-
-    return {
-      me,
-      lastName,
-      firstName,
-      username,
-      isErrorUserName,
-      errorMessageUserName,
-      botURL,
-      handleSaveName,
-      openTgLink,
-      isEmpty,
-      maxLength,
-      isUsername,
-      notDefisOnly,
-      latinAndCyrillic,
-      handleUpdateUserName,
-    };
+    isErrorUserName.value = false;
+    errorMessageUserName.value = '';
   },
+);
+
+const goForward = async () => {
+  await userStore
+    .getUserWorkspaces()
+    .then(() =>
+      router.replace(
+        `/${
+          user.value?.last_workspace_slug ||
+          userWorkspaces.value[0]?.slug ||
+          'no-workspace'
+        }`,
+      ),
+    );
+};
+
+const handleSaveName = async () => {
+  lastName.value.validate();
+  firstName.value.validate();
+  username.value.validate();
+
+  me.value.telegram_id
+    ? (me.value.telegram_id = Number(me.value.telegram_id))
+    : (me.value.telegram_id = null);
+
+  if (
+    firstName.value.hasError &&
+    lastName.value.hasError &&
+    username.value.hasError &&
+    (me.value.telegram_id as unknown as any).hasError
+  )
+    return;
+
+  await api
+    .setNameFromOnboard(me.value)
+    .then(async () => {
+      await goForward();
+    })
+    .catch(async (err) => {
+      if (err.response.status === 409 && err.response.data.code === 6002) {
+        isErrorUserName.value = true;
+        errorMessageUserName.value = ERROR_IDENTITY_USER;
+        return;
+      }
+
+      err.response.status === 304 ? await goForward() : null;
+    });
+};
+
+const handleUpdateUserName = () => {
+  isErrorUserName.value = false;
+  errorMessageUserName.value = '';
+};
+
+onMounted(async () => {
+  await userStore.getUserInfo().then((data) => {
+    return data;
+  });
+  await utilsStore.getNotificationBotUrl();
 });
 </script>
 
