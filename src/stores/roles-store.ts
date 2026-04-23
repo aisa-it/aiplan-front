@@ -124,6 +124,7 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     hasPermissionByIssue(issue: DtoIssue, action: string) {
+
       const ws_role = this.getWsNameRole(
         this.getWsMembership(issue?.workspace ?? ''),
       );
