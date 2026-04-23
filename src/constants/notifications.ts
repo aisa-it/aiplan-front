@@ -65,7 +65,9 @@ const SUCCESS_SCRIPT_SAVE = 'Сценарий создан';
 
 // избранное
 const SUCCESS_ADD_TO_FAVORITE = 'Проект добавлен в избранное';
+const ERROR_ADD_TO_FAVORITE = 'Ошибка при добавлении проекта в избранное';
 const SUCCESS_REMOVE_FROM_FAVORITE = 'Проект удален из избранного';
+const ERROR_REMOVE_FROM_FAVORITE = 'Ошибка при удалении проекта из избранного';
 
 // задача
 const SUCCESS_CREATE_ISSUE = 'Задача создана';
@@ -155,7 +157,9 @@ export {
   SUCCESS_DELETE_SUBISSUE,
   DOWNLOAD_FILE_DEMO,
   SUCCESS_ADD_TO_FAVORITE,
+  ERROR_ADD_TO_FAVORITE,
   SUCCESS_REMOVE_FROM_FAVORITE,
+  ERROR_REMOVE_FROM_FAVORITE,
   ERROR_AUTH,
   ERROR_AUTH_BLOCKED,
   SUCCESS_ADD_ATTACHMENT,
