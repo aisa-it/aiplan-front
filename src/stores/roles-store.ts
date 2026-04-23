@@ -80,6 +80,8 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     getIssueNameRole(issue: DtoIssue): string {
+      if (this.getProjectRole(issue.project ?? '') < 10) return '';
+
       if (issue?.author_detail?.id === user.value.id) return 'author';
 
       const isAssignee = issue?.assignee_details?.find(
