@@ -47,8 +47,8 @@
     <div
       v-if="
         (workspaceProjects.length === 0 ||
-          !workspaceProjects?.find(
-            (project) => project?.current_user_membership,
+          !workspaceProjects?.find((project) =>
+            getProjectRole(project.id ?? ''),
           )) &&
         !route.fullPath.includes('settings') &&
         generalLoader === false
@@ -116,7 +116,7 @@ useMeta(() => {
 const loaderStore = useLoaderStore();
 const workspaceStore = useWorkspaceStore();
 const userStore = useUserStore();
-const { hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
 const utilsStore = useUtilsStore();
 
 //storesToRefs

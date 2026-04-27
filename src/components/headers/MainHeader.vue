@@ -225,7 +225,7 @@ const breadCrumbsHistory = computed(() => {
               issueData.value?.parent_detail.sequence_id
             : ''
         } `,
-        url: `/${workspaceInfo.value.slug}/projects/${project.value?.identifier || project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
+        url: `/${workspaceInfo.value.slug}/projects/${issueData.value?.project_detail.identifier ?? project.value?.identifier ?? project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
 
         type: 'issue',
       };

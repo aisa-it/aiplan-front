@@ -13,7 +13,7 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            pinIssue(props.row, workspaceSlug, project.identifier),
+            pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
           )
         "
       >
@@ -28,7 +28,7 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            unpinIssue(props.row, workspaceSlug, project.identifier),
+            unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
           )
         "
       >
@@ -154,9 +154,11 @@ const menuProps = computed(() => {
   return isControlled.value ? {} : { 'context-menu': true };
 });
 
+const issuesStore = useIssuesStore();
 const { sprintsList } = storeToRefs(useSprintStore());
 const { project } = storeToRefs(useProjectStore());
-const { pinIssue, unpinIssue } = useIssuesStore();
+const { pinIssue, unpinIssue } = issuesStore;
+const { refreshIssues } = storeToRefs(issuesStore);
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
@@ -206,7 +208,17 @@ const pinAndUnpinIssue = async (func: () => Promise<void>) => {
   try {
     await func();
     if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
-  } catch {}
+    refreshIssues.value = true;
+    emit('refresh');
+  } catch (err) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage:
+      'Произошла ошибка при закреплении/откреплении задачи',
+    });
+    throw err;
+  }
 };
 
 const transferIssue = (): void => {

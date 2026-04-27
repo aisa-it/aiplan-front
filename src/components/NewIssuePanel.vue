@@ -378,7 +378,7 @@ const issuesStore = useIssuesStore();
 const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
@@ -434,10 +434,11 @@ const loading = computed({
 const refresh = async () => {
   loading.value = true;
   await workspaceStore
-    .getWorkspaceProjects(currentWorkspaceSlug.value)
+    .getWorkspaceProjects(currentWorkspaceSlug.value as string)
     .then((d) => {
+      if (!d) return;
       projects.value = d.filter(
-        (project) => project?.current_user_membership?.role > 5,
+        (project) => getProjectRole(project.id ?? '') > 5,
       );
       if (project.value == null) {
         if (route.params?.project || props.project_detail?.id) {
@@ -623,9 +624,11 @@ const handleCreateSuccess = async (createdIssueData: any) => {
 
   await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
 
-  sprints.value.forEach((sprint) => {
-    updateSprint(sprint, issue.id);
-  });
+  if (hasPermissionByWorkspace(workspaceInfo?.value, 'change-sprint')) {
+    sprints.value.forEach((sprint) => {
+      updateSprint(sprint, issue.id);
+    });
+  }
 
   emits('ok');
 };

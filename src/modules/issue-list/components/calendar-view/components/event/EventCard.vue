@@ -58,11 +58,7 @@
             :issue="event.issueData"
             :status="event.issueData.state_detail"
             :isDisabled="
-              !hasPermissionByIssue(
-                event.issueData,
-                project,
-                'change-issue-status',
-              )
+              !hasPermissionByIssue(event.issueData, 'change-issue-status')
             "
             :states-from-cache="statesCache[project.id]"
             @set-status="(val) => (event.issueData.state_detail = val)"

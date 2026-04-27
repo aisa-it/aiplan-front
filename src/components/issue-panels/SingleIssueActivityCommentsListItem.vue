@@ -95,7 +95,7 @@
               <HintTooltip> Скопировать ссылку </HintTooltip>
             </q-btn>
             <q-btn
-              v-if="hasPermissionByIssue(issueData, project, 'add-comment')"
+              v-if="hasPermissionByIssue(issueData, 'add-comment')"
               class="stamp-btn"
               dense
               flat
@@ -106,10 +106,7 @@
               <HintTooltip> Ответить </HintTooltip>
             </q-btn>
             <q-btn
-              v-if="
-                isAuthor &&
-                hasPermissionByIssue(issueData, project, 'add-comment')
-              "
+              v-if="isAuthor && hasPermissionByIssue(issueData, 'add-comment')"
               class="stamp-btn"
               dense
               flat
@@ -128,7 +125,7 @@
           @update-reaction="handleUpdateReaction"
         />
         <ReactionSelectEmoji
-          v-if="hasPermissionByIssue(issueData, project, 'add-comment')"
+          v-if="hasPermissionByIssue(issueData, 'add-comment')"
           :is-touch-start="isTouchStart"
           :is-show-reaction-menu="isHoverMessageText"
           :position-menu-left="isAuthor"
@@ -149,7 +146,6 @@ import { computed, onBeforeMount, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from 'stores/user-store';
 import { useRolesStore } from 'stores/roles-store';
-import { useProjectStore } from 'stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 // utils
@@ -186,13 +182,11 @@ const emits = defineEmits<{
 // store
 const userStore = useUserStore();
 const singleIssueStore = useSingleIssueStore();
-const projectStore = useProjectStore();
 
 // store to vars
 const { user } = userStore;
-const { project } = storeToRefs(projectStore);
 const { issueData } = storeToRefs(singleIssueStore);
-const { hasPermissionByIssue, hasPermission } = useRolesStore();
+const { hasPermissionByIssue, hasPermission, getProjectRole } = useRolesStore();
 
 // vars
 const isUpdateComment = ref<boolean>(false);
@@ -207,16 +201,11 @@ const isAuthor = computed(() => {
   return user.id === props.comment.actor_id;
 });
 
-const roleInProject = computed(() =>
-  project.value
-    ? project.value?.current_user_membership?.role
-    : issueData.value.project_detail?.current_user_membership?.role,
-);
-
 const canDeleteComment = computed(
   () =>
     isAuthor.value ||
-    (hasPermission('delete-issue-comment') && roleInProject.value > 5),
+    (hasPermission('delete-issue-comment') &&
+      getProjectRole(issueData.value.project) > 5),
 );
 
 const reactionList = computed(() => {
@@ -355,8 +344,7 @@ const deleteReaction = (value: string) => {
 };
 
 const handleUpdateReaction = (value: string) => {
-  if (!hasPermissionByIssue(issueData.value, project.value, 'add-comment'))
-    return;
+  if (!hasPermissionByIssue(issueData.value, 'add-comment')) return;
 
   const findReaction = reactionList.value.find((r) => r.reaction === value);
 

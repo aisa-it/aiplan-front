@@ -23,12 +23,12 @@
       </div>
     </div>
     <q-list class="q-mt-sm issue-links-wrapper">
-      <LinkItem 
+      <LinkItem
         v-for="link in links"
         :key="link.id"
         :link="link"
         :isDisabled="isDisabled"
-        @update:link="openLinkDialog"
+        @update="openLinkDialog"
         @delete="openDeleteLinkDialog"
       />
     </q-list>
@@ -53,6 +53,7 @@ import { ref, watch, PropType } from 'vue';
 
 // stores
 import { useUtilsStore } from 'src/stores/utils-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // icons
 import AddIcon from './icons/AddIcon.vue';
@@ -95,6 +96,7 @@ const emit = defineEmits(['add', 'delete', 'edit']);
 
 // stores
 const utilsStore = useUtilsStore();
+const roleStore = useRolesStore();
 // store to refs
 const { isDemo } = storeToRefs(utilsStore);
 
@@ -104,13 +106,7 @@ const isLinkOpenDialog = ref(false);
 const linkToDelete = ref();
 const linkToUpdate = ref<DtoIssueLinkLight | undefined>();
 
-const isDemoUserValid = () => {
-  if (
-    (props.project?.current_user_membership?.role ?? props.project?.role) >= 15
-  )
-    return true;
-  return false;
-};
+const isDemoUserValid = () => roleStore.getProjectRole(props.project?.id) >= 15;
 
 const openLinkDialog = (link: DtoIssueLinkLight) => {
   linkToUpdate.value = link;
