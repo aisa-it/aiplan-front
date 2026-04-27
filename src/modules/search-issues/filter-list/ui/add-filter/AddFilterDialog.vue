@@ -206,8 +206,8 @@
             </q-select>
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.created_at_from || '',
-                to: filter.filter.created_at_to || '',
+                from: sanitizeDate(filter.filter.created_at_from),
+                to: sanitizeDate(filter.filter.created_at_to),
               }"
               @update:model-value="(val) => updateDateField('created_at', val)"
               label="Дата создания"
@@ -215,8 +215,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.target_date_from || '',
-                to: filter.filter.target_date_to || '',
+                from: sanitizeDate(filter.filter.target_date_from),
+                to: sanitizeDate(filter.filter.target_date_to),
               }"
               @update:model-value="(val) => updateDateField('target_date', val)"
               label="Срок исполнения"
@@ -224,8 +224,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.start_date_from || '',
-                to: filter.filter.start_date_to || '',
+                from: sanitizeDate(filter.filter.start_date_from),
+                to: sanitizeDate(filter.filter.start_date_to),
               }"
               @update:model-value="(val) => updateDateField('start_date', val)"
               label="Дата начала"
@@ -233,8 +233,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.completed_at_from || '',
-                to: filter.filter.completed_at_to || '',
+                from: sanitizeDate(filter.filter.completed_at_from),
+                to: sanitizeDate(filter.filter.completed_at_to),
               }"
               @update:model-value="
                 (val) => updateDateField('completed_at', val)
@@ -621,6 +621,31 @@ const filterMember = () => {
     });
     filter.value.filter[type] = filteredMembers;
   });
+};
+
+// Обработка дат из фильтра, полученного с сервера
+const sanitizeDate = (value: unknown): string => {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  if (typeof value === 'number') {
+    // -62135596800 = значение не было задано
+    if (value === -62135596800 || value <= 0) {
+      return '';
+    } else {
+      return dayjs.unix(value).format('DD.MM.YYYY');
+    }
+  }
+
+  if (typeof value === 'string') {
+    const date = dayjs(value, 'DD.MM.YYYY', true);
+    if (date.isValid() && date.year() > 1970) {
+      return date.format('DD.MM.YYYY');
+    }
+  }
+
+  return '';
 };
 
 // Запись значений диапазонов дат в фильтр
