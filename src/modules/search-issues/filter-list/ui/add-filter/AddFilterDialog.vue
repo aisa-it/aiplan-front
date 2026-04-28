@@ -329,10 +329,12 @@ import {
 } from '../../services/api';
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -625,27 +627,13 @@ const filterMember = () => {
 
 // Обработка дат из фильтра, полученного с сервера
 const sanitizeDate = (value: unknown): string => {
-  if (value === null || value === undefined || value === '') {
-    return '';
-  }
-
   if (typeof value === 'number') {
-    // -62135596800 = значение не было задано
-    if (value === -62135596800 || value <= 0) {
-      return '';
-    } else {
-      return dayjs.unix(value).format('DD.MM.YYYY');
-    }
+    return value <= 0 ? '' : dayjs.unix(value).format('DD.MM.YYYY');
+  } else if (value === null || value === undefined || value === '') {
+    return '';
+  } else {
+    return value as string;
   }
-
-  if (typeof value === 'string') {
-    const date = dayjs(value, 'DD.MM.YYYY', true);
-    if (date.isValid() && date.year() > 1970) {
-      return date.format('DD.MM.YYYY');
-    }
-  }
-
-  return '';
 };
 
 // Запись значений диапазонов дат в фильтр
@@ -669,14 +657,18 @@ const convertDatesToTimestamp = (filterData: IFilter): IFilter => {
     'completed_at',
   ] as const;
 
-  const parseDate = (value: unknown) => {
-    if (!value || typeof value !== 'string' || value.trim() === '') return null;
-
-    const strictDate = dayjs(value, 'DD.MM.YYYY', true);
-    if (strictDate.isValid()) return strictDate;
-
-    const fallbackDate = dayjs(value);
-    return fallbackDate.isValid() ? fallbackDate : null;
+  const parseDate = (value: unknown): Dayjs | null => {
+    if (typeof value === 'number' && value > 0) {
+      const date = dayjs.unix(value);
+      return date.isValid() ? date : null;
+    } else if (typeof value === 'string' && value.trim() !== '') {
+      const strictDate = dayjs(value, 'DD.MM.YYYY', true);
+      if (strictDate.isValid()) return strictDate;
+      const fallbackDate = dayjs(value);
+      return fallbackDate.isValid() ? fallbackDate : null;
+    } else {
+      return null;
+    }
   };
 
   datePrefixes.forEach((prefix) => {
