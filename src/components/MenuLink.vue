@@ -85,6 +85,11 @@
     v-model="isNotificationsAdminSettingsOpen"
     :project="selectedProject"
   />
+  <ConfirmArchiveDialog
+    v-model="isArchiveDialogOpen"
+    :project="projectToArchive"
+    @success="successUnarchiveHandle"
+  />
 </template>
 
 <script setup lang="ts">
@@ -104,7 +109,7 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import AvatarImage from './AvatarImage.vue';
 import LinkIcon from './icons/LinkIcon.vue';
 import UnmutedIcon from './icons/UnmutedIcon.vue';
-
+import ArchiveAddIcon from './icons/ArchiveAddIcon.vue';
 import SettingsIcon from './icons/SettingsIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
 import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
@@ -120,6 +125,8 @@ import {
 import StarIcon from './icons/StarIcon.vue';
 
 import { getUrlFile } from 'src/utils/helpers';
+import ConfirmArchiveDialog from 'src/components/dialogs/ConfirmArchiveDialog.vue'
+import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<{
@@ -145,13 +152,13 @@ const props = withDefaults(
 
 // stores
 const userStore = useUserStore();
-const { hasPermissionByProject, getProjectRole } = useRolesStore();
+const { hasPermissionByWorkspace ,hasPermissionByProject, getProjectRole } = useRolesStore();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
 // store to refs
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 const router = useRouter();
 const route = useRoute();
@@ -159,6 +166,8 @@ const route = useRoute();
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
 const selectedProject = ref();
+const projectToArchive = ref<DtoProjectLight | null>(null);
+const isArchiveDialogOpen = ref(false);
 
 // functions
 
@@ -204,6 +213,20 @@ const removeFromFavorites = async (projectID: string) => {
     });
 };
 
+const showNotification = (type: 'success' | 'error', msg?: string) => {
+  setNotificationView({
+    open: true,
+    type: type,
+    customMessage: msg,
+  });
+};
+
+const successUnarchiveHandle = async () => {
+  projectToArchive.value = null;
+  showNotification('success', 'Проект добавлен в архив');
+  // await refreshSprints();
+};
+
 const getProjectMenuItems = () => {
   const items = [];
 
@@ -217,7 +240,7 @@ const getProjectMenuItems = () => {
         );
       },
     });
-  }
+  };
 
   items.push({
     text: 'Уведомления задач',
@@ -246,6 +269,17 @@ const getProjectMenuItems = () => {
       projectStore.projectLinkToClipboard(props.identifier || props.id);
     },
   });
+
+  if (hasPermissionByWorkspace(workspaceInfo?.value, 'edit-archive')) {
+    items.push({
+    text: 'В архив',
+    icon: ArchiveAddIcon,
+    onClick: () => {
+      projectToArchive.value = props.project;
+      isArchiveDialogOpen.value = true;
+    }
+  });
+  }
 
   return items;
 };
