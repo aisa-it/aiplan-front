@@ -268,10 +268,10 @@
           </q-btn>
         </div>
       </q-card-actions>
+      <q-inner-loading :showing="creationLoading">
+        <DefaultLoader />
+      </q-inner-loading>
     </div>
-    <q-inner-loading :showing="creationLoading">
-      <DefaultLoader />
-    </q-inner-loading>
     <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
@@ -751,6 +751,11 @@ watch(
 :deep(.tiptap) {
   min-height: 15rem;
 }
+
+:deep(.q-inner-loading) {
+  z-index: 10;
+}
+
 @media screen and (max-width: 1350px) {
   .new-issue-card {
     min-width: calc(100vw - 200px) !important;
