@@ -31,6 +31,7 @@ interface RootStore {
   meInWorkspace: DtoWorkspaceMemberWithOwner;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
+  workspaceArchive: DtoProjectLight[];
   workspaceUsers: DtoWorkspaceMember[];
   foundUsers: DtoWorkspaceMember[];
   allWorkspaceStates?: Record<string, DtoStateLight[]>;
@@ -43,6 +44,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       workspaceInfo: undefined,
       workspaceToken: '',
       workspaceProjects: [],
+      workspaceArchive: [],
       workspaceUsers: [],
       foundUsers: [],
       allWorkspaceStates: undefined,
@@ -166,8 +168,27 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         // временное решение - пока не трогать
         if (stopRefresh) this.stopRefresh = stopRefresh;
         this.workspaceProjects = res.data;
+
+        // Моковые данные
+        this.workspaceArchive = [res.data[0], res.data[res.data.length - 1]];
+
+
         return res.data;
       });
+    },
+
+    // Моковый метод добавления/удаления из архива
+    setWorkspaceArchive(id: string, isRemove?: boolean) {
+      if (isRemove) {
+        this.workspaceArchive = this.workspaceArchive.filter((project) => {
+          return project.id !== id;
+        });
+      } else {
+        const projectToArchive = this.workspaceProjects.find((project) => project.id === id);
+        if (projectToArchive) {
+          this.workspaceArchive.push(projectToArchive);
+        }
+      }
     },
 
     // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ
