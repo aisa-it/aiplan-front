@@ -245,6 +245,7 @@ const {
   newChildrenDoc,
   newRootDoc,
   parentDocId,
+  ancestorsDocsIds,
   deletedDocId,
   updatedDocId,
   selectedDocTitle,
@@ -261,6 +262,7 @@ const isNotificationsSettingsOpen = ref<boolean>(false);
 const isHierarchyDialogOpen = ref<boolean>(false);
 const docInfo = ref({});
 const loading = ref(false);
+const nodesToExpand = ref<string[] | null>(null);
 
 const currentUserRole = computed(() =>
   getWsRole(currentWorkspaceSlug.value ?? ''),
@@ -590,6 +592,29 @@ watch(
       docInfo.value = {};
     }
   },
+);
+
+watch(treeRef,
+  () => {
+    if ( treeRef.value && ancestorsDocsIds.value?.length ) {
+      nodesToExpand.value = ancestorsDocsIds.value.slice().reverse();
+      treeRef.value.setExpanded(nodesToExpand.value[0], true);
+      nodesToExpand.value.shift();
+    }
+  }
+);
+
+watch(() => treeNode.value,
+  () => {
+    if (treeRef.value && nodesToExpand.value?.length) {
+      try {
+        treeRef.value.setExpanded(nodesToExpand.value[0], true);
+        nodesToExpand.value.shift();
+      } catch {
+        return;
+      }
+    }
+  }, { deep: true }
 );
 
 onMounted(async () => {
