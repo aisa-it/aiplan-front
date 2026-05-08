@@ -3,11 +3,7 @@ import { useAiplanStore } from './aiplan-store';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { ReleaseNotes } from '@aisa-it/aiplan-api-ts/src/ReleaseNotes';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
-import {
-  API_AUTH_PREFIX,
-  API_USERS_ME_PREFIX,
-  API_WORKSPACES_PREFIX,
-} from 'src/constants/apiPrefix';
+import { Integrations } from '@aisa-it/aiplan-api-ts/src/Integrations';
 import {
   AiplanPostFeedbackRequest,
   DtoReleaseNoteLight,
@@ -20,6 +16,7 @@ const api = aiplan.api;
 
 const releaseNotesApi = new (withInterceptors(ReleaseNotes))();
 const usersApi = new (withInterceptors(Users))();
+const integrationsApi = new (withInterceptors(Integrations))();
 
 export const useUtilsStore = defineStore('utils-store', {
   state: () => {
@@ -38,6 +35,7 @@ export const useUtilsStore = defineStore('utils-store', {
   },
 
   actions: {
+    //TODO: Метод отсутствует
     async getVersion() {
       return await api
         .get('/api/version/')
@@ -62,52 +60,21 @@ export const useUtilsStore = defineStore('utils-store', {
         });
     },
 
+    // TODO: Проверить тип возвращаемого ответа
     async getNotificationBotUrl() {
-      await api
-        .get(`${API_AUTH_PREFIX}/notification-bot-link`)
-        .then((res) => (this.botURL = res.data.url))
+      await integrationsApi
+        .getTgBotLink()
+        .then((res) => (
+          this.botURL =
+          res.data.url
+        ))
         .catch((err) => {
           throw new Error(err);
         });
     },
 
-    // uploads
-    async mediaUpload(url: string, data = {}, config = {}): Promise<any> {
-      return api({
-        method: 'post',
-        url: url,
-        data,
-        headers: { 'Content-Type': 'multipart/form-data' },
-        ...config,
-      });
-    },
-
-    async deleteFile(workspace_id: string, assetUrl: string): Promise<any> {
-      const lastIndex = assetUrl.lastIndexOf('/');
-      const assetId = assetUrl.substring(lastIndex + 1);
-
-      return api
-        .delete(
-          `${API_WORKSPACES_PREFIX}/file-assets/${workspace_id}/${assetId}/`,
-        )
-        .then((response) => response?.data)
-        .catch((error) => {
-          throw error?.response?.data;
-        });
-    },
-
-    async uploadFile(file: FormData, workspaceSlug: string): Promise<any> {
-      return this.mediaUpload(
-        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/file-assets/`,
-        file,
-      )
-        .then((response) => response?.data)
-        .catch((error) => {
-          throw error?.response?.data;
-        });
-    },
-
     // ------------- Help -------------
+    //TODO: Метод отсутствует
     async getHelpPages() {
       return await api.get('/api/docsIndex/');
     },
@@ -123,11 +90,6 @@ export const useUtilsStore = defineStore('utils-store', {
 
     async createUserFeedback(data: AiplanPostFeedbackRequest) {
       return usersApi.createMyFeedback(data).then((res) => res.data);
-    },
-
-    async deleteUserFeedback() {
-      const { data } = await api.delete(`${API_USERS_ME_PREFIX}/feedback/`);
-      return data;
     },
 
     // ------------- Release Notes -------------

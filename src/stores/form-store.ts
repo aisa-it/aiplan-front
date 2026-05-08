@@ -2,10 +2,13 @@ import { defineStore } from 'pinia';
 import { IForms } from 'src/interfaces/forms';
 import { API_FORMS_PREFIX } from 'src/constants/apiPrefix';
 import { useAiplanStore } from './aiplan-store';
+import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
+import { Forms } from '@aisa-it/aiplan-api-ts/src/Forms';
 
 const aiplan = useAiplanStore();
-
 const api = aiplan.api;
+
+const formsApi = new (withInterceptors(Forms))();
 
 export const useFormStore = defineStore('form-store', {
   state: () => {
@@ -29,6 +32,7 @@ export const useFormStore = defineStore('form-store', {
       );
     },
 
+    // TODO: отсутствует метод в апи
     async deleteFormAttachment(formSlug: string, attachmentId: string) {
       const res = await api.delete(
         `${API_FORMS_PREFIX}/${formSlug}/form-attachments/${attachmentId}`,

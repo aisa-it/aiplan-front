@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { useAiplanStore } from './aiplan-store';
 import { IIssueFilters } from 'src/interfaces/issues';
 import {
-  API_AUTH_PREFIX,
   API_WORKSPACES_PREFIX,
 } from 'src/constants/apiPrefix';
 
@@ -44,12 +43,14 @@ export interface ISearchFilters {
 export interface IQuery {
   hide_sub_issues?: boolean;
   order_by?: string;
+  group_by?: string;
   offset?: number;
   limit?: number;
   desc?: boolean;
   only_count?: boolean;
+  only_active?: boolean;
   only_pinned?: boolean;
-  group_by?: string;
+  stream?: boolean;
 }
 
 export const useIssuesStore = defineStore('issues-store', {
@@ -63,6 +64,7 @@ export const useIssuesStore = defineStore('issues-store', {
     };
   },
   actions: {
+    //TODO: Используется только в SelectParentIssue для новых задач
     async getIssues(
       url: string,
       pagination: IPagination,
@@ -85,34 +87,24 @@ export const useIssuesStore = defineStore('issues-store', {
     },
 
     async extendedSearchIssues(
-      filters: ISearchFilters,
-      pagination: IPagination,
+      filters: TypesIssuesListFilters,
+      query: IQuery,
     ) {
       try {
-        const { data } = await api.post(
-          `${API_AUTH_PREFIX}/issues/search/`,
-          filters,
-          {
-            params: pagination,
-          },
-        );
+        const { data } = await issuesApi.getIssueList(filters, query)
 
         return data;
       } catch {}
     },
 
+    // TODO: Ошибка экспорта через сгенерированный апи. Прописать responseType: 'blob'
     async exportIssues(
       filters: TypesIssuesListFilters,
-      pagination: Omit<IPagination, 'offset' | 'limit'>,
+      query: Omit<IQuery, 'only_count' | 'stream'>,
     ) {
       try {
-        const res = await api.post('/api/auth/issues/search/export/', filters, {
-          params: pagination,
-          responseType: 'blob',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const res = await issuesApi.exportIssueList(filters, query);
+
 
         const url = window.URL.createObjectURL(res.data);
 
@@ -138,6 +130,7 @@ export const useIssuesStore = defineStore('issues-store', {
       return issuesApi.getIssueList(filters, query);
     },
 
+    //TODO Метод отсутствует
     async getIssuesTable(
       workspaceSlug: string,
       projectId: string,
@@ -165,6 +158,7 @@ export const useIssuesStore = defineStore('issues-store', {
       return response.data;
     },
 
+    //TODO: Метод отсутствует
     async pinIssue(
       issue: any,
       workspaceSlug: string,
@@ -177,6 +171,7 @@ export const useIssuesStore = defineStore('issues-store', {
       );
     },
 
+    //TODO: Неверный эндпоинт в апи (pin вместо unpin)
     async unpinIssue(
       issue: any,
       workspaceSlug: string,
@@ -187,6 +182,7 @@ export const useIssuesStore = defineStore('issues-store', {
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
+      // return await issuesApi.issueUnpin(issue, workspaceSlug, projectIdentifier)
     },
   },
 });
