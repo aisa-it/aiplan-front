@@ -62,6 +62,7 @@
                     "
                     :ref="(el) => (fieldRefs[field.originalIndex] = el)"
                     :form-slug="route.params.slug"
+                    :empty-user-allowed="!onlyAuth"
                     :workspace-slug="route.params.workspaceSlug"
                   />
                 </template>

@@ -43,6 +43,7 @@ const props = defineProps<{
   field: any;
   formSlug: string;
   workspaceSlug: string;
+  emptyUserAllowed?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
@@ -77,7 +78,7 @@ const handleUpload = async (file: File) => {
     return;
   }
 
-  if (!user.value?.id) {
+  if (!props.emptyUserAllowed && !user.value?.id) {
     setNotificationView({
       type: 'error',
       customMessage: 'Для загрузки файла авторизуйтесь или зарегистрируйтесь',
@@ -88,12 +89,13 @@ const handleUpload = async (file: File) => {
   }
 
   try {
+    console.log('тык')
     const response = await createFormAttachments(
       props.workspaceSlug,
       props.formSlug,
       { asset: file },
     );
-
+    console.log('тыгдык тык тык')
     const attachmentId = response.id;
 
     props.field.attachments = [response];

@@ -37,6 +37,7 @@
       :rules="getRules(field.type, field.required)"
       :lazy-rules="field.type === 'date'"
       :mask="getMask(field.type)"
+      :empty-user-allowed="field.type == 'attachment' && emptyUserAllowed"
       :error-message="error ? getErrorMessage(field.type) : ''"
       :error="error"
       style="padding-top: 1px"
@@ -151,6 +152,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  emptyUserAllowed: {
+    type: Boolean,
+    required: false,
+  }
 });
 
 const emit = defineEmits(['update:modelValue']);
