@@ -25,7 +25,7 @@ const workspaceApi = new (withInterceptors(Workspace))();
 const projectsApi = new (withInterceptors(Projects))();
 
 interface IUserState {
-  user: DtoUser;
+  user: DtoUser | undefined;
   userWorkspaces: DtoWorkspaceWithCount[];
   userActivity: DaoPaginationResponse;
   userActivityMap: TypesActivityTable;
@@ -38,7 +38,7 @@ interface IUserState {
 export const useUserStore = defineStore('user-store', {
   state: (): IUserState => {
     return {
-      user: {} as DtoUser,
+      user: undefined,
       userWorkspaces: [] as DtoWorkspaceWithCount[],
       userActivity: {} as DaoPaginationResponse,
       userActivityMap: {} as TypesActivityTable,
@@ -53,8 +53,8 @@ export const useUserStore = defineStore('user-store', {
       const theme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light';
-      const userTheme = this.user.theme?.dark ? 'dark' : 'light';
-      return this.user.theme?.system ? theme : userTheme;
+      const userTheme = this.user?.theme?.dark ? 'dark' : 'light';
+      return this.user?.theme?.system ? theme : userTheme;
     },
   },
   actions: {
@@ -176,16 +176,14 @@ export const useUserStore = defineStore('user-store', {
       workspaceSlug: string,
       project: AiplanAddProjectToFavoritesRequest,
     ): Promise<void> {
-      await projectsApi
-        .addProjectToFavorites(workspaceSlug, project);
+      await projectsApi.addProjectToFavorites(workspaceSlug, project);
     },
 
     async removeProjectFromFavorites(
       workspaceSlug: string,
       projectID: string,
     ): Promise<void> {
-      await projectsApi
-        .removeProjectFromFavorites(workspaceSlug, projectID);
+      await projectsApi.removeProjectFromFavorites(workspaceSlug, projectID);
     },
 
     async setNameFromOnboard(data: DtoUser): Promise<DtoUser | any> {

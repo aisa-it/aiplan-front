@@ -4,7 +4,7 @@
     view="lHh Lpr lFf"
     style="max-height: 100%; max-width: 100%"
   >
-    <LightsNewYear v-if="utilsStore.ny === true"></LightsNewYear>
+    <LightsNewYear v-if="utilsStore.ny === true" />
     <SnowFall v-if="utilsStore.ny === true && isSnowEnable" />
     <div>
       <MainHeader @toggle="toggleLeftDrawer()" />
@@ -26,7 +26,7 @@
       </q-page-container>
     </div>
 
-    <ReleaseNotePreviewDialog v-model="openReleaseNote" />
+    <ReleaseNotePreviewDialog v-model="isShowReleaseNote" />
   </q-layout>
 </template>
 
@@ -37,7 +37,15 @@ import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { useAiplanStore } from 'src/stores/aiplan-store';
-import { ref, watch, computed, onUnmounted, onBeforeMount, inject } from 'vue';
+import {
+  ref,
+  watch,
+  computed,
+  onUnmounted,
+  onBeforeMount,
+  inject,
+  shallowRef,
+} from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -48,7 +56,6 @@ import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store'
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 // helpers
-import { isServerVersionNewer } from 'src/utils/helpers';
 import { appVisibleTimeout } from 'src/utils/visibilityApp';
 
 // components
@@ -82,29 +89,13 @@ const route = useRoute();
 const { auth } = storeToRefs(api);
 const leftDrawerOpen = ref(false);
 const refreshInterval = ref();
+const isShowReleaseNote = shallowRef(false);
 
 const setTheme = () => {
   if (userStore.getTheme === 'dark' || auth.value) {
     localStorage.setItem('dark', String(userStore.getTheme === 'dark'));
     $q.dark.set(userStore.getTheme === 'dark');
   } else $q.dark.set(false);
-};
-
-const utilsRefresh = async () => {
-  if (user.value?.id) {
-    await utilsStore.getVersion().then(async (data) => {
-      await utilsStore.getReleaseNotes().then((d) => {
-        if (!d?.length) return;
-
-        if (d[0].tag_name !== data.version) return;
-
-        if (isServerVersionNewer(data.version)) {
-          localStorage.setItem('appVersion', data.version);
-          openReleaseNote.value = true;
-        }
-      });
-    });
-  }
 };
 
 // TODO продумать как оперативно рефрешить тему, сейчас отключаем долбежку me, чтобы убрать эпилепсию экрана
@@ -119,9 +110,6 @@ const userInfoRefresh = async () => {
   );
 };
 
-const loadAllData = async () => {
-  await Promise.allSettled([utilsRefresh(), userInfoRefresh()]);
-};
 const bus = inject('bus') as EventBus;
 
 const STORAGE_KEY = 'leftDrawerOpen';
@@ -139,13 +127,17 @@ const syncDrawerFromStorage = (e: StorageEvent) => {
 onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
 
-  useGlobalLoading();
+  // useGlobalLoading();
 
   currentIssueID.value = route.params.issue as string;
 
+  await userStore.getUserInfo().then(() => {
+    setTheme();
+  });
+
+  await userInfoRefresh();
+
   await Promise.all([
-    loadAllData(),
-    userStore.getUserInfo(),
     userStore.getUserWorkspaces(),
     userStore.getUserProjects(),
     userStore.getUserWorkspacesMemberships(),
@@ -154,7 +146,7 @@ onBeforeMount(async () => {
 
   bus.emit('successLoadUserInfo');
 
-  if (user.value.status === 'На звонке') {
+  if (user.value?.status === 'На звонке') {
     await userStore.updateCurrentUser({
       status: '',
       status_emoji: '',
@@ -185,6 +177,8 @@ onBeforeMount(async () => {
   leftDrawerOpen.value = stored ? JSON.parse(stored) : true;
 
   window.addEventListener('storage', syncDrawerFromStorage);
+
+  isShowReleaseNote.value = openReleaseNote.value;
 });
 
 onUnmounted(() => {
@@ -202,16 +196,7 @@ watch(
   },
 );
 
-watch(
-  () => user.value,
-  () => {
-    utilsRefresh();
-    setTheme();
-  },
-  {
-    deep: true,
-  },
-);
+
 useMeta({
   title: 'АИПлан | Инструмент управления проектами.',
 });

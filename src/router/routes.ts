@@ -1,5 +1,4 @@
 import { RouteRecordRaw } from 'vue-router';
-
 // ========== GIT EXTENSION ==========
 // Импорт роутов из git расширения (src/modules/git)
 // @see src/modules/git/router.ts
@@ -10,6 +9,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('src/layouts/MainLayout.vue'),
+
     children: [
       {
         path: 'profile',
@@ -36,11 +36,6 @@ const routes: RouteRecordRaw[] = [
                 component: () =>
                   import('src/components/forms/pages/FormsTable.vue'),
               },
-              // {
-              //   path: 'settings',
-              //   component: () =>
-              //     import('src/components/forms/pages/FormSettingsPage.vue'),
-              // },
             ],
           },
           {
