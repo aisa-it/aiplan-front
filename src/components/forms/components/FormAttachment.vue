@@ -37,6 +37,8 @@ import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useFormStore } from 'src/stores/form-store';
 import { useUserStore } from 'src/stores/user-store';
+import axios from 'axios';
+import { DtoFormAttachmentLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -89,15 +91,26 @@ const handleUpload = async (file: File) => {
   }
 
   try {
-    console.log('тык')
-    const response = await createFormAttachments(
-      props.workspaceSlug,
-      props.formSlug,
-      { asset: file },
-    );
-    console.log('тыгдык тык тык')
+    let response: DtoFormAttachmentLight;
+    if (props.emptyUserAllowed) {
+      const url = `/api/forms/${props.formSlug}/form-attachments/`;
+      response = (await axios.post(
+        url,
+        { asset: file },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )).data;
+    } else {
+      response = await createFormAttachments(
+        props.workspaceSlug,
+        props.formSlug,
+        { asset: file },
+      );
+    }
     const attachmentId = response.id;
-
     props.field.attachments = [response];
     emit('update:modelValue', attachmentId);
   } catch (error) {
