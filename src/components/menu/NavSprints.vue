@@ -191,19 +191,19 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
   ];
 };
 
-const headerMenuItems = [
+const headerMenuItems = computed(() => [
   {
     text: 'Создать спринт',
     icon: h(QIcon, { name: 'add' }),
-    onClick: () => (openCreateSprint.value = true),
-    show: canCreateSprint,
+    onClick: () => { openCreateSprint.value = true },
+    show: canCreateSprint.value,
   },
   {
     text: 'Настроить уведомления',
     icon: BellIcon,
-    onClick: () => (openSprintNotifications.value = true),
+    onClick: () => { openSprintNotifications.value = true; },
   },
-];
+]);
 
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;
