@@ -57,20 +57,27 @@
       class="flex flex-col full-width full-height no-wrap"
       style="padding-right: 400px; padding-top: 50px"
     >
-      <MainIssueInfo preview @update:issue-page="refreshData" />
+      <MainIssueInfo
+        preview
+        @update:issue-page="refreshData"
+        :is-disabled="isArchived"
+      />
 
       <SelectChildren
         v-if="!hideSettings.includes('sub_issues_count')"
         :projectid="issueData.project"
         :project="issueData.project_detail"
         :issueid="issueData.id"
-        :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
+        :is-disabled="!hasPermissionByIssue(issueData, 'add-sub-issue') || isArchived"
       />
-      <LinkedIssuesPanel :project_detail="issueData.project_detail" />
+      <LinkedIssuesPanel
+        :project_detail="issueData.project_detail"
+        :is-disabled="isArchived"
+      />
 
       <SelectAttachments
         entityType="issue"
-        :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
+        :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary') && !isArchived"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
         :upload-attachment-func="uploadAttachments"
@@ -170,6 +177,10 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
+
+const isArchived = computed(() =>
+  project.value?.is_archived
+);
 
 const refreshData = (args?: any): void => {
   emits('refresh', args);

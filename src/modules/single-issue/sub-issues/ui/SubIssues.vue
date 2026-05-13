@@ -47,6 +47,7 @@
           ><div>
             <q-btn
               v-show="props.manualSortMode"
+              :disable="isDisabled"
               flat
               icon="expand_less"
               dense
@@ -55,6 +56,7 @@
             />
             <q-btn
               v-show="props.manualSortMode"
+              :disable="isDisabled"
               flat
               icon="expand_more"
               dense
@@ -63,6 +65,7 @@
             />
             <q-btn
               v-if="canDelete(subIssue)"
+              :disable="isDisabled"
               flat
               icon="close"
               dense
@@ -100,7 +103,7 @@ const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(userStore);
 
 const route = useRoute();
-const props = defineProps(['subIssues', 'manualSortMode', 'project_detail']);
+const props = defineProps(['subIssues', 'manualSortMode', 'project_detail', 'isDisabled']);
 const emits = defineEmits(['refresh', 'toggleSortMode']);
 
 const isManualSort = computed({

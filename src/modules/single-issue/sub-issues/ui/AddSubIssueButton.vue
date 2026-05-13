@@ -1,5 +1,5 @@
 <template>
-  <q-btn v-if="isDisabled" class="btn-only-icon-sm q-ml-sm" no-caps>
+  <q-btn v-if="!isDisabled" class="btn-only-icon-sm q-ml-sm" no-caps>
     <AddIcon />
     <q-popup-proxy>
       <q-list>

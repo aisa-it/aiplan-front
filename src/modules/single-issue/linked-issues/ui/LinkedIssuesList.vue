@@ -42,6 +42,7 @@
         <q-item-section side
           ><q-btn
             v-if="hasPermissionByIssue"
+            :disable="isDisabled"
             flat
             icon="close"
             dense
@@ -68,6 +69,7 @@ const props = defineProps<{
   project_detail?: DtoProject;
   linkedIssues: any[];
   hasPermissionByIssue: boolean | 'author';
+  isDisabled?: boolean;
 }>();
 
 const emits = defineEmits(['update:linkedIssues', 'removeIssue']);

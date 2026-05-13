@@ -5,6 +5,7 @@
         <IssueNameInput :isReadonly="isReadOnlyEditor" />
         <q-btn
           v-if="isAdminOrAuthor && isReadOnlyEditor"
+          :disable="isDisabled"
           dense
           flat
           class="btn-only-icon-sm readonly-title-issue__edit"
@@ -49,6 +50,7 @@
             dense
             flat
             no-caps
+            :disable="isDisabled"
             :class="[
               issueData?.label_details.length
                 ? 'btn-only-icon-sm'
@@ -107,7 +109,7 @@
         <IssueDescriptionEditor
           :isReadonly="isReadOnlyEditor"
           :isAutosave="isAutoSave"
-          :isAllowedToEdit="isAdminOrAuthor"
+          :isAllowedToEdit="isAdminOrAuthor && !isDisabled"
           @autoSave="handleAutoSave()"
           @toggleEdit="handleEnableEdit()"
           @get-editor="(editorInstance) => (editor = editorInstance)"
@@ -221,6 +223,7 @@ defineOptions({
 
 defineProps<{
   preview?: boolean;
+  isDisabled?: boolean;
 }>();
 
 const emit = defineEmits([
