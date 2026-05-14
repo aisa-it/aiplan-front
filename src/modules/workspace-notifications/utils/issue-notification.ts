@@ -10,7 +10,7 @@ export function issueNotificationRender(data: any, detail: any) {
   let issue = '';
   const link = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${detail.issue.url}>
+                    href=/${detail.workspace?.slug}/projects/${detail.project.identifier}/issues/${detail.issue?.sequence_id}>
                     ${detail.project.identifier}-${detail.issue?.sequence_id} "${detail.issue?.name}"<a/>`;
 
   const customLink = (href: string, name: string) => `<a target="_blank"
@@ -211,6 +211,7 @@ export function issueNotificationRender(data: any, detail: any) {
       if (data.verb === 'move') {
         return `<span>перенес(-ла) задачу ${link} ${oldProject} ${newProject} </span>`;
       }
+      break;
     case 'issue_transfer':
       const newVal = data.new_value
         ? `в проект "${data.new_value}"`
