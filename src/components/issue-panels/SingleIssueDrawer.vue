@@ -365,6 +365,7 @@
         class="q-pt-md"
         :project-id="issueData.project"
         :issue-id="issueData.id"
+        :is-archived="isArchived"
       />
     </template>
     <template v-else>
