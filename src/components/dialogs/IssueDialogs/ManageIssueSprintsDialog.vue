@@ -65,7 +65,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -107,13 +107,13 @@ const selectedSprints = ref([] as string[]);
 const currentSprints = ref([] as string[]);
 const loading = ref(true);
 
-const addTo = computed(() => selectedSprints.value.filter(
-  (id) => !currentSprints.value.includes(id),
-))
-const removeFrom = computed(() => currentSprints.value.filter(
-  (id) => !selectedSprints.value.includes(id),
-))
-const isChanged = computed(() => isArraysEqual(addTo.value, removeFrom.value))
+const addTo = computed(() =>
+  selectedSprints.value.filter((id) => !currentSprints.value.includes(id)),
+);
+const removeFrom = computed(() =>
+  currentSprints.value.filter((id) => !selectedSprints.value.includes(id)),
+);
+const isChanged = computed(() => isArraysEqual(addTo.value, removeFrom.value));
 
 const getIssueSprints = async () => {
   const sprintIds = props.issue.sprints.map(
@@ -146,7 +146,7 @@ const saveIssueSprints = async () => {
       open: true,
       type: 'success',
       customMessage: SUCCESS_UPDATE_DATA,
-    })
+    });
   } catch {}
 };
 

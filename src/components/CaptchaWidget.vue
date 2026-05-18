@@ -15,23 +15,11 @@
     "
   ></altcha-widget>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { useAiplanStore } from 'src/stores/aiplan-store';
+<script setup lang="ts">
 import 'altcha';
 import { ALTCHA_RUS } from 'src/constants/constants';
 
-export default defineComponent({
-  name: 'CaptchaWidget',
-  emits: ['verified'],
-  setup() {
-    const api = useAiplanStore();
-    return {
-      api,
-      ALTCHA_RUS,
-    };
-  },
-});
+defineEmits<{ verified: [payload: any] }>();
 </script>
 
 <style scoped lang="scss">

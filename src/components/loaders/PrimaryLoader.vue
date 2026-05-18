@@ -4,20 +4,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-
-export default defineComponent({
-  name: 'PrimaryLoader',
-  components: { DefaultLoader },
-});
 </script>
 <style lang="scss" scoped>
 .primary-loader {
-  // height: -moz-available; /* WebKit игнор. */
-  // height: -webkit-fill-available; /* Mozilla игнор. */
-  // height: fill-available;
   height: calc(100% - 50px);
   width: 100%;
   position: fixed;

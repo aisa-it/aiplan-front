@@ -49,7 +49,7 @@
   </NodeViewWrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { NodeViewWrapper } from '@tiptap/vue-3';
 import { ref, computed, inject } from 'vue';
 import CalendarIcon from './icons/CalendarIcon.vue';

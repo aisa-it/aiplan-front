@@ -36,59 +36,46 @@
   </q-banner>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { INotification } from 'src/interfaces/notifications';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { logsRUS } from 'src/utils/translator';
-import { defineComponent, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
-export default defineComponent({
-  name: 'NotificationAlert',
+const store = useNotificationStore();
+const { notificationState } = storeToRefs(store);
 
-  setup() {
-    const store = useNotificationStore();
-    const { notificationState } = storeToRefs(store);
+const isOpen = ref(
+  notificationState.value ? notificationState.value.open : false,
+);
+const setNotificationType = (type: string) => {
+  return;
+};
 
-    const isOpen = ref(
-      notificationState.value ? notificationState.value.open : false,
-    );
-    const setNotificationType = (type: string) => {
-      return;
-    };
-    const content = ref<INotification>(
-      setNotificationType(
-        notificationState.value ? notificationState.value.type : '',
-      ),
-    );
+const content = ref<INotification>(
+  setNotificationType(
+    notificationState.value ? notificationState.value.type : '',
+  ),
+);
 
-    const handleClose = async () => {
-      isOpen.value = false;
-      store.clearNotificationView();
-    };
+const handleClose = async () => {
+  isOpen.value = false;
+  store.clearNotificationView();
+};
 
-    const autoClose = () =>
-      setTimeout(() => {
-        isOpen.value = false;
-        store.clearNotificationView();
-      }, 10000);
+const autoClose = () =>
+  setTimeout(() => {
+    isOpen.value = false;
+    store.clearNotificationView();
+  }, 10000);
 
-    watch(notificationState, () => {
-      isOpen.value = store.getCurrentState.open;
-      content.value = setNotificationType(store.getCurrentState.type);
-    });
+watch(notificationState, () => {
+  isOpen.value = store.getCurrentState.open;
+  content.value = setNotificationType(store.getCurrentState.type);
+});
 
-    watch(notificationState, () => {
-      store.getCurrentState.open === true ? autoClose() : null;
-    });
-
-    return {
-      isOpen,
-      content,
-      notificationState,
-      logsRUS,
-      handleClose,
-    };
-  },
+watch(notificationState, () => {
+  store.getCurrentState.open === true ? autoClose() : null;
 });
 </script>

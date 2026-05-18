@@ -72,9 +72,9 @@
               </template>
             </q-input>
             <CaptchaWidget
-            v-if="isEnabledCaptcha"
-            :key="updateKey"
-            @verified="(payload) => (captchaPayload = payload)"
+              v-if="isEnabledCaptcha"
+              :key="updateKey"
+              @verified="(payload) => (captchaPayload = payload)"
             />
             <q-btn
               class="login-panel__forget-btn"
@@ -136,7 +136,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useQuasar, useMeta } from 'quasar';

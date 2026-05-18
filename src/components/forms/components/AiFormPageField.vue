@@ -102,9 +102,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 //core
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import {
   QInput,
   QCheckbox,

@@ -9,8 +9,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-// nav menu components
+<script setup lang="ts">
 import ExpansionGroup from 'src/components/ExpansionGroup.vue';
 import NavMenuHeader from './menu/NavMenuHeader.vue';
 </script>

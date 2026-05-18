@@ -54,7 +54,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { useRoute } from 'vue-router';
 import { computed, ref } from 'vue';

@@ -14,31 +14,21 @@
       stroke-width="1.4"
       stroke-linejoin="round"
     />
-    <circle cx="18" cy="6" r="4" fill="#DC3E3E"/>
+    <circle cx="18" cy="6" r="4" fill="#DC3E3E" />
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'ChatIconUnread',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: () => 'currentColor',
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: 'currentColor',
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

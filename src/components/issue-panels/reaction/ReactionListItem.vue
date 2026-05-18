@@ -53,99 +53,76 @@
   </q-btn>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 
 import { getFirstSymbol, getUrlFile } from 'src/utils/helpers';
 import ReactionUsersListMenu from 'components/issue-panels/reaction/ReactionUsersListMenu.vue';
 
-export default defineComponent({
-  name: 'ReactionListItem',
-  components: { ReactionUsersListMenu },
-  props: {
-    reactionItem: {
-      type: Object,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-  },
-  emits: ['click-reaction'],
-  setup(props, { emit }) {
-    //vars
-    const showReactionUsersListMenu = ref<boolean>(false);
-    const longPressTimeout = ref<number | null>(null);
-    const isLongPress = ref<boolean>(false);
+const props = defineProps<{
+  reactionItem: any;
+}>();
 
-    // computed
-    const reactionItemData = computed(() => props.reactionItem);
+const emits = defineEmits<{ 'click-reaction': [] }>();
 
-    const reactionUsersList = computed(() => {
-      return reactionItemData.value.users || [];
-    });
+//vars
+const showReactionUsersListMenu = ref<boolean>(false);
+const longPressTimeout = ref<number | null>(null);
+const isLongPress = ref<boolean>(false);
 
-    // function
-    const getUserInitials = (user: any) => {
-      return `${getFirstSymbol(user?.last_name)} ${getFirstSymbol(
-        user?.first_name,
-      )}`;
-    };
+// computed
+const reactionItemData = computed(() => props.reactionItem);
 
-    const handleClick = (event) => {
-      if (isLongPress.value) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        return;
-      }
-
-      emit('click-reaction');
-      showReactionUsersListMenu.value = false;
-    };
-
-    const handleContextMenu = (event) => {
-      event.preventDefault();
-      showReactionUsersListMenu.value = true;
-    };
-
-    const handleTouchStart = () => {
-      isLongPress.value = false;
-      longPressTimeout.value = setTimeout(() => {
-        isLongPress.value = true;
-        showReactionUsersListMenu.value = true;
-      }, 300);
-    };
-
-    const handleTouchEnd = (event) => {
-      if (longPressTimeout.value) {
-        clearTimeout(longPressTimeout.value);
-      }
-
-      if (isLongPress.value) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-
-    const handleTouchCancel = () => {
-      if (longPressTimeout.value) {
-        clearTimeout(longPressTimeout.value);
-      }
-    };
-
-    return {
-      getUrlFile,
-      handleClick,
-      handleTouchEnd,
-      getUserInitials,
-      reactionItemData,
-      handleTouchStart,
-      handleTouchCancel,
-      reactionUsersList,
-      handleContextMenu,
-      showReactionUsersListMenu,
-    };
-  },
+const reactionUsersList = computed(() => {
+  return reactionItemData.value.users || [];
 });
+
+// function
+const getUserInitials = (user: any) => {
+  return `${getFirstSymbol(user?.last_name)} ${getFirstSymbol(
+    user?.first_name,
+  )}`;
+};
+
+const handleClick = (event) => {
+  if (isLongPress.value) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    return;
+  }
+
+  emits('click-reaction');
+  showReactionUsersListMenu.value = false;
+};
+
+const handleContextMenu = (event) => {
+  event.preventDefault();
+  showReactionUsersListMenu.value = true;
+};
+
+const handleTouchStart = () => {
+  isLongPress.value = false;
+  longPressTimeout.value = setTimeout(() => {
+    isLongPress.value = true;
+    showReactionUsersListMenu.value = true;
+  }, 300);
+};
+
+const handleTouchEnd = (event) => {
+  if (longPressTimeout.value) {
+    clearTimeout(longPressTimeout.value);
+  }
+
+  if (isLongPress.value) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+};
+
+const handleTouchCancel = () => {
+  if (longPressTimeout.value) {
+    clearTimeout(longPressTimeout.value);
+  }
+};
 </script>

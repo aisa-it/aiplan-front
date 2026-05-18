@@ -5,7 +5,7 @@
   </q-btn>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import DrawioIcon from 'src/components/icons/DrawioIcon.vue';
 
 const emit = defineEmits(['onClick']);

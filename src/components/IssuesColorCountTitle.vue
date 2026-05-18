@@ -30,7 +30,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import PrioritySingleIcon from './icons/PrioritySingleIcon.vue';
 import { watch, ref } from 'vue';
 

@@ -24,7 +24,8 @@
           </q-tab-panel>
           <q-tab-panel ref="tabActivity" name="activity">
             <SelectActivity
-              :activitiesData="docActivitiesData" type="docs"
+              :activitiesData="docActivitiesData"
+              type="docs"
               @refreshData="getActivityData"
             />
           </q-tab-panel>
@@ -33,7 +34,7 @@
     </div>
   </q-card>
 </template>
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -73,7 +74,6 @@ const getActivityData = async (page: number, pageSize: number) => {
   );
   docActivitiesData.value = { ...data, activities: data.result };
 };
-
 </script>
 
 <style lang="scss" scoped>

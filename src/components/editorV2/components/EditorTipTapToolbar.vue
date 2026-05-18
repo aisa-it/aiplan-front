@@ -230,6 +230,7 @@
             <EditorFontSizeButton
               :editorInstance="editorInstance"
               :isMobile="isMobile"
+              command="increment"
               tooltip="Увеличить размер шрифта"
               icon-name="fontIncreaseIcon"
             />

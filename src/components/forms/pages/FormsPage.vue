@@ -12,5 +12,3 @@
     </router-view>
   </q-page>
 </template>
-
-<script lang="ts" setup></script>

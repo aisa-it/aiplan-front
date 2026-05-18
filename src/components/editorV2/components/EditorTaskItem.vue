@@ -10,48 +10,25 @@
   </node-view-wrapper>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, inject, PropType, ref } from 'vue';
+<script setup lang="ts">
+import { computed, inject, ref } from 'vue';
 import { NodeViewWrapper, NodeViewContent, Editor } from '@tiptap/vue-3';
 
-export default defineComponent({
-  name: 'EditorTaskItem',
-  props: {
-    node: {
-      type: Object,
-      required: true,
-    },
-    updateAttributes: {
-      type: Function,
-      required: true,
-    },
-    editor: {
-      type: Object as PropType<Editor | null>,
-      required: true,
-    },
-  },
-  setup(props) {
-    // computed
-    const isChecked = computed(() => props.node.attrs.checked);
+const props = defineProps<{
+  node: any;
+  updateAttributes: (data: any) => any;
+  editor: Editor | null;
+}>();
 
-    const isDisabled = inject('isEditorReadOnly', ref(true));
+// computed
+const isChecked = computed(() => props.node.attrs.checked);
 
-    // function
-    const toggleChecked = (value: boolean) => {
-      props.updateAttributes({ checked: value });
-    };
+const isDisabled = inject('isEditorReadOnly', ref(true));
 
-    return {
-      isChecked,
-      isDisabled,
-      toggleChecked,
-    };
-  },
-  components: {
-    NodeViewWrapper,
-    NodeViewContent,
-  },
-});
+// function
+const toggleChecked = (value: boolean) => {
+  props.updateAttributes({ checked: value });
+};
 </script>
 
 <style lang="scss" scoped>

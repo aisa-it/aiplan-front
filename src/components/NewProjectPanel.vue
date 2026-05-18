@@ -24,21 +24,15 @@
   </q-card>
 </template>
 
-<script lang="ts">
-// import aiplan from 'src/utils/aiplan';
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+const emits = defineEmits<{
+  'handle-create-project': [];
+  cancel: [];
+}>();
 
-export default defineComponent({
-  name: 'NewProjectPanel',
-  emits: ['handle-create-project', 'cancel'],
-  setup(ctx, { emit }) {
-    function handleCreateProject() {
-      emit('handle-create-project');
-    }
-
-    return { handleCreateProject };
-  },
-});
+function handleCreateProject() {
+  emits('handle-create-project');
+}
 </script>
 <style scoped>
 .new-issue-card {

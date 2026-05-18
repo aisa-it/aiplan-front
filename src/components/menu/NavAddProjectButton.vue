@@ -37,7 +37,7 @@
   <FormDialog v-model="isFormCreateOpen" @success-create="refreshForms" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';

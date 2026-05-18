@@ -73,10 +73,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
-import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
+import PasswordRestoreDialog from 'src/components/PasswordRestoreDialog.vue';
 import NotificationAlert from 'src/components/notifications/NotificationAlert.vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useLoaderStore } from 'src/stores/loader-store';
@@ -84,7 +84,7 @@ import { isEmail } from 'src/utils/validation';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
-import logo from 'src/assets/logo.svg'
+import logo from 'src/assets/logo.svg';
 
 const api = useAiplanStore();
 const loaderStore = useLoaderStore();
@@ -95,7 +95,7 @@ const email = ref('');
 const isPassword = ref(true);
 const captchaPayload = ref('');
 const updateKey = ref(0);
-const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
+const { isEnabledCaptcha, ny } = storeToRefs(useUtilsStore());
 const login = async () => {
   loaderStore.startLoading();
   await api.login(email.value, password.value, captchaPayload.value);

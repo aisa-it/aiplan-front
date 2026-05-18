@@ -47,61 +47,44 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { computed, defineComponent, ref } from 'vue';
+import { computed, ref } from 'vue';
 
-export default defineComponent({
-  name: 'EditInsertTableDialog',
-  emits: ['pasteTable', 'cancel'],
-  setup(props, { emit }) {
-    // vars
-    const table = ref({
-      rows: 2,
-      cols: 2,
-    });
+const emits = defineEmits<{
+  pasteTable: [{ rows: number; cols: number }];
+  cancel: [];
+}>();
 
-    //function
-    const handlePasteTable = () => {
-      emit('pasteTable', table.value);
-    };
+// vars
+const table = ref({
+  rows: 2,
+  cols: 2,
+});
 
-    const validateCols = (value: number) => {
-      if (!value || Number(value) < 1 || Number(value) > 100) {
-        return 'Число столбцов от 1 до 100';
-      }
-      return true;
-    };
+//function
+const handlePasteTable = () => {
+  emits('pasteTable', table.value);
+};
 
-    const validateRows = (value: number) => {
-      if (value < 1 || value > 100) {
-        return 'Число строк от 1 до 100';
-      }
-      return true;
-    };
+const validateCols = (value: number) => {
+  if (!value || Number(value) < 1 || Number(value) > 100) {
+    return 'Число столбцов от 1 до 100';
+  }
+  return true;
+};
 
-    const validateForm = computed(() => {
-      const isValidCols = validateCols(table.value.cols) === true;
-      const isValidRows = validateRows(table.value.rows) === true;
-      return isValidCols && isValidRows;
-    });
+const validateRows = (value: number) => {
+  if (value < 1 || value > 100) {
+    return 'Число строк от 1 до 100';
+  }
+  return true;
+};
 
-    const handleHide = () => {
-      table.value = {
-        rows: 2,
-        cols: 2,
-      };
-    };
-
-    return {
-      table,
-      handleHide,
-      validateCols,
-      validateRows,
-      validateForm,
-      handlePasteTable,
-    };
-  },
+const validateForm = computed(() => {
+  const isValidCols = validateCols(table.value.cols) === true;
+  const isValidRows = validateRows(table.value.rows) === true;
+  return isValidCols && isValidRows;
 });
 </script>
 

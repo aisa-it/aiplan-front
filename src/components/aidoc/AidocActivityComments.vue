@@ -23,7 +23,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core //
 import { EventBus } from 'quasar';
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue';

@@ -5,7 +5,7 @@
   </q-btn>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const emit = defineEmits(['toggle-fullscreen']);
 
 const toggleFullScreen = (e) => {
