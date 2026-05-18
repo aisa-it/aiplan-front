@@ -11,6 +11,7 @@ import {
   NEW_GROUP_BY_OPTIONS,
   SPRINT_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
+import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 
 export function useIssueContext(contextType: 'project' | 'sprint') {
   const issuesStore = useIssuesStore();
@@ -51,6 +52,39 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       return response;
     };
 
+    const getIssueStream = async (
+      filters: TypesIssuesListFilters,
+      pagination: IQuery,
+    ) => {
+      const workspaceSlug = route.params.workspace
+      const projectSlug = route.params.project
+
+      const search = new URLSearchParams();
+      for (const [key, value] of Object.entries({
+        ...pagination,
+        stream: true,
+      })) {
+        if (value == null || value === '') continue;
+        search.set(key, String(value));
+      }
+
+      const response = await fetch(
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectSlug}/issues/search?${search.toString()}`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept:
+              'text/event-stream, application/x-ndjson, application/json, text/plain',
+          },
+          body: JSON.stringify(filters),
+        },
+      );
+
+      return { data: await response.json() };
+    };
+
     return {
       contextProps: projectProps,
       isGroupingEnabled,
@@ -61,6 +95,7 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       store,
       updateProps,
       getIssue,
+      getIssueStream,
       isGroupHide: store.isGroupHide,
       setGroupHide: store.setGroupHide,
     };

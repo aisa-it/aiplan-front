@@ -17,7 +17,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS, store } =
+  const { contextProps, isKanbanEnabled, getIssue, getIssueStream, GROUP_BY_OPTIONS, store } =
     useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
@@ -66,7 +66,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await getIssue(filters, parsePagination(quasarPagination));
+    const response = await getIssueStream(filters, parsePagination(quasarPagination));
 
     issuesStore.groupedIssueList = response?.data.issues;
     issuesStore.groupByIssues = response?.data.group_by;
@@ -126,7 +126,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
-    const response = await getIssue(filters, pagination);
+    const response = await getIssueStream(filters, pagination);
 
     const data = response?.data?.issues;
     const issues =
