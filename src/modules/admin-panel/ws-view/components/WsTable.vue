@@ -38,9 +38,7 @@
 
     <template v-slot:body-cell-settings="props">
       <q-td :props="props">
-        <SettingsButton
-          @click.stop="$router.push(`${props.row.slug}/workspace-settings`)"
-        />
+        <SettingsButton @click.stop="onEditWs(props.row)" />
         <q-btn
           flat
           dense
@@ -67,18 +65,28 @@
 
   <DeleteWsDialog
     v-model="isDeleteDialogOpen"
-    :workspace="workspaceToDelete"
+    :workspace="selectedWorkspace"
     @success="onDeleteSuccess"
     @error="onDeleteError"
+  />
+  <SettingsWsDialog
+    v-model="isSettingsDialogOpen"
+    :workspace="selectedWorkspace"
+    :user-id="user.id"
+    @success="onSettingsSuccess"
+    @error="onSettingsError"
   />
 </template>
 
 <script setup lang="ts">
 //core
-import { toRefs, watch, ref } from 'vue';
+import { toRefs, watch, ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUserStore } from 'src/stores/user-store';
 
 //types
 import { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -103,10 +111,15 @@ import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import SettingsButton from '../../ui/SettingsButton.vue';
 import DeleteWsDialog from '../components/ui/DeleteWsDialog.vue';
+import SettingsWsDialog from './ui/SettingsWsDialog.vue';
 
 const props = defineProps<{ searchQuery: string | undefined }>();
 
+const userStore = useUserStore();
+const router = useRouter();
+
 const { searchQuery } = toRefs(props);
+const { userWorkspacesMemberships, user } = storeToRefs(userStore);
 
 //stores
 const { setNotificationView } = useNotificationStore();
@@ -119,17 +132,18 @@ const { onRowClick } = useTableRowClick();
 
 //ref
 const isDeleteDialogOpen = ref(false);
-const workspaceToDelete = ref<DtoWorkspaceWithCount>();
+const isSettingsDialogOpen = ref(false);
+const selectedWorkspace = ref<DtoWorkspaceWithCount>();
 
 //methods
 const openDeleteDialog = (workspace: DtoWorkspaceWithCount) => {
-  workspaceToDelete.value = workspace;
+  selectedWorkspace.value = workspace;
   isDeleteDialogOpen.value = true;
 };
 
 const onDeleteSuccess = () => {
   isDeleteDialogOpen.value = false;
-  workspaceToDelete.value = undefined;
+  selectedWorkspace.value = undefined;
   setNotificationView({
     open: true,
     type: 'success',
@@ -147,7 +161,37 @@ const onDeleteError = () => {
   });
 };
 
+const onSettingsSuccess = () => {
+  isSettingsDialogOpen.value = false;
+  router.push(`${selectedWorkspace.value?.slug}/workspace-settings`);
+  selectedWorkspace.value = undefined;
+};
+
+const onSettingsError = () => {
+  isSettingsDialogOpen.value = false;
+  setNotificationView({
+    open: true,
+    type: 'error',
+    customMessage: 'Ошибка при редактировании простраства',
+  });
+};
+
+const onEditWs = (workspace: DtoWorkspaceWithCount) => {
+  if (!workspace.id) return;
+  const role = userWorkspacesMemberships.value[workspace.id]?.role;
+  if (role && role === 15) {
+    router.push(`${workspace.slug}/workspace-settings`);
+  } else {
+    isSettingsDialogOpen.value = true;
+    selectedWorkspace.value = workspace;
+  }
+};
+
 watch(searchQuery, (newVal) => {
   refresh({ pagination: pagination.value }, newVal);
+});
+
+onMounted(async () => {
+  await userStore.getUserWorkspacesMemberships();
 });
 </script>

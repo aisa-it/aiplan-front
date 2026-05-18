@@ -22,4 +22,14 @@ export const api = {
   deleteWorkspace: async (workspaceSlug: string): Promise<void> => {
     return apiWorkspace.deleteWorkspace(workspaceSlug).then((res) => res.data);
   },
+
+  // wip
+  setAdminRoleInWorkspace: async (
+    wsId: string,
+    userId: string,
+  ): Promise<void> => {
+    return apiAdminPanel
+      .authAdminUsersWorkspacesMemberCreate(wsId, userId, { role: 15 })
+      .then((res) => res.data);
+  },
 };

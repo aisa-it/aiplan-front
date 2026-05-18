@@ -587,7 +587,7 @@ const getLeadOptions = async () => {
       .map((member: any) => {
         return {
           ...member,
-          label: `${member.member.last_name} ${member.member.first_name}`,
+          label: `${member.member?.last_name} ${member.member?.first_name}`,
           value: member.member.id,
         };
       });
