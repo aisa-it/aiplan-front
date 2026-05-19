@@ -35,7 +35,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 

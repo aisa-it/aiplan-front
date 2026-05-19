@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 //core
-import { defineProps, defineEmits, computed, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
   modelValue: any;

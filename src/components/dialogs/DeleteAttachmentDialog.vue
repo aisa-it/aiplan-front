@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 // core
-import { computed, defineProps, defineEmits } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
   currentAttachment: any;

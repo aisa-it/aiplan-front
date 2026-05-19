@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, defineEmits, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { colorMap, bgColorMap } from 'src/utils/editorColorMap';
 import { hexWithOpacity, getOpacityFromHex } from '../utils/editorUtils';

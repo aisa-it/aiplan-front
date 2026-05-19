@@ -71,7 +71,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { onMounted, ref, computed } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';

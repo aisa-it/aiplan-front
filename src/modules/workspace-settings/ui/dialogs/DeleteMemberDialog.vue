@@ -35,7 +35,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { toRefs } from 'vue';
 import { IWorkspaceMember } from 'src/interfaces/workspaces';
 import { deleteWorkspaceMember } from 'src/modules/workspace-settings/services/api';

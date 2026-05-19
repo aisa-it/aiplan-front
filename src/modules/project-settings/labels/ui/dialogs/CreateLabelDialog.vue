@@ -62,7 +62,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';

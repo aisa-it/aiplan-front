@@ -46,7 +46,6 @@ withDefaults(
     height?: number;
   }>(),
   {
-    color: 'currentColor',
     width: 24,
     height: 24,
   },

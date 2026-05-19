@@ -30,9 +30,8 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed } from 'vue';
-import { IState } from 'src/interfaces/states';
 
 const emits = defineEmits(['update']);
 const props = defineProps(['statesProps', 'statuses']);

@@ -64,9 +64,7 @@
   </q-btn>
 </template>
 
-<script lang="ts">
-// core
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { LocalStorage, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
@@ -85,75 +83,63 @@ import aiplan from 'src/utils/aiplan';
 import AvatarImage from './AvatarImage.vue';
 import { useGlobalLoading } from 'src/composables/useGlobalLoader';
 
-export default defineComponent({
-  name: 'ProfileButton',
-  components: {
-    AvatarImage,
-  },
-  setup() {
-    // stores
-    const router = useRouter();
-    const store = useAiplanStore();
-    const userStore = useUserStore();
-    const stateStore = useStatesStore();
-    const projectStore = useProjectStore();
-    const workspaceStore = useWorkspaceStore();
-    const singleIssueStore = useSingleIssueStore();
+// stores
+const router = useRouter();
+const store = useAiplanStore();
+const userStore = useUserStore();
+const stateStore = useStatesStore();
+const projectStore = useProjectStore();
+const workspaceStore = useWorkspaceStore();
+const singleIssueStore = useSingleIssueStore();
 
-    // store to ref
-    const { user } = storeToRefs(userStore);
-    const $q = useQuasar();
-    const handleSignOut = async () => {
-      useGlobalLoading();
-      await store
-        .signOut()
-        .then(() => {
-          userStore.clearUserState();
-          LocalStorage.remove('next_url');
-        })
-        .then(() => {
-          $q.dark.set(false);
-          router.push('/signin');
+// store to ref
+const { user } = storeToRefs(userStore);
+const $q = useQuasar();
+const handleSignOut = async () => {
+  useGlobalLoading();
+  await store
+    .signOut()
+    .then(() => {
+      userStore.clearUserState();
+      LocalStorage.remove('next_url');
+    })
+    .then(() => {
+      $q.dark.set(false);
+      router.push('/signin');
 
-          // reset all stores on sign-out
-          userStore.$reset();
-          stateStore.$reset();
-          projectStore.$reset();
-          workspaceStore.$reset();
-          singleIssueStore.$reset();
-        });
-    };
+      // reset all stores on sign-out
+      userStore.$reset();
+      stateStore.$reset();
+      projectStore.$reset();
+      workspaceStore.$reset();
+      singleIssueStore.$reset();
+    });
+};
 
-    const handleSignOutEverywhere = async () => {
-      await store
-        .signOutEverywhere()
-        .then(() => {
-          LocalStorage.remove('next_url');
-          userStore.clearUserState();
-          router.push('/signin');
-        })
-        .then(() => {
-          $q.dark.set(false);
+const handleSignOutEverywhere = async () => {
+  await store
+    .signOutEverywhere()
+    .then(() => {
+      LocalStorage.remove('next_url');
+      userStore.clearUserState();
+      router.push('/signin');
+    })
+    .then(() => {
+      $q.dark.set(false);
 
-          // reset all stores on sign-out
-          userStore.$reset();
-          stateStore.$reset();
-          projectStore.$reset();
-          workspaceStore.$reset();
-          singleIssueStore.$reset();
-        });
-      return;
-    };
-    return {
-      user,
-      router,
-      handleSignOut,
-      handleSignOutEverywhere,
-      avatarText: aiplan.UserName,
-    };
-  },
-});
+      // reset all stores on sign-out
+      userStore.$reset();
+      stateStore.$reset();
+      projectStore.$reset();
+      workspaceStore.$reset();
+      singleIssueStore.$reset();
+    });
+  return;
+};
+
+const avatarText = aiplan.UserName;
 </script>
+
 <style lang="scss">
 .menu-card {
   width: 200px !important;

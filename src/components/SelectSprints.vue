@@ -65,7 +65,7 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
@@ -178,7 +178,7 @@ const handleUpdateSprints = async (
 
 const handleUpdateSelected = (value: DtoSprintLight[]) => {
   emit('update-selected', value);
-}
+};
 </script>
 
 <style scoped lang="scss"></style>

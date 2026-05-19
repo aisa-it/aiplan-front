@@ -30,7 +30,7 @@
   </q-layout>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { useQuasar, useMeta, EventBus } from 'quasar';
 import { storeToRefs } from 'pinia';

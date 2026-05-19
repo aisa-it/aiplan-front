@@ -87,7 +87,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { computed, ref } from 'vue';

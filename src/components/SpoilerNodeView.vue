@@ -42,7 +42,7 @@
   </node-view-wrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch, inject } from 'vue';
 import { NodeViewWrapper, nodeViewProps, NodeViewContent } from '@tiptap/vue-3';
 import { QInput, QBtn } from 'quasar';

@@ -25,7 +25,6 @@ withDefaults(
     height?: number;
   }>(),
   {
-    color: 'currentColor',
     width: 16,
     height: 16,
   },

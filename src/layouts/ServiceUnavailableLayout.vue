@@ -9,7 +9,7 @@
   </q-layout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { useMeta } from 'quasar';
 import { useRouter } from 'vue-router';
@@ -54,6 +54,7 @@ const unstableRelease = ref(
     location.hostname === 'localhost',
 );
 </script>
+
 <style lang="scss" scoped>
 .fully-centered {
   display: flex;

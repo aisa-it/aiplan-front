@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import SelectWatchers from '../selects/SelectWatchers.vue';
 import { useUserStore } from 'src/stores/user-store';

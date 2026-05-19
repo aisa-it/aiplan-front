@@ -28,7 +28,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 // components

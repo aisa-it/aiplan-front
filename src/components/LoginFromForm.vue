@@ -69,7 +69,6 @@
         >Войти</q-btn
       >
     </q-form>
-    <NotificationAlert />
   </div>
 </template>
 
@@ -77,7 +76,6 @@
 import { ref } from 'vue';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
 import PasswordRestoreDialog from 'src/components/PasswordRestoreDialog.vue';
-import NotificationAlert from 'src/components/notifications/NotificationAlert.vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useLoaderStore } from 'src/stores/loader-store';
 import { isEmail } from 'src/utils/validation';

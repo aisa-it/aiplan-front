@@ -132,7 +132,6 @@
     >
       <AiplanVersion />
     </div>
-    <NotificationAlert />
   </div>
 </template>
 
@@ -154,7 +153,6 @@ import { isEmail } from 'src/utils/validation';
 import AiplanVersion from 'src/components/AiplanVersion.vue';
 import RegisterPanel from 'src/components/RegisterPanel.vue';
 import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
-import NotificationAlert from 'src/components/notifications/NotificationAlert.vue';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
 import HatXmasIcon from './icons/HatXmasIcon.vue';
 import {

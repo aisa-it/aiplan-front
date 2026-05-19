@@ -16,7 +16,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/vue-3';

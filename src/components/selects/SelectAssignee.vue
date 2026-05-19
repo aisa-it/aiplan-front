@@ -102,18 +102,10 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import {
-  onMounted,
-  ref,
-  watch,
-  toRef,
-  defineProps,
-  withDefaults,
-  computed,
-} from 'vue';
+import { onMounted, ref, watch, toRef, computed } from 'vue';
 import { debounce } from 'quasar';
 //stores
 import { useProjectStore } from 'stores/project-store';

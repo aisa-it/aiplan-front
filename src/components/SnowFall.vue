@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useDesignSettings } from 'src/modules/profile-settings/composables/design-profile-settings/useDesignSettings';
 
@@ -63,7 +63,7 @@ const handleVisibilityChange = () => {
 onMounted(() => {
   const storedDensity = Number(localStorage.getItem('snowDensity'));
   if (!storedDensity) setSnowDensity(170);
-  flakeCount.value = storedDensity
+  flakeCount.value = storedDensity;
   reseedFlakes();
   document.addEventListener('visibilitychange', handleVisibilityChange);
 });

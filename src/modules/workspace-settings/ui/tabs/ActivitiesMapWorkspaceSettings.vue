@@ -70,7 +70,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useMeta } from 'quasar';
 
 import { storeToRefs } from 'pinia';

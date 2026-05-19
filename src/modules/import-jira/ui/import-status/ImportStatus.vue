@@ -65,7 +65,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref, onMounted, onUnmounted, computed, Ref } from 'vue';
 import { storeToRefs } from 'pinia';

@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, defineEmits, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
 

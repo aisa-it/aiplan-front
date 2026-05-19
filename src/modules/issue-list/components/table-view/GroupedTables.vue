@@ -29,7 +29,7 @@
   </GroupedTablesWrapper>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';

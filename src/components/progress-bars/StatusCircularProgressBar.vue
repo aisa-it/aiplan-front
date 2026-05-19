@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { TypesSprintStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { computed } from 'vue';
 

@@ -73,7 +73,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, onUpdated, ref, nextTick } from 'vue';
 import { ROLES } from 'src/constants/constants';
 import { isEmail } from 'src/utils/validation';

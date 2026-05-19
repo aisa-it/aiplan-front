@@ -121,77 +121,65 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useDropzone } from 'vue3-dropzone';
 import { IWorkspaceBackup } from 'src/interfaces/workspaces';
-import { defineComponent, ref } from 'vue';
+import { ref } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { storeToRefs } from 'pinia';
 
-export default defineComponent({
-  name: 'ImportDialog',
-  props: ['workspaceSlug'],
-  emits: ['success', 'error'],
+const props = defineProps<{
+  workspaceSlug: string;
+}>();
 
-  setup(props, { emit }) {
-    const workspaceStore = useWorkspaceStore();
-    const backups = ref<IWorkspaceBackup[]>();
-    const { workspaceInfo } = storeToRefs(workspaceStore);
-    const fromFile = ref(false);
-    const backupFile = ref<File>();
+const emits = defineEmits<{
+  success: [];
+  error: [];
+}>();
 
-    const getWorkspaceBackups = async () => {
-      backups.value = (
-        await workspaceStore.getWorkspaceBackups(workspaceInfo.value.slug)
-      ).reverse();
-    };
-    function onDrop(acceptFiles: File[]) {
-      backupFile.value = acceptFiles[0];
-    }
+const workspaceStore = useWorkspaceStore();
+const backups = ref<IWorkspaceBackup[]>();
+const { workspaceInfo } = storeToRefs(workspaceStore);
+const fromFile = ref(false);
+const backupFile = ref<File>();
 
-    const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });
+const getWorkspaceBackups = async () => {
+  backups.value = (
+    await workspaceStore.getWorkspaceBackups(workspaceInfo.value.slug)
+  ).reverse();
+};
+function onDrop(acceptFiles: File[]) {
+  backupFile.value = acceptFiles[0];
+}
 
-    const downloadBackup = (asset: string) => {
-      const element = document.createElement('a');
-      element.setAttribute('href', `/api/auth/file/${asset}`);
-      element.setAttribute(
-        'download',
-        `backup-${
-          props.workspaceSlug?.slug ?? 'workspace'
-        }-${new Date().toISOString()}.bin`,
-      );
-      element.click();
-    };
+const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });
 
-    const restoreFromBackup = async (asset: IWorkspaceBackup) => {
-      await workspaceStore
-        .importWorkspaceFromMinio(asset)
-        .then(() => emit('success'))
-        .catch(() => emit('error'));
-    };
+const downloadBackup = (asset: string) => {
+  const element = document.createElement('a');
+  element.setAttribute('href', `/api/auth/file/${asset}`);
+  element.setAttribute(
+    'download',
+    `backup-${
+      props.workspaceSlug?.slug ?? 'workspace'
+    }-${new Date().toISOString()}.bin`,
+  );
+  element.click();
+};
 
-    const importBackup = async () => {
-      try {
-        await workspaceStore.uploadAndImportWorkspace(backupFile.value as File);
-        emit('success');
-      } catch {
-        emit('error');
-      }
-      backupFile.value = undefined;
-    };
+const restoreFromBackup = async (asset: IWorkspaceBackup) => {
+  await workspaceStore
+    .importWorkspaceFromMinio(asset)
+    .then(() => emits('success'))
+    .catch(() => emits('error'));
+};
 
-    return {
-      ...rest,
-      backups,
-      fromFile,
-      backupFile,
-      importBackup,
-      getRootProps,
-      getInputProps,
-      downloadBackup,
-      restoreFromBackup,
-      getWorkspaceBackups,
-    };
-  },
-});
+const importBackup = async () => {
+  try {
+    await workspaceStore.uploadAndImportWorkspace(backupFile.value as File);
+    emits('success');
+  } catch {
+    emits('error');
+  }
+  backupFile.value = undefined;
+};
 </script>

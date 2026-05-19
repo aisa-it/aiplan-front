@@ -16,14 +16,15 @@
           class="html-editor__toc-link"
           @click.prevent="onItemClick(link)"
         >
-          {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
+          {{ !hasOwnNumeration(link.text) ? link.index + ' ' : ''
+          }}{{ link.text }}
         </a>
       </div>
     </div>
   </NodeViewWrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import { TextSelection } from '@tiptap/pm/state';
 import { ref, inject } from 'vue';
@@ -38,7 +39,7 @@ const nodeWrapper = ref(null);
 const hasOwnNumeration = (heading) => {
   const firstChar = heading[0];
   return /\d/.test(firstChar);
-}
+};
 
 const onItemClick = (link) => {
   if (props.editor && !props.editor.options.editable) {
