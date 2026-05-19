@@ -56,7 +56,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         : (contextProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
-
     const filters = {
       states: [] as string[],
       assigned_to_me: contextProps.value?.filters.assignedToMe,
@@ -66,10 +65,14 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await getIssueStream(filters, parsePagination(quasarPagination));
 
-    issuesStore.groupedIssueList = response?.data.issues;
-    issuesStore.groupByIssues = response?.data.group_by;
+    const pagination = parsePagination(quasarPagination);
+    issuesStore.groupByIssues = pagination.group_by ?? '';
+    issuesStore.groupedIssueList = [];
+
+    await getIssueStream(filters, pagination, (chunk: any) => {
+      issuesStore.groupedIssueList.push(chunk);
+    });
   }
 
   function defineFiltersByEntity(entity) {
@@ -126,12 +129,13 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
-    const response = await getIssueStream(filters, pagination);
 
-    const data = response?.data?.issues;
-    const issues =
-      Array.isArray(data) && data[0]?.issues ? data[0]?.issues : (data ?? []);
-    const count = response?.data?.count ?? 0;
+    let issues: any[] = []
+    let count = 0
+    await getIssueStream(filters, pagination, (chunk: any) => {
+      issues = chunk.issues
+      count = chunk.count
+    });
 
     const groups = issuesStore.groupedIssueList as any[];
 
