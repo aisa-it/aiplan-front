@@ -69,6 +69,12 @@ const ERROR_ADD_TO_FAVORITE = 'Ошибка при добавлении прое
 const SUCCESS_REMOVE_FROM_FAVORITE = 'Проект удален из избранного';
 const ERROR_REMOVE_FROM_FAVORITE = 'Ошибка при удалении проекта из избранного';
 
+// архив
+const SUCCESS_ADD_TO_ARCHIVE = 'Проект добавлен в архив';
+const ERROR_ADD_TO_ARCHIVE = 'Ошибка при добавлении проекта в архив';
+const SUCCESS_REMOVE_FROM_ARCHIVE = 'Проект разархивирован';
+const ERROR_REMOVE_FROM_ARCHIVE = 'Ошибка при разархивировании проекта';
+
 // задача
 const SUCCESS_CREATE_ISSUE = 'Задача создана';
 const SUCCESS_TRANSFER_ISSUE = 'Задача перенесена';
@@ -160,6 +166,10 @@ export {
   ERROR_ADD_TO_FAVORITE,
   SUCCESS_REMOVE_FROM_FAVORITE,
   ERROR_REMOVE_FROM_FAVORITE,
+  SUCCESS_ADD_TO_ARCHIVE,
+  ERROR_ADD_TO_ARCHIVE,
+  SUCCESS_REMOVE_FROM_ARCHIVE,
+  ERROR_REMOVE_FROM_ARCHIVE,
   ERROR_AUTH,
   ERROR_AUTH_BLOCKED,
   SUCCESS_ADD_ATTACHMENT,

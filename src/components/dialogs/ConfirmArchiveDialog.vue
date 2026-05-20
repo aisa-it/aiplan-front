@@ -26,9 +26,24 @@
 
 <script setup lang="ts">
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
 
+// store
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useNotificationStore } from 'src/stores/notification-store';
+
+// icons
 import CancelButton from 'src/components/buttons/CancelButton.vue';
+
+// constants
+import {
+  SUCCESS_ADD_TO_ARCHIVE,
+  SUCCESS_REMOVE_FROM_ARCHIVE,
+  ERROR_REMOVE_FROM_ARCHIVE,
+  ERROR_ADD_TO_ARCHIVE,
+} from 'src/constants/notifications';
+import { storeToRefs } from 'pinia';
+import { useLoadProjectInfo } from 'src/modules/issue-list/composables/useLoadProjectInfo';
+import { useProjectStore } from 'src/stores/project-store';
 
 const props = defineProps<{
   project: DtoProjectLight | null,
@@ -37,14 +52,40 @@ const props = defineProps<{
 const emits = defineEmits<{ success: []; error: [] }>();
 
 const workspaceStore = useWorkspaceStore();
+const { setNotificationView } = useNotificationStore();
+const projectStore = useProjectStore();
+
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { getProjectInfo } = useLoadProjectInfo();
+const { currentProjectID } = storeToRefs(projectStore);
+
 
 const handleConfirm = async (): Promise<void> => {
-  if (props.isUnarchive) {
-    console.log('Убрать из архива');
-    workspaceStore.setWorkspaceArchive(props.project?.id as string, true)
-  } else {
-    console.log('Добавить в архив');
-    workspaceStore.setWorkspaceArchive(props.project?.id as string)
+  try {
+    if (props.isUnarchive) {
+      await workspaceStore.unarchiveProject(currentWorkspaceSlug.value, props.project?.id);
+    } else {
+      await workspaceStore.archiveProject(currentWorkspaceSlug.value, props.project?.id);
+    }
+
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: props.isUnarchive ? SUCCESS_REMOVE_FROM_ARCHIVE : SUCCESS_ADD_TO_ARCHIVE,
+    });
+
+    workspaceStore.getWorkspaceArchivedProjects(currentWorkspaceSlug.value as string);
+    workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string);
+    if(props.project?.id ===  currentProjectID.value || props.project?.identifier === currentProjectID.value) {
+      getProjectInfo();
+    }
+  } catch(error) {
+    console.error(error);
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: props.isUnarchive ? ERROR_REMOVE_FROM_ARCHIVE : ERROR_ADD_TO_ARCHIVE,
+    });
   }
 };
 </script>
