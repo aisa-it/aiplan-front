@@ -185,27 +185,6 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       return data;
     },
 
-    // коммент актуален?
-    // async getWorkspaceBackups(
-    //   workspaceSlug: string,
-    // ): Promise<DaoWorkspaceBackup[]> {
-    //   return workspaceApi
-    //     .workspacesBackupsDetail(workspaceSlug)
-    //     .then((response) => response?.data)
-    //     .catch((error) => {
-    //       throw error?.response?.data;
-    //     });
-    // },
-
-    // async uploadAndImportWorkspace(file: File): Promise<any> {
-    //   return workspaceApi
-    //     .workspacesImportCreate({ backup: file })
-    //     .then((response) => response)
-    //     .catch((error) => {
-    //       throw error?.response?.data;
-    //     });
-    // },
-
     async getAllWorkspaceStates(
       currentWorkspaceSlug: string,
     ): Promise<Record<string, DtoStateLight[]> | void> {
