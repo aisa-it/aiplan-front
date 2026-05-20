@@ -110,7 +110,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRef, watch } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -178,8 +178,8 @@ const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
 
-const isArchived = computed(() =>
-  project.value?.is_archived
+const isArchived = toRef(() =>
+  project.value?.archived
 );
 
 const refreshData = (args?: any): void => {

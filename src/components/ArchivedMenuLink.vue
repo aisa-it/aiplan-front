@@ -62,6 +62,7 @@
     :project="projectToUnarchive"
     is-unarchive
     @success="successUnarchiveHandle"
+    @error="errorUnarchiveHandle"
   />
 </template>
 
@@ -69,12 +70,10 @@
 // core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 
@@ -84,8 +83,9 @@ import ArchiveRemoveIcon from './icons/ArchiveRemoveIcon.vue';
 import MenuActions from './menu/MenuActions.vue';
 
 import { getUrlFile } from 'src/utils/helpers';
-import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoProjectLight, DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import ConfirmArchiveDialog from 'src/components/dialogs/ConfirmArchiveDialog.vue';
+import { ERROR_REMOVE_FROM_ARCHIVE, SUCCESS_REMOVE_FROM_ARCHIVE } from 'src/constants/notifications';
 
 const props = withDefaults(
   defineProps<{
@@ -133,8 +133,12 @@ const showNotification = (type: 'success' | 'error', msg?: string) => {
 
 const successUnarchiveHandle = async () => {
   projectToUnarchive.value = null;
-  showNotification('success', 'Проект разархивирован');
-  // await refreshSprints();
+  showNotification('success', SUCCESS_REMOVE_FROM_ARCHIVE);
+};
+
+const errorUnarchiveHandle = async () => {
+  projectToUnarchive.value = null;
+  showNotification('error', ERROR_REMOVE_FROM_ARCHIVE);
 };
 
 const menuItems = [{
@@ -143,7 +147,8 @@ const menuItems = [{
     onClick: () => {
       projectToUnarchive.value = props.project;
       isUnarchiveDialogOpen.value = true;
-    }
+    },
+    show: hasPermissionByWorkspace(workspaceInfo?.value as DtoWorkspace, 'edit-archive'),
   }];
 
 </script>

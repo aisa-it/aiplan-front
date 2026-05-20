@@ -402,7 +402,7 @@
 </template>
 <script setup lang="ts">
 // core
-import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -494,9 +494,8 @@ const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
 
-const isArchived = computed(() =>
-// project.value?.is_archived
-  true
+const isArchived = toRef(() =>
+  project.value?.archived
 );
 
 //refs

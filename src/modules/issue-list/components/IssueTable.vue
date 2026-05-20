@@ -49,6 +49,7 @@
       <template v-slot:body-cell-priority="props">
         <PriorityColumn
           :row-info="props"
+          :is-disabled="isArchived"
           @refresh="updateIssueField('priority', props.row, entity)"
         />
       </template>
@@ -56,6 +57,7 @@
       <template v-slot:body-cell-state="props">
         <StatusColumn
           :row-info="props"
+          :is-disabled="isArchived"
           @refresh="
             (status) => {
               props.row.state_detail = status;
@@ -68,6 +70,7 @@
       <template v-slot:body-cell-target_date="props">
         <TargetDateColumn
           :row-info="props"
+          :is-disabled="isArchived"
           @refresh="updateIssueField('targetDate', props.row, entity)"
         />
       </template>
@@ -95,6 +98,7 @@
       <template v-slot:body-cell-sprint="props">
         <SprintColumn
           :row-info="props"
+          :is-disabled="isArchived"
           @refresh="updateIssueField('sprint', props.row, entity)"
         />
       </template>
@@ -139,6 +143,7 @@
   <IssueContextMenu
     :row="contextRow"
     :anchor-event="contextEvent"
+    :is-archived="isArchived"
     @refresh="refreshTable"
   />
 </template>
@@ -153,6 +158,7 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
+  toRef,
 } from 'vue';
 import { EventBus, QTable } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -206,6 +212,9 @@ const props = defineProps([
 ]);
 
 const { project } = storeToRefs(useProjectStore());
+const isArchived = toRef(() =>
+  project.value?.archived
+);
 
 const {
   contextProps,

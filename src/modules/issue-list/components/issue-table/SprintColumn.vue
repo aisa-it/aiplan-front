@@ -6,7 +6,7 @@
         :issueid="rowInfo.row.id"
         :currentSprints="rowInfo.row.sprints ?? []"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary') || isDisabled
         "
         @refresh="emits('refresh')"
       />
@@ -20,6 +20,7 @@ import SelectSprints from 'src/components/SelectSprints.vue';
 
 defineProps<{
   rowInfo: any;
+  isDisabled: boolean;
 }>();
 
 const emits = defineEmits(['refresh']);

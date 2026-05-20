@@ -46,7 +46,7 @@
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, toRef } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -81,8 +81,8 @@ const rightDrawerOpen = ref(Screen.width > 1323);
 
 const selectAttachments = ref();
 
-const isArchived = computed(() =>
-  project.value?.is_archived
+const isArchived = toRef(() =>
+  project.value?.archived
 );
 
 // блок вложений

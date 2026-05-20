@@ -34,7 +34,7 @@
       </h6>
 
       <q-btn
-        v-if="hasPermissionByIssue(issueData, 'add-linked-issue')"
+        v-if="hasPermissionByIssue(issueData, 'add-linked-issue') && !isDisabled"
         no-caps
         class="btn-only-icon-sm q-ml-sm"
         @click="() => (isOpenAdditionLinkedIssue = true)"

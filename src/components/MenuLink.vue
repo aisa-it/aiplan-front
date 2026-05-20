@@ -88,7 +88,8 @@
   <ConfirmArchiveDialog
     v-model="isArchiveDialogOpen"
     :project="projectToArchive"
-    @success="successUnarchiveHandle"
+    @success="successArchiveHandle"
+    @error="errorArchiveHandle"
   />
 </template>
 
@@ -121,6 +122,8 @@ import {
   SUCCESS_REMOVE_FROM_FAVORITE,
   ERROR_REMOVE_FROM_FAVORITE,
   ERROR_ADD_TO_FAVORITE,
+  SUCCESS_ADD_TO_ARCHIVE,
+  ERROR_ADD_TO_ARCHIVE,
 } from 'src/constants/notifications';
 import StarIcon from './icons/StarIcon.vue';
 
@@ -221,11 +224,15 @@ const showNotification = (type: 'success' | 'error', msg?: string) => {
   });
 };
 
-const successUnarchiveHandle = async () => {
+const successArchiveHandle = () => {
   projectToArchive.value = null;
-  showNotification('success', 'Проект добавлен в архив');
-  // await refreshSprints();
+  showNotification('success', SUCCESS_ADD_TO_ARCHIVE);
 };
+
+const errorArchiveHandle = () => {
+  projectToArchive.value = null;
+  showNotification('error', ERROR_ADD_TO_ARCHIVE)
+ }
 
 const getProjectMenuItems = () => {
   const items = [];

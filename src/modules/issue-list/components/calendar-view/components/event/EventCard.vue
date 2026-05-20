@@ -17,6 +17,7 @@
       />
       <q-btn
         v-if="!isEdit"
+        :disable="isArchived"
         @click="
           isEdit = true;
           $emit('statusPopupOrEditName', true);
@@ -29,6 +30,7 @@
       </q-btn>
       <q-btn
         v-else
+        :disable="isArchived"
         @click="
           saveNewName();
           $emit('statusPopupOrEditName', false);
@@ -58,7 +60,7 @@
             :issue="event.issueData"
             :status="event.issueData.state_detail"
             :isDisabled="
-              !hasPermissionByIssue(event.issueData, 'change-issue-status')
+              !hasPermissionByIssue(event.issueData, 'change-issue-status') || isArchived
             "
             :states-from-cache="statesCache[project.id]"
             @set-status="(val) => (event.issueData.state_detail = val)"
@@ -123,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, toRef, watch } from 'vue';
 import { CalendarEvent } from '../../types/calendar';
 
 import EditIcon from 'src/components/icons/EditIcon.vue';
@@ -177,6 +179,10 @@ const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 const { project } = storeToRefs(useProjectStore());
 const { statesCache } = storeToRefs(useStatesStore());
 const { hasPermissionByIssue } = useRolesStore();
+
+const isArchived = toRef(
+  () => project.value?.archived
+)
 
 const saveNewName = async () => {
   try {

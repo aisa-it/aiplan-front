@@ -74,7 +74,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, toRef } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -120,8 +120,8 @@ const { currentIssueID, issueData, issueExportPDFLink } =
 const isDeletingOpen = ref(false);
 const isTransferOpen = ref(false);
 
-const isArchived = computed(() =>
-  project.value?.is_archived
+const isArchived = toRef(() =>
+  project.value?.archived
 );
 
 const canDeleteIssue = computed(() => {

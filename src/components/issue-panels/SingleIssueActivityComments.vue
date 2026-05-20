@@ -180,6 +180,7 @@ import {
   watch,
   inject,
   onUnmounted,
+  toRef,
 } from 'vue';
 
 // store
@@ -281,8 +282,8 @@ const isEmpty = computed(() => isEditorEmpty(editorDOMvalue.value));
 const singleComment = ref<DtoIssueComment>();
 const singleCommentInfo = ref<IDatasetComment>();
 
-const isArchived = computed(() =>
-  project.value?.is_archived
+const isArchived = toRef(() =>
+  project.value?.archived
 );
 
 // function

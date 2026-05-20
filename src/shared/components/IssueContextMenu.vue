@@ -7,36 +7,38 @@
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
-      <q-item
-        v-if="!props.row?.pinned"
-        clickable
-        v-close-popup
-        @click="
-          pinAndUnpinIssue(() =>
-            pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
-          )
-        "
-      >
-        <q-item-section thumbnail class="q-px-md">
-          <PinIcon />
-        </q-item-section>
-        <q-item-section>Закрепить</q-item-section>
-      </q-item>
-      <q-item
-        v-else
-        clickable
-        v-close-popup
-        @click="
-          pinAndUnpinIssue(() =>
-            unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
-          )
-        "
-      >
-        <q-item-section thumbnail class="q-px-md">
-          <UnpinIcon />
-        </q-item-section>
-        <q-item-section>Открепить</q-item-section>
-      </q-item>
+      <template v-if="!isArchived">
+        <q-item
+          v-if="!props.row?.pinned"
+          clickable
+          v-close-popup
+          @click="
+            pinAndUnpinIssue(() =>
+              pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            )
+          "
+        >
+          <q-item-section thumbnail class="q-px-md">
+            <PinIcon />
+          </q-item-section>
+          <q-item-section>Закрепить</q-item-section>
+        </q-item>
+        <q-item
+          v-else
+          clickable
+          v-close-popup
+          @click="
+            pinAndUnpinIssue(() =>
+              unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            )
+          "
+        >
+          <q-item-section thumbnail class="q-px-md">
+            <UnpinIcon />
+          </q-item-section>
+          <q-item-section>Открепить</q-item-section>
+        </q-item>
+      </template>
       <q-item clickable v-close-popup @click="copyIssueLink">
         <q-item-section thumbnail class="q-px-md">
           <CopyLinkIcon />
@@ -61,34 +63,36 @@
         </q-item-section>
         <q-item-section>Скопировать название</q-item-section>
       </q-item>
-      <q-item v-if="isAdmin" clickable @click="manageIssueSprints">
-        <q-item-section thumbnail class="q-px-md">
-          <SprintIcon />
-        </q-item-section>
-        <q-item-section>Добавить в спринт</q-item-section>
-      </q-item>
-      <q-item clickable @click="transferIssue">
-        <q-item-section thumbnail class="q-px-md">
-          <CopyTransferIcon />
-        </q-item-section>
-        <q-item-section>Копировать/перенести</q-item-section>
-      </q-item>
-      <q-item clickable v-close-popup @click="addNewIssue">
-        <q-item-section thumbnail class="q-px-md">
-          <ParentIcon />
-        </q-item-section>
-        <q-item-section>Создать подзадачу</q-item-section>
-      </q-item>
-      <q-item
-        class="context-menu__options-item_red"
-        clickable
-        @click="deleteIssue"
-      >
-        <q-item-section thumbnail class="q-px-md">
-          <BinIcon color="#cd5c5c" />
-        </q-item-section>
-        <q-item-section>Удалить</q-item-section>
-      </q-item>
+      <template v-if="!isArchived">
+        <q-item v-if="isAdmin" clickable @click="manageIssueSprints">
+          <q-item-section thumbnail class="q-px-md">
+            <SprintIcon />
+          </q-item-section>
+          <q-item-section>Добавить в спринт</q-item-section>
+        </q-item>
+        <q-item clickable @click="transferIssue">
+          <q-item-section thumbnail class="q-px-md">
+            <CopyTransferIcon />
+          </q-item-section>
+          <q-item-section>Копировать/перенести</q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="addNewIssue">
+          <q-item-section thumbnail class="q-px-md">
+            <ParentIcon />
+          </q-item-section>
+          <q-item-section>Создать подзадачу</q-item-section>
+        </q-item>
+        <q-item
+          class="context-menu__options-item_red"
+          clickable
+          @click="deleteIssue"
+        >
+          <q-item-section thumbnail class="q-px-md">
+            <BinIcon color="#cd5c5c" />
+          </q-item-section>
+          <q-item-section>Удалить</q-item-section>
+        </q-item>
+      </template>
     </q-list>
     <TransferTaskDialog
       v-model="isTransferOpen"
@@ -140,6 +144,7 @@ import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 const props = defineProps<{
   row: DtoIssue | null;
   anchorEvent?: MouseEvent | null;
+  isArchived?: boolean;
 }>();
 
 const emit = defineEmits<{

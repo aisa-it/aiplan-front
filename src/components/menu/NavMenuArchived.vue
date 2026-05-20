@@ -38,12 +38,13 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import ExpansionItem from '../ExpansionItem.vue';
 
 import ArchiveAddIcon from '../icons/ArchiveAddIcon.vue';
 
 import ArchivedMenuLink from 'src/components/ArchivedMenuLink.vue';
+import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const workspaceStore = useWorkspaceStore();
@@ -57,4 +58,20 @@ const sortedWorkspaceArchive = computed(() =>
     b.is_favorite === a.is_favorite ? 0 : b.is_favorite ? 1 : -1,
   ),
 );
+
+const archivedProjects = ref([] as DtoProjectLight[]);
+
+const refreshArchivedProjects = async () => {
+  archivedProjects.value = await workspaceStore.getWorkspaceArchivedProjects(currentWorkspaceSlug.value as string);
+};
+
+onMounted(async () => {
+  if (!currentWorkspaceSlug.value) return;
+  refreshArchivedProjects();
+});
+
+watch(currentWorkspaceSlug, async (newValue) => {
+  if (!newValue) return;
+  archivedProjects.value = await workspaceStore.getWorkspaceArchivedProjects(newValue as string);
+});
 </script>

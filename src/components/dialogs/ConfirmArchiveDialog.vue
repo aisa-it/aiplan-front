@@ -29,18 +29,11 @@ import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // store
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 
 // icons
 import CancelButton from 'src/components/buttons/CancelButton.vue';
 
 // constants
-import {
-  SUCCESS_ADD_TO_ARCHIVE,
-  SUCCESS_REMOVE_FROM_ARCHIVE,
-  ERROR_REMOVE_FROM_ARCHIVE,
-  ERROR_ADD_TO_ARCHIVE,
-} from 'src/constants/notifications';
 import { storeToRefs } from 'pinia';
 import { useLoadProjectInfo } from 'src/modules/issue-list/composables/useLoadProjectInfo';
 import { useProjectStore } from 'src/stores/project-store';
@@ -52,7 +45,6 @@ const props = defineProps<{
 const emits = defineEmits<{ success: []; error: [] }>();
 
 const workspaceStore = useWorkspaceStore();
-const { setNotificationView } = useNotificationStore();
 const projectStore = useProjectStore();
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -68,11 +60,7 @@ const handleConfirm = async (): Promise<void> => {
       await workspaceStore.archiveProject(currentWorkspaceSlug.value, props.project?.id);
     }
 
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: props.isUnarchive ? SUCCESS_REMOVE_FROM_ARCHIVE : SUCCESS_ADD_TO_ARCHIVE,
-    });
+    emits('success');
 
     workspaceStore.getWorkspaceArchivedProjects(currentWorkspaceSlug.value as string);
     workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string);
@@ -81,11 +69,7 @@ const handleConfirm = async (): Promise<void> => {
     }
   } catch(error) {
     console.error(error);
-    setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage: props.isUnarchive ? ERROR_REMOVE_FROM_ARCHIVE : ERROR_ADD_TO_ARCHIVE,
-    });
+    emits('error');
   }
 };
 </script>
