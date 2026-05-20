@@ -58,10 +58,12 @@ export const useProjectStore = defineStore('project-store', {
   getters: {
     currentProject(): any {
       const workspaceStore = useWorkspaceStore();
-      const { workspaceProjects } = storeToRefs(workspaceStore);
+      const { workspaceProjects, workspaceArchive } = storeToRefs(workspaceStore);
 
       const projectID = this.router.currentRoute.value.params['project'];
       return workspaceProjects.value.find(
+        (e: any) => e.id == projectID || e.identifier === projectID,
+      ) || workspaceArchive.value.find(
         (e: any) => e.id == projectID || e.identifier === projectID,
       );
     },

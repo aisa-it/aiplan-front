@@ -169,26 +169,38 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         if (stopRefresh) this.stopRefresh = stopRefresh;
         this.workspaceProjects = res.data;
 
-        // Моковые данные
-        this.workspaceArchive = [res.data[0], res.data[res.data.length - 1]];
-
-
         return res.data;
       });
     },
 
-    // Моковый метод добавления/удаления из архива
-    setWorkspaceArchive(id: string, isRemove?: boolean) {
-      if (isRemove) {
-        this.workspaceArchive = this.workspaceArchive.filter((project) => {
-          return project.id !== id;
-        });
-      } else {
-        const projectToArchive = this.workspaceProjects.find((project) => project.id === id);
-        if (projectToArchive) {
-          this.workspaceArchive.push(projectToArchive);
-        }
-      }
+    async getWorkspaceArchivedProjects(
+      workspaceSlug: string,
+    ): Promise<DtoProjectLight[] | void> {
+      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+      return projectsApi.getProjectList(workspaceSlug, {is_archived: true}).then((res) => {
+        this.workspaceArchive = res.data;
+      });
+    },
+
+    async archiveProject(
+      workspaceSlug: string | null,
+      projectId: string | undefined,
+    ): Promise<void> {
+      if (!workspaceSlug || !projectId) return;
+
+      await projectsApi
+        .archiveProject(workspaceSlug, projectId)
+    },
+
+    async unarchiveProject(
+      workspaceSlug: string | null,
+      projectId: string | undefined,
+    ): Promise<void> {
+      if (!workspaceSlug || !projectId) return;
+
+      await projectsApi
+        .unarchiveProject(workspaceSlug, projectId)
     },
 
     // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ
