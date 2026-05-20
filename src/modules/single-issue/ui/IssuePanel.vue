@@ -13,21 +13,21 @@
     <q-page-container class="flex-grow">
       <div class="flex flex-col full-w full-height no-wrap">
         <MainIssueInfo
+          :is-disabled="isArchived"
           @toggleDrawer="toggleDrawer"
           @upload-attachment="refreshAttachments"
         />
-
         <SelectChildren
           :projectid="issueData.project"
           :project="issueData.project_detail"
           :issueid="issueData.id"
-          :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
+          :is-disabled="!hasPermissionByIssue(issueData, 'add-sub-issue') || isArchived"
         />
-        <LinkedIssuesPanel />
+        <LinkedIssuesPanel :is-disabled="isArchived" />
 
         <SelectAttachments
           entityType="issue"
-          :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
+          :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary') && !isArchived"
           :delete-attachment-func="deleteAttachment"
           :get-attachment-func="getAttachmentsList"
           :upload-attachment-func="uploadAttachments"
@@ -46,7 +46,7 @@
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, toRef } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -80,6 +80,10 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const rightDrawerOpen = ref(Screen.width > 1323);
 
 const selectAttachments = ref();
+
+const isArchived = toRef(() =>
+  project.value?.archived
+);
 
 // блок вложений
 const getAttachmentsList = async () => {

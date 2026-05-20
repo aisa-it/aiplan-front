@@ -4,7 +4,7 @@
     label="Выберите задачи"
     no-wrap
     no-caps
-    :disable="isDisabled === false"
+    :disable="isDisabled"
     @click="isBlockOpen = true"
   />
   <div
@@ -19,7 +19,7 @@
       clickable
       :key="ii.id"
       :disable="disableIssueItem(ii)"
-      :removable="isDisabled"
+      :removable="!isDisabled"
       :label="getLabel(ii)"
       :title="getLabel(ii)"
       @click="handleClick(ii)"

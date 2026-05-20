@@ -31,6 +31,7 @@ interface RootStore {
   meInWorkspace: DtoWorkspaceMemberWithOwner;
   workspaceToken?: string;
   workspaceProjects: DtoProjectLight[];
+  workspaceArchive: DtoProjectLight[];
   workspaceUsers: DtoWorkspaceMember[];
   foundUsers: DtoWorkspaceMember[];
   allWorkspaceStates?: Record<string, DtoStateLight[]>;
@@ -43,6 +44,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       workspaceInfo: undefined,
       workspaceToken: '',
       workspaceProjects: [],
+      workspaceArchive: [],
       workspaceUsers: [],
       foundUsers: [],
       allWorkspaceStates: undefined,
@@ -166,8 +168,39 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         // временное решение - пока не трогать
         if (stopRefresh) this.stopRefresh = stopRefresh;
         this.workspaceProjects = res.data;
+
         return res.data;
       });
+    },
+
+    async getWorkspaceArchivedProjects(
+      workspaceSlug: string,
+    ): Promise<DtoProjectLight[] | void> {
+      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+      return projectsApi.getProjectList(workspaceSlug, {is_archived: true}).then((res) => {
+        this.workspaceArchive = res.data;
+      });
+    },
+
+    async archiveProject(
+      workspaceSlug: string | null,
+      projectId: string | undefined,
+    ): Promise<void> {
+      if (!workspaceSlug || !projectId) return;
+
+      await projectsApi
+        .archiveProject(workspaceSlug, projectId)
+    },
+
+    async unarchiveProject(
+      workspaceSlug: string | null,
+      projectId: string | undefined,
+    ): Promise<void> {
+      if (!workspaceSlug || !projectId) return;
+
+      await projectsApi
+        .unarchiveProject(workspaceSlug, projectId)
     },
 
     // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ

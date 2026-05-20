@@ -29,6 +29,8 @@ export const ROLES = {
       'show-sprints-nav',
       'change-sprint',
       'create-tag',
+      'show-archive',
+      'edit-archive',
     ],
     admin: [
       'ws-settings',
@@ -57,6 +59,8 @@ export const ROLES = {
       'show-sprints-nav',
       'change-sprint',
       'create-tag',
+      'show-archive',
+      'edit-archive',
     ],
     member: ['show-ws', 'edit-document', 'show-sprints-nav'],
     guest: ['show-ws'],

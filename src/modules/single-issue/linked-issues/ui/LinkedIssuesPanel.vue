@@ -6,7 +6,7 @@
         v-model:is-expanded="isExpanded"
         :linked-issues-count="linkedIssues.length"
         :has-permission-by-issue="
-          hasPermissionByIssue(issueData, 'add-linked-issue')
+          hasPermissionByIssue(issueData, 'add-linked-issue') && !isDisabled
         "
       />
     </template>
@@ -16,6 +16,7 @@
       :has-permission-by-issue="
         hasPermissionByIssue(issueData, 'add-linked-issue')
       "
+      :is-disabled="isDisabled"
       @remove-issue="removeIssue"
     />
   </IssuesExpansionItem>
@@ -33,7 +34,7 @@
       </h6>
 
       <q-btn
-        v-if="hasPermissionByIssue(issueData, 'add-linked-issue')"
+        v-if="hasPermissionByIssue(issueData, 'add-linked-issue') && !isDisabled"
         no-caps
         class="btn-only-icon-sm q-ml-sm"
         @click="() => (isOpenAdditionLinkedIssue = true)"
@@ -94,7 +95,7 @@ import {
 } from '../services/api';
 import { setIntervalFunction } from 'src/utils/helpers';
 
-const props = defineProps<{ project_detail?: DtoProject }>();
+const props = defineProps<{ project_detail?: DtoProject; isDisabled?: boolean }>();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();

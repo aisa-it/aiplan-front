@@ -57,5 +57,5 @@ export const useLoadProjectInfo = () => {
     isLoadProjectInfo.value = false;
   };
 
-  return { getAllProjectInfo };
+  return { getAllProjectInfo, getProjectInfo };
 };

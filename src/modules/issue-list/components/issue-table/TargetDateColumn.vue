@@ -8,7 +8,7 @@
         :date="rowInfo.row.target_date"
         :issue="rowInfo.row"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary') || isDisabled
         "
         @refresh="emits('refresh')"
       ></SelectDate>
@@ -24,6 +24,7 @@ import SelectDate from 'src/components/SelectDate.vue';
 
 defineProps<{
   rowInfo: any;
+  isDisabled?: boolean;
 }>();
 
 const emits = defineEmits(['refresh']);

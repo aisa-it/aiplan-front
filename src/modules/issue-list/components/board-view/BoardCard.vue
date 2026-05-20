@@ -55,7 +55,7 @@
         :priority="card?.priority ?? 'Нет'"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary') || isArchived
         "
         @refresh="
           () => {
@@ -73,7 +73,7 @@
         :date="card?.target_date"
         :issue="card"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary') || isArchived
         "
         @refresh="emits('updateTable', 'targetDate', card, entity)"
       />
@@ -89,7 +89,7 @@
         :issue="card"
         :states-from-cache="statesCache[card.project]"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(card, 'change-issue-status')
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-status') || isArchived
         "
         @refresh="
           (status) => {
@@ -146,7 +146,7 @@
         :issueid="card.id"
         :current-sprints="card.sprints ?? []"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(card, 'change-issue-primary') || isArchived
         "
         class="selectors__single-selector"
         @refresh="
@@ -166,7 +166,10 @@
       <QuantityChip :type="'links'" :value="card?.link_count" />
       <QuantityChip :type="'attachments'" :value="card?.attachment_count" />
     </div>
-    <IssueContextMenu :row="card" />
+    <IssueContextMenu
+      :row="card"
+      :is-archived="isArchived"
+    />
   </div>
 </template>
 
@@ -175,7 +178,7 @@ import ParentIssueChip from 'src/components/ParentIssueChip.vue';
 import { formatDateTime } from 'src/utils/time';
 import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import SelectDate from 'src/components/SelectDate.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
 import { useStatesStore } from 'src/stores/states-store';
@@ -215,6 +218,10 @@ const emits = defineEmits([
 const { statesCache } = storeToRefs(useStatesStore());
 const { contextProps } = useIssueContext(props.contextType);
 const { project } = storeToRefs(useProjectStore());
+
+const isArchived = toRef(
+  () => project.value?.archived
+);
 
 const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;

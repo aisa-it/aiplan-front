@@ -60,6 +60,7 @@
             class="secondary-btn"
             no-caps
             @click.prevent.stop="handleVisibleEditor"
+            :disabled="isArchived"
           >
             Добавить комментарий
           </q-btn>
@@ -179,6 +180,7 @@ import {
   watch,
   inject,
   onUnmounted,
+  toRef,
 } from 'vue';
 
 // store
@@ -243,7 +245,7 @@ const aidocStore = useAiDocStore();
 // store to refs
 const { user } = storeToRefs(userStore);
 const { hasPermission } = useRolesStore();
-const { currentProjectID, projectMembers } = storeToRefs(projectStore);
+const { currentProjectID, projectMembers, project } = storeToRefs(projectStore);
 const { issueCommentsData, issueData, currentIssueID } =
   storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
@@ -279,6 +281,10 @@ const isMobile = computed(() => {
 const isEmpty = computed(() => isEditorEmpty(editorDOMvalue.value));
 const singleComment = ref<DtoIssueComment>();
 const singleCommentInfo = ref<IDatasetComment>();
+
+const isArchived = toRef(() =>
+  project.value?.archived
+);
 
 // function
 const refresh = async () => {

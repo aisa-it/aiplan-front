@@ -8,7 +8,7 @@
         :priority="rowInfo.value"
         :issue="rowInfo.row"
         :is-disabled="
-          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary')
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary') || isDisabled
         "
         @refresh="emits('refresh')"
       ></SelectPriority>
@@ -24,6 +24,7 @@ import SelectPriority from 'src/components/SelectPriority.vue';
 
 defineProps<{
   rowInfo: any;
+  isDisabled?: boolean;
 }>();
 
 const emits = defineEmits(['refresh']);

@@ -7,7 +7,7 @@
         :status="rowInfo.row.state_detail"
         :issue="rowInfo.row"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status')
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status') || isDisabled
         "
         :states-from-cache="statesCache[rowInfo.row.project]"
         @set-status="(val: any) => emits('refresh', val)"
@@ -29,6 +29,7 @@ import SelectStatus from 'src/components/SelectStatus.vue';
 
 defineProps<{
   rowInfo: any;
+  isDisabled?: boolean;
 }>();
 
 const emits = defineEmits(['refresh']);
