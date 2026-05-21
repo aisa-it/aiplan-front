@@ -57,9 +57,7 @@
             :issueid="event.issueData.id"
             :issue="event.issueData"
             :status="event.issueData.state_detail"
-            :isDisabled="
-              !hasPermissionByIssue(event.issueData, 'change-issue-status')
-            "
+            :isDisabled="!canChangeStatus"
             :states-from-cache="statesCache[project.id]"
             @set-status="(val) => (event.issueData.state_detail = val)"
             @refresh="handleRefresh"
@@ -123,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { CalendarEvent } from '../../types/calendar';
 
 import EditIcon from 'src/components/icons/EditIcon.vue';
@@ -173,10 +171,22 @@ const newName = ref(props.event.issueData?.title);
 
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
-const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { project } = storeToRefs(useProjectStore());
 const { statesCache } = storeToRefs(useStatesStore());
 const { hasPermissionByIssue } = useRolesStore();
+
+const canChangeStatus = computed(() =>
+  hasPermissionByIssue(
+    {
+      ...props.event.issueData,
+      workspace: workspaceStore.workspaceInfo?.id ?? '',
+      project: project.value?.id ?? '',
+    },
+    'change-issue-status',
+  ),
+);
 
 const saveNewName = async () => {
   try {
