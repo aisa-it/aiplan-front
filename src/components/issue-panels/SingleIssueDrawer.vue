@@ -179,7 +179,7 @@
           <div class="row items-center">
             <ExecuteDateIcon :height="19" class="issue-icon" />
             <span class="q-mx-sm">Срок исполнения </span>
-            <span v-if="isSubIssueTargetOverTime" class="inline-flex">
+            <div v-if="isSubIssueTargetOverTime" class="row items-center">
               <AlertIcon
                 width="19"
                 height="19"
@@ -190,7 +190,7 @@
               <HintTooltip>
                 Срок исполнения родительской задачи меньше текущего срока
               </HintTooltip>
-            </span>
+            </div>
           </div>
         </div>
         <div class="col flex rounded-borders">
