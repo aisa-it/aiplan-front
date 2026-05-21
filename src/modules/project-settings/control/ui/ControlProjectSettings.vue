@@ -165,18 +165,23 @@ async function refresh() {
     },
   ] as unknown as IProjectLeader[];
   leadProjectOptions.value = [] as unknown as IProjectLeader[];
+
+  const leadDetail = currentProject.value.project_lead_detail;
+
   if (
-    currentProject.value.project_lead_detail === null ||
-    currentProject.value.project_lead_detail === undefined
+    leadDetail === null ||
+    leadDetail === undefined
   ) {
     currentProject.value.project_lead = {
       label: 'Не выбран',
       value: null,
     };
   } else {
+    const name = (leadDetail.last_name && leadDetail.first_name) ? `${leadDetail.last_name} ${leadDetail.first_name}` : '';
+
     currentProject.value.project_lead = {
-      label: `${currentProject.value.project_lead_detail.last_name} ${currentProject.value.project_lead_detail.first_name}`,
-      value: currentProject.value.project_lead_detail.id,
+      label: name || leadDetail.email,
+      value: leadDetail.id,
     };
   }
 

@@ -130,7 +130,7 @@ const groupedOptions = computed(() => {
   }, {});
 
   return Object.keys(groups).map((projectId) => ({
-    label: props.projects.find((el) => el.id === projectId)?.name ?? '—',
+    label: props.projects.find((el) => el && el.id === projectId)?.name ?? '—',
     options: groups[projectId],
   }));
 });

@@ -206,8 +206,8 @@
             </q-select>
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.created_at_from || '',
-                to: filter.filter.created_at_to || '',
+                from: sanitizeDate(filter.filter.created_at_from),
+                to: sanitizeDate(filter.filter.created_at_to),
               }"
               @update:model-value="(val) => updateDateField('created_at', val)"
               label="Дата создания"
@@ -215,8 +215,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.target_date_from || '',
-                to: filter.filter.target_date_to || '',
+                from: sanitizeDate(filter.filter.target_date_from),
+                to: sanitizeDate(filter.filter.target_date_to),
               }"
               @update:model-value="(val) => updateDateField('target_date', val)"
               label="Срок исполнения"
@@ -224,8 +224,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.start_date_from || '',
-                to: filter.filter.start_date_to || '',
+                from: sanitizeDate(filter.filter.start_date_from),
+                to: sanitizeDate(filter.filter.start_date_to),
               }"
               @update:model-value="(val) => updateDateField('start_date', val)"
               label="Дата начала"
@@ -233,8 +233,8 @@
             />
             <RangeDateFilter
               :model-value="{
-                from: filter.filter.completed_at_from || '',
-                to: filter.filter.completed_at_to || '',
+                from: sanitizeDate(filter.filter.completed_at_from),
+                to: sanitizeDate(filter.filter.completed_at_to),
               }"
               @update:model-value="
                 (val) => updateDateField('completed_at', val)
@@ -329,10 +329,12 @@ import {
 } from '../../services/api';
 
 import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -623,6 +625,17 @@ const filterMember = () => {
   });
 };
 
+// Обработка дат из фильтра, полученного с сервера
+const sanitizeDate = (value: unknown): string => {
+  if (typeof value === 'number') {
+    return value <= 0 ? '' : dayjs.unix(value).format('DD.MM.YYYY');
+  } else if (value === null || value === undefined || value === '') {
+    return '';
+  } else {
+    return value as string;
+  }
+};
+
 // Запись значений диапазонов дат в фильтр
 const updateDateField = (
   prefix: 'created_at' | 'target_date' | 'start_date' | 'completed_at',
@@ -644,14 +657,18 @@ const convertDatesToTimestamp = (filterData: IFilter): IFilter => {
     'completed_at',
   ] as const;
 
-  const parseDate = (value: unknown) => {
-    if (!value || typeof value !== 'string' || value.trim() === '') return null;
-
-    const strictDate = dayjs(value, 'DD.MM.YYYY', true);
-    if (strictDate.isValid()) return strictDate;
-
-    const fallbackDate = dayjs(value);
-    return fallbackDate.isValid() ? fallbackDate : null;
+  const parseDate = (value: unknown): Dayjs | null => {
+    if (typeof value === 'number' && value > 0) {
+      const date = dayjs.unix(value);
+      return date.isValid() ? date : null;
+    } else if (typeof value === 'string' && value.trim() !== '') {
+      const strictDate = dayjs(value, 'DD.MM.YYYY', true);
+      if (strictDate.isValid()) return strictDate;
+      const fallbackDate = dayjs(value);
+      return fallbackDate.isValid() ? fallbackDate : null;
+    } else {
+      return null;
+    }
   };
 
   datePrefixes.forEach((prefix) => {
