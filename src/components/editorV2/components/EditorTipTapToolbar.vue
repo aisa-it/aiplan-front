@@ -298,12 +298,12 @@
 
           <EditorDrawioButton
             v-if="!excludedTabs.includes(TIPTAP_TABS.drawio)"
-            @on-click="editorInstance.commands.insertDrawIo"
+            @click="editorInstance.commands.insertDrawIo"
           />
 
           <EditorFullScreenButton
             v-if="$props.isFullScreen"
-            @toggle-fullscreen="emits('toggle-fullscreen')"
+            @click="emits('toggle-fullscreen')"
             :style="`margin: ${isMobile ? '0 auto' : ' 0 0 0 auto'}`"
           />
         </template>
@@ -376,12 +376,11 @@ const props = withDefaults(defineProps<IEditorTiptapToolbarProps>(), {
   showHeadings: false,
 });
 
-const emits = defineEmits([
-  'openLink',
-  'enableEditing',
-  'toggleFormatSample',
-  'toggle-fullscreen',
-]);
+const emits = defineEmits<{
+  enableEditing: [];
+  toggleFormatSample: [];
+  'toggle-fullscreen': [];
+}>();
 
 //hooks
 const $q = useQuasar();

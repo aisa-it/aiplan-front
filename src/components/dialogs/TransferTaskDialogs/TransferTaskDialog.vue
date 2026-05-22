@@ -303,7 +303,7 @@ const props = withDefaults(
 );
 
 // emits
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -506,7 +506,7 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
 
   if (transferModel.value.delete_src) {
     if (isPreview.value) {
-      emit('refresh');
+      emits('refresh');
       isPreview.value = false;
     }
 

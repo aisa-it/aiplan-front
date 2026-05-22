@@ -92,7 +92,7 @@ const props = defineProps<{
   issue: any;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -141,7 +141,7 @@ const saveIssueSprints = async () => {
       ),
     ];
     await Promise.all(updatePromises);
-    emit('refresh');
+    emits('refresh');
     setNotificationView({
       open: true,
       type: 'success',

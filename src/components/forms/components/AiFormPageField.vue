@@ -131,29 +131,18 @@ import {
 } from 'src/components/forms/helper/helperForm';
 import dayjs from 'dayjs';
 
-const props = defineProps({
-  field: {
-    type: Object,
-    required: true,
-  },
-  modelValue: {
-    required: true,
-  },
-  error: {
-    type: Boolean,
-    default: false,
-  },
-  formSlug: {
-    type: String,
-    default: '',
-  },
-  workspaceSlug: {
-    type: String,
-    required: true,
-  },
-});
+const props = withDefaults(
+  defineProps<{
+    field: any;
+    modelValue: any;
+    error?: boolean;
+    formSlug?: string;
+    workspaceSlug: string;
+  }>(),
+  { formSlug: '' },
+);
 
-const emit = defineEmits(['update:modelValue']);
+const emits = defineEmits<{ 'update:modelValue': any }>();
 
 //variables
 const dateDialogVisible = ref(false);
@@ -179,45 +168,45 @@ const transformDate = (date) => {
 const handleUpdateValue = (val) => {
   if (props.field.type === 'numeric') {
     if (isNaN(val)) return;
-    emit('update:modelValue', Math.trunc(Number(val)));
+    emits('update:modelValue', Math.trunc(Number(val)));
     return;
   }
   if (props.field.type === 'date') {
     if (val.length === 10) {
       internalDate.value = transformDate(val);
     }
-    emit('update:modelValue', val);
+    emits('update:modelValue', val);
     return;
   }
   if (props.field.type === 'color') {
     if (!String(val).startsWith('#') && val.length) {
-      emit('update:modelValue', '#' + val);
+      emits('update:modelValue', '#' + val);
     } else {
-      emit('update:modelValue', val);
+      emits('update:modelValue', val);
     }
     return;
   }
 
-  emit('update:modelValue', val);
+  emits('update:modelValue', val);
 };
 
 const updateNumeric = (delta) => {
   const current = Number(props.modelValue) || 0;
-  emit('update:modelValue', String(current + delta));
+  emits('update:modelValue', String(current + delta));
 };
 
 const setDateToInput = (val) => {
   internalDate.value = val;
-  emit('update:modelValue', dayjs(val).format('DD-MM-YYYY'));
+  emits('update:modelValue', dayjs(val).format('DD-MM-YYYY'));
 };
 
 const resetDate = () => {
   internalDate.value = null;
-  emit('update:modelValue', null);
+  emits('update:modelValue', null);
 };
 
 const handleColorUpdate = (val) => {
-  emit('update:modelValue', val);
+  emits('update:modelValue', val);
 };
 
 const handleEnterPress = (type, event) => {

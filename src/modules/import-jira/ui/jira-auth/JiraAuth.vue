@@ -69,7 +69,7 @@ import ImportJiraHistory from '../import-jira-history/ImportJiraHistory.vue';
 import { AiplanJiraInfoRequest } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // emits
-const emits = defineEmits(['next']);
+const emits = defineEmits<{ next: [] }>();
 
 //stores
 const importStore = useImportStore();

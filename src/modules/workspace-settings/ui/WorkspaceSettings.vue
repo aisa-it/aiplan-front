@@ -51,13 +51,7 @@ const { loading, onLoad } = useLoad(workspaceStore.getWorkspaceInfo);
 
 const currentWsSlug = computed(() => route.params.workspace as string);
 
-const props = defineProps({
-  isInAdminPanel: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+const props = defineProps<{ isInAdminPanel?: boolean }>();
 
 const wsSettingsTab = ref(0);
 

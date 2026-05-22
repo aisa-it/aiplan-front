@@ -56,7 +56,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useImportStore } from 'src/modules/import-jira/stores/import-store';
 
 // emits
-const emits = defineEmits(['next', 'get-back']);
+const emits = defineEmits<{ next: []; 'get-back': [] }>();
 
 // stores
 const userStore = useUserStore();

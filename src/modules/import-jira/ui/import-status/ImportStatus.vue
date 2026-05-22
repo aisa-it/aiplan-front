@@ -80,7 +80,7 @@ import { defineStage } from 'src/constants/jiraConstants';
 import { IssuesImportImportStatus } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // emits
-const emits = defineEmits(['next', 'get-back']);
+const emits = defineEmits<{ next: [] }>();
 
 // store
 const importStore = useImportStore();

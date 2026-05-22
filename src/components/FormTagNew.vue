@@ -81,7 +81,7 @@ const props = defineProps<{
   workspaceId?: string;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   close: [];
   add: [tag: DtoLabelLight];
 }>();
@@ -129,7 +129,7 @@ const onSubmit = () => {
     },
   )
     .then((d) => {
-      emit('add', d);
+      emits('add', d);
       name.value = '';
       color.value = '#000000';
       isTagExistError.value = false;

@@ -83,11 +83,12 @@ import { useUserStore } from 'src/stores/user-store';
 import { useQuasar } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  currentWsInfo: { type: Object, required: true },
-  currentWsSlug: { type: String, required: true },
-});
+const props = defineProps<{
+  currentWsInfo: DtoWorkspace;
+  currentWsSlug: string;
+}>();
 
 const workspaceStore = useWorkspaceStore();
 const settingsStore = useSettingsStore();

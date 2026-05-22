@@ -86,7 +86,7 @@ const props = defineProps<{
   currentWsSlug: string;
 }>();
 
-const emits = defineEmits(['success', 'error', 'update']);
+const emits = defineEmits<{ success: []; update: []; error: [string] }>();
 
 // interfaces
 interface Form {

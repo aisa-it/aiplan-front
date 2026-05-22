@@ -235,56 +235,6 @@
         :excluded-tabs="[TIPTAP_TABS.drawio]"
       /> </q-card
   ></q-dialog>
-  <!-- <div>
-      <h3>Восстановление</h3>
-      <div class="row mobile-block q-mt-md">
-        <div class="col">
-          <h4 class="text-lg font-semibold text-brand-base">Экспорт</h4>
-          <p class="text-sm text-brand-secondary">
-            Получение копии текущего состояния пространства.
-          </p>
-        </div>
-        <div class="col">
-          <q-card-actions align="right">
-            <q-btn
-              no-caps
-              class="secondary-btn"
-              style="width: 80px"
-              @click="downloadBackup"
-              :disable="isDemo"
-            >
-              Экспорт
-            </q-btn>
-          </q-card-actions>
-        </div>
-      </div>
-
-      <div class="row mobile-block q-mt-md">
-        <div class="col">
-          <h4 class="text-lg font-semibold text-brand-base">Импорт</h4>
-          <p class="text-sm text-brand-secondary">
-            Восстановление рабочего пространства из копии
-          </p>
-        </div>
-        <div class="col">
-          <q-card-actions align="right">
-            <q-btn
-              no-caps
-              class="secondary-btn"
-              style="width: 80px"
-              :disable="isDemo"
-              @click="
-                () => {
-                  handleOpenImport();
-                }
-              "
-            >
-              Импорт
-            </q-btn>
-          </q-card-actions>
-        </div>
-      </div>
-    </div> -->
 
   <div v-if="hasPermission('delete-ws')">
     <div class="row mobile-block q-mt-md" :style="'align-items: end;'">
@@ -413,16 +363,13 @@ const EditorTipTapV2 = defineAsyncComponent(
 
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  currentWsInfo: { type: Object, required: true },
-  currentWsSlug: { type: String, required: true },
-  isInAdminPanel: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+const props = defineProps<{
+  currentWsInfo: DtoWorkspace;
+  currentWsSlug: string;
+  isInAdminPanel?: boolean;
+}>();
 
 //composables
 const q = useQuasar();

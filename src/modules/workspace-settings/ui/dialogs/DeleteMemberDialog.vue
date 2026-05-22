@@ -53,7 +53,7 @@ const props = withDefaults(
   },
 );
 
-const emits = defineEmits(['delete', 'error']);
+const emits = defineEmits<{ delete: []; error: [] }>();
 
 // refs
 const { user: choosedUser } = toRefs(props);

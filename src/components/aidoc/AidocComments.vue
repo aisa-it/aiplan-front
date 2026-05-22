@@ -52,12 +52,9 @@ const aidocStore = useAiDocStore();
 // store to refs
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-const props = defineProps({
-  documentId: {
-    type: String,
-    required: true,
-  },
-});
+const props = defineProps<{
+  documentId: string;
+}>();
 
 //vars
 const tab = ref('comments');

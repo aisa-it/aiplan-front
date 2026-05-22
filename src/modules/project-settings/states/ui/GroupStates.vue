@@ -67,7 +67,7 @@ import { updateState } from '../services/api';
 const props = defineProps<{
   states: Record<string, DtoStateLight>;
 }>();
-const emit = defineEmits(['update', 'refresh', 'refresh-states']);
+const emits = defineEmits<{ update: []; refresh: []; 'refresh-states': [] }>();
 
 const { setNotificationView } = useNotificationStore();
 // vars
@@ -91,8 +91,8 @@ onMounted(() => {
 });
 
 const onError = async () => {
-  emit('update');
-  emit('refresh-states');
+  emits('update');
+  emits('refresh-states');
 };
 
 const onSuccess = async (msg?: string) => {
@@ -101,9 +101,9 @@ const onSuccess = async (msg?: string) => {
     type: 'success',
     customMessage: msg ?? SUCCESS_UPDATE_DATA,
   });
-  emit('refresh');
-  emit('update');
-  emit('refresh-states');
+  emits('refresh');
+  emits('update');
+  emits('refresh-states');
 };
 
 const onEditOpen = (s: DtoStateLight) => {
@@ -123,8 +123,8 @@ const changeGroupSequence = async (state: DtoStateLight, index: number) => {
     state.id as string,
     Object.assign(state, { group_seq_id: index + 1 }),
   ).then(() => {
-    emit('refresh');
-    emit('refresh-states');
+    emits('refresh');
+    emits('refresh-states');
     setNotificationView({
       open: true,
       type: 'success',

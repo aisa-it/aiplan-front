@@ -28,7 +28,7 @@
           style="width: 100px"
           label="Удалить"
           v-close-popup
-          @click="emit('onDelete')"
+          @click="emits('onDelete')"
         />
       </q-card-actions>
     </q-card>
@@ -39,20 +39,14 @@
 import { computed, ref, watch } from 'vue';
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
+import { DtoDocComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-// Определение пропсов
-const props = defineProps({
-  isOpenDialog: {
-    type: Boolean,
-    default: false,
-  },
-  comment: {
-    type: Object,
-    required: true,
-  },
-});
+const props = defineProps<{
+  isOpenDialog?: boolean;
+  comment: DtoDocComment;
+}>();
 
-const emit = defineEmits(['onDelete']);
+const emits = defineEmits<{ onDelete: [] }>();
 
 const isOpen = ref(props.isOpenDialog);
 
@@ -68,6 +62,6 @@ const commentUserName = computed(() =>
 );
 
 const commentCreatedAt = computed(() =>
-  formatDateTime(props.comment.created_at),
+  formatDateTime(props.comment?.created_at ?? ''),
 );
 </script>

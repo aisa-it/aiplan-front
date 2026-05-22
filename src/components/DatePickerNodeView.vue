@@ -54,16 +54,10 @@ import { NodeViewWrapper } from '@tiptap/vue-3';
 import { ref, computed, inject } from 'vue';
 import CalendarIcon from './icons/CalendarIcon.vue';
 
-const props = defineProps({
-  node: {
-    type: Object,
-    required: true,
-  },
-  updateAttributes: {
-    type: Function,
-    required: true,
-  },
-});
+const props = defineProps<{
+  node: any;
+  updateAttributes: (data: any) => any;
+}>();
 
 const selectedDate = ref(props.node.attrs.date);
 const showPicker = ref(false);

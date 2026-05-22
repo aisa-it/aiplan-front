@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-// components
 import BinIcon from '../icons/BinIcon.vue';
 import EditIcon from '../icons/EditIcon.vue';
 
@@ -35,5 +34,5 @@ const props = withDefaults(
   },
 );
 
-const emits = defineEmits(['edit', 'block', 'unblock', 'delete']);
+const emits = defineEmits<{ edit: []; delete: [] }>();
 </script>

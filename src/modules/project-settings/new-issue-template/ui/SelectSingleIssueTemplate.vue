@@ -14,9 +14,9 @@
     option-value="id"
     option-label="name"
     :popup-content-class="'scrollable-content fit-popup'"
-    @update:model-value="(val) => emit('update:modelValue', val)"
-    @virtual-scroll="(args) => emit('virtual-scroll', args)"
-    @clear="emit('clear')"
+    @update:model-value="(val) => emits('update:modelValue', val)"
+    @virtual-scroll="(args) => emits('virtual-scroll', args)"
+    @clear="emits('clear')"
   >
     <template v-slot:option="scope">
       <q-item v-bind="scope.itemProps">
@@ -91,7 +91,7 @@ const props = defineProps<{
   newIssue?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'update:modelValue', value: any): void;
   (e: 'virtual-scroll', args: any): void;
   (e: 'delete', id: string): void;
@@ -101,7 +101,7 @@ const emit = defineEmits<{
 //computeds
 const template = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+  set: (value) => emits('update:modelValue', value),
 });
 
 //state
@@ -118,7 +118,7 @@ function confirmDelete(id: string, name: string) {
 
 function handleDelete() {
   if (templateIdToDelete.value) {
-    emit('delete', templateIdToDelete.value);
+    emits('delete', templateIdToDelete.value);
   }
   deleteDialog.value = false;
   templateIdToDelete.value = null;

@@ -59,7 +59,7 @@ const props = withDefaults(
 );
 
 // emits
-const emits = defineEmits(['error', 'update']);
+const emits = defineEmits<{ error: []; update: [] }>();
 
 // to refs
 const { user: targetUser } = toRefs(props);

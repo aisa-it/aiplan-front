@@ -54,7 +54,7 @@ const props = defineProps<{
   user?: DtoProjectMemberLight;
   me?: DtoProjectMember;
 }>();
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'success'): void;
   (e: 'error'): void;
 }>();
@@ -87,8 +87,8 @@ const handleChangeRole = async () => {
     choosed_user.value.id as string,
     { role: +role.value.value },
   )
-    .then(() => emit('success'))
-    .catch(() => emit('error'));
+    .then(() => emits('success'))
+    .catch(() => emits('error'));
 };
 
 onUpdated(() => {

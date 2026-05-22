@@ -104,7 +104,7 @@ import {
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // emits
-const emits = defineEmits(['next', 'get-back']);
+const emits = defineEmits<{ next: []; 'get-back': [] }>();
 
 //stores
 const importStore = useImportStore();

@@ -25,7 +25,7 @@
         :key="child.id"
         :item="child"
         :on-sortable-end="onSortableEnd"
-        @sortable-refresh="emit('sortable-refresh')"
+        @sortable-refresh="emits('sortable-refresh')"
       />
     </ul>
   </li>
@@ -44,7 +44,7 @@ const props = defineProps<{
   onSortableEnd?: (evt: any) => void;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'sortable-refresh'): void;
 }>();
 
@@ -103,7 +103,7 @@ const toggleExpand = async () => {
     await nextTick();
     isExpanded.value = true;
     props.item.isExpanded = true;
-    emit('sortable-refresh');
+    emits('sortable-refresh');
   }
 };
 

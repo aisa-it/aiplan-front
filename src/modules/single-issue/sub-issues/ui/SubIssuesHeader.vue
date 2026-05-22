@@ -56,7 +56,7 @@ const expanded = computed({
   set: (val: boolean) => emits('update:isExpanded', val),
 });
 
-const emits = defineEmits(['refresh', 'update:isExpanded']);
+const emits = defineEmits<{ refresh: []; 'update:isExpanded': [boolean] }>();
 
 const singleIssueStore = useSingleIssueStore();
 const { currentIssueID } = storeToRefs(singleIssueStore);

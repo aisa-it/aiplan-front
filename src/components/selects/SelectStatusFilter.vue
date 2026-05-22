@@ -33,8 +33,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-const emits = defineEmits(['update']);
-const props = defineProps(['statesProps', 'statuses']);
+const props = defineProps<{
+  statesProps: any[];
+  statuses: any[];
+}>();
+
+const emits = defineEmits<{ update: [any[]] }>();
 
 const states = computed<any[]>({
   get() {

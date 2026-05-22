@@ -223,11 +223,11 @@ defineProps<{
   preview?: boolean;
 }>();
 
-const emit = defineEmits([
-  'update:issuePage',
-  'toggleDrawer',
-  'uploadAttachment',
-]);
+const emits = defineEmits<{
+  'update:issuePage': [];
+  toggleDrawer: [];
+  uploadAttachment: [];
+}>();
 
 // stores
 const userStore = useUserStore();
@@ -345,7 +345,7 @@ const handleUpdateTitleAndEditor = async () => {
         open: true,
         type: 'success',
       });
-      emit('update:issuePage');
+      emits('update:issuePage');
     })
     .catch(() => {
       if (issueData.value) {
@@ -445,7 +445,7 @@ const refresh = async () => {
 };
 
 const toggleDrawer = () => {
-  emit('toggleDrawer');
+  emits('toggleDrawer');
 };
 
 const editorContainer = ref<HTMLElement>();
@@ -459,7 +459,7 @@ const { handleDrop } = useAttachmentsWithEditor(
       issueData.value.project,
       issueData.value.id,
     ),
-  () => emit('uploadAttachment'),
+  () => emits('uploadAttachment'),
 );
 
 onMounted(() => {

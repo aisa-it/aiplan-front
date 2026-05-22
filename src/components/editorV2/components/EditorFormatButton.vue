@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<iEditorFormatButtonProps>(), {
   hasRunCommandListener: false,
 });
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   runCommand: [command: string];
 }>();
 
@@ -59,7 +59,7 @@ const runCommand = (): void => {
   const chain = editor.chain();
 
   if (props.hasRunCommandListener) {
-    emit('runCommand', props.command);
+    emits('runCommand', props.command);
   } else {
     const commandChain = !props.isMobile ? chain.focus() : chain;
 
@@ -77,7 +77,7 @@ const runCommand = (): void => {
 
   if (props.focusAfterRun) chain.focus();
 
-  bus.emit('clearEditor');
+  bus.emits('clearEditor');
 };
 </script>
 

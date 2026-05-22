@@ -54,9 +54,9 @@ import { DtoEntityActivityFull } from '@aisa-it/aiplan-api-ts/src/data-contracts
 const props = defineProps<{
   rows: DtoEntityActivityFull[];
   rowsCount: number;
-  currentDay: string;
-  onlyProject: boolean;
-  onlyWorkspace: boolean;
+  currentDay?: string;
+  onlyProject?: boolean;
+  onlyWorkspace?: boolean;
 }>();
 
 const emits = defineEmits<{

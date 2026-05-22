@@ -87,7 +87,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('open', props.row)"
+                @click="emits('open', props.row)"
                 v-if="!props.row.draft"
               >
                 <ZoomIcon :width="20" :height="20" />
@@ -98,7 +98,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('delete', props.row)"
+                @click="emits('delete', props.row)"
               >
                 <BinIcon :width="20" :height="20" color="#DC3E3E" />
                 <HintTooltip>Удалить</HintTooltip>
@@ -132,7 +132,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('open', props.row)"
+                    @click="emits('open', props.row)"
                     v-if="!props.row.draft"
                   >
                     <q-item-section class="col-auto q-pr-sm">
@@ -143,7 +143,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('delete', props.row)"
+                    @click="emits('delete', props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <BinIcon :width="20" :height="20" color="#DC3E3E" />
@@ -215,7 +215,7 @@ const props = defineProps<{
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   open: [value: IAttachmentCard];
   delete: [value: IAttachmentCard];
 }>();

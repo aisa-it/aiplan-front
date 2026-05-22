@@ -70,7 +70,7 @@
         <SelectSprintIssues
           v-if="issues && issues.length > 0"
           :issues="issues"
-          @delete="(id) => emit('delete', id)"
+          @delete="(id) => emits('delete', id)"
           class="visible-scroll issues-scroll"
           style="min-height: 216px; height: 100%"
         />
@@ -124,7 +124,7 @@ const props = defineProps<{
   isMobile?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   delete: [id: string];
   create: [data: any];
   edit: [data: any];
@@ -252,9 +252,9 @@ const pushData = () => {
   };
 
   if (props.defaultProps) {
-    emit('edit', data);
+    emits('edit', data);
   } else {
-    emit('create', data);
+    emits('create', data);
   }
 };
 

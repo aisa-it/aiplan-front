@@ -23,8 +23,8 @@
       :isFullScreen="isFullScreenView"
       :showHeadings="props.showHeadings"
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
-      @enable-editing="$emit('enableEditing')"
-      @toggle-fullscreen="$emit('toggle-fullscreen')"
+      @enable-editing="emits('enableEditing')"
+      @toggle-fullscreen="emits('toggle-fullscreen')"
     />
 
     <div class="html-editor__outer">
@@ -37,7 +37,7 @@
             { 'html-editor__btn-edit--force': isShowEdit || isTocPopupOpen },
           ]"
           title="Нажмите для редактирования"
-          @click="$emit('enableEditing')"
+          @click="emits('enableEditing')"
         >
           <EditIcon />
 
@@ -215,14 +215,13 @@ const props = withDefaults(defineProps<IEditorV2Props>(), {
 });
 
 // Emits
-const emit = defineEmits([
-  'update:modelValue',
-  'getEditor',
-  'enableEditing',
-  'isEditorEmpty',
-  'toggle-fullscreen',
-  'updateEditorDOM',
-]);
+const emits = defineEmits<{
+  'update:modelValue': [string];
+  getEditor: [Editor | null];
+  enableEditing: [];
+  'toggle-fullscreen': [];
+  updateEditorDOM: [any];
+}>();
 
 const $q = useQuasar();
 const bus = inject<EventBus>('bus');
@@ -326,13 +325,13 @@ function createEditor() {
     editable: !isReadOnly.value,
     extensions: editorExtensions.value as any,
     onUpdate: () => {
-      emit('update:modelValue', editorInstance.value?.getHTML());
-      emit('updateEditorDOM', editorInstance.value?.state.doc);
+      emits('update:modelValue', editorInstance.value?.getHTML());
+      emits('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
       floatScroll();
     },
     onCreate: () => {
-      emit('updateEditorDOM', editorInstance.value?.state.doc);
+      emits('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
       floatScroll();
     },
@@ -344,7 +343,7 @@ function createEditor() {
     isFormatSampleActive,
   );
   addMouseUpListener();
-  emit('getEditor', editorInstance.value);
+  emits('getEditor', editorInstance.value);
 }
 
 const refreshTocLinks = () => {
@@ -403,7 +402,7 @@ const onResize = (size: any) => {
 
 const onCommentLink = (commentData: any) => {
   if (isReadOnly.value) {
-    if (commentData) bus?.emit('openSingleComment', commentData);
+    if (commentData) bus?.emits('openSingleComment', commentData);
   } else {
     editAnchor.value = true;
   }

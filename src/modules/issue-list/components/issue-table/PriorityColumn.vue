@@ -17,15 +17,13 @@
 </template>
 
 <script setup lang="ts">
-// stores
 import { useRolesStore } from 'src/stores/roles-store';
-// components
 import SelectPriority from 'src/components/SelectPriority.vue';
 
 defineProps<{
   rowInfo: any;
 }>();
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits<{ refresh: [] }>();
 const rolesStore = useRolesStore();
 </script>

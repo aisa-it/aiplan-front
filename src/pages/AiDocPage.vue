@@ -101,10 +101,6 @@
           <AidocComments :documentId="documentValue.id" />
         </div>
         <DeleteDocDialog v-model="showDeleteDialog" :document="documentValue" />
-        <AidocImportExport
-          v-model="showImportExportDialog"
-          :itemExport="currentExportDialogItem"
-        />
       </q-page-container>
     </q-layout>
 
@@ -146,7 +142,6 @@ import SelectAttachments from 'src/components/SelectAttachments.vue';
 import EditorHeader from 'src/components/EditorHeader.vue';
 import DeleteDocDialog from 'src/components/dialogs/AIDocDialogs/DeleteDocDialog.vue';
 import AidocComments from 'src/components/aidoc/AidocComments.vue';
-import AidocImportExport from 'src/components/aidoc/AidocImportExport.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { cleanContent } from 'src/components/editorV2/utils/editorUtils';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
@@ -179,8 +174,6 @@ const isReadOnlyEditor = ref(true);
 const documentValue = ref<DtoDoc>({});
 const updateCurrentEditorValue = ref();
 const showDeleteDialog = ref(false);
-const showImportExportDialog = ref(false);
-const currentExportDialogItem = ref();
 const docVersionList = ref<DtoHistoryBodyLight[]>([]);
 const loading = ref(false);
 const isDocumentEditPending = ref(false);
@@ -197,19 +190,6 @@ useMeta(() => {
 
 //consts
 const preventClickClass = 'prevent-click-issue-outside';
-// const listItem = [
-// { title: 'Права доступа', disabled: true, emit: 'accessRights' },
-// { title: 'Экспорт в PDF', disabled: true, emit: 'exportPdf' },
-// { title: 'Экспорт в Word', disabled: true, emit: 'exportWord' },
-// {
-//   title: 'Импорт документа в Word',
-//   disabled: false,
-//   emit: 'importWord',
-//   extensions: ['doc', 'docx'],
-// },
-// { title: 'Переместить', disabled: true, emit: 'moveDocument' },
-//   { title: 'Удалить', disabled: false, emit: 'openDeleteDialog' },
-// ];
 
 //computeds
 const currentUserRole = computed(() =>
@@ -326,11 +306,6 @@ const updateDocument = async (roles = {}) => {
 const openDeleteDialog = () => {
   showDeleteDialog.value = true;
 };
-
-// const openImportExportDialog = (type: string) => {
-//   currentExportDialogItem.value = listItem.find((el) => el.emit === type);
-//   showImportExportDialog.value = true;
-// };
 
 //TODO дубляж функции в компонентах CreateDocPageDialog, AiDocPage, AidocActivityComments, AidocVersionSelect
 const getWorkspaceMembersForMention = async (

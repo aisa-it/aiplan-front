@@ -1,5 +1,5 @@
 <template>
-  <q-btn dense flat @click="handleClick">
+  <q-btn dense flat>
     <HintTooltip>Вставить диаграмму</HintTooltip>
     <DrawioIcon :width="24" :height="24" />
   </q-btn>
@@ -7,10 +7,4 @@
 
 <script setup lang="ts">
 import DrawioIcon from 'src/components/icons/DrawioIcon.vue';
-
-const emit = defineEmits(['onClick']);
-
-const handleClick = (e) => {
-  emit('onClick', e);
-};
 </script>

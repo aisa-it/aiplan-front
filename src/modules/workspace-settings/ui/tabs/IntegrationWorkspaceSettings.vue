@@ -87,11 +87,12 @@ import {
   getWorkspaceIntegrations,
   addWorkspaceIntegration,
 } from 'src/modules/workspace-settings/services/api';
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  currentWsInfo: { type: Object, required: true },
-  currentWsSlug: { type: String, required: true },
-});
+const props = defineProps<{
+  currentWsInfo: DtoWorkspace;
+  currentWsSlug: string;
+}>();
 
 const { setNotificationView } = useNotificationStore();
 const aiplanStore = useAiplanStore();

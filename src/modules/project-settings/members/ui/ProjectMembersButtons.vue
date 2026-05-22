@@ -25,5 +25,5 @@ const props = withDefaults(
   },
 );
 
-const emits = defineEmits(['edit', 'delete']);
+const emits = defineEmits<{ edit: []; delete: [] }>();
 </script>

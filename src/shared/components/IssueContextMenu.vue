@@ -13,7 +13,11 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            pinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
           )
         "
       >
@@ -28,7 +32,11 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            unpinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
           )
         "
       >
@@ -93,17 +101,17 @@
     <TransferTaskDialog
       v-model="isTransferOpen"
       :issue="props.row"
-      @refresh="emit('refresh')"
+      @refresh="emits('refresh')"
     />
     <DeleteIssueDialog
       v-model="isDeletingOpen"
       :issue="props.row"
-      @refresh="emit('refresh')"
+      @refresh="emits('refresh')"
     />
     <ManageIssueSprintsDialog
       v-model="isManageSprintsOpen"
       :issue="props.row"
-      @refresh="emit('refresh')"
+      @refresh="emits('refresh')"
     />
   </q-menu>
 </template>
@@ -142,7 +150,7 @@ const props = defineProps<{
   anchorEvent?: MouseEvent | null;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -209,13 +217,12 @@ const pinAndUnpinIssue = async (func: () => Promise<void>) => {
     await func();
     if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
     refreshIssues.value = true;
-    emit('refresh');
+    emits('refresh');
   } catch (err) {
     setNotificationView({
       open: true,
       type: 'error',
-      customMessage:
-      'Произошла ошибка при закреплении/откреплении задачи',
+      customMessage: 'Произошла ошибка при закреплении/откреплении задачи',
     });
     throw err;
   }
@@ -249,7 +256,7 @@ const addNewIssue = () => {
       parent: props.row?.id,
       project: props.row?.project_detail,
     },
-  }).onOk(() => emit('refresh'));
+  }).onOk(() => emits('refresh'));
 };
 
 watch(

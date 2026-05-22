@@ -78,7 +78,7 @@ import { usePalette } from '../../composables/usePalette';
 
 const { getRandomColorFromPalette } = usePalette();
 
-const emit = defineEmits(['close']);
+const emits = defineEmits<{ close: [] }>();
 
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
@@ -107,7 +107,7 @@ const handleSubmit = async () => {
       currentWorkspaceSlug.value as string,
       project.value.id,
     );
-    emit('close');
+    emits('close');
     setNotificationView({
       open: true,
       type: 'success',
