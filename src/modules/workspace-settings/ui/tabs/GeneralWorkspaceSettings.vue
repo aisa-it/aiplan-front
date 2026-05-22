@@ -329,18 +329,20 @@
   />
   <q-dialog
     v-model="isSelectLeadOpen"
-    @show="oldLeadWs = workspaceInfoForm.owner_id"
-    @hide="workspaceInfoForm.owner_id = oldLeadWs"
+    @show="oldLeadWs = workspaceInfoForm.ownerMember"
+    @hide="workspaceInfoForm.ownerMember = oldLeadWs"
   >
     <div class="dialog-select-leader">
-      <SelectLeader
-        v-model:current-value="workspaceInfoForm.owner_id"
-        :options="leadWorkspaceOptions"
+      <SelectMembers
+        v-model="workspaceInfoForm.ownerMember"
         label="Лидер пространства"
-        style="margin: 0.375em 0; width: 100%"
+        off-multiple
+        off-search
         :is-disabled="
           !hasPermissionByWorkspace(computedWorkspaceInfo, 'change-lead-ws')
         "
+        style="margin: 0.375em 0; width: 100%"
+        :refresh-members-func="fethAdmins"
       />
       <div
         class="q-mt-xs"
@@ -411,7 +413,7 @@ import {
   DeleteWorkspaceModal,
   UploadWorkspaceAvatarDialog,
 } from 'src/modules/workspace-settings/ui/dialogs';
-import SelectLeader from 'components/selects/SelectLeader.vue';
+import SelectMembers from 'src/components/selects/SelectMembers.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
 
 const EditorTipTapV2 = defineAsyncComponent(
@@ -420,6 +422,8 @@ const EditorTipTapV2 = defineAsyncComponent(
 
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
+import { Pagination } from 'src/components/selects/types/types';
+import { DtoWorkspaceMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps({
   currentWsInfo: { type: Object, required: true },
@@ -478,7 +482,6 @@ const isToken = ref<boolean>(true);
 const isAvatarError = ref<boolean>(false);
 
 // опции лидер пространства
-const leadWorkspaceOptions = ref<any[]>([]);
 const oldLeadWs = ref(null);
 
 //computeds
@@ -507,7 +510,7 @@ const { hasChanges, init } = useFormChanges(workspaceInfoForm, {
     return {
       name: val.name,
       description: normalizeHtml(val.description),
-      owner_id: val.owner_id?.value ?? val.owner_id,
+      owner_id: val.ownerMember?.[0]?.member_id,
     };
   },
 });
@@ -546,7 +549,6 @@ const avatarText = (text: string) => {
 
 // функции рефреша данных текущего спейса
 const refreshInfo = async () => {
-  await getLeadOptions();
   if (props.isInAdminPanel) {
   } else {
     await workspaceStore
@@ -566,13 +568,11 @@ const refreshInfo = async () => {
   setAnotherTitle(computedWorkspaceInfo.value.name);
 
   const owner = computedWorkspaceInfo.value?.owner;
+  const admins = (await fethAdmins({ limit: -1 })).result;
+  workspaceInfoForm.value.ownerMember = [
+    admins.find((el) => el.member_id === owner.id),
+  ];
 
-  workspaceInfoForm.value.owner_id = leadWorkspaceOptions.value.find(
-    (el) => el.value === computedWorkspaceInfo.value?.owner_id,
-  ) ?? {
-    label: owner ? aiplan.UserName(owner).join(' ') : 'Не выбран',
-    value: owner?.id ?? null,
-  };
   init();
 };
 
@@ -580,19 +580,17 @@ const refreshToken = async () => {
   await settingsStore.setWorkspaceToken(route.params['workspace'] as string);
 };
 
-const getLeadOptions = async () => {
-  await workspaceStore.getWorkspaceMembers(props.currentWsSlug).then((res) => {
-    leadWorkspaceOptions.value = (res?.result || [])
-      .filter((member: any) => member.role === 15)
-      .map((member: any) => {
-        return {
-          ...member,
-          label: `${member.member.last_name} ${member.member.first_name}`,
-          value: member.member.id,
-        };
-      });
-  });
-};
+async function fethAdmins(pagination: Pagination) {
+  const result = await workspaceStore.getWorkspaceMembers(
+    props.currentWsSlug,
+    pagination,
+  );
+  if (!result) return {};
+  result.result = result?.result.filter(
+    (el: DtoWorkspaceMemberLight) => el?.role === 15,
+  );
+  return result;
+}
 
 // апдейт данных спейса
 const handleUpdateWorkspace = async () => {
@@ -601,7 +599,7 @@ const handleUpdateWorkspace = async () => {
   const payload = {
     name: workspaceInfoForm.value.name,
     description: workspaceInfoForm.value.description,
-    owner_id: workspaceInfoForm.value.owner_id.value,
+    owner_id: workspaceInfoForm.value.ownerMember?.[0]?.member_id,
   };
 
   await updateWorkspace(workspaceInfoForm.value.slug, payload)

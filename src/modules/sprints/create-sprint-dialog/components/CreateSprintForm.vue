@@ -20,12 +20,12 @@
             <ObserveIcon />
             <span class="q-ml-sm"> Наблюдатели </span>
           </div>
-
-          <SelectWatchers
-            v-model:watchers="watchers"
-            :current-member="user"
+          <SelectMembers
+            v-model="watchers"
             label="Выберите наблюдателя"
             class="col centered-horisontally"
+            :default-members="defaultProps?.watchers"
+            :refresh-members-func="fetchMembers"
           />
         </div>
 
@@ -101,10 +101,9 @@ dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-import { storeToRefs } from 'pinia';
-import { useUserStore } from 'src/stores/user-store';
+import { useFetchMembers } from 'src/components/selects/composables/useFetchMembers';
 
-import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
+import SelectMembers from 'src/components/selects/SelectMembers.vue';
 import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
@@ -117,6 +116,7 @@ import {
   DtoIssueLight,
   DtoSprint,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Member } from 'src/components/selects/types/types';
 
 const props = defineProps<{
   issues?: DtoIssueLight[];
@@ -130,16 +130,12 @@ const emit = defineEmits<{
   edit: [data: any];
 }>();
 
-const userStore = useUserStore();
-
-const { user } = storeToRefs(userStore);
+const { fetchMembers } = useFetchMembers('workspace');
 
 const nameRef = ref();
 
 const sprintName = ref(props.defaultProps?.name ?? '');
-const watchers = ref<any>(
-  props.defaultProps?.watchers?.map((el) => el.id) ?? [],
-);
+const watchers = ref<Member[]>([]);
 
 const dateRange = ref({
   from: props.defaultProps?.start_date
@@ -203,22 +199,24 @@ const removeAndAddArrayHelper = <T extends { id?: string }>(
 };
 
 const removeAndAddWatcher = () => {
+  const watchersIds = watchers.value.map((el) => el.member?.id);
+
   if (!props.defaultProps?.watchers || !props.defaultProps?.watchers.length) {
     return {
-      add: watchers.value,
+      add: watchersIds,
       remove: [],
     };
   }
 
-  if (!watchers.value) return { remove: [], add: [] };
+  if (!watchersIds) return { remove: [], add: [] };
 
   const remove =
     props.defaultProps?.watchers?.filter(
-      (el) => !watchers.value.some((i) => i === el.id),
+      (el) => !watchersIds.some((i) => i === el.id),
     ) ?? [];
 
   const add =
-    watchers.value.filter((el) => !remove?.some((del) => del.id === el)) ?? [];
+    watchersIds.filter((el) => !remove?.some((del) => del.id === el)) ?? [];
 
   return {
     remove: remove.map((el) => el.id),
@@ -264,7 +262,7 @@ watch(
     if (!props.defaultProps) return;
 
     sprintName.value = props.defaultProps?.name ?? '';
-    watchers.value = props.defaultProps?.watchers?.map((el) => el.id) ?? [];
+    watchers.value = [];
 
     dateRange.value = {
       from: props.defaultProps?.start_date

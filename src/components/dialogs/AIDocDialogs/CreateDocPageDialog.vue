@@ -91,14 +91,12 @@
               </q-card>
             </q-menu>
           </div>
-
-          <SelectWatchers
-            v-model:watchers="watcherList"
-            :current-member="user"
-            :isDisabled="false"
+          <SelectMembers
+            v-model="watchersList"
             class="watchers-selector"
-            hide-dropdown-icon
-          ></SelectWatchers>
+            label="Наблюдатель"
+            :refresh-members-func="fetchMembers"
+          />
 
           <EditorTipTapV2
             v-if="false"
@@ -203,8 +201,8 @@ import { storeToRefs } from 'pinia';
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
-import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useFetchMembers } from 'src/components/selects/composables/useFetchMembers';
 // components
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
@@ -212,7 +210,7 @@ import AddIcon from 'src/components/icons/AddIcon.vue';
 import AttachmentCard from './cards/AttachmentCard.vue';
 import ArrowDown from 'src/components/icons/ArrowDown.vue';
 import AidocAttachmentsInfo from 'src/components/AttachmentsInfo.vue';
-import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
+import SelectMembers from 'src/components/selects/SelectMembers.vue';
 // utils
 import { mapDocNode } from 'src/utils/tree';
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
@@ -224,6 +222,8 @@ import {
   MAX_SIZE_FILE,
 } from 'src/constants/aidocFiles';
 import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { Member } from 'src/components/selects/types/types';
+import { MemberToIdArray } from 'src/components/selects/helpers/helpers';
 
 const emit = defineEmits<{
   successCreate: [];
@@ -236,16 +236,16 @@ const route = useRoute();
 //stores
 const workspaceStore = useWorkspaceStore();
 const docStore = useAiDocStore();
-const userStore = useUserStore();
 const aidocStore = useAiDocStore();
 const { setNotificationView } = useNotificationStore();
 
 //storesToRefs
 const { workspaceUsers } = storeToRefs(workspaceStore);
 const { rootDocs } = storeToRefs(docStore);
-const { user } = storeToRefs(userStore);
 const { parentDocId, selectedDocId, selectedDocTitle } =
   storeToRefs(aidocStore);
+
+const { fetchMembers } = useFetchMembers('workspace');
 
 //constants
 const acceptFileTypes = AIDOC_ACCEPT_FILE_TYPES_STRING;
@@ -280,7 +280,7 @@ const isLoading = ref(false);
 const isChildDocsLoading = ref(false);
 const srcDocBool = ref(false);
 const treeMenuWidth = ref(0);
-const watcherList = ref([]);
+const watchersList = ref<Member[]>([]);
 const isManuallySelected = ref(false);
 
 //computed
@@ -320,7 +320,7 @@ const updateSrcDoc = (val: boolean) => {
 const clear = () => {
   state.title = '';
   state.content = '';
-  watcherList.value = [];
+  watchersList.value = [];
   folder.title = 'Корневой';
   folder.id = '';
   attachments.value = [];
@@ -370,7 +370,7 @@ const onSave = async () => {
           doc: {
             title: state.title,
             content: contents.html,
-            watcher_list: watcherList.value,
+            watcher_list: MemberToIdArray(watchersList.value),
           },
           files: contents.files,
         },
@@ -384,7 +384,7 @@ const onSave = async () => {
           doc: {
             title: state.title,
             content: contents.html,
-            watcher_list: watcherList.value,
+            watcher_list: MemberToIdArray(watchersList.value),
           },
           files: contents.files,
         },

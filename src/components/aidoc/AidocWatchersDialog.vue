@@ -14,15 +14,15 @@
 
       <q-card-section class="q-pa-md">
         <div class="col flex rounded-borders">
-          <SelectWatchers
-            v-model:watchers="docWatchers"
+          <SelectMembers
+            v-model="docWatchers"
             class="watchers-selector"
-            :docId="docId"
-            :current-member="user"
-            :isDisabled="!canEdit"
-            :is-loading="loading"
+            :label="label"
+            :refresh-members-func="fetchMembers"
+            :on-change="update"
             @refresh="emit('refresh')"
-          ></SelectWatchers>
+            :isDisabled="!canEdit"
+          />
         </div>
       </q-card-section>
     </q-card>
@@ -30,10 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
-import { storeToRefs } from 'pinia';
-import SelectWatchers from '../selects/SelectWatchers.vue';
-import { useUserStore } from 'src/stores/user-store';
+import { ref, watch } from 'vue';
+import SelectMembers from '../selects/SelectMembers.vue';
+import { useAidocWatchers } from '../selects/composables/useAidocWatchers';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -45,8 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['refresh', 'update:modelValue']);
 
-const userStore = useUserStore();
-const { user } = storeToRefs(userStore);
+let { label, fetchMembers, update } = useAidocWatchers(props.docId ?? '');
 
 const docWatchers = ref([]);
 
@@ -57,6 +55,17 @@ const setWatchers = () => {
 };
 
 const updateModelValue = (value: boolean) => emit('update:modelValue', value);
+
+watch(
+  () => props.docId,
+  (newId) => {
+    if (!newId) return;
+    const newSelectState = useAidocWatchers(newId);
+    label = newSelectState.label;
+    fetchMembers = newSelectState.fetchMembers;
+    update = newSelectState.update;
+  },
+);
 </script>
 
 <style scoped>

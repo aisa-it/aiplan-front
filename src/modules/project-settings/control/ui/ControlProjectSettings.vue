@@ -7,12 +7,15 @@
         <p class="text-sm text-brand-secondary">Выберите лидера проекта</p>
       </div>
       <div class="col">
-        <SelectLeader
-          v-model:current-value="currentProject.project_lead"
-          :options="leadProjectOptions"
+        <SelectMembers
+          v-model="currentProject.project_lead"
+          label="Лидер проекта"
+          off-multiple
+          off-search
           :is-disabled="
             !rolesStore.hasPermissionByProject(project, 'change-lead-project')
           "
+          :refresh-members-func="fethAdmins"
         />
       </div>
     </div>
@@ -27,13 +30,10 @@
         </p>
       </div>
       <div class="col">
-        <SelectAssignee
-          v-model:assigness="currentProject.default_assignees"
-          :default-assignee="currentProject.default_assignees_details"
-          :projectid="currentProject.id"
+        <SelectMembers
+          v-model="currentProject.default_assignees_details"
           label="Исполнитель по умолчанию"
-          :is-adaptive-select="false"
-          :current-member="user"
+          :refresh-members-func="fetchMembers"
         />
       </div>
     </div>
@@ -49,13 +49,10 @@
         </p>
       </div>
       <div class="col">
-        <SelectWatchers
-          v-model:watchers="currentProject.default_watchers"
-          :default-watcher="currentProject.default_watchers_details"
+        <SelectMembers
+          v-model="currentProject.default_watchers_details"
           label="Наблюдатель по умолчанию"
-          :projectid="currentProject.id"
-          :is-adaptive-select="false"
-          :current-member="user"
+          :refresh-members-func="fetchMembers"
         />
       </div>
     </div>
@@ -87,9 +84,9 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUserStore } from 'stores/user-store';
+import { useFetchMembers } from 'src/components/selects/composables/useFetchMembers';
 
 //types
-import { IProjectLeader } from 'src/interfaces/projects';
 import {
   DtoProject,
   DtoProjectMemberLight,
@@ -97,15 +94,15 @@ import {
 
 //components
 import LoadPage from 'src/pages/LoadPage.vue';
-import SelectAssignee from 'components/selects/SelectAssignee.vue';
-import SelectWatchers from 'components/selects/SelectWatchers.vue';
-import SelectLeader from 'components/selects/SelectLeader.vue';
+import SelectMembers from 'src/components/selects/SelectMembers.vue';
 
 //api
 import { updateProject } from '../../services/api';
 
 //composables
 import { useFormChanges } from 'src/composables/useFormChanges';
+import { MemberToIdArray } from 'src/components/selects/helpers/helpers';
+import { Pagination } from 'src/components/selects/types/types';
 
 const route = useRoute();
 const rolesStore = useRolesStore();
@@ -113,35 +110,26 @@ const projectStore = useProjectStore();
 const userStore = useUserStore();
 const { project } = storeToRefs(projectStore);
 const currentProject = ref();
-// TODO касается типизации project, в данном компоненте идёт нарушение контракта в угоду используемым компонентам типа селекта
-// FE project_lead является по контракту строкой, здесь же используется как объект
-// нужно или изменить селекты и логику получения информации об выбранном пользователе либо же создавать промежуточные стейты, а не переписывать переменные в нарушение контрактов
-const projectMembers = ref<DtoProjectMemberLight[]>();
-const projectOptions = ref<IProjectLeader[]>([]);
-const leadProjectOptions = ref<IProjectLeader[]>([]);
+
 const metadata = ref({
   title: 'Загрузка...',
 });
-const { user } = storeToRefs(userStore);
 
-const isLoading = computed(() => {
-  return (
-    projectMembers.value === undefined || currentProject.value === undefined
-  );
+const { fetchMembers } = useFetchMembers('project', {
+  projectId: project.value.id,
 });
 
-const normalizeArray = (arr: any[]) => {
-  if (!Array.isArray(arr)) return [];
-  return arr.map((val) => val?.member_id ?? val);
-};
+const isLoading = computed(() => {
+  return currentProject.value === undefined;
+});
 
 const { hasChanges, init } = useFormChanges(currentProject, {
   transform: (val) => {
     if (!val) return {};
     return {
-      project_lead: val.project_lead?.value,
-      default_assignees: normalizeArray(val.default_assignees),
-      default_watchers: normalizeArray(val.default_watchers),
+      project_lead: val.project_lead?.[0]?.member_id,
+      default_assignees: MemberToIdArray(val.default_assignees_details),
+      default_watchers: MemberToIdArray(val.default_watchers_details),
     };
   },
 });
@@ -156,55 +144,31 @@ function setAnotherTitle(title: string) {
   metadata.value.title = `Настройки ${title}`;
 }
 
-async function refresh() {
-  currentProject.value = { ...project.value };
-  projectOptions.value = [
-    {
-      value: null,
-      label: 'Не выбран',
-    },
-  ] as unknown as IProjectLeader[];
-  leadProjectOptions.value = [] as unknown as IProjectLeader[];
-
-  const leadDetail = currentProject.value.project_lead_detail;
-
-  if (
-    leadDetail === null ||
-    leadDetail === undefined
-  ) {
-    currentProject.value.project_lead = {
-      label: 'Не выбран',
-      value: null,
-    };
-  } else {
-    const name = (leadDetail.last_name && leadDetail.first_name) ? `${leadDetail.last_name} ${leadDetail.first_name}` : '';
-
-    currentProject.value.project_lead = {
-      label: name || leadDetail.email,
-      value: leadDetail.id,
-    };
-  }
-
-  projectMembers.value = (
-    await projectStore.getProjectMembers(
-      route.params.workspace as string,
-      route.params.project as string,
-    )
-  )?.result;
-
-  projectMembers.value = projectMembers.value?.filter(
-    (el) => el?.member?.is_integration !== true,
+async function fethAdmins(pagination: Pagination) {
+  const result = await projectStore.getProjectMembers(
+    route.params.workspace as string,
+    route.params.project as string,
+    pagination,
   );
+  if (!result) return {};
+  result.result = result?.result.filter(
+    (el: DtoProjectMemberLight) =>
+      !el?.member?.is_integration && el?.role === 15,
+  );
+  return result;
+}
 
-  projectMembers.value?.forEach((member: any) => {
-    if (member.role === 15) {
-      leadProjectOptions.value.push({
-        ...member,
-        label: `${member.member.last_name} ${member.member.first_name}`,
-        value: member.member.id,
-      });
-    }
-  });
+async function refresh() {
+  currentProject.value = { ...project.value, project_lead: [] };
+
+  if (currentProject.value.project_lead_detail) {
+    const admins = (await fethAdmins({ limit: -1 })).result;
+    currentProject.value.project_lead = [
+      admins.find(
+        (el) => el.member_id === currentProject.value.project_lead_detail.id,
+      ),
+    ];
+  }
 
   setAnotherTitle(currentProject.value.name);
   init();
@@ -224,15 +188,14 @@ function onSuccess() {
 
 const onSubmit = async () => {
   const payload: DtoProject = {
-    default_assignees: currentProject.value.default_assignees.map(
-      (assignee: DtoProjectMemberLight) =>
-        assignee?.member_id ? assignee?.member_id : assignee,
+    default_assignees: MemberToIdArray(
+      currentProject.value.default_assignees_details,
     ),
-    default_watchers: currentProject.value.default_watchers.map(
-      (watcher: DtoProjectMemberLight) =>
-        watcher?.member_id ? watcher?.member_id : watcher,
+
+    default_watchers: MemberToIdArray(
+      currentProject.value.default_watchers_details,
     ),
-    project_lead: currentProject.value.project_lead.value,
+    project_lead: currentProject.value.project_lead?.[0].member_id,
   };
 
   await updateProject(

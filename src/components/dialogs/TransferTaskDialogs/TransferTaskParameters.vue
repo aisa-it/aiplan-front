@@ -60,21 +60,16 @@
           <div
             class="col flex rounded-borders issue-panel__assignees issue-panel__q-select-wrapper"
           >
-            <SelectAssignee
+            <SelectMembers
+              v-model="issueSettings.assignees"
               class="issue-selector"
-              :projectid="props.project_id"
-              :assigness="issueSettings.assignees"
+              label="Исполнитель"
+              isAdaptiveSelect
               :isDisabled="
                 !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
-              :current-member="user"
-              isAdaptiveSelect
-              @update:assigness="
-                (val) => {
-                  return (issueSettings.assignees = val);
-                }
-              "
-            ></SelectAssignee>
+              :refresh-members-func="fetchMembers"
+            />
           </div>
         </div>
 
@@ -87,21 +82,16 @@
             </div>
           </div>
           <div class="col flex rounded-borders issue-panel__q-select-wrapper">
-            <SelectWatchers
+            <SelectMembers
+              v-model="issueSettings.watchers"
               class="issue-selector"
-              :projectid="props.project_id"
-              :watchers="issueSettings.watchers"
-              :current-member="user"
+              label="Наблюдатель"
               isAdaptiveSelect
               :isDisabled="
                 !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
-              @update:watchers="
-                (val) => {
-                  return (issueSettings.watchers = val);
-                }
-              "
-            ></SelectWatchers>
+              :refresh-members-func="fetchMembers"
+            />
           </div>
         </div>
 
@@ -201,8 +191,7 @@ import { Screen } from 'quasar';
 
 // components
 import SelectStatus from 'src/components/SelectStatus.vue';
-import SelectAssignee from 'components/selects/SelectAssignee.vue';
-import SelectWatchers from 'components/selects/SelectWatchers.vue';
+import SelectMembers from 'src/components/selects/SelectMembers.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
 import SelectDate from 'src/components/SelectDate.vue';
 
@@ -219,6 +208,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useFetchMembers } from 'src/components/selects/composables/useFetchMembers';
 import {
   DtoIssue,
   DtoProjectMemberLight,
@@ -270,6 +260,10 @@ const issueSettings = ref({
 });
 
 let isSave = ref(false);
+
+let { fetchMembers } = useFetchMembers('project', {
+  projectId: props.project_id,
+});
 
 // function
 const getFilteredMembers = async (membersArr: DtoProjectMemberLight[]) => {
@@ -377,5 +371,13 @@ const close = () => {
 watch(
   () => props.issue_settings,
   () => resetSettings(),
+);
+
+watch(
+  () => props.project_id,
+  (newId) => {
+    const newFetch = useFetchMembers('project', { projectId: newId });
+    fetchMembers = newFetch.fetchMembers;
+  },
 );
 </script>

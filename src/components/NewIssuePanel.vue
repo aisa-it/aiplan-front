@@ -111,16 +111,13 @@
               <span class="q-ml-sm"> Исполнитель </span>
             </div>
             <UserIcon class="issue-selector-icon mr-12" />
-
-            <select-assignee
-              v-model:assigness="assigness"
-              :projectid="project.id || ''"
-              :defaultAssignee="project.default_assignees_details as any[]"
-              :current-member="user"
-              :new-issue="true"
+            <select-members
+              v-model="assigness"
               label="Выберите исполнителя"
               class="col centered-horisontally"
-            ></select-assignee>
+              :refresh-members-func="fetchProjectMembers"
+              :default-members="project.default_assignees_details"
+            />
           </div>
         </div>
 
@@ -152,14 +149,13 @@
             </div>
             <ObserveIcon class="issue-selector-icon mr-12" />
 
-            <select-watchers
-              v-model:watchers="watchers"
-              :projectid="project.id || ''"
-              :current-member="user"
-              :new-issue="true"
+            <select-members
+              v-model="watchers"
               label="Выберите наблюдателя"
               class="col centered-horisontally"
-            ></select-watchers>
+              :refresh-members-func="fetchProjectMembers"
+              :default-members="project.default_watchers_details"
+            />
           </div>
         </div>
 
@@ -196,8 +192,8 @@
               :model-value="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -291,11 +287,11 @@ import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useUserStore } from 'stores/user-store';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import { useFetchMembers } from './selects/composables/useFetchMembers';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
@@ -313,9 +309,8 @@ import { useRouter } from 'vue-router';
 import SelectDate from './SelectDate.vue';
 import SelectTags from './SelectTags.vue';
 import SelectStatus from './SelectStatus.vue';
+import SelectMembers from './selects/SelectMembers.vue';
 import SelectPriority from './SelectPriority.vue';
-import SelectAssignee from './selects/SelectAssignee.vue';
-import SelectWatchers from './selects/SelectWatchers.vue';
 import SelectParentIssue from './SelectParentIssue.vue';
 import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-template/ui/SelectSingleIssueTemplate.vue';
 import SelectAttachments from './SelectAttachments.vue';
@@ -342,6 +337,7 @@ import CheckStatusIcon from './icons/CheckStatusIcon.vue';
 import EditorTipTapV2 from './editorV2/EditorTipTapV2.vue';
 import SprintIcon from './icons/SprintIcon.vue';
 import PriorityIcon from './icons/PriorityIcon.vue';
+import { Member } from './selects/types/types';
 
 const props = defineProps<{
   project_detail?: DtoProject;
@@ -371,7 +367,6 @@ const {
 
 //stores
 const api = useAiplanStore();
-const userStore = useUserStore();
 const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
 const issuesStore = useIssuesStore();
@@ -383,7 +378,6 @@ const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
-const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(issuesStore);
 const { sprint } = storeToRefs(sprintStore);
 
@@ -396,9 +390,11 @@ const name = ref('');
 const description = ref('');
 const status = ref<any>(null);
 const priority = ref<any>(null);
-const assigness = ref<any[]>([]);
-const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const assigness = ref<Member[]>([]);
+const watchers = ref<Member[]>([]);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -557,12 +553,12 @@ const create = async () => {
     const content = await handleEditorValue(description.value);
     const descriptionJson = editorInstance.value?.getJSON();
 
-    const assigneeIds = (assigness.value as any[]).map((assignee) =>
-      assignee?.member_id ? assignee?.member_id : assignee,
+    const assigneeIds = (assigness.value as Member[]).map(
+      (assignee) => assignee?.member_id,
     );
 
-    const watcherIds = (watchers.value as any[]).map((watcher) =>
-      watcher?.member_id ? watcher?.member_id : watcher,
+    const watcherIds = (watchers.value as any[]).map(
+      (watcher) => watcher?.member_id,
     );
 
     const tagIds = (tags.value as any[]).map((d) => d.id);
@@ -640,7 +636,7 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {
@@ -719,12 +715,19 @@ watch(
   },
 );
 
+const fetchProjectMembers = ref();
+
 watch(
   () => project.value,
   (newValue, oldValue) => {
     if (newValue?.id !== oldValue?.id) parent.value = null;
-    if (project.value?.id)
+    if (project.value?.id) {
       fetchTemplates(workspaceSlug.value, project.value?.id);
+      const { fetchMembers } = useFetchMembers('project', {
+        projectId: project.value.id ?? '',
+      });
+      fetchProjectMembers.value = fetchMembers;
+    }
   },
 );
 
