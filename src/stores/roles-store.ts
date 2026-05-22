@@ -80,13 +80,15 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     getIssueNameRole(issue: DtoIssue): string {
+      if (this.getProjectRole(issue.project ?? '') < 10) return '';
+
+      if (issue?.author_detail?.id === user.value.id) return 'author';
+
       const isAssignee = issue?.assignee_details?.find(
         (assignee) => assignee.id == user.value.id,
       );
 
       if (isAssignee) return 'assignee';
-
-      if (issue?.author_detail?.id === user.value.id) return 'author';
 
       return '';
     },
@@ -122,6 +124,7 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     hasPermissionByIssue(issue: DtoIssue, action: string) {
+
       const ws_role = this.getWsNameRole(
         this.getWsMembership(issue?.workspace ?? ''),
       );

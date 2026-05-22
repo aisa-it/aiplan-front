@@ -4,13 +4,12 @@
     class="q-my-md q-px-none activities-table table-bottom-reverse"
     :columns="columns"
     :rows="rows"
-    row-key="activity"
     no-data-label="Нет данных"
     loading-label="Загружается..."
     :rows-per-page-options="[10, 25, 100]"
     v-model:pagination="pagination"
     @request="onUpdate"
-  >
+    >
     <template #pagination>
       <PaginationDefault
         v-model:selected-page="pagination.page"

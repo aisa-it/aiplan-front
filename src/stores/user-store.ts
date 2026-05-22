@@ -25,7 +25,7 @@ const workspaceApi = new (withInterceptors(Workspace))();
 const projectsApi = new (withInterceptors(Projects))();
 
 interface IUserState {
-  user: DtoUser;
+  user: DtoUser | undefined;
   userWorkspaces: DtoWorkspaceWithCount[];
   userActivity: DaoPaginationResponse;
   userActivityMap: TypesActivityTable;
@@ -38,7 +38,7 @@ interface IUserState {
 export const useUserStore = defineStore('user-store', {
   state: (): IUserState => {
     return {
-      user: {} as DtoUser,
+      user: undefined,
       userWorkspaces: [] as DtoWorkspaceWithCount[],
       userActivity: {} as DaoPaginationResponse,
       userActivityMap: {} as TypesActivityTable,
@@ -53,8 +53,8 @@ export const useUserStore = defineStore('user-store', {
       const theme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light';
-      const userTheme = this.user.theme?.dark ? 'dark' : 'light';
-      return this.user.theme?.system ? theme : userTheme;
+      const userTheme = this.user?.theme?.dark ? 'dark' : 'light';
+      return this.user?.theme?.system ? theme : userTheme;
     },
   },
   actions: {
@@ -84,7 +84,8 @@ export const useUserStore = defineStore('user-store', {
       await usersApi.getCurrentUser().then((res) => {
         this.user = res.data;
 
-        if (this.router.currentRoute.value.path.includes('not-found')) return;
+        if (this.router?.currentRoute?.value?.path.includes('not-found'))
+          return;
 
         if (!res.data.is_onboarded) return this.router.replace('/onboarding');
       });
@@ -176,18 +177,14 @@ export const useUserStore = defineStore('user-store', {
       workspaceSlug: string,
       project: AiplanAddProjectToFavoritesRequest,
     ): Promise<void> {
-      await projectsApi
-        .addProjectToFavorites(workspaceSlug, project)
-        .then(async () => await this.getFavouriteProjects(workspaceSlug));
+      await projectsApi.addProjectToFavorites(workspaceSlug, project);
     },
 
     async removeProjectFromFavorites(
       workspaceSlug: string,
       projectID: string,
     ): Promise<void> {
-      await projectsApi
-        .removeProjectFromFavorites(workspaceSlug, projectID)
-        .then(async () => await this.getFavouriteProjects(workspaceSlug));
+      await projectsApi.removeProjectFromFavorites(workspaceSlug, projectID);
     },
 
     async setNameFromOnboard(data: DtoUser): Promise<DtoUser | any> {

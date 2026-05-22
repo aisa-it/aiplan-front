@@ -254,15 +254,25 @@ const showDescHighlighted = (text: string) => {
   return text && parseBoldText(text)?.includes('<b>');
 };
 
+const textarea = document.createElement('textarea');
+
+const decodeHtmlEntities = (text: string) => {
+  textarea.innerHTML = text;
+  return textarea.value;
+};
+
 const getDescHighlightedText = (
   text?: string,
   maxLength = 110,
   showMatchesCount = false,
 ) => {
   if (!text) return '';
-  if (text.length <= maxLength) return text;
 
-  let truncatedText = text.substring(0, maxLength);
+  const validHtmlText = decodeHtmlEntities(text);
+
+  if (validHtmlText.length <= maxLength) return validHtmlText;
+
+  let truncatedText = validHtmlText.substring(0, maxLength);
   const isLetterOrDigit = (char: string) => /^[\p{L}\p{N}]$/u.test(char);
   let lastValidIndex = -1;
 
@@ -274,7 +284,7 @@ const getDescHighlightedText = (
   }
   truncatedText = truncatedText.substring(0, lastValidIndex + 1);
 
-  const remainingText = text.substring(maxLength);
+  const remainingText = validHtmlText.substring(maxLength);
   const matches = remainingText.match(/<b>/g);
 
   return matches && showMatchesCount

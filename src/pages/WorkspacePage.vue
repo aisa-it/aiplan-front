@@ -76,17 +76,7 @@ const refresh = async () => {
   }
 
   try {
-    await Promise.allSettled([
-      workspaceStore.getWorkspaceMembers(slug),
-      workspaceStore.getWorkspaceProjects(slug),
-    ]);
-
-    if (getWsRole(currentWorkspaceSlug.value ?? '') === 15) {
-      await getFormList(slug)
-        .then((res) => (formStore.forms = res))
-        .catch(() => formStore.resetForms());
-    } else formStore.resetForms();
-
+    await Promise.allSettled([workspaceStore.getWorkspaceMembers(slug)]);
     await workspaceStore
       .getAllWorkspaceStates(currentWorkspaceSlug.value)
       .then(() => {

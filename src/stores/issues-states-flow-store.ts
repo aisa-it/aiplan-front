@@ -12,10 +12,10 @@ export const useIssuesStatesFlowStore = defineStore('issues-states-flow', {
       workspaceSlug: string,
       projectId: string,
       issueId: string,
-    ): Promise<Record<string, DtoStateLight>> {
+    ): Promise<DtoStateLight[]> {
       const res = await api.getAvailableStates(workspaceSlug, projectId, issueId);
       return res.data ?? {};
-    },
+    }
   },
 });
 

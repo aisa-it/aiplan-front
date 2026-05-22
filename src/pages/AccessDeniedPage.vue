@@ -21,42 +21,36 @@
   </q-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent, onBeforeMount, computed } from 'vue';
+<script setup lang="ts">
+import { onBeforeMount, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-export default defineComponent({
-  name: 'AccessDenied',
-  setup() {
-    const workspaceStore = useWorkspaceStore();
-    const userStore = useUserStore();
-    const { user, userWorkspaces } = storeToRefs(userStore);
 
-    onBeforeMount(async () => {
-      workspaceStore.$reset();
-      await userStore.getUserWorkspaces();
-      await userStore.getUserWorkspacesMemberships();
-      await userStore.getUserProjectsMemberships();
-      await userStore.getUserInfo();
-    });
+const workspaceStore = useWorkspaceStore();
+const userStore = useUserStore();
+const { user, userWorkspaces } = storeToRefs(userStore);
 
-    const currentRoute = computed(() => {
-      let currentWsRoute = '';
+onBeforeMount(async () => {
+  workspaceStore.$reset();
+  await userStore.getUserWorkspaces();
+  await userStore.getUserWorkspacesMemberships();
+  await userStore.getUserProjectsMemberships();
+  await userStore.getUserInfo();
+});
 
-      // проверяем есть ли доступен ли юзеру последний спейс
-      if (userWorkspaces.value.length && user.value?.last_workspace_slug) {
-        currentWsRoute = userWorkspaces.value.find(
-          (ws) => ws.slug === user.value?.last_workspace_slug,
-        )
-          ? user.value?.last_workspace_slug
-          : userWorkspaces.value[0]?.slug;
-      }
-      return currentWsRoute;
-    });
+const currentRoute = computed(() => {
+  let currentWsRoute = '';
 
-    return { user, userWorkspaces, currentRoute };
-  },
+  // проверяем есть ли доступен ли юзеру последний спейс
+  if (userWorkspaces.value.length && user.value?.last_workspace_slug) {
+    currentWsRoute = userWorkspaces.value.find(
+      (ws) => ws.slug === user.value?.last_workspace_slug,
+    )
+      ? user.value?.last_workspace_slug
+      : userWorkspaces.value[0]?.slug;
+  }
+  return currentWsRoute;
 });
 </script>

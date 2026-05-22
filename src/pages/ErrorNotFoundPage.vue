@@ -33,7 +33,7 @@
           label="Вернуться на главную"
           no-caps
           @click="
-            $router.push(
+            router.push(
               `/${
                 user?.last_workspace_slug ||
                 userWorkspaces[0]?.slug ||
@@ -47,30 +47,28 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onBeforeMount, onMounted } from 'vue';
+<script setup lang="ts">
+import { onBeforeMount, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { LocalStorage } from 'quasar';
 import { stopGlobalLoading } from 'src/composables/useGlobalLoader';
-export default defineComponent({
-  name: 'ErrorNotFoundPage',
-  setup() {
-    const userStore = useUserStore();
-    const workspaceStore = useWorkspaceStore();
-    const { user, userWorkspaces } = storeToRefs(userStore);
-    onMounted(async () => {
-      LocalStorage.remove('next_url');
-      workspaceStore.$reset();
-      await userStore.getUserInfo();
-    });
+import { useRouter } from 'vue-router';
 
-    onBeforeMount(() => {
-      stopGlobalLoading();
-    });
-    return { user, userWorkspaces };
-  },
+const userStore = useUserStore();
+const workspaceStore = useWorkspaceStore();
+const { user, userWorkspaces } = storeToRefs(userStore);
+const router = useRouter();
+
+onMounted(async () => {
+  LocalStorage.remove('next_url');
+  workspaceStore.$reset();
+  await userStore.getUserInfo();
+});
+
+onBeforeMount(() => {
+  stopGlobalLoading();
 });
 </script>

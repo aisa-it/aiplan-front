@@ -113,7 +113,6 @@ import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
-import AddIcon from '../icons/AddIcon.vue';
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
@@ -140,9 +139,7 @@ onMounted(async () => {
 });
 
 const refreshSprints = async () => {
-  sprints.value = await sprintStore.getSprintsList(
-    currentWorkspaceSlug.value as string,
-  );
+  sprints.value = sprintStore.sprintsList;
 };
 
 const reopen = async (id: string) => {
@@ -191,19 +188,19 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
   ];
 };
 
-const headerMenuItems = [
+const headerMenuItems = computed(() => [
   {
     text: 'Создать спринт',
     icon: h(QIcon, { name: 'add' }),
-    onClick: () => (openCreateSprint.value = true),
-    show: canCreateSprint,
+    onClick: () => { openCreateSprint.value = true },
+    show: canCreateSprint.value,
   },
   {
     text: 'Настроить уведомления',
     icon: BellIcon,
-    onClick: () => (openSprintNotifications.value = true),
+    onClick: () => { openSprintNotifications.value = true; },
   },
-];
+]);
 
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;

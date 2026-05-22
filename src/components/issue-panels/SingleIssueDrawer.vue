@@ -196,7 +196,19 @@
         <div class="col">
           <div class="row items-center">
             <ExecuteDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Срок исполнения </span>
+            <span class="q-mx-sm">Срок исполнения </span>
+            <div v-if="isSubIssueTargetOverTime" class="row items-center">
+              <AlertIcon
+                width="19"
+                height="19"
+                :color="'rgb(236, 177, 104)'"
+                class="issue-icon"
+              />
+
+              <HintTooltip>
+                Срок исполнения родительской задачи меньше текущего срока
+              </HintTooltip>
+            </div>
           </div>
         </div>
         <div class="col flex rounded-borders">
@@ -480,7 +492,10 @@ import {
 } from 'src/constants/notifications';
 
 import { setIntervalFunction } from 'src/utils/helpers';
-import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoIssueLinkLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
@@ -498,8 +513,9 @@ const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
-defineProps<{
+const props = defineProps<{
   preview?: boolean;
+  subIssues?: DtoIssue[];
 }>();
 
 const emits = defineEmits<{
@@ -511,6 +527,14 @@ const { navigateToActivityPage } = useUserActivityNavigation();
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
+
+const isSubIssueTargetOverTime = computed(
+  () =>
+    props.subIssues?.some(
+      (issue) =>
+        issue.target_date && issue.target_date > issueData.value.target_date,
+    ) ?? false,
+);
 
 //refs
 const refreshCycle = ref();

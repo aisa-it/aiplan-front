@@ -161,12 +161,7 @@ async function fethAdmins(pagination: Pagination) {
 async function refresh() {
   currentProject.value = { ...project.value, project_lead: [] };
 
-  if (
-    currentProject.value.project_lead_detail === null ||
-    currentProject.value.project_lead_detail === undefined
-  ) {
-    currentProject.value.project_lead = [];
-  } else {
+  if (currentProject.value.project_lead_detail) {
     const admins = (await fethAdmins({ limit: -1 })).result;
     currentProject.value.project_lead = [
       admins.find(

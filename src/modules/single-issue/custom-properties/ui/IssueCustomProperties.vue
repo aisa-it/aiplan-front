@@ -59,12 +59,7 @@
                 id: prop.id,
                 title: prop.value?.name,
                 url: prop.value?.url,
-              }"
-            />
-            <LinkDialog
-              v-model="isLinkOpenDialog"
-              :link="linkToUpdate"
-              @edit="(link) => updateValue(prop, link)"
+              }; propToUpdate = prop"
             />
           </div>
 
@@ -84,6 +79,11 @@
           </div>
         </div>
       </div>
+      <LinkDialog
+        v-model="isLinkOpenDialog"
+        :link="linkToUpdate"
+        @edit="(link) => updateValue(propToUpdate, link)"
+      />
     </div>
     <div v-if="isLoading" class="q-gutter-y-sm">
       <div v-for="n in 3" :key="n" class="row items-center q-py-xs">
@@ -136,6 +136,7 @@ const properties = ref<DtoIssueProperty[]>([]);
 const isLoading = ref(false);
 const isLinkOpenDialog = ref(false);
 const linkToUpdate = ref();
+const propToUpdate = ref();
 //methods
 const fetchData = async () => {
   if (!props.issueId) return;

@@ -51,6 +51,14 @@ export const useWorkspaceStore = defineStore('workspace-store', {
     };
   },
 
+  getters: {
+    workspaceLogo(): string | undefined {
+      return this.workspaceInfo?.logo ?? undefined;
+    },
+    workspaceName(): string | undefined {
+      return this.workspaceInfo?.name ?? undefined;
+    },
+  },
   actions: {
     async getWorkspaceInfo(
       workspaceSlug: string,

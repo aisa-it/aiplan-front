@@ -1,10 +1,7 @@
 import { defineStore } from 'pinia';
-import { useAiplanStore } from './aiplan-store';
+import { api } from './aiplan-store';
 import { getStatesList } from 'src/utils/helpers';
 import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
-
-const aiplan = useAiplanStore();
-const api = aiplan.api;
 
 export const useStatesStore = defineStore('states', {
   state: () => {
@@ -40,7 +37,7 @@ export const useStatesStore = defineStore('states', {
       );
     },
     setDraggingState(state: string) {
-      this.draggingState = state
-    }
+      this.draggingState = state;
+    },
   },
 });
