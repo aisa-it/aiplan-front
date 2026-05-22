@@ -608,7 +608,7 @@ const handleCreateSuccess = async (createdIssueData: any) => {
   const link = getIssueLink(
     workspaceSlug.value,
     project.value?.identifier,
-    createdIssueData.id,
+    issue.sequence_id || createdIssueData.id,
   );
 
   setNotificationView({

@@ -50,7 +50,6 @@ export function issueActivityRender(
           ? activity.project_detail?.identifier + '-' + activity.old_value
           : ''
       } ${workspaceSource}<span/>`;
-    case 'label':
     case 'labels':
       action = translateAction('labels', Boolean(activity.new_value));
       value = setValue(activity);

@@ -1,59 +1,89 @@
 import { RouteRecordRaw } from 'vue-router';
-
 // ========== GIT EXTENSION ==========
 // Импорт роутов из git расширения (src/modules/git)
 // @see src/modules/git/router.ts
 import { gitRoutes } from 'src/modules/git/index';
+import { useUserStore } from 'src/stores/user-store';
 // ===================================
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'main',
     component: () => import('src/layouts/MainLayout.vue'),
+    async beforeEnter(to, from) {
+      const userStore = useUserStore();
+
+      await userStore.getUserInfo();
+      await userStore.getUserWorkspaces();
+      await userStore.getUserWorkspacesMemberships();
+      await userStore.getUserProjectsMemberships();
+
+      if (to.meta.requiredWorkspace === false) return;
+      else if (!to.params.workspace) {
+        const targetSlug =
+          userStore.user?.last_workspace_slug ||
+          userStore.userWorkspaces[0]?.slug;
+
+        return `/${targetSlug}`;
+      }
+    },
     children: [
       {
         path: 'profile',
         component: () => import('pages/ProfilePage.vue'),
+        meta: { requiredWorkspace: false },
       },
       {
         path: ':workspace',
         component: () => import('pages/WorkspacePage.vue'),
+        meta: { requiredWorkspace: true },
         children: [
           {
             path: '',
+            name: 'workspace',
             component: () => import('pages/GeneralWorkspacePage.vue'),
+            meta: { requiredWorkspace: true },
           },
           {
             path: 'projects',
-            component: () => import('pages/GeneralWorkspacePage.vue'),
+            name: 'projects',
+            component: () => import('pages/ProjectsPage.vue'),
+            meta: { requiredWorkspace: true },
+          },
+          {
+            path: 'sprints',
+            name: 'sprints',
+            component: () => import('pages/SprintsPage.vue'),
+            meta: { requiredWorkspace: true },
           },
           {
             path: 'forms/:formSlug/',
             component: () => import('src/components/forms/pages/FormsPage.vue'),
+            meta: { requiredWorkspace: true },
             children: [
               {
                 path: '',
                 component: () =>
                   import('src/components/forms/pages/FormsTable.vue'),
+                meta: { requiredWorkspace: true },
               },
-              // {
-              //   path: 'settings',
-              //   component: () =>
-              //     import('src/components/forms/pages/FormSettingsPage.vue'),
-              // },
             ],
           },
           {
             path: 'settings',
             component: () => import('pages/WorkspaceSettingsPage.vue'),
+            meta: { requiredWorkspace: true },
           },
           {
             path: 'aidoc',
             component: () => import('pages/AiDocPage.vue'),
+            meta: { requiredWorkspace: true },
             children: [
               {
                 path: ':doc/:commentId?',
                 name: 'doc',
+                meta: { requiredWorkspace: true },
                 component: () => import('pages/AiDocPage.vue'),
               },
             ],
@@ -61,19 +91,23 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'projects/:project/',
             component: async () => import('pages/ProjectPage.vue'),
+            meta: { requiredWorkspace: true },
             children: [
               {
                 path: '',
                 name: 'project-issues',
+                meta: { requiredWorkspace: true },
                 component: () => import('pages/ProjectIssuesPage.vue'),
               },
               {
                 path: 'issues',
                 name: 'project-issue',
+                meta: { requiredWorkspace: true },
                 component: () => import('pages/ProjectIssuesPage.vue'),
               },
               {
                 path: 'settings',
+                meta: { requiredWorkspace: true },
                 name: 'project-settings',
                 component: () => import('pages/ProjectSettingsPage.vue'),
               },
@@ -81,16 +115,19 @@ const routes: RouteRecordRaw[] = [
               {
                 path: 'issues/:issue/:commentId?',
                 name: 'issue',
+                meta: { requiredWorkspace: true },
                 component: () => import('pages/IssuePage.vue'),
               },
             ],
           },
           {
             path: 'user-activities/:id',
+            meta: { requiredWorkspace: true },
             component: () => import('pages/UserActivitiesPage.vue'),
           },
           {
             path: 'sprints/:sprint',
+            meta: { requiredWorkspace: true },
             component: () => import('src/pages/SprintPage.vue'),
           },
         ],

@@ -23,10 +23,11 @@ export function projectNotificationRender(
                     )}>
                     ${detail?.project?.name}</a>`;
 
-  const issueLink = (href: string, prefix: string, name: string) => {
+  const issueLink = (sequence_id: string, prefix: string, name: string) => {
     return `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${href}>
+                    href=/${detail?.workspace?.slug}/projects/${detail?.project?.identifier}/issues/${sequence_id}
+                    >
                     ${prefix} "${name}"</a>`;
   };
   const customLink = (href: string, name: string) => {
@@ -209,10 +210,13 @@ export function projectNotificationRender(
     case 'issue':
       if (data.verb === 'created') {
         action = 'создал(-а)';
-        const priority = data.new_entity_detail.priority
+        const priority = data.new_entity_detail?.priority
           ? `с приоритетом "${capitalizeFirstLetter(translatePrioritets(data.new_entity_detail.priority))}"`
           : 'без приоритета';
-        return `<span>${action} задачу ${issueLink(data?.new_entity_detail?.url, data.new_value, data?.new_entity_detail?.name)} ${priority} ${
+        return `<span>${action} задачу
+
+
+        ${issueLink(data?.new_entity_detail?.sequence_id, data.new_value, data?.new_entity_detail?.name)} ${priority} ${
           projectLink ? `в проекте ${projectLink}` : ''
         }<span/>`;
       }
@@ -225,13 +229,13 @@ export function projectNotificationRender(
       }
 
       if (data.verb === 'copied') {
-        return `<span>скопировал(-а) задачу ${issueLink(data?.new_entity_detail?.url, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
+        return `<span>скопировал(-а) задачу ${issueLink(data?.new_entity_detail?.sequence_id, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
       }
       if (data.verb === 'removed') {
-        return `<span>убрал(-а) задачу ${issueLink(data?.old_entity_detail?.url, data.old_value, data?.old_entity_detail?.name)} из проекта ${customLink(detail?.project?.url ?? '', detail?.project?.name ?? '')} </span>`;
+        return `<span>убрал(-а) задачу ${issueLink(data?.old_entity_detail?.sequence_id, data.old_value, data?.old_entity_detail?.name)} из проекта ${customLink(detail?.project?.url ?? '', detail?.project?.name ?? '')} </span>`;
       }
       if (data.verb === 'added') {
-        return `<span>добавил(-а) задачу ${issueLink(data?.new_entity_detail?.url, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
+        return `<span>добавил(-а) задачу ${issueLink(data?.new_entity_detail?.sequence_id, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
       }
       return;
 

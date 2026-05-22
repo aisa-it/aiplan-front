@@ -58,6 +58,18 @@
   @include only-icon-btn-sm;
 }
 
+.drawer-btn {
+  border-radius: 8px;
+  padding: 0px !important;
+  min-height: 30px;
+  min-width: 20px;
+  background: $dark-border-color;
+
+  &::before {
+    box-shadow: none !important;
+  }
+}
+
 //  primary button
 @mixin primary-btn-common {
   @include btn-common;
