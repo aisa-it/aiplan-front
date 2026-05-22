@@ -113,7 +113,6 @@ import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
-import AddIcon from '../icons/AddIcon.vue';
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
@@ -140,9 +139,7 @@ onMounted(async () => {
 });
 
 const refreshSprints = async () => {
-  sprints.value = await sprintStore.getSprintsList(
-    currentWorkspaceSlug.value as string,
-  );
+  sprints.value = sprintStore.sprintsList;
 };
 
 const reopen = async (id: string) => {
