@@ -24,6 +24,9 @@ export default boot(async () => {
     });
   } catch (error) {
     // Ошибки уже обрабатываются в store, просто логируем
-    console.error('[Boot:App-settings] Failed to initialize App-settings store:', error);
+    console.error(
+      '[Boot:App-settings] Failed to initialize App-settings store:',
+      error,
+    );
   }
 });

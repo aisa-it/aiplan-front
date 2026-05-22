@@ -50,34 +50,58 @@
 </template>
 
 <script lang="ts" setup>
+// core
+import { LocalStorage } from 'quasar';
+import { useRouter } from 'vue-router';
+import { computed, onMounted, ref } from 'vue';
+
 // nav menu components
 import ExpansionGroup from 'src/components/ExpansionGroup.vue';
 import NavMenuHeader from './menu/NavMenuHeader.vue';
 
+// stores
 import { useFormStore } from 'src/stores/form-store';
-import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
-import { computed, onMounted, ref } from 'vue';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useRoute } from 'vue-router';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+
+// api
 import { getFormList } from './forms/services/api';
-import { LocalStorage } from 'quasar';
 
 const formStore = useFormStore();
 const sprintStore = useSprintStore();
 const workspaceStore = useWorkspaceStore();
+
 const loadingMenu = ref(true);
 
-const route = useRoute();
-const slug = route.params.workspace as string;
+const router = useRouter();
+const slug = router.currentRoute.value.params.workspace as string;
 const sidebarWidth = computed(() => LocalStorage.getItem('menuSidebarWidth'));
-onMounted(async () => {
+
+const loadBarInfo = async (slug: string) => {
   try {
+    if (!slug) return;
     await workspaceStore.getWorkspaceProjects(slug);
     await sprintStore.getSprintsList(slug);
     await getFormList(slug).then((res) => (formStore.forms = res));
-  } catch {
+  } catch (e) {
+    formStore.forms = [];
+    console.error(e);
   } finally {
     loadingMenu.value = false;
+  }
+};
+
+// первая загрузка, когда заходим по пути воркспейса
+onMounted(async () => {
+  await loadBarInfo(slug);
+});
+
+// при изменении воркспейса подгружаем новые спринты, формы, проекты
+router.beforeEach(async (to, from) => {
+  if (to.params.workspace === from.params.workspace) return;
+  else {
+    loadingMenu.value = true;
+    await loadBarInfo(to.params.workspace as string);
   }
 });
 </script>

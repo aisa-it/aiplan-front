@@ -43,7 +43,7 @@ import type { Component } from 'vue';
 export interface MenuActionItem {
   text: string;
   icon?: Component;
-  onClick: () => void;
+  onClick?: () => void;
   to?: string;
   show?: boolean;
 }
