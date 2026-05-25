@@ -72,13 +72,15 @@ const load = async () => {
   }
 
   issuesLoader.value = true;
-
-  if (isGroupingEnabled.value === false) {
-    await onRequest();
-  } else if (isGroupingEnabled.value === true) {
-    await getGroupedIssues();
+  try {
+    if (isGroupingEnabled.value === false) {
+      await onRequest();
+    } else if (isGroupingEnabled.value === true) {
+      await getGroupedIssues();
+    }
+  } finally {
+    issuesLoader.value = false;
   }
-  issuesLoader.value = false;
 };
 
 onMounted(async () => {
@@ -146,7 +148,6 @@ watchEffect(() => {
       currentIssueList.value = components.CalendarView;
       return;
     }
-
     if (isGroupingEnabled.value) {
       currentIssueList.value = components.GroupedIssueList;
       return;

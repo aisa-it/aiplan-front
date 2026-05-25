@@ -11,6 +11,7 @@ import {
   NEW_GROUP_BY_OPTIONS,
   SPRINT_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
+import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 
 export function useIssueContext(contextType: 'project' | 'sprint') {
   const issuesStore = useIssuesStore();
@@ -51,6 +52,55 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       return response;
     };
 
+    const getIssueStream = async (
+      filters: TypesIssuesListFilters,
+      pagination: IQuery,
+      onChunk: (chunk: any) => void,
+    ) => {
+      const workspaceSlug = route.params.workspace
+      const projectSlug = route.params.project
+
+      const search = new URLSearchParams();
+      for (const [key, value] of Object.entries({ ...pagination, stream: true })) {
+        if (value == null || value === '') continue
+        search.set(key, String(value))
+      }
+
+      const response = await fetch(
+        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectSlug}/issues/search?${search.toString()}`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/x-ndjson, application/json',
+          },
+          body: JSON.stringify(filters),
+        },
+      );
+
+      if (!response?.body) return;
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      const flush = (line: string) => {
+        const s = line.trim()
+        if (s) onChunk(JSON.parse(s))
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        lines.forEach(flush)
+      }
+      flush(buffer);
+    };
+
     return {
       contextProps: projectProps,
       isGroupingEnabled,
@@ -61,6 +111,7 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       store,
       updateProps,
       getIssue,
+      getIssueStream,
       isGroupHide: store.isGroupHide,
       setGroupHide: store.setGroupHide,
     };
