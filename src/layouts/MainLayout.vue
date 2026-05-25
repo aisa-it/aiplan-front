@@ -96,9 +96,10 @@ onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
   currentIssueID.value = route.params.issue as string;
 
-  await userStore.getUserInfo().then(() => {
-    setTheme();
-  });
+  //TODO сделать тему
+  // await userStore.getUserInfo().then(() => {
+  //   setTheme();
+  // });
 
   if (user.value?.status === 'На звонке') {
     await userStore.updateCurrentUser({

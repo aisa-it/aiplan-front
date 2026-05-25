@@ -30,9 +30,7 @@
           :active="route.name === 'projects'"
           clickable
           v-ripple
-          :to="{
-            name: 'projects',
-          }"
+          @click="router.push(`/${currentWorkspaceSlug}/projects`)"
         >
           <q-item-section avatar>
             <MenuProjectsIcon :is-dark="$q.dark.isActive" />
