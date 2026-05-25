@@ -12,6 +12,7 @@ const routes: RouteRecordRaw[] = [
     name: 'main',
     component: () => import('src/layouts/MainLayout.vue'),
     async beforeEnter(to, from) {
+
       const userStore = useUserStore();
 
       await userStore.getUserInfo();

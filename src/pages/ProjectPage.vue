@@ -41,8 +41,6 @@ const getCurrentProject = async () => {
   isLoadProjectInfo.value = false;
 };
 
-onMounted(async () => await getCurrentProject());
-
 watch(
   () => router.currentRoute.value.params.project,
   () => {

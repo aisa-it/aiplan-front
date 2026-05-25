@@ -8,7 +8,9 @@ const getWorkspaceProjects = async (
   workspaceSlug: string,
   searchQuery?: string,
 ): Promise<DtoProjectLight[]> => {
-  const response = await api.getProjectList(workspaceSlug, searchQuery);
+  const response = await api.getProjectList(workspaceSlug, {
+    search_query: searchQuery,
+  });
   return response.data;
 };
 
