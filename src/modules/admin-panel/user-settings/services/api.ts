@@ -1,6 +1,5 @@
 import { AdminPanel } from '@aisa-it/aiplan-api-ts/src/AdminPanel';
 import {
-  AiplanRoleUpdRequest,
   DaoPaginationResponse,
   DtoProjectLight,
   DtoUserLight,
@@ -53,16 +52,6 @@ export const api = {
       .then((res) => res.data);
   },
 
-  changeUserRoleInWorkspace: async (
-    wsId: string,
-    userId: string,
-    data: AiplanRoleUpdRequest,
-  ): Promise<void> => {
-    return apiAdminPanel
-      .authAdminUsersWorkspacesMemberCreate(wsId, userId, data)
-      .then((res) => res.data);
-  },
-
   getProjects: async (
     userId: string,
     wsId: string,
@@ -82,19 +71,4 @@ export const api = {
       .then((res) => res.data);
   },
 
-  updateUserRoleInProject: async (
-    wsId: string,
-    userId: string,
-    projectId: string,
-    data: AiplanRoleUpdRequest,
-  ): Promise<void> => {
-    return apiAdminPanel
-      .authAdminUsersWorkspacesProjectsMemberCreate(
-        wsId,
-        userId,
-        projectId,
-        data,
-      )
-      .then((res) => res.data);
-  },
 };

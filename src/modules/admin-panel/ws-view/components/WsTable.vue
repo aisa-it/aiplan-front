@@ -182,8 +182,8 @@ const onEditWs = (workspace: DtoWorkspaceWithCount) => {
   if (role && role === 15) {
     router.push(`${workspace.slug}/workspace-settings`);
   } else {
-    isSettingsDialogOpen.value = true;
     selectedWorkspace.value = workspace;
+    isSettingsDialogOpen.value = true;
   }
 };
 

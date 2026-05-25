@@ -93,6 +93,7 @@ import { columns } from '../columnWsConfig';
 import { ROLES } from 'src/constants/constants';
 
 import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { api as adminApi } from 'src/modules/admin-panel/services/api';
 import { api } from '../services/api';
 import { apiWrapperWithIds } from '../../services/wrappers';
 import { useTableWithPagination } from '../../composables/useTableWithPagination';
@@ -115,7 +116,7 @@ const currentWs = ref('');
 const expanded = ref<string[]>([]);
 
 const updateUserRole = async (ws: DtoWorkspace, role: number) => {
-  await api.changeUserRoleInWorkspace(ws.id ?? '', props.userId, {
+  await adminApi.changeUserRoleInWorkspace(ws.id ?? '', props.userId, {
     role: role,
   });
   await refresh({ pagination: pagination.value }, searchQuery.value);
