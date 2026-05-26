@@ -113,7 +113,7 @@ const filteredRows = computed(() => {
 });
 
 const refresh = async () => {
-  const workspaceSlug = route.params.workspace as string;
+  const workspaceSlug = route.params.workspace;
   if (!workspaceSlug) return;
 
   loading.value = true;
@@ -132,7 +132,7 @@ const openForm = (_event: Event, form: IForms) => {
 const copyFormLink = (form: IForms) => {
   if (!form.slug) return;
   copyLinkToClipboard('forms', {
-    workspaceSlug: route.params.workspace as string,
+    workspaceSlug: route.params.workspace,
     formSlug: form.slug,
   });
 };

@@ -8,7 +8,7 @@
     bordered
     class="main-nav-bar"
   >
-    <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: '0' }">
+    <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: 0 }">
       <q-list padding>
         <q-item
           clickable

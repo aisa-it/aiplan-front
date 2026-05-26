@@ -209,19 +209,16 @@ const columns: QTableColumn<DtoDocLight>[] = [
 
 const filteredRows = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  const roots = !query
-    ? rootDocs.value
-    : rootDocs.value.filter((doc) =>
-        `${doc.title ?? ''}`.toLowerCase().includes(query),
-      );
+  const matchesQuery = (doc) =>
+    !query || `${doc.title ?? ''}`.toLowerCase().includes(query);
+  const roots = rootDocs.value.filter(matchesQuery);
 
-  const flattenRows = (docs: DtoDocLight[], level = 0) => {
+  const flattenRows = (docs, level = 0) => {
     return docs.flatMap((doc) => {
       const row = { ...doc, level };
       const children = childDocsMap.value[doc.id ?? ''] ?? [];
-      const isOpen = !!doc.id && isExpanded(doc.id);
 
-      if (!isOpen || !children.length) return [row];
+      if (!doc.id || !isExpanded(doc.id) || !children.length) return [row];
       return [row, ...flattenRows(children, level + 1)];
     });
   };
@@ -229,13 +226,13 @@ const filteredRows = computed(() => {
   return flattenRows(roots);
 });
 
-const workspaceSlug = computed(() => route.params.workspace as string);
+const workspaceSlug = computed(() => route.params.workspace);
 
-const currentUserRole = computed(() => getWsRole(workspaceSlug.value ?? ''));
+const currentUserRole = computed(() => getWsRole(workspaceSlug.value));
 
 const isAdminOrAuthor = computed(() => {
   return (
-    hasPermission('change-issue-primary') || docInfo.value?.author?.id === user.value?.id
+    hasPermission('change-issue-primary')
   );
 });
 
@@ -248,7 +245,7 @@ const canEdit = computed(() => {
 });
 
 const refresh = async () => {
-  if (!workspaceSlug.value) return;
+  if (!workspaceSlug.value) return
 
   loading.value = true;
   try {
@@ -333,8 +330,6 @@ const isExpanded = (id?: string) => {
 };
 
 const toggleExpand = async (doc: DtoDocLight) => {
-  if (!doc.id || !doc.has_child_docs || !workspaceSlug.value) return;
-
   const expanded = isExpanded(doc.id);
   if (expanded) {
     expandedDocIds.value = expandedDocIds.value.filter((id) => id !== doc.id);
@@ -343,7 +338,7 @@ const toggleExpand = async (doc: DtoDocLight) => {
 
   if (!childDocsMap.value[doc.id]) {
     const response = await aidocStore.getChildDocList(workspaceSlug.value, doc.id);
-    childDocsMap.value[doc.id] = (response?.data ?? []) as DtoDocLight[];
+    childDocsMap.value[doc.id] = (response?.data ?? []);
   }
 
   expandedDocIds.value = [...expandedDocIds.value, doc.id];
@@ -352,7 +347,7 @@ const toggleExpand = async (doc: DtoDocLight) => {
 const copyDocLink = (doc: DtoDocLight) => {
   if (!doc.id) return;
   copyLinkToClipboard('docs', {
-    workspaceSlug: route.params.workspace as string,
+    workspaceSlug: route.params.workspace,
     docsId: doc.id,
   });
 };
