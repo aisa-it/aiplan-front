@@ -1,7 +1,6 @@
 <template>
   <q-page v-if="!loading" class="flex justify-center flex-grow">
-    <q-layout
-      view="hHh lpr fFf"
+    <div
       class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow"
     >
       <q-drawer
@@ -13,10 +12,17 @@
       >
         <div ref="menuRef" class="nav-menu-bottom-bar">
           <NavMenuAIDocs
+            data-id="favorites"
+            class="draggable-item"
             filterBy="favorites"
             @updateFavoriteState="updateFavoriteState"
           />
-          <NavMenuAIDocs ref="docsMenu" filterBy="docs" />
+          <NavMenuAIDocs
+            ref="docsMenu"
+            data-id="docs"
+            class="draggable-item"
+            filterBy="docs"
+          />
         </div>
       </q-drawer>
 
@@ -124,7 +130,7 @@
       <q-page-container v-else class="flex flex-center flex-grow">
         <AiDocEmptyPlaceholder :is-admin-or-author="isAdminOrAuthor" />
       </q-page-container>
-    </q-layout>
+    </div>
   </q-page>
 
   <q-page v-else class="flex justify-center items-center">
@@ -170,7 +176,7 @@ import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
 import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
-
+import { useSortable } from 'src/composables/useSortable';
 //composables
 const route = useRoute();
 
@@ -192,6 +198,11 @@ const aidocEditor = ref();
 const docsMenu = ref();
 const menuRef = ref<HTMLElement | null>(null);
 useExpansionGroupResize(menuRef, 'aidocMenuItemsLayout');
+const { initSortable } = useSortable(menuRef, {
+  draggable: '.draggable-item',
+  filter: '.resizer',
+  preventOnFilter: true,
+});
 const isReadOnlyEditor = ref(true);
 const documentValue = ref<DtoDoc>({});
 const updateCurrentEditorValue = ref();
@@ -418,6 +429,8 @@ onMounted(async () => {
     aidocStore.selectDoc('', '');
     aidocStore.parentDocId = null;
   }
+
+  await initSortable();
 });
 
 watch(
@@ -522,6 +535,10 @@ watch(
   padding: 8px 0;
   margin-right: 10px !important;
   background: none;
+}
+
+:deep(.q-page-container) {
+  padding: 0 !important;
 }
 
 .issue-panel__editor {
