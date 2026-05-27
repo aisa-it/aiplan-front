@@ -85,7 +85,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'aidoc',
             name: 'aidoc',
-            component: () => import('pages/AiDocsPage.vue'),
+            component: () => import('pages/AiDocPage.vue'),
             meta: { requiredWorkspace: true },
           },
           {

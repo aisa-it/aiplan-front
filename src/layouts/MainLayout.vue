@@ -11,7 +11,7 @@
       <PrimaryLoader v-show="generalLoader === true" />
 
       <!-- <MainLayoutDrawer v-model:drawer-open="leftDrawerOpen" /> -->
-      <NavBar />
+      <NavBar v-if="!isAiDocRoute" />
 
       <q-page-container>
         <router-view v-slot="{ Component, route }">
@@ -129,6 +129,7 @@ useMeta({
 });
 
 const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
+const isAiDocRoute = computed(() => route.path.includes('/aidoc'));
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;

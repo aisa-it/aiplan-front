@@ -16,7 +16,7 @@
       loading-label="Загружается..."
       no-data-label="Нет данных"
       :rows="filteredRows"
-      :columns="columns"
+      :columns="formsTableColumns"
       :rows-per-page-options="[10, 25, 50, 100]"
       @row-click="openForm"
     >
@@ -58,11 +58,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { QTableColumn } from 'quasar';
 
 import { getFormList } from 'src/components/forms/services/api';
 import type { IForms } from 'src/interfaces/forms';
 import { copyLinkToClipboard } from 'src/utils/copyLinkToClipboard';
+import { formsTableColumns } from '../utils/tableColums';
 
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
@@ -79,29 +79,6 @@ const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 });
-
-const columns: QTableColumn<IForms>[] = [
-  {
-    name: 'title',
-    align: 'left',
-    label: 'Название',
-    sortable: true,
-    field: (row) => row.title ?? '-',
-  },
-  {
-    name: 'slug',
-    align: 'left',
-    label: 'Идентификатор',
-    sortable: true,
-    field: (row) => row.slug ?? '-',
-  },
-  {
-    name: 'copy_link',
-    align: 'center',
-    label: 'Ссылка',
-    field: (row) => row,
-  },
-];
 
 const filteredRows = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
