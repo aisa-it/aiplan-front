@@ -21,6 +21,7 @@ interface IDocState {
   selectedDocId: string | null;
   selectedDocTitle: string | null;
   parentDocId: string | null;
+  ancestorsDocsIds: string[] | null;
   deletedDocId: string | null;
   updatedDocId: string | null;
   favoritesDocs: DtoDocFavorites[];
@@ -36,6 +37,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
       selectedDocId: null,
       selectedDocTitle: null,
       parentDocId: null,
+      ancestorsDocsIds: null,
       deletedDocId: null,
       updatedDocId: null,
       favoritesDocs: [],
@@ -50,6 +52,9 @@ export const useAiDocStore = defineStore('aidoc-store', {
   actions: {
     setParentDoc(id: string | null) {
       this.parentDocId = id;
+    },
+    setAncestorsDocsIds(ids: string[] | null) {
+      this.ancestorsDocsIds = ids;
     },
     setUpdatedDoc(id: string | null) {
       this.updatedDocId = id;

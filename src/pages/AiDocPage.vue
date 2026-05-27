@@ -260,6 +260,8 @@ const refreshDocument = async () => {
   documentValue.value.content = data.content;
   const parentDocId = data.parent_doc ? data.parent_doc : null;
   aidocStore.setParentDoc(parentDocId);
+  const ancestorsDocsIds = data.breadcrumbs ? data.breadcrumbs.slice(1) : null;
+  aidocStore.setAncestorsDocsIds(ancestorsDocsIds);
   aidocStore.selectDoc(data.id, data.title);
   aidocStore.setUpdatedDoc(null);
 
