@@ -22,10 +22,16 @@
           </div>
 
           <SelectWatchers
-            v-model:watchers="watchers"
+            :watchers="watchers"
             :current-member="user"
+            is-sprint
             label="Выберите наблюдателя"
             class="col centered-horisontally"
+            @update:watchers="
+                (val) => {
+                  return (watchers = val);
+                }
+              "
           />
         </div>
 
@@ -138,7 +144,9 @@ const nameRef = ref();
 
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
-  props.defaultProps?.watchers?.map((el) => el.id) ?? [],
+  props.defaultProps?.watchers?.map((watcher) => ({
+    member: watcher,
+  })) || []
 );
 
 const dateRange = ref({
@@ -203,26 +211,27 @@ const removeAndAddArrayHelper = <T extends { id?: string }>(
 };
 
 const removeAndAddWatcher = () => {
+  if (!watchers.value) return { remove: [], add: [] };
+
+  const watchersIds = watchers.value.map((watcher) => watcher.member?.id);
+
   if (!props.defaultProps?.watchers || !props.defaultProps?.watchers.length) {
     return {
-      add: watchers.value,
+      add: watchersIds,
       remove: [],
     };
   }
 
-  if (!watchers.value) return { remove: [], add: [] };
 
   const remove =
     props.defaultProps?.watchers?.filter(
-      (el) => !watchers.value.some((i) => i === el.id),
-    ) ?? [];
+      (el) => !watchersIds.some((i) => i === el.id),
+    ).map((el) => el.id) ?? [];
 
-  const add =
-    watchers.value.filter((el) => !remove?.some((del) => del.id === el)) ?? [];
 
   return {
-    remove: remove.map((el) => el.id),
-    add: add,
+    remove: remove,
+    add: watchersIds,
   };
 };
 
@@ -264,7 +273,9 @@ watch(
     if (!props.defaultProps) return;
 
     sprintName.value = props.defaultProps?.name ?? '';
-    watchers.value = props.defaultProps?.watchers?.map((el) => el.id) ?? [];
+    watchers.value = props.defaultProps?.watchers?.map((watcher) => ({
+    member: watcher,
+  })) || [];
 
     dateRange.value = {
       from: props.defaultProps?.start_date
