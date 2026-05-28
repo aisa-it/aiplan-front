@@ -22,7 +22,9 @@
     </template>
 
     <template v-slot:top>
-      <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">Пользователей в пространстве:  {{ usersCount }}</p>
+      <p v-if="usersCount" class="q-mb-lg text-subtitle1 full-w">
+        Пользователей в пространстве: {{ usersCount }}
+      </p>
       <div class="flex q-table__title q-mr-sm">Пользователи</div>
       <q-input
         label="Поиск"
@@ -170,7 +172,6 @@
     :currentWsInfo="currentWsInfo"
     :currentWsSlug="currentWsSlug"
     :isInAdminPanel="isInAdminPanel"
-    @refreshData="refreshData"
   />
 </template>
 
@@ -210,6 +211,7 @@ import {
   SUCCESS_CHANGE_USER_ROLE,
 } from 'src/constants/notifications';
 import { useRouter } from 'vue-router';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps({
   currentWsInfo: { type: Object, required: true },
@@ -274,7 +276,7 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
-const rows = ref([]);
+const rows = ref<DtoWorkspaceMember[]>([]);
 const columns = [
   {
     name: 'username',
@@ -323,11 +325,10 @@ async function onRequest(p: any) {
       pagination.value.sortBy = sortBy;
       pagination.value.descending = descending;
       rows.value = res?.result || [];
-      loading.value = false;
       if (!searchQuery.value) {
         usersCount.value = res?.count;
       }
-    });
+    }).finally(()=> loading.value = false);
 }
 
 async function refreshData() {

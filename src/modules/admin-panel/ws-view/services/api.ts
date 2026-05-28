@@ -22,4 +22,5 @@ export const api = {
   deleteWorkspace: async (workspaceSlug: string): Promise<void> => {
     return apiWorkspace.deleteWorkspace(workspaceSlug).then((res) => res.data);
   },
+
 };
