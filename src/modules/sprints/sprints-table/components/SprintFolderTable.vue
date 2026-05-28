@@ -3,12 +3,13 @@
     <q-table
       ref="folderTable"
       :rows="rows"
-      :row-key="id"
       :columns="columns"
+      :rows-per-page-options="[0]"
       binary-state-sort
       flat
-      class="my-sticky-column-table table-bottom-reverse hide-native-bottom"
+      class="my-sticky-column-table"
       @row-click="(_, row) => handleClick(row)"
+      @row-contextmenu.prevent="onRowContextMenu"
     >
       <template v-slot:header="props">
         <q-tr :props="props">
@@ -31,110 +32,49 @@
         </q-td>
       </template>
     </q-table>
-
-    <div class="sticky-bottom">
-      <div class="table-h-scroll" ref="hScroll">
-        <div class="table-h-scroll__content" />
-      </div>
-    </div>
   </div>
 
-  <!-- <IssueContextMenu
+  <SprintContextMenu
     :row="contextRow"
     :anchor-event="contextEvent"
-    @refresh="refreshTable"
-  /> -->
+    @refresh="emits('refresh')"
+    />
 </template>
 
 <script lang="ts" setup>
 import {
-  inject,
   ref,
-  watch,
-  watchEffect,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
 } from 'vue';
-import { EventBus, QTable } from 'quasar';
-import { storeToRefs } from 'pinia';
+import { QTable } from 'quasar';
 
-import { useProjectStore } from 'src/stores/project-store';
+import SprintContextMenu from 'src/modules/sprints/sprints-table/components/SprintContextMenu.vue';
 
-import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
-import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
-
-import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
-import SequenceId from 'src/modules/issue-list/components/board-view-ui/SequenceId.vue';
 import StatusLinearProgressBar from 'src/components/progress-bars/StatusLinearProgressBar.vue';
-import { useUserStore } from 'src/stores/user-store';
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store.ts';
+import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const sprintStore = useSprintStore();
-const { user } = storeToRefs(useUserStore());
 
 const emits = defineEmits([
   'refresh',
-  'updateIssueField',
-  'openSprint',
-  'updateGroupedIssues',
 ]);
 const props = defineProps([
-  'entity',
   'rows',
-  'rowsCount',
-  'loading',
   'columns',
-  'contextType',
 ]);
 
-// const { updateCurrentTable } = useGroupedIssues(props.contextType);
-
-const bus = inject('bus') as EventBus;
 
 const contextRow = ref(null);
 const contextEvent = ref<MouseEvent | null>(null);
 
-// const onRowContextMenu = (evt, row) => {
-//   contextRow.value = row;
-//   contextEvent.value = evt;
-// };
-
-const loadingTable = ref(false);
-
-const handleClick = (row) => {
-    const target = user.value?.theme?.open_in_new ? '_blank' : '_self';
-    sprintStore.openSprint(row.id, target);
+const onRowContextMenu = (evt, row) => {
+  contextRow.value = row;
+  contextEvent.value = evt;
 };
 
-const issueTable = ref<InstanceType<typeof QTable> | null>(null);
-const hScroll = ref<HTMLElement | null>(null);
-let middle: HTMLElement | null = null;
-
-const getMiddle = () =>
-  issueTable.value?.$el.querySelector('.q-table__middle') as HTMLElement;
-
-const updateWidth = () => {
-  const middle = getMiddle();
-  const table = middle?.querySelector('table');
-
-  if (!middle || !table || !hScroll.value) return;
-
-  const tableWidth = table.scrollWidth;
-  const containerWidth = middle.clientWidth;
-
-  hScroll.value.firstElementChild!.style.width = tableWidth + 'px';
-
-  hScroll.value.style.display = tableWidth > containerWidth ? 'block' : 'none';
+const handleClick = (row: DtoSprintLight) => {
+    sprintStore.openSprint(row.id as string, '_blank');
 };
-
-watch(
-  () => props.rows,
-  () => {
-    loadingTable.value = false;
-  },
-);
 </script>
 
 <style lang="scss">
@@ -204,23 +144,12 @@ th.count-column {
 </style>
 
 <style lang="scss" scoped>
-// :deep(.hide-native-bottom .q-table__bottom) {
-//   min-height: auto;
-//   height: 0 !important;
-//   padding: 0 !important;
-// }
-
 :deep(.q-table__middle) {
   overflow-x: hidden;
 }
 
 .folder-table-wrapper {
   position: relative;
-}
-
-.pagination-wrapper {
-  display: flex;
-  justify-content: end;
 }
 
 .sticky-bottom {

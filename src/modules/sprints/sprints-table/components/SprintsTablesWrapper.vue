@@ -25,17 +25,7 @@
         </template>
 
         <div>
-          <!-- <LazyVirtualMount
-            :scroll-container="scrollContainer"
-            :active="isOpen(folder, index)"
-            :estimated-height="getEstimatedHeight(folder?.issues?.length)"
-          > -->
-            <slot :folder="folder" :index="index" />
-
-            <!-- <template #fallback>
-              <TableListSkeleton />
-            </template>
-          </LazyVirtualMount> -->
+          <slot :folder="folder" :index="index" />
         </div>
       </q-expansion-item>
       <q-expansion-item
@@ -49,17 +39,7 @@
         </template>
 
         <div>
-          <!-- <LazyVirtualMount
-            :scroll-container="scrollContainer"
-            :active="isOpen(folder, index)"
-            :estimated-height="getEstimatedHeight(folder?.issues?.length)"
-          > -->
-            <slot :folder="folder" :index="index" />
-
-            <!-- <template #fallback>
-              <TableListSkeleton />
-            </template>
-          </LazyVirtualMount> -->
+          <slot :folder="folder" />
         </div>
       </q-expansion-item>
     </div>
@@ -74,52 +54,10 @@ import { storeToRefs } from 'pinia';
 import { ROOT_FOLDER_ID } from 'src/constants/constants';
 import GroupedHeader from 'src/modules/sprints/ui/GroupedHeader.vue';
 import { useUtilsStore } from 'src/stores/utils-store';
-import { computed, ref } from 'vue';
-import LazyVirtualMount from 'src/components/LazyVirtualMount.vue'
 
 const { ny } = storeToRefs(useUtilsStore());
 
 const props = defineProps<{
   sprintFolders: DtoSprintFolder[];
-  showEmptyFolders?: boolean;
-  isFolderOpen?: (folder: DtoSprintFolder) => boolean;
 }>();
-
-const scrollContainer = ref();
-const root = ref<HTMLElement>();
-
-const estimatedHeights = {
-  10: 630,
-  25: 1400,
-  50: 2770,
-} as const;
-
-function getEstimatedHeight(length?: number): number {
-  if (!length) return 300;
-  return estimatedHeights[length as keyof typeof estimatedHeights] ?? 300;
-};
-
-const isOpen = (folder: DtoSprintFolder, index: number) => {
-  if (props.isFolderOpen) return props.isFolderOpen(folder);
-  const key = groupKey(folder, index);
-  return localOpenState.value[key] ?? true;
-};
-
-// const sprintFolders = computed(() =>
-//   sprints.value?.filter((item) => item.id !== ROOT_FOLDER_ID),
-// );
-// const rootSprints = computed(
-//   () => sprints.value?.find((item) => item.id === ROOT_FOLDER_ID)?.sprints,
-// );
-// const filteredSprints = computed(() => {
-//   let items = [];
-//   if (sprintFolders.value) {
-//     items.push(...sprintFolders.value);
-//   }
-//   if (rootSprints.value) {
-//     items.push(...rootSprints.value);
-//   }
-//   return items;
-// });
-
 </script>
