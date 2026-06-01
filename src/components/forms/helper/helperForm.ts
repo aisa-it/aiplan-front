@@ -1,6 +1,10 @@
 import { TypesFormFields } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import dayjs from 'dayjs';
 import {
+  uploadFormAttachment,
+  UploadFormAttachmentOptions,
+} from 'src/components/forms/services/api';
+import {
   ERROR_EDIT_FORM,
   SUCCESS_CREATE_FORM,
 } from 'src/constants/notifications';
@@ -368,7 +372,55 @@ export const isFieldVisible = (field: any, fields: any[]) => {
   return true;
 };
 
+export const clearFieldAttachment = (field: any) => {
+  if (field.pendingAttachment?.previewUrl) {
+    URL.revokeObjectURL(field.pendingAttachment.previewUrl);
+  }
+  delete field.pendingAttachment;
+  field.attachments = [];
+  field.value = null;
+};
+
+// Загрузка драфт-вложений
+export const uploadPendingFormAttachments = async (
+  fields: any[],
+  options: UploadFormAttachmentOptions,
+  isVisible: (field: any, allFields: any[]) => boolean,
+) => {
+  for (const field of fields) {
+    if (field.type !== 'attachment' || !field.pendingAttachment) continue;
+    if (!isVisible(field, fields)) continue;
+
+    const response = await uploadFormAttachment(
+      field.pendingAttachment.file,
+      options,
+    );
+
+    if (field.pendingAttachment?.previewUrl) {
+      URL.revokeObjectURL(field.pendingAttachment.previewUrl);
+    }
+
+    const attachmentId = response?.id;
+    if (!attachmentId) {
+      throw new Error('Attachment upload response missing id');
+    }
+
+    field.value = attachmentId;
+    field.attachments = [response];
+    delete field.pendingAttachment;
+  }
+};
+
 export const getSubmissionValue = (field: any) => {
+  if (field.type === 'attachment') {
+    if (field.pendingAttachment) {
+      return { value: null };
+    }
+
+    const attachmentId = field.attachments?.[0]?.id ?? field.value;
+    return { value: attachmentId || null };
+  }
+
   if (field.type === 'date') {
     const isoDate = serializationDate(field.value, true);
     return {
@@ -409,7 +461,7 @@ export const resetFieldValues = (targetFields: any[], allFields: any[]) => {
         targetField.value = '';
         break;
       case 'attachment':
-        targetField.value = [];
+        clearFieldAttachment(targetField);
         break;
       case 'select':
       case 'multiselect':

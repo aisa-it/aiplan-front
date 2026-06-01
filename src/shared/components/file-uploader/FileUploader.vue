@@ -94,19 +94,27 @@ const triggerUpload = () => {
   fileInput.value?.click();
 };
 
+const cloneFile = (file: File) =>
+  new File([file], file.name, {
+    type: file.type,
+    lastModified: file.lastModified,
+  });
+
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
-    emit('upload', target.files[0]);
-  }
-  if (fileInput.value) fileInput.value.value = '  ';
+  const selectedFile = target.files?.[0];
+  if (!selectedFile) return;
+
+  emit('upload', cloneFile(selectedFile));
+  target.value = '';
 };
 
 const handleDrop = (event: DragEvent) => {
   isDragIn.value = false;
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    emit('upload', event.dataTransfer.files[0]);
-  }
+  const droppedFile = event.dataTransfer?.files?.[0];
+  if (!droppedFile) return;
+
+  emit('upload', cloneFile(droppedFile));
 };
 
 const handleOpen = (attachment: any) => {

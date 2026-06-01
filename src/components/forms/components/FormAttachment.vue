@@ -1,9 +1,10 @@
 <template>
   <FileUploader
     :attachments="field.attachments"
-    :loading="uploading"
+    :loading="submitting"
     :max-items="1"
-    @upload="handleUpload"
+    :download-handler="downloadDraftFile"
+    @upload="handleFileSelect"
     @delete="handleDelete"
     @open="handleOpen"
     :upload-btn-style="{ minHeight: '156px' }"
@@ -25,9 +26,6 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
-//api
-import { createFormAttachments } from 'src/components/forms/services/api';
-
 //components
 import FileUploader from 'src/shared/components/file-uploader/FileUploader.vue';
 import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
@@ -35,10 +33,11 @@ import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
-import { useFormStore } from 'src/stores/form-store';
 import { useUserStore } from 'src/stores/user-store';
-import axios from 'axios';
-import { DtoFormAttachmentLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+//utils
+import { clearFieldAttachment } from 'src/components/forms/helper/helperForm';
+import { IAttachmentCard } from 'src/interfaces/files';
 
 const props = defineProps<{
   modelValue: string | null;
@@ -46,13 +45,13 @@ const props = defineProps<{
   formSlug: string;
   workspaceSlug: string;
   emptyUserAllowed?: boolean;
+  submitting?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
 
 //stores
 const { setNotificationView } = useNotificationStore();
-const formStore = useFormStore();
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
@@ -62,21 +61,57 @@ const MAX_SIZE_FILE_UNIT = 'мб';
 const MAX_SIZE_FILE = MAX_SIZE_FILE_VALUE * 1024 * 1024;
 
 //refs
-const uploading = ref(false);
 const isPreviewOpen = ref(false);
 const previewFile = ref();
 
-//methods
-const handleUpload = async (file: File) => {
-  uploading.value = true;
+const buildDraftAttachment = (
+  file: File,
+  localId: string,
+): IAttachmentCard => ({
+  id: localId,
+  created_at: new Date().toISOString(),
+  draft: true,
+  asset: {
+    id: localId,
+    name: file.name,
+    size: file.size,
+    content_type: file.type,
+  },
+});
 
+const downloadDraftFile = async (
+  _attachment: IAttachmentCard,
+  onProgress: (progress: number) => void,
+) => {
+  const pendingFile = props.field.pendingAttachment?.file;
+  if (!pendingFile) return;
+
+  onProgress(0);
+
+  const url =
+    props.field.pendingAttachment?.previewUrl ??
+    URL.createObjectURL(pendingFile);
+  const shouldRevoke = !props.field.pendingAttachment?.previewUrl;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = pendingFile.name;
+  link.click();
+
+  if (shouldRevoke) {
+    URL.revokeObjectURL(url);
+  }
+
+  onProgress(100);
+};
+
+const handleFileSelect = (file: File) => {
   if (file.size > MAX_SIZE_FILE) {
     setNotificationView({
       type: 'error',
       customMessage: `Файл слишком большой. Максимальный размер ${MAX_SIZE_FILE_VALUE} ${MAX_SIZE_FILE_UNIT}`,
       open: true,
     });
-    uploading.value = false;
     return;
   }
 
@@ -86,73 +121,34 @@ const handleUpload = async (file: File) => {
       customMessage: 'Для загрузки файла авторизуйтесь или зарегистрируйтесь',
       open: true,
     });
-    uploading.value = false;
     return;
   }
 
-  try {
-    let response: DtoFormAttachmentLight;
-    if (props.emptyUserAllowed) {
-      const url = `/api/forms/${props.formSlug}/form-attachments/`;
-      response = (await axios.post(
-        url,
-        { asset: file },
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      )).data;
-    } else {
-      response = await createFormAttachments(
-        props.workspaceSlug,
-        props.formSlug,
-        { asset: file },
-      );
-    }
-    const attachmentId = response.id;
-    props.field.attachments = [response];
-    emit('update:modelValue', attachmentId);
-  } catch (error) {
-    console.error('Upload error:', error);
-    setNotificationView({
-      type: 'error',
-      customMessage: 'Не удалось загрузить файл',
-      open: true,
-    });
-  } finally {
-    uploading.value = false;
-  }
+  // Сборка файла-заглушки
+  clearFieldAttachment(props.field);
+
+  const localId = crypto.randomUUID();
+  const previewUrl = URL.createObjectURL(file);
+
+  props.field.pendingAttachment = { localId, file, previewUrl };
+  props.field.attachments = [buildDraftAttachment(file, localId)];
+  emit('update:modelValue', localId);
 };
 
-const handleDelete = async (id: string) => {
-  if (!id || !props.formSlug) return;
-
-  try {
-    await formStore.deleteFormAttachment(props.formSlug, id);
-
-    if (Array.isArray(props.field.attachments)) {
-      props.field.attachments = props.field.attachments.filter(
-        (a: any) => a.id !== id,
-      );
-    }
-
-    if (props.modelValue === id) {
-      emit('update:modelValue', null);
-    }
-  } catch (error) {
-    console.error('Delete error:', error);
-    setNotificationView({
-      type: 'error',
-      customMessage: 'Не удалось удалить файл',
-      open: true,
-    });
-  }
+const handleDelete = () => {
+  clearFieldAttachment(props.field);
+  emit('update:modelValue', null);
 };
 
-const handleOpen = (file: any) => {
+const handleOpen = (file: IAttachmentCard) => {
   if (!file) return;
-  previewFile.value = file;
+
+  if (file.draft && props.field.pendingAttachment?.previewUrl) {
+    previewFile.value = { asset: props.field.pendingAttachment.previewUrl };
+  } else {
+    previewFile.value = file;
+  }
+
   isPreviewOpen.value = true;
 };
 </script>
