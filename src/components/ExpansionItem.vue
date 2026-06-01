@@ -56,7 +56,7 @@ const minHeight = computed(() => {
   let height;
   switch (props.type) {
     case 'help':
-      height = 234;
+      height = 255;
       break;
     case 'jitsi':
       height = Screen.height > 700 ? 450 : 300;
