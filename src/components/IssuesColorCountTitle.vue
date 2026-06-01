@@ -30,26 +30,24 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import PrioritySingleIcon from './icons/PrioritySingleIcon.vue';
 import { watch, ref } from 'vue';
 
-const props = defineProps({
-  name: { type: String, required: false },
-  count: { type: Number, required: false },
-  placeholder: { type: String, required: false },
-  priority: { type: String, required: false },
-  color: {
-    type: String,
-    required: false,
-    default: () => '#bac4d5',
+const props = withDefaults(
+  defineProps<{
+    name?: string;
+    count?: number;
+    placeholder?: string;
+    priority?: string;
+    color?: string;
+    badgeClass?: string;
+  }>(),
+  {
+    color: '#bac4d5',
+    badgeClass: 'circle-badge',
   },
-  badgeClass: {
-    type: String,
-    required: false,
-    default: () => 'circle-badge',
-  },
-});
+);
 
 const textColor = ref('');
 

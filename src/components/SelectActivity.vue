@@ -87,17 +87,17 @@ import { useUserActivityNavigation } from 'src/composables/useUserActivityNaviga
 
 //components - icon
 import AvatarImage from './AvatarImage.vue';
+import {
+  DaoPaginationResponse,
+  DtoEntityActivityFull,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-defineProps({
-  activitiesData: {
-    type: Object,
-    required: true,
-  },
-  type: {
-    type: String,
-    required: true,
-  },
-});
+defineProps<{
+  activitiesData: DaoPaginationResponse & {
+    activities: DtoEntityActivityFull[];
+  };
+  type: string;
+}>();
 
 const emits = defineEmits<{
   updateComponent: [];

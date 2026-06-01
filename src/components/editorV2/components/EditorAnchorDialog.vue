@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { Editor } from '@tiptap/vue-3';
 import { QPopupProxy } from 'quasar';
-import { defineProps, ref } from 'vue';
+import { ref } from 'vue';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
 
 const props = defineProps<{

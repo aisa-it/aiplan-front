@@ -54,6 +54,7 @@ const unstableRelease = ref(
     location.hostname === 'localhost',
 );
 </script>
+
 <style lang="scss" scoped>
 .fully-centered {
   display: flex;

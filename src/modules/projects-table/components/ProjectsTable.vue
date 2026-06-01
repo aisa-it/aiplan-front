@@ -1,5 +1,13 @@
 <template>
   <div>
+    <q-input
+      v-model="projectSearch"
+      class="base-input q-mb-md"
+      label="Поиск"
+      dense
+      clearable
+      @update:model-value="() => searchProjects()"
+    />
     <q-table
       flat
       bordered
@@ -18,7 +26,7 @@
             flat
             no-caps
             no-wrap
-            @click.prevent.stop="copyLink(props.row)"
+            @click.stop="copyLink(props.row)"
           >
             <LinkIcon />
           </q-btn>
@@ -33,7 +41,7 @@
             flat
             no-caps
             no-wrap
-            @click.prevent.stop="openNotificationSettings(props.row)"
+            @click.stop="openNotificationSettings(props.row)"
           >
             <UnmutedIcon />
           </q-btn>
@@ -49,7 +57,7 @@
             flat
             no-caps
             no-wrap
-            @click.prevent.stop="openNotificationsAdminSettings(props.row)"
+            @click.stop="openNotificationsAdminSettings(props.row)"
           >
             <UnmutedIcon />
           </q-btn>
@@ -72,6 +80,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { QTableColumn } from 'quasar';
+import { debounce } from 'quasar';
 
 import { getWorkspaceProjects } from '../api';
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -84,13 +93,12 @@ import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/Noti
 import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
 
 import { useRolesStore } from 'src/stores/roles-store';
-
 const { getProjectRole } = useRolesStore();
 
 const route = useRoute();
 const router = useRouter();
 const projects = ref<DtoProjectLight[]>([]);
-
+const projectSearch = ref('');
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
 
@@ -171,4 +179,11 @@ const openNotificationsAdminSettings = (project: DtoProjectLight) => {
   selectedProject.value = project;
   isNotificationsAdminSettingsOpen.value = true;
 };
+
+const searchProjects = debounce(async () => {
+  projects.value = await getWorkspaceProjects(
+    route.params.workspace as string,
+    projectSearch.value,
+  );
+}, 500);
 </script>

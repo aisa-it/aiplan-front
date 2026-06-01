@@ -1,7 +1,9 @@
 <template>
   <q-card class="setting-card">
     <div class="sub-text q-ml-sm q-my-sm">
-      <p v-if="disable" class="text-warning q-mb-sm">Уведомления данного типа отключены глобально в профиле</p>
+      <p v-if="disable" class="text-warning q-mb-sm">
+        Уведомления данного типа отключены глобально в профиле
+      </p>
       <slot name="subtitle"></slot>
     </div>
     <div class="notification-header">
@@ -416,17 +418,16 @@ import { IProjectNotificationSettings } from 'src/interfaces/projectNotification
 // constants
 import { INITIAL_PROJECT_NOTIFICATION_SETTINGS } from 'src/constants/projectNotificationSettings';
 
+const props = defineProps<{
+  authorSettings: any;
+  memberSettings: any;
+  disable: boolean;
+}>();
+
 const emits = defineEmits<{
   updateTelegram: [value: IProjectNotificationSettings];
   updateEmail: [value: IProjectNotificationSettings];
 }>();
-
-const props = defineProps([
-  'project',
-  'authorSettings',
-  'memberSettings',
-  'disable',
-]);
 
 const emailAllSettings = ref(false);
 const telegramAllSettings = ref(false);

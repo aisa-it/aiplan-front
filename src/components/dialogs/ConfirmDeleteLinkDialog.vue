@@ -5,8 +5,8 @@
         <h6 class="q-ma-md">Удаление ссылки</h6>
         <span>
           Вы действительно хотите удалить ссылку "<b> {{ link?.title }} </b>" от
-          {{ formatDateTime(link?.created_at) }}?<br />Ссылка будет удалена
-          навсегда. Действие необратимо.</span
+          {{ formatDateTime(link?.created_at ?? '') }}?<br />Ссылка будет
+          удалена навсегда. Действие необратимо.</span
         >
       </q-card-section>
       <q-card-actions align="right">
@@ -33,18 +33,10 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-// utils
+<script setup lang="ts">
 import { formatDateTime } from 'src/utils/time';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'ConfirmDeleteLinkDialog',
-  emits: ['delete'],
-  props: ['link'],
-  setup() {
-    return { formatDateTime };
-  },
-});
+defineProps<{ link: DtoIssueLinkLight }>();
+defineEmits<{ delete: [] }>();
 </script>

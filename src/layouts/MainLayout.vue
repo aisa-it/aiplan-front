@@ -11,7 +11,7 @@
       <PrimaryLoader v-show="generalLoader === true" />
 
       <!-- <MainLayoutDrawer v-model:drawer-open="leftDrawerOpen" /> -->
-      <NavBar />
+      <NavBar v-if="!isAiDocRoute" />
 
       <q-page-container>
         <router-view v-slot="{ Component, route }">
@@ -31,7 +31,7 @@
   </q-layout>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { useQuasar, useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -96,9 +96,10 @@ onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
   currentIssueID.value = route.params.issue as string;
 
-  await userStore.getUserInfo().then(() => {
-    setTheme();
-  });
+  //TODO сделать тему
+  // await userStore.getUserInfo().then(() => {
+  //   setTheme();
+  // });
 
   if (user.value?.status === 'На звонке') {
     await userStore.updateCurrentUser({
@@ -128,6 +129,7 @@ useMeta({
 });
 
 const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
+const isAiDocRoute = computed(() => route.path.includes('/aidoc'));
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;

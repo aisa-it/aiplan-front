@@ -12,7 +12,7 @@
     dense
     multiple
     clearable
-    emit-value
+    emits-value
     map-options
     @update:model-value="onUpdate"
   >
@@ -43,7 +43,7 @@
           dense
           clearable
           class="base-input q-mb-sm"
-          @update:model-value="(e) => emit('search', e?.toString())"
+          @update:model-value="(e) => emits('search', e?.toString())"
         />
       </div>
     </template>
@@ -56,7 +56,7 @@
           dense
           clearable
           class="base-input q-mb-sm"
-          @update:model-value="(e) => emit('search', e?.toString())"
+          @update:model-value="(e) => emits('search', e?.toString())"
         />
       </div>
       <q-item>
@@ -80,7 +80,7 @@ const props = defineProps<{
   search?: string;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:modelValue': [val: string[]];
   search: [val?: string];
 }>();
@@ -92,7 +92,7 @@ const source = computed(() => props.searchedOptions ?? props.options);
 
 const onUpdate = (val: any[]) => {
   const ids = val ? val.map((el) => (el?.id ? el.id : el)) : [];
-  emit('update:modelValue', ids);
+  emits('update:modelValue', ids);
 };
 
 const formatLabel = (member: any) => {

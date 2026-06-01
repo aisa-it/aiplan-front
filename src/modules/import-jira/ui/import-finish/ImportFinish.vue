@@ -63,7 +63,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import dayjs from 'dayjs';
 import { ref, onMounted, Ref } from 'vue';

@@ -72,9 +72,9 @@
               </template>
             </q-input>
             <CaptchaWidget
-            v-if="isEnabledCaptcha"
-            :key="updateKey"
-            @verified="(payload) => (captchaPayload = payload)"
+              v-if="isEnabledCaptcha"
+              :key="updateKey"
+              @verified="(payload) => (captchaPayload = payload)"
             />
             <q-btn
               class="login-panel__forget-btn"
@@ -132,11 +132,10 @@
     >
       <AiplanVersion />
     </div>
-    <NotificationAlert />
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useQuasar, useMeta } from 'quasar';
@@ -154,7 +153,6 @@ import { isEmail } from 'src/utils/validation';
 import AiplanVersion from 'src/components/AiplanVersion.vue';
 import RegisterPanel from 'src/components/RegisterPanel.vue';
 import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
-import NotificationAlert from 'src/components/notifications/NotificationAlert.vue';
 import CaptchaWidget from 'src/components/CaptchaWidget.vue';
 import HatXmasIcon from './icons/HatXmasIcon.vue';
 import {
