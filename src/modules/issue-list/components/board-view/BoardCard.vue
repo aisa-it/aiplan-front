@@ -183,12 +183,12 @@ import SelectStatus from 'src/components/SelectStatus.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
 import QuantityChip from 'src/components/QuantityChip.vue';
-import { useProjectStore } from 'src/stores/project-store';
 import { useIssueContext } from '../../composables/useIssueContext';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 import SelectSprints from 'src/components/SelectSprints.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const { user } = storeToRefs(useUserStore());
 
@@ -206,15 +206,13 @@ const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits([
-  'refresh',
-  'updateTable',
-  'openPreview',
-  'openIssue',
-]);
+const emits = defineEmits<{
+  updateTable: [string, DtoIssue, any];
+  openPreview: [DtoIssue];
+  openIssue: [number, string];
+}>();
 const { statesCache } = storeToRefs(useStatesStore());
 const { contextProps } = useIssueContext(props.contextType);
-const { project } = storeToRefs(useProjectStore());
 
 const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;

@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
@@ -56,7 +56,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useImportStore } from 'src/modules/import-jira/stores/import-store';
 
 // emits
-const emits = defineEmits(['next', 'get-back']);
+const emits = defineEmits<{ next: []; 'get-back': [] }>();
 
 // stores
 const userStore = useUserStore();

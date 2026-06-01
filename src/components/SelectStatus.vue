@@ -16,10 +16,10 @@
     @popup-show="
       () => {
         refresh();
-        $emit('popup-show');
+        emits('popup-show');
       }
     "
-    @popup-hide="$emit('popup-hide')"
+    @popup-hide="emits('popup-hide')"
   >
     <template v-slot:no-option></template>
     <template v-slot:option="scope">
@@ -76,9 +76,7 @@ import {
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
-import {
-  useIssuesStatesFlowStore,
-} from 'src/stores/issues-states-flow-store';
+import { useIssuesStatesFlowStore } from 'src/stores/issues-states-flow-store';
 import { useProjectStatesFlowStore } from 'src/stores/project-states-flow-store';
 
 // utils
@@ -93,32 +91,31 @@ defineOptions({
   name: 'SelectStatus',
 });
 
-const props = 
-  defineProps<{
-    projectid: string;
-    issueid?: string;
-    status?: {
-      id?: string;
-      color?: string;
-      name?: string;
-    };
-    issue?: {
-      project_detail?: unknown;
-    };
-    statesFromCache?: Record<string, IState[]>;
-    isAdaptiveSelect?: boolean;
-    isDisabled?: boolean;
-    label?: string;
-  }>();
+const props = defineProps<{
+  projectid: string;
+  issueid?: string;
+  status?: {
+    id?: string;
+    color?: string;
+    name?: string;
+  };
+  issue?: {
+    project_detail?: unknown;
+  };
+  statesFromCache?: Record<string, IState[]>;
+  isAdaptiveSelect?: boolean;
+  isDisabled?: boolean;
+  label?: string;
+}>();
 
-const emit = defineEmits([
-  'setStatus',
-  'update-initial-status',
-  'update:status',
-  'refresh',
-  'popup-show',
-  'popup-hide',
-]);
+const emits = defineEmits<{
+  setStatus: [IState];
+  'update-initial-status': [IState];
+  'update:status': [IState];
+  refresh: [];
+  'popup-show': [];
+  'popup-hide': [];
+}>();
 
 useAiplanStore();
 const statesStore = useStatesStore();
@@ -155,13 +152,22 @@ const refresh = async () => {
           props.projectid,
           props.issueid,
         );
-        arr = filterStatesByAllowedTransitions(arr, available, props.status?.id);
-      } else {
-        const available = await projectStatesFlowStore.getAvailableStatesNewIssue(
-          currentWorkspaceSlug.value,
-          props.projectid,
+        arr = filterStatesByAllowedTransitions(
+          arr,
+          available,
+          props.status?.id,
         );
-        arr = filterStatesByAllowedTransitions(arr, available, props.status?.id);
+      } else {
+        const available =
+          await projectStatesFlowStore.getAvailableStatesNewIssue(
+            currentWorkspaceSlug.value,
+            props.projectid,
+          );
+        arr = filterStatesByAllowedTransitions(
+          arr,
+          available,
+          props.status?.id,
+        );
       }
     } catch (e) {
       // ignore
@@ -171,7 +177,7 @@ const refresh = async () => {
   states.value = arr;
 
   if (!props.status) {
-    emit(
+    emits(
       'update-initial-status',
       arr.find((status) => status.default === true) || arr[0],
     );
@@ -185,9 +191,7 @@ const filterStatesByAllowedTransitions = (
 ) => {
   const allowedIds = new Set(available.map((s) => s.id));
   if (!allowedIds.size) return states;
-  return states.filter(
-    (s) => allowedIds.has(s.id) || s.id === currentStatusId,
-  );
+  return states.filter((s) => allowedIds.has(s.id) || s.id === currentStatusId);
 };
 
 const showNotification = (type: 'success' | 'error', msg?: string) => {
@@ -202,19 +206,24 @@ const issueStateUpdate = async (state: IState) => {
   if (state.id === props.status?.id) return;
 
   if (!props.issueid) {
-    emit('update:status', state);
+    emits('update:status', state);
   } else {
     if (!currentWorkspaceSlug.value) return;
     await singleIssueStore
-      .updateIssueData(currentWorkspaceSlug.value, props.projectid, props.issueid, {
-        state: state.id,
-      })
+      .updateIssueData(
+        currentWorkspaceSlug.value,
+        props.projectid,
+        props.issueid,
+        {
+          state: state.id,
+        },
+      )
       .then(() => {
         refresh();
         useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
         showNotification('success');
-        emit('setStatus', state);
-        emit('refresh');
+        emits('setStatus', state);
+        emits('refresh');
       });
   }
 };

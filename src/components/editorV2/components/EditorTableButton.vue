@@ -16,29 +16,21 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { defineComponent, ref } from 'vue';
+import { ref } from 'vue';
 
 // utils
 import { ICONS } from 'src/utils/icons';
 
-export default defineComponent({
-  name: 'EditorTableButton',
-  emits: ['showToolbar'],
-  setup(props, { emit }) {
-    const showToolbar = ref<boolean>(false);
+const emits = defineEmits<{
+  showToolbar: [boolean];
+}>();
 
-    const toggleShowToolbar = () => {
-      showToolbar.value = !showToolbar.value;
-      emit('showToolbar', showToolbar.value);
-    };
+const showToolbar = ref<boolean>(false);
 
-    return {
-      ICONS,
-      showToolbar,
-      toggleShowToolbar,
-    };
-  },
-});
+const toggleShowToolbar = () => {
+  showToolbar.value = !showToolbar.value;
+  emits('showToolbar', showToolbar.value);
+};
 </script>

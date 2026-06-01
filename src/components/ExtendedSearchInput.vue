@@ -32,7 +32,6 @@
           <q-item>
             <q-item-section>
               <q-item-label>
-
                 <div
                   class="abbriviated-text"
                   v-html="
@@ -62,9 +61,13 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+
+const props = defineProps<{
+  options:
+}>()
 
 export default defineComponent({
   name: 'ExtendedSearchInput',

@@ -179,7 +179,7 @@
   </ExpansionItem>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { onMounted, ref, watch, nextTick, computed } from 'vue';
 import { QTree } from 'quasar';

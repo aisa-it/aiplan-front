@@ -86,7 +86,7 @@
   </ExpansionItem>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, h, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { QIcon, useQuasar } from 'quasar';

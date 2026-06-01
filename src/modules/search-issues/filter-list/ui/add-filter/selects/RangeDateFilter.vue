@@ -57,7 +57,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:modelValue': [value: DateRange];
 }>();
 
@@ -84,7 +84,7 @@ const internalRange = computed<DateRange | string>({
     };
   },
   set: (val) => {
-    emit('update:modelValue', val as DateRange);
+    emits('update:modelValue', val as DateRange);
   },
 });
 
@@ -95,7 +95,7 @@ const formattedValue = computed<string>(() => {
 function onInputChange(value: string | number | null) {
   const input = String(value ?? '');
   const [from, to] = input.split('-').map((v) => v.trim());
-  emit('update:modelValue', { from, to });
+  emits('update:modelValue', { from, to });
 }
 
 // Обработка входящего значения для превью даты в календаре

@@ -46,19 +46,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 
-const props = defineProps({
-  type: { type: String, required: true },
-  modelValue: { type: Array, required: true, default: () => [] },
-  label: { type: String, required: true },
-  validate: { type: Object, required: true, default: () => ({ opt: [] }) },
-  required: { type: Boolean, required: false },
-  errorMessage: { type: String, required: false },
-});
+const props = withDefaults(
+  defineProps<{
+    type: string;
+    modelValue?: { value: any; index: any }[];
+    label: string;
+    validate?: { opt: any[] };
+    required?: boolean;
+    errorMessage?: string;
+  }>(),
+  {
+    modelValue: () => [],
+    validate: () => ({ opt: [] }),
+  },
+);
 
-const emits = defineEmits(['update:modelValue']);
+const emits = defineEmits<{
+  'update:modelValue': [{ value: any; index: any }[]];
+}>();
 
 const arr = ref([]);
 const isCollapsed = ref(true);

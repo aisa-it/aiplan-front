@@ -48,7 +48,7 @@
     </div>
   </q-card>
 </template>
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { nextTick, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';

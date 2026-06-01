@@ -45,7 +45,9 @@ const props = defineProps<{
   workspaceSlug: string;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emits = defineEmits<{
+  'update:modelValue': [string | null];
+}>();
 
 //stores
 const { setNotificationView } = useNotificationStore();
@@ -97,7 +99,7 @@ const handleUpload = async (file: File) => {
     const attachmentId = response.id;
 
     props.field.attachments = [response];
-    emit('update:modelValue', attachmentId);
+    emits('update:modelValue', attachmentId ?? null);
   } catch (error) {
     console.error('Upload error:', error);
     setNotificationView({
@@ -123,7 +125,7 @@ const handleDelete = async (id: string) => {
     }
 
     if (props.modelValue === id) {
-      emit('update:modelValue', null);
+      emits('update:modelValue', null);
     }
   } catch (error) {
     console.error('Delete error:', error);

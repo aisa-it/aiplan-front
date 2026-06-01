@@ -1,11 +1,11 @@
 <template>
-  <template v-if="!isDialog" >
+  <template v-if="!isDialog">
     <WorkspaceNotificationsButton
       :count="unreadNotificationsCount"
       :is-show="!isShowList"
       :is-mobile="isMobile"
       :style="isMobile ? 'left: -2px; top: 2px;' : ''"
-      >
+    >
       <WorkspaceNotificationsListDialog
         v-if="!isMobile"
         v-model="isShowList"
@@ -70,7 +70,7 @@ const props = defineProps<{
   isMobile?: boolean;
 }>();
 
-const emit = defineEmits(['closeDialog']);
+const emits = defineEmits<{ closeDialog: [] }>();
 
 const isCreateOpen = ref<boolean>(false);
 const isShowList = ref<boolean>(false);
@@ -122,7 +122,7 @@ const onHide = () => {
   );
   hasMoreUnread.value = true;
   hasMoreRead.value = true;
-  emit('closeDialog');
+  emits('closeDialog');
 };
 
 const hasNewNotifications = ref(false);
@@ -201,7 +201,10 @@ watch(isShowList, async (open) => {
   }
 });
 
-watch(() => props.showDialog, () => {
-  isShowList.value = props.showDialog;
-});
+watch(
+  () => props.showDialog,
+  () => {
+    isShowList.value = props.showDialog;
+  },
+);
 </script>

@@ -5,7 +5,7 @@ div
     dense
     multiple
     clearable
-    emit-value
+    emits-value
     map-options
     :label="label"
     :options="groupedOptions"
@@ -70,7 +70,7 @@ div
           clearable
           dense
           class="base-input q-mb-sm"
-          @update:model-value="(e) => emit('search', e?.toString())"
+          @update:model-value="(e) => emits('search', e?.toString())"
         />
       </div>
     </template>
@@ -83,7 +83,7 @@ div
           clearable
           dense
           class="base-input q-mb-sm"
-          @update:model-value="(e) => emit('search', e?.toString())"
+          @update:model-value="(e) => emits('search', e?.toString())"
         />
       </div>
       <q-item>
@@ -109,7 +109,7 @@ const props = defineProps<{
   unavailableText?: string;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:modelValue': [value: any[]];
   remove: [value: string];
   search: [value?: string];
@@ -143,11 +143,14 @@ const updateSelected = (option: any) => {
   if (index === -1) newValue.push(id);
   else newValue.splice(index, 1);
 
-  emit('update:modelValue', newValue);
+  emits('update:modelValue', newValue);
 };
 
 const onUpdate = (e: any[]) => {
-  emit('update:modelValue', e ? e.map((el: any) => (el?.id ? el.id : el)) : []);
+  emits(
+    'update:modelValue',
+    e ? e.map((el: any) => (el?.id ? el.id : el)) : [],
+  );
 };
 
 const onClear = () => {

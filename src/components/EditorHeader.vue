@@ -22,7 +22,7 @@
         :readonly="readOnly"
         autogrow
         :rules="rules"
-        @update:model-value="emit('update:modelValue', documentTitle)"
+        @update:model-value="emits('update:modelValue', documentTitle)"
       >
       </q-input>
       <div class="flex no-wrap items-center" style="height: 32px">
@@ -77,7 +77,7 @@
           :docVersionList="docVersionList"
           :isDisabled="!canEdit"
           mini
-          @refresh="emit('refresh')"
+          @refresh="emits('refresh')"
         />
         <q-btn
           v-if="screen.gt.lg"
@@ -98,7 +98,7 @@
           flat
           no-wrap
           no-caps
-          @click="emit('openDeleteDialog')"
+          @click="emits('openDeleteDialog')"
         >
           <HintTooltip>Удалить</HintTooltip>
           <BinIcon color="#dc3e3e" :width="24" :height="24"></BinIcon>
@@ -151,7 +151,7 @@
               </q-btn>
               <AidocVersionSelect
                 v-if="screen.lt.lg"
-                @refresh="emit('refresh')"
+                @refresh="emits('refresh')"
                 :docVersionList="docVersionList"
                 :isDisabled="!canEdit"
               />
@@ -177,7 +177,7 @@
                 no-wrap
                 no-caps
                 align="left"
-                @click="emit('openDeleteDialog')"
+                @click="emits('openDeleteDialog')"
               >
                 <HintTooltip>Удалить</HintTooltip>
                 <BinIcon color="#dc3e3e" :width="24" :height="24"></BinIcon>
@@ -216,7 +216,7 @@
         editor_ids: document.editor_ids,
       }"
       :isAdminOrAuthor="isAdminOrAuthor"
-      @update:roles="(val) => emit('updateDocument', val)"
+      @update:roles="(val) => emits('updateDocument', val)"
     />
 
     <AidocWatchersDialog
@@ -225,7 +225,7 @@
       :doc-id="document.id"
       :watchers="document.watchers"
       :loading="loading"
-      @refresh="emit('refresh')"
+      @refresh="emits('refresh')"
     />
   </div>
 </template>
@@ -270,13 +270,13 @@ const props = defineProps<{
   updateDate?: string;
 }>();
 
-const emit = defineEmits([
-  'update:modelValue',
-  'saveValue',
-  'updateDocument',
-  'refresh',
-  'openDeleteDialog',
-]);
+const emits = defineEmits<{
+  'update:modelValue': [string];
+  saveValue: [];
+  updateDocument: [any];
+  refresh: [];
+  openDeleteDialog: [];
+}>();
 
 const $q = useQuasar();
 const { screen } = $q;
@@ -296,8 +296,8 @@ const editTitle = () => {
   if (readOnly.value) {
     readOnly.value = false;
   } else {
-    emit('update:modelValue', documentTitle.value);
-    emit('saveValue');
+    emits('update:modelValue', documentTitle.value);
+    emits('saveValue');
     readOnly.value = true;
   }
 };
@@ -327,12 +327,12 @@ const copyLink = async (short_url: string | undefined) => {
 };
 
 const openRulesDialog = async () => {
-  emit('refresh');
+  emits('refresh');
   isRulesDialogOpen.value = true;
 };
 
 const openWatchersDialog = async () => {
-  emit('refresh');
+  emits('refresh');
   isWatchersDialogOpen.value = true;
 };
 

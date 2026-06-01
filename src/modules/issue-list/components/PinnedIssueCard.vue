@@ -52,7 +52,11 @@
           :member="l"
           @click.stop="navigateToActivityPage(filteredAssignees[n]?.id)"
         />
-        <AvatarImage v-if="extraAssignees > 0" class="overlapping" :text="'+' + extraAssignees" />
+        <AvatarImage
+          v-if="extraAssignees > 0"
+          class="overlapping"
+          :text="'+' + extraAssignees"
+        />
       </div>
 
       <AvatarImage
@@ -81,7 +85,7 @@
         :value="props.card?.attachment_count"
       />
     </div>
-    <IssueContextMenu :row="props.card" unpin @refresh="emits('refresh')"/>
+    <IssueContextMenu :row="props.card" unpin @refresh="emits('refresh')" />
   </div>
 </template>
 
@@ -98,7 +102,10 @@ import { useUserActivityNavigation } from 'src/composables/useUserActivityNaviga
 import { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{ card: DtoIssueWithCount }>();
-const emits = defineEmits(['refresh', 'updateTable', 'openPreview']);
+const emits = defineEmits<{
+  refresh: [];
+  openPreview: [number | undefined];
+}>();
 
 const { user } = storeToRefs(useUserStore());
 

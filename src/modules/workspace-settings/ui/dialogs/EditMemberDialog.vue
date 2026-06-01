@@ -33,7 +33,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref, toRefs, watch } from 'vue';
 
@@ -59,7 +59,7 @@ const props = withDefaults(
 );
 
 // emits
-const emits = defineEmits(['error', 'update']);
+const emits = defineEmits<{ error: []; update: [] }>();
 
 // to refs
 const { user: targetUser } = toRefs(props);

@@ -80,7 +80,7 @@
         multiple
         clearable
         map-options
-        emit-value
+        emits-value
         label="Приоритеты"
         class="base-selector q-mb-sm"
         option-value="id"
@@ -160,7 +160,7 @@ const filters = ref<CalendarFilters>({
   priorities: [],
 });
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'update:filters', value: CalendarFilters): void;
 }>();
 

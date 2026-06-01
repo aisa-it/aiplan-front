@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import {
   AIDOC_ACCEPTABLE_FORMATS_DOCS,

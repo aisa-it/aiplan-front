@@ -79,7 +79,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'upload', file: File): void;
   (e: 'delete', id: string): void;
   (e: 'open', attachment: any): void;
@@ -97,7 +97,7 @@ const triggerUpload = () => {
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
-    emit('upload', target.files[0]);
+    emits('upload', target.files[0]);
   }
   if (fileInput.value) fileInput.value.value = '  ';
 };
@@ -105,16 +105,16 @@ const handleFileSelect = (event: Event) => {
 const handleDrop = (event: DragEvent) => {
   isDragIn.value = false;
   if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    emit('upload', event.dataTransfer.files[0]);
+    emits('upload', event.dataTransfer.files[0]);
   }
 };
 
 const handleOpen = (attachment: any) => {
-  emit('open', attachment);
+  emits('open', attachment);
 };
 
 const handleDelete = (id: string) => {
-  emit('delete', id);
+  emits('delete', id);
 };
 </script>
 

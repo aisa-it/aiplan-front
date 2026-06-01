@@ -8,23 +8,12 @@
   </span>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { useUtilsStore } from 'src/stores/utils-store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
-export default defineComponent({
-  name: 'AiplanVersion',
-  setup() {
-    const utilsStore = useUtilsStore();
-    const route = useRoute();
-    const { version } = storeToRefs(utilsStore);
-
-    return {
-      route,
-      version,
-    };
-  },
-});
+const utilsStore = useUtilsStore();
+const route = useRoute();
+const { version } = storeToRefs(utilsStore);
 </script>

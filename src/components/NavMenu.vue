@@ -49,13 +49,10 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-// core
+<script setup lang="ts">
 import { LocalStorage } from 'quasar';
 import { useRouter } from 'vue-router';
 import { computed, onMounted, ref } from 'vue';
-
-// nav menu components
 import ExpansionGroup from 'src/components/ExpansionGroup.vue';
 import NavMenuHeader from './menu/NavMenuHeader.vue';
 

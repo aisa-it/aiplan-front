@@ -13,23 +13,29 @@
         :rows="group?.issues"
         :rowsCount="group?.count"
         :entity="group.entity"
+        :context-type="contextType"
         @updateGroupedIssues="updateGroupedIssues"
         @refresh="
           (pagination, isFullUpdate) =>
-            refreshTable(index, pagination, isFullUpdate, group?.entity)
+            emits(
+              'refreshTable',
+              index,
+              pagination,
+              isFullUpdate,
+              group?.entity,
+            )
         "
         @open-preview="
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, group?.entity)
         "
-        :context-type="contextType"
         @open-issue="(id, issue) => emits('openIssue', id, issue)"
       />
     </template>
   </GroupedTablesWrapper>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 
 import IssueTable from '../IssueTable.vue';
@@ -39,6 +45,7 @@ import { useIssueContext } from '../../composables/useIssueContext';
 import { useGroupedIssues } from '../../composables/useGroupedIssues';
 
 import GroupedTablesWrapper from './GroupedTablesWrapper.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -46,22 +53,17 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits([
-  'refreshTable',
-  'updateIssueField',
-  'openPreview',
-  'openIssue',
-]);
+const emits = defineEmits<{
+  refreshTable: [number, any, boolean | undefined, any];
+  openPreview: [DtoIssue, number, any, any];
+  openIssue: [number, DtoIssue];
+}>();
 
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
 );
 
 const { getGroupedIssues } = useGroupedIssues(props.contextType);
-
-const refreshTable = (index, pagination, isFullUpdate, entity) => {
-  emits('refreshTable', index, pagination, isFullUpdate, entity);
-};
 
 const updateGroupedIssues = async (status: any) => {
   if (!status) {
@@ -85,7 +87,7 @@ const updateGroupedIssues = async (status: any) => {
       limit: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
 
-    await refreshTable(groupIndex, pagination, false, status);
+    await emits('refreshTable', groupIndex, pagination, false, status);
   }
 };
 </script>

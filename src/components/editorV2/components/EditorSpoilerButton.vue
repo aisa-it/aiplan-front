@@ -31,52 +31,24 @@ import { ICONS } from 'src/utils/icons';
 import ColorPicker from './ColorPicker.vue';
 import { EventBus } from 'quasar';
 
-const props = defineProps({
-  editorInstance: {
-    type: Object as () => Editor,
-    required: true,
-  },
-  command: {
-    type: String,
-    required: true,
-  },
-  tooltip: {
-    type: String,
-    required: true,
-  },
-  iconName: {
-    type: String,
-    required: true,
-  },
-  formatName: {
-    type: String,
-    default: '',
-  },
-  isMobile: {
-    type: Boolean,
-    default: false,
-  },
-  hasRunCommandListener: {
-    type: Boolean,
-    default: false,
-  },
-  classPrevent: {
-    type: String,
-    required: false,
-  },
-
-  isSpoilerButtonClicked: {
-    type: Boolean,
-    required: true,
-  },
-});
+const props = defineProps<{
+  editorInstance: Editor;
+  command: string;
+  tooltip: string;
+  iconName: string;
+  formatName?: string;
+  isMobile?: boolean;
+  hasRunCommandListener?: boolean;
+  classPrevent?: string;
+  isSpoilerButtonClicked: boolean;
+}>();
 
 interface IStyleSpoiler {
   bgColor: string;
   textColor: string;
 }
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   resetClickState: [value: boolean];
 }>();
 
@@ -138,13 +110,13 @@ function setFocusedSpoilerPos(
       );
     }
     // Действие провели, сбрасываем состояние кнопки
-    emit('resetClickState', false);
+    emits('resetClickState', false);
   } else {
     // Мы в заголовке, включаем режим редактирования
     expectedSpoilerPos.value = pos;
     wasPosInTitle.value = true;
     // Включаем состояние кнопки
-    emit('resetClickState', true);
+    emits('resetClickState', true);
     styleSpoiler.value = styleColors;
     console.log(
       `В заголовке. expect ${expectedSpoilerPos.value}, was ${wasPosInTitle.value} `,
@@ -180,8 +152,8 @@ const runCommand = (value: IStyleSpoiler) => {
     expectedSpoilerPos.value = null;
     wasPosInTitle.value = false;
     console.log(
-        `Очистка после редактирования. expect ${expectedSpoilerPos.value}, was ${wasPosInTitle.value} `,
-      );
+      `Очистка после редактирования. expect ${expectedSpoilerPos.value}, was ${wasPosInTitle.value} `,
+    );
   } else {
     // Создаем новый спойлер в точке курсора
     console.log('Создаем');

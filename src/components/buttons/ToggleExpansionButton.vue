@@ -9,7 +9,7 @@
   </q-btn>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import ArrowUp from '../icons/ArrowUp.vue';
 
 withDefaults(

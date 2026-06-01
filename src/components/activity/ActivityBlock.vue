@@ -57,7 +57,7 @@
   </li>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
@@ -71,7 +71,11 @@ import aiplan from 'src/utils/aiplan';
 
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 
-const props = defineProps<{ activityRow: any; onlyProject?: boolean; onlyWorkspace?: boolean }>();
+const props = defineProps<{
+  activityRow: any;
+  onlyProject?: boolean;
+  onlyWorkspace?: boolean;
+}>();
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 

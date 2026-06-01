@@ -48,21 +48,34 @@ import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { DtoDocComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  comments: { type: Array<DtoDocComment>, required: true },
-  docId: { type: String, required: true },
-  members: { type: Array, required: false },
-  workspaceSlug: { type: String, required: true },
-  getMembersForMention: { type: Function, required: false },
-  isAutoSave: { type: Boolean, required: true },
-});
+const props = defineProps<{
+  comments: DtoDocComment[];
+  docId: string;
+  members?: any[];
+  workspaceSlug: string;
+  getMembersForMention?: (data: any) => any;
+  isAutoSave: boolean;
+}>();
 
-const emit = defineEmits([
-  'refresh',
-  'handle-reply',
-  'updateCommit',
-  'deleteCommit',
-]);
+export interface updateBodyType {
+  workspaceSlug: string;
+  docId: string;
+  commentId: any;
+  data: {
+    comment: {
+      comment_html: string | null | undefined;
+      reply_to_comment_id: any;
+    };
+    files: File[] | never[];
+  };
+}
+
+const emits = defineEmits<{
+  refresh: [];
+  'handle-reply': [DtoDocComment];
+  updateCommit: [updateBodyType];
+  deleteCommit: [{ workspaceSlug: string; docId: string; commentId: string }];
+}>();
 
 const aidocStore = useAiDocStore();
 
@@ -95,7 +108,7 @@ const handleUpdateComment = async (data: { content: string; text: string }) => {
       files: contents.files,
     },
   };
-  emit('updateCommit', updateBody);
+  emits('updateCommit', updateBody);
 };
 
 const handleDeleteComment = async () => {
@@ -104,7 +117,7 @@ const handleDeleteComment = async () => {
     docId: props.docId,
     commentId: currentChangeCommitId.value,
   };
-  emit('deleteCommit', deleteBody);
+  emits('deleteCommit', deleteBody);
 };
 
 const openCommentHistory = (comment: DtoDocComment) => {
@@ -118,7 +131,7 @@ const handleAddReaction = async (comment: DtoDocComment, reaction: string) => {
       reaction,
     })
     .then(() => {
-      emit('refresh');
+      emits('refresh');
     });
 };
 
@@ -134,11 +147,11 @@ const handleDeleteReaction = async (
       reaction,
     )
     .then(() => {
-      emit('refresh');
+      emits('refresh');
     });
 };
 
-const handleReply = (comment: DtoDocComment) => emit('handle-reply', comment);
+const handleReply = (comment: DtoDocComment) => emits('handle-reply', comment);
 </script>
 
 <style lang="scss" scoped>

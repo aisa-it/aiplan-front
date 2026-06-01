@@ -24,7 +24,7 @@
   </q-card>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 
 import LoaderDefault from 'src/components/loaders/DefaultLoader.vue';
