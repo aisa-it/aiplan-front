@@ -23,7 +23,6 @@ h6 {
 }
 
 .header {
-  background-color: $bg-color !important;
   box-shadow: none !important;
   border-bottom: 1px solid $darkest-border-color;
 }
@@ -1447,3 +1446,7 @@ select:-ms-autofill {
 
 /* import the default theme (optional) */
 @import '@vue-flow/core/dist/theme-default.css';
+
+.q-layout__section--marginal {
+  background-color: inherit !important;
+}

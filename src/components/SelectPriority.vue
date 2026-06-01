@@ -46,98 +46,54 @@
   </q-select>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'SelectPriority',
-  props: {
-    workspaceSlug: {
-      type: String,
-      required: true,
-    },
-    projectid: {
-      type: String,
-      required: true,
-    },
-    issueid: {
-      type: String,
-      required: false,
-    },
-    priority: {
-      type: String || null,
-      required: false,
-    },
-    issue: {
-      type: Object,
-      required: false,
-    },
-    label: {
-      type: String || null,
-      required: false,
-      default: () => null,
-    },
-    newIssue: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    editIssue: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    isDisabled: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    isAdaptiveSelect: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-  },
-  components: { PrioritySingleIcon },
-  emits: ['refresh', 'update:priority'],
-  setup(props, { emit }) {
-    const api = useAiplanStore();
-    const { setNotificationView } = useNotificationStore();
+const props = defineProps<{
+  workspaceSlug: string;
+  projectid: string;
+  issueid: string;
+  priority?: string;
+  issue?: DtoIssue;
+  label?: string;
+  newIssue?: boolean;
+  editIssue?: boolean;
+  isDisabled?: boolean;
+  isAdaptiveSelect?: boolean;
+}>();
 
-    const handleUpdateModelValue = (e: string) => {
-      if (props.issueid) {
-        api
-          .issuePartialUpdate(
-            props.workspaceSlug,
-            props.projectid,
-            props.issueid,
-            { priority: e },
-          )
-          .then(() => {
-            setNotificationView({ type: 'success', open: true });
-            emit('refresh');
-            emit('update:priority', e);
-          });
-      } else {
-        emit('update:priority', e);
-      }
-    };
+const emits = defineEmits<{
+  refresh: [];
+  'update:priority': [string];
+}>();
 
-    return {
-      api,
-      options: ['low', 'medium', 'high', 'urgent'],
-      options_label: {
-        low: 'Низкий',
-        medium: 'Средний',
-        high: 'Высокий',
-        urgent: 'Критический',
-      },
-      setNotificationView,
-      handleUpdateModelValue,
-    };
-  },
-});
+const api = useAiplanStore();
+const { setNotificationView } = useNotificationStore();
+
+const handleUpdateModelValue = (e: string) => {
+  if (props.issueid) {
+    api
+      .issuePartialUpdate(props.workspaceSlug, props.projectid, props.issueid, {
+        priority: e,
+      })
+      .then(() => {
+        setNotificationView({ type: 'success', open: true });
+        emits('refresh');
+        emits('update:priority', e);
+      });
+  } else {
+    emits('update:priority', e);
+  }
+};
+
+const options = ['low', 'medium', 'high', 'urgent'];
+const options_label = {
+  low: 'Низкий',
+  medium: 'Средний',
+  high: 'Высокий',
+  urgent: 'Критический',
+};
 </script>

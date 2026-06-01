@@ -23,7 +23,7 @@ const expanded = computed({
   set: (val: boolean) => emits('update:modelValue', val),
 });
 
-const emits = defineEmits(['refresh', 'update:modelValue']);
+const emits = defineEmits<{ 'update:modelValue': [boolean] }>();
 </script>
 
 <style lang="scss" scoped>

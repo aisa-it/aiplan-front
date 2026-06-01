@@ -65,7 +65,7 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
@@ -111,7 +111,10 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(['refresh', 'update-selected']);
+const emits = defineEmits<{
+  refresh: [];
+  'update-selected': [DtoSprintLight[]];
+}>();
 
 //stores
 const workspaceStore = useWorkspaceStore();
@@ -172,13 +175,13 @@ const handleUpdateSprints = async (
     }
 
     setNotificationView({ open: true, type: 'success' });
-    emit('refresh');
+    emits('refresh');
   }
 };
 
 const handleUpdateSelected = (value: DtoSprintLight[]) => {
-  emit('update-selected', value);
-}
+  emits('update-selected', value);
+};
 </script>
 
 <style scoped lang="scss"></style>

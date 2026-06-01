@@ -34,6 +34,7 @@ import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useFormStore } from 'src/stores/form-store';
 
 //utils
 import { clearFieldAttachment } from 'src/components/forms/helper/helperForm';
@@ -48,11 +49,14 @@ const props = defineProps<{
   submitting?: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const emits = defineEmits<{
+  'update:modelValue': [string | null];
+}>();
 
 //stores
 const { setNotificationView } = useNotificationStore();
 const userStore = useUserStore();
+const formStore = useFormStore()
 const { user } = storeToRefs(userStore);
 
 //consts
@@ -132,12 +136,33 @@ const handleFileSelect = (file: File) => {
 
   props.field.pendingAttachment = { localId, file, previewUrl };
   props.field.attachments = [buildDraftAttachment(file, localId)];
-  emit('update:modelValue', localId);
+  emits('update:modelValue', localId);
 };
 
-const handleDelete = () => {
-  clearFieldAttachment(props.field);
-  emit('update:modelValue', null);
+const handleDelete = async (id: string) => {
+  if (!id || !props.formSlug) return;
+
+  try {
+    await formStore.deleteFormAttachment(props.formSlug, id);
+
+    if (Array.isArray(props.field.attachments)) {
+      props.field.attachments = props.field.attachments.filter(
+        (a: any) => a.id !== id,
+      );
+    }
+
+    if (props.modelValue === id) {
+      clearFieldAttachment(props.field);
+      emits('update:modelValue', null);
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    setNotificationView({
+      type: 'error',
+      customMessage: 'Не удалось удалить файл',
+      open: true,
+    });
+  }
 };
 
 const handleOpen = (file: IAttachmentCard) => {

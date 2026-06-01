@@ -2,34 +2,23 @@
   <q-spinner-oval :color="color" :size="computedSize"></q-spinner-oval>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-export default defineComponent({
-  name: 'LoaderDefault',
-  props: {
-    size: {
-      type: Number,
-      default: 50,
-    },
-    color: {
-      type: String,
-      default: 'primary',
-    },
-    unit: {
-      type: String,
-      default: 'px',
-      validator: (value: string) =>
-        ['px', 'em', 'rem', '%', 'vw', 'vh'].includes(value),
-    },
+const props = withDefaults(
+  defineProps<{
+    size?: number;
+    color?: string;
+    unit?: 'px' | 'em' | 'rem' | '%' | 'vw' | 'vh';
+  }>(),
+  {
+    size: 50,
+    color: 'primary',
+    unit: 'px',
   },
-  setup(props) {
-    const computedSize = computed(() => {
-      return `${props.size}${props.unit}`;
-    });
-    return {
-      computedSize,
-    };
-  },
+);
+
+const computedSize = computed(() => {
+  return `${props.size}${props.unit}`;
 });
 </script>

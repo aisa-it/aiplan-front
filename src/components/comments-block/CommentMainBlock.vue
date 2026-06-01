@@ -78,9 +78,9 @@
       :isAutoSave="isAutoSave"
       :members="members"
       :get-members-for-mention="getMembersForMention"
-      @refresh="emit('refresh')"
-      @update-commit="(body) => emit('updateComment', body)"
-      @delete-commit="(body) => emit('deleteCommit', body)"
+      @refresh="emits('refresh')"
+      @update-commit="(body) => emits('updateComment', body)"
+      @delete-commit="(body) => emits('deleteCommit', body)"
       @handle-reply="handleReplyComment"
     />
   </div>
@@ -111,7 +111,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 
 // store
@@ -121,27 +121,35 @@
 import ReplyCard from 'components/issue-panels/reply/ReplyCard.vue';
 import { nextTick, ref } from 'vue';
 import { Editor } from '@tiptap/vue-3';
-import CommentList from './CommentList.vue';
+import CommentList, { updateBodyType } from './CommentList.vue';
 import EditorTipTapV2 from '../editorV2/EditorTipTapV2.vue';
 import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
+import { DtoDocComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
-defineProps({
-  commentsList: { type: Array, required: true },
-  docId: { type: String, required: false },
-  isAutoSave: { type: Boolean, required: true },
-  currentWorkspaceSlug: { type: String, required: false },
-  loading: { type: Boolean, required: false },
-  members: { type: Array, required: false },
-  getMembersForMention: { type: Function, required: false },
-});
-const emit = defineEmits([
-  'updateComponent',
-  'createComment',
-  'refresh',
-  'updateComment',
-  'deleteCommit',
-]);
+defineProps<{
+  commentsList: DtoDocComment[];
+  docId?: string;
+  isAutoSave: boolean;
+  currentWorkspaceSlug?: string;
+  loading?: boolean;
+  members?: any[];
+  getMembersForMention?: (data: any) => any;
+}>();
+
+const emits = defineEmits<{
+  refresh: [];
+  createComment: [{ content: any; reply_id: string | null }];
+  updateComment: [updateBodyType];
+  deleteCommit: [
+    {
+      workspaceSlug: string;
+      docId: string;
+      commentId: string;
+    },
+  ];
+}>();
+
 const editor = ref<Editor>();
 const editorValue = ref();
 const editorValueDialog = ref();
@@ -173,7 +181,7 @@ const updateEditorDOM = (value: boolean) => {
 
 const createComment = async () => {
   if (isEditorEmpty(editDOMvalue.value)) return;
-  emit('createComment', {
+  emits('createComment', {
     content: editorValue.value,
     reply_id: isReplyComment.value ? docReplyComment.value.id : null,
   });

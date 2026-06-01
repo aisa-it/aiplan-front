@@ -1,11 +1,32 @@
 <template>
   <q-page v-if="!loading" class="flex justify-center flex-grow">
-    <q-layout
-      v-if="!isEmptyDoc"
-      view="hHh lpr fFf"
+    <div
       class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow"
     >
-      <q-page-container class="flex-grow">
+      <q-drawer
+        show-if-above
+        bordered
+        :width="300"
+        :breakpoint="760"
+        class="issue-side-drawer"
+      >
+        <div ref="menuRef" class="nav-menu-bottom-bar">
+          <NavMenuAIDocs
+            data-id="favorites"
+            class="draggable-item"
+            filterBy="favorites"
+            @updateFavoriteState="updateFavoriteState"
+          />
+          <NavMenuAIDocs
+            ref="docsMenu"
+            data-id="docs"
+            class="draggable-item"
+            filterBy="docs"
+          />
+        </div>
+      </q-drawer>
+
+      <q-page-container v-if="!isEmptyDoc" class="flex-grow">
         <div
           class="col items-stretch content-stretch flex column issue-panel__wrapper full-height no-wrap"
           :style="'position: relative'"
@@ -101,18 +122,11 @@
           <AidocComments :documentId="documentValue.id" />
         </div>
         <DeleteDocDialog v-model="showDeleteDialog" :document="documentValue" />
-        <AidocImportExport
-          v-model="showImportExportDialog"
-          :itemExport="currentExportDialogItem"
-        />
       </q-page-container>
-    </q-layout>
-
-    <AiDocEmptyPlaceholder
-      v-else
-      style="margin: 0 auto"
-      :is-admin-or-author="isAdminOrAuthor"
-    />
+      <q-page-container v-else class="flex flex-center flex-grow">
+        <AiDocEmptyPlaceholder :is-admin-or-author="isAdminOrAuthor" />
+      </q-page-container>
+    </div>
   </q-page>
 
   <q-page v-else class="flex justify-center items-center">
@@ -120,7 +134,7 @@
   ></q-page>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
 import { computed, ref, onMounted, watch } from 'vue';
@@ -146,17 +160,18 @@ import SelectAttachments from 'src/components/SelectAttachments.vue';
 import EditorHeader from 'src/components/EditorHeader.vue';
 import DeleteDocDialog from 'src/components/dialogs/AIDocDialogs/DeleteDocDialog.vue';
 import AidocComments from 'src/components/aidoc/AidocComments.vue';
-import AidocImportExport from 'src/components/aidoc/AidocImportExport.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { cleanContent } from 'src/components/editorV2/utils/editorUtils';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { SUCCESS_UPDATE_DOCUMENT } from 'src/constants/notifications';
+import NavMenuAIDocs from 'src/components/menu/NavMenuAIDocs.vue';
 //utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
 import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
-
+import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
+import { useSortable } from 'src/composables/useSortable';
 //composables
 const route = useRoute();
 
@@ -175,12 +190,18 @@ const { ny } = storeToRefs(utilsStore);
 
 //states
 const aidocEditor = ref();
+const docsMenu = ref();
+const menuRef = ref<HTMLElement | null>(null);
+useExpansionGroupResize(menuRef, 'aidocMenuItemsLayout');
+const { initSortable } = useSortable(menuRef, {
+  draggable: '.draggable-item',
+  filter: '.resizer',
+  preventOnFilter: true,
+});
 const isReadOnlyEditor = ref(true);
 const documentValue = ref<DtoDoc>({});
 const updateCurrentEditorValue = ref();
 const showDeleteDialog = ref(false);
-const showImportExportDialog = ref(false);
-const currentExportDialogItem = ref();
 const docVersionList = ref<DtoHistoryBodyLight[]>([]);
 const loading = ref(false);
 const isDocumentEditPending = ref(false);
@@ -197,19 +218,6 @@ useMeta(() => {
 
 //consts
 const preventClickClass = 'prevent-click-issue-outside';
-// const listItem = [
-// { title: 'Права доступа', disabled: true, emit: 'accessRights' },
-// { title: 'Экспорт в PDF', disabled: true, emit: 'exportPdf' },
-// { title: 'Экспорт в Word', disabled: true, emit: 'exportWord' },
-// {
-//   title: 'Импорт документа в Word',
-//   disabled: false,
-//   emit: 'importWord',
-//   extensions: ['doc', 'docx'],
-// },
-// { title: 'Переместить', disabled: true, emit: 'moveDocument' },
-//   { title: 'Удалить', disabled: false, emit: 'openDeleteDialog' },
-// ];
 
 //computeds
 const currentUserRole = computed(() =>
@@ -236,6 +244,10 @@ const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 const isEmptyDoc = computed(
   () => Object.keys(documentValue.value).length === 0,
 );
+
+const updateFavoriteState = (id: string, state: boolean) => {
+  docsMenu.value?.setFavoriteState(id, state);
+};
 
 //methods
 const getDocDate = (date: string) => {
@@ -327,11 +339,6 @@ const openDeleteDialog = () => {
   showDeleteDialog.value = true;
 };
 
-// const openImportExportDialog = (type: string) => {
-//   currentExportDialogItem.value = listItem.find((el) => el.emit === type);
-//   showImportExportDialog.value = true;
-// };
-
 //TODO дубляж функции в компонентах CreateDocPageDialog, AiDocPage, AidocActivityComments, AidocVersionSelect
 const getWorkspaceMembersForMention = async (
   search: string,
@@ -397,6 +404,8 @@ onMounted(async () => {
     aidocStore.selectDoc('', '');
     aidocStore.parentDocId = null;
   }
+
+  await initSortable();
 });
 
 watch(
@@ -468,6 +477,10 @@ watch(
   }
 }
 
+.nav-menu-bottom-bar {
+  height: 100% !important;
+}
+
 .issue-panel__autor-label {
   flex-wrap: nowrap;
 }
@@ -497,6 +510,10 @@ watch(
   padding: 8px 0;
   margin-right: 10px !important;
   background: none;
+}
+
+:deep(.q-page-container) {
+  padding: 0 !important;
 }
 
 .issue-panel__editor {

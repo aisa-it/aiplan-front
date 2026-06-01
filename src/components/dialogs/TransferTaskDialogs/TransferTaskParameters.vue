@@ -193,7 +193,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
@@ -256,7 +256,7 @@ const props = defineProps<{
 }>();
 
 // emits
-const emit = defineEmits(['save']);
+const emits = defineEmits<{ save: any }>();
 
 const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
@@ -350,7 +350,7 @@ const checkParameters = async () => {
         await checkWatchers();
       }
     } finally {
-      emit('save', issueSettings.value);
+      emits('save', issueSettings.value);
     }
   }
 };
@@ -368,7 +368,7 @@ const resetSettings = () => {
 const close = () => {
   if (isSave.value) {
     isSave.value = false;
-    emit('save', issueSettings.value);
+    emits('save', issueSettings.value);
   } else {
     resetSettings();
   }

@@ -12,7 +12,7 @@
     dense
     multiple
     clearable
-    emit-value
+    emits-value
     map-options
     @update:model-value="onUpdate"
   >
@@ -37,7 +37,7 @@
           dense
           clearable
           class="base-input q-mb-sm"
-          @update:model-value="(val) => emit('search', val?.toString())"
+          @update:model-value="(val) => emits('search', val?.toString())"
         />
       </div>
     </template>
@@ -50,7 +50,7 @@
           dense
           clearable
           class="base-input q-mb-sm"
-          @update:model-value="(val) => emit('search', val?.toString())"
+          @update:model-value="(val) => emits('search', val?.toString())"
         />
       </div>
       <q-item>
@@ -74,7 +74,7 @@ const props = defineProps<{
   unavailableText?: string;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:modelValue': [val: string[]];
   search: [val?: string];
   update: [val: string[]];
@@ -101,7 +101,7 @@ watch(
 
 const onUpdate = (val: any[]) => {
   const normalized = val ? val.map((el) => el?.id ?? el) : [];
-  emit('update:modelValue', normalized);
-  emit('update', normalized);
+  emits('update:modelValue', normalized);
+  emits('update', normalized);
 };
 </script>

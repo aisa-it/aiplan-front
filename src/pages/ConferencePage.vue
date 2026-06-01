@@ -2,7 +2,7 @@
   <ConferenceEntry />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import ConferenceEntry from 'src/modules/conference/ConferenceEntry.vue';
 import { useUtilsStore } from 'src/stores/utils-store';

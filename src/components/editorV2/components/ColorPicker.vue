@@ -8,7 +8,7 @@
     <div
       class="color-box cursor-pointer flex flex-center"
       style="position: relative"
-      @click="$emit('selectBgColor', 'inherit')"
+      @click="emits('selectBgColor', 'inherit')"
     >
       <span class="diagonal-line"></span>
       <q-tooltip>Отсутствует</q-tooltip>
@@ -22,7 +22,7 @@
       ]"
       :style="{ backgroundColor: color.bgColor }"
       @click="
-        $emit('selectBgColor', props.isTableCell ? color.key : color.bgColor)
+        emits('selectBgColor', props.isTableCell ? color.key : color.bgColor)
       "
     >
       <span
@@ -46,7 +46,7 @@
         'color-box cursor-pointer flex flex-center',
         { selected: color.color === modelValue },
       ]"
-      @click="$emit('selectTextColor', color.color)"
+      @click="emits('selectTextColor', color.color)"
     >
       <span
         class="text-weight-medium picker-text-example"
@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, defineEmits, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { colorMap, bgColorMap } from 'src/utils/editorColorMap';
 import { hexWithOpacity, getOpacityFromHex } from '../utils/editorUtils';
@@ -147,7 +147,7 @@ const props = defineProps<{
   classPrevent?: string;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'select', value: IStyleSpoiler): void;
   (e: 'selectBgColor', value: string): void;
   (e: 'selectTextColor', value: string): void;
@@ -181,7 +181,7 @@ const clearValues = () => {
 };
 
 const generateSpoiler = () => {
-  emit('select', {
+  emits('select', {
     bgColor: hexWithOpacity(selectedBgColor.value, opacity.value),
     textColor:
       selectedTextColor.value === ''

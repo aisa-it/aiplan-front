@@ -55,7 +55,7 @@ const props = defineProps<{
   currentWsInfo: object;
   isInAdminPanel: boolean;
 }>();
-const emit = defineEmits(['refreshData']);
+const emits = defineEmits<{ refreshData: [] }>();
 
 // store
 const userStore = useUserStore();
@@ -78,7 +78,7 @@ const leaveWorkspace = async () => {
       userStore.getUserProjectsMemberships(),
     ]);
     if (props.isInAdminPanel) {
-      emit('refreshData');
+      emits('refreshData');
     } else {
       router.push(
         userWorkspaces.value.length

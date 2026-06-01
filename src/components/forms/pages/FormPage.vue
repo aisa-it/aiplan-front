@@ -191,7 +191,7 @@
   </q-layout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 //core
 import dayjs from 'dayjs';
 import { ref, onMounted, computed } from 'vue';

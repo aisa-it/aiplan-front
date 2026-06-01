@@ -23,35 +23,14 @@
   />
 </template>
 
-<script lang="ts">
-// core
-import { storeToRefs } from 'pinia';
-import { defineComponent, ref } from 'vue';
-
-// stores
-import { useUserStore } from 'src/stores/user-store';
+<script setup lang="ts">
+import { ref } from 'vue';
 
 // components
 import BufferIcon from './icons/BufferIcon.vue';
 import NewWorkspaceDialog from './dialogs/NewWorkspaceDialog.vue';
 
-export default defineComponent({
-  name: 'NoWorkspacesBlock',
-  components: {
-    NewWorkspaceDialog,
-    BufferIcon,
-  },
-
-  setup() {
-    const userStore = useUserStore();
-    const { user } = storeToRefs(userStore);
-
-    return {
-      user,
-      open: ref(false),
-    };
-  },
-});
+const open = ref(false);
 </script>
 
 <style lang="scss" scoped>

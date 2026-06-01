@@ -79,7 +79,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'upload', file: File): void;
   (e: 'delete', id: string): void;
   (e: 'open', attachment: any): void;
@@ -105,7 +105,7 @@ const handleFileSelect = (event: Event) => {
   const selectedFile = target.files?.[0];
   if (!selectedFile) return;
 
-  emit('upload', cloneFile(selectedFile));
+  emits('upload', cloneFile(selectedFile));
   target.value = '';
 };
 
@@ -114,15 +114,15 @@ const handleDrop = (event: DragEvent) => {
   const droppedFile = event.dataTransfer?.files?.[0];
   if (!droppedFile) return;
 
-  emit('upload', cloneFile(droppedFile));
+  emits('upload', cloneFile(droppedFile));
 };
 
 const handleOpen = (attachment: any) => {
-  emit('open', attachment);
+  emits('open', attachment);
 };
 
 const handleDelete = (id: string) => {
-  emit('delete', id);
+  emits('delete', id);
 };
 </script>
 

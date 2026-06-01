@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { onMounted, ref } from 'vue';
 import { useMeta } from 'quasar';

@@ -16,27 +16,17 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'CloudsEnable',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: () => 'currentColor',
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: 'currentColor',
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

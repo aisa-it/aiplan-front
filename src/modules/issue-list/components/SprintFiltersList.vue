@@ -23,7 +23,7 @@ defineProps<{
   columns: any[];
 }>();
 
-const emit = defineEmits(['update']);
+const emits = defineEmits<{ update: [string] }>();
 
 const {
   viewForm,
@@ -35,5 +35,5 @@ const {
   onUpdate,
   refreshFilters,
   updateIssueView,
-} = useSprintFilters(emit);
+} = useSprintFilters(emits);
 </script>

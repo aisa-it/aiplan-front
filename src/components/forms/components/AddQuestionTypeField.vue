@@ -38,7 +38,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // constants
 import { QUESTION_TYPE_FIELD_OPTIONS } from 'src/constants/constants';
 

@@ -21,7 +21,7 @@
             :current-member="user"
             :isDisabled="!canEdit"
             :is-loading="loading"
-            @refresh="emit('refresh')"
+            @refresh="emits('refresh')"
           ></SelectWatchers>
         </div>
       </q-card-section>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import SelectWatchers from '../selects/SelectWatchers.vue';
 import { useUserStore } from 'src/stores/user-store';
@@ -43,7 +43,7 @@ const props = defineProps<{
   watchers?: any;
 }>();
 
-const emit = defineEmits(['refresh', 'update:modelValue']);
+const emits = defineEmits<{ refresh: []; 'update:modelValue': [boolean] }>();
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
@@ -56,7 +56,7 @@ const setWatchers = () => {
   }));
 };
 
-const updateModelValue = (value: boolean) => emit('update:modelValue', value);
+const updateModelValue = (value: boolean) => emits('update:modelValue', value);
 </script>
 
 <style scoped>

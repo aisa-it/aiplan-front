@@ -117,7 +117,7 @@ import { DtoUserLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { isActive } from '../../utils/active';
 
-const emit = defineEmits(['update:user']);
+const emits = defineEmits<{ 'update:user': [] }>();
 const props = defineProps<{ user: DtoUserLight }>();
 
 const { setNotificationView } = useNotificationStore();
@@ -137,7 +137,7 @@ const onSuccess = async () => {
     type: 'success',
     customMessage: SUCCESS_UPDATE_DATA,
   });
-  emit('update:user');
+  emits('update:user');
 };
 
 const save = () => {

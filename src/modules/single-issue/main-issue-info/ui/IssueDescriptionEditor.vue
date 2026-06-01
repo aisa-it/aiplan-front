@@ -16,7 +16,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { Editor } from '@tiptap/vue-3';
@@ -40,8 +40,16 @@ const { projectMembers } = storeToRefs(projectStore);
 const { issueData } = storeToRefs(singleIssueStore);
 const { ny } = storeToRefs(utilsStore);
 
-const emits = defineEmits(['toggleEdit', 'getEditor']);
-const props = defineProps(['isReadonly', 'isAutosave', 'isAllowedToEdit']);
+const props = defineProps<{
+  isReadonly?: boolean;
+  isAutosave?: boolean;
+  isAllowedToEdit?: boolean;
+}>();
+
+const emits = defineEmits<{
+  toggleEdit: [];
+  getEditor: [any];
+}>();
 
 // vars
 const route = useRoute();

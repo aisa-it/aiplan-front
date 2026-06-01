@@ -3,13 +3,10 @@
     style="z-index: 1000"
     :style="utilsStore.ny === true ? 'background-color: transparent' : ''"
   >
-    <q-toolbar
-      :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''"
-      class="header text-grey-9 main-toolbar"
-    >
-      <q-btn flat dense round aria-label="Menu" @click="$emit('toggle')">
-        <MenuIcon />
-      </q-btn>
+    <q-toolbar :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''">
+      
+      <WorkspaceButton></WorkspaceButton>
+
       <template v-if="workspaceInfo">
         <q-breadcrumbs
           active-color="grey-9"
@@ -107,7 +104,7 @@
   </q-header>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -132,6 +129,7 @@ import HomeIcon from 'src/components/icons/HomeIcon.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
 import FlowerLine from 'src/components/FlowerLine.vue';
+import WorkspaceButton from 'src/modules/select-workspace/components/WorkspaceButton.vue';
 
 // stores
 const userStore = useUserStore();

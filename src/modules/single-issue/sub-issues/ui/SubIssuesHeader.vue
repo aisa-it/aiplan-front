@@ -25,7 +25,7 @@
   </IssuesHeaderWrapper>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import IssuesColorCountTitle from 'src/components/IssuesColorCountTitle.vue';
@@ -56,7 +56,7 @@ const expanded = computed({
   set: (val: boolean) => emits('update:isExpanded', val),
 });
 
-const emits = defineEmits(['refresh', 'update:isExpanded']);
+const emits = defineEmits<{ refresh: []; 'update:isExpanded': [boolean] }>();
 
 const singleIssueStore = useSingleIssueStore();
 const { currentIssueID } = storeToRefs(singleIssueStore);

@@ -71,7 +71,10 @@ function filterValidMembers(list: Record<string, any>[]) {
   return list.filter((m) => m.member?.is_active && m.member?.username);
 }
 
-const emit = defineEmits(['onSave', 'update:modelValue']);
+const emits = defineEmits<{
+  onSave: [IIssueCommentUpdate];
+  'update:modelValue': [boolean];
+}>();
 
 // Reactive variables
 const editor = ref<Editor | null>(null);
@@ -89,7 +92,7 @@ const handleUpdateMessage = () => {
     content: issueCommentHtml.value,
     text: editor.value.getText(),
   };
-  emit('onSave', saveData);
+  emits('onSave', saveData);
 };
 
 const getEditor = (value: Editor | null) => {
@@ -100,7 +103,7 @@ const updateEditorDOM = (value: boolean) => {
   editorDOMvalue.value = value;
 };
 
-const updateModelValue = (value: boolean) => emit('update:modelValue', value);
+const updateModelValue = (value: boolean) => emits('update:modelValue', value);
 
 // Watchers
 watch(

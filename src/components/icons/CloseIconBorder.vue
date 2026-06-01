@@ -27,27 +27,17 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'CloseIconBorder',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: () => '#bac4d5',
-    },
-    width: {
-      type: String,
-      required: false,
-      default: () => '24',
-    },
-    height: {
-      type: String,
-      required: false,
-      default: () => '24',
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: '#bac4d5',
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

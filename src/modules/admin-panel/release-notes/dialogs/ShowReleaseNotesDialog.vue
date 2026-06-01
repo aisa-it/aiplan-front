@@ -12,7 +12,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import BaseReleaseNoteDialog from './BaseReleaseNotesDialog.vue';
 
 import { DtoReleaseNoteLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';

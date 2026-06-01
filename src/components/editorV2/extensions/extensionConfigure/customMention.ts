@@ -6,7 +6,6 @@ import tippy from 'tippy.js';
 import { Mention } from '@tiptap/extension-mention';
 import { VueRenderer } from '@tiptap/vue-3';
 import { mergeAttributes } from '@tiptap/core';
-// import MentionNode from './MentionNode.vue'; //TODO Удалить компонент, рендер списка уже в EditorMentionList
 
 // Stores
 import { useProjectStore } from 'src/stores/project-store';
@@ -152,18 +151,6 @@ export const useMention = (
       ];
     },
   });
-
-  // TODO Удалить вместе с Mention Node
-  // const mention = Mention.extend({
-  //   addNodeView() {
-  //     return VueNodeViewRenderer(MentionNode);
-  //   },
-  // }).configure({
-  //   suggestion,
-  //   HTMLAttributes: {
-  //     class: 'mention',
-  //   },
-  // });
 
   return { mention };
 };

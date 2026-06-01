@@ -48,42 +48,19 @@ import { ICONS } from 'src/utils/icons';
 import { colorMap } from 'src/utils/editorColorMap';
 import { useQuasar } from 'quasar';
 
-const props = defineProps({
-  editorInstance: {
-    type: Object as () => Editor,
-    required: true,
-  },
-  command: {
-    type: String,
-    required: true,
-  },
-  tooltip: {
-    type: String,
-    required: true,
-  },
-  iconName: {
-    type: String,
-    required: true,
-  },
-  formatName: {
-    type: String,
-    default: '',
-  },
-  isMobile: {
-    type: Boolean,
-    default: false,
-  },
-  hasRunCommandListener: {
-    type: Boolean,
-    default: false,
-  },
-  classPrevent: {
-    type: String,
-    required: false,
-  },
-});
+const props = defineProps<{
+  editorInstance: Editor;
+  command: string;
+  tooltip: string;
+  iconName: string;
+  formatName?: string;
+  isMobile?: boolean;
+  hasRunCommandListener?: boolean;
+  classPrevent?: string;
+}>();
 
-const emit = defineEmits(['runCommand']);
+const emits = defineEmits<{ runCommand: [string] }>();
+
 const $q = useQuasar();
 
 const isActive = computed(() => {
@@ -149,7 +126,7 @@ const runCommand = (icon: { name: string; color: string }) => {
   // Если не найден info-block — вставляем новый
   const chain = editor.chain() as any;
   if (props.hasRunCommandListener) {
-    emit('runCommand', props.command);
+    emits('runCommand', props.command);
   } else {
     if (props.isMobile) {
       chain[props.command]({ icon: icon.name, iconColor: icon.color }).run();

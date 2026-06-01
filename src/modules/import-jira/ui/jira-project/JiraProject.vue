@@ -58,7 +58,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { onMounted, ref } from 'vue';
 // stores
@@ -67,7 +67,7 @@ import { useImportStore } from 'src/modules/import-jira/stores/import-store';
 import { IImportJiraProject } from 'src/interfaces/jira';
 
 // emits
-const emits = defineEmits(['next', 'to-finish', 'get-back', 'to-import']);
+const emits = defineEmits<{ next: []; 'get-back': []; 'to-import': [] }>();
 
 // store
 const importStore = useImportStore();

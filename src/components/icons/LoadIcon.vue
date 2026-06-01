@@ -17,26 +17,16 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'LoadIcon',
-  props: {
-    color: {
-      type: String,
-      required: false
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 16,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 16,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    width: 16,
+    height: 16,
   },
-});
+);
 </script>

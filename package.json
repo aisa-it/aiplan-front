@@ -46,6 +46,7 @@
     "@tiptap/vue-3": "^3.10.1",
     "@types/frappe-gantt": "^0.9.0",
     "@vue-flow/core": "^1.48.2",
+    "@vueuse/core": "^14.3.0",
     "@weiruo/tiptap-extension-indent": "^2.0.4-1",
     "altcha": "^2.2.4",
     "axios": "^1.13.1",

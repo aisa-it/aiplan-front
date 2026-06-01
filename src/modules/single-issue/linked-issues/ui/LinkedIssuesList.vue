@@ -70,7 +70,10 @@ const props = defineProps<{
   hasPermissionByIssue: boolean | 'author';
 }>();
 
-const emits = defineEmits(['update:linkedIssues', 'removeIssue']);
+const emits = defineEmits<{
+  'update:linkedIssues': [any[]];
+  removeIssue: [any];
+}>();
 
 const userStore = useUserStore();
 const statesStore = useStatesStore();

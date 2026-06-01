@@ -13,108 +13,33 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { useRouter } from 'vue-router';
-import { ref, watch, onBeforeMount } from 'vue';
+import { watch } from 'vue';
 
-//stores
-import { useFormStore } from 'src/stores/form-store';
-import { useRolesStore } from 'src/stores/roles-store';
-import { useStatesStore } from 'src/stores/states-store';
-import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
-//utils
-import { sortStates } from 'src/utils/sort';
-import { appVisibleTimeout } from 'src/utils/visibilityApp';
-
 //composables
-import { stopGlobalLoading } from 'src/composables/useGlobalLoader';
+import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
+import { useRolesStore } from 'src/stores/roles-store';
 
 //api
-import { getFormList } from 'src/components/forms/services/api';
 
 //core
 const route = useRoute();
-const router = useRouter();
 
 //stores
-const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
-
-const statesStore = useStatesStore();
-const projectStore = useProjectStore();
+const rolesStore = useRolesStore();
 const singleIssueStore = useSingleIssueStore();
-const { getWsRole } = useRolesStore();
 
-const { project } = storeToRefs(projectStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
+  storeToRefs(workspaceStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
-
-//refs
-const startLoader = ref(true);
-
-//methods
-const refresh = async () => {
-  if (!route.params.project) project.value = null;
-
-  if (!route.params.workspace || route.params.workspace === 'undefined') return;
-
-  currentWorkspaceSlug.value = route.params.workspace as string;
-  const slug = route.params.workspace as string;
-
-  try {
-    await workspaceStore.getWorkspaceInfo(slug);
-  } catch (e: any) {
-    stopGlobalLoading();
-
-    if (e?.response.status === 403) return router.push('/access-denied');
-  }
-
-  try {
-    await Promise.allSettled([
-      workspaceStore.getWorkspaceMembers(slug),
-      workspaceStore.getWorkspaceProjects(slug),
-    ]);
-
-    if (getWsRole(currentWorkspaceSlug.value ?? '') === 15) {
-      await getFormList(slug)
-        .then((res) => (formStore.forms = res))
-        .catch(() => formStore.resetForms());
-    } else formStore.resetForms();
-
-    await workspaceStore
-      .getAllWorkspaceStates(currentWorkspaceSlug.value)
-      .then(() => {
-        let obj = {};
-        for (let o in workspaceStore.allWorkspaceStates) {
-          obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
-        }
-        statesStore.statesCache = obj;
-      })
-      .catch(() => null);
-  } finally {
-    stopGlobalLoading();
-  }
-};
-
-const refreshAfterVisible = async () => {
-  startLoader.value = true;
-  if (router.currentRoute.value.fullPath.includes('settings')) {
-    startLoader.value = false;
-  }
-  await refresh();
-};
-
-//hooks
-onBeforeMount(async () => {
-  appVisibleTimeout(() => refreshAfterVisible());
-  await refresh();
-});
+const { workspace } = storeToRefs(useWorkspaceStoreV2());
 
 watch(
   () => route.params.issue,
@@ -123,6 +48,17 @@ watch(
       issueData.value = null;
       currentIssueID.value = '';
     }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => workspace?.value,
+  () => {
+    workspaceInfo.value = workspace.value;
+    currentWorkspaceSlug.value = workspace?.value?.slug;
+    workspaceStore.getMeInWorkspace(currentWorkspaceSlug.value);
+    rolesStore.defineWorkspaceRole(meInWorkspace.value);
   },
   { immediate: true },
 );

@@ -73,7 +73,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, onUpdated, ref, nextTick } from 'vue';
 import { ROLES } from 'src/constants/constants';
 import { isEmail } from 'src/utils/validation';
@@ -86,7 +86,7 @@ const props = defineProps<{
   currentWsSlug: string;
 }>();
 
-const emits = defineEmits(['success', 'error', 'update']);
+const emits = defineEmits<{ success: []; update: []; error: [string] }>();
 
 // interfaces
 interface Form {

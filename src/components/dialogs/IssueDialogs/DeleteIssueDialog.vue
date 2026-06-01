@@ -32,7 +32,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -49,7 +49,7 @@ const props = defineProps<{
   issue: any;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -90,7 +90,7 @@ const handleDeleteIssue = async () => {
         ),
       });
       if (props.issue || isPreview.value) {
-        emit('refresh');
+        emits('refresh');
         isPreview.value = false;
       }
     })

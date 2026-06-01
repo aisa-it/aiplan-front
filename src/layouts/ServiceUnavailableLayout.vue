@@ -9,59 +9,52 @@
   </q-layout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { useMeta } from 'quasar';
 import { useRouter } from 'vue-router';
-import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
 
-export default defineComponent({
-  name: 'ServiceUnavailableLayout',
-  components: {},
-  setup() {
-    useMeta({
-      title: 'АИПлан | Инструмент управления проектами.',
-    });
-    const userStore = useUserStore();
-
-    const { user, userWorkspaces } = storeToRefs(userStore);
-    const router = useRouter();
-    const refreshInterval = ref();
-
-    const userInfoRefresh = async () => {
-      clearInterval(refreshInterval.value);
-      refreshInterval.value = setInterval(async () => {
-        await userStore.getUserInfo();
-        if (user.value.last_workspace_slug)
-          return router.push(`${user.value.last_workspace_slug}`);
-        await userStore.getUserWorkspaces();
-        if (userWorkspaces.value.length > 0)
-          router.push(`${userWorkspaces.value[0].slug}`);
-        else router.push('no-workspace');
-      }, 5000);
-    };
-
-    onMounted(() => {
-      userInfoRefresh();
-    });
-
-    onUnmounted(() => {
-      clearInterval(refreshInterval.value);
-    });
-
-    const unstableRelease = ref(
-      location.hostname === 'test.aiplan.aisa.ru' ||
-        location.hostname === 'localhost',
-    );
-
-    return { unstableRelease };
-  },
+useMeta({
+  title: 'АИПлан | Инструмент управления проектами.',
 });
+const userStore = useUserStore();
+
+const { user, userWorkspaces } = storeToRefs(userStore);
+const router = useRouter();
+const refreshInterval = ref();
+
+const userInfoRefresh = async () => {
+  clearInterval(refreshInterval.value);
+  refreshInterval.value = setInterval(async () => {
+    await userStore.getUserInfo();
+    if (user.value.last_workspace_slug)
+      return router.push(`${user.value.last_workspace_slug}`);
+    await userStore.getUserWorkspaces();
+    if (userWorkspaces.value.length > 0)
+      router.push(`${userWorkspaces.value[0].slug}`);
+    else router.push('no-workspace');
+  }, 5000);
+};
+
+onMounted(() => {
+  userInfoRefresh();
+});
+
+onUnmounted(() => {
+  clearInterval(refreshInterval.value);
+});
+
+const unstableRelease = ref(
+  location.hostname === 'test.aiplan.aisa.ru' ||
+    location.hostname === 'localhost',
+);
 </script>
+
 <style lang="scss" scoped>
 .fully-centered {
   display: flex;

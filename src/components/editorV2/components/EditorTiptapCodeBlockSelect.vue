@@ -14,70 +14,41 @@
   </node-view-wrapper>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 import { NodeViewWrapper, NodeViewContent, Editor } from '@tiptap/vue-3';
 
-export default defineComponent({
-  name: 'EditorTiptapCodeBlockSelect',
-  props: {
-    node: {
-      type: Object,
-      required: true,
-    },
-    updateAttributes: {
-      type: Function,
-      required: true,
-    },
-    extension: {
-      type: Object,
-      required: true,
-    },
-    editor: {
-      type: Object as PropType<Editor | null>,
-      required: true,
-    },
-    classPrevent: {
-      type: String,
-      required: false,
-    },
-  },
-  setup(props) {
-    const languages = ref<string[]>([
-      'auto',
-      'css',
-      'html',
-      'js',
-      'ts',
-      'java',
-      'c',
-      'php',
-      'lua',
-    ]);
+const props = defineProps<{
+  node: any;
+  updateAttributes: (data: any) => any;
+  extension: any;
+  editor: Editor | null;
+  classPrevent: string;
+}>();
 
-    const selectedLanguage = computed({
-      get() {
-        return props.node.attrs.language ?? 'auto';
-      },
-      set(language) {
-        props.updateAttributes({ language });
-      },
-    });
+const languages = ref<string[]>([
+  'auto',
+  'css',
+  'html',
+  'js',
+  'ts',
+  'java',
+  'c',
+  'php',
+  'lua',
+]);
 
-    const showCodeSelect = computed(() => {
-      return props.editor?.isEditable && props.extension.options.isCodeSelect;
-    });
+const selectedLanguage = computed({
+  get() {
+    return props.node.attrs.language ?? 'auto';
+  },
+  set(language) {
+    props.updateAttributes({ language });
+  },
+});
 
-    return {
-      languages,
-      showCodeSelect,
-      selectedLanguage,
-    };
-  },
-  components: {
-    NodeViewWrapper,
-    NodeViewContent,
-  },
+const showCodeSelect = computed(() => {
+  return props.editor?.isEditable && props.extension.options.isCodeSelect;
 });
 </script>
 

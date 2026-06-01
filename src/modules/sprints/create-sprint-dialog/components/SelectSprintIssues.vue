@@ -15,7 +15,7 @@
     >
       <q-checkbox
         :model-value="!!issue.id"
-        @update:model-value="() => emit('delete', issue.id ?? '')"
+        @update:model-value="() => emits('delete', issue.id ?? '')"
         class="sprint-issue-checkbox"
       />
 
@@ -38,7 +38,7 @@ const props = defineProps<{
   issues: DtoIssue[];
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'delete', id: string): void;
 }>();
 </script>

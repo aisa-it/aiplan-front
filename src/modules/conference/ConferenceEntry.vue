@@ -52,7 +52,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onBeforeMount, onMounted, onUnmounted, ref, computed } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { storeToRefs } from 'pinia';
