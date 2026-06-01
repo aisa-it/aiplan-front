@@ -54,7 +54,12 @@
           <q-item-section> Спринты </q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple>
+        <q-item
+          :active="route.path.includes('/forms')"
+          clickable
+          v-ripple
+          @click="router.push(`/${currentWorkspaceSlug}/forms`)"
+        >
           <q-item-section avatar>
             <MenuFormsIcon :is-dark="$q.dark.isActive" />
           </q-item-section>
@@ -62,7 +67,12 @@
           <q-item-section> Формы </q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple>
+        <q-item
+          :active="route.path.includes('/aidoc')"
+          clickable
+          v-ripple
+          @click="router.push(`/${currentWorkspaceSlug}/aidoc`)"
+        >
           <q-item-section avatar>
             <AIDocIcon />
           </q-item-section>

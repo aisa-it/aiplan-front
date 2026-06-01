@@ -59,6 +59,12 @@ const routes: RouteRecordRaw[] = [
             meta: { requiredWorkspace: true },
           },
           {
+            path: 'forms',
+            name: 'forms',
+            component: () => import('pages/FormsPage.vue'),
+            meta: { requiredWorkspace: true },
+          },
+          {
             path: 'forms/:formSlug/',
             component: () => import('src/components/forms/pages/FormsPage.vue'),
             meta: { requiredWorkspace: true },
@@ -78,16 +84,15 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'aidoc',
+            name: 'aidoc',
             component: () => import('pages/AiDocPage.vue'),
             meta: { requiredWorkspace: true },
-            children: [
-              {
-                path: ':doc/:commentId?',
-                name: 'doc',
-                meta: { requiredWorkspace: true },
-                component: () => import('pages/AiDocPage.vue'),
-              },
-            ],
+          },
+          {
+            path: 'aidoc/:doc/:commentId?',
+            name: 'doc',
+            meta: { requiredWorkspace: true },
+            component: () => import('pages/AiDocPage.vue'),
           },
           {
             path: 'projects/:project/',

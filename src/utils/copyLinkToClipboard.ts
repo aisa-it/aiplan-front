@@ -3,6 +3,7 @@ interface ILinkBody {
   workspaceSlug?: string;
   projectIdentifier?: string;
   docsId?: string;
+  formSlug?: string;
 }
 export const copyLinkToClipboard = (
   source: LinkSource,
@@ -21,6 +22,10 @@ export const copyLinkToClipboard = (
 
     case 'docs': {
       link = `${linkBody.workspaceSlug}/aidoc/${linkBody.docsId}`;
+      break;
+    }
+    case 'forms': {
+      link = `${linkBody.workspaceSlug}/forms/${linkBody.formSlug}`;
       break;
     }
   }

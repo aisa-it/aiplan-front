@@ -1,11 +1,32 @@
 <template>
   <q-page v-if="!loading" class="flex justify-center flex-grow">
-    <q-layout
-      v-if="!isEmptyDoc"
-      view="hHh lpr fFf"
+    <div
       class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow"
     >
-      <q-page-container class="flex-grow">
+      <q-drawer
+        show-if-above
+        bordered
+        :width="300"
+        :breakpoint="760"
+        class="issue-side-drawer"
+      >
+        <div ref="menuRef" class="nav-menu-bottom-bar">
+          <NavMenuAIDocs
+            data-id="favorites"
+            class="draggable-item"
+            filterBy="favorites"
+            @updateFavoriteState="updateFavoriteState"
+          />
+          <NavMenuAIDocs
+            ref="docsMenu"
+            data-id="docs"
+            class="draggable-item"
+            filterBy="docs"
+          />
+        </div>
+      </q-drawer>
+
+      <q-page-container v-if="!isEmptyDoc" class="flex-grow">
         <div
           class="col items-stretch content-stretch flex column issue-panel__wrapper full-height no-wrap"
           :style="'position: relative'"
@@ -106,13 +127,10 @@
           :itemExport="currentExportDialogItem"
         />
       </q-page-container>
-    </q-layout>
-
-    <AiDocEmptyPlaceholder
-      v-else
-      style="margin: 0 auto"
-      :is-admin-or-author="isAdminOrAuthor"
-    />
+      <q-page-container v-else class="flex flex-center flex-grow">
+        <AiDocEmptyPlaceholder :is-admin-or-author="isAdminOrAuthor" />
+      </q-page-container>
+    </div>
   </q-page>
 
   <q-page v-else class="flex justify-center items-center">
@@ -151,12 +169,14 @@ import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { cleanContent } from 'src/components/editorV2/utils/editorUtils';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { SUCCESS_UPDATE_DOCUMENT } from 'src/constants/notifications';
+import NavMenuAIDocs from 'src/components/menu/NavMenuAIDocs.vue';
 //utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import AiDocEmptyPlaceholder from 'src/components/AiDocEmptyPlaceholder.vue';
 import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
-
+import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
+import { useSortable } from 'src/composables/useSortable';
 //composables
 const route = useRoute();
 
@@ -175,6 +195,14 @@ const { ny } = storeToRefs(utilsStore);
 
 //states
 const aidocEditor = ref();
+const docsMenu = ref();
+const menuRef = ref<HTMLElement | null>(null);
+useExpansionGroupResize(menuRef, 'aidocMenuItemsLayout');
+const { initSortable } = useSortable(menuRef, {
+  draggable: '.draggable-item',
+  filter: '.resizer',
+  preventOnFilter: true,
+});
 const isReadOnlyEditor = ref(true);
 const documentValue = ref<DtoDoc>({});
 const updateCurrentEditorValue = ref();
@@ -236,6 +264,10 @@ const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 const isEmptyDoc = computed(
   () => Object.keys(documentValue.value).length === 0,
 );
+
+const updateFavoriteState = (id: string, state: boolean) => {
+  docsMenu.value?.setFavoriteState(id, state);
+};
 
 //methods
 const getDocDate = (date: string) => {
@@ -397,6 +429,8 @@ onMounted(async () => {
     aidocStore.selectDoc('', '');
     aidocStore.parentDocId = null;
   }
+
+  await initSortable();
 });
 
 watch(
@@ -468,6 +502,10 @@ watch(
   }
 }
 
+.nav-menu-bottom-bar {
+  height: 100% !important;
+}
+
 .issue-panel__autor-label {
   flex-wrap: nowrap;
 }
@@ -497,6 +535,10 @@ watch(
   padding: 8px 0;
   margin-right: 10px !important;
   background: none;
+}
+
+:deep(.q-page-container) {
+  padding: 0 !important;
 }
 
 .issue-panel__editor {
