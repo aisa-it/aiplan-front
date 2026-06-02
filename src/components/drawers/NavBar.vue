@@ -3,7 +3,7 @@
     v-model="drawer"
     show-if-above
     :mini="!drawer || miniState"
-    :width="200"
+    :width="258"
     :breakpoint="500"
     bordered
     class="main-nav-bar"
@@ -89,12 +89,11 @@
             <q-item-section avatar>
               <HelpIcon />
             </q-item-section>
-            <q-item-section> Помощь </q-item-section>
+            <q-item-section> Помощь и поддержка </q-item-section>
           </template>
 
           <template v-slot:content>
             <NavBarHelpList
-              class="q-pl-md"
               @open-help="isHelpOpen = !isHelpOpen"
               @open-feedback="isFeedbackOpen = !isFeedbackOpen"
               @open-release="isReleaseOpen = !isReleaseOpen"

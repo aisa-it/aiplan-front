@@ -6,8 +6,11 @@
       class="centered-horisontally"
       @click="emit('open-help')"
     >
-      <BookIcon class="q-mr-md" />
-      Руководство
+      <q-item-section avatar>
+        <BookIcon />
+      </q-item-section>
+
+      <q-item-section> Руководство </q-item-section>
     </q-item>
     <q-item
       clickable
@@ -15,18 +18,24 @@
       class="centered-horisontally"
       @click="emit('open-feedback')"
     >
-      <EditIcon class="q-mr-md" />
-      Оставить отзыв
+      <q-item-section avatar>
+        <EditIcon />
+      </q-item-section>
+      <q-item-section> Оставить отзыв </q-item-section>
     </q-item>
     <q-item clickable class="centered-horisontally" v-close-popup>
-      <ChatIcon class="q-mr-md" />
-      <a
-        href="https://t.me/aiplan_faq"
-        target="_blank"
-        style="text-decoration: none; color: inherit"
-      >
-        Поддержка
-      </a>
+      <q-item-section avatar>
+        <ChatIcon />
+      </q-item-section>
+      <q-item-section>
+        <a
+          href="https://t.me/aiplan_faq"
+          target="_blank"
+          style="text-decoration: none; color: inherit"
+        >
+          Поддержка
+        </a>
+      </q-item-section>
     </q-item>
     <q-separator />
     <q-item
