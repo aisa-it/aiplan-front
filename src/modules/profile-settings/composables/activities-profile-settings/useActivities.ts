@@ -11,11 +11,14 @@ export const useActivities = () => {
   const rows = ref<DtoEntityActivityFull[]>([]);
   const rowsCount = ref<number>(0);
 
-  async function onRequest(p: any): Promise<void> {
+  async function onRequest(p: any, currentDay?: string): Promise<void> {
     const { page, rowsPerPage, rowsNumber } = p.pagination;
 
     await userStore
       .getUserActivities({
+        day: currentDay
+          ? currentDay.split('.').join('')
+          : undefined,
         offset: (page - 1) * (rowsPerPage == 0 ? 10 : rowsPerPage),
         limit: rowsPerPage == 0 ? rowsNumber || 10 : rowsPerPage,
       })

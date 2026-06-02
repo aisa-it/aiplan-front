@@ -139,8 +139,6 @@
           :isActive="props.row.member?.is_active"
           :show-delete="!props.row.member?.is_superuser"
           @edit="editUser(props.row)"
-          @block="blockUser(props.row)"
-          @unblock="unblockUser(props.row)"
           @delete="confirmDelUser(props.row)"
         />
       </q-td>
@@ -204,24 +202,18 @@ import { valToRole } from 'src/utils/translator';
 
 // constants
 import {
-  SUCCESS_BLOCK_USER,
   SUCCESS_DELETE_USER,
   SUCCESS_INVITE_USER,
-  SUCCESS_UNBLOCK_USER,
   SUCCESS_CHANGE_USER_ROLE,
 } from 'src/constants/notifications';
 import { useRouter } from 'vue-router';
-import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoWorkspace, DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  currentWsInfo: { type: Object, required: true },
-  currentWsSlug: { type: String, required: true },
-  isInAdminPanel: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+const props = defineProps<{
+  currentWsInfo: DtoWorkspace;
+  currentWsSlug: string;
+  isInAdminPanel?: boolean;
+}>();
 
 //core
 const router = useRouter();
@@ -381,31 +373,6 @@ const isInviteOpenDialog = async () => {
   if (el) {
     el.dataset.id = 'select-roles-member-icon-dropdown';
   }
-};
-
-const blockUser = async (row: any) => {
-  await workspaceStore
-    .controlWorkspaceUser(props.currentWsSlug, row.id, true)
-    .then(() => {
-      onSuccess(SUCCESS_BLOCK_USER);
-    })
-
-    .finally(() => {
-      return onRequest({ pagination: pagination.value });
-    });
-};
-
-const unblockUser = async (row: any) => {
-  await workspaceStore
-    .controlWorkspaceUser(props.currentWsSlug, row.id, false)
-
-    .then(() => {
-      onSuccess(SUCCESS_UNBLOCK_USER);
-    })
-
-    .finally(() => {
-      return onRequest({ pagination: pagination.value });
-    });
 };
 
 const editUser = (row: any) => {

@@ -5,7 +5,7 @@
     multiple
     clearable
     map-options
-    emit-value
+    emits-value
     :loading="loading"
     :options="groupedOptions"
     option-value="id"
@@ -57,13 +57,13 @@
           clearable
           dense
           class="base-input q-mb-sm"
-          @update:model-value="(val) => emit('search', val?.toString())"
+          @update:model-value="(val) => emits('search', val?.toString())"
         />
       </div>
       <q-checkbox
         label="Только активные"
         :model-value="props.onlyActive"
-        @update:model-value="(val) => emit('setOnlyActive', val)"
+        @update:model-value="(val) => emits('setOnlyActive', val)"
       />
     </template>
 
@@ -75,13 +75,13 @@
           clearable
           dense
           class="base-input q-mb-sm"
-          @update:model-value="(val) => emit('search', val?.toString())"
+          @update:model-value="(val) => emits('search', val?.toString())"
         />
       </div>
       <q-checkbox
         label="Только активные"
         :model-value="props.onlyActive"
-        @update:model-value="(val) => emit('setOnlyActive', val)"
+        @update:model-value="(val) => emits('setOnlyActive', val)"
       />
       <q-item>
         <q-item-section>Нет статусов</q-item-section>
@@ -107,7 +107,7 @@ const props = defineProps<{
   onlyActive: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:modelValue': [val: string[]];
   search: [val?: string];
   setOnlyActive: [val: boolean, resetStates?: boolean];
@@ -139,7 +139,8 @@ const groupedOptions = computed(() => {
   );
 
   return Object.entries(groups).map(([projectId, options]) => {
-    const label = props.projects.find((el) => el && el.id === projectId)?.name ?? '—';
+    const label =
+      props.projects.find((el) => el && el.id === projectId)?.name ?? '—';
     return {
       label,
       options,
@@ -148,7 +149,7 @@ const groupedOptions = computed(() => {
 });
 
 const updateSelected = (option: any) => {
-  emit('setOnlyActive', false);
+  emits('setOnlyActive', false);
   const id = option.value.id;
   const index = props.modelValue.findIndex((val) => val === id);
   const newValue = [...props.modelValue];
@@ -156,7 +157,7 @@ const updateSelected = (option: any) => {
   if (index === -1) newValue.push(id);
   else newValue.splice(index, 1);
 
-  emit('update:modelValue', newValue);
+  emits('update:modelValue', newValue);
 };
 
 watch(
@@ -168,10 +169,10 @@ watch(
 
 const onUpdate = (val: any[] | null) => {
   if (!val) {
-    emit('setOnlyActive', false, true);
+    emits('setOnlyActive', false, true);
     return;
   }
   const normalized = val ? val.map((el) => el?.id ?? el) : [];
-  emit('update:modelValue', normalized);
+  emits('update:modelValue', normalized);
 };
 </script>

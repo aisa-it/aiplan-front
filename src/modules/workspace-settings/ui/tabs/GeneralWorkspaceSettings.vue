@@ -235,56 +235,6 @@
         :excluded-tabs="[TIPTAP_TABS.drawio]"
       /> </q-card
   ></q-dialog>
-  <!-- <div>
-      <h3>Восстановление</h3>
-      <div class="row mobile-block q-mt-md">
-        <div class="col">
-          <h4 class="text-lg font-semibold text-brand-base">Экспорт</h4>
-          <p class="text-sm text-brand-secondary">
-            Получение копии текущего состояния пространства.
-          </p>
-        </div>
-        <div class="col">
-          <q-card-actions align="right">
-            <q-btn
-              no-caps
-              class="secondary-btn"
-              style="width: 80px"
-              @click="downloadBackup"
-              :disable="isDemo"
-            >
-              Экспорт
-            </q-btn>
-          </q-card-actions>
-        </div>
-      </div>
-
-      <div class="row mobile-block q-mt-md">
-        <div class="col">
-          <h4 class="text-lg font-semibold text-brand-base">Импорт</h4>
-          <p class="text-sm text-brand-secondary">
-            Восстановление рабочего пространства из копии
-          </p>
-        </div>
-        <div class="col">
-          <q-card-actions align="right">
-            <q-btn
-              no-caps
-              class="secondary-btn"
-              style="width: 80px"
-              :disable="isDemo"
-              @click="
-                () => {
-                  handleOpenImport();
-                }
-              "
-            >
-              Импорт
-            </q-btn>
-          </q-card-actions>
-        </div>
-      </div>
-    </div> -->
 
   <div v-if="hasPermission('delete-ws')">
     <div class="row mobile-block q-mt-md" :style="'align-items: end;'">
@@ -310,12 +260,6 @@
       </div>
     </div>
   </div>
-  <ImportDialog
-    v-if="!isDemo"
-    v-model="isImportOpen"
-    :workspaceSlug="workspaceInfoForm?.slug ?? ''"
-    @success="onSuccess"
-  />
   <DeleteWorkspaceModal
     v-model="isDeleteOpen"
     :currentWorkspace="workspaceInfoForm"
@@ -407,7 +351,6 @@ import { NOT_VALID_UID } from 'src/constants/constants';
 
 // components
 import {
-  ImportDialog,
   DeleteWorkspaceModal,
   UploadWorkspaceAvatarDialog,
 } from 'src/modules/workspace-settings/ui/dialogs';
@@ -420,16 +363,13 @@ const EditorTipTapV2 = defineAsyncComponent(
 
 import AvatarImage from 'src/components/AvatarImage.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  currentWsInfo: { type: Object, required: true },
-  currentWsSlug: { type: String, required: true },
-  isInAdminPanel: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+const props = defineProps<{
+  currentWsInfo: DtoWorkspace;
+  currentWsSlug: string;
+  isInAdminPanel?: boolean;
+}>();
 
 //composables
 const q = useQuasar();
@@ -454,8 +394,9 @@ const { workspaceToken } = storeToRefs(settingsStore);
 const workspaceInfoForm = ref({} as typeof computedWorkspaceInfo.value);
 
 const workspaceBaseUrl = computed(() => {
-  const viteUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } })
-    ?.env?.VITE_API_URL?.replace(/\/+$/, ''); // убираем все слэши в конце URL
+  const viteUrl = (
+    import.meta as unknown as { env?: { VITE_API_URL?: string } }
+  )?.env?.VITE_API_URL?.replace(/\/+$/, ''); // убираем все слэши в конце URL
   const origin =
     typeof window !== 'undefined' && window.location
       ? window.location.origin
@@ -465,7 +406,6 @@ const workspaceBaseUrl = computed(() => {
 });
 
 // флаги для открытия диалогов
-const isImportOpen = ref<boolean>(false);
 const isDeleteOpen = ref<boolean>(false);
 const isUploaderOpen = ref<boolean>(false);
 const isSelectLeadOpen = ref<boolean>(false);
@@ -616,25 +556,6 @@ const handleUpdateWorkspace = async () => {
       await refreshInfo();
     });
 };
-
-// const handleOpenImport = () => {
-//   isImportOpen.value = !isImportOpen.value;
-// };
-
-// const downloadBackup = async () => {
-//   await exportWorkspace(route.params['workspace'] as string).then(
-//     ({ asset }) => {
-//       const element = document.createElement('a');
-//       element.setAttribute('href', `/api/auth/file/${asset}`);
-//       element.setAttribute(
-//         'download',
-//         `backup-${new Date().toISOString()}.bin`,
-//       );
-//       element.click();
-//       onSuccess(SUCCESS_EXPORT);
-//     },
-//   );
-// };
 
 const isWorkspaceLogo = computed(() => {
   return (

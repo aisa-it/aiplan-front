@@ -61,7 +61,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref, watch } from 'vue';
 import CyrillicToTranslit from 'cyrillic-to-translit-js';

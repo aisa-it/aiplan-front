@@ -23,30 +23,17 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'SuccessIcon',
-  props: {
-    firstColor: {
-      type: String,
-      required: false,
-    },
-    secondColor: {
-      type: String,
-      required: false,
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 16,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 16,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    firstColor?: string;
+    secondColor?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

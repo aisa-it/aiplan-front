@@ -26,12 +26,13 @@ import { useStatesStore } from 'src/stores/states-store';
 
 // components
 import SelectStatus from 'src/components/SelectStatus.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 defineProps<{
-  rowInfo: any;
+  rowInfo: { row: DtoIssue };
 }>();
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits<{ refresh: [any] }>();
 const rolesStore = useRolesStore();
 const { statesCache } = storeToRefs(useStatesStore());
 </script>

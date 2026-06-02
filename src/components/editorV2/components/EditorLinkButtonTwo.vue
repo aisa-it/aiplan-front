@@ -63,7 +63,7 @@
 
 <script setup lang="ts">
 import { Editor } from '@tiptap/vue-3';
-import { computed, defineProps, ref, watch, nextTick } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { ICONS } from 'src/utils/icons';
 import { isValidURL } from 'src/utils/validation';
 import { parseCommentLink } from 'src/utils/links';

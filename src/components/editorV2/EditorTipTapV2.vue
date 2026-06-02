@@ -23,8 +23,8 @@
       :isFullScreen="isFullScreenView"
       :showHeadings="props.showHeadings"
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
-      @enable-editing="$emit('enableEditing')"
-      @toggle-fullscreen="$emit('toggle-fullscreen')"
+      @enable-editing="emits('enableEditing')"
+      @toggle-fullscreen="emits('toggle-fullscreen')"
     />
 
     <div class="html-editor__outer">
@@ -37,7 +37,7 @@
             { 'html-editor__btn-edit--force': isShowEdit || isTocPopupOpen },
           ]"
           title="Нажмите для редактирования"
-          @click="$emit('enableEditing')"
+          @click="emits('enableEditing')"
         >
           <EditIcon />
 
@@ -75,7 +75,8 @@
                       class="html-editor__toc-link"
                       @click.prevent="onTocItemClick(link)"
                     >
-                        {{ !hasOwnNumeration(link.text) ? link.index + ' ' : '' }}{{ link.text }}
+                      {{ !hasOwnNumeration(link.text) ? link.index + ' ' : ''
+                      }}{{ link.text }}
                     </a>
                   </div>
                 </q-card-section>
@@ -127,7 +128,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // Vue
 import {
   ref,
@@ -214,14 +215,13 @@ const props = withDefaults(defineProps<IEditorV2Props>(), {
 });
 
 // Emits
-const emit = defineEmits([
-  'update:modelValue',
-  'getEditor',
-  'enableEditing',
-  'isEditorEmpty',
-  'toggle-fullscreen',
-  'updateEditorDOM',
-]);
+const emits = defineEmits<{
+  'update:modelValue': [string];
+  getEditor: [Editor | null];
+  enableEditing: [];
+  'toggle-fullscreen': [];
+  updateEditorDOM: [any];
+}>();
 
 const $q = useQuasar();
 const bus = inject<EventBus>('bus');
@@ -246,8 +246,7 @@ const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
 
 useMenuHandler(tocPopupRef);
-const { floatScroll, clearFloatScroll} = useFloatScroll(editorInstance)
-
+const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
 
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
@@ -257,7 +256,7 @@ const editorExtensions = computed(() => getEditorExtensions(props));
 const hasOwnNumeration = (heading: string) => {
   const firstChar = heading[0];
   return /\d/.test(firstChar);
-}
+};
 
 // Попап с информацией о пользователе при наведении
 const handleMouseMove = (e: any) => {
@@ -326,13 +325,13 @@ function createEditor() {
     editable: !isReadOnly.value,
     extensions: editorExtensions.value as any,
     onUpdate: () => {
-      emit('update:modelValue', editorInstance.value?.getHTML());
-      emit('updateEditorDOM', editorInstance.value?.state.doc);
+      emits('update:modelValue', editorInstance.value?.getHTML());
+      emits('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
       floatScroll();
     },
     onCreate: () => {
-      emit('updateEditorDOM', editorInstance.value?.state.doc);
+      emits('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
       floatScroll();
     },
@@ -344,7 +343,7 @@ function createEditor() {
     isFormatSampleActive,
   );
   addMouseUpListener();
-  emit('getEditor', editorInstance.value);
+  emits('getEditor', editorInstance.value);
 }
 
 const refreshTocLinks = () => {
@@ -362,9 +361,7 @@ const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
   if (!editorInstance.value) return;
   const editor = editorInstance.value;
 
-  const element = editor.view.dom.querySelector(
-    `[data-toc-id="${link.id}"]`,
-  )
+  const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
 
   if (!element) return;
 
@@ -405,7 +402,7 @@ const onResize = (size: any) => {
 
 const onCommentLink = (commentData: any) => {
   if (isReadOnly.value) {
-    if (commentData) bus?.emit('openSingleComment', commentData);
+    if (commentData) bus?.emits('openSingleComment', commentData);
   } else {
     editAnchor.value = true;
   }

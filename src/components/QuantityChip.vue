@@ -12,21 +12,14 @@
     <div>{{ value }}</div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import LinkIcon from './icons/LinkIcon.vue';
 import ClipIcon from './icons/ClipIcon.vue';
 import DotListIcon from './icons/DotListIcon.vue';
 import LinkedIssueIcon from './icons/LinkedIssueIcon.vue';
 
-export default defineComponent({
-  name: 'QuantityChip',
-  props: ['type', 'value'],
-  components: {
-    LinkIcon,
-    ClipIcon,
-    DotListIcon,
-    LinkedIssueIcon,
-  },
-});
+defineProps<{
+  type: string;
+  value: string;
+}>();
 </script>

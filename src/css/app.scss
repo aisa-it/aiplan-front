@@ -1589,3 +1589,7 @@ body .q-table th {
     transform: translateX(0);
   }
 }
+
+.q-drawer {
+  border-right: 1px solid $darkest-border-color !important;
+}

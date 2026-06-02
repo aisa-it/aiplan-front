@@ -75,7 +75,10 @@ defineProps<{
   modelValue?: boolean;
 }>();
 
-defineEmits(['go-to-page', 'update:modelValue']);
+defineEmits<{
+  'go-to-page': [number];
+  'update:modelValue': [boolean];
+}>();
 
 //core
 const quasar = useQuasar();

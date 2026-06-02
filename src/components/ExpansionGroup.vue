@@ -50,7 +50,7 @@ const route = useRoute();
 //stores
 const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
-const { isDemo, isEnabledJitsi } = storeToRefs(utilsStore);
+const { isDemo } = storeToRefs(utilsStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //composables
