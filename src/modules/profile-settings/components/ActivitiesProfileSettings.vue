@@ -16,7 +16,7 @@
     :rows="rows"
     :current-day="currentDay"
     :rows-count="rowsCount"
-    @update="onRequest"
+    @update="(options) => onRequest(options, currentDay)"
     @on-close-click="closeCurrentActivity"
   />
 </template>
