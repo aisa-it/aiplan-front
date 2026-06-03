@@ -2,11 +2,20 @@
   <q-menu
     ref="menuRef"
     class="context-menu"
-    :style="`z-index: ${ isDeletingOpen ? 6000 : 9001}`"
+    :style="`z-index: ${ isDeletingOpen || isEditingOpen ? 6000 : 9001}`"
     v-bind="menuProps"
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
+      <q-item
+        clickable
+        @click="addToFolder"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <FolderIcon />
+        </q-item-section>
+        <q-item-section>Добавить к папке ...</q-item-section>
+      </q-item>
       <q-item clickable v-close-popup @click="copySprintLink">
         <q-item-section thumbnail class="q-px-md">
           <CopyLinkIcon />
@@ -48,6 +57,10 @@
       @success="successDeleteHandle"
       @error="errorDeleteHandle"
     />
+    <EditFolderDialog
+      v-model="isEditingOpen"
+      :sprint="sprintForManageFolder"
+    />
   </q-menu>
 </template>
 
@@ -55,6 +68,7 @@
 import { computed, ref, watch, nextTick } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
 
+import FolderIcon from 'src/components/icons/FolderIcon.vue';
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
@@ -62,6 +76,7 @@ import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue'
+import EditFolderDialog from 'src/modules/sprints/edit-folder-dialog/EditFolderDialog.vue'
 
 const props = defineProps<{
   row: DtoSprintLight | null;
@@ -84,6 +99,13 @@ const { setNotificationView } = useNotificationStore();
 
 let sprintLink = computed(() => props.row?.short_url ?? props.row?.url ?? '');
 const isDeletingOpen = ref<boolean>(false);
+const isEditingOpen = ref<boolean>(false);
+const sprintForManageFolder = ref<DtoSprintLight | null>();
+
+const addToFolder = () => {
+  sprintForManageFolder.value = props.row;
+  isEditingOpen.value = true;
+}
 
 const copySprintLink = (): void => {
   try {
