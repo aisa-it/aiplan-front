@@ -442,3 +442,5 @@ export const TIMEZONES = [
   { value: 'Pacific/Pago_Pago', label: '-11:00 Паго-Паго, Ниуэ, Мидуэй' },
   { value: 'Etc/GMT-12', label: '-12:00 Острова Бейкер и Хауленд' },
 ];
+
+export const ROOT_FOLDER_ID = '00000000-0000-0000-0000-000000000000';

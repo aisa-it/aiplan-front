@@ -2,7 +2,7 @@
   <div class="q-pa-xs full-w" :class="preventClass">
     <q-card class="reply-card">
       <q-card-section class="reply-card__section">
-        <q-icon v-if="isNotMessage" name="reply"/>
+        <q-icon v-if="isNotMessage" name="reply" />
         <q-btn
           no-caps
           class="reply-card__text q-pa-sm"
@@ -41,74 +41,46 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
 import CloseIcon from 'components/icons/CloseIcon.vue';
 import ReplyPreviewDialog from 'components/issue-panels/reply/ReplyPreviewDialog.vue';
 
-export default defineComponent ({
-  name: 'ReplyCard',
-  components: { ReplyPreviewDialog, CloseIcon },
-  props: {
-    replyComment: {
-      type: Object,
-      required: false,
-      default: () => {
-        return {}
-      }
-    },
-    isNotMessage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    members: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    preventClass: {
-      type: String,
-      required: false,
-    },
-  },
-  emits: ['delete-reply'],
-  setup(props, { emit }) {
+const props = defineProps<{
+  replyComment?: any;
+  isNotMessage?: boolean;
+  members?: any[];
+  preventClass?: string;
+}>();
 
-    const showCommentPreview = ref<boolean>(false);
+const emits = defineEmits<{
+  'delete-reply': [];
+}>();
 
-    const userFirstNameAndLastName = computed(() => {
-      const firstName = props.replyComment?.actor_detail?.first_name?? '';
-      const lastName = props.replyComment?.actor_detail?.last_name?? '';
+const showCommentPreview = ref<boolean>(false);
 
-      if (!firstName && !lastName) {
-        return '';
-      }
+const userFirstNameAndLastName = computed(() => {
+  const firstName = props.replyComment?.actor_detail?.first_name ?? '';
+  const lastName = props.replyComment?.actor_detail?.last_name ?? '';
 
-      return `${firstName} ${lastName}`;
-    });
-
-    const commentStripped = computed(() => {
-      return `${props.replyComment?.comment_stripped?? ''}`
-    });
-
-    const handleClickDelete = () => {
-      emit('delete-reply');
-    };
-
-    const handleClickOpenPreview = () => {
-      showCommentPreview.value = true;
-    };
-
-    return {
-      commentStripped,
-      handleClickDelete,
-      showCommentPreview,
-      handleClickOpenPreview,
-      userFirstNameAndLastName,
-    }
+  if (!firstName && !lastName) {
+    return '';
   }
+
+  return `${firstName} ${lastName}`;
 });
+
+const commentStripped = computed(() => {
+  return `${props.replyComment?.comment_stripped ?? ''}`;
+});
+
+const handleClickDelete = () => {
+  emits('delete-reply');
+};
+
+const handleClickOpenPreview = () => {
+  showCommentPreview.value = true;
+};
 </script>
 
 <style lang="scss" scoped>

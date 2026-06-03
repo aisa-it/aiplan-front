@@ -22,7 +22,7 @@
 <script setup lang="ts">
 // core
 import { LocalStorage, Screen, useQuasar } from 'quasar';
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, onBeforeMount, onUnmounted, ref, toRefs, watch } from 'vue';
 
 // components
 import NavMenu from 'components/NavMenu.vue';
@@ -30,6 +30,17 @@ import { useRoute } from 'vue-router';
 import { useUIStore } from 'src/stores/ui-store';
 import { storeToRefs } from 'pinia';
 import { useDrawerResize } from 'src/composables/useDrawerResize';
+
+const emits = defineEmits<{
+  'update:drawer-open': [value: boolean];
+}>();
+
+const leftDrawerOpen = ref(false);
+
+const $q = useQuasar();
+const route = useRoute();
+
+const uiStore = useUIStore();
 
 const props = withDefaults(
   defineProps<{
@@ -39,22 +50,12 @@ const props = withDefaults(
     drawerOpen: false,
   },
 );
-
-const emits = defineEmits<{
-  'update:drawer-open': [value: boolean];
-}>();
-
-const { drawerOpen: leftDrawerOpen } = toRefs(props);
-
-const $q = useQuasar();
-const route = useRoute();
-
-const uiStore = useUIStore();
+const { drawerOpen } = toRefs(props);
 
 const { menuSidebarWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 300;
-const clientWidth = ref(document.documentElement.clientWidth)
+const clientWidth = ref(document.documentElement.clientWidth);
 const minWidth = computed(() => defaultWidth);
 const maxWidth = computed(() =>
   isMobile.value ? defaultWidth : clientWidth.value / 2,
@@ -73,6 +74,29 @@ const isMobile = computed(() => {
   return $q.platform.is.mobile && Screen.lt.md;
 });
 
+const STORAGE_KEY = 'leftDrawerOpen';
+
+const syncDrawerFromStorage = (e: StorageEvent) => {
+  if (e.key === STORAGE_KEY) {
+    try {
+      leftDrawerOpen.value = JSON.parse(e.newValue as string);
+    } catch {
+      leftDrawerOpen.value = false;
+    }
+  }
+};
+
+onBeforeMount(() => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  leftDrawerOpen.value = stored ? JSON.parse(stored) : true;
+
+  window.addEventListener('storage', syncDrawerFromStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('storage', syncDrawerFromStorage);
+});
+
 watch(
   () => Screen.lt.md,
   (newValue) => {
@@ -84,6 +108,13 @@ watch(
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => drawerOpen.value,
+  () => {
+    leftDrawerOpen.value = drawerOpen.value;
+  },
 );
 
 watch(

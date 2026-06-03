@@ -65,6 +65,7 @@
         :project="issueData.project_detail"
         :issueid="issueData.id"
         :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
+        @get-sub-issues="(issues) => (subIssues = issues)"
       />
       <LinkedIssuesPanel :project_detail="issueData.project_detail" />
 
@@ -87,6 +88,7 @@
       preview
       class="fixed-right hide-scrollbar issue-drawer-preview"
       style="top: 62px"
+      :sub-issues="subIssues"
       @refresh="(v) => refreshData(v)"
     />
   </q-drawer>
@@ -128,6 +130,7 @@ import MainIssueInfo from '../../main-issue-info/ui/MainIssueInfo.vue';
 import { QUASAR_SELECTORS_CLASSES } from 'src/constants/quasarSelectorsClasses';
 import { useDrawerResize } from 'src/composables/useDrawerResize';
 import { useUIStore } from 'src/stores/ui-store';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const model = defineModel<boolean>({ default: false });
 
@@ -167,6 +170,8 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   'right',
 );
 
+const subIssues = ref<DtoIssue[]>([]);
+
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
@@ -186,13 +191,11 @@ const uploadAttachments = async (
   ev: object,
   onProgress?: FileAttUploadProgressFunc,
 ) => {
-  await aiplanStore
-    .issueAttachmentsUpload(ev, issueData.value.id, onProgress)
+  await aiplanStore.issueAttachmentsUpload(ev, issueData.value.id, onProgress);
 };
 
 const deleteAttachment = async (attachmentId: string) => {
-  await aiplanStore
-    .issueAttachmentDelete(currentIssueID.value, attachmentId)
+  await aiplanStore.issueAttachmentDelete(currentIssueID.value, attachmentId);
 };
 
 // заменить на сервис после обновления апи

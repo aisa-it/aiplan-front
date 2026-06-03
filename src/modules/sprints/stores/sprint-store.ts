@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import {
   DtoSprint,
+  DtoSprintFolder,
   DtoSprintLight,
   TypesIssuesListFilters,
   TypesViewProps,
@@ -10,9 +11,13 @@ import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
 import { IQuery } from 'src/stores/issues-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { getSprints, getSprint, updateSprintView } from '../services/api';
+import { Sprint } from '@aisa-it/aiplan-api-ts/src/Sprint';
+import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 
 const aiplan = useAiplanStore();
 const api = aiplan.api;
+
+const sprintApi = new (withInterceptors(Sprint))();
 
 export enum NotUpdated {
   SprintPage = 1,
@@ -27,7 +32,7 @@ export const useSprintStore = defineStore('sprint-store', {
       issuesLoader: false,
       refreshSprintData: false,
       notUpdated: [] as NotUpdated[],
-      sprintsList: [] as DtoSprintLight[],
+      sprintsList: [] as DtoSprintFolder[],
     };
   },
 
@@ -92,6 +97,16 @@ export const useSprintStore = defineStore('sprint-store', {
   },
 
   actions: {
+    openSprint(sprintId: string, target?: string) {
+      const url = `/${this.router.currentRoute.value.params.workspace}/sprints/${sprintId}`;
+
+      if (target && target === '_blank') {
+        window.open(url, target);
+      } else {
+        this.router.push(url);
+      }
+    },
+
     triggerSprintRefresh(notUpdated?: NotUpdated) {
       if (notUpdated) {
         this.notUpdated.push(notUpdated);
@@ -173,7 +188,9 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     async getSprintsList(wsSlug: string) {
-      return this.sprintsList = await getSprints(wsSlug)
+      // return this.sprintsList = await getSprintList(wsSlug)
+     await sprintApi.getSprintList(wsSlug)
+      .then((res) => this.sprintsList = res.data)
     }
   },
 });

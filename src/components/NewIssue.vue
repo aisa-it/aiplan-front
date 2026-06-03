@@ -43,7 +43,7 @@
     <NewProjectDialog
       v-if="isProjectCreateOpen"
       v-model="isProjectCreateOpen"
-      @hide="emit('closeDialog')"
+      @hide="emits('closeDialog')"
     />
     <CreateDocPageDialog
       v-if="isDocCreateOpen"
@@ -94,7 +94,10 @@ const props = defineProps<{
   showDialog?: boolean;
 }>();
 
-const emit = defineEmits(['closeDialog', 'setDisable']);
+const emits = defineEmits<{
+  closeDialog: [];
+  setDisable: [boolean];
+}>();
 
 const isMobile = toRef(props.isMobile);
 
@@ -122,7 +125,7 @@ const addIssue = () => {
 };
 
 const closeDialog = () => {
-  emit('closeDialog');
+  emits('closeDialog');
 };
 
 watch(
@@ -137,12 +140,12 @@ watch(
 watch(
   () => isDisabled.value,
   () => {
-    emit('setDisable', isDisabled.value);
+    emits('setDisable', isDisabled.value);
   },
 );
 
 onMounted(() => {
-  emit('setDisable', isDisabled.value);
+  emits('setDisable', isDisabled.value);
 });
 </script>
 

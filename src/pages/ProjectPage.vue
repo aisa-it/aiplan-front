@@ -13,7 +13,7 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { onMounted, watch } from 'vue';
 
@@ -40,8 +40,6 @@ const getCurrentProject = async () => {
   );
   isLoadProjectInfo.value = false;
 };
-
-onMounted(async () => await getCurrentProject());
 
 watch(
   () => router.currentRoute.value.params.project,

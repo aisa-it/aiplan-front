@@ -106,6 +106,7 @@ export const ROLES = {
       'show-project',
       'change-issue-status',
       'add-to-fav',
+      'transfer-issue',
     ],
     guest: ['show-project-popup', 'show-project', 'show-comment', 'add-to-fav'],
   },

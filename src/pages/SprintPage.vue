@@ -41,7 +41,7 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { is } from 'quasar';
 import { useRouter } from 'vue-router';
 import {
