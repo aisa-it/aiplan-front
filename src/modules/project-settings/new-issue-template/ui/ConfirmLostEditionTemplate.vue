@@ -16,7 +16,7 @@
           class="secondary-btn"
           label="Вернуться в шаблон"
           style="width: 180px"
-          @click="() => emit('backToEdition')"
+          @click="() => emits('backToEdition')"
         />
         <q-btn
           flat
@@ -25,7 +25,7 @@
           class="primary-btn"
           label="Закрыть"
           style="width: 180px"
-          @click="() => emit('closeEdition')"
+          @click="() => emits('closeEdition')"
         />
       </q-card-actions>
     </q-card>
@@ -33,9 +33,7 @@
 </template>
 
 <script setup lang="ts">
-
-const emit = defineEmits(['closeEdition', 'backToEdition']);
-
+const emits = defineEmits<{ closeEdition: []; backToEdition: [] }>();
 </script>
 
 <style scoped>

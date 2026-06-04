@@ -23,7 +23,7 @@
                 :readonly="!isAdminOrAuthor"
                 option-value="value"
                 option-label="label"
-                emit-value
+                emits-value
                 map-options
                 class="base-selector role-select"
                 dense
@@ -83,7 +83,7 @@
                   option-value="value"
                   option-label="label"
                   :readonly="!isAdminOrAuthor"
-                  emit-value
+                  emits-value
                   map-options
                   class="base-selector role-select"
                   dense
@@ -154,7 +154,10 @@ const props = defineProps<{
   isAdminOrAuthor: boolean;
 }>();
 
-const emit = defineEmits(['update:roles', 'update:modelValue']);
+const emits = defineEmits<{
+  'update:roles': [Roles | null];
+  'update:modelValue': [boolean];
+}>();
 
 const currentRole = ref<Roles | null>(null);
 const workspaceMmebers = ref<DtoWorkspaceMember[]>([]);
@@ -252,11 +255,11 @@ const getUsersBySearch = (): void => {
   );
 };
 
-const updateModelValue = (value: boolean) => emit('update:modelValue', value);
+const updateModelValue = (value: boolean) => emits('update:modelValue', value);
 
 const saveChanges = () => {
   if (currentRole.value) {
-    emit('update:roles', currentRole.value);
+    emits('update:roles', currentRole.value);
   }
   updateModelValue(false);
 };

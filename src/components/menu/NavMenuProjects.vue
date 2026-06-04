@@ -37,7 +37,7 @@
   </ExpansionItem>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';

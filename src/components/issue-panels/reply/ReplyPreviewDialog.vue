@@ -18,35 +18,13 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
-// core
-import { defineComponent } from 'vue';
-
-// components
+<script setup lang="ts">
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
-export default defineComponent({
-  name: 'ReplyPreviewDialog',
-  props: {
-    commentPreview: {
-      type: Object,
-      required: true,
-      default: () => {
-        return {};
-      },
-    },
-    members: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup() {
-    return {};
-  },
-  components: {
-    EditorTipTapV2,
-  },
-});
+defineProps<{
+  commentPreview: any;
+  members: any[];
+}>();
 </script>
 
 <style scoped lang="scss">

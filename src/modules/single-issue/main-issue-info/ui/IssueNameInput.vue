@@ -33,5 +33,5 @@ const singleIssueStore = useSingleIssueStore();
 // store to refs
 const { issueData } = storeToRefs(singleIssueStore);
 
-const props = defineProps(['isReadonly']);
+const props = defineProps<{ isReadonly: boolean }>();
 </script>

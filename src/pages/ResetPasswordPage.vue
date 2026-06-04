@@ -56,9 +56,9 @@
   </q-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { defineComponent, ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -69,48 +69,36 @@ import { IPassword } from 'src/interfaces/users';
 // constants
 import { SUCCESS_IDENTITY_PASSWORD } from 'src/constants/notifications';
 
-export default defineComponent({
-  name: 'ResetPasswordPage',
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const api = useAiplanStore();
-    const { setNotificationView } = useNotificationStore();
+const route = useRoute();
+const router = useRouter();
+const api = useAiplanStore();
+const { setNotificationView } = useNotificationStore();
 
-    const isFirstPassword = ref(true);
-    const isSecondPassword = ref(true);
+const isFirstPassword = ref(true);
+const isSecondPassword = ref(true);
 
-    const { uidb64, token } = route.query;
-    const password = ref<IPassword>({
-      new_password: '',
-      confirm_password: '',
-    });
-
-    const changePassword = async () => {
-      if (!uidb64 || !token) return;
-
-      await api
-        .resetPassword(String(uidb64), String(token), password.value)
-        .then(() => localStorage.clear())
-        .then(() => {
-          router.replace('/signin');
-
-          setNotificationView({
-            open: true,
-            type: 'success',
-            customMessage: SUCCESS_IDENTITY_PASSWORD,
-          });
-        });
-    };
-
-    return {
-      password,
-      isFirstPassword,
-      isSecondPassword,
-      changePassword,
-    };
-  },
+const { uidb64, token } = route.query;
+const password = ref<IPassword>({
+  new_password: '',
+  confirm_password: '',
 });
+
+const changePassword = async () => {
+  if (!uidb64 || !token) return;
+
+  await api
+    .resetPassword(String(uidb64), String(token), password.value)
+    .then(() => localStorage.clear())
+    .then(() => {
+      router.replace('/signin');
+
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: SUCCESS_IDENTITY_PASSWORD,
+      });
+    });
+};
 </script>
 
 <style lang="scss" scoped>

@@ -7,7 +7,7 @@
       class="issue-side-drawer q-ml-sm issue-panel-card hide-scrollbar"
       :width="dynamicWidthDrawer"
     >
-      <SingleIssueDrawer />
+      <SingleIssueDrawer :sub-issues="subIssues" />
     </q-drawer>
 
     <q-page-container class="flex-grow">
@@ -22,6 +22,7 @@
           :project="issueData.project_detail"
           :issueid="issueData.id"
           :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
+          @get-sub-issues="(issues) => (subIssues = issues)"
         />
         <LinkedIssuesPanel />
 
@@ -42,7 +43,7 @@
   </q-layout>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -63,6 +64,7 @@ import SingleIssueActivity from 'src/components/issue-panels/SingleIssueActivity
 import { MainIssueInfo } from 'src/modules/single-issue/main-issue-info';
 import LinkedIssuesPanel from '../linked-issues/ui/LinkedIssuesPanel.vue';
 import { FileAttUploadProgressFunc } from 'src/interfaces/files';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // emits: ['update:issuePage'],
 // stores
@@ -80,6 +82,8 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const rightDrawerOpen = ref(Screen.width > 1323);
 
 const selectAttachments = ref();
+
+const subIssues = ref<DtoIssue[]>([]);
 
 // блок вложений
 const getAttachmentsList = async () => {

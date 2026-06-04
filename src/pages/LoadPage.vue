@@ -3,13 +3,7 @@
     <q-linear-progress indeterminate />
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
 
-export default defineComponent({
-  name: 'LoadPage',
-});
-</script>
 <style scoped lang="scss">
 .underlay {
   position: fixed;

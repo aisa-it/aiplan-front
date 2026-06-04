@@ -21,7 +21,7 @@
   </NodeViewWrapper>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { NodeViewContent, NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import { ICONS } from 'src/utils/icons';
 import { ref, inject, computed } from 'vue';

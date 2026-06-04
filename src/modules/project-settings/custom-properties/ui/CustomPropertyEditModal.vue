@@ -1,7 +1,7 @@
 <template>
   <q-dialog
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="emits('update:modelValue', $event)"
   >
     <q-card style="min-width: 400px; border-radius: 12px">
       <q-card-section class="row items-center q-pb-none">
@@ -27,7 +27,7 @@
             class="base-selector"
             label="Тип"
             dense
-            emit-value
+            emits-value
             map-options
           />
 
@@ -44,7 +44,9 @@
                   class="base-input col"
                   :label="`Вариант ${index + 1}`"
                   dense
-                  :rules="[(val) => !!val?.trim() || 'Поле не может быть пустым']"
+                  :rules="[
+                    (val) => !!val?.trim() || 'Поле не может быть пустым',
+                  ]"
                   lazy-rules
                 />
                 <q-btn
@@ -128,7 +130,7 @@ const props = defineProps<{
   editItem?: PropertyTemplate | null;
 }>();
 
-const emit = defineEmits(['update:modelValue', 'submit']);
+const emits = defineEmits<{ submit: [any]; 'update:modelValue': [boolean] }>();
 
 //variables
 const form = ref<PropertyTemplate>({
@@ -144,7 +146,10 @@ const isSelectType = computed(() => form.value.type === 'select');
 const hasEmptyOptions = computed(() => {
   if (!isSelectType) return false;
   if (isSelectType && form.value.options.length <= 0) return true;
-  return form.value.options?.some((opt: string) => !opt || opt.trim() === '') ?? false;
+  return (
+    form.value.options?.some((opt: string) => !opt || opt.trim() === '') ??
+    false
+  );
 });
 const canSubmit = computed(() => {
   if (!form.value.name) return false;
@@ -166,7 +171,7 @@ const onSubmit = () => {
   if (data.type !== 'select') {
     delete data.options;
   }
-  emit('submit', data);
+  emits('submit', data);
 };
 
 const addOption = () => {
@@ -205,7 +210,10 @@ watch(
 watch(
   () => form.value.type,
   (newType) => {
-    if (newType === 'select' && (!form.value.options || form.value.options.length === 0)) {
+    if (
+      newType === 'select' &&
+      (!form.value.options || form.value.options.length === 0)
+    ) {
       form.value.options = [''];
     }
   },
