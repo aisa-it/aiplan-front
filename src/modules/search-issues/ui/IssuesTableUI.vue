@@ -245,7 +245,7 @@ const router = useRouter();
 
 const route = (row) => {
   const routeData = router.resolve(
-    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.id}/issues/${row.id}`,
+    `/${row.workspace_detail?.slug}/projects/${row.project_detail?.identifier || row.project_detail?.id}/issues/${row.sequence_id || row.id}`,
   );
   window.open(routeData.href, '_blank');
 };

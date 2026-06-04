@@ -1,4 +1,5 @@
 import { getFullName } from 'src/utils/helpers';
+import { getSprintLink } from 'src/utils/links';
 
 const link = (href: string, text: string) => `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
@@ -8,8 +9,9 @@ const link = (href: string, text: string) => `<a target="_blank"
 export function sprintNotificationRender(data: any, detail: any) {
   const sprintDetail = detail?.sprint || null;
   const sprintName = sprintDetail?.name || '';
-  const sprintLink = sprintDetail?.url
-    ? link(sprintDetail.url, `${sprintName}`)
+  const sprintHref = sprintDetail ? getSprintLink(detail?.workspace?.slug, sprintDetail?.sequence_id || sprintDetail?.id) : null;
+  const sprintLink = sprintHref
+    ? link(sprintHref, `${sprintName}`)
     : sprintName
       ? `"${sprintName}"`
       : '';
