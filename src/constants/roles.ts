@@ -31,6 +31,7 @@ export const ROLES = {
       'create-tag',
       'show-archive',
       'edit-archive',
+      'edit-sprint-folders',
     ],
     admin: [
       'ws-settings',
@@ -61,6 +62,7 @@ export const ROLES = {
       'create-tag',
       'show-archive',
       'edit-archive',
+      'edit-sprint-folders',
     ],
     member: ['show-ws', 'edit-document', 'show-sprints-nav'],
     guest: ['show-ws'],

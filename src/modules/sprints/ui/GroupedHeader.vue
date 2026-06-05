@@ -1,5 +1,5 @@
 <template>
-  <div class="grouped-header-wrapper">
+  <div class="grouped-header-wrapper" @click.right.prevent="onContextMenu">
     <q-badge
       :label="sprintsCount"
       :style="`
@@ -12,19 +12,35 @@
     <div class="word-wrap px-sm" style="width: 95%">
       <span class="text-bold">{{ badgeName ? badgeName : 'Без папки' }}</span>
     </div>
+    <FolderContextMenu
+      v-if="folder.id !== ROOT_FOLDER_ID"
+      :folder-id="folder.id"
+      :folder-name="folder.name ?? ''"
+      :anchor-event="contextEvent"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
+import { DtoSprintFolder } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import FolderContextMenu from 'src/modules/sprints/sprints-table/components/FolderContextMenu.vue';
+import { ROOT_FOLDER_ID } from 'src/constants/constants';
 
 const props = defineProps<{
     badgeName?: string;
     badgeColor?: string;
     sprintsCount: number;
+    folder: DtoSprintFolder;
   }>();
 
 const defaultColor = '#bac4d5';
+
+const contextEvent = ref<MouseEvent | null>(null);
+
+const onContextMenu = (evt) => {
+  contextEvent.value = evt;
+};
 
 function getContrastYIQ(r: number, g: number, b: number) {
   const yiq = (r * 299 + g * 587 + b * 114) / 1000;
