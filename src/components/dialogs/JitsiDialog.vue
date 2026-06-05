@@ -86,7 +86,7 @@
   </ExpansionItem>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { ref, watch, computed, onUnmounted } from 'vue';
 import { JitsiMeeting } from '@jitsi/vue-sdk';

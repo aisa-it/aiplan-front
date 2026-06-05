@@ -42,7 +42,7 @@
   </q-item>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, onBeforeUnmount } from 'vue';
@@ -61,7 +61,10 @@ import IssuesExpansionItem from 'src/modules/single-issue/ui/components/IssuesEx
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 import { setIntervalFunction } from 'src/utils/helpers';
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoProject,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(defineProps<{
   project?: DtoProject;
@@ -71,6 +74,8 @@ const props = withDefaults(defineProps<{
 }>(), {
   isDisabled: false,
 });
+
+const emits = defineEmits<{ getSubIssues: [DtoIssue[]] }>();
 
 //core
 const route = useRoute();
@@ -96,6 +101,7 @@ const refresh = async () => {
   );
 
   subIssues.value = data?.sub_issues;
+  emits('getSubIssues', data?.sub_issues);
   stateDistribution.value = data?.state_distribution;
 };
 

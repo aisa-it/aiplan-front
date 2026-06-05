@@ -31,15 +31,9 @@
     </q-btn>
   </q-form>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 // core
-import {
-  defineComponent,
-  onBeforeMount,
-  onMounted,
-  onUnmounted,
-  ref,
-} from 'vue';
+import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
@@ -60,74 +54,61 @@ import { SUCCESS_REGISTRATION_REQUEST } from 'src/constants/notifications';
 import { useQuasar } from 'quasar';
 import { useUtilsStore } from 'src/stores/utils-store';
 
-export default defineComponent({
-  name: 'RegisterPanel',
-  emits: ['registerRequestSent'],
-  components: { CaptchaWidget },
+const emits = defineEmits<{
+  registerRequestSent: [];
+}>();
 
-  setup(props, { emit }) {
-    const api = useAiplanStore();
-    const { setNotificationView } = useNotificationStore();
-    const $q = useQuasar();
-    const captchaPayload = ref('');
-    const loading = ref(false);
-    const updateKey = ref(0);
-    const email = ref<string>('');
-    const refreshInterval = ref();
-    const userStore = useUserStore();
-    const router = useRouter();
-    const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
+const api = useAiplanStore();
+const { setNotificationView } = useNotificationStore();
+const $q = useQuasar();
+const captchaPayload = ref('');
+const loading = ref(false);
+const updateKey = ref(0);
+const email = ref<string>('');
+const refreshInterval = ref();
+const userStore = useUserStore();
+const router = useRouter();
+const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
 
-    const sendRegistrationRequest = async () => {
-      loading.value = true;
-      await api
-        .registerViaEmail(email.value, captchaPayload.value)
-        .then(() => {
-          loading.value = false;
-          setNotificationView({
-            open: true,
-            type: 'success',
-            customMessage: `${SUCCESS_REGISTRATION_REQUEST}${email.value}`,
-          });
-          emit('registerRequestSent');
-        })
-        .catch(() => {
-          loading.value = false;
-        })
-        .finally(() => (updateKey.value += 1));
-    };
-    const workspaceStore = useWorkspaceStore();
-    const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-
-    const tryToAuth = async () => {
-      userStore.getUserInfo().then(async () => {
-        router.push('/');
-        await userStore.getUserWorkspaces();
-        await userStore.getUserWorkspacesMemberships();
-        await userStore.getUserProjectsMemberships();
-        await workspaceStore.getWorkspaceInfo(currentWorkspaceSlug.value);
-        await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
+const sendRegistrationRequest = async () => {
+  loading.value = true;
+  await api
+    .registerViaEmail(email.value, captchaPayload.value)
+    .then(() => {
+      loading.value = false;
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: `${SUCCESS_REGISTRATION_REQUEST}${email.value}`,
       });
-    };
+      emits('registerRequestSent');
+    })
+    .catch(() => {
+      loading.value = false;
+    })
+    .finally(() => (updateKey.value += 1));
+};
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
-    const intervalRefresh = () => {
-      clearInterval(refreshInterval.value);
-      refreshInterval.value = setInterval(() => tryToAuth(), 10000);
-    };
+const tryToAuth = async () => {
+  userStore.getUserInfo().then(async () => {
+    router.push('/');
+    await userStore.getUserWorkspaces();
+    await userStore.getUserWorkspacesMemberships();
+    await userStore.getUserProjectsMemberships();
+    await workspaceStore.getWorkspaceInfo(currentWorkspaceSlug.value);
+    await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
+  });
+};
 
-    intervalRefresh();
-    onBeforeMount(() => $q.dark.set(false));
-    onMounted(() => tryToAuth());
-    onUnmounted(() => clearInterval(refreshInterval.value));
-    return {
-      email,
-      isEmail,
-      loading,
-      captchaPayload,
-      sendRegistrationRequest,
-      updateKey,
-      isEnabledCaptcha,
-    };
-  },
-});
+const intervalRefresh = () => {
+  clearInterval(refreshInterval.value);
+  refreshInterval.value = setInterval(() => tryToAuth(), 10000);
+};
+
+intervalRefresh();
+onBeforeMount(() => $q.dark.set(false));
+onMounted(() => tryToAuth());
+onUnmounted(() => clearInterval(refreshInterval.value));
 </script>

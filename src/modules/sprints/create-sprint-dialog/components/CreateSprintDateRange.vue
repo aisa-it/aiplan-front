@@ -39,7 +39,9 @@ dayjs.extend(timezone);
 const props = defineProps<{
   modelValue: { from: string; to: string };
 }>();
-const emit = defineEmits(['update:modelValue']);
+const emits = defineEmits<{
+  'update:modelValue': [{ from: string; to: string }];
+}>();
 
 const minDate = dayjs().tz('UTC').format('DD.MM.YYYY');
 const maxDate = dayjs()
@@ -61,12 +63,12 @@ const localRange = computed({
       to: val?.to ?? '',
     };
   },
-  set: (val) => emit('update:modelValue', val),
+  set: (val) => emits('update:modelValue', val),
 });
 
 function onInputChange(value: string | number | null) {
   const input = String(value ?? '');
   const [from, to] = input.split('-').map((v) => v.trim());
-  emit('update:modelValue', { from, to });
+  emits('update:modelValue', { from, to });
 }
 </script>

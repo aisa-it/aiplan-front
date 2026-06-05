@@ -58,109 +58,81 @@
   </q-menu>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import {
-  defineComponent,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  PropType,
-  ref,
-  watch,
-} from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 // utils
 import { getUrlFile } from 'src/utils/helpers';
 import { ContentMention } from 'src/components/editorV2/utils/tiptap';
 
-export default defineComponent({
-  name: 'EditorTooltipMention',
-  props: {
-    showTooltip: {
-      type: Boolean,
-      required: true,
-    },
-    anchor: {
-      type: Object as PropType<HTMLElement>,
-    },
-    content: {
-      type: Object as PropType<ContentMention>,
-      required: true,
-    },
-    classPrevent: {
-      type: String,
-      required: false,
-    },
-  },
-  emits: ['showTooltip'],
-  setup(props, { emit }) {
-    //vars
-    const mentionRef = ref();
-    const closeTimer = ref();
+const props = defineProps<{
+  showTooltip: boolean;
+  anchor: HTMLElement;
+  content: ContentMention;
+  classPrevent: string;
+}>();
 
-    // function
-    const closeMenu = () => {
-      if (!props.content) return;
-      mentionRef.value.hide();
-      emit('showTooltip');
-    };
+const emits = defineEmits<{
+  showTooltip: [];
+}>();
 
-    const delayedCloseMenu = () => {
-      if (!props.content) return;
-      closeTimer.value = setTimeout(() => {
-        closeMenu();
-      }, 200);
-    };
+//vars
+const mentionRef = ref();
+const closeTimer = ref();
 
-    const cancelDelayedClose = () => {
-      clearTimeout(closeTimer.value);
-    };
+// function
+const closeMenu = () => {
+  if (!props.content) return;
+  mentionRef.value.hide();
+  emits('showTooltip');
+};
 
-    const hideTooltipOnScroll = () => {
-      if (mentionRef.value && props.showTooltip) {
-        mentionRef.value.hide();
-        emit('showTooltip');
-      }
-    };
+const delayedCloseMenu = () => {
+  if (!props.content) return;
+  closeTimer.value = setTimeout(() => {
+    closeMenu();
+  }, 200);
+};
 
-    onMounted(() => {
-      const scrollContainer = document.querySelector('.comments-list');
-      if (scrollContainer) {
-        scrollContainer.addEventListener('scroll', hideTooltipOnScroll);
-      }
-    });
+const cancelDelayedClose = () => {
+  clearTimeout(closeTimer.value);
+};
 
-    onBeforeUnmount(() => {
-      const scrollContainer = document.querySelector('.comments-list');
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('scroll', hideTooltipOnScroll);
-      }
-    });
+const hideTooltipOnScroll = () => {
+  if (mentionRef.value && props.showTooltip) {
+    mentionRef.value.hide();
+    emits('showTooltip');
+  }
+};
 
-    watch(
-      () => props.showTooltip,
-      (newValue) => {
-        if (newValue) {
-          nextTick(() => {
-            if (mentionRef.value) {
-              mentionRef.value.show();
-            }
-          });
-        }
-      },
-      { immediate: true },
-    );
-
-    return {
-      closeMenu,
-      mentionRef,
-      getUrlFile,
-      delayedCloseMenu,
-      cancelDelayedClose,
-    };
-  },
+onMounted(() => {
+  const scrollContainer = document.querySelector('.comments-list');
+  if (scrollContainer) {
+    scrollContainer.addEventListener('scroll', hideTooltipOnScroll);
+  }
 });
+
+onBeforeUnmount(() => {
+  const scrollContainer = document.querySelector('.comments-list');
+  if (scrollContainer) {
+    scrollContainer.removeEventListener('scroll', hideTooltipOnScroll);
+  }
+});
+
+watch(
+  () => props.showTooltip,
+  (newValue) => {
+    if (newValue) {
+      nextTick(() => {
+        if (mentionRef.value) {
+          mentionRef.value.show();
+        }
+      });
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>

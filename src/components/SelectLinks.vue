@@ -49,7 +49,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, watch, PropType } from 'vue';
+import { ref, watch } from 'vue';
 
 // stores
 import { useUtilsStore } from 'src/stores/utils-store';
@@ -64,35 +64,32 @@ import LinkDialog from './dialogs/LinkDialog.vue';
 import ConfirmDeleteLinkDialog from './dialogs/ConfirmDeleteLinkDialog.vue';
 
 //types
-import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssueLinkLight,
+  DtoProject,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Screen } from 'quasar';
 import LinkItem from './LinkItem.vue';
 
-const props = defineProps({
-  project: { type: Object, required: false },
-  issueid: {
-    type: String,
-    required: false,
-    default: '',
+const props = withDefaults(
+  defineProps<{
+    project?: DtoProject;
+    issueid?: string;
+    links?: DtoIssueLinkLight[];
+    isDisabled?: boolean;
+    isFullWidth?: boolean;
+  }>(),
+  {
+    links: () => [],
+    issueid: '',
   },
-  links: {
-    type: Array as PropType<DtoIssueLinkLight[] | null>,
-    required: false,
-    default: () => [],
-  },
-  isDisabled: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-  isFullWidth: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+);
 
-const emit = defineEmits(['add', 'delete', 'edit']);
+const emits = defineEmits<{
+  add: [DtoIssueLinkLight];
+  edit: [DtoIssueLinkLight];
+  delete: [string];
+}>();
 
 // stores
 const utilsStore = useUtilsStore();
@@ -119,15 +116,15 @@ const openDeleteLinkDialog = (link: DtoIssueLinkLight) => {
 };
 
 const deleteLink = async (linkID: string) => {
-  emit('delete', linkID);
+  emits('delete', linkID);
 };
 
-const addLink = (link: any) => {
-  emit('add', link);
+const addLink = (link: DtoIssueLinkLight) => {
+  emits('add', link);
 };
 
-const editLink = (link: any) => {
-  emit('edit', link);
+const editLink = (link: DtoIssueLinkLight) => {
+  emits('edit', link);
 };
 
 watch(

@@ -11,74 +11,50 @@
   </q-btn>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { Editor } from '@tiptap/vue-3';
-import { computed, defineComponent, PropType } from 'vue';
+import { computed } from 'vue';
 
 // utils
 import { ICONS } from 'src/utils/icons';
 
-export default defineComponent({
-  name: 'EditorFontSizeButton',
-  props: {
-    editorInstance: {
-      type: Object as PropType<Editor>,
-      required: true,
-    },
-    command: {
-      type: String as PropType<'increment'|'decrement'>,
-      default: 'increment',
-    },
-    tooltip: {
-      type: String,
-      required: true,
-    },
-    iconName: {
-      type: String,
-      required: true,
-    },
-    isMobile: {
-      type: Boolean,
-      default: false
-    }
-  },
-  setup(props) {
-    // function
-    const changeFontSize = () => {
-      const currentFontSize = props.editorInstance.getAttributes('textStyle').fontSize;
-      const newFontSize = calculateNewFontSize(currentFontSize);
-      if (props.isMobile) {
-        props.editorInstance.chain().setFontSize(newFontSize).run();
-      } else {
-        props.editorInstance.chain().focus().setFontSize(newFontSize).run();
-      }
-    };
+const props = defineProps<{
+  editorInstance: Editor;
+  command: 'increment' | 'decrement';
+  tooltip: string;
+  iconName: string;
+  isMobile?: boolean;
+}>();
 
-    const calculateNewFontSize = (currentFontSize: string | null) => {
-      const currentSeize = currentFontSize?? '14px';
+// function
+const changeFontSize = () => {
+  const currentFontSize =
+    props.editorInstance.getAttributes('textStyle').fontSize;
+  const newFontSize = calculateNewFontSize(currentFontSize);
+  if (props.isMobile) {
+    props.editorInstance.chain().setFontSize(newFontSize).run();
+  } else {
+    props.editorInstance.chain().focus().setFontSize(newFontSize).run();
+  }
+};
 
-      const currentSize = parseInt(currentSeize.replace('px', ''));
-      const increment = props.command === 'increment';
+const calculateNewFontSize = (currentFontSize: string | null) => {
+  const currentSeize = currentFontSize ?? '14px';
 
-      if (increment) {
-        return `${currentSize + 2}px`;
-      } else {
-        return `${currentSize - 2}px`;
-      }
-    };
+  const currentSize = parseInt(currentSeize.replace('px', ''));
+  const increment = props.command === 'increment';
 
-    // computed
-    const canChangeFontSize = computed(() => {
-      return props.editorInstance.isActive('codeBlock');
-    });
+  if (increment) {
+    return `${currentSize + 2}px`;
+  } else {
+    return `${currentSize - 2}px`;
+  }
+};
 
-    return {
-      ICONS,
-      changeFontSize,
-      canChangeFontSize,
-    }
-  },
+// computed
+const canChangeFontSize = computed(() => {
+  return props.editorInstance.isActive('codeBlock');
 });
 </script>
 

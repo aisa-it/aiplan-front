@@ -148,7 +148,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import {
   inject,
   ref,
@@ -161,9 +161,6 @@ import {
   toRef,
 } from 'vue';
 import { EventBus, QTable } from 'quasar';
-import { storeToRefs } from 'pinia';
-
-import { useProjectStore } from 'src/stores/project-store';
 
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
@@ -184,8 +181,11 @@ import {
 
 import { useIssueContext } from '../composables/useIssueContext';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
+import { useProjectStore } from 'src/stores/project-store'
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { storeToRefs } from 'pinia';
 
 interface QuasarPagination {
   page: number;
@@ -195,26 +195,24 @@ interface QuasarPagination {
   rowsPerPage: number;
 }
 
-const emits = defineEmits([
-  'refresh',
-  'updateIssueField',
-  'openPreview',
-  'openIssue',
-  'updateGroupedIssues',
-]);
-const props = defineProps([
-  'entity',
-  'rows',
-  'rowsCount',
-  'loading',
-  'columns',
-  'contextType',
-]);
+const props = defineProps<{
+  entity?: any;
+  rows: DtoIssue[];
+  rowsCount: number;
+  loading?: boolean;
+  contextType: 'project' | 'sprint';
+}>();
 
 const { project } = storeToRefs(useProjectStore());
 const isArchived = toRef(() =>
   project.value?.archived
 );
+const emits = defineEmits<{
+  refresh: [any, boolean | undefined];
+  openPreview: [DtoIssue, any];
+  openIssue: [number, DtoIssue];
+  updateGroupedIssues: [any];
+}>();
 
 const {
   contextProps,
@@ -226,7 +224,7 @@ const {
 const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
 const columns = computed(() => {
-  return props.columns ?? getTableColumns;
+  return getTableColumns;
 });
 
 const bus = inject('bus') as EventBus;

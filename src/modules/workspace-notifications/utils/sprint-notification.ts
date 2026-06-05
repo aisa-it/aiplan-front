@@ -18,8 +18,9 @@ export function sprintNotificationRender(data: any, detail: any) {
     data?.verb === 'removed' ? data?.old_entity_detail : data?.new_entity_detail;
   const issueKey = data?.verb === 'removed' ? data?.old_value : data?.new_value;
   const issueName = issueEntity?.name || '';
+  const issueHref = `/${detail.workspace?.slug}/projects/${issueKey.split("-")[0]}/issues/${issueKey.split("-")[1]}`;
   const issueLink = issueEntity?.url
-    ? link(issueEntity.url, `${issueKey ? issueKey + ' ' : ''}"${issueName}"`)
+    ? link(issueHref, `${issueKey ? issueKey + ' ' : ''}"${issueName}"`)
     : issueKey
       ? `"${issueKey}"`
       : issueName

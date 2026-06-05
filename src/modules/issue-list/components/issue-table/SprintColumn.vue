@@ -23,7 +23,7 @@ defineProps<{
   isDisabled: boolean;
 }>();
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits<{ refresh: [] }>();
 
 const rolesStore = useRolesStore();
 </script>

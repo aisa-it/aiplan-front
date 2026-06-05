@@ -17,9 +17,7 @@
 </template>
 
 <script setup lang="ts">
-// stores
 import { useRolesStore } from 'src/stores/roles-store';
-// components
 import SelectPriority from 'src/components/SelectPriority.vue';
 
 defineProps<{
@@ -27,6 +25,6 @@ defineProps<{
   isDisabled?: boolean;
 }>();
 
-const emits = defineEmits(['refresh']);
+const emits = defineEmits<{ refresh: [] }>();
 const rolesStore = useRolesStore();
 </script>

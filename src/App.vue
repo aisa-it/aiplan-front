@@ -4,16 +4,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { useQuasar } from 'quasar';
 
-export default defineComponent({
-  name: 'App',
-  setup() {
-    const $q = useQuasar();
-    $q.dark.set(JSON.parse(localStorage.getItem('dark') as string) ?? false);
-    return;
-  },
-});
+const $q = useQuasar();
+$q.dark.set(JSON.parse(localStorage.getItem('dark') as string) ?? false);
 </script>

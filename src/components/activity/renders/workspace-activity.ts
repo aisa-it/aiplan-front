@@ -112,7 +112,7 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
     case 'form':
       const formLink = activity?.new_entity_detail
         ? `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${
                       activity?.entity_url ??
                       `/f/${activity?.new_entity_detail?.slug}`
@@ -130,7 +130,7 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
     case 'project':
       const projectLink = activity.new_entity_detail
         ? `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${activity?.new_entity_detail?.url}>
                     ${activity?.new_value} "${activity.new_entity_detail.name}"<a/>`
         : `"${activity.new_value || activity.old_value}"`;

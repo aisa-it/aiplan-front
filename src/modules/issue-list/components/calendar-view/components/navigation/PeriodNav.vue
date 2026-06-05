@@ -11,7 +11,7 @@
       flat
       dense
       icon="chevron_left"
-      @click="emit('prev')"
+      @click="emits('prev')"
     />
 
     <div class="calendar-period-nav__label q-px-md">
@@ -23,7 +23,7 @@
       flat
       dense
       icon="chevron_right"
-      @click="emit('next')"
+      @click="emits('next')"
     />
   </div>
 </template>
@@ -41,7 +41,7 @@ const props = defineProps<{
   offNavigation?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'prev'): void;
   (e: 'next'): void;
 }>();

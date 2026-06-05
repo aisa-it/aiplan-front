@@ -242,7 +242,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
@@ -303,7 +303,7 @@ const props = withDefaults(
 );
 
 // emits
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -506,7 +506,7 @@ const onCancel = (type: 'ok' | 'error', errors?: IMigrationError[]) => {
 
   if (transferModel.value.delete_src) {
     if (isPreview.value) {
-      emit('refresh');
+      emits('refresh');
       isPreview.value = false;
     }
 

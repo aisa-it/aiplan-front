@@ -93,7 +93,10 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import { updateIssueInfo } from '../../services/api';
 import { moveSubIssueDown, moveSubIssueUp } from '../services/api';
 import { SUCCESS_DELETE_SUBISSUE } from 'src/constants/notifications';
-import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoProject,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const userStore = useUserStore();
 const singleIssueStore = useSingleIssueStore();
@@ -103,8 +106,18 @@ const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(userStore);
 
 const route = useRoute();
-const props = defineProps(['subIssues', 'manualSortMode', 'project_detail', 'isDisabled']);
-const emits = defineEmits(['refresh', 'toggleSortMode']);
+
+const props = defineProps<{
+  subIssues: DtoIssue[];
+  manualSortMode: boolean;
+  project_detail: DtoProject;
+  isDisabled: boolean;
+}>();
+
+const emits = defineEmits<{
+  refresh: [];
+  toggleSortMode: [boolean];
+}>();
 
 const isManualSort = computed({
   get: () => props.manualSortMode,

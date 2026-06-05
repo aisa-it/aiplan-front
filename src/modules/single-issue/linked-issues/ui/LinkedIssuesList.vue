@@ -72,7 +72,10 @@ const props = defineProps<{
   isDisabled?: boolean;
 }>();
 
-const emits = defineEmits(['update:linkedIssues', 'removeIssue']);
+const emits = defineEmits<{
+  'update:linkedIssues': [any[]];
+  removeIssue: [any];
+}>();
 
 const userStore = useUserStore();
 const statesStore = useStatesStore();
