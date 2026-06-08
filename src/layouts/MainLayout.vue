@@ -58,6 +58,10 @@ import ReleaseNotePreviewDialog from 'components/dialogs/ReleaseNotePreviewDialo
 import SnowFall from 'src/components/SnowFall.vue';
 import MainHeader from 'src/components/headers/MainHeader.vue';
 import NavBar from 'src/components/drawers/NavBar.vue';
+import { watch } from 'vue';
+import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // stores
 const api = useAiplanStore();
@@ -72,7 +76,11 @@ const { currentIssueID } = storeToRefs(singleIssueStore);
 const { user, userWorkspaces } = storeToRefs(userStore);
 const { generalLoader } = storeToRefs(loaderStore);
 
+const rolesStore = useRolesStore();
+const workspaceStore = useWorkspaceStore();
 const { openReleaseNote } = storeToRefs(utilsStore);
+const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
+  storeToRefs(workspaceStore);
 
 // vars
 const router = useRouter();
@@ -82,6 +90,7 @@ const { auth } = storeToRefs(api);
 const leftDrawerOpen = ref(false);
 const refreshInterval = ref();
 const isShowReleaseNote = shallowRef(false);
+const { workspace } = storeToRefs(useWorkspaceStoreV2());
 
 const setTheme = () => {
   if (userStore.getTheme === 'dark' || auth.value) {
@@ -135,4 +144,16 @@ const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
   localStorage.setItem(STORAGE_KEY, String(leftDrawerOpen.value));
 };
+
+// TODO: убрать
+watch(
+  () => workspace?.value,
+  async () => {
+    workspaceInfo.value = workspace.value;
+    currentWorkspaceSlug.value = workspace?.value?.slug;
+    await workspaceStore.getMeInWorkspace(currentWorkspaceSlug.value);
+    rolesStore.defineWorkspaceRole(meInWorkspace.value);
+  },
+  { immediate: true },
+);
 </script>
