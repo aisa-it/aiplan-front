@@ -43,9 +43,13 @@ const getCurrentProject = async () => {
 
 watch(
   () => router.currentRoute.value.params.project,
-  () => {
-    issuesStore.$reset();
-    projectStore.$reset();
+  async (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      await getCurrentProject();
+    }
+    // issuesStore.$reset();
+    // projectStore.$reset();
   },
+  { immediate: true },
 );
 </script>
