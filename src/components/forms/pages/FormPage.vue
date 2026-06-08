@@ -54,7 +54,7 @@
                 >
                   <AiFormPageField
                     v-if="isFieldVisible(field, fields)"
-                    :field="field"
+                    :field="fields[field.originalIndex]"
                     :model-value="fields[field.originalIndex].value"
                     :error="validaionError[field.originalIndex]"
                     @update:model-value="
@@ -62,7 +62,9 @@
                     "
                     :ref="(el) => (fieldRefs[field.originalIndex] = el)"
                     :form-slug="route.params.slug"
+                    :empty-user-allowed="!onlyAuth"
                     :workspace-slug="route.params.workspaceSlug"
+                    :submitting="isSubmitting"
                   />
                 </template>
                 <div class="flex justify-between button-container q-mt-md">
@@ -112,7 +114,8 @@
                       :label="!hasNextVisiblePage ? 'Записать ответ' : 'Далее'"
                       size="15px"
                       @click="nextPage"
-                      :disable="isNextButtonDisabled"
+                      :disable="isNextButtonDisabled || isSubmitting"
+                      :loading="isSubmitting"
                       no-caps
                     />
                   </div>
@@ -221,6 +224,7 @@ import {
   resetFieldValues,
   isFieldInvalid,
   findVisiblePage,
+  uploadPendingFormAttachments,
 } from 'src/components/forms/helper/helperForm';
 
 //components
@@ -255,6 +259,7 @@ const currentPage = ref(0);
 const pages = ref([]);
 const drawerOpen = ref(false);
 const fieldRefs = ref([]);
+const isSubmitting = ref(false);
 
 //computeds
 const isMobile = computed(() => quasar.screen.width < 451);
@@ -278,7 +283,15 @@ const isNextButtonDisabled = computed(() => {
     if (!field.required) return false;
     if (field.type === 'checkbox') return false;
 
-    const val = fields.value[field.originalIndex].value;
+    const targetField = fields.value[field.originalIndex];
+    const val = targetField.value;
+
+    if (field.type === 'attachment') {
+      const hasFile =
+        targetField.pendingAttachment ||
+        (val !== '' && val !== null && val !== undefined);
+      return !hasFile;
+    }
 
     if (field.type === 'select' || field.type === 'multiselect') {
       return !val || val.length === 0;
@@ -341,8 +354,31 @@ const submitForm = async () => {
 
   if (hasErrors) return;
 
+  isSubmitting.value = true;
+
+  try {
+    await uploadPendingFormAttachments(
+      fields.value,
+      {
+        formSlug: route.params.slug,
+        workspaceSlug: route.params.workspaceSlug,
+        emptyUserAllowed: !onlyAuth.value,
+      },
+      isFieldVisible,
+    );
+  } catch (error) {
+    console.error('Ошибка загрузки файлов:', error);
+    setNotificationView({
+      type: 'error',
+      customMessage: 'Не удалось загрузить файл',
+      open: true,
+    });
+    isSubmitting.value = false;
+    return;
+  }
+
   const submissionData = [];
-  fields.value.forEach((field, index) => {
+  fields.value.forEach((field) => {
     if (isFieldVisible(field, fields.value)) {
       submissionData.push(getSubmissionValue(field));
     } else {
@@ -360,7 +396,9 @@ const submitForm = async () => {
       customMessage: SUCCESS_SEND_FORM,
     });
     completedForm.value = true;
-  } catch (e) {}
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const goToPage = (index) => {
