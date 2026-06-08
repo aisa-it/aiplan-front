@@ -3,6 +3,7 @@ import { formatDateTime } from 'src/utils/time';
 import { translatePrioritets, translateVerb } from 'src/utils/translator';
 import aiplan from 'src/utils/aiplan';
 import dayjs from 'dayjs';
+import { getProjectLink, getSprintLink } from 'src/utils/links';
 
 export function issueNotificationRender(data: any, detail: any) {
   let action = '';
@@ -200,12 +201,15 @@ export function issueNotificationRender(data: any, detail: any) {
       return `<span>${action} ${value} в задачe ${link}<span/>`;
 
     case 'project':
+      const newProjectHref = getProjectLink(detail?.workspace?.slug, data.new_entity_detail?.identifier || data.new_entity_detail?.id);
+      const oldProjectHref = getProjectLink(detail?.workspace?.slug, data.old_entity_detail?.identifier || data.old_entity_detail?.id);
+
       const newProject = data.new_value
-        ? `в проект ${customLink(data.new_entity_detail.url, data.new_entity_detail.name)}`
+        ? `в проект ${customLink(newProjectHref, data.new_entity_detail.name)}`
         : 'в скрытый/удаленный проект';
 
       const oldProject = data.old_value
-        ? `из проекта ${customLink(data.old_entity_detail.url, data.old_entity_detail.name)}`
+        ? `из проекта ${customLink(oldProjectHref, data.old_entity_detail.name)}`
         : 'из скрытого/удаленного проекта';
 
       if (data.verb === 'move') {
@@ -232,9 +236,10 @@ export function issueNotificationRender(data: any, detail: any) {
         data?.verb === 'removed' ? data?.old_entity_detail : data?.new_entity_detail;
       const sprintName =
         sprintEntity?.name || data?.new_value || data?.old_value || '';
+      const sprintHref = sprintEntity ? getSprintLink(detail?.workspace?.slug, sprintEntity?.sequence_id || sprintEntity?.id) : null;
       const sprintLink =
-        sprintEntity?.url
-          ? customLink(sprintEntity.url, `${sprintName}`)
+        sprintHref
+          ? customLink(sprintHref, `${sprintName}`)
           : sprintName
             ? `"${sprintName}"`
             : '';

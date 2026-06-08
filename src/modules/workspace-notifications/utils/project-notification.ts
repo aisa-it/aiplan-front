@@ -18,7 +18,7 @@ export function projectNotificationRender(
   const projectLink = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
                     href=${getProjectLink(
-                      detail?.project?.workspace as string,
+                      detail?.workspace?.slug || detail?.project?.workspace as string,
                       detail?.project?.identifier as string,
                     )}>
                     ${detail?.project?.name}</a>`;
@@ -29,12 +29,6 @@ export function projectNotificationRender(
                     href=/${detail?.workspace?.slug}/projects/${detail?.project?.identifier}/issues/${sequence_id}
                     >
                     ${prefix} "${name}"</a>`;
-  };
-  const customLink = (href: string, name: string) => {
-    return `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${href}>
-                    ${name}</a>`;
   };
   switch (data.field) {
     case 'emoji':
@@ -232,7 +226,7 @@ export function projectNotificationRender(
         return `<span>скопировал(-а) задачу ${issueLink(data?.new_entity_detail?.sequence_id, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
       }
       if (data.verb === 'removed') {
-        return `<span>убрал(-а) задачу ${issueLink(data?.old_entity_detail?.sequence_id, data.old_value, data?.old_entity_detail?.name)} из проекта ${customLink(detail?.project?.url ?? '', detail?.project?.name ?? '')} </span>`;
+        return `<span>убрал(-а) задачу ${issueLink(data?.old_entity_detail?.sequence_id, data.old_value, data?.old_entity_detail?.name)} из проекта ${projectLink} </span>`;
       }
       if (data.verb === 'added') {
         return `<span>добавил(-а) задачу ${issueLink(data?.new_entity_detail?.sequence_id, data?.new_value, data?.new_entity_detail?.name)} в проект ${projectLink} </span>`;
