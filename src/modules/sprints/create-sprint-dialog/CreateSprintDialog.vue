@@ -302,7 +302,7 @@ const updateIssueAndWatchers = async (id: string, data: any) => {
       id ?? '',
       data.issuesSprint,
     ).catch((err) => {
-      showNotification('error', 'Ошибка при прекреплении задач');
+      showNotification('error', 'Ошибка при прикреплении задач');
       throw err;
     }),
     sprintWatchersUpdate(
@@ -310,7 +310,7 @@ const updateIssueAndWatchers = async (id: string, data: any) => {
       id ?? '',
       data.membersSprint,
     ).catch((err) => {
-      showNotification('error', 'Ошибка при прекреплении наблюдателей');
+      showNotification('error', 'Ошибка при прикреплении наблюдателей');
       throw err;
     }),
   ]);

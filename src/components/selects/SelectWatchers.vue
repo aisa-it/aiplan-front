@@ -146,6 +146,7 @@ const props = withDefaults(
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
     debounced?: boolean;
+    isSprint?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -334,12 +335,19 @@ const updateDocWatchers = async (e: any) => {
     });
 };
 
+const updateSprintWatchers = (e: any) => {
+  emit('update:watchers', e);
+  return;
+}
+
 const handleUpdateWatchers = async (e) => {
   watcherid.value = e;
   if (props.projectid) {
     props.debounced
       ? debouncedProjectWatchersUpdate(e)
       : updateProjectWatchers(e);
+  } else if (props.isSprint) {
+    updateSprintWatchers(e);
   } else {
     props.debounced ? debouncedDocWatchersUpdate(e) : updateDocWatchers(e);
   }
