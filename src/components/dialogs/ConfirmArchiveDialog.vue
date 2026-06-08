@@ -1,9 +1,9 @@
 <template>
-  <q-dialog>
+  <q-dialog @hide="emits('hide')">
     <q-card class="modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ma-md">
-          {{ isUnarchive ? 'Разархивировать' : 'Добавить в архив' }}
+          {{ isArchive ? 'Разархивировать' : 'Добавить в архив' }}
           {{ ` проект` }}
           {{ project?.name }}?
         </h6>
@@ -14,8 +14,8 @@
           flat
           no-caps
           class="btn primary-btn"
-          :label="isUnarchive ? 'Разархивировать' : 'В архив'"
-          :style="{ width: isUnarchive ? '210px' : '110px' }"
+          :label="isArchive ? 'Разархивировать' : 'В архив'"
+          :style="{ width: isArchive ? '210px' : '110px' }"
           v-close-popup
           @click="handleConfirm"
         />
@@ -39,10 +39,10 @@ import { useLoadProjectInfo } from 'src/modules/issue-list/composables/useLoadPr
 import { useProjectStore } from 'src/stores/project-store';
 
 const props = defineProps<{
-  project: DtoProjectLight | null,
-  isUnarchive?: boolean,
+  project: DtoProjectLight,
+  isArchive?: boolean,
 }>();
-const emits = defineEmits<{ success: []; error: [] }>();
+const emits = defineEmits<{ success: []; error: []; hide: [] }>();
 
 const workspaceStore = useWorkspaceStore();
 const projectStore = useProjectStore();
@@ -54,7 +54,7 @@ const { currentProjectID } = storeToRefs(projectStore);
 
 const handleConfirm = async (): Promise<void> => {
   try {
-    if (props.isUnarchive) {
+    if (props.isArchive) {
       await workspaceStore.unarchiveProject(currentWorkspaceSlug.value, props.project?.id);
     } else {
       await workspaceStore.archiveProject(currentWorkspaceSlug.value, props.project?.id);

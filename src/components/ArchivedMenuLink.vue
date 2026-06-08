@@ -60,7 +60,7 @@
   <ConfirmArchiveDialog
     v-model="isUnarchiveDialogOpen"
     :project="projectToUnarchive"
-    is-unarchive
+    is-archive
     @success="successUnarchiveHandle"
     @error="errorUnarchiveHandle"
   />

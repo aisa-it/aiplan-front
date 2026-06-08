@@ -53,6 +53,12 @@ const routes: RouteRecordRaw[] = [
             meta: { requiredWorkspace: true },
           },
           {
+            path: 'archive',
+            name: 'archive',
+            component: () => import('pages/ArchivePage.vue'),
+            meta: { requiredWorkspace: true },
+          },
+          {
             path: 'sprints',
             name: 'sprints',
             component: () => import('pages/SprintsPage.vue'),
