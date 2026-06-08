@@ -1,10 +1,9 @@
 <template>
-  <q-header
-    style="z-index: 1000"
-    :style="utilsStore.ny === true ? 'background-color: transparent' : ''"
-  >
-    <q-toolbar :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''">
-      
+  <q-header style="z-index: 1000">
+    <q-toolbar
+      :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''"
+      class="header"
+    >
       <WorkspaceButton></WorkspaceButton>
 
       <template v-if="workspaceInfo">

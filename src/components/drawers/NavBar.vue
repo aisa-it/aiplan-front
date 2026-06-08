@@ -3,14 +3,14 @@
     v-model="drawer"
     show-if-above
     :mini="!drawer || miniState"
-    :width="258"
+    :width="270"
     :breakpoint="500"
     bordered
     class="main-nav-bar"
   >
     <div class="column full-height">
       <q-scroll-area class="col" :horizontal-thumb-style="{ opacity: 0 }">
-        <q-list padding>
+        <q-list>
           <q-item
             clickable
             v-ripple
@@ -83,7 +83,7 @@
         </q-list>
       </q-scroll-area>
 
-      <q-list padding class="col-auto">
+      <q-list class="col-auto">
         <ExpansionItem v-if="!miniState" type="help" itemName="help">
           <template v-slot:header>
             <q-item-section avatar>
