@@ -6,10 +6,14 @@
     ref="root"
   >
     <div v-for="(folder, index) in sprintFolders" :key="folder.id">
-      <q-item v-if="!folder.sprints?.length">
+      <q-item
+        v-if="!folder.sprints?.length"
+        clickable
+      >
         <GroupedHeader
           :badge-name="folder?.name"
           :sprints-count="0"
+          :folder="folder"
         />
       </q-item>
 
@@ -21,6 +25,7 @@
           <GroupedHeader
             :badge-name="folder?.name"
             :sprints-count="folder?.sprints?.length"
+            :folder="folder"
           />
         </template>
 
@@ -32,9 +37,11 @@
         v-else
         class="gantt-margin"
         >
+        <!-- @click.right="onFolderContextMenu" -->
         <template #header>
           <GroupedHeader
             :sprints-count="folder?.sprints?.length"
+            :folder="folder"
           />
         </template>
 
@@ -61,3 +68,4 @@ const props = defineProps<{
   sprintFolders: DtoSprintFolder[];
 }>();
 </script>
+
