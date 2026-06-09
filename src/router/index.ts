@@ -67,5 +67,12 @@ export default route(function (/* { store, ssrContext } */) {
     localStorage.setItem('next_url', to.fullPath);
   });
 
+  Router.onError((error) => {
+    if (error.message.includes('Failed to fetch dynamically imported module')) {
+      console.log(error);
+      window.location.reload();
+    }
+  });
+
   return Router;
 });
