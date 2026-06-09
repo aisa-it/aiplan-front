@@ -93,23 +93,6 @@ export default configure(function (ctx) {
           }
           return cleanName;
         };
-
-        viteConf.build.rollupOptions.output.manualChunks = (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('quasar')) return 'quasar-vendor';
-            if (id.includes('vue')) return 'vue-vendor';
-            if (id.includes('chart.js') || id.includes('apexcharts'))
-              return 'charts-vendor';
-            if (id.includes('@tiptap')) return 'tiptap-vendor';
-            return 'vendor';
-          }
-
-          if (id.includes('src/modules/')) {
-            const moduleName = id.split('src/modules/')[1]?.split('/')[0];
-            if (moduleName) return `module-${moduleName}`;
-          }
-          return null;
-        };
       },
       vitePlugins: [
         [
