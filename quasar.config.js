@@ -75,42 +75,48 @@ export default configure(function (ctx) {
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
-      // Увеличиваем лимит предупреждения о размере chunks
       chunkSizeWarningLimit: 1000,
 
       extendViteConf(viteConf) {
-        // Добавляем оптимизацию chunks
-        if (viteConf.build && viteConf.build.rollupOptions) {
-          viteConf.build.rollupOptions.output = {
-            ...viteConf.build.rollupOptions.output,
-            manualChunks(id) {
-              // Разделяем node_modules на отдельные chunks
-              if (id.includes('node_modules')) {
-                if (id.includes('quasar')) {
-                  return 'quasar-vendor';
-                }
-                if (id.includes('vue')) {
-                  return 'vue-vendor';
-                }
-                if (id.includes('chart.js') || id.includes('apexcharts')) {
-                  return 'charts-vendor';
-                }
-                if (id.includes('@tiptap')) {
-                  return 'tiptap-vendor';
-                }
-                return 'vendor';
-              }
+        viteConf.build = viteConf.build || {};
+        viteConf.build.rollupOptions = viteConf.build.rollupOptions || {};
+        viteConf.build.rollupOptions.output =
+          viteConf.build.rollupOptions.output || {};
 
-              // Разделяем собственный код на chunks по модулям
-              if (id.includes('src/modules/')) {
-                const moduleName = id.split('src/modules/')[1]?.split('/')[0];
-                if (moduleName) {
-                  return `module-${moduleName}`;
-                }
-              }
-            },
-          };
-        }
+        viteConf.build.rollupOptions.output.sanitizeFileName = (name) => {
+          if (name.startsWith('_')) {
+            return name.substring(1);
+          }
+          if (name.includes('?')) {
+            return name.split('?')[0];
+          }
+          return name;
+        };
+
+        const originalManualChunks =
+          viteConf.build.rollupOptions.output.manualChunks;
+
+        viteConf.build.rollupOptions.output.manualChunks = (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('quasar')) return 'quasar-vendor';
+            if (id.includes('vue')) return 'vue-vendor';
+            if (id.includes('chart.js') || id.includes('apexcharts'))
+              return 'charts-vendor';
+            if (id.includes('@tiptap')) return 'tiptap-vendor';
+            return 'vendor';
+          }
+
+          if (id.includes('src/modules/')) {
+            const moduleName = id.split('src/modules/')[1]?.split('/')[0];
+            if (moduleName) return `module-${moduleName}`;
+          }
+
+          if (typeof originalManualChunks === 'function') {
+            return originalManualChunks(id);
+          }
+
+          return null;
+        };
       },
 
       vitePlugins: [
