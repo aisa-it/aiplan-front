@@ -29,17 +29,6 @@ const router = useRouter();
 
 const api = new HttpClient();
 
-interface RootStore {
-  currentWorkspaceSlug: string | null;
-  workspaceInfo?: DtoWorkspace;
-  meInWorkspace: DtoWorkspaceMemberWithOwner;
-  workspaceToken?: string;
-  workspaceProjects: DtoProjectLight[];
-  workspaceUsers: DtoWorkspaceMember[];
-  foundUsers: DtoWorkspaceMember[];
-  allWorkspaceStates?: Record<string, DtoStateLight[]>;
-  stopRefresh: boolean;
-}
 export const useWorkspaceStore = defineStore('workspace-store', () => {
   const currentWorkspaceSlug = ref<string | null>(null);
   const workspaceInfo = ref<DtoWorkspace>();
