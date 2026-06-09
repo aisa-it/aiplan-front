@@ -76,32 +76,41 @@ export default configure(function (ctx) {
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
       chunkSizeWarningLimit: 1000,
-
-      extendViteConf(viteConf) {
+      extendViteConf(viteConf, env) {
         viteConf.build = viteConf.build || {};
         viteConf.build.rollupOptions = viteConf.build.rollupOptions || {};
         viteConf.build.rollupOptions.output =
           viteConf.build.rollupOptions.output || {};
-          
-        viteConf.build.rollupOptions.output.manualChunks = (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('quasar')) return 'quasar-vendor';
-            if (id.includes('vue')) return 'vue-vendor';
-            if (id.includes('chart.js') || id.includes('apexcharts'))
-              return 'charts-vendor';
-            if (id.includes('@tiptap')) return 'tiptap-vendor';
-            return 'vendor';
+        viteConf.build.rollupOptions.output.sanitizeFileName = (name) => {
+          let cleanName = name.replace(/\x00/g, '');
+          cleanName = cleanName.replace(/^plugin-vue:/, '');
+          if (cleanName.startsWith('_')) {
+            cleanName = cleanName.substring(1);
           }
-
-          if (id.includes('src/modules/')) {
-            const moduleName = id.split('src/modules/')[1]?.split('/')[0];
-            if (moduleName) return `module-${moduleName}`;
+          cleanName = cleanName.replace(/:/g, '-');
+          if (cleanName.includes('?')) {
+            cleanName = cleanName.split('?')[0];
           }
-
-          return null;
+          return cleanName;
         };
-      },
 
+        // viteConf.build.rollupOptions.output.manualChunks = (id) => {
+        //   if (id.includes('node_modules')) {
+        //     if (id.includes('quasar')) return 'quasar-vendor';
+        //     if (id.includes('vue')) return 'vue-vendor';
+        //     if (id.includes('chart.js') || id.includes('apexcharts'))
+        //       return 'charts-vendor';
+        //     if (id.includes('@tiptap')) return 'tiptap-vendor';
+        //     return 'vendor';
+        //   }
+
+        //   if (id.includes('src/modules/')) {
+        //     const moduleName = id.split('src/modules/')[1]?.split('/')[0];
+        //     if (moduleName) return `module-${moduleName}`;
+        //   }
+        //   return null;
+        // };
+      },
       vitePlugins: [
         [
           '@intlify/vite-plugin-vue-i18n',
