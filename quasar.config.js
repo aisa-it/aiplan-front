@@ -82,20 +82,7 @@ export default configure(function (ctx) {
         viteConf.build.rollupOptions = viteConf.build.rollupOptions || {};
         viteConf.build.rollupOptions.output =
           viteConf.build.rollupOptions.output || {};
-
-        viteConf.build.rollupOptions.output.sanitizeFileName = (name) => {
-          if (name.startsWith('_')) {
-            return name.substring(1);
-          }
-          if (name.includes('?')) {
-            return name.split('?')[0];
-          }
-          return name;
-        };
-
-        const originalManualChunks =
-          viteConf.build.rollupOptions.output.manualChunks;
-
+          
         viteConf.build.rollupOptions.output.manualChunks = (id) => {
           if (id.includes('node_modules')) {
             if (id.includes('quasar')) return 'quasar-vendor';
@@ -109,10 +96,6 @@ export default configure(function (ctx) {
           if (id.includes('src/modules/')) {
             const moduleName = id.split('src/modules/')[1]?.split('/')[0];
             if (moduleName) return `module-${moduleName}`;
-          }
-
-          if (typeof originalManualChunks === 'function') {
-            return originalManualChunks(id);
           }
 
           return null;
