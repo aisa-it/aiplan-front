@@ -8,6 +8,7 @@ import {
   DtoWorkspace,
   DtoWorkspaceMember,
   DtoWorkspaceMemberWithOwner,
+  DtoWorkspaceSummaryResponse,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
@@ -35,6 +36,7 @@ interface RootStore {
   foundUsers: DtoWorkspaceMember[];
   allWorkspaceStates?: Record<string, DtoStateLight[]>;
   stopRefresh: boolean;
+  workspaceSummary: DtoWorkspaceSummaryResponse | null;
 }
 export const useWorkspaceStore = defineStore('workspace-store', {
   state: (): RootStore => {
@@ -48,6 +50,7 @@ export const useWorkspaceStore = defineStore('workspace-store', {
       allWorkspaceStates: undefined,
       stopRefresh: false,
       meInWorkspace: {} as DtoWorkspaceMemberWithOwner,
+      workspaceSummary: null,
     };
   },
 
@@ -236,6 +239,13 @@ export const useWorkspaceStore = defineStore('workspace-store', {
         type: ContentType.Json,
         ...params,
       });
+    },
+
+    async getWorkspaceSummary(workspaceSlug: string): Promise<void> {
+      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+      const res = await workspaceApi.getWorkspaceSummary(workspaceSlug);
+      this.workspaceSummary = res.data;
     },
   },
 });

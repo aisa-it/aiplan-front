@@ -27,45 +27,52 @@
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <q-item
-            :active="route.name === 'projects'"
-            clickable
-            v-ripple
-            @click="router.push(`/${currentWorkspaceSlug}/projects`)"
-          >
+          <q-item :active="route.name === 'projects'" clickable v-ripple>
             <q-item-section avatar>
               <MenuProjectsIcon :is-dark="$q.dark.isActive" />
             </q-item-section>
 
             <q-item-section> Проекты </q-item-section>
+
+            <q-item-section side>
+              <q-icon name="expand_more" size="16px" />
+            </q-item-section>
+
+            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+              <NavPopupProjects />
+            </q-menu>
           </q-item>
 
-          <q-item
-            :active="route.name === 'sprints'"
-            clickable
-            v-ripple
-            :to="{
-              name: 'sprints',
-            }"
-          >
+          <q-item :active="route.name === 'sprints'" clickable v-ripple>
             <q-item-section avatar>
               <SprintIcon />
             </q-item-section>
 
             <q-item-section> Спринты </q-item-section>
+
+            <q-item-section side>
+              <q-icon name="expand_more" size="16px" />
+            </q-item-section>
+
+            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+              <NavPopupSprints />
+            </q-menu>
           </q-item>
 
-          <q-item
-            :active="route.path.includes('/forms')"
-            clickable
-            v-ripple
-            @click="router.push(`/${currentWorkspaceSlug}/forms`)"
-          >
+          <q-item :active="route.path.includes('/forms')" clickable v-ripple>
             <q-item-section avatar>
               <MenuFormsIcon :is-dark="$q.dark.isActive" />
             </q-item-section>
 
             <q-item-section> Формы </q-item-section>
+
+            <q-item-section side>
+              <q-icon name="expand_more" size="16px" />
+            </q-item-section>
+
+            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+              <NavPopupForms />
+            </q-menu>
           </q-item>
 
           <q-item
@@ -137,7 +144,7 @@
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
@@ -160,6 +167,9 @@ import AiplanHelpDialog from 'src/components/dialogs/AiplanHelp/AiplanHelpDialog
 import ReleaseNotePreviewDialog from 'components/dialogs/ReleaseNotePreviewDialog.vue';
 import ExpansionItem from '../ExpansionItem.vue';
 import NavBarHelpList from './NavBarHelpList.vue';
+import NavPopupProjects from 'src/components/nav-popups/NavPopupProjects.vue';
+import NavPopupSprints from 'src/components/nav-popups/NavPopupSprints.vue';
+import NavPopupForms from 'src/components/nav-popups/NavPopupForms.vue';
 
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
@@ -185,5 +195,18 @@ const onSuccess = (msg?: string) => {
   });
 };
 
-const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+onMounted(() => {
+  if (currentWorkspaceSlug.value) {
+    workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value);
+  }
+});
+
+watch(currentWorkspaceSlug, (newSlug) => {
+  if (newSlug) {
+    workspaceStore.getWorkspaceSummary(newSlug);
+  }
+});
 </script>
