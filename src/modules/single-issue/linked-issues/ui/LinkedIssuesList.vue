@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 //stores
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoProject, DtoProjectLight, DtoWorkspaceLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
@@ -90,10 +90,12 @@ const issues = computed({
 
 const getUrl = (value: {
   workspace: string;
+  workspace_detail?: DtoWorkspaceLight;
   project: string;
+  project_detail?: DtoProjectLight;
   sequence_id: string;
 }) => {
-  return `/${value.workspace}/projects/${value.project}/issues/${value?.sequence_id}`;
+  return `/${value.workspace_detail?.slug || value.workspace}/projects/${value.project_detail?.identifier || value.project}/issues/${value?.sequence_id}`;
 };
 </script>
 

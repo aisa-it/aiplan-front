@@ -170,7 +170,6 @@
     :currentWsInfo="currentWsInfo"
     :currentWsSlug="currentWsSlug"
     :isInAdminPanel="isInAdminPanel"
-    @refreshData="refreshData"
   />
 </template>
 
@@ -208,7 +207,7 @@ import {
   SUCCESS_CHANGE_USER_ROLE,
 } from 'src/constants/notifications';
 import { useRouter } from 'vue-router';
-import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoWorkspace, DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   currentWsInfo: DtoWorkspace;
@@ -269,7 +268,7 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
-const rows = ref([]);
+const rows = ref<DtoWorkspaceMember[]>([]);
 const columns = [
   {
     name: 'username',
@@ -318,11 +317,10 @@ async function onRequest(p: any) {
       pagination.value.sortBy = sortBy;
       pagination.value.descending = descending;
       rows.value = res?.result || [];
-      loading.value = false;
       if (!searchQuery.value) {
         usersCount.value = res?.count;
       }
-    });
+    }).finally(()=> loading.value = false);
 }
 
 async function refreshData() {

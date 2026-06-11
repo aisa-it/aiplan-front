@@ -1,7 +1,7 @@
 <template>
   <q-page class="row flex items-stretch content-stretch fit q-pa-none">
     <IssuePanel
-      v-if="projectStore.currentProject && !isRefreshIssue"
+      v-if="projectStore.project && !isRefreshIssue"
       @update:issue-page="updateIssue"
     />
     <q-inner-loading v-else showing>

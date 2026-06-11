@@ -11,16 +11,16 @@ export default boot(async () => {
 
   try {
     await utilsStore.getVersion().then(async (data) => {
-      await utilsStore.getReleaseNotes().then((d) => {
-        if (!d?.length) return;
+      // await utilsStore.getReleaseNotes().then((d) => {
+      //   if (!d?.length) return;
 
-        if (d[0].tag_name !== data.version) return;
+      //   if (d[0].tag_name !== data.version) return;
 
-        if (isServerVersionNewer(data.version)) {
-          localStorage.setItem('appVersion', data.version);
-          utilsStore.openReleaseNote = true;
-        }
-      });
+      //   if (isServerVersionNewer(data.version)) {
+      //     localStorage.setItem('appVersion', data.version);
+      //     utilsStore.openReleaseNote = true;
+      //   }
+      // });
     });
   } catch (error) {
     // Ошибки уже обрабатываются в store, просто логируем
