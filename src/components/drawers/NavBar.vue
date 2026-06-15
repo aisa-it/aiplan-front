@@ -80,6 +80,19 @@
 
             <q-item-section> АИДок </q-item-section>
           </q-item>
+
+        <q-item
+          :active="route.path.includes('/archive')"
+          clickable
+          v-ripple
+          @click="router.push(`/${currentWorkspaceSlug}/archive`)"
+        >
+          <q-item-section avatar>
+            <ArchiveAddIcon />
+          </q-item-section>
+
+          <q-item-section> Архив </q-item-section>
+        </q-item>
         </q-list>
       </q-scroll-area>
 
@@ -152,14 +165,7 @@ import AIDocIcon from '../icons/AIDocIcon.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 import MenuFormsIcon from '../icons/MenuFormsIcon.vue';
 import MenuProjectsIcon from '../icons/MenuProjectsIcon.vue';
-import HelpIcon from '../icons/HelpIcon.vue';
-
-// components
-import FeedbackDialog from 'src/components/dialogs/FeedbackDialog.vue';
-import AiplanHelpDialog from 'src/components/dialogs/AiplanHelp/AiplanHelpDialog.vue';
-import ReleaseNotePreviewDialog from 'components/dialogs/ReleaseNotePreviewDialog.vue';
-import ExpansionItem from '../ExpansionItem.vue';
-import NavBarHelpList from './NavBarHelpList.vue';
+import ArchiveAddIcon from '../icons/ArchiveAddIcon.vue';
 
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 

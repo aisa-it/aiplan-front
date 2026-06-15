@@ -11,11 +11,11 @@
     <q-table
       flat
       bordered
-      :rows="projects"
+      :rows="archivedProjects"
       :columns="columns"
       :rows-per-page-options="[10, 25, 50]"
       @row-click="
-        (event, row) => router.push(`projects/${row.identifier}/issues`)
+        (_, row) => router.push(`projects/${row.identifier}/issues`)
       "
       @row-contextmenu.prevent="onRowContextMenu"
     >
@@ -33,51 +33,12 @@
           </q-btn>
         </q-td>
       </template>
-
-      <template v-slot:body-cell-notifications="props">
-        <q-td :props="props">
-          <q-btn
-            class="btn-only-icon-sm"
-            dense
-            flat
-            no-caps
-            no-wrap
-            @click.stop="openNotificationSettings(props.row)"
-          >
-            <UnmutedIcon />
-          </q-btn>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-admin_notifications="props">
-        <q-td :props="props">
-          <q-btn
-            v-if="isAdminProject(props.row.id)"
-            class="btn-only-icon-sm"
-            dense
-            flat
-            no-caps
-            no-wrap
-            @click.stop="openNotificationsAdminSettings(props.row)"
-          >
-            <UnmutedIcon />
-          </q-btn>
-        </q-td>
-      </template>
     </q-table>
-
-    <NotificationsSettingsDialog
-      v-model="isNotificationsSettingsOpen"
-      :project="selectedProject"
-    />
-    <NotificationsAdminProjectSettingsDialog
-      v-model="isNotificationsAdminSettingsOpen"
-      :project="selectedProject"
-    />
     <ProjectContextMenu v-if="contextRow"
       :row="contextRow"
       :anchor-event="contextEvent"
-    />
+      is-archive
+      />
   </div>
 </template>
 
@@ -87,34 +48,25 @@ import { useRoute, useRouter } from 'vue-router';
 import { QTableColumn } from 'quasar';
 import { debounce } from 'quasar';
 
-import { getWorkspaceProjects } from '../api';
+import { searchWorkspaceArchivedProjects } from '../api';
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { copyLinkToClipboard } from 'src/utils/copyLinkToClipboard';
 
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
-import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
-import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
-import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue';
-import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
 
-import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { storeToRefs } from 'pinia';
-const { getProjectRole } = useRolesStore();
+import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue'
 const workspaceStore = useWorkspaceStore();
-const { workspaceProjects } = storeToRefs(workspaceStore);
+const { workspaceArchive, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const route = useRoute();
 const router = useRouter();
-const projects = ref<DtoProjectLight[]>([]);
 const projectSearch = ref('');
-const isNotificationsSettingsOpen = ref(false);
-const isNotificationsAdminSettingsOpen = ref(false);
 const contextRow = ref<DtoProjectLight>();
 const contextEvent = ref<MouseEvent | null>(null);
-
-const selectedProject = ref<DtoProjectLight>();
+const archivedProjects = ref<DtoProjectLight[]>([]);
 
 const columns: QTableColumn<DtoProjectLight>[] = [
   {
@@ -153,28 +105,12 @@ const columns: QTableColumn<DtoProjectLight>[] = [
     label: 'Ссылка',
     field: (row) => row,
   },
-  {
-    name: 'notifications',
-    align: 'center',
-    label: 'Уведомления задач',
-    field: (row) => row,
-  },
-  {
-    name: 'admin_notifications',
-    align: 'center',
-    label: 'Уведомления проекта',
-    field: (row) => row,
-  },
 ];
 
 const onRowContextMenu = (evt, row: DtoProjectLight) => {
   contextRow.value = row;
   contextEvent.value = evt;
 };
-
-onMounted(async () => {
-  projects.value = await getWorkspaceProjects(route.params.workspace as string);
-});
 
 const copyLink = (project: DtoProjectLight) => {
   copyLinkToClipboard('project', {
@@ -183,32 +119,33 @@ const copyLink = (project: DtoProjectLight) => {
   });
 };
 
-const isAdminProject = (projectId: string) => {
-  return getProjectRole(projectId) === 15;
-};
-
-const openNotificationSettings = (project: DtoProjectLight) => {
-  selectedProject.value = project;
-  isNotificationsSettingsOpen.value = true;
-};
-
-const openNotificationsAdminSettings = (project: DtoProjectLight) => {
-  selectedProject.value = project;
-  isNotificationsAdminSettingsOpen.value = true;
-};
-
 const searchProjects = debounce(async () => {
-  projects.value = await getWorkspaceProjects(
+  archivedProjects.value = await searchWorkspaceArchivedProjects(
     route.params.workspace as string,
     projectSearch.value,
   );
 }, 500);
 
-watch(() => workspaceProjects.value, () => {
+const refreshArchivedProjects = async () => {
+  await workspaceStore.getWorkspaceArchivedProjects(currentWorkspaceSlug.value as string);
+};
+
+onMounted(async () => {
+  if (!currentWorkspaceSlug.value) return;
+  await refreshArchivedProjects();
+  archivedProjects.value = workspaceArchive.value;
+});
+
+watch(currentWorkspaceSlug, async (newValue) => {
+  if (!newValue) return;
+  await workspaceStore.getWorkspaceArchivedProjects(newValue as string);
+});
+
+watch(() => workspaceArchive.value, () => {
   if (projectSearch.value) {
     searchProjects();
   } else {
-    projects.value = workspaceProjects.value;
+    archivedProjects.value = workspaceArchive.value;
   }
 })
 </script>

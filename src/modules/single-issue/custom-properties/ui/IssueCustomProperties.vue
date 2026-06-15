@@ -19,6 +19,7 @@
         <div class="col-8">
           <div v-if="prop.type === 'boolean'">
             <q-checkbox
+              :disable="isArchived"
               :model-value="!!prop.value"
               @update:model-value="
                 (val) => {
@@ -33,6 +34,7 @@
             <q-select
               class="base-selector issue-selector"
               :model-value="(prop.value as string) || null"
+              :disable="isArchived"
               @update:model-value="
                 (val) => {
                   prop.value = val as string;
@@ -55,6 +57,7 @@
                 url: prop.value?.url,
               }"
               disableDelete
+              :is-disabled="isArchived"
               @update="isLinkOpenDialog = true; linkToUpdate = {
                 id: prop.id,
                 title: prop.value?.name,
@@ -67,6 +70,7 @@
             <q-input
               class="base-input"
               :model-value="(prop.value as string) || ''"
+              :disable="isArchived"
               @update:model-value="
                 (val) => {
                   prop.value = val as string;
@@ -123,6 +127,7 @@ import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 const props = defineProps<{
   projectId: string;
   issueId: string;
+  isArchived?: boolean;
 }>();
 
 //stores

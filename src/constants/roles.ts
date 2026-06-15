@@ -29,6 +29,8 @@ export const ROLES = {
       'show-sprints-nav',
       'change-sprint',
       'create-tag',
+      'show-archive',
+      'edit-archive',
       'edit-sprint-folders',
     ],
     admin: [
@@ -58,6 +60,8 @@ export const ROLES = {
       'show-sprints-nav',
       'change-sprint',
       'create-tag',
+      'show-archive',
+      'edit-archive',
       'edit-sprint-folders',
     ],
     member: ['show-ws', 'edit-document', 'show-sprints-nav'],

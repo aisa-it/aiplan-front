@@ -47,6 +47,7 @@
           ><div>
             <q-btn
               v-show="props.manualSortMode"
+              :disable="isDisabled"
               flat
               icon="expand_less"
               dense
@@ -55,6 +56,7 @@
             />
             <q-btn
               v-show="props.manualSortMode"
+              :disable="isDisabled"
               flat
               icon="expand_more"
               dense
@@ -63,6 +65,7 @@
             />
             <q-btn
               v-if="canDelete(subIssue)"
+              :disable="isDisabled"
               flat
               icon="close"
               dense
@@ -108,6 +111,7 @@ const props = defineProps<{
   subIssues: DtoIssue[];
   manualSortMode: boolean;
   project_detail: DtoProject;
+  isDisabled: boolean;
 }>();
 
 const emits = defineEmits<{

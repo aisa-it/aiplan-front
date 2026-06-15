@@ -38,6 +38,7 @@ import { isDev } from 'src/utils/helpers';
 
 // components
 import NavMenuProjects from './menu/NavMenuProjects.vue';
+import NavMenuArchived from './menu/NavMenuArchived.vue';
 import NavMenuForms from './menu/NavMenuForms.vue';
 import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
 import NavMenuAIDocs from './menu/NavMenuAIDocs.vue';
@@ -66,6 +67,7 @@ const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 const defaultOrder = [
   'sprints',
   'projects',
+  'archived',
   'forms',
   'favorites',
   'docs',
@@ -150,6 +152,14 @@ const itemsMap: Record<
     props: { filterBy: 'favorites' },
     listeners: { updateFavoriteState },
     condition: () => !!(isAIDoc.value && currentWorkspaceSlug.value),
+  },
+  archived: {
+    id: 'archived',
+    component: markRaw(NavMenuArchived),
+    condition: () =>
+      !isAIDoc.value &&
+      !!currentWorkspaceSlug.value &&
+      hasPermissionByWorkspace(workspaceInfo?.value, 'show-archive'),
   },
   docs: {
     id: 'docs',

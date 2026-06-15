@@ -7,7 +7,7 @@
         :status="rowInfo.row.state_detail"
         :issue="rowInfo.row"
         :isDisabled="
-          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status')
+          !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status') || isDisabled
         "
         :states-from-cache="statesCache[rowInfo.row.project]"
         @set-status="(val: any) => emits('refresh', val)"
@@ -30,6 +30,7 @@ import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 defineProps<{
   rowInfo: { row: DtoIssue };
+  isDisabled?: boolean;
 }>();
 
 const emits = defineEmits<{ refresh: [any] }>();

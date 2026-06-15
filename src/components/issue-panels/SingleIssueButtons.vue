@@ -5,6 +5,7 @@
         {{ issueData.project_detail.identifier }}-{{ issueData.sequence_id }}
       </h6>
       <div
+        v-if="!isArchived"
         class="row justify-end flex q-gutter-sm"
         :class="{ 'q-ml-none full-w': preview }"
       >
@@ -58,11 +59,13 @@
     </div>
   </div>
   <TransferTaskDialog
+    v-if="!isArchived"
     v-model="isTransferOpen"
     :issue="issueData"
     @refresh="emits('refresh', true)"
   />
   <DeleteIssueDialog
+    v-if="!isArchived"
     v-model="isDeletingOpen"
     :issue="issueData"
     @refresh="emits('refresh', true)"
@@ -71,7 +74,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, toRef } from 'vue';
 
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
@@ -116,6 +119,10 @@ const { currentIssueID, issueData, issueExportPDFLink } =
 // vars
 const isDeletingOpen = ref(false);
 const isTransferOpen = ref(false);
+
+const isArchived = toRef(() =>
+  project.value?.archived
+);
 
 const canDeleteIssue = computed(() => {
   const proj = issueData.value?.project_detail ?? project.value;

@@ -3,7 +3,7 @@
     :class="`btn-sm full-w without-border ${newIssue ? 'new-issue-btn' : ''}`"
     no-wrap
     no-caps
-    :disable="isDisabled === false"
+    :disable="isDisabled"
     @click="isParentOpen = true"
   >
     <div class="row justify-between centered-horisontally no-wrap">

@@ -26,7 +26,7 @@
             :issue="issueData"
             :status="issueData.state_detail"
             :isDisabled="
-              !hasPermissionByIssue(issueData, 'change-issue-status')
+              !hasPermissionByIssue(issueData, 'change-issue-status') || isArchived
             "
             :states-from-cache="statesCache[issueData?.project]"
             @set-status="(val) => (issueData.state_detail = val)"
@@ -92,7 +92,7 @@
             :projectid="issueData.project"
             :issueid="issueData.id"
             :assigness="assignees"
-            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
+            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic') || isArchived"
             :current-member="user"
             debounced
             @refresh="handleRefresh"
@@ -102,7 +102,7 @@
 
       <div
         class="row q-pt-md centered-horisontally"
-        v-if="!hideSettings.includes('wathcers')"
+        v-if="!hideSettings.includes('watchers')"
       >
         <div class="col">
           <div class="row items-center">
@@ -117,7 +117,7 @@
             :issueid="issueData.id"
             :watchers="watchers"
             :current-member="user"
-            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
+            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic') || isArchived"
             debounced
             @refresh="handleRefresh"
           ></SelectWatchers>
@@ -145,7 +145,7 @@
             :priority="issueData.priority"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(issueData, 'change-issue-primary')
+              !hasPermissionByIssue(issueData, 'change-issue-primary') || isArchived
             "
             @update:priority="(val) => (issueData.priority = val)"
             @refresh="handleRefresh"
@@ -202,7 +202,7 @@
             :date="issueData.target_date"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(issueData, 'change-issue-primary')
+              !hasPermissionByIssue(issueData, 'change-issue-primary') || isArchived
             "
             @refresh="handleRefresh"
           />
@@ -266,14 +266,14 @@
             :issue="issueData.parent_detail"
             :project="issueData.project_detail ?? project"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              !hasPermissionByIssue(issueData, 'change-issue-primary') ||  isArchived
             "
             @refresh="handleRefresh"
           ></SelectParentIssue>
           <q-btn
             v-if="
               issueData.parent_detail &&
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-primary') && !isArchived
             "
             class="btn-only-icon-sm q-ml-xs"
             style="padding: 0 3px"
@@ -301,7 +301,7 @@
             :issues="issueData.blocker_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              !hasPermissionByIssue(issueData, 'change-issue-primary') ||  isArchived
             "
             @refresh="handleRefresh"
           />
@@ -326,7 +326,7 @@
             :issues="issueData.blocked_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-primary') && !isArchived
             "
             @refresh="handleRefresh"
           />
@@ -350,7 +350,7 @@
             :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
-              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint')
+              !hasPermissionByWorkspace(workspaceInfo, 'change-sprint') || isArchived
             "
             @refresh="handleRefresh"
           />
@@ -366,7 +366,7 @@
         :issueid="issueData.id"
         :links="issueData.issue_link"
         :project="issueData.project_detail"
-        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary')"
+        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary') || isArchived"
         @add="handleLinkAdd"
         @delete="handleLinkDelete"
         @edit="handleLinkEdit"
@@ -377,6 +377,7 @@
         class="q-pt-md"
         :project-id="issueData.project"
         :issue-id="issueData.id"
+        :is-archived="isArchived"
       />
     </template>
     <template v-else>
@@ -413,7 +414,7 @@
 </template>
 <script setup lang="ts">
 // core
-import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
+import { onMounted, onBeforeUnmount, ref, computed, toRef } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -508,6 +509,10 @@ const { navigateToActivityPage } = useUserActivityNavigation();
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
+
+const isArchived = toRef(() =>
+  project.value?.archived
+);
 
 const isSubIssueTargetOverTime = computed(
   () =>

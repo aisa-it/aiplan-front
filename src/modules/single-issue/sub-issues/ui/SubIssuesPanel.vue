@@ -15,6 +15,7 @@
       :project_detail="project"
       :subIssues="subIssues"
       :manual-sort-mode="manualSortMode"
+      :is-disabled="isDisabled"
       @refresh="refresh()"
       @toggle-sort-mode="(value) => toggleSort(value)"
     />
@@ -65,16 +66,14 @@ import {
   DtoProject,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   project?: DtoProject;
   projectid: string | null;
   issueid: string;
-  isDisabled: {
-    type: Boolean;
-    required: false;
-    default: () => false;
-  };
-}>();
+  isDisabled?: boolean;
+}>(), {
+  isDisabled: false,
+});
 
 const emits = defineEmits<{ getSubIssues: [DtoIssue[]] }>();
 

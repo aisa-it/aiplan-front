@@ -57,7 +57,8 @@ h6 {
 }
 
 .default-icon-color {
-  path {
+  path,
+  rect {
     stroke: $text-color;
   }
 }
