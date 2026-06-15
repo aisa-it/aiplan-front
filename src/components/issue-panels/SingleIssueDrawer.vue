@@ -345,8 +345,9 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectSprints
+            :projectid="issueData.project"
             class="issue-selector"
-            :issueid="issueData.id"
+            :issue="issueData"
             :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
