@@ -105,14 +105,28 @@ const isMobile = toRef(props.isMobile);
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 
 const isDisabled = computed(() => {
-  return (
-    (isAIDoc.value && getWsRole(currentWorkspaceSlug?.value ?? '') < 10) ||
-    (!isAIDoc.value &&
-      (workspaceProjects.value.length === 0 ||
-        !workspaceProjects.value.find(
-          (project) => getProjectRole(project.id ?? '') > 5,
-        )))
+  const wsSlug = currentWorkspaceSlug?.value ?? '';
+  const wsRole = getWsRole(wsSlug);
+
+  if (isAIDoc.value) {
+    return wsRole < 10;
+  }
+
+  workspaceStore.getWorkspaceProjects(wsSlug);
+
+  if (workspaceProjects.value.length === 0) {
+    return true;
+  }
+
+  if (wsRole >= 10) {
+    return false;
+  }
+
+  const hasProjectWithAccess = workspaceProjects.value.some(
+    (project) => getProjectRole(project.id ?? '') > 5,
   );
+
+  return !hasProjectWithAccess;
 });
 
 // methods
