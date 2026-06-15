@@ -112,8 +112,6 @@ const isDisabled = computed(() => {
     return wsRole < 10;
   }
 
-  workspaceStore.getWorkspaceProjects(wsSlug);
-
   if (workspaceProjects.value.length === 0) {
     return true;
   }
@@ -158,7 +156,8 @@ watch(
   },
 );
 
-onMounted(() => {
+onMounted(async () => {
+  await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug?.value ?? '');
   emits('setDisable', isDisabled.value);
 });
 </script>
