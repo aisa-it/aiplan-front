@@ -137,7 +137,7 @@
       @success="(msg) => onSuccess(msg)"
     />
     <ReleaseNotePreviewDialog v-model="isReleaseOpen" />
-    <div class="handle-resize" @pointerdown="onPointerDown"></div>
+    <div v-show="!miniState" class="handle-resize" @pointerdown="onPointerDown"></div>
   </q-drawer>
 </template>
 
@@ -250,5 +250,9 @@ onUnmounted(() => {
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+}
+
+.drawer-btn {
+  z-index: 1000;
 }
 </style>
