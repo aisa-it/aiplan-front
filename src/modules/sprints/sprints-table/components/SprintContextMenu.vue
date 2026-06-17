@@ -8,6 +8,7 @@
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint')"
         clickable
         @click="openEditSprint"
       >
@@ -17,6 +18,7 @@
         <q-item-section>Настройки</q-item-section>
       </q-item>
       <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint-folders')"
         clickable
         @click="addToFolder"
       >
@@ -50,6 +52,7 @@
         <q-item-section>Скопировать название</q-item-section>
       </q-item>
       <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'delete-sprint')"
         class="context-menu__options-item_red"
         clickable
         @click="deleteSprint"
@@ -83,6 +86,8 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useRolesStore } from 'src/stores/roles-store.ts';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import SettingsIcon from 'src/components/icons/SettingsIcon.vue';
 import FolderIcon from 'src/components/icons/FolderIcon.vue';
@@ -91,10 +96,11 @@ import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
 import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
-import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoSprintLight, DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue'
 import EditFolderDialog from 'src/modules/sprints/edit-folder-dialog/EditFolderDialog.vue'
 import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   row: DtoSprintLight | null;
@@ -114,6 +120,9 @@ const menuProps = computed(() => {
 });
 
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const workspaceStore = useWorkspaceStore();
+const { workspaceInfo } = storeToRefs(workspaceStore);
 
 let sprintLink = computed(() => props.row?.short_url ?? props.row?.url ?? '');
 const isDeletingOpen = ref<boolean>(false);
