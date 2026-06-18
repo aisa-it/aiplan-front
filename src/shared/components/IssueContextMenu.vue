@@ -163,7 +163,8 @@ const menuProps = computed(() => {
 });
 
 const issuesStore = useIssuesStore();
-const { sprintsList } = storeToRefs(useSprintStore());
+const sprintStore = useSprintStore();
+const { sprintsList } = storeToRefs(sprintStore);
 const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = issuesStore;
 const { refreshIssues } = storeToRefs(issuesStore);
@@ -236,15 +237,18 @@ const deleteIssue = (): void => {
   isDeletingOpen.value = true;
 };
 
-const manageIssueSprints = (): void => {
+const manageIssueSprints = async (): Promise<void> => {
   if (!sprintsList.value.length) {
-    setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage:
-        'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
-    });
-    return;
+    await sprintStore.getSprintsList(workspaceSlug.value);
+    if (!sprintsList.value.length) {
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage:
+          'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
+      });
+      return;
+    }
   }
   isManageSprintsOpen.value = true;
 };
