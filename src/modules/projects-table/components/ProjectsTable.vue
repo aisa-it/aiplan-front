@@ -17,6 +17,8 @@
       @row-click="
         (event, row) => router.push(`projects/${row.identifier}/issues`)
       "
+      @row-contextmenu.prevent="onRowContextMenu"
+      @resetContext="onResetContext"
     >
       <template v-slot:body-cell-copy_link="props">
         <q-td :props="props">
@@ -73,6 +75,10 @@
       v-model="isNotificationsAdminSettingsOpen"
       :project="selectedProject"
     />
+    <ProjectContextMenu
+      :row="contextRow"
+      :anchor-event="contextEvent"
+    />
   </div>
 </template>
 
@@ -91,7 +97,7 @@ import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
 import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
 import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
-
+import ProjectContextMenu from 'src/modules/projects-table/components/ProjectContextMenu.vue'
 import { useRolesStore } from 'src/stores/roles-store';
 const { getProjectRole } = useRolesStore();
 
@@ -101,7 +107,8 @@ const projects = ref<DtoProjectLight[]>([]);
 const projectSearch = ref('');
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
-
+const contextRow = ref(null);
+const contextEvent = ref<MouseEvent | null>(null);
 const selectedProject = ref<DtoProjectLight>();
 
 const columns: QTableColumn<DtoProjectLight>[] = [
@@ -154,6 +161,17 @@ const columns: QTableColumn<DtoProjectLight>[] = [
     field: (row) => row,
   },
 ];
+
+const onRowContextMenu = (evt, row) => {
+  if (!row) return;
+  contextRow.value = row;
+  contextEvent.value = evt;
+};
+
+const onResetContext = () => {
+  contextRow.value = null;
+  contextEvent.value = null;
+};
 
 onMounted(async () => {
   projects.value = await getWorkspaceProjects(route.params.workspace as string);
