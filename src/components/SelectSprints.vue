@@ -7,6 +7,7 @@
     map-options
     :hide-dropdown-icon="hideDropdownIcon"
     popup-content-class="inh-popup scrollable-content"
+    class="issue-selector"
     :class="`${label ? 'base-selector' : 'base-selector-sm'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     :popup-content-style="selectSprintWidth"
     :label="label"
@@ -17,8 +18,8 @@
     :options="sprintsList"
     :loading="loading || isLoading"
     @update:model-value="handleUpdateSelected"
-    @popup-show="() => (isOpen = true)"
-    @popup-hide="() => (isOpen = false)"
+    @popup-show="() => (isDialogOpen = true)"
+    @popup-hide="() => (isDialogOpen = false)"
     @add="(sprint) => handleUpdateSprints(sprint.value, ACTIONS.ADD)"
     @remove="(sprint) => handleUpdateSprints(sprint.value, ACTIONS.REMOVE)"
     @clear="
@@ -37,20 +38,7 @@
       <ArrowDown class="chevron-rotate" :class="{ 'rotate-180': isOpen }" />
     </template>
 
-    <template v-slot:option="scope">
-      <q-item v-if="scope.opt.name" v-bind="scope.itemProps">
-        <q-item-section>
-          <q-item-label
-            >{{ scope.opt.name }}
-            {{
-              getSprintDates(
-                scope.opt?.start_date ?? '',
-                scope.opt?.end_date ?? '',
-              )
-            }}</q-item-label
-          >
-        </q-item-section>
-      </q-item>
+    <template v-slot:option>
     </template>
 
     <template v-if="!label" v-slot:selected>
@@ -63,6 +51,13 @@
       </q-item-label>
     </template>
   </q-select>
+
+  <ManageIssueSprintsDialog
+      v-model="isDialogOpen"
+      :issue="issue"
+      @refresh="emits('refresh')"
+      @hide="() => selectSprintRef.hidePopup()"
+    />
 </template>
 
 <script setup lang="ts">
@@ -83,11 +78,11 @@ import ArrowDown from './icons/ArrowDown.vue';
 
 //components
 import {
-  AiplanRequestIssueIdList,
+  DtoRequestIssueIdList,
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { getSprintDates } from 'src/modules/sprints/helpres';
 import { sprintIssuesUpdate } from '../modules/sprints/services/api';
+import ManageIssueSprintsDialog from 'src/components/dialogs/IssueDialogs/ManageIssueSprintsDialog.vue';
 
 // constants
 const ACTIONS = {
@@ -97,7 +92,7 @@ const ACTIONS = {
 
 const props = withDefaults(
   defineProps<{
-    issueid?: string | null;
+    issue?: any;
     currentSprints?: DtoSprintLight[];
     isDisabled?: boolean;
     label?: string;
@@ -138,15 +133,17 @@ const isClearable = computed<boolean>(() => {
 const { getWidthStyle: selectSprintWidth } =
   useResizeObserverSelect(selectSprintRef);
 
+const isDialogOpen = ref(false);
+
 //methods
 const handleUpdateSprints = async (
   sprint: DtoSprintLight,
   action: (typeof ACTIONS)[keyof typeof ACTIONS],
 ) => {
-  if (props.issueid) {
-    const data: AiplanRequestIssueIdList = {
+  if (props.issue) {
+    const data: DtoRequestIssueIdList = {
       [action === ACTIONS.ADD ? 'issues_add' : 'issues_remove']: [
-        props.issueid,
+        props.issue.id,
       ],
     };
 
@@ -184,4 +181,9 @@ const handleUpdateSelected = (value: DtoSprintLight[]) => {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.issue-selector {
+  max-width: 100%;
+  min-width: 100%;
+}
+</style>

@@ -2,12 +2,23 @@
   <q-menu
     ref="menuRef"
     class="context-menu"
-    :style="`z-index: ${ isDeletingOpen || isEditingOpen ? 6000 : 9001}`"
+    :style="`z-index: ${ isDeletingOpen || isFolderEditingOpen || isSprintEditingOpen ? 6000 : 9001}`"
     v-bind="menuProps"
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint')"
+        clickable
+        @click="openEditSprint"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <SettingsIcon />
+        </q-item-section>
+        <q-item-section>Настройки</q-item-section>
+      </q-item>
+      <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint-folders')"
         clickable
         @click="addToFolder"
       >
@@ -41,6 +52,7 @@
         <q-item-section>Скопировать название</q-item-section>
       </q-item>
       <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'delete-sprint')"
         class="context-menu__options-item_red"
         clickable
         @click="deleteSprint"
@@ -58,25 +70,37 @@
       @error="errorDeleteHandle"
     />
     <EditFolderDialog
-      v-model="isEditingOpen"
+      v-model="isFolderEditingOpen"
       :sprint="sprintForManageFolder"
+      @hide="menuRef.hide()"
     />
+    <CreateSprintDialog
+        v-model="isSprintEditingOpen"
+        :sprint-id="sprintForEditId"
+        @update-sprints="emit('refresh')"
+        @hide="menuRef.hide()"
+        />
   </q-menu>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useRolesStore } from 'src/stores/roles-store.ts';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
+import SettingsIcon from 'src/components/icons/SettingsIcon.vue';
 import FolderIcon from 'src/components/icons/FolderIcon.vue';
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
 import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
-import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoSprintLight, DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue'
 import EditFolderDialog from 'src/modules/sprints/edit-folder-dialog/EditFolderDialog.vue'
+import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   row: DtoSprintLight | null;
@@ -96,15 +120,25 @@ const menuProps = computed(() => {
 });
 
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const workspaceStore = useWorkspaceStore();
+const { workspaceInfo } = storeToRefs(workspaceStore);
 
 let sprintLink = computed(() => props.row?.short_url ?? props.row?.url ?? '');
 const isDeletingOpen = ref<boolean>(false);
-const isEditingOpen = ref<boolean>(false);
+const isFolderEditingOpen = ref<boolean>(false);
+const isSprintEditingOpen = ref<boolean>(false);
 const sprintForManageFolder = ref<DtoSprintLight | null>();
+const sprintForEditId = ref<string>();
 
 const addToFolder = () => {
   sprintForManageFolder.value = props.row;
-  isEditingOpen.value = true;
+  isFolderEditingOpen.value = true;
+}
+
+const openEditSprint = () => {
+  sprintForEditId.value = props.row?.id;
+  isSprintEditingOpen.value = true;
 }
 
 const copySprintLink = (): void => {
