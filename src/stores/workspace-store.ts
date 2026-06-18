@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useRouter } from 'vue-router';
 import { useRolesStore } from './roles-store';
 import {
   AiplanCreateWorkspaceRequest,
@@ -14,228 +15,239 @@ import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { AiplanWorkspaceNotificationRequest } from 'src/interfaces/aidocNotificationSettings';
 
+
 import {
   ContentType,
   HttpClient,
   RequestParams,
 } from '@aisa-it/aiplan-api-ts/src/http-client';
+import { computed, ref } from 'vue';
 
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
+const router = useRouter();
 
 const api = new HttpClient();
 
-interface RootStore {
-  currentWorkspaceSlug: string | null;
-  workspaceInfo?: DtoWorkspace;
-  meInWorkspace: DtoWorkspaceMemberWithOwner;
-  workspaceToken?: string;
-  workspaceProjects: DtoProjectLight[];
-  workspaceUsers: DtoWorkspaceMember[];
-  foundUsers: DtoWorkspaceMember[];
-  allWorkspaceStates?: Record<string, DtoStateLight[]>;
-  stopRefresh: boolean;
-}
-export const useWorkspaceStore = defineStore('workspace-store', {
-  state: (): RootStore => {
-    return {
-      currentWorkspaceSlug: null,
-      workspaceInfo: undefined,
-      workspaceToken: '',
-      workspaceProjects: [],
-      workspaceUsers: [],
-      foundUsers: [],
-      allWorkspaceStates: undefined,
-      stopRefresh: false,
-      meInWorkspace: {} as DtoWorkspaceMemberWithOwner,
-    };
-  },
+export const useWorkspaceStore = defineStore('workspace-store', () => {
+  const currentWorkspaceSlug = ref<string | null>(null);
+  const workspaceInfo = ref<DtoWorkspace>();
+  const workspaceToken = ref<string>('');
+  const workspaceProjects = ref<DtoProjectLight[]>([]);
+  const workspaceUsers = ref<DtoWorkspaceMember[]>([]);
+  const foundUsers = ref<DtoWorkspaceMember[]>([]);
+  const allWorkspaceStates = ref<Record<string, DtoStateLight[]>>();
+  const stopRefresh = ref<boolean>(false);
+  const meInWorkspace = ref<DtoWorkspaceMemberWithOwner>({});
 
-  getters: {
-    workspaceLogo(): string | undefined {
-      return this.workspaceInfo?.logo ?? undefined;
-    },
-    workspaceName(): string | undefined {
-      return this.workspaceInfo?.name ?? undefined;
-    },
-  },
-  actions: {
-    async getWorkspaceInfo(
+  const workspaceLogo = computed<string | undefined>(() =>
+    workspaceInfo?.value?.logo ?? undefined
+  );
+
+  const workspaceName = computed<string | undefined>(() =>
+    workspaceInfo?.value?.name ?? undefined
+  );
+
+  async function getMeInWorkspace(
+    workspaceSlug: string,
+  ): Promise<DtoWorkspaceMemberWithOwner | void> {
+    if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+    const res =
+      await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
+
+    return (meInWorkspace.value = res.data);
+  };
+
+  async function getWorkspaceInfo(
       workspaceSlug: string,
       isInAdminPanel = false,
     ): Promise<DtoWorkspace | void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-      return workspaceApi
-        .getWorkspace(workspaceSlug)
-        .then(async (res) => {
-          const rolesStore = useRolesStore();
-          this.workspaceInfo = res.data;
+    return workspaceApi
+      .getWorkspace(workspaceSlug)
+      .then(async (res) => {
+        const rolesStore = useRolesStore();
+        workspaceInfo.value = res.data;
 
-          await this.getMeInWorkspace(workspaceSlug);
+        await getMeInWorkspace(workspaceSlug);
 
-          rolesStore.defineWorkspaceRole(this.meInWorkspace);
+        rolesStore.defineWorkspaceRole(meInWorkspace.value);
 
-          // Проверяем есть ли доступ к рабочему пространству
-          if (
-            !rolesStore.hasPermissionByWorkspace(
-              this.workspaceInfo,
-              'show-ws',
-            ) &&
-            !isInAdminPanel
-          ) {
-            window.location.href = '/access-denied';
-          }
-        })
-        .catch((err) => {
-          if (err.response.status == 404) {
-            this.router.replace('/not-found');
-          }
-          return Promise.reject(err);
-        });
+        // Проверяем есть ли доступ к рабочему пространству
+        if (
+          !rolesStore.hasPermissionByWorkspace(
+            workspaceInfo.value,
+            'show-ws',
+          ) &&
+          !isInAdminPanel
+        ) {
+          window.location.href = '/access-denied';
+        }
+      })
+      .catch((err) => {
+        if (err.response.status == 404) {
+          router.replace('/not-found');
+        }
+        return Promise.reject(err);
+      });
+  };
+
+  async function createWorkspace (
+    data: AiplanCreateWorkspaceRequest,
+  ): Promise<DtoWorkspace | any> {
+    await workspaceApi.createWorkspace(data).then((res) => res.data);
+  };
+
+  async function getWorkspaceMembers (
+    workspaceSlug: string,
+    data?: {
+      offset?: number;
+      limit?: number;
+      order_by?: string;
+      desc?: boolean;
+      search_query?: string;
     },
-
-    async createWorkspace(
-      data: AiplanCreateWorkspaceRequest,
-    ): Promise<DtoWorkspace | any> {
-      await workspaceApi.createWorkspace(data).then((res) => res.data);
-    },
-
-    async getWorkspaceMembers(
-      workspaceSlug: string,
-      data?: {
-        offset?: number;
-        limit?: number;
-        order_by?: string;
-        desc?: boolean;
-        search_query?: string;
-      },
-      isInitState = true,
-    ): Promise<
-      | (DaoPaginationResponse & {
-          result?: DtoWorkspaceMember[];
-        })
-      | void
-    > {
-      if (!workspaceSlug) return;
-
-      return workspaceApi
-        .getWorkspaceMemberList(workspaceSlug, data)
-        .then((res) => {
-          if (!isInitState) return res.data;
-
-          !data?.search_query
-            ? (this.workspaceUsers = res.data.result)
-            : (this.foundUsers = res.data.result);
-          return res.data;
-        });
-    },
-
-    async getWorkspaceMembersByQuery(
-      workspaceSlug: string,
-      filters?: {
-        search_query: string;
-      },
-    ): Promise<
-      DaoPaginationResponse & {
+    isInitState = true,
+  ): Promise<
+    | (DaoPaginationResponse & {
         result?: DtoWorkspaceMember[];
-      }
-    > {
-      return workspaceApi
-        .getWorkspaceMemberList(workspaceSlug, filters)
-        .then((res) => res?.data);
-    },
+      })
+    | void
+  > {
+    if (!workspaceSlug) return;
 
-    // раньше использовалось для блокировки и разблокировки юзера
-    // сейчас по контракту принимает третим параметром роль (видимо меняет роль юзера)
-    // что с этим делать?
-    async controlWorkspaceUser(
-      workspaceSlug: string,
-      memberID: string,
-      value: boolean,
-    ): Promise<void> {
-      await workspaceApi
-        .updateWorkspaceMember(workspaceSlug, memberID, {
-          blocked: value,
-        })
-        .then((res) => res.data);
-    },
+    return workspaceApi
+      .getWorkspaceMemberList(workspaceSlug, data)
+      .then((res) => {
+        if (!isInitState) return res.data;
 
-    async getWorkspaceProjects(
-      workspaceSlug: string,
-      filters?: {
-        search_query?: string;
-      },
-      stopRefresh?: boolean,
-    ): Promise<DtoProjectLight[] | void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
-
-      return projectsApi.getProjectList(workspaceSlug, filters).then((res) => {
-        // временное решение - пока не трогать
-        if (stopRefresh) this.stopRefresh = stopRefresh;
-        this.workspaceProjects = res.data;
+        !data?.search_query
+          ? (workspaceUsers.value = res.data.result)
+          : (foundUsers.value = res.data.result);
         return res.data;
       });
+  };
+
+  async function getWorkspaceMembersByQuery (
+    workspaceSlug: string,
+    filters?: {
+      search_query: string;
     },
+  ): Promise<
+    DaoPaginationResponse & {
+      result?: DtoWorkspaceMember[];
+    }
+  > {
+    return workspaceApi
+      .getWorkspaceMemberList(workspaceSlug, filters)
+      .then((res) => res?.data);
+  };
 
-    // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ
-    // чем отличается от предыдущего сервиса? (getWorkspaceProjects)
-    async getWsProjects(
-      workspaceSlug: string,
-      filters?: {
-        search_query?: string;
-      },
-    ) {
-      if (workspaceSlug === undefined) return;
-      const { data } = await projectsApi.getProjectList(workspaceSlug, {
-        ...filters,
-      });
-      return data;
+  // раньше использовалось для блокировки и разблокировки юзера
+  // сейчас по контракту принимает третим параметром роль (видимо меняет роль юзера)
+  // что с этим делать?
+  async function controlWorkspaceUser(
+    workspaceSlug: string,
+    memberID: string,
+    value: boolean,
+  ): Promise<void> {
+    await workspaceApi
+      .updateWorkspaceMember(workspaceSlug, memberID, {
+        blocked: value,
+      })
+      .then((res) => res.data);
+  };
+
+  async function getWorkspaceProjects(
+    workspaceSlug: string,
+    filters?: {
+      search_query?: string;
     },
+    isStopRefresh?: boolean,
+  ): Promise<DtoProjectLight[] | void> {
+    if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-    async getAllWorkspaceStates(
-      currentWorkspaceSlug: string,
-    ): Promise<Record<string, DtoStateLight[]> | void> {
-      if (!currentWorkspaceSlug || currentWorkspaceSlug === 'undefined') return;
+    return projectsApi.getProjectList(workspaceSlug, filters).then((res) => {
+      // временное решение - пока не трогать
+      if (isStopRefresh) stopRefresh.value = isStopRefresh;
+      workspaceProjects.value = res.data;
+      return res.data;
+    });
+  };
 
-      return workspaceApi
-        .getWorkspaceStateList(currentWorkspaceSlug)
-        .then((res) => (this.allWorkspaceStates = res.data));
+  // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ
+  // чем отличается от предыдущего сервиса? (getWorkspaceProjects)
+  async function getWsProjects(
+    workspaceSlug: string,
+    filters?: {
+      search_query?: string;
     },
+  ) {
+    if (workspaceSlug === undefined) return;
+    const { data } = await projectsApi.getProjectList(workspaceSlug, {
+      ...filters,
+    });
+    return data;
+  };
 
-    async getJitsiToken(
-      currentWorkspaceSlug: string,
-    ): Promise<Record<string, string> | any> {
-      return workspaceApi
-        .getWorkspaceJitsiToken(currentWorkspaceSlug)
-        .then((res) => res.data);
-    },
+  async function getAllWorkspaceStates(
+    currentWorkspaceSlug: string,
+  ): Promise<Record<string, DtoStateLight[]> | void> {
+    if (!currentWorkspaceSlug || currentWorkspaceSlug === 'undefined') return;
 
-    async getMeInWorkspace(
-      workspaceSlug: string,
-    ): Promise<DtoWorkspaceMemberWithOwner | void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    return workspaceApi
+      .getWorkspaceStateList(currentWorkspaceSlug)
+      .then((res) => (allWorkspaceStates.value = res.data));
+  };
 
-      const res =
-        await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
+  async function getJitsiToken(
+    currentWorkspaceSlug: string,
+  ): Promise<Record<string, string> | any> {
+    return workspaceApi
+      .getWorkspaceJitsiToken(currentWorkspaceSlug)
+      .then((res) => res.data);
+  };
 
-      return (this.meInWorkspace = res.data);
-    },
+  async function setAiDocNotificationSettings(
+    workspaceSlug: string,
+    notificationSettings: AiplanWorkspaceNotificationRequest,
+    params: RequestParams = {},
+  ) {
+    // workspaceApi.updateMyNotifications(workspaceSlug, data); - нет в Workspace
+    api.request({
+      path: `/api/auth/workspaces/${workspaceSlug}/me/notifications/`,
+      method: 'POST',
+      body: notificationSettings,
+      secure: true,
+      type: ContentType.Json,
+      ...params,
+    });
+  };
 
-    async setAiDocNotificationSettings(
-      workspaceSlug: string,
-      notificationSettings: AiplanWorkspaceNotificationRequest,
-      params: RequestParams = {},
-    ) {
-      // workspaceApi.updateMyNotifications(workspaceSlug, data); - нет в Workspace
-      api.request({
-        path: `/api/auth/workspaces/${workspaceSlug}/me/notifications/`,
-        method: 'POST',
-        body: notificationSettings,
-        secure: true,
-        type: ContentType.Json,
-        ...params,
-      });
-    },
-  },
+  return {
+    currentWorkspaceSlug,
+    workspaceInfo,
+    workspaceToken,
+    workspaceProjects,
+    workspaceUsers,
+    foundUsers,
+    allWorkspaceStates,
+    stopRefresh,
+    meInWorkspace,
+    workspaceLogo,
+    workspaceName,
+    getMeInWorkspace,
+    getWorkspaceInfo,
+    createWorkspace,
+    getWorkspaceMembers,
+    getWorkspaceMembersByQuery,
+    controlWorkspaceUser,
+    getWorkspaceProjects,
+    getWsProjects,
+    getAllWorkspaceStates,
+    getJitsiToken,
+    setAiDocNotificationSettings,
+  };
 });
