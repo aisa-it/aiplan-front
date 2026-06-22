@@ -23,7 +23,7 @@
         @click="addToFolder"
       >
         <q-item-section thumbnail class="q-px-md">
-          <FolderIcon />
+          <FolderAddIcon />
         </q-item-section>
         <q-item-section>Добавить к папке ...</q-item-section>
       </q-item>
@@ -90,7 +90,7 @@ import { useRolesStore } from 'src/stores/roles-store.ts';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 import SettingsIcon from 'src/components/icons/SettingsIcon.vue';
-import FolderIcon from 'src/components/icons/FolderIcon.vue';
+import FolderAddIcon from 'src/components/icons/FolderAddIcon.vue';
 import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
 import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
