@@ -3,9 +3,8 @@
     ref="menuRef"
     class="context-menu"
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
-    v-bind="menuProps"
+    :context-menu="!isControlled"
     touch-position
-    context-menu
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
@@ -158,10 +157,6 @@ const emits = defineEmits<{
 const menuRef = ref<any>(null);
 
 const isControlled = computed(() => !!props.anchorEvent);
-
-const menuProps = computed(() => {
-  return isControlled.value ? {} : { 'context-menu': true };
-});
 
 const issuesStore = useIssuesStore();
 const sprintStore = useSprintStore();
