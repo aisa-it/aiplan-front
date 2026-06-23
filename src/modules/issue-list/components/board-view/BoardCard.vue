@@ -143,7 +143,7 @@
     <div class="selectors">
       <SelectSprints
         :workspace-slug="card.workspace_detail?.slug"
-        :issueid="card.id"
+        :issue="card"
         :current-sprints="card.sprints ?? []"
         :is-disabled="
           !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')

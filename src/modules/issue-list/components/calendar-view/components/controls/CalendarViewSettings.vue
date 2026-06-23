@@ -177,10 +177,11 @@ watch(
 );
 
 const { project } = storeToRefs(useProjectStore());
-const { workspaceInfo } = useWorkspaceStore();
+const workspaceStore = useWorkspaceStore();
+const { workspaceInfo } = storeToRefs(workspaceStore);
 const calendarFiltersStore = useCalendarFiltersStore();
 
-const workspaceId = computed(() => workspaceInfo?.id ?? '');
+const workspaceId = computed(() => workspaceInfo.value?.id ?? '');
 const projectId = computed(() => project.value?.id ?? '');
 
 const priorities = [

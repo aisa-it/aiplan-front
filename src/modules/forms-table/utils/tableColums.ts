@@ -38,4 +38,16 @@ export const formsTableColumns: QTableColumn<IForms>[] = [
     label: 'Ссылка',
     field: (row) => row,
   },
+  {
+    name: 'edit',
+    align: 'center',
+    label: 'Редактировать',
+    field: (row) => row,
+  },
+  {
+    name: 'delete',
+    align: 'center',
+    label: 'Удалить',
+    field: (row) => row,
+  },
 ];

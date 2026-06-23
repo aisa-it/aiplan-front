@@ -3,7 +3,7 @@
     <div @click.stop>
       <SelectSprints
         :workspace-slug="rowInfo.row.workspace_detail?.slug"
-        :issueid="rowInfo.row.id"
+        :issue="rowInfo.row"
         :currentSprints="rowInfo.row.sprints ?? []"
         :is-disabled="
           !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-primary')
