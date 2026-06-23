@@ -5,6 +5,7 @@
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
     v-bind="menuProps"
     touch-position
+    context-menu
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
