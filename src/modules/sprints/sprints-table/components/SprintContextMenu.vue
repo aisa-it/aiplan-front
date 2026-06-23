@@ -1,5 +1,6 @@
 <template>
   <q-menu
+    context-menu
     ref="menuRef"
     class="context-menu"
     :style="`z-index: ${ isDeletingOpen || isFolderEditingOpen || isSprintEditingOpen ? 6000 : 9001}`"
@@ -63,24 +64,24 @@
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
-    <DeleteSprintDialog
-      v-model="isDeletingOpen"
-      :sprint="props.row"
-      @success="successDeleteHandle"
-      @error="errorDeleteHandle"
-    />
-    <EditFolderDialog
-      v-model="isFolderEditingOpen"
-      :sprint="sprintForManageFolder"
-      @hide="menuRef.hide()"
-    />
-    <CreateSprintDialog
-        v-model="isSprintEditingOpen"
-        :sprint-id="sprintForEditId"
-        @update-sprints="emit('refresh')"
-        @hide="menuRef.hide()"
-        />
   </q-menu>
+  <DeleteSprintDialog
+    v-model="isDeletingOpen"
+    :sprint="props.row"
+    @success="successDeleteHandle"
+    @error="errorDeleteHandle"
+  />
+  <EditFolderDialog
+    v-model="isFolderEditingOpen"
+    :sprint="sprintForManageFolder"
+    @hide="menuRef.hide()"
+  />
+  <CreateSprintDialog
+    v-model="isSprintEditingOpen"
+    :sprint-id="sprintForEditId"
+    @update-sprints="emit('refresh')"
+    @hide="menuRef.hide()"
+  />
 </template>
 
 <script setup lang="ts">
