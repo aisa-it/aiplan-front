@@ -3,7 +3,11 @@
     <q-card class="inner-modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Выберите спринты для задачи</h6>
-        <span v-if="filteredSprints.length > 0">Отметьте спринты, в которых должна участвовать задача {{ issue.project_detail?.identifier }}-{{ issue.sequence_id }} {{ issue.name }}</span>
+        <span v-if="filteredSprints.length > 0"
+          >Отметьте спринты, в которых должна участвовать задача
+          {{ issue.project_detail?.identifier }}-{{ issue.sequence_id }}
+          {{ issue.name }}</span
+        >
         <span v-else>
           Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.
         </span>
@@ -13,7 +17,6 @@
         class="column q-pt-none scrollable-content"
         style="max-height: 60vh; overflow: scroll"
       >
-
         <q-tree
           :nodes="filteredSprints"
           node-key="id"
@@ -21,13 +24,12 @@
           children-key="sprints"
           dense
         >
-          <template v-slot:default-header="prop"
-          >
+          <template v-slot:default-header="prop">
             <q-item
               v-if="prop.node.stats"
               class="menu-link__item row items-center"
               style="padding: 0 5px"
-              >
+            >
               <q-item-section side>
                 <q-checkbox v-model="selectedSprints" :val="prop.node.id" />
               </q-item-section>
@@ -51,7 +53,7 @@
               </q-item-section>
             </q-item>
 
-            <q-item v-else class="menu-link__item row items-center" >
+            <q-item v-else class="menu-link__item row items-center">
               <q-item-section
                 class="tree-custom-header__name"
                 style="font-weight: 500"
@@ -127,7 +129,9 @@ const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { sprintsList } = storeToRefs(sprintStore);
 const sprintFolders = computed(() =>
-  sprintsList.value?.filter((item) => item.id !== ROOT_FOLDER_ID && item.sprints),
+  sprintsList.value?.filter(
+    (item) => item.id !== ROOT_FOLDER_ID && item.sprints,
+  ),
 );
 const rootSprints = computed(
   () => sprintsList.value?.find((item) => item.id === ROOT_FOLDER_ID)?.sprints,
@@ -156,6 +160,10 @@ const removeFrom = computed(() =>
 const isChanged = computed(() => isArraysEqual(addTo.value, removeFrom.value));
 
 const getIssueSprints = async () => {
+  if (!sprintsList.value.length) {
+    await sprintStore.getSprintsList(currentWorkspaceSlug.value as string);
+  }
+
   const sprintIds = props.issue.sprints.map(
     (sprint: DtoSprintLight) => sprint.id,
   );
@@ -195,19 +203,13 @@ const reset = () => {
   currentSprints.value = [];
   emits('hide');
 };
-
-onBeforeMount(async () => {
-  if (!sprintsList.value.length) {
-    await sprintStore.getSprintsList(currentWorkspaceSlug.value as string);
-  }
-})
 </script>
 <style lang="scss" scoped>
-  :deep(.q-tree__node--child) {
-    padding-left: 0;
+:deep(.q-tree__node--child) {
+  padding-left: 0;
 
-    &::before {
-      content: none;
-    }
+  &::before {
+    content: none;
   }
+}
 </style>
