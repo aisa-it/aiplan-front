@@ -43,7 +43,7 @@ import { useUserStore } from 'src/stores/user-store';
 const { user } = storeToRefs(useUserStore());
 const q = useQuasar();
 const route = useRoute();
-const roomName = ref(user.value.last_workspace_slug || '');
+const roomName = ref(user.value?.last_workspace_slug || '');
 const inputRef = ref();
 
 defineProps<{
@@ -56,7 +56,7 @@ onMounted(async () => {
   if (route.params.roomName?.length) {
     roomName.value = route.params.roomName;
     connectToConference(true);
-  } else roomName.value = user.value.last_workspace_slug || '';
+  } else roomName.value = user.value?.last_workspace_slug || '';
 });
 
 const connectToConference = (routeByQuery = false) => {
