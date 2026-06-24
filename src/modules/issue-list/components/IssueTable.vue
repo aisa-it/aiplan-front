@@ -134,13 +134,13 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <IssueContextMenu
-    :row="contextRow"
-    :anchor-event="contextEvent"
-    @refresh="refreshTable"
-  />
+    <IssueContextMenu
+      :row="contextRow"
+      :anchor-event="contextEvent"
+      @refresh="refreshTable"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

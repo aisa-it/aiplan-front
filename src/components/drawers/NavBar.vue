@@ -3,11 +3,15 @@
     v-model="drawer"
     show-if-above
     :mini="!drawer || miniState"
-    :width="270"
+    :width="isMobile ? DEFAULT_WIDTH : adaptiveWidth"
     :breakpoint="500"
     bordered
     class="main-nav-bar"
-  >
+    @mouseenter="isBtnShow = true"
+    @mouseleave="isBtnShow = false"
+    @before-show="updateClientWidth"
+    @mini-state="saveState"
+    >
     <div class="column full-height">
       <q-scroll-area class="col" :horizontal-thumb-style="{ opacity: 0 }">
         <q-list>
@@ -21,27 +25,27 @@
             }"
           >
             <q-item-section avatar>
-              <HomeIcon />
+              <HomeIcon :color="route.name === 'workspace' ? ACTIVE_ICON_COLOR : ''"/>
             </q-item-section>
 
             <q-item-section> Главная </q-item-section>
           </q-item>
 
           <q-item
-            :active="route.name === 'projects'"
+            :active="route.path.includes('projects')"
             clickable
             v-ripple
             @click="router.push(`/${currentWorkspaceSlug}/projects`)"
           >
             <q-item-section avatar>
-              <MenuProjectsIcon :is-dark="$q.dark.isActive" />
+              <MenuProjectsIcon :color="route.path.includes('projects') ? ACTIVE_ICON_COLOR : ''" />
             </q-item-section>
 
             <q-item-section> Проекты </q-item-section>
           </q-item>
 
           <q-item
-            :active="route.name === 'sprints'"
+            :active="route.path.includes('sprints')"
             clickable
             v-ripple
             :to="{
@@ -49,7 +53,7 @@
             }"
           >
             <q-item-section avatar>
-              <SprintIcon />
+              <SprintIcon :color="route.path.includes('/sprints') ? ACTIVE_ICON_COLOR : ''" />
             </q-item-section>
 
             <q-item-section> Спринты </q-item-section>
@@ -62,7 +66,7 @@
             @click="router.push(`/${currentWorkspaceSlug}/forms`)"
           >
             <q-item-section avatar>
-              <MenuFormsIcon :is-dark="$q.dark.isActive" />
+              <MenuFormsIcon :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''" />
             </q-item-section>
 
             <q-item-section> Формы </q-item-section>
@@ -75,7 +79,7 @@
             @click="router.push(`/${currentWorkspaceSlug}/aidoc`)"
           >
             <q-item-section avatar>
-              <AIDocIcon />
+              <AIDocIcon :color="route.path.includes('/aidoc') ? ACTIVE_ICON_COLOR : ''" />
             </q-item-section>
 
             <q-item-section> АИДок </q-item-section>
@@ -120,9 +124,10 @@
 
     <div class="absolute" style="top: 15px; right: -10px">
       <q-btn
+        v-show="isBtnShow"
         class="drawer-btn"
         :icon="miniState ? 'chevron_right' : 'chevron_left'"
-        @click="drawerClick"
+        @click="onDrawerBtnClick"
       />
     </div>
 
@@ -132,18 +137,20 @@
       @success="(msg) => onSuccess(msg)"
     />
     <ReleaseNotePreviewDialog v-model="isReleaseOpen" />
+    <div v-show="!miniState" class="handle-resize" @pointerdown="onPointerDown"></div>
   </q-drawer>
 </template>
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { computed, onBeforeMount, onUnmounted, ref } from 'vue';
+import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 
 // services
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
 
 // icons
@@ -160,12 +167,12 @@ import AiplanHelpDialog from 'src/components/dialogs/AiplanHelp/AiplanHelpDialog
 import ReleaseNotePreviewDialog from 'components/dialogs/ReleaseNotePreviewDialog.vue';
 import ExpansionItem from '../ExpansionItem.vue';
 import NavBarHelpList from './NavBarHelpList.vue';
-
-import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useDrawerResize } from 'src/composables/useDrawerResize';
 
 const $q = useQuasar();
 const miniState = ref(false);
 const drawer = ref(true);
+
 const router = useRouter();
 const route = useRoute();
 
@@ -174,8 +181,43 @@ const { setNotificationView } = useNotificationStore();
 const isHelpOpen = ref(false);
 const isFeedbackOpen = ref(false);
 const isReleaseOpen = ref(false);
+const isBtnShow = ref(false);
 
-const drawerClick = () => (miniState.value = !miniState.value);
+const ACTIVE_ICON_COLOR = '#3f75ff';
+const STORAGE_KEY = 'isMiniState';
+const DEFAULT_WIDTH = 270;
+
+const clientWidth = ref(document.documentElement.clientWidth);
+const isMobile = computed(() => {
+  return $q.platform.is.mobile && Screen.lt.md;
+});
+const minWidth = computed(() => DEFAULT_WIDTH);
+const maxWidth = computed(() =>
+  isMobile.value ? DEFAULT_WIDTH : clientWidth.value / 2,
+);
+const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
+  minWidth,
+  maxWidth,
+  clientWidth,
+  'menuSidebarWidth',
+  'left',
+);
+
+const onDrawerBtnClick = () => (miniState.value = !miniState.value);
+
+const syncDrawerFromStorage = (e: StorageEvent) => {
+  if (e.key === STORAGE_KEY) {
+    try {
+      miniState.value = JSON.parse(e.newValue as string);
+    } catch {
+      miniState.value = false;
+    }
+  }
+};
+
+const saveState = () => {
+  localStorage.setItem(STORAGE_KEY, String(miniState.value));
+}
 
 const onSuccess = (msg?: string) => {
   setNotificationView({
@@ -186,4 +228,31 @@ const onSuccess = (msg?: string) => {
 };
 
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+
+onBeforeMount(() => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  miniState.value = stored ? JSON.parse(stored) : true;
+  window.addEventListener('storage', syncDrawerFromStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('storage', syncDrawerFromStorage);
+});
 </script>
+
+<style scoped>
+.handle-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.drawer-btn {
+  z-index: 1000;
+}
+</style>

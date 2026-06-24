@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useRouter } from 'vue-router';
 import { useRolesStore } from './roles-store';
 import {
   AiplanCreateWorkspaceRequest,
@@ -23,6 +24,7 @@ import { computed, ref, watch } from 'vue';
 
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
+const router = useRouter();
 
 const api = new HttpClient();
 
@@ -61,15 +63,15 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   ): Promise<DtoWorkspace | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-      return workspaceApi
-        .getWorkspace(workspaceSlug)
-        .then(async (res) => {
-          const rolesStore = useRolesStore();
-          this.workspaceInfo = res.data;
+    return workspaceApi
+      .getWorkspace(workspaceSlug)
+      .then(async (res) => {
+        const rolesStore = useRolesStore();
+        workspaceInfo.value = res.data;
 
-          await this.getMeInWorkspace(workspaceSlug);
+        await getMeInWorkspace(workspaceSlug);
 
-          rolesStore.defineWorkspaceRole(this.meInWorkspace);
+        rolesStore.defineWorkspaceRole(meInWorkspace.value);
 
         // Проверяем есть ли доступ к рабочему пространству
         if (
@@ -114,10 +116,10 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   > {
     if (!workspaceSlug) return;
 
-      return workspaceApi
-        .getWorkspaceMemberList(workspaceSlug, data)
-        .then((res) => {
-          if (!isInitState) return res.data;
+    return workspaceApi
+      .getWorkspaceMemberList(workspaceSlug, data)
+      .then((res) => {
+        if (!isInitState) return res.data;
 
         !data?.search_query
           ? (workspaceUsers.value = res.data.result)
@@ -156,14 +158,14 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       .then((res) => res.data);
   }
 
-    async getWorkspaceProjects(
-      workspaceSlug: string,
-      filters?: {
-        search_query?: string;
-      },
-      stopRefresh?: boolean,
-    ): Promise<DtoProjectLight[] | void> {
-      if (!workspaceSlug || workspaceSlug === 'undefined') return;
+  async function getWorkspaceProjects(
+    workspaceSlug: string,
+    filters?: {
+      search_query?: string;
+    },
+    isStopRefresh?: boolean,
+  ): Promise<DtoProjectLight[] | void> {
+    if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
     return projectsApi.getProjectList(workspaceSlug, filters).then((res) => {
       // временное решение - пока не трогать
@@ -188,10 +190,10 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     return data;
   }
 
-    async getAllWorkspaceStates(
-      currentWorkspaceSlug: string,
-    ): Promise<Record<string, DtoStateLight[]> | void> {
-      if (!currentWorkspaceSlug || currentWorkspaceSlug === 'undefined') return;
+  async function getAllWorkspaceStates(
+    currentWorkspaceSlug: string,
+  ): Promise<Record<string, DtoStateLight[]> | void> {
+    if (!currentWorkspaceSlug || currentWorkspaceSlug === 'undefined') return;
 
     return workspaceApi
       .getWorkspaceStateList(currentWorkspaceSlug)

@@ -336,7 +336,7 @@ const updateDocWatchers = async (e: any) => {
 };
 
 const updateSprintWatchers = (e: any) => {
-  emit('update:watchers', e);
+  emits('update:watchers', e);
   return;
 }
 

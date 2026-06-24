@@ -3,42 +3,64 @@
     <q-card class="inner-modal-card">
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Выберите спринты для задачи</h6>
-        <span>Отметьте спринты, в которых должна участвовать задача</span>
+        <span v-if="filteredSprints.length > 0">Отметьте спринты, в которых должна участвовать задача {{ issue.project_detail?.identifier }}-{{ issue.sequence_id }} {{ issue.name }}</span>
+        <span v-else>
+          Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.
+        </span>
       </q-card-section>
       <q-card-section
+        v-if="filteredSprints.length > 0"
         class="column q-pt-none scrollable-content"
         style="max-height: 60vh; overflow: scroll"
       >
-        <q-list>
-          <q-item
-            v-for="sprint in sprintsList"
-            :key="sprint.id"
-            class="menu-link__item row items-center"
-            style="padding-top: 0; padding-bottom: 0"
+
+        <q-tree
+          :nodes="filteredSprints"
+          node-key="id"
+          label-key="name"
+          children-key="sprints"
+          dense
+        >
+          <template v-slot:default-header="prop"
           >
-            <q-item-section side>
-              <q-checkbox v-model="selectedSprints" :val="sprint.id" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="abbriviated-text">
-                {{ sprint.name }}
-                {{
-                  getSprintDates(
-                    sprint?.start_date ?? '',
-                    sprint?.end_date ?? '',
-                  )
-                }}
-              </q-item-label>
-              <HintTooltip
-                anchor="bottom start"
-                self="bottom start"
-                :offset="[0, 42]"
+            <q-item
+              v-if="prop.node.stats"
+              class="menu-link__item row items-center"
+              style="padding: 0 5px"
               >
-                {{ sprint.name }}
-              </HintTooltip>
-            </q-item-section>
-          </q-item>
-        </q-list>
+              <q-item-section side>
+                <q-checkbox v-model="selectedSprints" :val="prop.node.id" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="abbriviated-text">
+                  {{ prop.node.name }}
+                  {{
+                    getSprintDates(
+                      prop.node?.start_date ?? '',
+                      prop.node?.end_date ?? '',
+                    )
+                  }}
+                </q-item-label>
+                <HintTooltip
+                  anchor="bottom start"
+                  self="bottom start"
+                  :offset="[0, 42]"
+                >
+                  {{ prop.node.name }}
+                </HintTooltip>
+              </q-item-section>
+            </q-item>
+
+            <q-item v-else class="menu-link__item row items-center" >
+              <q-item-section
+                class="tree-custom-header__name"
+                style="font-weight: 500"
+              >
+                {{ prop.node.name }}
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-tree>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn
@@ -67,7 +89,7 @@
 
 <script setup lang="ts">
 // core
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -87,6 +109,7 @@ import { isArraysEqual } from 'src/utils/helpers';
 import { sprintIssuesUpdate } from 'src/modules/sprints/services/api';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { getSprintDates } from 'src/modules/sprints/helpres';
+import { ROOT_FOLDER_ID } from 'src/constants/constants';
 
 const props = defineProps<{
   issue: any;
@@ -94,6 +117,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   refresh: [];
+  hide: [];
 }>();
 
 const workspaceStore = useWorkspaceStore();
@@ -102,6 +126,22 @@ const { setNotificationView } = useNotificationStore();
 
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { sprintsList } = storeToRefs(sprintStore);
+const sprintFolders = computed(() =>
+  sprintsList.value?.filter((item) => item.id !== ROOT_FOLDER_ID && item.sprints),
+);
+const rootSprints = computed(
+  () => sprintsList.value?.find((item) => item.id === ROOT_FOLDER_ID)?.sprints,
+);
+const filteredSprints = computed(() => {
+  let items = [];
+  if (sprintFolders.value) {
+    items.push(...sprintFolders.value);
+  }
+  if (rootSprints.value) {
+    items.push(...rootSprints.value);
+  }
+  return items;
+});
 
 const selectedSprints = ref([] as string[]);
 const currentSprints = ref([] as string[]);
@@ -153,5 +193,21 @@ const saveIssueSprints = async () => {
 const reset = () => {
   selectedSprints.value = [];
   currentSprints.value = [];
+  emits('hide');
 };
+
+onBeforeMount(async () => {
+  if (!sprintsList.value.length) {
+    await sprintStore.getSprintsList(currentWorkspaceSlug.value as string);
+  }
+})
 </script>
+<style lang="scss" scoped>
+  :deep(.q-tree__node--child) {
+    padding-left: 0;
+
+    &::before {
+      content: none;
+    }
+  }
+</style>

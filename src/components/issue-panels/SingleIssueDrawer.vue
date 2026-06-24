@@ -345,8 +345,9 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectSprints
+            :projectid="issueData.project"
             class="issue-selector"
-            :issueid="issueData.id"
+            :issue="issueData"
             :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
@@ -496,12 +497,13 @@ const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 const props = defineProps<{
   preview?: boolean;
-  subIssues?: DtoIssue[];
 }>();
 
 const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
+
+const parentIssueData = ref<DtoIssue>();
 
 const { navigateToActivityPage } = useUserActivityNavigation();
 
@@ -511,10 +513,8 @@ const hideSettings = computed(() => {
 
 const isSubIssueTargetOverTime = computed(
   () =>
-    props.subIssues?.some(
-      (issue) =>
-        issue.target_date && issue.target_date > issueData.value.target_date,
-    ) ?? false,
+    parentIssueData.value?.target_date &&
+    issueData.value.target_date > parentIssueData.value?.target_date,
 );
 
 //refs
@@ -523,6 +523,7 @@ const refreshCycle = ref();
 // functions
 const handleRefresh = async () => {
   await refresh();
+  await updateParentIssueData();
   emits('refresh');
 };
 
@@ -664,8 +665,21 @@ const handleLinkEdit = async (link: DtoIssueLinkLight) => {
   });
 };
 
-onMounted(() => {
+const updateParentIssueData = async () => {
+  if (issueData.value.parent) {
+    parentIssueData.value = (
+      await singleIssueStore.getIssueDataById(
+        currentWorkspaceSlug.value,
+        issueData.value.project ?? currentProjectID.value,
+        issueData.value.parent,
+      )
+    ).data;
+  }
+};
+
+onMounted(async () => {
   refreshCycle.value = setIntervalFunction(refresh);
+  await updateParentIssueData();
 });
 
 onBeforeUnmount(() => {

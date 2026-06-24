@@ -13,6 +13,13 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
+    <path
+      d="M10 13H14M12 11L12 15"
+      :stroke="color"
+      stroke-width="1.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
   </svg>
 </template>
 <script setup lang="ts">

@@ -67,7 +67,10 @@ import { useNotificationStore } from 'src/stores/notification-store';
 import { IPassword } from 'src/interfaces/users';
 
 // constants
-import { SUCCESS_IDENTITY_PASSWORD } from 'src/constants/notifications';
+import {
+  SUCCESS_IDENTITY_PASSWORD,
+  ERROR_CHANGE_PASSWORD,
+} from 'src/constants/notifications';
 
 const route = useRoute();
 const router = useRouter();
@@ -88,15 +91,24 @@ const changePassword = async () => {
 
   await api
     .resetPassword(String(uidb64), String(token), password.value)
-    .then(() => localStorage.clear())
     .then(() => {
-      router.replace('/signin');
-
+      localStorage.clear();
       setNotificationView({
         open: true,
         type: 'success',
         customMessage: SUCCESS_IDENTITY_PASSWORD,
       });
+    })
+    .catch(() => {
+      localStorage.clear();
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage: ERROR_CHANGE_PASSWORD,
+      });
+    })
+    .finally(() => {
+      router.replace('/signin');
     });
 };
 </script>

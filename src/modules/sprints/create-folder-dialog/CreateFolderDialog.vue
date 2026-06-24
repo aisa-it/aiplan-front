@@ -33,17 +33,20 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { createSprintFolder } from '../services/api';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-
-import CancelButton from 'src/components/buttons/CancelButton.vue';
 import { useNotificationStore } from 'src/stores/notification-store';
-import { ref } from 'vue';
+import { useSprintStore } from '../stores/sprint-store';
+import { DtoSprintFolder } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import CancelButton from 'src/components/buttons/CancelButton.vue';
 
 const emits = defineEmits<{ success: []; error: [] }>();
 
 const { setNotificationView } = useNotificationStore();
+const sprintStore = useSprintStore();
+const { sprintsList } = storeToRefs(sprintStore);
 
 const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
 const folderName = ref('');
@@ -60,7 +63,22 @@ const resetName = () => {
   folderName.value = '';
 }
 
+const sameNameFolder = ref<DtoSprintFolder>();
+const checkName = () => {
+  sameNameFolder.value = sprintsList.value.find((folder) => {
+    return folder.name?.toLowerCase() === folderName.value.toLowerCase();
+  });
+}
+
 const handleCreate = async () => {
+  checkName();
+
+  if (sameNameFolder.value) {
+    showNotification('error', 'Папка с таким именем уже существует');
+    resetName();
+    return;
+  }
+
   const data = {
     name: folderName.value,
   }

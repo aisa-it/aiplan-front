@@ -13,7 +13,9 @@
     >
       <AddIcon :color="'#fff'" />
       <span v-if="!isMobile && Screen.width > 720"> Создать </span>
-      <HintTooltip v-if="!isAIDoc && workspaceProjects.length === 0">
+      <HintTooltip
+        v-if="!isAIDoc && !isForms && workspaceProjects.length === 0"
+      >
         Создать задачу можно только если есть хотя бы один проект
       </HintTooltip>
     </q-btn>
@@ -30,6 +32,11 @@
     <CreateDocPageDialog
       v-if="!isMobile && isDocCreateOpen"
       v-model="isDocCreateOpen"
+    />
+    <FormDialog
+      v-if="!isMobile && isFormCreateOpen"
+      v-model="isFormCreateOpen"
+      @success-create="refreshForms"
     />
   </template>
   <template v-else>
@@ -50,6 +57,12 @@
       v-model="isDocCreateOpen"
       @hide="closeDialog"
     />
+    <FormDialog
+      v-if="isFormCreateOpen"
+      v-model="isFormCreateOpen"
+      @success-create="refreshForms"
+      @hide="closeDialog"
+    />
   </template>
 </template>
 
@@ -64,11 +77,15 @@ import { useIssuesStore } from 'src/stores/issues-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useGuiderStore } from 'src/modules/guided-tours/guider-store';
+import { useFormStore } from 'src/stores/form-store';
 // components
 import AddIcon from 'src/components/icons/AddIcon.vue';
 import NewIssueDialog from './NewIssueDialog.vue';
 import NewProjectDialog from './dialogs/NewProjectDialog.vue';
 import CreateDocPageDialog from './dialogs/AIDocDialogs/CreateDocPageDialog.vue';
+import FormDialog from './forms/dialogs/FormDialog.vue';
+// api
+import { getFormList } from 'src/components/forms/services/api';
 
 // route
 const route = useRoute();
@@ -76,6 +93,7 @@ const route = useRoute();
 // stores
 const issuesStore = useIssuesStore();
 const workspaceStore = useWorkspaceStore();
+const formStore = useFormStore();
 const { getWsRole, getProjectRole } = useRolesStore();
 
 // refs from stores
@@ -86,6 +104,7 @@ const { activeGuid } = storeToRefs(useGuiderStore());
 // local state
 const isProjectCreateOpen = ref(false);
 const isDocCreateOpen = ref(false);
+const isFormCreateOpen = ref(false);
 const isNewIssueDialogOpened = ref(false);
 
 const props = defineProps<{
@@ -103,6 +122,7 @@ const isMobile = toRef(props.isMobile);
 
 // computed
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
+const isForms = computed(() => route.name === 'forms');
 
 const isDisabled = computed(() => {
   const wsSlug = currentWorkspaceSlug?.value ?? '';
@@ -112,7 +132,9 @@ const isDisabled = computed(() => {
     return wsRole < 10;
   }
 
-  workspaceStore.getWorkspaceProjects(wsSlug);
+  if (isForms.value) {
+    return false;
+  }
 
   if (workspaceProjects.value.length === 0) {
     return true;
@@ -133,9 +155,16 @@ const isDisabled = computed(() => {
 const addIssue = () => {
   if (isAIDoc.value) {
     isDocCreateOpen.value = true;
+  } else if (isForms.value) {
+    isFormCreateOpen.value = true;
   } else {
     isNewIssueDialogOpened.value = true;
   }
+};
+
+const refreshForms = async () => {
+  if (!currentWorkspaceSlug.value) return;
+  formStore.forms = await getFormList(currentWorkspaceSlug.value);
 };
 
 const closeDialog = () => {
@@ -158,7 +187,8 @@ watch(
   },
 );
 
-onMounted(() => {
+onMounted(async () => {
+  await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug?.value ?? '');
   emits('setDisable', isDisabled.value);
 });
 </script>

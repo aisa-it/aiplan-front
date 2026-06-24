@@ -51,6 +51,33 @@
             {{ dateError }}
           </div>
         </div>
+
+        <div class="row q-mb-md centered-horisontally">
+          <div class="col centered-horisontally">
+            <FolderIcon />
+            <span class="q-ml-sm"> Папка </span>
+            <q-btn
+              class="btn btn-only-icon-sm self-center q-ml-xs"
+              no-caps
+              @click="isCreateFolderOpen = true"
+            >
+              <div class="full-w centered-horisontally justify-between">
+                <AddIcon />
+                <q-tooltip>Создать</q-tooltip>
+              </div>
+            </q-btn>
+          </div>
+          <SelectFolder
+            :sprint-id="defaultProps?.id"
+            :folder="folder"
+            class="col centered-horisontally"
+            @update:folder="
+                (val) => {
+                  return (folder = val);
+                }
+              "
+          />
+        </div>
       </div>
 
       <p class="q-mb-md">Цель спринта:</p>
@@ -92,6 +119,11 @@
       style="width: 100%"
       @click="pushData"
     />
+
+    <CreateFolderDialog
+      v-model="isCreateFolderOpen"
+      @success="refreshSprints"
+    />
   </div>
 </template>
 
@@ -109,20 +141,28 @@ dayjs.extend(timezone);
 
 import { storeToRefs } from 'pinia';
 import { useUserStore } from 'src/stores/user-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
 import SelectSprintIssues from './SelectSprintIssues.vue';
+import CreateFolderDialog from 'src/modules/sprints/create-folder-dialog/CreateFolderDialog.vue'
 
 import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
+import FolderIcon from 'src/components/icons/FolderIcon.vue';
+import AddIcon from 'src/components/icons/AddIcon.vue';
 import WatchDashedIcon from 'src/components/icons/WatchDashedIcon.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import {
   DtoIssueLight,
   DtoSprint,
+  DtoSprintFolder,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import SelectFolder from 'src/components/selects/SelectFolder.vue';
+import { ROOT_FOLDER_ID } from 'src/constants/constants.ts';
 
 const props = defineProps<{
   issues?: DtoIssueLight[];
@@ -137,10 +177,13 @@ const emits = defineEmits<{
 }>();
 
 const userStore = useUserStore();
+const sprintStore = useSprintStore();
+const workspaceStore = useWorkspaceStore();
 
 const { user } = storeToRefs(userStore);
 
 const nameRef = ref();
+const isCreateFolderOpen = ref(false);
 
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
@@ -148,6 +191,15 @@ const watchers = ref<any>(
     member: watcher,
   })) || []
 );
+const folder = ref<DtoSprintFolder | undefined>(
+  props.defaultProps?.sprint_folder
+);
+
+const refreshSprints = async () => {
+  await sprintStore.getSprintsList(
+    workspaceStore.currentWorkspaceSlug as string,
+  );
+};
 
 const dateRange = ref({
   from: props.defaultProps?.start_date
@@ -222,7 +274,6 @@ const removeAndAddWatcher = () => {
     };
   }
 
-
   const remove =
     props.defaultProps?.watchers?.filter(
       (el) => !watchersIds.some((i) => i === el.id),
@@ -255,6 +306,7 @@ const pushData = () => {
       description: description.value,
       start_date: toISO(dateRange.value.from),
       end_date: toISO(dateRange.value.to),
+      sprint_folder_id: folder.value?.id || ROOT_FOLDER_ID,
     },
     issuesSprint: { issues_add: addIssues, issues_remove: removeIssues },
     membersSprint: { members_add: addWatchers, members_remove: removeWatchers },
@@ -276,6 +328,7 @@ watch(
     watchers.value = props.defaultProps?.watchers?.map((watcher) => ({
     member: watcher,
   })) || [];
+    folder.value = props.defaultProps?.sprint_folder;
 
     dateRange.value = {
       from: props.defaultProps?.start_date
