@@ -25,7 +25,7 @@ export const copyLinkToClipboard = (
       break;
     }
     case 'forms': {
-      link = `${linkBody.workspaceSlug}/forms/${linkBody.formSlug}`;
+      link = `f/${linkBody.workspaceSlug}/${linkBody.formSlug}`;
       break;
     }
   }
