@@ -15,9 +15,8 @@
       :columns="columns"
       :rows-per-page-options="[10, 25, 50]"
       :loading="isLoading"
-      @row-click="(_, row) => router.push(`projects/${row.identifier}/issues`)"
+      @row-click="(_, row) => toProjectPage(row)"
       @row-contextmenu.prevent="onRowContextMenu"
-      @resetContext="onResetContext"
     >
       <template v-slot:body-cell-copy_link="props">
         <q-td :props="props">
@@ -42,6 +41,7 @@
             flat
             no-caps
             no-wrap
+            :disable="!isAccessToProject(props.row.id)"
             @click.stop="openNotificationSettings(props.row)"
           >
             <UnmutedIcon />
@@ -74,7 +74,11 @@
       v-model="isNotificationsAdminSettingsOpen"
       :project="selectedProject"
     />
-    <ProjectContextMenu :row="contextRow" :anchor-event="contextEvent" />
+    <ProjectContextMenu
+      :row="contextRow"
+      :anchor-event="contextEvent"
+      @reset-context="onResetContext"
+    />
   </div>
 </template>
 
@@ -94,11 +98,14 @@ import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
 import ProjectContextMenu from 'src/modules/projects-table/components/ProjectContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useNotificationStore } from 'src/stores/notification-store';
 import { storeToRefs } from 'pinia';
 
 import { getWorkspaceProjects } from '../api';
+import { BASE_ERROR_RULES } from 'src/constants/notifications';
 
-const { getProjectRole } = useRolesStore();
+const { getProjectRole, getWsRole } = useRolesStore();
+const { setNotificationView } = useNotificationStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -166,7 +173,10 @@ const columns: QTableColumn<DtoProjectLight>[] = [
 ];
 
 const onRowContextMenu = (evt: Event, row: DtoProjectLight | null) => {
-  if (!row) return;
+  if (!row || (row.id && !isAccessToProject(row.id))) {
+    onResetContext();
+    return;
+  }
   contextRow.value = row;
   contextEvent.value = evt as MouseEvent;
 };
@@ -191,6 +201,25 @@ const copyLink = (project: DtoProjectLight) => {
     workspaceSlug: route.params.workspace as string,
     projectIdentifier: project.identifier,
   });
+};
+
+const toProjectPage = (row: DtoProjectLight) => {
+  if (row.id && !isAccessToProject(row.id)) {
+    setNotificationView({
+      type: 'error',
+      customMessage: BASE_ERROR_RULES,
+      open: true,
+    });
+    return;
+  }
+  router.push(`projects/${row.identifier}/issues`);
+};
+
+const isAccessToProject = (projectId: string) => {
+  return (
+    !!getProjectRole(projectId) ||
+    getWsRole(route.params.workspace as string) === 15
+  );
 };
 
 const isAdminProject = (projectId: string) => {
