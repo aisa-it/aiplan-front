@@ -11,7 +11,7 @@
     @mouseleave="isBtnShow = false"
     @before-show="updateClientWidth"
     @mini-state="saveState"
-    >
+  >
     <div class="column full-height">
       <q-scroll-area class="col" :horizontal-thumb-style="{ opacity: 0 }">
         <q-list>
@@ -25,20 +25,21 @@
             }"
           >
             <q-item-section avatar>
-              <HomeIcon :color="route.name === 'workspace' ? ACTIVE_ICON_COLOR : ''"/>
+              <HomeIcon
+                :color="route.name === 'workspace' ? ACTIVE_ICON_COLOR : ''"
+              />
             </q-item-section>
 
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <q-item
-            :active="route.name === 'projects'"
-            clickable
-            v-ripple
-            @click="router.push(`/${currentWorkspaceSlug}/projects`)"
-          >
+          <q-item :active="route.name === 'projects'" clickable v-ripple>
             <q-item-section avatar>
-              <MenuProjectsIcon :color="route.path.includes('projects') ? ACTIVE_ICON_COLOR : ''" />
+              <MenuProjectsIcon
+                :color="
+                  route.path.includes('projects') ? ACTIVE_ICON_COLOR : ''
+                "
+              />
             </q-item-section>
 
             <q-item-section> Проекты </q-item-section>
@@ -47,21 +48,23 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+            <q-menu
+              anchor="top end"
+              self="top start"
+              :offset="[8, 0]"
+              max-height="70vh"
+            >
               <NavPopupProjects />
             </q-menu>
           </q-item>
 
-          <q-item
-            :active="route.name === 'sprints'"
-            clickable
-            v-ripple
-            :to="{
-              name: 'sprints',
-            }"
-          >
+          <q-item :active="route.name === 'sprints'" clickable v-ripple>
             <q-item-section avatar>
-              <SprintIcon :color="route.path.includes('/sprints') ? ACTIVE_ICON_COLOR : ''" />
+              <SprintIcon
+                :color="
+                  route.path.includes('/sprints') ? ACTIVE_ICON_COLOR : ''
+                "
+              />
             </q-item-section>
 
             <q-item-section> Спринты </q-item-section>
@@ -70,19 +73,21 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+            <q-menu
+              anchor="top end"
+              self="top start"
+              :offset="[8, 0]"
+              max-height="70vh"
+            >
               <NavPopupSprints />
             </q-menu>
           </q-item>
 
-          <q-item
-            :active="route.path.includes('/forms')"
-            clickable
-            v-ripple
-            @click="router.push(`/${currentWorkspaceSlug}/forms`)"
-          >
+          <q-item :active="route.path.includes('/forms')" clickable v-ripple>
             <q-item-section avatar>
-              <MenuFormsIcon :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''" />
+              <MenuFormsIcon
+                :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''"
+              />
             </q-item-section>
 
             <q-item-section> Формы </q-item-section>
@@ -91,7 +96,12 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu anchor="top end" self="top start" :offset="[8, 0]" max-height="70vh">
+            <q-menu
+              anchor="top end"
+              self="top start"
+              :offset="[8, 0]"
+              max-height="70vh"
+            >
               <NavPopupForms />
             </q-menu>
           </q-item>
@@ -103,7 +113,9 @@
             @click="router.push(`/${currentWorkspaceSlug}/aidoc`)"
           >
             <q-item-section avatar>
-              <AIDocIcon :color="route.path.includes('/aidoc') ? ACTIVE_ICON_COLOR : ''" />
+              <AIDocIcon
+                :color="route.path.includes('/aidoc') ? ACTIVE_ICON_COLOR : ''"
+              />
             </q-item-section>
 
             <q-item-section> АИДок </q-item-section>
@@ -161,13 +173,24 @@
       @success="(msg) => onSuccess(msg)"
     />
     <ReleaseNotePreviewDialog v-model="isReleaseOpen" />
-    <div v-show="!miniState" class="handle-resize" @pointerdown="onPointerDown"></div>
+    <div
+      v-show="!miniState"
+      class="handle-resize"
+      @pointerdown="onPointerDown"
+    ></div>
   </q-drawer>
 </template>
 
 <script setup lang="ts">
 // core
-import { computed, onBeforeMount, onUnmounted, ref, onMounted, watch } from 'vue';
+import {
+  computed,
+  onBeforeMount,
+  onUnmounted,
+  ref,
+  onMounted,
+  watch,
+} from 'vue';
 import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
@@ -244,7 +267,7 @@ const syncDrawerFromStorage = (e: StorageEvent) => {
 
 const saveState = () => {
   localStorage.setItem(STORAGE_KEY, String(miniState.value));
-}
+};
 
 const onSuccess = (msg?: string) => {
   setNotificationView({
