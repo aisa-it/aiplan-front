@@ -98,22 +98,23 @@
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
-    <TransferTaskDialog
-      v-model="isTransferOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
-    <DeleteIssueDialog
-      v-model="isDeletingOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
-    <ManageIssueSprintsDialog
-      v-model="isManageSprintsOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
   </q-menu>
+  <TransferTaskDialog
+    v-if="isTransferOpen"
+    v-model="isTransferOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <DeleteIssueDialog
+    v-model="isDeletingOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <ManageIssueSprintsDialog
+    v-model="isManageSprintsOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
 </template>
 
 <script setup lang="ts">
