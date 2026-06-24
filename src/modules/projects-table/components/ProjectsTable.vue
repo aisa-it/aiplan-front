@@ -6,17 +6,16 @@
       label="Поиск"
       dense
       clearable
-      @update:model-value="() => searchProjects()"
+      @update:model-value="searchProjects"
     />
     <q-table
       flat
       bordered
-      :rows="projects"
+      :rows="displayedProjects"
       :columns="columns"
       :rows-per-page-options="[10, 25, 50]"
-      @row-click="
-        (event, row) => router.push(`projects/${row.identifier}/issues`)
-      "
+      :loading="isLoading"
+      @row-click="(_, row) => router.push(`projects/${row.identifier}/issues`)"
       @row-contextmenu.prevent="onRowContextMenu"
       @resetContext="onResetContext"
     >
@@ -75,20 +74,15 @@
       v-model="isNotificationsAdminSettingsOpen"
       :project="selectedProject"
     />
-    <ProjectContextMenu
-      :row="contextRow"
-      :anchor-event="contextEvent"
-    />
+    <ProjectContextMenu :row="contextRow" :anchor-event="contextEvent" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { QTableColumn } from 'quasar';
-import { debounce } from 'quasar';
+import { QTableColumn, debounce } from 'quasar';
 
-import { getWorkspaceProjects } from '../api';
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { copyLinkToClipboard } from 'src/utils/copyLinkToClipboard';
@@ -97,19 +91,28 @@ import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
 import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
 import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
-import ProjectContextMenu from 'src/modules/projects-table/components/ProjectContextMenu.vue'
+import ProjectContextMenu from 'src/modules/projects-table/components/ProjectContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { storeToRefs } from 'pinia';
+
+import { getWorkspaceProjects } from '../api';
+
 const { getProjectRole } = useRolesStore();
 
 const route = useRoute();
 const router = useRouter();
-const projects = ref<DtoProjectLight[]>([]);
 const projectSearch = ref('');
+const filteredProjects = ref<DtoProjectLight[] | undefined>(undefined);
 const isNotificationsSettingsOpen = ref(false);
 const isNotificationsAdminSettingsOpen = ref(false);
-const contextRow = ref(null);
+const contextRow = ref<DtoProjectLight | null>(null);
 const contextEvent = ref<MouseEvent | null>(null);
 const selectedProject = ref<DtoProjectLight>();
+const isLoading = ref(false);
+
+const workspaceStore = useWorkspaceStore();
+const { workspaceProjects } = storeToRefs(workspaceStore);
 
 const columns: QTableColumn<DtoProjectLight>[] = [
   {
@@ -162,10 +165,10 @@ const columns: QTableColumn<DtoProjectLight>[] = [
   },
 ];
 
-const onRowContextMenu = (evt, row) => {
+const onRowContextMenu = (evt: Event, row: DtoProjectLight | null) => {
   if (!row) return;
   contextRow.value = row;
-  contextEvent.value = evt;
+  contextEvent.value = evt as MouseEvent;
 };
 
 const onResetContext = () => {
@@ -173,8 +176,14 @@ const onResetContext = () => {
   contextEvent.value = null;
 };
 
+const displayedProjects = computed(
+  () => filteredProjects.value ?? workspaceProjects.value,
+);
+
 onMounted(async () => {
-  projects.value = await getWorkspaceProjects(route.params.workspace as string);
+  isLoading.value = true;
+  await workspaceStore.getWorkspaceProjects(route.params.workspace as string);
+  isLoading.value = false;
 });
 
 const copyLink = (project: DtoProjectLight) => {
@@ -199,9 +208,19 @@ const openNotificationsAdminSettings = (project: DtoProjectLight) => {
 };
 
 const searchProjects = debounce(async () => {
-  projects.value = await getWorkspaceProjects(
-    route.params.workspace as string,
-    projectSearch.value,
-  );
+  if (!projectSearch.value.trim()) {
+    filteredProjects.value = undefined;
+    return;
+  }
+  isLoading.value = true;
+  try {
+    filteredProjects.value =
+      (await getWorkspaceProjects(
+        route.params.workspace as string,
+        projectSearch.value,
+      )) ?? [];
+  } finally {
+    isLoading.value = false;
+  }
 }, 500);
 </script>

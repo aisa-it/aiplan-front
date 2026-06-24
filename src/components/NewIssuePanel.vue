@@ -95,11 +95,13 @@
             <CheckStatusIcon class="issue-selector-icon mr-12" />
 
             <select-status
-              :projectid="project.id || ''"
               v-model:status="status"
-              @updateInitialStatus="(s: any) => (status = s)"
+              :items="items"
+              :loading="isLoading"
+              :error="statesError"
               label="Выберите статус"
               class="col centered-horisontally"
+              @popup-show="loadItems(project.id || '')"
             ></select-status>
           </div>
         </div>
@@ -193,11 +195,11 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              :model-value="sprints"
+              :current-sprints="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -307,6 +309,7 @@ import {
 
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import { useRouter } from 'vue-router';
 
 // components
@@ -379,6 +382,8 @@ const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
+const { items, isLoading, error: statesError, loadItems, resetItems } =
+  useStatusSelect();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
@@ -398,7 +403,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -640,7 +647,7 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {
@@ -725,6 +732,16 @@ watch(
     if (newValue?.id !== oldValue?.id) parent.value = null;
     if (project.value?.id)
       fetchTemplates(workspaceSlug.value, project.value?.id);
+  },
+);
+
+watch(
+  () => project.value?.id,
+  async (id) => {
+    if (!id) return;
+    resetItems();
+    await loadItems(id);
+    status.value = items.value.find((s) => s.default) || items.value[0] || null;
   },
 );
 

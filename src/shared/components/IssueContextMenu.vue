@@ -3,9 +3,8 @@
     ref="menuRef"
     class="context-menu"
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
-    v-bind="menuProps"
+    :context-menu="!isControlled"
     touch-position
-    context-menu
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
@@ -99,22 +98,23 @@
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
-    <TransferTaskDialog
-      v-model="isTransferOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
-    <DeleteIssueDialog
-      v-model="isDeletingOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
-    <ManageIssueSprintsDialog
-      v-model="isManageSprintsOpen"
-      :issue="props.row"
-      @refresh="emits('refresh')"
-    />
   </q-menu>
+  <TransferTaskDialog
+    v-if="isTransferOpen"
+    v-model="isTransferOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <DeleteIssueDialog
+    v-model="isDeletingOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <ManageIssueSprintsDialog
+    v-model="isManageSprintsOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -158,10 +158,6 @@ const emits = defineEmits<{
 const menuRef = ref<any>(null);
 
 const isControlled = computed(() => !!props.anchorEvent);
-
-const menuProps = computed(() => {
-  return isControlled.value ? {} : { 'context-menu': true };
-});
 
 const issuesStore = useIssuesStore();
 const sprintStore = useSprintStore();
