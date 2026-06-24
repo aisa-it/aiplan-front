@@ -224,13 +224,14 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     });
   }
 
-  watch(currentWorkspaceSlug, (newSlug) => {
+  async function changeWorkspace(newSlug: string | null) {
+    currentWorkspaceSlug.value = newSlug ?? null;
     if (newSlug) {
-      getWorkspaceProjects(newSlug);
+      await getWorkspaceProjects(newSlug);
     } else {
       workspaceProjects.value = [];
     }
-  });
+  }
 
   return {
     currentWorkspaceSlug,
@@ -255,5 +256,6 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     getAllWorkspaceStates,
     getJitsiToken,
     setAiDocNotificationSettings,
+    changeWorkspace,
   };
 });
