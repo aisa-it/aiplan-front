@@ -23,7 +23,7 @@
                 :readonly="!isAdminOrAuthor"
                 option-value="value"
                 option-label="label"
-                emits-value
+                emit-value
                 map-options
                 class="base-selector role-select"
                 dense
@@ -83,7 +83,7 @@
                   option-value="value"
                   option-label="label"
                   :readonly="!isAdminOrAuthor"
-                  emits-value
+                  emit-value
                   map-options
                   class="base-selector role-select"
                   dense

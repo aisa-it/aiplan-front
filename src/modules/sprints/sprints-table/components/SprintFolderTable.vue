@@ -32,13 +32,13 @@
         </q-td>
       </template>
     </q-table>
-  </div>
 
-  <SprintContextMenu
-    :row="contextRow"
-    :anchor-event="contextEvent"
-    @refresh="emits('refresh')"
+    <SprintContextMenu
+      :row="contextRow"
+      :anchor-event="contextEvent"
+      @refresh="emits('refresh')"
     />
+  </div>
 </template>
 
 <script lang="ts" setup>
