@@ -539,7 +539,6 @@ watch(
   top: 50px;
   z-index: 10;
   background-color: $bg-color;
-  border-radius: 0;
 }
 
 .ny-theme :deep(.html-editor__toolbar) {
@@ -553,6 +552,12 @@ watch(
     right: 0;
     height: 80px;
     background-color: $bg-color;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .issue-panel__layout {
+    max-width: 99%;
   }
 }
 </style>
