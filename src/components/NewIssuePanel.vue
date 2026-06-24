@@ -196,8 +196,8 @@
               :model-value="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -398,7 +398,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -640,12 +642,14 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {
   await refresh();
-  await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  if (project.value?.id) {
+    await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  }
   refreshIssues.value = false;
   props.parentissue &&
     api
