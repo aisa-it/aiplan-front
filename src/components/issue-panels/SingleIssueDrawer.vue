@@ -21,16 +21,16 @@
         <div class="col flex rounded-borders">
           <SelectStatus
             class="issue-selector full-w"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
             :issue="issueData"
             :status="issueData.state_detail"
+            :items="items"
+            :loading="isLoading"
+            :error="statesError"
             :isDisabled="
               !hasPermissionByIssue(issueData, 'change-issue-status')
             "
-            :states-from-cache="statesCache[issueData?.project]"
-            @set-status="(val) => (issueData.state_detail = val)"
-            @refresh="handleRefresh"
+            @popup-show="loadItems(issueData.project, issueData.id)"
+            @update:status="onUpdateStatus"
           />
         </div>
       </div>
@@ -420,7 +420,6 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
@@ -432,6 +431,7 @@ import { formatDateTime, msToRussianTime } from 'src/utils/time';
 
 // composables
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 
 // components - core
 import AvatarImage from 'src/components/AvatarImage.vue';
@@ -477,21 +477,22 @@ import { setIntervalFunction } from 'src/utils/helpers';
 import {
   DtoIssue,
   DtoIssueLinkLight,
+  DtoStateLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
-const statesStore = useStatesStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
+const { items, isLoading, error: statesError, loadItems, updateStatus } =
+  useStatusSelect();
 
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
-const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
@@ -521,6 +522,14 @@ const isSubIssueTargetOverTime = computed(
 const refreshCycle = ref();
 
 // functions
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === issueData.value.state_detail?.id) return;
+
+  await updateStatus(issueData.value.project, issueData.value.id, state);
+  issueData.value.state_detail = state;
+  handleRefresh();
+};
+
 const handleRefresh = async () => {
   await refresh();
   await updateParentIssueData();

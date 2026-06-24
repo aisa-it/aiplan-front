@@ -28,23 +28,16 @@
           <div class="col flex rounded-borders">
             <SelectStatus
               class="issue-selector full-w"
-              :projectid="props.project_id"
               :status="issueSettings.state_detail"
+              :items="items"
+              :loading="isLoading"
+              :error="statesError"
               :isDisabled="
                 !hasPermissionByIssue(issueData, 'change-issue-status')
               "
               isAdaptiveSelect
-              :states-from-cache="statesCache[issueData?.project]"
-              @update:status="
-                (val) => {
-                  return (issueSettings.state_detail = val);
-                }
-              "
-              @updateInitialStatus="
-                (val) => {
-                  return (issueSettings.state_detail = val);
-                }
-              "
+              @popup-show="loadItems(project_id)"
+              @update:status="(val) => (issueSettings.state_detail = val)"
             />
           </div>
         </div>
@@ -219,6 +212,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import {
   DtoIssue,
   DtoProjectMemberLight,
@@ -231,7 +225,7 @@ const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
 const statesStore = useStatesStore();
 const workspaceStore = useWorkspaceStore();
-const { statesCache } = storeToRefs(statesStore);
+const { items, isLoading, error: statesError, loadItems } = useStatusSelect();
 
 // store to refs
 const { user } = storeToRefs(userStore);

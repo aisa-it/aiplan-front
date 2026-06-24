@@ -2,37 +2,49 @@
   <q-td :props="rowInfo">
     <div @click.stop>
       <SelectStatus
-        :projectid="rowInfo.row.project"
-        :issueid="rowInfo.row.id"
         :status="rowInfo.row.state_detail"
         :issue="rowInfo.row"
+        :items="items"
+        :loading="isLoading"
+        :error="statesError"
         :isDisabled="
           !rolesStore.hasPermissionByIssue(rowInfo.row, 'change-issue-status')
         "
-        :states-from-cache="statesCache[rowInfo.row.project]"
-        @set-status="(val: any) => emits('refresh', val)"
+        @popup-show="loadItems(rowInfo.row.project, rowInfo.row.id)"
+        @update:status="onUpdateStatus"
       />
     </div>
   </q-td>
 </template>
 
 <script setup lang="ts">
-// core
-import { storeToRefs } from 'pinia';
-
 // stores
 import { useRolesStore } from 'src/stores/roles-store';
-import { useStatesStore } from 'src/stores/states-store';
+
+// composables
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 
 // components
 import SelectStatus from 'src/components/SelectStatus.vue';
-import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoStateLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-defineProps<{
+const props = defineProps<{
   rowInfo: { row: DtoIssue };
 }>();
 
 const emits = defineEmits<{ refresh: [any] }>();
+
 const rolesStore = useRolesStore();
-const { statesCache } = storeToRefs(useStatesStore());
+const { items, isLoading, error: statesError, loadItems, updateStatus } =
+  useStatusSelect();
+
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === props.rowInfo.row.state_detail?.id) return;
+
+  await updateStatus(props.rowInfo.row.project, props.rowInfo.row.id, state);
+  emits('refresh', state);
+};
 </script>
