@@ -115,6 +115,7 @@ const emits = defineEmits<{
   refresh: [];
   'popup-show': [];
   'popup-hide': [];
+  'update:statesFromCache': [Record<string, IState[]>];
 }>();
 
 useAiplanStore();
@@ -135,9 +136,9 @@ useResizeObserverSelect(selectStatusRef);
 
 const refresh = async () => {
   const workspaceSlug = currentWorkspaceSlug.value;
-  const { data } = props.issue?.project_detail
+  const { data } = props.statesFromCache
     ? { data: props.statesFromCache }
-    : await statesStore.getStatesByProject(workspaceSlug, props.projectid);
+    : await refreshStates(workspaceSlug);
   let arr: IState[] = [];
   for (const n in data) {
     arr = arr.concat(data[n]);
@@ -226,6 +227,12 @@ const issueStateUpdate = async (state: IState) => {
         emits('refresh');
       });
   }
+};
+
+const refreshStates = async (workspaceSlug: string) => {
+  const data = await statesStore.getStatesByProject(workspaceSlug, props.projectid);
+  emits('update:statesFromCache', data.data);
+  return data;
 };
 
 onMounted(() => {
