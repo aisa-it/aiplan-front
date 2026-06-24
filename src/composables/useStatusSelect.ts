@@ -26,22 +26,26 @@ export function useStatusSelect() {
 
     const workspaceSlug = currentWorkspaceSlug.value ?? '';
 
-    isLoading.value = true;
     error.value = '';
+
+    const loaderTimeout = setTimeout(() => (isLoading.value = true), 300);
     try {
-      items.value = issueId
-        ? await issuesStatesFlowStore.getAvailableStates(
-            workspaceSlug,
-            projectId,
-            issueId,
-          )
-        : await projectStatesFlowStore.getAvailableStatesNewIssue(
-            workspaceSlug,
-            projectId,
-          );
+      if (issueId) {
+        items.value = await issuesStatesFlowStore.getAvailableStates(
+          workspaceSlug,
+          projectId,
+          issueId,
+        );
+      } else {
+        items.value = await projectStatesFlowStore.getAvailableStatesNewIssue(
+          workspaceSlug,
+          projectId,
+        );
+      }
     } catch (e) {
       error.value = 'Не удалось получить актуальные статусы';
     } finally {
+      clearTimeout(loaderTimeout);
       isLoading.value = false;
     }
   };
