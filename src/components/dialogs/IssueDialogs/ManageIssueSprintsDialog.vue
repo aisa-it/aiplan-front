@@ -4,9 +4,7 @@
       <q-card-section class="column q-pt-none">
         <h6 class="q-ml-md">Выберите спринты для задачи</h6>
         <span v-if="filteredSprints.length > 0"
-          >Отметьте спринты, в которых должна участвовать задача
-          {{ issue.project_detail?.identifier }}-{{ issue.sequence_id }}
-          {{ issue.name }}</span
+          >Отметьте спринты, в которых должна участвовать {{ title }}</span
         >
         <span v-else>
           Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.
@@ -91,7 +89,7 @@
 
 <script setup lang="ts">
 // core
-import { ref, computed, onBeforeMount } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -115,9 +113,11 @@ import { ROOT_FOLDER_ID } from 'src/constants/constants';
 
 const props = defineProps<{
   issue: any;
+  checkedSprints?: DtoSprintLight[];
 }>();
 
 const emits = defineEmits<{
+  'update-selected': [DtoSprintLight[]];
   refresh: [];
   hide: [];
 }>();
@@ -133,6 +133,13 @@ const sprintFolders = computed(() =>
     (item) => item.id !== ROOT_FOLDER_ID && item.sprints,
   ),
 );
+
+const title = computed(() => {
+  if (props.issue)
+    return `задача ${props.issue.project_detail?.identifier}-${props.issue.sequence_id} ${props.issue.name}`;
+  return 'новая задача';
+});
+
 const rootSprints = computed(
   () => sprintsList.value?.find((item) => item.id === ROOT_FOLDER_ID)?.sprints,
 );
@@ -164,6 +171,17 @@ const getIssueSprints = async () => {
     await sprintStore.getSprintsList(currentWorkspaceSlug.value as string);
   }
 
+  if (!props.issue) {
+    loading.value = false;
+    if (props.checkedSprints) {
+      const checkedIds = props.checkedSprints?.map((sprint) => sprint.id ?? '');
+      selectedSprints.value = [...checkedIds];
+      currentSprints.value = [...checkedIds];
+    }
+
+    return;
+  }
+
   const sprintIds = props.issue.sprints.map(
     (sprint: DtoSprintLight) => sprint.id,
   );
@@ -173,6 +191,19 @@ const getIssueSprints = async () => {
 };
 
 const saveIssueSprints = async () => {
+  if (!props.issue) {
+    const resultSprints: DtoSprintLight[] = [];
+    sprintsList.value.forEach((folder) =>
+      folder.sprints?.forEach((sprint) => {
+        if (sprint.id && selectedSprints.value.includes(sprint.id)) {
+          resultSprints.push(sprint);
+        }
+      }),
+    );
+    emits('update-selected', resultSprints);
+    emits('refresh');
+    return;
+  }
   try {
     const updatePromises = [
       ...removeFrom.value.map((sprintId) =>

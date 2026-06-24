@@ -195,11 +195,11 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              :model-value="sprints"
+              :current-sprints="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -403,7 +403,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -645,7 +647,7 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {
