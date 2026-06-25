@@ -10,7 +10,12 @@
           :emoji="project.emoji"
           :logo="project.logo"
           @select="toProjectPage(project)"
-        />
+        >
+          <ProjectContextMenu
+            context-menu
+            :project="project"
+          />
+        </NavPopupItem>
       </q-list>
     </NavPopupSection>
     <q-separator />
@@ -43,6 +48,7 @@ import { useRolesStore } from 'src/stores/roles-store.ts';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store.ts';
 import { BASE_ERROR_RULES } from 'src/constants/notifications.ts';
+import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue'
 
 const { getProjectRole, getWsRole } = useRolesStore();
 const workspaceStore = useWorkspaceStore();

@@ -75,7 +75,7 @@
       :project="selectedProject"
     />
     <ProjectContextMenu
-      :row="contextRow"
+      :project="contextRow"
       :anchor-event="contextEvent"
       @reset-context="onResetContext"
     />
@@ -95,7 +95,7 @@ import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import NotificationsSettingsDialog from 'src/components/dialogs/NotificationsSettingsDialog.vue';
 import NotificationsAdminProjectSettingsDialog from 'src/components/dialogs/NotificationsAdminProjectSettingsDialog.vue';
 import UnmutedIcon from 'src/components/icons/UnmutedIcon.vue';
-import ProjectContextMenu from 'src/modules/projects-table/components/ProjectContextMenu.vue';
+import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';

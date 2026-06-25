@@ -31,6 +31,7 @@
         </span>
       </q-item-label>
     </q-item-section>
+    <slot />
   </q-item>
 </template>
 
