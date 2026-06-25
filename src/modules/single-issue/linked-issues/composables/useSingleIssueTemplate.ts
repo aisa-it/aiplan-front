@@ -16,6 +16,7 @@ export function useSingleIssueTemplate() {
     reset = false,
     search = '',
   ) => {
+    if (!workspaceSlug || !projectId) return;
     if (loading.value) return;
     loading.value = true;
     try {

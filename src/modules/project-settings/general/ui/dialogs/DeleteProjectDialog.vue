@@ -42,6 +42,7 @@ import { useRouter } from 'vue-router';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUserStore } from 'src/stores/user-store';
 
 // constants
 import { SUCCESS_DELETE_PROJECT } from 'src/constants/notifications';
@@ -64,6 +65,7 @@ const emits = defineEmits<{
 
 const { currentProject: current_project } = toRefs(props);
 
+const userStore = useUserStore();
 const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
@@ -79,6 +81,15 @@ const handleDeleteProject = async () => {
       currentWorkspaceSlug.value as string,
       currentProjectID.value,
     );
+
+    if (currentWorkspaceSlug.value) {
+      await Promise.all([
+        workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value),
+        workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value),
+        userStore.getUserProjects(),
+        userStore.getUserProjectsMemberships()
+      ]);
+    }
 
     router.push(`/${currentWorkspaceSlug.value}/`);
     project.value = null;
