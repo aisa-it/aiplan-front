@@ -75,6 +75,7 @@
       :project="selectedProject"
     />
     <ProjectContextMenu
+      v-if="isAccessToProject(contextRow?.id || '')"
       :project="contextRow"
       :anchor-event="contextEvent"
       @reset-context="onResetContext"

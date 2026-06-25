@@ -4,7 +4,6 @@
     class="context-menu"
     context-menu
     touch-position
-    no-parent-event
     @hide="emit('resetContext')"
   >
     <q-list class="context-menu__options-list" separator>
