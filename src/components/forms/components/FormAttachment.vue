@@ -143,8 +143,6 @@ const handleDelete = async (id: string) => {
   if (!id || !props.formSlug) return;
 
   try {
-    await formStore.deleteFormAttachment(props.formSlug, id);
-
     if (Array.isArray(props.field.attachments)) {
       props.field.attachments = props.field.attachments.filter(
         (a: any) => a.id !== id,
