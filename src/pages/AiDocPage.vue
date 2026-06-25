@@ -541,6 +541,10 @@ watch(
   background-color: $bg-color;
 }
 
+:deep(.html-editor__outer) {
+  flex-grow: 1;
+}
+
 .ny-theme :deep(.html-editor__toolbar) {
   top: 80px;
 
@@ -555,9 +559,7 @@ watch(
   }
 }
 
-@media screen and (min-width: 1024px) {
-  .issue-panel__layout {
-    max-width: 99%;
-  }
+.issue-panel__layout {
+  max-width: 99%;
 }
 </style>
