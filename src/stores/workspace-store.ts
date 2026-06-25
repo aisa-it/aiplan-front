@@ -16,13 +16,12 @@ import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { AiplanWorkspaceNotificationRequest } from 'src/interfaces/aidocNotificationSettings';
 
-
 import {
   ContentType,
   HttpClient,
   RequestParams,
 } from '@aisa-it/aiplan-api-ts/src/http-client';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const projectsApi = new (withInterceptors(Projects))();
 const workspaceApi = new (withInterceptors(Workspace))();
@@ -42,12 +41,12 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   const meInWorkspace = ref<DtoWorkspaceMemberWithOwner>({});
   const workspaceSummary = ref<DtoWorkspaceSummaryResponse | null>(null);
 
-  const workspaceLogo = computed<string | undefined>(() =>
-    workspaceInfo?.value?.logo ?? undefined
+  const workspaceLogo = computed<string | undefined>(
+    () => workspaceInfo?.value?.logo ?? undefined,
   );
 
-  const workspaceName = computed<string | undefined>(() =>
-    workspaceInfo?.value?.name ?? undefined
+  const workspaceName = computed<string | undefined>(
+    () => workspaceInfo?.value?.name ?? undefined,
   );
 
   async function getMeInWorkspace(
@@ -55,16 +54,15 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   ): Promise<DtoWorkspaceMemberWithOwner | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-    const res =
-      await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
+    const res = await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
 
     return (meInWorkspace.value = res.data);
-  };
+  }
 
   async function getWorkspaceInfo(
-      workspaceSlug: string,
-      isInAdminPanel = false,
-    ): Promise<DtoWorkspace | void> {
+    workspaceSlug: string,
+    isInAdminPanel = false,
+  ): Promise<DtoWorkspace | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
     return workspaceApi
@@ -94,15 +92,15 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
         }
         return Promise.reject(err);
       });
-  };
+  }
 
-  async function createWorkspace (
+  async function createWorkspace(
     data: AiplanCreateWorkspaceRequest,
   ): Promise<DtoWorkspace | any> {
     await workspaceApi.createWorkspace(data).then((res) => res.data);
-  };
+  }
 
-  async function getWorkspaceMembers (
+  async function getWorkspaceMembers(
     workspaceSlug: string,
     data?: {
       offset?: number;
@@ -130,9 +128,9 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
           : (foundUsers.value = res.data.result);
         return res.data;
       });
-  };
+  }
 
-  async function getWorkspaceMembersByQuery (
+  async function getWorkspaceMembersByQuery(
     workspaceSlug: string,
     filters?: {
       search_query: string;
@@ -145,7 +143,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     return workspaceApi
       .getWorkspaceMemberList(workspaceSlug, filters)
       .then((res) => res?.data);
-  };
+  }
 
   // раньше использовалось для блокировки и разблокировки юзера
   // сейчас по контракту принимает третим параметром роль (видимо меняет роль юзера)
@@ -160,7 +158,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
         blocked: value,
       })
       .then((res) => res.data);
-  };
+  }
 
   async function getWorkspaceProjects(
     workspaceSlug: string,
@@ -177,7 +175,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       workspaceProjects.value = res.data;
       return res.data;
     });
-  };
+  }
 
   // ВРЕМЕННОЕ РЕШЕНИЕ ДЛЯ РАСШИРЕННОГО ПОИСКА, ЧТОБЫ НЕ МЕНЯТЬ СТЕЙТ
   // чем отличается от предыдущего сервиса? (getWorkspaceProjects)
@@ -192,7 +190,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       ...filters,
     });
     return data;
-  };
+  }
 
   async function getAllWorkspaceStates(
     currentWorkspaceSlug: string,
@@ -202,7 +200,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     return workspaceApi
       .getWorkspaceStateList(currentWorkspaceSlug)
       .then((res) => (allWorkspaceStates.value = res.data));
-  };
+  }
 
   async function getJitsiToken(
     currentWorkspaceSlug: string,
@@ -210,7 +208,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     return workspaceApi
       .getWorkspaceJitsiToken(currentWorkspaceSlug)
       .then((res) => res.data);
-  };
+  }
 
   async function setAiDocNotificationSettings(
     workspaceSlug: string,
@@ -226,7 +224,16 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       type: ContentType.Json,
       ...params,
     });
-  };
+  }
+
+  async function changeWorkspace(newSlug: string | null) {
+    currentWorkspaceSlug.value = newSlug ?? null;
+    if (newSlug) {
+      await getWorkspaceProjects(newSlug);
+    } else {
+      workspaceProjects.value = [];
+    }
+  }
 
   async function getWorkspaceSummary(workspaceSlug: string): Promise<void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
@@ -259,6 +266,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     getAllWorkspaceStates,
     getJitsiToken,
     setAiDocNotificationSettings,
+    changeWorkspace,
     workspaceSummary,
     getWorkspaceSummary,
   };
