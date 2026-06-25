@@ -3,7 +3,7 @@
   <CreateNotificationForm @send="handleSend" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useNotificationStore } from 'src/stores/notification-store';
 import {
   SUCCESS_SEND_NOTIFICATION,

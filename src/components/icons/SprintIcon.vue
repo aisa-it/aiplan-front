@@ -4,6 +4,7 @@
     height="24"
     viewBox="0 0 24 24"
     fill="none"
+    :class="color ? '' : 'default-icon-color'"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
@@ -15,27 +16,18 @@
     />
   </svg>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
 
-export default defineComponent({
-  name: 'SprintIcon',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: 'currentColor',
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: 'currentColor',
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

@@ -1,12 +1,8 @@
 import { AxiosInstance, AxiosResponse } from 'axios';
-import { useNotificationStore } from 'src/stores/notification-store';
 import { NON_VALIDATED_ROUTES } from 'src/constants/constants';
 import { NOT_FOUND_ERROR_CODES } from 'src/constants/notFoundErrorCodes';
-import { useAiplanStore } from 'src/stores/aiplan-store';
 import { allowedNotFoundServices } from 'src/utils/validation';
-
-const toast = useNotificationStore();
-const appStore = useAiplanStore();
+import { handleNotify } from './notify';
 
 const validateRouteCheck = (route: string): boolean =>
   NON_VALIDATED_ROUTES.includes(route);
@@ -30,13 +26,10 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
       }
       const { status, data } = res ?? {};
       let refreshInterval: any;
-      if (
-        appStore.isServerUnavailable === false &&
-        status.toString().startsWith('5')
-      ) {
-        appStore.isServerUnavailable = true;
-        return appStore.api.get('/api/_health/').catch(() => {
-          toast.setNotificationView({
+
+      if (status.toString().startsWith('5')) {
+        return fetch('/api/_health/').catch(() => {
+          handleNotify({
             open: true,
             type: 'error',
             customMessage: 'Сервер сейчас недоступен. Сохраните свои данные!',
@@ -44,8 +37,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
           });
 
           refreshInterval = setInterval(() => {
-            appStore.api.get('/api/_health/').then(() => {
-              appStore.isServerUnavailable = false;
+            fetch('/api/_health/').then(() => {
               return clearInterval(refreshInterval);
             });
           }, 5000);
@@ -77,7 +69,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
           return Promise.reject(error);
         case 409:
         default:
-          toast.setNotificationView({
+          handleNotify({
             open: true,
             type: 'error',
             customMessage: data?.code ? data.ru_error : data.error,

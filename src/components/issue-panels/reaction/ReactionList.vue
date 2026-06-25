@@ -9,32 +9,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
+<script setup lang="ts">
 import ReactionListItem from 'components/issue-panels/reaction/ReactionListItem.vue';
 
-export default defineComponent({
-  name: 'ReactionList',
-  components: { ReactionListItem },
-  props: {
-    reactionList: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
-  },
-  emits: ['update-reaction'],
-  setup(props, { emit }) {
-    const handleClickReaction = (reactionValue: string) => {
-      emit('update-reaction', reactionValue);
-    };
+const props = defineProps<{
+  reactionList: { id: string; reaction: string }[];
+}>();
 
-    return {
-      handleClickReaction,
-    };
-  },
-});
+const emits = defineEmits<{
+  'update-reaction': [string];
+}>();
+
+const handleClickReaction = (reactionValue: string) => {
+  emits('update-reaction', reactionValue);
+};
 </script>
 
 <style lang="scss">

@@ -32,7 +32,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -41,42 +41,30 @@ import CaptchaWidget from './CaptchaWidget.vue';
 import { SUCCESS_RESTORE_PASS } from 'src/constants/notifications';
 import { storeToRefs } from 'pinia';
 import { useUtilsStore } from 'src/stores/utils-store';
-export default {
-  emits: [...useDialogPluginComponent.emits, 'update'],
-  setup() {
-    const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
-      useDialogPluginComponent();
 
-    const { setNotificationView } = useNotificationStore();
-    const api = useAiplanStore();
-    const email = ref('');
-    const captchaPayload = ref('');
+defineEmits(useDialogPluginComponent.emits);
 
-    const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
-    return {
-      email,
-      api,
-      captchaPayload,
-      dialogRef,
-      restore() {
-        api
-          .forgotPassword(email.value, captchaPayload.value)
-          .then(() =>
-            setNotificationView({
-              open: true,
-              type: 'success',
-              customMessage: SUCCESS_RESTORE_PASS,
-            }),
-          )
+const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
+  useDialogPluginComponent();
 
-          .finally(() => onDialogOK());
-      },
-      onDialogHide,
-      onDialogOK,
-      onDialogCancel,
-      isEnabledCaptcha,
-    };
-  },
-  components: { CaptchaWidget },
+const { setNotificationView } = useNotificationStore();
+const api = useAiplanStore();
+const email = ref('');
+const captchaPayload = ref('');
+
+const restore = () => {
+  api
+    .forgotPassword(email.value, captchaPayload.value)
+    .then(() =>
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: SUCCESS_RESTORE_PASS,
+      }),
+    )
+
+    .finally(() => onDialogOK());
 };
+
+const { isEnabledCaptcha } = storeToRefs(useUtilsStore());
 </script>

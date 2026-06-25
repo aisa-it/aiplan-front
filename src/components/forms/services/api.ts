@@ -1,7 +1,15 @@
+import { DtoFormAttachmentLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Forms } from '@aisa-it/aiplan-api-ts/src/Forms';
+import axios from 'axios';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 
 const api = new (withInterceptors(Forms))();
+
+export interface UploadFormAttachmentOptions {
+  formSlug: string;
+  workspaceSlug: string;
+  emptyUserAllowed?: boolean;
+}
 
 export const getFormAuth = async (formSlug: string) => {
   return (await api.getFormAuth(formSlug)).data;
@@ -17,6 +25,23 @@ export const createFormAttachments = async (
   data: { asset: File },
 ) => {
   return (await api.createFormAttachments(workspaceSlug, formSlug, data)).data;
+};
+
+export const uploadFormAttachment = async (
+  file: File,
+  options: UploadFormAttachmentOptions,
+): Promise<DtoFormAttachmentLight> => {
+  const { formSlug, workspaceSlug, emptyUserAllowed } = options;
+
+  if (emptyUserAllowed) {
+    const formData = new FormData();
+    formData.append('asset', file);
+
+    const url = `/api/forms/${formSlug}/form-attachments/`;
+    return (await axios.post(url, formData)).data;
+  }
+
+  return createFormAttachments(workspaceSlug, formSlug, { asset: file });
 };
 
 export const getFormList = async (workspaceSlug: string) => {

@@ -104,6 +104,7 @@ const SUCCESS_DOWNLOAD_FILE = 'Файл скачан';
 
 const ERROR_IDENTITY_PASSWORD = 'Пароли не совпадает';
 const SUCCESS_IDENTITY_PASSWORD = 'Пароль обновлён';
+const ERROR_CHANGE_PASSWORD = 'Ошибка при смене пароля';
 const ERROR_SAVE_SETTINGS_PROJECT = 'Настройки проекта не сохранены';
 const ERROR_IDENTIFIER_PROJECT = 'Идентификатор уже существует';
 const ERROR_BLOCK_USER = 'Возникла ошибка при блокировке пользователя';
@@ -257,4 +258,5 @@ export {
   ERROR_SETUP_VERSION,
   BASE_ERROR_RULES,
   BASE_ERROR_MESSAGE,
+  ERROR_CHANGE_PASSWORD,
 };

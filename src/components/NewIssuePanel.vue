@@ -95,11 +95,13 @@
             <CheckStatusIcon class="issue-selector-icon mr-12" />
 
             <select-status
-              :projectid="project.id || ''"
               v-model:status="status"
-              @updateInitialStatus="(s: any) => (status = s)"
+              :items="items"
+              :loading="isLoading"
+              :error="statesError"
               label="Выберите статус"
               class="col centered-horisontally"
+              @popup-show="loadItems(project.id || '')"
             ></select-status>
           </div>
         </div>
@@ -193,11 +195,11 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              :model-value="sprints"
+              :current-sprints="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
-              @update-selected ="updateCurrentSprints"
-              />
+              @update-selected="updateCurrentSprints"
+            />
           </div>
         </div>
 
@@ -268,10 +270,10 @@
           </q-btn>
         </div>
       </q-card-actions>
+      <q-inner-loading :showing="creationLoading">
+        <DefaultLoader />
+      </q-inner-loading>
     </div>
-    <q-inner-loading :showing="creationLoading">
-      <DefaultLoader />
-    </q-inner-loading>
     <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
@@ -307,6 +309,7 @@ import {
 
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import { useRouter } from 'vue-router';
 
 // components
@@ -379,6 +382,8 @@ const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
+const { items, isLoading, error: statesError, loadItems, resetItems } =
+  useStatusSelect();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
@@ -398,7 +403,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>(router.currentRoute.value.params.sprint ? [sprint.value] : []);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -608,7 +615,7 @@ const handleCreateSuccess = async (createdIssueData: any) => {
   const link = getIssueLink(
     workspaceSlug.value,
     project.value?.identifier,
-    createdIssueData.id,
+    issue.sequence_id || createdIssueData.id,
   );
 
   setNotificationView({
@@ -640,12 +647,14 @@ const handleClearIssueTemplate = () => {
 
 const updateCurrentSprints = (value: DtoSprintLight[]) => {
   sprints.value = value;
-}
+};
 
 //hooks
 onMounted(async () => {
   await refresh();
-  await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  if (project.value?.id) {
+    await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  }
   refreshIssues.value = false;
   props.parentissue &&
     api
@@ -729,6 +738,16 @@ watch(
 );
 
 watch(
+  () => project.value?.id,
+  async (id) => {
+    if (!id) return;
+    resetItems();
+    await loadItems(id);
+    status.value = items.value.find((s) => s.default) || items.value[0] || null;
+  },
+);
+
+watch(
   () => selectedIssueTemplate.value,
   (newTemplate) => {
     if (newTemplate && newTemplate.template && editorInstance.value) {
@@ -751,6 +770,11 @@ watch(
 :deep(.tiptap) {
   min-height: 15rem;
 }
+
+:deep(.q-inner-loading) {
+  z-index: 10;
+}
+
 @media screen and (max-width: 1350px) {
   .new-issue-card {
     min-width: calc(100vw - 200px) !important;

@@ -21,16 +21,16 @@
         <div class="col flex rounded-borders">
           <SelectStatus
             class="issue-selector full-w"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
             :issue="issueData"
             :status="issueData.state_detail"
+            :items="items"
+            :loading="isLoading"
+            :error="statesError"
             :isDisabled="
               !hasPermissionByIssue(issueData, 'change-issue-status')
             "
-            :states-from-cache="statesCache[issueData?.project]"
-            @set-status="(val) => (issueData.state_detail = val)"
-            @refresh="handleRefresh"
+            @popup-show="loadItems(issueData.project, issueData.id)"
+            @update:status="onUpdateStatus"
           />
         </div>
       </div>
@@ -178,7 +178,19 @@
         <div class="col">
           <div class="row items-center">
             <ExecuteDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Срок исполнения </span>
+            <span class="q-mx-sm">Срок исполнения </span>
+            <div v-if="isSubIssueTargetOverTime" class="row items-center">
+              <AlertIcon
+                width="19"
+                height="19"
+                :color="'rgb(236, 177, 104)'"
+                class="issue-icon"
+              />
+
+              <HintTooltip>
+                Срок исполнения родительской задачи меньше текущего срока
+              </HintTooltip>
+            </div>
           </div>
         </div>
         <div class="col flex rounded-borders">
@@ -333,8 +345,9 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectSprints
+            :projectid="issueData.project"
             class="issue-selector"
-            :issueid="issueData.id"
+            :issue="issueData"
             :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
@@ -407,7 +420,6 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
@@ -419,6 +431,7 @@ import { formatDateTime, msToRussianTime } from 'src/utils/time';
 
 // composables
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 
 // components - core
 import AvatarImage from 'src/components/AvatarImage.vue';
@@ -461,25 +474,29 @@ import {
 } from 'src/constants/notifications';
 
 import { setIntervalFunction } from 'src/utils/helpers';
-import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoIssueLinkLight,
+  DtoStateLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
-const statesStore = useStatesStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
+const { items, isLoading, error: statesError, loadItems, updateStatus } =
+  useStatusSelect();
 
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
-const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
-defineProps<{
+const props = defineProps<{
   preview?: boolean;
 }>();
 
@@ -487,18 +504,35 @@ const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
 
+const parentIssueData = ref<DtoIssue>();
+
 const { navigateToActivityPage } = useUserActivityNavigation();
 
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
 
+const isSubIssueTargetOverTime = computed(
+  () =>
+    parentIssueData.value?.target_date &&
+    issueData.value.target_date > parentIssueData.value?.target_date,
+);
+
 //refs
 const refreshCycle = ref();
 
 // functions
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === issueData.value.state_detail?.id) return;
+
+  await updateStatus(issueData.value.project, issueData.value.id, state);
+  issueData.value.state_detail = state;
+  handleRefresh();
+};
+
 const handleRefresh = async () => {
   await refresh();
+  await updateParentIssueData();
   emits('refresh');
 };
 
@@ -640,8 +674,21 @@ const handleLinkEdit = async (link: DtoIssueLinkLight) => {
   });
 };
 
-onMounted(() => {
+const updateParentIssueData = async () => {
+  if (issueData.value.parent) {
+    parentIssueData.value = (
+      await singleIssueStore.getIssueDataById(
+        currentWorkspaceSlug.value,
+        issueData.value.project ?? currentProjectID.value,
+        issueData.value.parent,
+      )
+    ).data;
+  }
+};
+
+onMounted(async () => {
   refreshCycle.value = setIntervalFunction(refresh);
+  await updateParentIssueData();
 });
 
 onBeforeUnmount(() => {

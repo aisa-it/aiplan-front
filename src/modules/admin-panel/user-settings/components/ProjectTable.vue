@@ -74,6 +74,7 @@ import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import { columns } from '../columnProjectConfig';
 import { ROLES } from 'src/constants/constants';
 
+import { api as adminApi } from 'src/modules/admin-panel/services/api';
 import { api } from '../services/api';
 import { apiWrapperWithIds } from '../../services/wrappers';
 import { useTableWithPagination } from '../../composables/useTableWithPagination';
@@ -102,7 +103,7 @@ const { loading, rows, pagination, refresh } =
   );
 
 const updateUserRoleProject = async (projectId: string, newRole: number) => {
-  await api.updateUserRoleInProject(
+  await adminApi.changeUserRoleInProject(
     props.ws?.id ?? '',
     props.userId,
     projectId,

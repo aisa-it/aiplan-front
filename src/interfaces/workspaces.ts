@@ -23,14 +23,14 @@ export interface IWorkspaceMemberInvitation {
 }
 
 export interface IWorkspaceMember {
-  id: string,
+  id: string;
   role: number;
   member: IUser;
   member_id: string;
   workspace: any;
   created_at: Date;
   created_by: any | null;
-  updated_at: Date,
+  updated_at: Date;
   workspace_id: string;
   created_by_id: string;
   updated_by_id: string | null;

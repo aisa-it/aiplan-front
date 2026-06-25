@@ -32,14 +32,6 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'ConfirmCloseProjectCreateDialog',
-  emits: ['close'],
-  setup() {
-    return {};
-  },
-});
+<script setup lang="ts">
+defineEmits<{ close: [] }>();
 </script>

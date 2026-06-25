@@ -25,13 +25,13 @@
         :key="child.id"
         :item="child"
         :on-sortable-end="onSortableEnd"
-        @sortable-refresh="emit('sortable-refresh')"
+        @sortable-refresh="emits('sortable-refresh')"
       />
     </ul>
   </li>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -44,7 +44,7 @@ const props = defineProps<{
   onSortableEnd?: (evt: any) => void;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'sortable-refresh'): void;
 }>();
 
@@ -103,7 +103,7 @@ const toggleExpand = async () => {
     await nextTick();
     isExpanded.value = true;
     props.item.isExpanded = true;
-    emit('sortable-refresh');
+    emits('sortable-refresh');
   }
 };
 

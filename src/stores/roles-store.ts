@@ -18,11 +18,6 @@ import {
   DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const userStore = useUserStore();
-
-const { user, userWorkspacesMemberships, userProjectsMemberships } =
-  storeToRefs(userStore);
-
 export const useRolesStore = defineStore('roles-store', {
   state: () => {
     return {
@@ -42,7 +37,8 @@ export const useRolesStore = defineStore('roles-store', {
         workspaceID === workspaceInfo?.value?.slug
       )
         return meInWorkspace?.value;
-      return userWorkspacesMemberships.value[workspaceID];
+      const userStore = useUserStore();
+      return userStore.userWorkspacesMemberships[workspaceID];
     },
 
     getWsRole(workspaceID: string): number {
@@ -62,7 +58,8 @@ export const useRolesStore = defineStore('roles-store', {
     getProjectMembership(projectID: string) {
       const { project, meInProject } = storeToRefs(useProjectStore());
       if (projectID === project?.value?.id) return meInProject?.value;
-      return userProjectsMemberships.value[projectID];
+      const userStore = useUserStore();
+      return userStore.userProjectsMemberships[projectID];
     },
 
     getProjectRole(projectID: string): number {
@@ -80,12 +77,13 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     getIssueNameRole(issue: DtoIssue): string {
+      const userStore = useUserStore();
       if (this.getProjectRole(issue.project ?? '') < 10) return '';
 
-      if (issue?.author_detail?.id === user.value.id) return 'author';
+      if (issue?.author_detail?.id === userStore.user?.id) return 'author';
 
       const isAssignee = issue?.assignee_details?.find(
-        (assignee) => assignee.id == user.value.id,
+        (assignee) => assignee.id == userStore.user?.id,
       );
 
       if (isAssignee) return 'assignee';
@@ -93,9 +91,9 @@ export const useRolesStore = defineStore('roles-store', {
       return '';
     },
 
-    // set types
     defineIssueRole(issueData: DtoIssue) {
-      if (!user.value?.id) {
+      const userStore = useUserStore();
+      if (!userStore.user?.id) {
         return userStore.getUserInfo().then(() => {
           this.defineIssueRole(issueData);
         });
@@ -124,7 +122,6 @@ export const useRolesStore = defineStore('roles-store', {
     },
 
     hasPermissionByIssue(issue: DtoIssue, action: string) {
-
       const ws_role = this.getWsNameRole(
         this.getWsMembership(issue?.workspace ?? ''),
       );
@@ -156,7 +153,8 @@ export const useRolesStore = defineStore('roles-store', {
       )
         return false;
 
-      if (user.value?.is_superuser || user.value?.is_staff) return true;
+      const userStore = useUserStore();
+      if (userStore.user?.is_superuser || userStore.user?.is_staff) return true;
 
       if (this.roles.workspace === 'owner' || this.roles.workspace === 'admin')
         return true;

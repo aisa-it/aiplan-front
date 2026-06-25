@@ -53,17 +53,19 @@
         <div class="col flex rounded-borders">
           <SelectStatus
             class="issue-selector full-w"
-            :projectid="project.id"
-            :issueid="event.issueData.id"
             :issue="event.issueData"
             :status="event.issueData.state_detail"
-            :isDisabled="
-              !hasPermissionByIssue(event.issueData, 'change-issue-status')
+            :items="items"
+            :loading="isLoading"
+            :error="statesError"
+            :isDisabled="!canChangeStatus"
+            @update:status="onUpdateStatus"
+            @popup-show="
+              () => {
+                loadItems(project.id, event.issueData.id);
+                $emit('statusPopupOrEditName', true);
+              }
             "
-            :states-from-cache="statesCache[project.id]"
-            @set-status="(val) => (event.issueData.state_detail = val)"
-            @refresh="handleRefresh"
-            @popup-show="$emit('statusPopupOrEditName', true)"
             @popup-hide="$emit('statusPopupOrEditName', false)"
           />
         </div>
@@ -123,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { CalendarEvent } from '../../types/calendar';
 
 import EditIcon from 'src/components/icons/EditIcon.vue';
@@ -139,8 +141,9 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
-import { useStatesStore } from 'src/stores/states-store';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import { useRolesStore } from 'src/stores/roles-store';
+import { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { useCalendarEventStore } from '../../store/calendar-event-store';
 import { useCalendarStore } from '../../store/calendar-store';
@@ -173,10 +176,32 @@ const newName = ref(props.event.issueData?.title);
 
 const singleIssueStore = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
-const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { project } = storeToRefs(useProjectStore());
-const { statesCache } = storeToRefs(useStatesStore());
 const { hasPermissionByIssue } = useRolesStore();
+
+const { items, isLoading, error: statesError, loadItems, updateStatus } =
+  useStatusSelect();
+
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === props.event.issueData.state_detail?.id) return;
+
+  await updateStatus(project.value.id, props.event.issueData.id, state);
+  props.event.issueData.state_detail = state;
+  handleRefresh();
+};
+
+const canChangeStatus = computed(() =>
+  hasPermissionByIssue(
+    {
+      ...props.event.issueData,
+      workspace: workspaceStore.workspaceInfo?.id ?? '',
+      project: project.value?.id ?? '',
+    },
+    'change-issue-status',
+  ),
+);
 
 const saveNewName = async () => {
   try {

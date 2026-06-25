@@ -112,13 +112,13 @@ import {
 
 // editor
 import { EditorContent, Editor } from '@tiptap/vue-3';
-import {Table} from '@tiptap/extension-table';
+import { Table } from '@tiptap/extension-table';
 import StarterKit from '@tiptap/starter-kit';
 import { Color } from '@tiptap/extension-color';
 import TableRow from '@tiptap/extension-table-row';
 import TaskList from '@tiptap/extension-task-list';
 import TableCell from '@tiptap/extension-table-cell';
-import {TextStyle} from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import { FontSize } from 'tiptap-extension-font-size';
 import FontFamily from '@tiptap/extension-font-family';
@@ -202,13 +202,13 @@ const props = withDefaults(
   },
 );
 
-const emits = defineEmits([
-  'update:content',
-  'getEditor',
-  'enableEditing',
-  'isEditorEmpty',
-  'toggle-fullscreen',
-]);
+const emits = defineEmits<{
+  'update:content': [string | undefined];
+  getEditor: [Editor | undefined];
+  enableEditing: [];
+  isEditorEmpty: [boolean];
+  'toggle-fullscreen': [];
+}>();
 
 const bus = inject('bus') as EventBus;
 // vars

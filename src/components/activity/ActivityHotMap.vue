@@ -1,6 +1,6 @@
 <template>
   <div class="heatmap-wrapper">
-    <div style='display: flex'>
+    <div style="display: flex">
       <div style="margin-top: 28px" v-if="!loadReq">
         <div
           v-for="(day, dIndex) in days"
@@ -29,7 +29,12 @@
             v-for="(level, index) in squares"
             :key="index"
             @click="onCellClick(index, squaresData[index].date)"
-            :class="['heatmap-square', activeSquares === index ? 'heatmap-square-active' : '' , getSquareClass(level), isMobile ? '' : 'heatmap-square-hover']"
+            :class="[
+              'heatmap-square',
+              activeSquares === index ? 'heatmap-square-active' : '',
+              getSquareClass(level),
+              isMobile ? '' : 'heatmap-square-hover',
+            ]"
             :style="{
               gridColumnStart: Math.floor(index / 7) + 2,
               gridRowStart: (index % 7) + 2,
@@ -41,18 +46,35 @@
               transition-hide="scale"
               class="q-pa-sm"
               :breakpoint="100"
-              style="width: 250px; text-align: center; z-index: 1;"
-              @before-hide="() => activeSquares = null"
+              style="width: 250px; text-align: center; z-index: 1"
+              @before-hide="() => (activeSquares = null)"
             >
-              <div>{{"Дата: " + squaresData[index].date + " Активность: " + level}}</div>
+              <div>
+                {{
+                  'Дата: ' + squaresData[index].date + ' Активность: ' + level
+                }}
+              </div>
             </q-popup-proxy>
           </div>
         </div>
       </div>
-      <q-spinner-oval v-if="loadReq" color="blue" style="width: 100%" class="q-mt-sm" size="75px" />
+      <q-spinner-oval
+        v-if="loadReq"
+        color="blue"
+        style="width: 100%"
+        class="q-mt-sm"
+        size="75px"
+      />
     </div>
-    <div class="q-mt-md example-block" v-if="squares.length > 0 && exampleBlock && !loadReq">
-      <div :class="['heatmap-square', `level-${index}`]" v-for="(text, index) in colorOfActivity" :key="index">
+    <div
+      class="q-mt-md example-block"
+      v-if="squares.length > 0 && exampleBlock && !loadReq"
+    >
+      <div
+        :class="['heatmap-square', `level-${index}`]"
+        v-for="(text, index) in colorOfActivity"
+        :key="index"
+      >
         <q-popup-proxy
           transition-show="scale"
           transition-hide="scale"
@@ -69,44 +91,64 @@
 import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
-const props = withDefaults(defineProps<{
-  activities: any
-  loadReq?: boolean
-  exampleBlock?: boolean
-}>(), {
-  exampleBlock: true
-})
+const props = withDefaults(
+  defineProps<{
+    activities: any;
+    loadReq?: boolean;
+    exampleBlock?: boolean;
+  }>(),
+  {
+    exampleBlock: true,
+  },
+);
 
-const emits = defineEmits(['onCellClick']);
-const quasar = useQuasar()
+const emits = defineEmits<{ onCellClick: [string] }>();
+const quasar = useQuasar();
 
 const squares = ref<number[]>([]);
-const squaresData = ref<{ date: string; level: any; }[]>([]);
+const squaresData = ref<{ date: string; level: any }[]>([]);
 
 const months = [
-  'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+  'Янв',
+  'Фев',
+  'Мар',
+  'Апр',
+  'Май',
+  'Июн',
+  'Июл',
+  'Авг',
+  'Сен',
+  'Окт',
+  'Ноя',
+  'Дек',
 ];
 const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-const colorOfActivity = ['0 активностей', '1-10 активностей', '11-20 активностей', '21-30 активностей', '31+ активностей'];
+const colorOfActivity = [
+  '0 активностей',
+  '1-10 активностей',
+  '11-20 активностей',
+  '21-30 активностей',
+  '31+ активностей',
+];
 const monthPositions = ref<{ name: string; start: number; span: number }[]>([]);
 const today = new Date();
 const activeSquares = ref<number | null>(null);
-const isMobile = computed(() => quasar.screen.width < 600)
-const heatmap = ref<HTMLDivElement | null>(null)
+const isMobile = computed(() => quasar.screen.width < 600);
+const heatmap = ref<HTMLDivElement | null>(null);
 
-const onCellClick = (index:number, day:string) => {
-  activeSquares.value = index
+const onCellClick = (index: number, day: string) => {
+  activeSquares.value = index;
   emits('onCellClick', day);
-}
+};
 
 const generateHeatmapSquares = () => {
   const dateIteration = new Date(today);
   dateIteration.setFullYear(today.getFullYear() - 1);
 
   if (dateIteration.getDay() !== 1) {
-    let iteration = dateIteration.getDay() - 1
+    let iteration = dateIteration.getDay() - 1;
     if (dateIteration.getDay() === 0) {
-      iteration = 6
+      iteration = 6;
     }
     for (let i = 0; i < iteration; i++) {
       squares.value.push(-1);
@@ -152,7 +194,7 @@ const generateHeatmapSquares = () => {
   }
 };
 
-const getSquareClass = (level:number) => {
+const getSquareClass = (level: number) => {
   if (level === -1) return 'level--1';
   if (level === 0) return 'level-0';
   if (0 < level && level < 11) return 'level-1';
@@ -167,7 +209,8 @@ watch(
     nextTick(() => {
       if (heatmap.value) heatmap.value.scrollLeft = heatmap.value.scrollWidth;
     });
-  },{immediate: true},
+  },
+  { immediate: true },
 );
 onMounted(async () => {
   // await userStore.getActivityDate(dates.from, dates.to);
@@ -176,7 +219,6 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-
 .activity-heatmap {
   display: grid;
   grid-template-rows: auto repeat(7, 18px);

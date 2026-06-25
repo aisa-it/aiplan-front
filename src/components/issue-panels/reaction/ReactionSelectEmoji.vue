@@ -13,10 +13,7 @@
         rounded
         @scroll.stop
       >
-        <template
-          v-for="(emoji, index) in reactionEmojisList"
-          :key="emoji"
-        >
+        <template v-for="(emoji, index) in reactionEmojisList" :key="emoji">
           <q-btn
             v-show="index === 0 || isShowEmojis || isTouchStart"
             round
@@ -30,12 +27,11 @@
       </q-btn-group>
     </div>
   </transition>
-
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { computed, defineComponent, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 // utils
 import { getEmojiFromHexCode } from 'src/utils/helpers';
@@ -43,86 +39,62 @@ import { getEmojiFromHexCode } from 'src/utils/helpers';
 // constants
 import { REACTION_EMOJIS } from 'src/constants/emojis';
 
-export default defineComponent({
-  name: 'ReactionSelectEmoji',
-  props: {
-    isTouchStart: {
-      Boolean,
-      required: false,
-      default: false,
-    },
-    isShowReactionMenu: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    positionMenuLeft: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  emits:['update-reaction'],
-  setup(props, { emit }) {
-    const isShowEmojis = ref(false);
+const props = defineProps<{
+  isTouchStart?: boolean;
+  isShowReactionMenu: boolean;
+  positionMenuLeft?: boolean;
+}>();
 
-    const reactionEmojisList = REACTION_EMOJIS.map((code) => {
-      return {
-        label: getEmojiFromHexCode(code),
-        value: code,
-      };
-    });
+const emits = defineEmits<{
+  'update-reaction': [string];
+}>();
 
-    const showReactionMenu = computed(() => {
-      return props.isShowReactionMenu;
-    });
+const isShowEmojis = ref(false);
 
-    const classPositionMenu = computed(() => {
-      return props.positionMenuLeft? 'reaction-menu_left' : 'reaction-menu_right';
-    });
-
-    const buttonGroupClasses = computed(() => {
-      return [
-        isShowEmojis.value || props.isTouchStart ? 'reaction-menu__list_active' : '',
-        props.isTouchStart ? 'reaction-menu__list_touch' : '',
-      ];
-    });
-
-    const showEmojis = () => {
-      setTimeout(() => {
-        isShowEmojis.value = true;
-      }, 200);
-
-    };
-
-    const hideEmojis = () => {
-      isShowEmojis.value = false;
-    };
-
-    const handleClickReaction = (value: string) => {
-      emit('update-reaction', value);
-    };
-
-    watch(
-      () => showReactionMenu.value,
-      () => {
-        hideEmojis();
-      }
-    );
-
-
-    return {
-      showEmojis,
-      hideEmojis,
-      isShowEmojis,
-      showReactionMenu,
-      classPositionMenu,
-      buttonGroupClasses,
-      reactionEmojisList,
-      handleClickReaction,
-    }
-  }
+const reactionEmojisList = REACTION_EMOJIS.map((code) => {
+  return {
+    label: getEmojiFromHexCode(code),
+    value: code,
+  };
 });
+
+const showReactionMenu = computed(() => {
+  return props.isShowReactionMenu;
+});
+
+const classPositionMenu = computed(() => {
+  return props.positionMenuLeft ? 'reaction-menu_left' : 'reaction-menu_right';
+});
+
+const buttonGroupClasses = computed(() => {
+  return [
+    isShowEmojis.value || props.isTouchStart
+      ? 'reaction-menu__list_active'
+      : '',
+    props.isTouchStart ? 'reaction-menu__list_touch' : '',
+  ];
+});
+
+const showEmojis = () => {
+  setTimeout(() => {
+    isShowEmojis.value = true;
+  }, 200);
+};
+
+const hideEmojis = () => {
+  isShowEmojis.value = false;
+};
+
+const handleClickReaction = (value: string) => {
+  emits('update-reaction', value);
+};
+
+watch(
+  () => showReactionMenu.value,
+  () => {
+    hideEmojis();
+  },
+);
 </script>
 
 <style lang="scss" scoped>
@@ -178,7 +150,9 @@ export default defineComponent({
 
 .fade-reaction-enter-active,
 .fade-reaction-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fade-reaction-enter-from,

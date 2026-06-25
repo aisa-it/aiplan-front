@@ -49,6 +49,7 @@ import { storeToRefs } from 'pinia';
 
 const { listTabs, profileSettingsTab, setTab, isLoadingComponent } =
   useProfileTabs();
+  
 useUserLoadInfo();
 useMetadataTitle();
 

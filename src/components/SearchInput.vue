@@ -25,14 +25,14 @@ const props = withDefaults(
   { debounceValue: 700 },
 );
 
-const emit = defineEmits(['update:modelValue']);
+const emits = defineEmits<{ 'update:modelValue': [string | undefined] }>();
 
 const internalValue = ref(props.modelValue);
 
 watch(
   () => internalValue.value,
   debounce((newVal) => {
-    emit('update:modelValue', newVal);
+    emits('update:modelValue', newVal);
   }, props.debounceValue),
 );
 

@@ -83,24 +83,16 @@
       <SelectStatus
         v-if="contextProps?.columns_to_show?.includes('state')"
         style="width: auto !important"
-        :projectid="card?.project"
-        :issueid="card?.id"
         :status="card?.state_detail"
         :issue="card"
-        :states-from-cache="statesCache[card.project]"
+        :items="items"
+        :loading="isLoading"
+        :error="statesError"
         :isDisabled="
           !rolesStore.hasPermissionByIssue(card, 'change-issue-status')
         "
-        @refresh="
-          (status) => {
-            emits(
-              'updateTable',
-              'state',
-              Object.assign(card, { state_detail: status }),
-              entity,
-            );
-          }
-        "
+        @popup-show="loadItems(card.project, card.id)"
+        @update:status="onUpdateStatus"
       />
 
       <div class="row">
@@ -143,7 +135,7 @@
     <div class="selectors">
       <SelectSprints
         :workspace-slug="card.workspace_detail?.slug"
-        :issueid="card.id"
+        :issue="card"
         :current-sprints="card.sprints ?? []"
         :is-disabled="
           !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
@@ -178,17 +170,20 @@ import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import SelectDate from 'src/components/SelectDate.vue';
 import SelectPriority from 'src/components/SelectPriority.vue';
-import { useStatesStore } from 'src/stores/states-store';
 import SelectStatus from 'src/components/SelectStatus.vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 import aiplan from 'src/utils/aiplan';
 import QuantityChip from 'src/components/QuantityChip.vue';
-import { useProjectStore } from 'src/stores/project-store';
 import { useIssueContext } from '../../composables/useIssueContext';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
 import { useRolesStore } from 'src/stores/roles-store';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
 import SelectSprints from 'src/components/SelectSprints.vue';
+import {
+  DtoIssue,
+  DtoStateLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const { user } = storeToRefs(useUserStore());
 
@@ -198,23 +193,34 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 const rolesStore = useRolesStore();
+const { items, isLoading, error: statesError, loadItems, updateStatus } =
+  useStatusSelect();
 const avatarText = aiplan.UserName;
 
 const { navigateToActivityPage } = useUserActivityNavigation();
+
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === props.card?.state_detail?.id) return;
+
+  await updateStatus(props.card.project, props.card.id, state);
+  emits(
+    'updateTable',
+    'state',
+    Object.assign(props.card, { state_detail: state }),
+    props.entity,
+  );
+};
 
 const isParent = computed((): boolean => {
   return !!props.card?.parent && !!props.card?.parent_detail?.sequence_id;
 });
 
-const emits = defineEmits([
-  'refresh',
-  'updateTable',
-  'openPreview',
-  'openIssue',
-]);
-const { statesCache } = storeToRefs(useStatesStore());
+const emits = defineEmits<{
+  updateTable: [string, DtoIssue, any];
+  openPreview: [DtoIssue];
+  openIssue: [number, string];
+}>();
 const { contextProps } = useIssueContext(props.contextType);
-const { project } = storeToRefs(useProjectStore());
 
 const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;

@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { api } from '../services/api';
 import { useUserStore } from 'src/stores/user-store';
 import type {
-  AiplanIssueLockResponse,
+  DtoIssueLockResponse,
   DtoUserLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -16,19 +16,47 @@ export function useLockIssueInfo(
 ) {
   const userStore = useUserStore();
 
-  const isTryingToLock = ref(false);
+  const isTryingToLock = ref<boolean>(false);
   const lockedBy = ref<DtoUserLight | null>(null);
-  const isTimeExpire = ref(true);
+  const isTimeExpire = ref<boolean>(true);
 
-  const handlWrapperForTryingToLock = async (handlFunc: () => void) => {
-    if (isTryingToLock.value) return;
-    isTryingToLock.value = true;
+  const isLockPending = ref<boolean>(false);
+  // Переменные для хранения обрабатывающихся запросов. Если не null, то идет запрос на lock/unlock
+  let lockInProcess: Promise<boolean> | null = null;
+  let unlockInProcess: Promise<void> | null = null;
 
-    try {
-      const gotLock = await tryingToLock();
-
+  const handlWrapperForTryingToLock = async (
+    handlFunc: () => void | Promise<void>,
+  ) => {
+    // Не создаем новый вызов, если есть активный запрос на lock
+    if (lockInProcess) {
+      const gotLock = await lockInProcess;
       if (gotLock) {
-        handlFunc();
+        await handlFunc();
+      }
+      return;
+    }
+
+    isTryingToLock.value = true;
+    isLockPending.value = true;
+
+    // Исполнение и запись вызова в переменную
+    lockInProcess = (async () => {
+      try {
+        const gotLock = await tryingToLock();
+        return gotLock;
+      } finally {
+        isLockPending.value = false;
+        lockInProcess = null;
+      }
+    })();
+
+    // Если вызов прошел - исполняем функцию из аргумента
+    try {
+      const isLocked = await lockInProcess;
+
+      if (isLocked) {
+        await handlFunc();
       }
     } finally {
       isTryingToLock.value = false;
@@ -39,7 +67,7 @@ export function useLockIssueInfo(
     let delay = 800;
     const maxDelay = 5000;
 
-    let res: AiplanIssueLockResponse | null = null;
+    let res: DtoIssueLockResponse | null = null;
 
     while (isTryingToLock.value) {
       res = await api.lockEditDescription(wsSlug, projectSlug, issueSlug);
@@ -47,22 +75,23 @@ export function useLockIssueInfo(
       if (res?.ok) {
         stopTryingLock();
         setTimerUnlock(res?.locked_until ?? '');
-      } else {
-        if (res?.locked_by?.id === userStore.user.id) {
-          stopLocking();
-          isTryingToLock.value = true;
-          continue;
-        }
-
-        lockedBy.value = res?.locked_by ?? null;
-
-        const jitter = Math.floor(Math.random() * 250);
-        await sleep(Math.min(delay + jitter, maxDelay));
-        delay = Math.min(Math.floor(delay * 1.5), maxDelay);
+        return true;
       }
+
+      if (res?.locked_by?.id === userStore.user.id) {
+        await stopLocking();
+        isTryingToLock.value = true;
+        continue;
+      }
+
+      lockedBy.value = res?.locked_by ?? null;
+
+      const jitter = Math.floor(Math.random() * 250);
+      await sleep(Math.min(delay + jitter, maxDelay));
+      delay = Math.min(Math.floor(delay * 1.5), maxDelay);
     }
 
-    return res?.ok ?? false;
+    return false;
   }
 
   const stopTryingLock = () => {
@@ -70,11 +99,33 @@ export function useLockIssueInfo(
     lockedBy.value = null;
   };
 
-  const stopLocking = () => {
+  const stopLocking = async () => {
     stopTryingLock();
 
-    if (unlockTimer) clearTimeout(unlockTimer);
-    api.unlockEditDescription(wsSlug, projectSlug, issueSlug);
+    if (unlockTimer) {
+      clearTimeout(unlockTimer);
+      unlockTimer = null;
+    }
+
+    // Не создаем новый вызов, если есть активный запрос на unlock
+    if (unlockInProcess) {
+      await unlockInProcess;
+      return;
+    }
+
+    isLockPending.value = true;
+
+    // Запись вызова в переменную
+    unlockInProcess = (async () => {
+      try {
+        await api.unlockEditDescription(wsSlug, projectSlug, issueSlug);
+      } finally {
+        unlockInProcess = null;
+        isLockPending.value = false;
+      }
+    })();
+
+    await unlockInProcess;
   };
 
   function setTimerUnlock(until: string) {
@@ -87,7 +138,7 @@ export function useLockIssueInfo(
 
     const msUntilSave = Math.max(0, expiresAt - now - buffer);
 
-    unlockTimer = window.setTimeout(async () => {
+    unlockTimer = window.setTimeout(() => {
       isTimeExpire.value = true;
     }, msUntilSave);
   }
