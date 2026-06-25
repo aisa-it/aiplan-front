@@ -2,7 +2,6 @@
   <q-menu
     ref="menuRef"
     class="context-menu"
-    v-bind="menuProps"
     touch-position
     @hide="emit('resetContext')"
   >
@@ -74,12 +73,6 @@ const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { hasPermissionByProject } = useRolesStore();
 
-const isControlled = computed(() => !!props.anchorEvent);
-
-const menuProps = computed(() => {
-  return isControlled.value ? {} : { 'context-menu': true };
-});
-
 const openSettings = () => {
   if (!props.row) return;
   router.push(
@@ -111,7 +104,8 @@ const copyProjectTitle = (): void => {
 watch(
   () => props.anchorEvent,
   async (evt) => {
-    if (evt && menuRef.value) {
+    if (!evt || !props.row) menuRef.value.hide();
+    if (evt && menuRef.value && props.row) {
       menuRef.value.hide();
       await nextTick();
       menuRef.value.show(evt);
