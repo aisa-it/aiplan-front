@@ -54,6 +54,7 @@
               :offset="[8, 0]"
               max-height="70vh"
             >
+              <div class="nav-popup__section-title">Проекты</div>
               <NavPopupProjects />
             </q-menu>
           </q-item>
@@ -79,6 +80,7 @@
               :offset="[8, 0]"
               max-height="70vh"
             >
+              <div class="nav-popup__section-title">Спринты</div>
               <NavPopupSprints />
             </q-menu>
           </q-item>
@@ -102,6 +104,7 @@
               :offset="[8, 0]"
               max-height="70vh"
             >
+              <div class="nav-popup__section-title">Формы</div>
               <NavPopupForms />
             </q-menu>
           </q-item>

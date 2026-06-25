@@ -7,8 +7,8 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
-import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 /*
  * If not building with SSR mode, you can
@@ -41,8 +41,15 @@ export default route(function (/* { store, ssrContext } */) {
       to.meta.requiredWorkspace === true &&
       to.params.workspace !== from.params.workspace
     ) {
+      const newSlug = to.params.workspace as string | undefined;
+
       const workspaceStoreV2 = useWorkspaceStoreV2();
-      workspaceStoreV2.getWorkspaceInfo(to.params.workspace as string);
+      if (newSlug) {
+        workspaceStoreV2.getWorkspaceInfo(newSlug);
+      }
+
+      const workspaceStore = useWorkspaceStore();
+      workspaceStore.changeWorkspace(newSlug || null);
     }
 
     if (to.fullPath.includes('/reset-password')) {

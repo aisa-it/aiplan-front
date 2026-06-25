@@ -4,6 +4,7 @@ import { RouteRecordRaw } from 'vue-router';
 // @see src/modules/git/router.ts
 import { gitRoutes } from 'src/modules/git/index';
 import { useUserStore } from 'src/stores/user-store';
+import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 // ===================================
 
 const routes: RouteRecordRaw[] = [
@@ -12,7 +13,6 @@ const routes: RouteRecordRaw[] = [
     name: 'main',
     component: () => import('src/layouts/MainLayout.vue'),
     async beforeEnter(to, from) {
-
       const userStore = useUserStore();
 
       await userStore.getUserInfo();
@@ -33,6 +33,17 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'profile',
         component: () => import('pages/ProfilePage.vue'),
+        async beforeEnter(to, from) {
+          const userStore = useUserStore();
+          const workspaceStoreV2 = useWorkspaceStoreV2();
+          const slug =
+            userStore.user?.last_workspace_slug ||
+            userStore.userWorkspaces[0]?.slug;
+
+          if (slug) {
+            await workspaceStoreV2.getWorkspaceInfo(slug);
+          }
+        },
         meta: { requiredWorkspace: false },
       },
       {

@@ -652,7 +652,9 @@ const updateCurrentSprints = (value: DtoSprintLight[]) => {
 //hooks
 onMounted(async () => {
   await refresh();
-  await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  if (project.value?.id) {
+    await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  }
   refreshIssues.value = false;
   props.parentissue &&
     api
