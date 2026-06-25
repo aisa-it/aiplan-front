@@ -1448,6 +1448,80 @@ select:-ms-autofill {
 /* import the default theme (optional) */
 @import '@vue-flow/core/dist/theme-default.css';
 
+// --------------------- nav-popup (Проекты / Спринты / Формы) ---------------------
+.nav-popup {
+  min-width: 280px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  overflow: hidden;
+
+  &__footer-link {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: $primary;
+    min-height: 36px;
+    flex-shrink: 0;
+  }
+
+  > .q-separator {
+    flex-shrink: 0;
+  }
+
+  &__section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: $sub-text-color;
+    padding: 12px 16px 4px;
+    letter-spacing: 0.5px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  &__item {
+    min-height: 36px;
+    padding: 4px 16px;
+    font-size: 14px;
+
+    .q-item__section--avatar {
+      min-width: 32px;
+      padding-right: 8px;
+    }
+  }
+
+  &__item-subtitle {
+    color: $sub-text-color;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  &__item-dates {
+    font-size: 11px;
+    color: $sub-text-color;
+  }
+
+  &__item-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+  }
+}
+
 .q-layout__section--marginal {
   background-color: inherit !important;
+}
+
+.nav-popup-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nav-popup__section-content {
+  overflow-y: auto;
+  flex: 1;
 }

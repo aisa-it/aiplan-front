@@ -38,8 +38,7 @@
       <ArrowDown class="chevron-rotate" :class="{ 'rotate-180': isOpen }" />
     </template>
 
-    <template v-slot:option>
-    </template>
+    <template v-slot:option> </template>
 
     <template v-if="!label" v-slot:selected>
       <q-item-label class="q-ml-xs ellipsis">
@@ -53,11 +52,13 @@
   </q-select>
 
   <ManageIssueSprintsDialog
-      v-model="isDialogOpen"
-      :issue="issue"
-      @refresh="emits('refresh')"
-      @hide="() => selectSprintRef.hidePopup()"
-    />
+    v-model="isDialogOpen"
+    :issue="issue"
+    :checked-sprints="currentSprints"
+    @refresh="emits('refresh')"
+    @hide="() => selectSprintRef.hidePopup()"
+    @update-selected="handleUpdateSelected"
+  />
 </template>
 
 <script setup lang="ts">

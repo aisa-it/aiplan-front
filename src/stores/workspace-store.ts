@@ -9,6 +9,7 @@ import {
   DtoWorkspace,
   DtoWorkspaceMember,
   DtoWorkspaceMemberWithOwner,
+  DtoWorkspaceSummaryResponse,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
@@ -39,6 +40,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   const allWorkspaceStates = ref<Record<string, DtoStateLight[]>>();
   const stopRefresh = ref<boolean>(false);
   const meInWorkspace = ref<DtoWorkspaceMemberWithOwner>({});
+  const workspaceSummary = ref<DtoWorkspaceSummaryResponse | null>(null);
 
   const workspaceLogo = computed<string | undefined>(() =>
     workspaceInfo?.value?.logo ?? undefined
@@ -226,6 +228,14 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     });
   };
 
+  async function getWorkspaceSummary(workspaceSlug: string): Promise<void> {
+    if (!workspaceSlug || workspaceSlug === 'undefined') return;
+
+    const res = await workspaceApi.getWorkspaceSummary(workspaceSlug);
+    workspaceSummary.value = res.data;
+  }
+
+
   return {
     currentWorkspaceSlug,
     workspaceInfo,
@@ -249,5 +259,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     getAllWorkspaceStates,
     getJitsiToken,
     setAiDocNotificationSettings,
+    workspaceSummary,
+    getWorkspaceSummary,
   };
 });
