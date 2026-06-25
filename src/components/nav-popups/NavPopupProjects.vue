@@ -1,23 +1,19 @@
 <template>
-  <div class="nav-popup">
-    <NavPopupSection title="Проекты">
-      <q-list dense>
-        <NavPopupItem
-          v-for="project in projects"
-          :key="project.id"
-          :title="project.name ?? ''"
-          :subtitle="project.identifier"
-          :emoji="project.emoji"
-          :logo="project.logo"
-          @select="toProjectPage(project)"
-        >
-          <ProjectContextMenu
-            context-menu
-            :project="project"
-          />
-        </NavPopupItem>
-      </q-list>
-    </NavPopupSection>
+  <q-list dense>
+    <NavPopupItem
+      v-for="project in projects"
+      :key="project.id"
+      :title="project.name ?? ''"
+      :subtitle="project.identifier"
+      :emoji="project.emoji"
+      :logo="project.logo"
+      @select="toProjectPage(project)"
+    >
+      <ProjectContextMenu
+        v-if="isAccessToProject(project.id as string)"
+        :project="project"
+      />
+    </NavPopupItem>
     <q-separator />
 
     <q-item
@@ -29,7 +25,7 @@
     >
       Просмотр всех проектов
     </q-item>
-  </div>
+  </q-list>
 </template>
 
 <script setup lang="ts">
@@ -41,7 +37,6 @@ import { storeToRefs } from 'pinia';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // components
-import NavPopupSection from './NavPopupSection.vue';
 import NavPopupItem from './NavPopupItem.vue';
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
 import { useRolesStore } from 'src/stores/roles-store.ts';
