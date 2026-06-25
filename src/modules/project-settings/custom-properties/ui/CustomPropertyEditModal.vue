@@ -27,7 +27,7 @@
             class="base-selector"
             label="Тип"
             dense
-            emits-value
+            emit-value
             map-options
           />
 
