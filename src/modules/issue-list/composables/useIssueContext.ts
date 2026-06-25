@@ -85,11 +85,20 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       const decoder = new TextDecoder()
       let buffer = ''
 
+      let chunkCount = 0;
       const flush = (line: string) => {
         const s = line.trim()
-        if (s) onChunk(JSON.parse(s))
+        if (!s) return
+        chunkCount++
+        const parsed = JSON.parse(s)
+        console.debug(
+          `[grouped-stream] chunk #${chunkCount} получен @ ${new Date().toISOString()}`,
+          { issues: parsed?.issues?.length, count: parsed?.count, entity: parsed?.entity },
+        )
+        onChunk(parsed)
       };
 
+      console.debug('[grouped-stream] начало чтения стрима')
       while (true) {
         const { done, value } = await reader.read();
         if (done) break
@@ -99,6 +108,9 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
         lines.forEach(flush)
       }
       flush(buffer);
+      console.debug(
+        `[grouped-stream] стрим завершён, всего чанков: ${chunkCount}`,
+      )
     };
 
     return {

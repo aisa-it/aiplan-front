@@ -17,8 +17,15 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, getIssueStream, GROUP_BY_OPTIONS, store } =
-    useIssueContext(contextType);
+  const {
+    contextProps,
+    isKanbanEnabled,
+    getIssue,
+    getIssueStream,
+    GROUP_BY_OPTIONS,
+    store,
+    issuesLoader,
+  } = useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
   function parsePagination(pagination: QuasarPagination) {
@@ -69,9 +76,22 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const pagination = parsePagination(quasarPagination);
     issuesStore.groupByIssues = pagination.group_by ?? '';
     issuesStore.groupedIssueList = [];
+    let hasRenderedFirstChunk = false;
 
     await getIssueStream(filters, pagination, (chunk: any) => {
       issuesStore.groupedIssueList.push(chunk);
+      // Снимаем скелетон сразу после первой пришедшей группы, чтобы
+      // дальше группы дорисовывались по мере прихода стрима.
+      if (!hasRenderedFirstChunk && issuesLoader?.value) {
+        hasRenderedFirstChunk = true;
+        issuesLoader.value = false;
+        console.debug(
+          '[grouped-stream] первый чанк отрисован, скелетон снят',
+        );
+      }
+      console.debug(
+        `[grouped-stream] групп в сторе: ${issuesStore.groupedIssueList.length}`,
+      );
     });
   }
 
@@ -130,13 +150,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
 
-    let issues: any[] = []
-    let count = 0
-    await getIssueStream(filters, pagination, (chunk: any) => {
-      issues = chunk.issues
-      count = chunk.count
-    });
-
     const groups = issuesStore.groupedIssueList as any[];
 
     const sameEntity = (a: any, b: any) => {
@@ -149,18 +162,29 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         ? index
         : groups.findIndex((g) => sameEntity(g?.entity, entity));
 
-    if (targetIndex < 0) {
-      groups.push({ entity, issues, count });
-      return;
-    }
+    const upsertGroup = (issues: any[], count: number) => {
+      if (targetIndex < 0) {
+        groups.push({ entity, issues, count });
+        return;
+      }
 
-    if (!groups[targetIndex]) {
-      groups[targetIndex] = { entity, issues, count };
-      return;
-    }
+      if (!groups[targetIndex]) {
+        groups[targetIndex] = { entity, issues, count };
+        return;
+      }
 
-    groups[targetIndex].issues = issues;
-    groups[targetIndex].count = count;
+      groups[targetIndex].issues = issues;
+      groups[targetIndex].count = count;
+    };
+
+    await getIssueStream(filters, pagination, (chunk: any) => {
+      console.debug('[grouped-stream] getCurrentTable чанк', {
+        targetIndex,
+        issues: chunk?.issues?.length,
+        count: chunk?.count,
+      });
+      upsertGroup(chunk.issues, chunk.count);
+    });
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {
