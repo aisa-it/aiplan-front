@@ -3,7 +3,10 @@
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
-          <MenuProjectsIcon :is-dark="$q.dark.isActive" />
+          <MenuProjectsIcon
+            :is-dark="$q.dark.isActive"
+            :color="active ? '#3f75ff' : ''"
+          />
         </q-item-section>
         <q-item-section>Проекты</q-item-section>
         <NavAddProjectButton v-if="hasPermission('create-project')" />
@@ -47,6 +50,10 @@ import ExpansionItem from '../ExpansionItem.vue';
 import MenuLink from 'src/components/MenuLink.vue';
 import NavAddProjectButton from './NavAddProjectButton.vue';
 import MenuProjectsIcon from '../icons/MenuProjectsIcon.vue';
+
+const props = defineProps<{
+  active?: boolean;
+}>();
 
 // stores
 const workspaceStore = useWorkspaceStore();

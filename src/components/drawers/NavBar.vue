@@ -33,7 +33,12 @@
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <q-item :active="route.name === 'projects'" clickable v-ripple>
+          <q-item
+            v-if="miniState"
+            :active="route.name === 'projects'"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <MenuProjectsIcon
                 :color="
@@ -59,7 +64,14 @@
             </q-menu>
           </q-item>
 
-          <q-item :active="route.name === 'sprints'" clickable v-ripple>
+          <NavMenuProjects v-else :active="route.path.includes('projects')" />
+
+          <q-item
+            v-if="miniState"
+            :active="route.name === 'sprints'"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <SprintIcon
                 :color="
@@ -85,7 +97,14 @@
             </q-menu>
           </q-item>
 
-          <q-item :active="route.path.includes('/forms')" clickable v-ripple>
+          <NavSprints v-else :active="route.path.includes('sprints')" />
+
+          <q-item
+            v-if="miniState"
+            :active="route.path.includes('/forms')"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <MenuFormsIcon
                 :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''"
@@ -108,6 +127,8 @@
               <NavPopupForms />
             </q-menu>
           </q-item>
+
+          <NavMenuForms v-else :active="route.path.includes('forms')" />
 
           <q-item
             :active="route.path.includes('/aidoc')"
@@ -220,6 +241,10 @@ import NavBarHelpList from './NavBarHelpList.vue';
 import NavPopupProjects from 'src/components/nav-popups/NavPopupProjects.vue';
 import NavPopupSprints from 'src/components/nav-popups/NavPopupSprints.vue';
 import NavPopupForms from 'src/components/nav-popups/NavPopupForms.vue';
+import NavMenuProjects from '../menu/NavMenuProjects.vue';
+import NavSprints from '../menu/NavSprints.vue';
+import NavMenuForms from '../menu/NavMenuForms.vue';
+
 import { useDrawerResize } from 'src/composables/useDrawerResize';
 
 const $q = useQuasar();
