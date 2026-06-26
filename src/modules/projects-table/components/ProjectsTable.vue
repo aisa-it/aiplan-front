@@ -237,7 +237,7 @@ const openNotificationsAdminSettings = (project: DtoProjectLight) => {
 };
 
 const searchProjects = debounce(async () => {
-  if (!projectSearch.value.trim()) {
+  if (!projectSearch.value?.trim()) {
     filteredProjects.value = undefined;
     return;
   }
