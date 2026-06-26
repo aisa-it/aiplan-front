@@ -14,8 +14,10 @@
     <div v-show="isResizable" ref="resizerRef" class="resizer"></div>
     <div class="menu-item-header" @click="toggleDropdown()">
       <slot name="header" style="cursor: pointer"></slot>
-      <ArrowUp
+      <q-icon
         v-if="!isOpenDisable"
+        name="expand_more"
+        size="16px"
         :class="{ 'rotate-180': isExpanded, 'arrow-up': true }"
       />
     </div>
@@ -28,7 +30,6 @@
 
 <script setup lang="ts">
 import { ref, watch, inject, onMounted, onBeforeMount, computed } from 'vue';
-import ArrowUp from './icons/ArrowUp.vue';
 import { EventBus, Screen } from 'quasar';
 import { useExpansionItemResize } from 'src/composables/useExpansionItemResize';
 
@@ -46,7 +47,7 @@ const bus = inject('bus') as EventBus;
 const isMobile = computed(() => Screen.width <= 650);
 const isExpanded = ref(props.isDefaultOpen ?? false);
 const MIN_HEIGHT = 40;
-const MIN_HEIGHT_EXPANDED = 136;
+const MIN_HEIGHT_EXPANDED = 300;
 
 const id = props.itemName;
 const menuItemRef = ref<HTMLElement | null>(null);
