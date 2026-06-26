@@ -271,6 +271,13 @@ export function projectActivityRender(
         return `изменил(-а) шаблон задачи "${activity.new_entity_detail.name}"`;
       }
       return;
+
+    case 'rules_script':
+      if (activity.verb === 'updated') {
+        return `<span>изменил(-а) сценарий проекта ${link}<span/>`;
+      }
+      return;
+    
     default:
       break;
   }
