@@ -58,8 +58,12 @@
               <NavPopupProjects />
             </q-menu>
           </q-item>
-
-          <q-item :active="route.name === 'sprints'" clickable v-ripple>
+          <q-item
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
+            :active="route.name === 'sprints'"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <SprintIcon
                 :color="
@@ -85,7 +89,12 @@
             </q-menu>
           </q-item>
 
-          <q-item :active="route.path.includes('/forms')" clickable v-ripple>
+          <q-item
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
+            :active="route.path.includes('/forms')"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <MenuFormsIcon
                 :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''"
@@ -202,6 +211,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // icons
 import HomeIcon from '../icons/HomeIcon.vue';
@@ -230,6 +240,7 @@ const router = useRouter();
 const route = useRoute();
 
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 
 const isHelpOpen = ref(false);
 const isFeedbackOpen = ref(false);
@@ -281,7 +292,7 @@ const onSuccess = (msg?: string) => {
 };
 
 const workspaceStore = useWorkspaceStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 onMounted(() => {
   if (currentWorkspaceSlug.value) {
