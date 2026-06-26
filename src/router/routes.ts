@@ -5,6 +5,7 @@ import { RouteRecordRaw } from 'vue-router';
 import { gitRoutes } from 'src/modules/git/index';
 import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
+import { useProjectStore } from 'src/stores/project-store';
 // ===================================
 
 const routes: RouteRecordRaw[] = [
@@ -35,6 +36,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/ProfilePage.vue'),
         async beforeEnter(to, from) {
           const userStore = useUserStore();
+          const projectStore = useProjectStore();
+          projectStore.$reset();
           const workspaceStoreV2 = useWorkspaceStoreV2();
           await userStore.getUserInfo();
           const slug =
