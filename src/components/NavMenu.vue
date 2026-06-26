@@ -72,6 +72,7 @@ const sidebarWidth = computed(() => LocalStorage.getItem('menuSidebarWidth'));
 const loadBarInfo = async (slug: string) => {
   try {
     if (!slug) return;
+    if (workspaceStore.workspaceSummary) return;
     await workspaceStore.getWorkspaceSummary(slug);
   } catch (e) {
     formStore.forms = [];
