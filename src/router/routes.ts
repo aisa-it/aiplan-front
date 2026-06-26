@@ -36,6 +36,7 @@ const routes: RouteRecordRaw[] = [
         async beforeEnter(to, from) {
           const userStore = useUserStore();
           const workspaceStoreV2 = useWorkspaceStoreV2();
+          await userStore.getUserInfo();
           const slug =
             userStore.user?.last_workspace_slug ||
             userStore.userWorkspaces[0]?.slug;

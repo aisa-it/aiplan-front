@@ -9,6 +9,7 @@ import {
 import routes from './routes';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useProjectStore } from 'src/stores/project-store';
 
 /*
  * If not building with SSR mode, you can
@@ -41,6 +42,8 @@ export default route(function (/* { store, ssrContext } */) {
       to.meta.requiredWorkspace === true &&
       to.params.workspace !== from.params.workspace
     ) {
+      const projectStore = useProjectStore();
+      projectStore.$reset();
       const newSlug = to.params.workspace as string | undefined;
 
       const workspaceStoreV2 = useWorkspaceStoreV2();
