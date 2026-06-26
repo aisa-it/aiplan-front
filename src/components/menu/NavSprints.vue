@@ -1,7 +1,6 @@
 <template>
   <ExpansionItem
     full-open
-    :is-expanding="sprints.length > 0"
     :is-open-disable="sprints.length === 0"
     itemName="sprints"
   >

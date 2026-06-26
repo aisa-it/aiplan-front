@@ -1,14 +1,57 @@
 <template>
   <div ref="menuRef" class="menu scrollable-content">
+    <q-item
+      clickable
+      v-ripple
+      :active="route.name === 'workspace'"
+      :to="{
+        name: 'workspace',
+        params: { workspace: currentWorkspaceSlug },
+      }"
+      class="menu-item"
+    >
+      <q-item-section avatar>
+        <HomeIcon :color="route.name === 'workspace' ? '#3f75ff' : ''" />
+      </q-item-section>
+
+      <q-item-section> Главная </q-item-section>
+    </q-item>
     <component
       :is="item.component"
       v-for="item in visibleItems"
       :key="item.id"
       :data-id="item.id"
-      :class="{ 'draggable-item': !item.isLocked }"
+      :class="{
+        'draggable-item': !item.isLocked,
+      }"
       v-bind="item.props"
       :ref="(el) => setItemRef(item.id, el)"
       v-on="item.listeners || {}"
+    />
+
+    <q-item
+      :active="route.path.includes('/aidoc')"
+      clickable
+      v-ripple
+      @click="router.push(`/${currentWorkspaceSlug}/aidoc`)"
+      class="menu-item"
+    >
+      <q-item-section avatar>
+        <AIDocIcon :color="route.path.includes('/aidoc') ? '#3f75ff' : ''" />
+      </q-item-section>
+
+      <q-item-section> АИДок </q-item-section>
+    </q-item>
+
+    <component
+      :is="HelpItem.component"
+      :key="HelpItem.id"
+      :data-id="HelpItem.id"
+      :class="{
+        'draggable-item': !HelpItem.isLocked,
+      }"
+      :ref="(el) => setItemRef(HelpItem.id, el)"
+      class="help-item"
     />
     <q-banner v-if="isDev()" rounded class="bg-orange text-white flex-shrink-0">
       <b>Внимание!</b> Вы находитесь на активно разрабатываемой версии АИПлана.
@@ -20,7 +63,7 @@
 <script setup lang="ts">
 //core
 import { computed, ref, markRaw, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { LocalStorage } from 'quasar';
 
@@ -44,8 +87,12 @@ import NavMenuAIDocs from './menu/NavMenuAIDocs.vue';
 import NavSprints from './menu/NavSprints.vue';
 import NavMenuConferencesDemo from './menu/NavMenuConferencesDemo.vue';
 
+import HomeIcon from './icons/HomeIcon.vue';
+import AIDocIcon from './icons/AIDocIcon.vue';
+
 //core
 const route = useRoute();
+const router = useRouter();
 
 //stores
 const utilsStore = useUtilsStore();
@@ -162,12 +209,13 @@ const itemsMap: Record<
     component: markRaw(NavMenuConferencesDemo),
     condition: () => isDemo.value,
   },
-  help: {
-    id: 'help',
-    component: markRaw(NavMenuBottomBarHelpAndSupport),
-    condition: () => true,
-    isLocked: true,
-  },
+};
+
+const HelpItem = {
+  id: 'help',
+  component: markRaw(NavMenuBottomBarHelpAndSupport),
+  condition: () => true,
+  isLocked: true,
 };
 
 const mergedOrder = [...savedOrder];
@@ -222,10 +270,14 @@ useExpansionGroupResize(menuRef, 'menuItemsLayout', fixedHeightItems);
 <style scoped lang="scss">
 .menu {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-direction: column;
   width: 100%;
   height: 100%;
+}
+
+.help-item {
+  margin-top: auto;
 }
 
 :deep(.menu-ghost) {
