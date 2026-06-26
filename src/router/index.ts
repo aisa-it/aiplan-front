@@ -47,7 +47,7 @@ export default route(function (/* { store, ssrContext } */) {
       const newSlug = to.params.workspace as string | undefined;
 
       const workspaceStoreV2 = useWorkspaceStoreV2();
-      if (newSlug) {
+      if (newSlug && newSlug !== 'undefined') {
         workspaceStoreV2.getWorkspaceInfo(newSlug);
       }
 
