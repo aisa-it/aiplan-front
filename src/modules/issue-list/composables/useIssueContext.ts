@@ -13,6 +13,10 @@ import {
 } from 'src/constants/constants';
 import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
 
+// НЕ ПЕРЕНОСИТЬ В useIssueContext! Нужно чтобы экземпляр был именно один
+// иначе невозможно будет отменить текущий запрос
+let activeStreamController: AbortController | null = null;
+
 export function useIssueContext(contextType: 'project' | 'sprint') {
   const issuesStore = useIssuesStore();
   const route = useRoute();
@@ -56,7 +60,20 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       filters: TypesIssuesListFilters,
       pagination: IQuery,
       onChunk: (chunk: any) => void,
+      options?: { cancelPrevious?: boolean },
     ) => {
+      // По умолчанию отменяем предыдущий запрос.
+      // Для тех запросов, где это не нужно, отмену отключаем через cancelPrevious: false
+      const cancelPrevious = options?.cancelPrevious ?? true;
+
+      const controller = new AbortController();
+      if (cancelPrevious) {
+        if (activeStreamController) {
+          activeStreamController.abort();
+        }
+        activeStreamController = controller;
+      }
+
       const workspaceSlug = route.params.workspace
       const projectSlug = route.params.project
 
@@ -66,51 +83,53 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
         search.set(key, String(value))
       }
 
-      const response = await fetch(
-        `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectSlug}/issues/search?${search.toString()}`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/x-ndjson, application/json',
+      try {
+        const response = await fetch(
+          `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectSlug}/issues/search?${search.toString()}`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/x-ndjson, application/json',
+            },
+            body: JSON.stringify(filters),
+            signal: controller.signal,
           },
-          body: JSON.stringify(filters),
-        },
-      );
+        );
 
-      if (!response?.body) return;
+        if (!response?.body) return;
 
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
 
-      let chunkCount = 0;
-      const flush = (line: string) => {
-        const s = line.trim()
-        if (!s) return
-        chunkCount++
-        const parsed = JSON.parse(s)
-        console.debug(
-          `[grouped-stream] chunk #${chunkCount} получен @ ${new Date().toISOString()}`,
-          { issues: parsed?.issues?.length, count: parsed?.count, entity: parsed?.entity },
-        )
-        onChunk(parsed)
-      };
+        const flush = (line: string) => {
+          const s = line.trim()
+          if (!s) return
+          onChunk(JSON.parse(s))
+        };
 
-      console.debug('[grouped-stream] начало чтения стрима')
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
-        lines.forEach(flush)
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+          lines.forEach(flush)
+        }
+        flush(buffer);
+      } catch (e) {
+        // Прерывание предыдущего запроса — штатная ситуация, не ошибка.
+        if ((e as Error)?.name === 'AbortError') {
+          return
+        }
+        throw e
+      } finally {
+        if (activeStreamController === controller) {
+          activeStreamController = null;
+        }
       }
-      flush(buffer);
-      console.debug(
-        `[grouped-stream] стрим завершён, всего чанков: ${chunkCount}`,
-      )
     };
 
     return {

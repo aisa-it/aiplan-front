@@ -85,13 +85,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       if (!hasRenderedFirstChunk && issuesLoader?.value) {
         hasRenderedFirstChunk = true;
         issuesLoader.value = false;
-        console.debug(
-          '[grouped-stream] первый чанк отрисован, скелетон снят',
-        );
       }
-      console.debug(
-        `[grouped-stream] групп в сторе: ${issuesStore.groupedIssueList.length}`,
-      );
     });
   }
 
@@ -177,14 +171,15 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       groups[targetIndex].count = count;
     };
 
-    await getIssueStream(filters, pagination, (chunk: any) => {
-      console.debug('[grouped-stream] getCurrentTable чанк', {
-        targetIndex,
-        issues: chunk?.issues?.length,
-        count: chunk?.count,
-      });
-      upsertGroup(chunk.issues, chunk.count);
-    });
+    await getIssueStream(
+      filters,
+      pagination,
+      (chunk: any) => {
+        upsertGroup(chunk.issues, chunk.count);
+      },
+      // запросы идут дважды — не отменяем.
+      { cancelPrevious: false },
+    );
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {
