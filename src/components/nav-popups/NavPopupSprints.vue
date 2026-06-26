@@ -1,46 +1,66 @@
 <template>
-  <q-list dense>
-    <q-item
-      v-for="sprint in sprints"
-      :key="sprint.id"
-      clickable
-      v-ripple
-      class="nav-popup__item"
-      :to="`/${currentWorkspaceSlug}/sprints/${sprint.id}`"
+  <q-menu
+    anchor="top end"
+    self="top start"
+    :offset="[8, 0]"
+    max-height="70vh"
+    class="nav-popup"
+  >
+    <div
+      class="text-caption text-weight-bold text-uppercase text-grey-7 q-pt-sm q-px-md q-pb-xs non-selectable shrink"
     >
-      <q-item-section avatar>
-        <StatusCircularProgressBar
-          style="width: 24px"
-          :stats="sprint.stats ?? {}"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-item-label class="ellipsis">
-          {{ sprint.name }}
-        </q-item-label>
-        <q-item-label caption class="nav-popup__item-dates">
-          {{ formatSprintDates(sprint.start_date, sprint.end_date) }}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-separator />
+      Спринты
+    </div>
+    <div class="scroll">
+      <q-list dense>
+        <q-item
+          v-for="sprint in sprints"
+          :key="sprint.id"
+          clickable
+          v-ripple
+          :active="route.params.sprint === String(sprint.id)"
+          active-class="nav-popup__item--active text-weight-medium"
+          :to="`/${currentWorkspaceSlug}/sprints/${sprint.id}`"
+        >
+          <q-item-section side class="q-pr-sm">
+            <StatusCircularProgressBar
+              style="width: 24px"
+              :stats="sprint.stats ?? {}"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label class="ellipsis">
+              {{ sprint.name }}
+            </q-item-label>
+            <q-item-label caption class="text-grey-7 text-caption">
+              {{ formatSprintDates(sprint.start_date, sprint.end_date) }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+    <q-separator class="shrink" />
 
     <q-item
+      dense
       clickable
       v-ripple
-      class="nav-popup__footer-link"
+      class="shrink q-py-sm text-body2"
       :to="`/${currentWorkspaceSlug}/sprints`"
       v-close-popup
     >
-      Просмотр всех спринтов
+      <q-item-section>
+        <div class="text-primary">Просмотр всех спринтов</div></q-item-section
+      >
     </q-item>
-  </q-list>
+  </q-menu>
 </template>
 
 <script setup lang="ts">
 // core
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
 
 // stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -51,6 +71,7 @@ import StatusCircularProgressBar from 'src/components/progress-bars/StatusCircul
 
 const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const route = useRoute();
 
 const sprints = computed(() => workspaceStore.workspaceSummary?.sprints ?? []);
 
