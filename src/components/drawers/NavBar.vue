@@ -32,12 +32,7 @@
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <q-item
-            v-if="miniState"
-            :active="route.name === 'projects'"
-            clickable
-            v-ripple
-          >
+          <q-item :active="route.name === 'projects'" clickable v-ripple>
             <q-item-section avatar>
               <MenuProjectsIcon
                 :color="
@@ -55,10 +50,11 @@
             <NavPopupProjects />
           </q-item>
 
-          <NavMenuProjects v-else :active="route.path.includes('projects')" />
-
           <q-item
-            v-if="miniState"
+            v-if="
+              workspaceInfo &&
+              hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')
+            "
             :active="route.name === 'sprints'"
             clickable
             v-ripple
@@ -80,10 +76,11 @@
             <NavPopupSprints />
           </q-item>
 
-          <NavSprints v-else :active="route.path.includes('sprints')" />
-
           <q-item
-            v-if="miniState"
+            v-if="
+              workspaceInfo &&
+              hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')
+            "
             :active="route.path.includes('/forms')"
             clickable
             v-ripple
@@ -102,8 +99,6 @@
 
             <NavPopupForms />
           </q-item>
-
-          <NavMenuForms v-else :active="route.path.includes('forms')" />
 
           <q-item
             :active="route.path.includes('/aidoc')"
@@ -191,6 +186,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // icons
 import HomeIcon from '../icons/HomeIcon.vue';
@@ -209,9 +205,6 @@ import NavBarHelpList from './NavBarHelpList.vue';
 import NavPopupProjects from 'src/components/nav-popups/NavPopupProjects.vue';
 import NavPopupSprints from 'src/components/nav-popups/NavPopupSprints.vue';
 import NavPopupForms from 'src/components/nav-popups/NavPopupForms.vue';
-import NavMenuProjects from '../menu/NavMenuProjects.vue';
-import NavSprints from '../menu/NavSprints.vue';
-import NavMenuForms from '../menu/NavMenuForms.vue';
 
 import { useDrawerResize } from 'src/composables/useDrawerResize';
 
@@ -230,6 +223,7 @@ const router = useRouter();
 const route = useRoute();
 
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 
 const isHelpOpen = ref(false);
 const isFeedbackOpen = ref(false);
@@ -266,7 +260,7 @@ const onSuccess = (msg?: string) => {
 };
 
 const workspaceStore = useWorkspaceStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 onMounted(() => {
   if (currentWorkspaceSlug.value) {

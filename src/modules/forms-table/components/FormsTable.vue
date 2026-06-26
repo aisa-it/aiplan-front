@@ -134,7 +134,7 @@ const pagination = ref({
 });
 
 const filteredRows = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase();
+  const query = searchQuery.value?.trim()?.toLowerCase();
   if (!query) return rows.value;
 
   return rows.value.filter((form) =>

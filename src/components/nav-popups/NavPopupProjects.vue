@@ -22,7 +22,12 @@
           :logo="project.logo"
           :active="route.params.project === project.identifier"
           @select="toProjectPage(project)"
-        />
+        >
+          <ProjectContextMenu
+            v-if="isAccessToProject(project.id as string)"
+            :project="project"
+          />
+        </NavPopupItem>
       </q-list>
     </div>
     <q-separator class="shrink" />
@@ -57,6 +62,7 @@ import { useRolesStore } from 'src/stores/roles-store.ts';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store.ts';
 import { BASE_ERROR_RULES } from 'src/constants/notifications.ts';
+import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue'
 
 const { getProjectRole, getWsRole } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
