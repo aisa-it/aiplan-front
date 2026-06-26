@@ -65,6 +65,11 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
     case 'end_date':
       return `<span>изменил(-а) дату конца спринта ${sprintLink}<span/>`;
 
+    case 'sprint_folder':
+      const newVal = activity.new_value ? activity.new_value : "Без папки";
+      const oldVal = activity.old_value ? activity.old_value : "Без папки";
+      return `<span>изменил(-а) папку спринта ${sprintLink} с "${oldVal}" на "${newVal}"<span/>`;
+        
     default:
       break;
   }

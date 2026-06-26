@@ -53,15 +53,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Проекты</div>
-              <NavPopupProjects />
-            </q-menu>
+            <NavPopupProjects />
           </q-item>
 
           <NavMenuProjects v-else :active="route.path.includes('projects')" />
@@ -86,15 +78,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Спринты</div>
-              <NavPopupSprints />
-            </q-menu>
+            <NavPopupSprints />
           </q-item>
 
           <NavSprints v-else :active="route.path.includes('sprints')" />
@@ -117,15 +101,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Формы</div>
-              <NavPopupForms />
-            </q-menu>
+            <NavPopupForms />
           </q-item>
 
           <NavMenuForms v-else :active="route.path.includes('forms')" />

@@ -539,7 +539,10 @@ watch(
   top: 50px;
   z-index: 10;
   background-color: $bg-color;
-  border-radius: 0;
+}
+
+:deep(.html-editor__outer) {
+  flex-grow: 1;
 }
 
 .ny-theme :deep(.html-editor__toolbar) {
@@ -554,5 +557,9 @@ watch(
     height: 80px;
     background-color: $bg-color;
   }
+}
+
+.issue-panel__layout {
+  max-width: 99%;
 }
 </style>
