@@ -67,6 +67,7 @@ export default route(function (/* { store, ssrContext } */) {
       to.fullPath === '/' ||
       to.fullPath === '/signin' ||
       to.fullPath === '/signup' ||
+      to.path === '/onboarding' ||
       to.fullPath === '/#/' ||
       to.fullPath.includes('/f/')
     )
