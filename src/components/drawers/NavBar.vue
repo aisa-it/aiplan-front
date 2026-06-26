@@ -48,18 +48,14 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Проекты</div>
-              <NavPopupProjects />
-            </q-menu>
+            <NavPopupProjects />
           </q-item>
-
-          <q-item :active="route.name === 'sprints'" clickable v-ripple>
+          <q-item
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
+            :active="route.name === 'sprints'"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <SprintIcon
                 :color="
@@ -74,18 +70,15 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Спринты</div>
-              <NavPopupSprints />
-            </q-menu>
+            <NavPopupSprints />
           </q-item>
 
-          <q-item :active="route.path.includes('/forms')" clickable v-ripple>
+          <q-item
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
+            :active="route.path.includes('/forms')"
+            clickable
+            v-ripple
+          >
             <q-item-section avatar>
               <MenuFormsIcon
                 :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''"
@@ -98,15 +91,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Формы</div>
-              <NavPopupForms />
-            </q-menu>
+            <NavPopupForms />
           </q-item>
 
           <q-item
@@ -202,6 +187,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { SUCCESS_UPDATE_DATA } from 'src/constants/notifications';
+import { useRolesStore } from 'src/stores/roles-store';
 
 // icons
 import HomeIcon from '../icons/HomeIcon.vue';
@@ -230,6 +216,7 @@ const router = useRouter();
 const route = useRoute();
 
 const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
 
 const isHelpOpen = ref(false);
 const isFeedbackOpen = ref(false);
@@ -281,7 +268,7 @@ const onSuccess = (msg?: string) => {
 };
 
 const workspaceStore = useWorkspaceStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
 onMounted(() => {
   if (currentWorkspaceSlug.value) {
