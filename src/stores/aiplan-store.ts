@@ -139,7 +139,11 @@ export const useAiplanStore = defineStore('aiplan', {
         this.me = data;
         if (!data.is_onboarded) return this.router.replace('/onboarding');
 
-        const url = LocalStorage.getItem('next_url') || '/';
+        const nextUrl = LocalStorage.getItem('next_url');
+        const url =
+          typeof nextUrl === 'string' && nextUrl.startsWith('/onboarding')
+            ? '/'
+            : (nextUrl ?? '/');
         this.router.replace(url as string);
       });
     },
