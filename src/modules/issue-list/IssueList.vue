@@ -65,7 +65,7 @@ const { user } = storeToRefs(userStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
-const load = async () => {
+const load = async (signal?: AbortSignal) => {
   if (isCalendar.value) {
     issuesLoader.value = false;
     return;
@@ -74,9 +74,9 @@ const load = async () => {
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
-    await onRequest();
+    await onRequest(undefined, signal);
   } else if (isGroupingEnabled.value === true) {
-    await getGroupedIssues();
+    await getGroupedIssues(signal);
   }
   issuesLoader.value = false;
 };
@@ -87,14 +87,22 @@ onMounted(async () => {
   await load();
 });
 
+let controller: AbortController | null = null;
+
 watch(
   () => refreshIssues.value,
-  async () => {
-    if (isCalendar.value) return;
-    if (refreshIssues.value === true) {
-      refreshIssues.value = false;
-      await load();
-    }
+  async (value) => {
+    if (!value || isCalendar.value) return;
+
+    refreshIssues.value = false;
+
+    controller?.abort();
+
+    controller = new AbortController();
+
+    try {
+      await load(controller.signal);
+    } catch {}
   },
 );
 const components = {

@@ -20,7 +20,7 @@ export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
     };
   });
 
-  async function onRequest(pagination?: IQuery) {
+  async function onRequest(pagination?: IQuery, signal?: AbortSignal) {
     if (pagination) {
       pagination.order_by = pagination.order_by ?? 'sequence_id';
     }
@@ -37,6 +37,7 @@ export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
     const response = await getIssue(
       filters,
       pagination || defineIssuesPagination.value,
+      signal,
     );
     issuesStore.ungroupedIssueList = response?.data;
     return response;
