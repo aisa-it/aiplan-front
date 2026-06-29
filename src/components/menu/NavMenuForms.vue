@@ -1,5 +1,5 @@
 <template>
-  <ExpansionItem v-if="forms?.length" full-open itemName="forms">
+  <ExpansionItem full-open itemName="forms">
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
@@ -93,7 +93,7 @@ const workspaceStore = useWorkspaceStore();
 const $q = useQuasar();
 
 const { forms } = storeToRefs(formStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceSummary } = storeToRefs(workspaceStore);
 
 const isOpenEditingForm = ref(false);
 const isOpenDeletingForm = ref(false);
@@ -142,10 +142,13 @@ const getFormMenuItems = (form: IForms) => {
 };
 
 watch(
-  () => workspaceStore.workspaceSummary?.forms,
+  () => workspaceSummary.value?.forms,
   (newVal) => {
     formStore.forms = newVal ?? [];
   },
-  { immediate: true },
+  {
+    immediate: true,
+    deep: true,
+   },
 );
 </script>
