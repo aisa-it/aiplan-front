@@ -149,8 +149,8 @@ watch(
   () => refreshIssues.value,
   async () => {
     if (refreshIssues.value === true) {
-      await load();
       refreshIssues.value = false;
+      await load();
     }
   },
 );

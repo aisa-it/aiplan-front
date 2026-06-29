@@ -92,8 +92,8 @@ watch(
   async () => {
     if (isCalendar.value) return;
     if (refreshIssues.value === true) {
-      await load();
       refreshIssues.value = false;
+      await load();
     }
   },
 );
