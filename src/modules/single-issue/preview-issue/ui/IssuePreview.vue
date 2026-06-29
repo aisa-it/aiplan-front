@@ -93,6 +93,7 @@
 
   <Teleport to="body">
     <div
+      v-if="model"
       class="handle-resize"
       :style="{ left: `calc(100vw - ${adaptiveWidth}px)` }"
       @pointerdown="onPointerDown"
