@@ -528,7 +528,7 @@ const getLeadOptions = async () => {
         return {
           ...member,
           label: `${member.member?.last_name} ${member.member?.first_name}`,
-          value: member.member.id,
+          value: member.member?.id || member.member_id,
         };
       });
   });
