@@ -34,12 +34,18 @@
 import { LocalStorage, Screen, useQuasar } from 'quasar';
 import { computed, ref, toRefs, watch } from 'vue';
 
+// services
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+
 // components
 import NavMenu from 'components/NavMenu.vue';
 import { useRoute } from 'vue-router';
 import { useUIStore } from 'src/stores/ui-store';
 import { storeToRefs } from 'pinia';
 import { useDrawerResize } from 'src/composables/useDrawerResize';
+
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const emits = defineEmits<{
   'update:drawer-open': [value: boolean];
@@ -150,6 +156,12 @@ watch(
 
 watch(adaptiveWidth, (width) => {
   if (leftDrawerOpen.value) menuSidebarWidth.value = width;
+});
+
+watch(currentWorkspaceSlug, (newSlug) => {
+  if (newSlug) {
+    workspaceStore.getWorkspaceSummary(newSlug);
+  }
 });
 </script>
 

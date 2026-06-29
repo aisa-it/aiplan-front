@@ -49,12 +49,8 @@
 
             <NavPopupProjects />
           </q-item>
-
           <q-item
-            v-if="
-              workspaceInfo &&
-              hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')
-            "
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
             :active="route.name === 'sprints'"
             clickable
             v-ripple
@@ -77,10 +73,7 @@
           </q-item>
 
           <q-item
-            v-if="
-              workspaceInfo &&
-              hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')
-            "
+            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
             :active="route.path.includes('/forms')"
             clickable
             v-ripple

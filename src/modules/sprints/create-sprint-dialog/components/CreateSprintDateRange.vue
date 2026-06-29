@@ -6,6 +6,8 @@
     :model-value="`${localRange.from}-${localRange.to}`"
     @update:model-value="onInputChange"
     mask="##.##.####-##.##.####"
+    clearable
+    @clear="clearRange"
   >
     <template v-slot:append>
       <q-icon name="event" class="cursor-pointer">
@@ -37,10 +39,10 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const props = defineProps<{
-  modelValue: { from: string; to: string };
+  modelValue: { from: string | null; to: string | null };
 }>();
 const emits = defineEmits<{
-  'update:modelValue': [{ from: string; to: string }];
+  'update:modelValue': [{ from: string | null; to: string | null }];
 }>();
 
 const minDate = dayjs().tz('UTC').format('DD.MM.YYYY');
@@ -59,12 +61,16 @@ const localRange = computed({
     }
 
     return {
-      from: val?.from ?? '',
-      to: val?.to ?? '',
+      from: val?.from ?? null,
+      to: val?.to ?? null,
     };
   },
   set: (val) => emits('update:modelValue', val),
 });
+
+const clearRange = () => {
+  localRange.value = { from: null, to: null };
+};
 
 function onInputChange(value: string | number | null) {
   const input = String(value ?? '');

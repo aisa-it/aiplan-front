@@ -178,11 +178,12 @@ export const useSprintStore = defineStore('sprint-store', {
       sprintSlug: string,
       filters?: TypesIssuesListFilters,
       query?: IQuery,
+      signal?: AbortSignal,
     ) {
       return api.post(
         `/api/auth/workspaces/${wsSlug}/sprints/${sprintSlug}/issues/search/`,
         { ...filters },
-        { params: query },
+        { params: query, signal },
       );
     },
 
