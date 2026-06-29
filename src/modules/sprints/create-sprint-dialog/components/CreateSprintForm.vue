@@ -28,10 +28,10 @@
             label="Выберите наблюдателя"
             class="col centered-horisontally"
             @update:watchers="
-                (val) => {
-                  return (watchers = val);
-                }
-              "
+              (val) => {
+                return (watchers = val);
+              }
+            "
           />
         </div>
 
@@ -72,10 +72,10 @@
             :folder="folder"
             class="col centered-horisontally"
             @update:folder="
-                (val) => {
-                  return (folder = val);
-                }
-              "
+              (val) => {
+                return (folder = val);
+              }
+            "
           />
         </div>
       </div>
@@ -149,7 +149,7 @@ import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
 import SelectSprintIssues from './SelectSprintIssues.vue';
-import CreateFolderDialog from 'src/modules/sprints/create-folder-dialog/CreateFolderDialog.vue'
+import CreateFolderDialog from 'src/modules/sprints/create-folder-dialog/CreateFolderDialog.vue';
 
 import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
 import FolderIcon from 'src/components/icons/FolderIcon.vue';
@@ -189,10 +189,10 @@ const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
   props.defaultProps?.watchers?.map((watcher) => ({
     member: watcher,
-  })) || []
+  })) || [],
 );
 const folder = ref<DtoSprintFolder | undefined>(
-  props.defaultProps?.sprint_folder
+  props.defaultProps?.sprint_folder,
 );
 
 const refreshSprints = async () => {
@@ -212,6 +212,8 @@ const dateRange = ref({
 });
 
 const dateError = computed(() => {
+  if (!dateRange.value.from && !dateRange.value.to) return '';
+
   const from = toISO(dateRange.value.from);
   const to = toISO(dateRange.value.to);
 
@@ -275,10 +277,9 @@ const removeAndAddWatcher = () => {
   }
 
   const remove =
-    props.defaultProps?.watchers?.filter(
-      (el) => !watchersIds.some((i) => i === el.id),
-    ).map((el) => el.id) ?? [];
-
+    props.defaultProps?.watchers
+      ?.filter((el) => !watchersIds.some((i) => i === el.id))
+      .map((el) => el.id) ?? [];
 
   return {
     remove: remove,
@@ -304,8 +305,8 @@ const pushData = () => {
     createSprintData: {
       name: sprintName.value,
       description: description.value,
-      start_date: toISO(dateRange.value.from),
-      end_date: toISO(dateRange.value.to),
+      start_date: toISO(dateRange.value.from) ?? undefined,
+      end_date: toISO(dateRange.value.to) ?? undefined,
       sprint_folder_id: folder.value?.id || ROOT_FOLDER_ID,
     },
     issuesSprint: { issues_add: addIssues, issues_remove: removeIssues },
@@ -325,9 +326,10 @@ watch(
     if (!props.defaultProps) return;
 
     sprintName.value = props.defaultProps?.name ?? '';
-    watchers.value = props.defaultProps?.watchers?.map((watcher) => ({
-    member: watcher,
-  })) || [];
+    watchers.value =
+      props.defaultProps?.watchers?.map((watcher) => ({
+        member: watcher,
+      })) || [];
     folder.value = props.defaultProps?.sprint_folder;
 
     dateRange.value = {

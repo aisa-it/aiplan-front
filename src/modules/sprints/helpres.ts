@@ -2,7 +2,11 @@ const formatDate = (date: string) => {
   return `${date.slice(8, 10)}.${date.slice(5, 7)}`;
 };
 
-export const getSprintDates = (start_date: string, end_date: string) => {
+export const getSprintDates = (
+  start_date: string | undefined,
+  end_date: string | undefined,
+) => {
+  if (!start_date || !end_date) return '';
   return `(${formatDate(start_date)} - ${formatDate(end_date)})`;
 };
 
