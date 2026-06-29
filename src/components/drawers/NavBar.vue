@@ -73,14 +73,7 @@
           </q-item>
 
           <q-item
-<<<<<<< HEAD
             v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
-=======
-            v-if="
-              workspaceInfo &&
-              hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')
-            "
->>>>>>> dev
             :active="route.path.includes('/forms')"
             clickable
             v-ripple
