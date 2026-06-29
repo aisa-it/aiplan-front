@@ -44,7 +44,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     };
   }
 
-  async function getGroupedIssues() {
+  async function getGroupedIssues(signal?: AbortSignal) {
     const quasarPagination: QuasarPagination = {
       page: 1,
       rowsNumber: 0,
@@ -66,7 +66,11 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await getIssue(filters, parsePagination(quasarPagination));
+    const response = await getIssue(
+      filters,
+      parsePagination(quasarPagination),
+      signal,
+    );
 
     issuesStore.groupedIssueList = response?.data.issues;
     issuesStore.groupByIssues = response?.data.group_by;

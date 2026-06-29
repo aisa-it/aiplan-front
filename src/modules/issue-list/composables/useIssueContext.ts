@@ -41,12 +41,14 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
     const getIssue = async (
       filters: TypesIssuesListFilters,
       pagination: IQuery,
+      signal?: AbortSignal,
     ) => {
       const response = await issuesStore.getIssuesTable(
         route.params.workspace as string,
         route.params.project as string,
         filters,
         pagination,
+        signal,
       );
       return response;
     };
@@ -94,12 +96,14 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
     const getIssue = async (
       filters: TypesIssuesListFilters,
       pagination: IQuery,
+      signal?: AbortSignal,
     ) => {
       const response = await store.getIssueList(
         route.params.workspace as string,
         route.params.sprint as string,
         filters,
         pagination,
+        signal,
       );
       return response;
     };
