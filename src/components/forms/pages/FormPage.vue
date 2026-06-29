@@ -362,7 +362,7 @@ const submitForm = async () => {
       {
         formSlug: route.params.slug,
         workspaceSlug: route.params.workspaceSlug,
-        emptyUserAllowed: !onlyAuth.value,
+        emptyUserAllowed: useAuth.value ? false : true,
       },
       isFieldVisible,
     );
