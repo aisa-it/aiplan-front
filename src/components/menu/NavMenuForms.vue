@@ -3,7 +3,10 @@
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
-          <MenuFormsIcon :is-dark="$q.dark.isActive" />
+          <MenuFormsIcon
+            :is-dark="$q.dark.isActive"
+            :color="active ? '#3f75ff' : ''"
+          />
         </q-item-section>
         <q-item-section>Формы</q-item-section>
         <q-btn
@@ -56,7 +59,7 @@
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -80,6 +83,10 @@ import MenuActions from './MenuActions.vue';
 import { IForms } from 'src/interfaces/forms';
 import MenuFormsIcon from '../icons/MenuFormsIcon.vue';
 import { useQuasar } from 'quasar';
+
+const props = defineProps<{
+  active?: boolean;
+}>();
 
 const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
@@ -133,4 +140,12 @@ const getFormMenuItems = (form: IForms) => {
     },
   ];
 };
+
+watch(
+  () => workspaceStore.workspaceSummary?.forms,
+  (newVal) => {
+    formStore.forms = newVal ?? [];
+  },
+  { immediate: true },
+);
 </script>

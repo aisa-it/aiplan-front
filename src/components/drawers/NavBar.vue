@@ -10,7 +10,6 @@
     @mouseenter="isBtnShow = true"
     @mouseleave="isBtnShow = false"
     @before-show="updateClientWidth"
-    @mini-state="saveState"
   >
     <div class="column full-height">
       <q-scroll-area class="col" :horizontal-thumb-style="{ opacity: 0 }">
@@ -48,15 +47,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Проекты</div>
-              <NavPopupProjects />
-            </q-menu>
+            <NavPopupProjects />
           </q-item>
           <q-item
             v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
@@ -78,19 +69,18 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Спринты</div>
-              <NavPopupSprints />
-            </q-menu>
+            <NavPopupSprints />
           </q-item>
 
           <q-item
+<<<<<<< HEAD
             v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
+=======
+            v-if="
+              workspaceInfo &&
+              hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')
+            "
+>>>>>>> dev
             :active="route.path.includes('/forms')"
             clickable
             v-ripple
@@ -107,15 +97,7 @@
               <q-icon name="expand_more" size="16px" />
             </q-item-section>
 
-            <q-menu
-              anchor="top end"
-              self="top start"
-              :offset="[8, 0]"
-              max-height="70vh"
-            >
-              <div class="nav-popup__section-title">Формы</div>
-              <NavPopupForms />
-            </q-menu>
+            <NavPopupForms />
           </q-item>
 
           <q-item
@@ -195,14 +177,7 @@
 
 <script setup lang="ts">
 // core
-import {
-  computed,
-  onBeforeMount,
-  onUnmounted,
-  ref,
-  onMounted,
-  watch,
-} from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
@@ -230,10 +205,18 @@ import NavBarHelpList from './NavBarHelpList.vue';
 import NavPopupProjects from 'src/components/nav-popups/NavPopupProjects.vue';
 import NavPopupSprints from 'src/components/nav-popups/NavPopupSprints.vue';
 import NavPopupForms from 'src/components/nav-popups/NavPopupForms.vue';
+
 import { useDrawerResize } from 'src/composables/useDrawerResize';
 
+const props = defineProps<{
+  miniState: boolean;
+}>();
+
+const emits = defineEmits<{
+  'update:miniState': [boolean];
+}>();
+
 const $q = useQuasar();
-const miniState = ref(false);
 const drawer = ref(true);
 
 const router = useRouter();
@@ -248,7 +231,6 @@ const isReleaseOpen = ref(false);
 const isBtnShow = ref(false);
 
 const ACTIVE_ICON_COLOR = '#3f75ff';
-const STORAGE_KEY = 'isMiniState';
 const DEFAULT_WIDTH = 270;
 
 const clientWidth = ref(document.documentElement.clientWidth);
@@ -267,21 +249,7 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   'left',
 );
 
-const onDrawerBtnClick = () => (miniState.value = !miniState.value);
-
-const syncDrawerFromStorage = (e: StorageEvent) => {
-  if (e.key === STORAGE_KEY) {
-    try {
-      miniState.value = JSON.parse(e.newValue as string);
-    } catch {
-      miniState.value = false;
-    }
-  }
-};
-
-const saveState = () => {
-  localStorage.setItem(STORAGE_KEY, String(miniState.value));
-};
+const onDrawerBtnClick = () => emits('update:miniState', !props.miniState);
 
 const onSuccess = (msg?: string) => {
   setNotificationView({
@@ -304,16 +272,6 @@ watch(currentWorkspaceSlug, (newSlug) => {
   if (newSlug) {
     workspaceStore.getWorkspaceSummary(newSlug);
   }
-});
-
-onBeforeMount(() => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  miniState.value = stored ? JSON.parse(stored) : true;
-  window.addEventListener('storage', syncDrawerFromStorage);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('storage', syncDrawerFromStorage);
 });
 </script>
 
