@@ -1,7 +1,10 @@
 <template>
   <div class="horizontal-scroll-enable board-wrapper">
-    <div v-for="(table, index) in defineIssues" :key="index">
+    <div v-for="(table, index) in props.issues" :key="index">
+      <!-- Не менять v-show на v-if это связанно с handleUpdateIssueTable -->
+      <!-- Иначе компонент не подпишется на updateIssueTable и не сможет получить задачи если в него их переведут -->
       <BoardCardList
+        v-show="table.count > 0 || showEmptyGroups"
         :table="table"
         :group-by="groupBy"
         :context-type="contextType"
@@ -46,11 +49,7 @@ const refreshTable = (index: number, pagination, entity) => {
   emits('refreshCard', index, pagination, entity);
 };
 
-const defineIssues = computed(() => {
-  return !contextProps.value?.showEmptyGroups
-    ? props.issues.filter((table) => table.issues?.length)
-    : props.issues;
-});
+const showEmptyGroups = computed(() => { return contextProps.value?.showEmptyGroups });
 </script>
 
 <style scoped lang="scss">
