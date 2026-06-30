@@ -147,7 +147,7 @@ onMounted(async () => {
 const refreshSprints = async () => {
   await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
   sprints.value =
-    sprintStore.sprintsList.map((folder) => folder.sprints).flat() ?? [];
+    sprintStore.sprintsList.map((folder) => folder.sprints || []).flat() ?? [];
 };
 
 const reopen = async (id: string) => {
