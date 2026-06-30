@@ -201,15 +201,27 @@ const refreshSprints = async () => {
   );
 };
 
-const dateRange = ref({
-  from: props.defaultProps?.start_date
-    ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
-    : dayjs.utc().format('DD.MM.YYYY'),
+const createDefaultDate = () => {
+  if (
+    props.defaultProps?.id &&
+    !(props.defaultProps?.start_date && props.defaultProps?.end_date)
+  )
+    return { from: undefined, to: undefined };
 
-  to: props.defaultProps?.end_date
-    ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
-    : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
-});
+  if (props.defaultProps?.start_date && props.defaultProps?.end_date) {
+    return {
+      from: dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY'),
+      to: dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY'),
+    };
+  }
+
+  return {
+    from: dayjs.utc().format('DD.MM.YYYY'),
+    to: dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
+  };
+};
+
+const dateRange = ref(createDefaultDate());
 
 const dateError = computed(() => {
   if (!dateRange.value.from && !dateRange.value.to) return '';
@@ -287,6 +299,15 @@ const removeAndAddWatcher = () => {
   };
 };
 
+const createDateForSprintData = (date: string | undefined) => {
+  if (!date) {
+    if (props.defaultProps) return null;
+    else return undefined;
+  }
+
+  return toISO(date);
+};
+
 const pushData = () => {
   const isValidName = nameRef.value.validate();
 
@@ -305,8 +326,8 @@ const pushData = () => {
     createSprintData: {
       name: sprintName.value,
       description: description.value,
-      start_date: toISO(dateRange.value.from) ?? undefined,
-      end_date: toISO(dateRange.value.to) ?? undefined,
+      start_date: createDateForSprintData(dateRange.value.from),
+      end_date: createDateForSprintData(dateRange.value.to),
       sprint_folder_id: folder.value?.id || ROOT_FOLDER_ID,
     },
     issuesSprint: { issues_add: addIssues, issues_remove: removeIssues },
@@ -332,15 +353,7 @@ watch(
       })) || [];
     folder.value = props.defaultProps?.sprint_folder;
 
-    dateRange.value = {
-      from: props.defaultProps?.start_date
-        ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
-        : dayjs.utc().format('DD.MM.YYYY'),
-
-      to: props.defaultProps?.end_date
-        ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
-        : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
-    };
+    dateRange.value = createDefaultDate();
 
     description.value = props.defaultProps?.description ?? '';
   },
