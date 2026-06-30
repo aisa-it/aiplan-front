@@ -95,7 +95,10 @@ const { ny } = storeToRefs(utilsStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
+let currentRequestId = 0;
+
 const load = async (signal?: AbortSignal) => {
+  const requestId = ++currentRequestId;
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
@@ -104,7 +107,9 @@ const load = async (signal?: AbortSignal) => {
     await getGroupedIssues(signal);
   }
 
-  issuesLoader.value = false;
+  if (requestId === currentRequestId) {
+    issuesLoader.value = false;
+  }
 };
 
 const updateSprint = async () => {
