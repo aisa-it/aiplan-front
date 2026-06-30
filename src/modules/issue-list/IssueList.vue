@@ -65,7 +65,11 @@ const { user } = storeToRefs(userStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
+let currentRequestId = 0;
+
 const load = async (signal?: AbortSignal) => {
+  const requestId = ++currentRequestId;
+
   if (isCalendar.value) {
     issuesLoader.value = false;
     return;
@@ -78,7 +82,10 @@ const load = async (signal?: AbortSignal) => {
   } else if (isGroupingEnabled.value === true) {
     await getGroupedIssues(signal);
   }
-  issuesLoader.value = false;
+
+  if (requestId === currentRequestId) {
+    issuesLoader.value = false;
+  }
 };
 
 onMounted(async () => {

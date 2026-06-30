@@ -72,20 +72,20 @@ import { useSortable } from 'src/composables/useSortable';
 import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
 
 //stores
-import { useUtilsStore } from 'src/stores/utils-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 //utils
 import { isDev } from 'src/utils/helpers';
 
+//types
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
+
 // components
 import NavMenuProjects from './menu/NavMenuProjects.vue';
 import NavMenuForms from './menu/NavMenuForms.vue';
 import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
-import NavMenuAIDocs from './menu/NavMenuAIDocs.vue';
 import NavSprints from './menu/NavSprints.vue';
-import NavMenuConferencesDemo from './menu/NavMenuConferencesDemo.vue';
 
 import HomeIcon from './icons/HomeIcon.vue';
 import AIDocIcon from './icons/AIDocIcon.vue';
@@ -95,9 +95,7 @@ const route = useRoute();
 const router = useRouter();
 
 //stores
-const utilsStore = useUtilsStore();
 const workspaceStore = useWorkspaceStore();
-const { isDemo } = storeToRefs(utilsStore);
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //composables
@@ -110,18 +108,12 @@ const itemRefs = ref<Record<string, any>>({});
 const isAIDoc = computed(() => route.fullPath.includes('aidoc'));
 
 //consts
-const defaultOrder = [
-  'sprints',
-  'projects',
-  'forms',
-  'favorites',
-  'docs',
-  'jitsi',
-  'conferences',
-  'help',
-];
-const ORDER_KEY = `${route.params.workspace}_menuOrder`;
-const savedOrder = LocalStorage.getItem<string[]>(ORDER_KEY) || [];
+const defaultOrder = ['projects', 'sprints', 'forms'];
+const OLD_ORDER_KEY = `${route.params.workspace}_menuOrder`;
+const ORDER_KEY = computed(() => `${route.params.workspace}_menu`);
+const savedOrder = computed(
+  () => LocalStorage.getItem<string[]>(ORDER_KEY.value) || [],
+);
 
 // sortable integration
 const { initSortable } = useSortable(menuRef, {
@@ -136,12 +128,13 @@ const { initSortable } = useSortable(menuRef, {
   onEnd: async ({ oldIndex, newIndex }) => {
     if (oldIndex == null || newIndex == null || oldIndex === newIndex) return;
 
-    const movedItem = visibleItems.value[oldIndex];
+    const movedItem = visibleItems.value[oldIndex - 1];
+
     if (!movedItem) return;
 
     const visibleListIds = visibleItems.value.map((i) => i.id);
-    visibleListIds.splice(oldIndex, 1);
-    visibleListIds.splice(newIndex, 0, movedItem.id);
+    visibleListIds.splice(oldIndex - 1, 1);
+    visibleListIds.splice(newIndex - 1, 0, movedItem.id);
 
     const newFullOrder: string[] = [];
     let vIndex = 0;
@@ -156,9 +149,10 @@ const { initSortable } = useSortable(menuRef, {
         newFullOrder.push(id);
       }
     }
+
     currentOrder.value = newFullOrder;
 
-    LocalStorage.set(ORDER_KEY, currentOrder.value);
+    LocalStorage.set(ORDER_KEY.value, currentOrder.value);
   },
 });
 
@@ -173,42 +167,35 @@ const itemsMap: Record<
     isLocked?: boolean;
   }
 > = {
+  projects: {
+    id: 'projects',
+    component: markRaw(NavMenuProjects),
+    condition: () => !isAIDoc.value,
+  },
   sprints: {
     id: 'sprints',
     component: markRaw(NavSprints),
     condition: () =>
       !isAIDoc.value &&
       !!currentWorkspaceSlug.value &&
-      hasPermissionByWorkspace(workspaceInfo?.value, 'show-sprints-nav'),
-  },
-  projects: {
-    id: 'projects',
-    component: markRaw(NavMenuProjects),
-    condition: () => !isAIDoc.value,
+      hasPermissionByWorkspace(
+        workspaceInfo?.value as DtoWorkspace,
+        'show-sprints-nav',
+      ),
   },
   forms: {
     id: 'forms',
     component: markRaw(NavMenuForms),
-    condition: () => !isAIDoc.value,
+    condition: () =>
+      !isAIDoc.value &&
+      !!currentWorkspaceSlug.value &&
+      hasPermissionByWorkspace(workspaceInfo?.value, 'show-forms-nav'),
   },
-  favorites: {
-    id: 'favorites',
-    component: markRaw(NavMenuAIDocs),
-    props: { filterBy: 'favorites' },
-    listeners: { updateFavoriteState },
-    condition: () => !!(isAIDoc.value && currentWorkspaceSlug.value),
-  },
-  docs: {
-    id: 'docs',
-    component: markRaw(NavMenuAIDocs),
-    props: { filterBy: 'docs' },
-    condition: () => !!(isAIDoc.value && currentWorkspaceSlug.value),
-  },
-  conferences: {
-    id: 'conferences',
-    component: markRaw(NavMenuConferencesDemo),
-    condition: () => isDemo.value,
-  },
+  // conferences: {
+  //   id: 'conferences',
+  //   component: markRaw(NavMenuConferencesDemo),
+  //   condition: () => isDemo.value,
+  // },
 };
 
 const HelpItem = {
@@ -218,21 +205,26 @@ const HelpItem = {
   isLocked: true,
 };
 
-const mergedOrder = [...savedOrder];
-defaultOrder.forEach((id) => {
-  if (!mergedOrder.includes(id)) {
-    const helpIndex = mergedOrder.indexOf('help');
-    if (helpIndex >= 0) {
-      mergedOrder.splice(helpIndex, 0, id);
-    } else {
-      mergedOrder.push(id);
+const mergedOrder = computed(() => {
+  const merged = [...savedOrder.value];
+  defaultOrder.forEach((id) => {
+    if (!merged.includes(id)) {
+      const helpIndex = merged.indexOf('help');
+      if (helpIndex >= 0) {
+        merged.splice(helpIndex, 0, id);
+      } else {
+        merged.push(id);
+      }
     }
-  }
+  });
+  return merged;
 });
 
-const validOrderSpy = mergedOrder.filter((id) => itemsMap[id]);
+const validOrderSpy = computed(() =>
+  mergedOrder.value.filter((id) => itemsMap[id]),
+);
 const currentOrder = ref<string[]>(
-  validOrderSpy.length ? validOrderSpy : defaultOrder,
+  validOrderSpy.value.length ? validOrderSpy.value : defaultOrder,
 );
 
 const visibleItems = computed(() => {
@@ -245,11 +237,11 @@ const setItemRef = (id: string, el: any) => {
   if (el) itemRefs.value[id] = el;
 };
 
-function updateFavoriteState(id: string, state: boolean) {
-  if (itemRefs.value['docs']) {
-    itemRefs.value['docs'].setFavoriteState(id, state);
-  }
-}
+watch(validOrderSpy, (newValidOrderSpy) => {
+  currentOrder.value = newValidOrderSpy.length
+    ? newValidOrderSpy
+    : defaultOrder;
+});
 
 watch(
   () => visibleItems.value.length,
@@ -261,6 +253,9 @@ watch(
 
 onMounted(async () => {
   await initSortable();
+
+  // очистка старого порядка меню у старых пользователей 30.06.26, можно убрать когда пройдет некоторое время
+  LocalStorage.removeItem(OLD_ORDER_KEY);
 });
 
 const fixedHeightItems = ['help', 'jitsi'];
