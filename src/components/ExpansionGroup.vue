@@ -79,6 +79,9 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 //utils
 import { isDev } from 'src/utils/helpers';
 
+//types
+import { DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
+
 // components
 import NavMenuProjects from './menu/NavMenuProjects.vue';
 import NavMenuForms from './menu/NavMenuForms.vue';
@@ -179,7 +182,7 @@ const itemsMap: Record<
     condition: () =>
       !isAIDoc.value &&
       !!currentWorkspaceSlug.value &&
-      hasPermissionByWorkspace(workspaceInfo?.value, 'show-sprints-nav'),
+      hasPermissionByWorkspace(workspaceInfo?.value as DtoWorkspace, 'show-sprints-nav'),
   },
   projects: {
     id: 'projects',
@@ -189,7 +192,7 @@ const itemsMap: Record<
   forms: {
     id: 'forms',
     component: markRaw(NavMenuForms),
-    condition: () => !isAIDoc.value,
+    condition: () => !isAIDoc.value && hasPermissionByWorkspace(workspaceInfo?.value as DtoWorkspace, 'show-forms-nav'),
   },
   favorites: {
     id: 'favorites',
