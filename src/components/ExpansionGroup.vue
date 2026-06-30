@@ -205,21 +205,26 @@ const HelpItem = {
   isLocked: true,
 };
 
-const mergedOrder = [...savedOrder.value];
-defaultOrder.forEach((id) => {
-  if (!mergedOrder.includes(id)) {
-    const helpIndex = mergedOrder.indexOf('help');
-    if (helpIndex >= 0) {
-      mergedOrder.splice(helpIndex, 0, id);
-    } else {
-      mergedOrder.push(id);
+const mergedOrder = computed(() => {
+  const merged = [...savedOrder.value];
+  defaultOrder.forEach((id) => {
+    if (!merged.includes(id)) {
+      const helpIndex = merged.indexOf('help');
+      if (helpIndex >= 0) {
+        merged.splice(helpIndex, 0, id);
+      } else {
+        merged.push(id);
+      }
     }
-  }
+  });
+  return merged;
 });
 
-const validOrderSpy = mergedOrder.filter((id) => itemsMap[id]);
+const validOrderSpy = computed(() =>
+  mergedOrder.value.filter((id) => itemsMap[id]),
+);
 const currentOrder = ref<string[]>(
-  validOrderSpy.length ? validOrderSpy : defaultOrder,
+  validOrderSpy.value.length ? validOrderSpy.value : defaultOrder,
 );
 
 const visibleItems = computed(() => {
@@ -231,6 +236,12 @@ const visibleItems = computed(() => {
 const setItemRef = (id: string, el: any) => {
   if (el) itemRefs.value[id] = el;
 };
+
+watch(validOrderSpy, (newValidOrderSpy) => {
+  currentOrder.value = newValidOrderSpy.length
+    ? newValidOrderSpy
+    : defaultOrder;
+});
 
 watch(
   () => visibleItems.value.length,
