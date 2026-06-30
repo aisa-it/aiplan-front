@@ -250,9 +250,10 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   // Сценарий с обычной вставкой
   if (!isInTable || !isSingleTableInHTML(fragment)) {
     event.preventDefault();
+
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+    const slice = parser.parseSlice(fragment);
+    dispatch(state.tr.replaceSelection(slice));
     return true;
   }
 
@@ -261,8 +262,8 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   if (!pastedTableEl) {
     event.preventDefault();
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+    const slice = parser.parseSlice(fragment);
+    dispatch(state.tr.replaceSelection(slice));
     return true;
   }
 
@@ -284,8 +285,8 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   // Если таблица не нашлась - обычная вставка
   if (tableDepth === -1) {
     const parser = DOMParser.fromSchema(schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+    const slice = parser.parseSlice(fragment);
+    dispatch(state.tr.replaceSelection(slice));
     return true;
   }
 
