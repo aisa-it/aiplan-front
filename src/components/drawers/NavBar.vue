@@ -32,68 +32,6 @@
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <!-- <q-item :active="route.name === 'projects'" clickable v-ripple>
-            <q-item-section avatar>
-              <MenuProjectsIcon
-                :color="
-                  route.path.includes('projects') ? ACTIVE_ICON_COLOR : ''
-                "
-              />
-            </q-item-section>
-
-            <q-item-section> Проекты </q-item-section>
-
-            <q-item-section side>
-              <q-icon name="expand_more" size="16px" />
-            </q-item-section>
-
-            <NavPopupProjects />
-          </q-item>
-
-          <q-item
-            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
-            :active="route.name === 'sprints'"
-            clickable
-            v-ripple
-          >
-            <q-item-section avatar>
-              <SprintIcon
-                :color="
-                  route.path.includes('sprints') ? ACTIVE_ICON_COLOR : ''
-                "
-              />
-            </q-item-section>
-
-            <q-item-section> Спринты </q-item-section>
-
-            <q-item-section side>
-              <q-icon name="expand_more" size="16px" />
-            </q-item-section>
-
-            <NavPopupSprints />
-          </q-item>
-
-          <q-item
-            v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
-            :active="route.path === 'forms'"
-            clickable
-            v-ripple
-          >
-            <q-item-section avatar>
-              <MenuFormsIcon
-                :color="route.path.includes('forms') ? ACTIVE_ICON_COLOR : ''"
-              />
-            </q-item-section>
-
-            <q-item-section> Формы </q-item-section>
-
-            <q-item-section side>
-              <q-icon name="expand_more" size="16px" />
-            </q-item-section>
-
-            <NavPopupForms />
-          </q-item> -->
-
           <q-item
             v-for="item in orderedItems"
             :key="item.id"
