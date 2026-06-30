@@ -32,7 +32,7 @@
             <q-item-section> Главная </q-item-section>
           </q-item>
 
-          <q-item :active="route.name === 'projects'" clickable v-ripple>
+          <!-- <q-item :active="route.name === 'projects'" clickable v-ripple>
             <q-item-section avatar>
               <MenuProjectsIcon
                 :color="
@@ -49,6 +49,7 @@
 
             <NavPopupProjects />
           </q-item>
+
           <q-item
             v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-sprints-nav')"
             :active="route.name === 'sprints'"
@@ -58,7 +59,7 @@
             <q-item-section avatar>
               <SprintIcon
                 :color="
-                  route.path.includes('/sprints') ? ACTIVE_ICON_COLOR : ''
+                  route.path.includes('sprints') ? ACTIVE_ICON_COLOR : ''
                 "
               />
             </q-item-section>
@@ -74,13 +75,13 @@
 
           <q-item
             v-if="workspaceInfo && hasPermissionByWorkspace(workspaceInfo, 'show-forms-nav')"
-            :active="route.path.includes('/forms')"
+            :active="route.path === 'forms'"
             clickable
             v-ripple
           >
             <q-item-section avatar>
               <MenuFormsIcon
-                :color="route.path.includes('/forms') ? ACTIVE_ICON_COLOR : ''"
+                :color="route.path.includes('forms') ? ACTIVE_ICON_COLOR : ''"
               />
             </q-item-section>
 
@@ -91,6 +92,29 @@
             </q-item-section>
 
             <NavPopupForms />
+          </q-item> -->
+
+          <q-item
+            v-for="item in orderedItems"
+            :key="item.id"
+            :active="route.path === item.id"
+            clickable
+            v-ripple
+          >
+            <q-item-section avatar>
+              <component
+                :is="item.icon"
+                :color="route.path.includes(item.id) ? ACTIVE_ICON_COLOR : ''"
+              />
+            </q-item-section>
+
+            <q-item-section> {{ item.name }} </q-item-section>
+
+            <q-item-section side>
+              <q-icon name="expand_more" size="16px" />
+            </q-item-section>
+
+            <component :is="item.component" />
           </q-item>
 
           <q-item
@@ -170,8 +194,8 @@
 
 <script setup lang="ts">
 // core
-import { computed, ref, onMounted, watch } from 'vue';
-import { Screen, useQuasar } from 'quasar';
+import { computed, ref, onMounted, watch, markRaw } from 'vue';
+import { LocalStorage, Screen, useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -226,6 +250,48 @@ const isBtnShow = ref(false);
 const ACTIVE_ICON_COLOR = '#3f75ff';
 const DEFAULT_WIDTH = 270;
 
+const defaultOrder = ['projects', 'sprints', 'forms'];
+const ORDER_KEY = computed(() => `${route.params.workspace}_menu`);
+const savedOrder = computed(
+  () => LocalStorage.getItem<string[]>(ORDER_KEY.value) || defaultOrder,
+);
+
+type MenuItem = {
+  id: string;
+  component: any;
+  icon: any;
+  name: string;
+  condition: () => boolean;
+};
+
+const itemsMap: Record<string, MenuItem> = {
+  projects: {
+    id: 'projects',
+    component: markRaw(NavPopupProjects),
+    icon: markRaw(MenuProjectsIcon),
+    name: 'Проекты',
+    condition: () => true,
+  },
+  sprints: {
+    id: 'sprints',
+    component: markRaw(NavPopupSprints),
+    icon: markRaw(SprintIcon),
+    name: 'Спринты',
+    condition: () =>
+      !!workspaceInfo.value &&
+      hasPermissionByWorkspace(workspaceInfo.value, 'show-sprints-nav'),
+  },
+  forms: {
+    id: 'forms',
+    component: markRaw(NavPopupForms),
+    icon: markRaw(MenuFormsIcon),
+    name: 'Формы',
+    condition: () =>
+      !!workspaceInfo.value &&
+      hasPermissionByWorkspace(workspaceInfo.value, 'show-forms-nav'),
+  },
+};
+
 const clientWidth = ref(document.documentElement.clientWidth);
 const isMobile = computed(() => {
   return $q.platform.is.mobile && Screen.lt.md;
@@ -254,6 +320,21 @@ const onSuccess = (msg?: string) => {
 
 const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
+
+const orderedItems = computed(() => {
+  const sortedItems = savedOrder.value
+    .map((key) => itemsMap[key])
+    .filter((item) => item !== undefined);
+
+  const remainingKeys = Object.keys(itemsMap).filter(
+    (key) => !savedOrder.value.includes(key),
+  );
+  const remainingItems = remainingKeys.map((key) => itemsMap[key]);
+
+  return [...sortedItems, ...remainingItems].filter((el) => {
+    return el.condition();
+  });
+});
 
 onMounted(() => {
   if (currentWorkspaceSlug.value) {
