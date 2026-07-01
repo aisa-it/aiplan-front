@@ -50,6 +50,7 @@ export interface IQuery {
   only_count?: boolean;
   only_pinned?: boolean;
   group_by?: string;
+  stream?: boolean;
 }
 
 export const useIssuesStore = defineStore('issues-store', {
