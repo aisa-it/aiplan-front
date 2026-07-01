@@ -73,6 +73,15 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       filters.states = contextProps?.value?.filters?.states;
     }
 
+    // const response = await getIssue(
+    //   filters,
+    //   parsePagination(quasarPagination),
+    //   signal,
+    // );
+
+    // issuesStore.groupedIssueList = response?.data.issues;
+    // issuesStore.groupByIssues = response?.data.group_by;
+
     const pagination = parsePagination(quasarPagination);
     issuesStore.groupByIssues = pagination.group_by ?? '';
     issuesStore.groupedIssueList = [];
@@ -87,14 +96,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         issuesLoader.value = false;
       }
     });
-    const response = await getIssue(
-      filters,
-      parsePagination(quasarPagination),
-      signal,
-    );
-
-    issuesStore.groupedIssueList = response?.data.issues;
-    issuesStore.groupByIssues = response?.data.group_by;
   }
 
   function defineFiltersByEntity(entity) {
