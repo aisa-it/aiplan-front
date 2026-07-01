@@ -1,13 +1,16 @@
 <template>
   <ExpansionItem
     full-open
-    :is-expanding="sprints.length > 0"
+    :is-open-disable="sprints.length === 0"
     itemName="sprints"
   >
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
-          <SprintIcon :is-dark="$q.dark.isActive" />
+          <SprintIcon
+            :is-dark="$q.dark.isActive"
+            :color="active ? '#3f75ff' : ''"
+          />
         </q-item-section>
         <q-item-section>Спринты</q-item-section>
         <MenuActions
@@ -45,7 +48,7 @@
               :stats="sprint.stats ?? {}"
             />
           </q-item-section>
-          <q-item-section>
+          <q-item-section class="sprint_name">
             <q-item-label class="abbriviated-text">
               {{ sprint.name }}
               {{
@@ -114,6 +117,10 @@ import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
 
+const props = defineProps<{
+  active?: boolean;
+}>();
+
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
@@ -134,12 +141,13 @@ const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
 onMounted(async () => {
-  if (!currentWorkspaceSlug.value) return;
-  refreshSprints();
+  sprints.value = workspaceStore.workspaceSummary?.sprints ?? [];
 });
 
 const refreshSprints = async () => {
-  sprints.value = sprintStore.sprintsList;
+  await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
+  sprints.value =
+    sprintStore.sprintsList.map((folder) => folder.sprints || []).flat() ?? [];
 };
 
 const reopen = async (id: string) => {
@@ -192,19 +200,30 @@ const headerMenuItems = computed(() => [
   {
     text: 'Создать спринт',
     icon: h(QIcon, { name: 'add' }),
-    onClick: () => { openCreateSprint.value = true },
+    onClick: () => {
+      openCreateSprint.value = true;
+    },
     show: canCreateSprint.value,
   },
   {
     text: 'Настроить уведомления',
     icon: BellIcon,
-    onClick: () => { openSprintNotifications.value = true; },
+    onClick: () => {
+      openSprintNotifications.value = true;
+    },
   },
 ]);
 
+watch(
+  () => workspaceStore.workspaceSummary?.sprints,
+  (newVal) => {
+    sprints.value = newVal ?? [];
+  },
+);
+
 watch(currentWorkspaceSlug, async (newValue) => {
   if (!newValue) return;
-  sprints.value = await sprintStore.getSprintsList(newValue as string);
+  refreshSprints();
 });
 
 watch(
@@ -217,3 +236,9 @@ watch(
   },
 );
 </script>
+
+<style lang="scss" scoped>
+.sprint_name {
+  width: 100px;
+}
+</style>

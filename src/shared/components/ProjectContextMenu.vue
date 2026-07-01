@@ -2,13 +2,14 @@
   <q-menu
     ref="menuRef"
     class="context-menu"
+    context-menu
     touch-position
     @hide="emit('resetContext')"
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
         v-if="
-          hasPermissionByProject(props.row as DtoProject, 'project-settings')
+          hasPermissionByProject(props.project as DtoProject, 'project-settings')
         "
         clickable
         @click="openSettings"
@@ -58,7 +59,7 @@ import {
 import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
-  row: DtoProjectLight | null;
+  project: DtoProjectLight | null;
   anchorEvent?: MouseEvent | null;
 }>();
 
@@ -74,15 +75,15 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { hasPermissionByProject } = useRolesStore();
 
 const openSettings = () => {
-  if (!props.row) return;
+  if (!props.project) return;
   router.push(
-    `/${currentWorkspaceSlug.value}/projects/${props.row.identifier || props.row.id}/settings`,
+    `/${currentWorkspaceSlug.value}/projects/${props.project.identifier || props.project.id}/settings`,
   );
 };
 
 const projectLink = computed(
   () =>
-    `/${currentWorkspaceSlug.value}/projects/${props.row?.identifier || props.row?.id}`,
+    `/${currentWorkspaceSlug.value}/projects/${props.project?.identifier || props.project?.id}`,
 );
 
 const openInNewTab = (): void => {
@@ -95,7 +96,7 @@ const openInNewWindow = (): void => {
 
 const copyProjectTitle = (): void => {
   try {
-    navigator.clipboard.writeText(props.row?.name as string);
+    navigator.clipboard.writeText(props.project?.name as string);
   } catch {
     console.error('Произошла ошибка при копировании названия');
   }
@@ -104,8 +105,8 @@ const copyProjectTitle = (): void => {
 watch(
   () => props.anchorEvent,
   async (evt) => {
-    if (!evt || !props.row) menuRef.value.hide();
-    if (evt && menuRef.value && props.row) {
+    if (!evt || !props.project) menuRef.value.hide();
+    if (evt && menuRef.value && props.project) {
       menuRef.value.hide();
       await nextTick();
       menuRef.value.show(evt);

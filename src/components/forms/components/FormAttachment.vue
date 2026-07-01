@@ -34,7 +34,6 @@ import AttachmentsInfo from 'src/components/AttachmentsInfo.vue';
 //stores
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useUserStore } from 'src/stores/user-store';
-import { useFormStore } from 'src/stores/form-store';
 
 //utils
 import { clearFieldAttachment } from 'src/components/forms/helper/helperForm';
@@ -56,11 +55,10 @@ const emits = defineEmits<{
 //stores
 const { setNotificationView } = useNotificationStore();
 const userStore = useUserStore();
-const formStore = useFormStore()
 const { user } = storeToRefs(userStore);
 
 //consts
-const MAX_SIZE_FILE_VALUE = 50;
+const MAX_SIZE_FILE_VALUE = user.value?.id ? 50 : 5;
 const MAX_SIZE_FILE_UNIT = 'мб';
 const MAX_SIZE_FILE = MAX_SIZE_FILE_VALUE * 1024 * 1024;
 
@@ -143,8 +141,6 @@ const handleDelete = async (id: string) => {
   if (!id || !props.formSlug) return;
 
   try {
-    await formStore.deleteFormAttachment(props.formSlug, id);
-
     if (Array.isArray(props.field.attachments)) {
       props.field.attachments = props.field.attachments.filter(
         (a: any) => a.id !== id,

@@ -95,16 +95,21 @@ const { ny } = storeToRefs(utilsStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
-const load = async () => {
+let currentRequestId = 0;
+
+const load = async (signal?: AbortSignal) => {
+  const requestId = ++currentRequestId;
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
-    await onRequest();
+    await onRequest(undefined, signal);
   } else if (isGroupingEnabled.value === true) {
-    await getGroupedIssues();
+    await getGroupedIssues(signal);
   }
 
-  issuesLoader.value = false;
+  if (requestId === currentRequestId) {
+    issuesLoader.value = false;
+  }
 };
 
 const updateSprint = async () => {
@@ -145,13 +150,22 @@ watch(
   },
 );
 
+let controller: AbortController | null = null;
+
 watch(
   () => refreshIssues.value,
-  async () => {
-    if (refreshIssues.value === true) {
-      await load();
-      refreshIssues.value = false;
-    }
+  async (value) => {
+    if (!value) return;
+
+    refreshIssues.value = false;
+
+    controller?.abort();
+
+    controller = new AbortController();
+
+    try {
+      await load(controller.signal);
+    } catch {}
   },
 );
 

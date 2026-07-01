@@ -144,12 +144,13 @@ export const useIssuesStore = defineStore('issues-store', {
       projectId: string,
       filters: TypesIssuesListFilters,
       query: IQuery,
+      signal?: AbortSignal,
     ) {
       try {
         const response = await api.post(
           `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectId}/issues/search`,
           filters,
-          { params: query },
+          { params: query, signal },
         );
         return response;
       } catch {}

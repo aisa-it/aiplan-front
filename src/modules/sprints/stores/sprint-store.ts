@@ -178,17 +178,18 @@ export const useSprintStore = defineStore('sprint-store', {
       sprintSlug: string,
       filters?: TypesIssuesListFilters,
       query?: IQuery,
+      signal?: AbortSignal,
     ) {
       return api.post(
         `/api/auth/workspaces/${wsSlug}/sprints/${sprintSlug}/issues/search/`,
         { ...filters },
-        { params: query },
+        { params: query, signal },
       );
     },
 
     async getSprintsList(wsSlug: string) {
       // return this.sprintsList = await getSprintList(wsSlug)
-      await sprintApi
+      return await sprintApi
         .getSprintList(wsSlug)
         .then((res) => (this.sprintsList = res.data));
     },

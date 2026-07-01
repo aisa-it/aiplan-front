@@ -159,6 +159,19 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
         return `<span>удалил(-а) спринт ${sprintLink}<span/>`;
       }
       return;
+    case 'sprint_folder':
+      if (activity.verb === 'created') {
+        return `<span>создал(-а) папку спринтов "${activity.new_value}"<span/>`;
+      }
+      if (activity.verb === 'deleted') {
+        return `<span>удалил(-а) папку спринтов "${activity.old_value}"<span/>`;
+      }
+      return;
+    case 'sprint_folder_name':
+      if (activity.verb === 'updated') {
+        return `<span>изменил(-а) название папки спринтов с "${activity.old_value}" на "${activity.new_value}"<span/>`;
+      }
+      return;
     default:
       break;
   }

@@ -23,14 +23,9 @@
               rounded
               class="q-mr-xs"
               :style="{
-                backgroundColor: statesCache[i.project]?.find(
-                  (state) => state?.id === i.state,
-                )?.color,
+                backgroundColor: i.state_detail.color,
               }"
-              ><HintTooltip>{{
-                statesCache[i.project]?.find((state) => state?.id === i.state)
-                  ?.name
-              }}</HintTooltip></q-badge
+              ><HintTooltip>{{ i.state_detail.name }}</HintTooltip></q-badge
             >
 
             {{ props.project_detail?.identifier ?? project?.identifier }}-{{
@@ -55,7 +50,11 @@
 
 <script setup lang="ts">
 //stores
-import { DtoProject, DtoProjectLight, DtoWorkspaceLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProject,
+  DtoProjectLight,
+  DtoWorkspaceLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';

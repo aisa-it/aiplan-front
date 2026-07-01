@@ -1,9 +1,12 @@
 <template>
-  <ExpansionItem v-if="forms?.length" full-open itemName="forms">
+  <ExpansionItem full-open itemName="forms">
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
-          <MenuFormsIcon :is-dark="$q.dark.isActive" />
+          <MenuFormsIcon
+            :is-dark="$q.dark.isActive"
+            :color="active ? '#3f75ff' : ''"
+          />
         </q-item-section>
         <q-item-section>Формы</q-item-section>
         <q-btn
@@ -56,7 +59,7 @@
 
 <script setup lang="ts">
 // core
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
@@ -81,12 +84,16 @@ import { IForms } from 'src/interfaces/forms';
 import MenuFormsIcon from '../icons/MenuFormsIcon.vue';
 import { useQuasar } from 'quasar';
 
+const props = defineProps<{
+  active?: boolean;
+}>();
+
 const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
 const $q = useQuasar();
 
 const { forms } = storeToRefs(formStore);
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceSummary } = storeToRefs(workspaceStore);
 
 const isOpenEditingForm = ref(false);
 const isOpenDeletingForm = ref(false);
@@ -133,4 +140,15 @@ const getFormMenuItems = (form: IForms) => {
     },
   ];
 };
+
+watch(
+  () => workspaceSummary.value?.forms,
+  (newVal) => {
+    formStore.forms = newVal ?? [];
+  },
+  {
+    immediate: true,
+    deep: true,
+   },
+);
 </script>

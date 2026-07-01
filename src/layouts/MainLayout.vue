@@ -7,11 +7,17 @@
     <LightsNewYear v-if="utilsStore.ny === true" />
     <SnowFall v-if="utilsStore.ny === true && isSnowEnable" />
     <div>
-      <MainHeader @toggle="toggleLeftDrawer()" />
+      <MainHeader />
       <PrimaryLoader v-show="generalLoader === true" />
 
-      <!-- <MainLayoutDrawer v-model:drawer-open="leftDrawerOpen" /> -->
-      <NavBar v-if="!isAiDocRoute" />
+      <template v-if="!isAiDocRoute">
+        <MainLayoutDrawer
+          v-if="!miniState"
+          v-model:drawer-open="leftDrawerOpen"
+          @close="miniState = true"
+        />
+        <NavBar v-else v-model:mini-state="miniState" />
+      </template>
 
       <q-page-container>
         <router-view v-slot="{ Component, route }">
@@ -58,6 +64,7 @@ import ReleaseNotePreviewDialog from 'components/dialogs/ReleaseNotePreviewDialo
 import SnowFall from 'src/components/SnowFall.vue';
 import MainHeader from 'src/components/headers/MainHeader.vue';
 import NavBar from 'src/components/drawers/NavBar.vue';
+import MainLayoutDrawer from 'src/components/drawers/MainLayoutDrawer.vue';
 import { watch } from 'vue';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -87,7 +94,7 @@ const router = useRouter();
 const $q = useQuasar();
 const route = useRoute();
 const { auth } = storeToRefs(api);
-const leftDrawerOpen = ref(false);
+const leftDrawerOpen = ref(true);
 const refreshInterval = ref();
 const isShowReleaseNote = shallowRef(false);
 const { workspace } = storeToRefs(useWorkspaceStoreV2());
@@ -99,7 +106,14 @@ const setTheme = () => {
   } else $q.dark.set(false);
 };
 
-const STORAGE_KEY = 'leftDrawerOpen';
+// const STORAGE_KEY = 'leftDrawerOpen';
+const STORAGE_KEY = 'isMiniState';
+
+const miniState = ref(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'true'));
+
+watch(miniState, (value) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+});
 
 onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
@@ -139,11 +153,6 @@ useMeta({
 
 const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
 const isAiDocRoute = computed(() => route.path.includes('/aidoc'));
-
-const toggleLeftDrawer = () => {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-  localStorage.setItem(STORAGE_KEY, String(leftDrawerOpen.value));
-};
 
 // TODO: убрать
 watch(

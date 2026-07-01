@@ -51,7 +51,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     };
   }
 
-  async function getGroupedIssues() {
+  async function getGroupedIssues(signal?: AbortSignal) {
     const quasarPagination: QuasarPagination = {
       page: 1,
       rowsNumber: 0,
@@ -87,6 +87,14 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         issuesLoader.value = false;
       }
     });
+    const response = await getIssue(
+      filters,
+      parsePagination(quasarPagination),
+      signal,
+    );
+
+    issuesStore.groupedIssueList = response?.data.issues;
+    issuesStore.groupByIssues = response?.data.group_by;
   }
 
   function defineFiltersByEntity(entity) {
