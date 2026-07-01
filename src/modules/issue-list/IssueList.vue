@@ -161,7 +161,6 @@ watchEffect(() => {
       currentIssueList.value = components.CalendarView;
       return;
     }
-
     if (isGroupingEnabled.value) {
       currentIssueList.value = components.GroupedIssueList;
       return;

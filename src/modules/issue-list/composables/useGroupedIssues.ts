@@ -17,8 +17,15 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS, store } =
-    useIssueContext(contextType);
+  const {
+    contextProps,
+    isKanbanEnabled,
+    getIssue,
+    getIssueStream,
+    GROUP_BY_OPTIONS,
+    store,
+    issuesLoader,
+  } = useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
   function parsePagination(pagination: QuasarPagination) {
@@ -56,7 +63,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         : (contextProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
-
     const filters = {
       states: [] as string[],
       assigned_to_me: contextProps.value?.filters.assignedToMe,
@@ -66,14 +72,30 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await getIssue(
-      filters,
-      parsePagination(quasarPagination),
-      signal,
-    );
 
-    issuesStore.groupedIssueList = response?.data.issues;
-    issuesStore.groupByIssues = response?.data.group_by;
+    // const response = await getIssue(
+    //   filters,
+    //   parsePagination(quasarPagination),
+    //   signal,
+    // );
+
+    // issuesStore.groupedIssueList = response?.data.issues;
+    // issuesStore.groupByIssues = response?.data.group_by;
+
+    const pagination = parsePagination(quasarPagination);
+    issuesStore.groupByIssues = pagination.group_by ?? '';
+    issuesStore.groupedIssueList = [];
+    let hasRenderedFirstChunk = false;
+
+    await getIssueStream(filters, pagination, (chunk: any) => {
+      issuesStore.groupedIssueList.push(chunk);
+      // Снимаем скелетон сразу после первой пришедшей группы, чтобы
+      // дальше группы дорисовывались по мере прихода стрима.
+      if (!hasRenderedFirstChunk && issuesLoader?.value) {
+        hasRenderedFirstChunk = true;
+        issuesLoader.value = false;
+      }
+    });
   }
 
   function defineFiltersByEntity(entity) {
@@ -130,12 +152,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
-    const response = await getIssue(filters, pagination);
-
-    const data = response?.data?.issues;
-    const issues =
-      Array.isArray(data) && data[0]?.issues ? data[0]?.issues : (data ?? []);
-    const count = response?.data?.count ?? 0;
 
     const groups = issuesStore.groupedIssueList as any[];
 
@@ -149,18 +165,30 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         ? index
         : groups.findIndex((g) => sameEntity(g?.entity, entity));
 
-    if (targetIndex < 0) {
-      groups.push({ entity, issues, count });
-      return;
-    }
+    const upsertGroup = (issues: any[], count: number) => {
+      if (targetIndex < 0) {
+        groups.push({ entity, issues, count });
+        return;
+      }
 
-    if (!groups[targetIndex]) {
-      groups[targetIndex] = { entity, issues, count };
-      return;
-    }
+      if (!groups[targetIndex]) {
+        groups[targetIndex] = { entity, issues, count };
+        return;
+      }
 
-    groups[targetIndex].issues = issues;
-    groups[targetIndex].count = count;
+      groups[targetIndex].issues = issues;
+      groups[targetIndex].count = count;
+    };
+
+    await getIssueStream(
+      filters,
+      pagination,
+      (chunk: any) => {
+        upsertGroup(chunk.issues, chunk.count);
+      },
+      // запросы идут дважды — не отменяем.
+      { cancelPrevious: false },
+    );
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {
