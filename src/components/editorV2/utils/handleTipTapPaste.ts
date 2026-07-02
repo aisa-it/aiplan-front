@@ -247,13 +247,25 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
     });
   }
 
+  const isEmptyParagraph =
+    $from.parent.type.name === 'paragraph' && $from.parent.content.size === 0;
+
   // Сценарий с обычной вставкой
   if (!isInTable || !isSingleTableInHTML(fragment)) {
     event.preventDefault();
 
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
     const slice = parser.parseSlice(fragment);
-    dispatch(state.tr.replaceSelection(slice));
+
+    if (isEmptyParagraph) {
+      const from = $from.before();
+      const to = $from.after();
+
+      dispatch(state.tr.replace(from, to, slice));
+    } else {
+      dispatch(state.tr.replaceSelection(slice));
+    }
+
     return true;
   }
 
@@ -286,7 +298,14 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   if (tableDepth === -1) {
     const parser = DOMParser.fromSchema(schema);
     const slice = parser.parseSlice(fragment);
-    dispatch(state.tr.replaceSelection(slice));
+    if (isEmptyParagraph) {
+      const from = $from.before();
+      const to = $from.after();
+
+      dispatch(state.tr.replace(from, to, slice));
+    } else {
+      dispatch(state.tr.replaceSelection(slice));
+    }
     return true;
   }
 
