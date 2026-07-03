@@ -20,7 +20,6 @@
         v-else-if="group.count > 0"
         :model-value="isOpen(group, index)"
         @update:model-value="(val) => onToggle(group, index, val)"
-        class="gantt-margin"
       >
         <template #header>
           <GroupedHeader
@@ -46,6 +45,7 @@
             :scroll-container="scrollContainer"
             :active="isOpen(group, index)"
             :estimated-height="getEstimatedHeight(group?.issues?.length)"
+            :lazzy-off="lazzyOff"
           >
             <slot :group="group" :index="index" />
 
@@ -80,6 +80,8 @@ const props = defineProps<{
   groups: Group[];
   groupBy: string;
   showEmptyGroups?: boolean;
+  lazzyOff?: boolean;
+  isDiagrammFix?: boolean;
   isGroupOpen?: (group: Group) => boolean;
 }>();
 

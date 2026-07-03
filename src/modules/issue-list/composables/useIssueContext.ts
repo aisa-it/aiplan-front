@@ -12,10 +12,12 @@ import {
   SPRINT_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
 import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
+import { ref } from 'vue';
 
 // НЕ ПЕРЕНОСИТЬ В useIssueContext! Нужно чтобы экземпляр был именно один
 // иначе невозможно будет отменить текущий запрос
 let activeStreamController: AbortController | null = null;
+const isEndStream = ref(true);
 
 export function useIssueContext(contextType: 'project' | 'sprint') {
   const issuesStore = useIssuesStore();
@@ -23,8 +25,13 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
 
   if (contextType === 'project') {
     const store = useProjectStore();
-    const { projectProps, isGroupingEnabled, isKanbanEnabled, issuesLoader } =
-      storeToRefs(store);
+    const {
+      projectProps,
+      isGroupingEnabled,
+      isKanbanEnabled,
+      isGanttDiagramm,
+      issuesLoader,
+    } = storeToRefs(store);
 
     const updateProps = async (props: TypesViewProps) => {
       const { showSubIssues, ...newProps } = props;
@@ -76,13 +83,16 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
         activeStreamController = controller;
       }
 
-      const workspaceSlug = route.params.workspace
-      const projectSlug = route.params.project
+      const workspaceSlug = route.params.workspace;
+      const projectSlug = route.params.project;
 
       const search = new URLSearchParams();
-      for (const [key, value] of Object.entries({ ...pagination, stream: true })) {
-        if (value == null || value === '') continue
-        search.set(key, String(value))
+      for (const [key, value] of Object.entries({
+        ...pagination,
+        stream: true,
+      })) {
+        if (value == null || value === '') continue;
+        search.set(key, String(value));
       }
 
       try {
@@ -102,31 +112,32 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
 
         if (!response?.body) return;
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
         const flush = (line: string) => {
-          const s = line.trim()
-          if (!s) return
-          onChunk(JSON.parse(s))
+          const s = line.trim();
+          if (!s) return;
+          onChunk(JSON.parse(s));
         };
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break
+          isEndStream.value = done;
+          if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n')
-          buffer = lines.pop() ?? ''
-          lines.forEach(flush)
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          lines.forEach(flush);
         }
         flush(buffer);
       } catch (e) {
         // Прерывание предыдущего запроса — штатная ситуация, не ошибка.
         if ((e as Error)?.name === 'AbortError') {
-          return
+          return;
         }
-        throw e
+        throw e;
       } finally {
         if (activeStreamController === controller) {
           activeStreamController = null;
@@ -140,7 +151,9 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       getTableColumns: store.getTableColumns,
       GROUP_BY_OPTIONS: NEW_GROUP_BY_OPTIONS,
       isKanbanEnabled,
+      isGanttDiagramm,
       issuesLoader,
+      isEndStream,
       store,
       updateProps,
       getIssue,
@@ -148,12 +161,16 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       isGroupHide: store.isGroupHide,
       setGroupHide: store.setGroupHide,
     };
-  }
-
-  if (contextType === 'sprint') {
+  } else {
+    //contextType === 'sprint'
     const store = useSprintStore();
-    const { sprintProps, isGroupingEnabled, isKanbanEnabled, issuesLoader } =
-      storeToRefs(store);
+    const {
+      sprintProps,
+      isGroupingEnabled,
+      isKanbanEnabled,
+      isGanttDiagramm,
+      issuesLoader,
+    } = storeToRefs(store);
 
     const updateProps = async (props?: TypesViewProps) => {
       if (props) {
@@ -206,7 +223,9 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       getTableColumns: store.getTableColumns,
       GROUP_BY_OPTIONS: SPRINT_GROUP_BY_OPTIONS,
       isKanbanEnabled,
+      isGanttDiagramm,
       issuesLoader,
+      isEndStream,
       store,
       updateProps,
       getIssue,

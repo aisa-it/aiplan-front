@@ -19,7 +19,7 @@ export function decorateBars(
 ) {
   highlightWeekendInHeader(container);
 
-  const svg = container.querySelector('svg');
+  const svg = container?.querySelector('svg');
   if (!svg) return;
 
   fixTodayLine(container, svg);

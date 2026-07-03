@@ -37,9 +37,17 @@
         </q-card-section>
       </template>
       <template v-slot:after>
-        <q-card-section v-if="issues.length" class="col q-pa-none">
-          <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
-        </q-card-section>
+        <template v-if="isEndStream">
+          <q-card-section v-if="issues.length" class="col q-pa-none">
+            <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
+          </q-card-section>
+        </template>
+        <div v-else class="row justify-center">
+          <DefaultLoader
+            class="fixed"
+            style="top: 50%; transform: translate(-50%, -50%)"
+          />
+        </div>
       </template>
     </q-splitter>
   </q-card>
@@ -52,6 +60,7 @@ import { DtoIssue, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import DefaultIssueList from '../DefaultIssueList.vue';
 import GroupedIssueList from '../GroupedIssueList.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useIssueContext } from '../../composables/useIssueContext';
 
@@ -64,9 +73,8 @@ const issuesStore = useIssuesStore();
 
 const issues = shallowRef<any>([]);
 
-const { isGroupHide, contextProps, isGroupingEnabled } = useIssueContext(
-  props.contextType,
-);
+const { isGroupHide, contextProps, isGroupingEnabled, isEndStream } =
+  useIssueContext(props.contextType);
 
 const refresh = (newIssues: DtoIssue[]) => {
   issues.value = newIssues ?? [];
@@ -91,11 +99,15 @@ const closePreview = () => {
 };
 
 watch(
-  () => [issuesStore.groupedIssueList, contextProps.value.group_tables_hide],
+  () => [
+    issuesStore.groupedIssueList?.length,
+    isEndStream.value,
+    contextProps.value.group_tables_hide,
+  ],
   () => {
-    if (!issuesStore.groupedIssueList) return;
+    if (!issuesStore.groupedIssueList?.length || !isEndStream.value) return;
     let result = [] as DtoIssue[];
-    issuesStore.groupedIssueList.map((el) => {
+    issuesStore.groupedIssueList.forEach((el) => {
       if (isGroupHide(el?.entity?.id || el?.entity)) {
         result = [...result, { id: null }];
         return;
@@ -141,9 +153,5 @@ watch(
 
 :deep(.groupped-table) {
   height: 100%;
-}
-
-:deep(.gantt-margin) {
-  margin-bottom: 14.17px;
 }
 </style>
