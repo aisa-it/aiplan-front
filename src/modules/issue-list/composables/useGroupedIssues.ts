@@ -121,7 +121,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'priority': {
         // Для "Без приоритета" и др. отправляем пустую строку
-        filters = { priorities: [entity || ''] };
+        filters = { priorities: [entity?.id || ''] };
         return filters;
       }
       case 'watchers': {
