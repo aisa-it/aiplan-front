@@ -81,7 +81,6 @@ const props = defineProps<{
   groupBy: string;
   showEmptyGroups?: boolean;
   lazzyOff?: boolean;
-  isDiagrammFix?: boolean;
   isGroupOpen?: (group: Group) => boolean;
 }>();
 
