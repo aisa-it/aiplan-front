@@ -180,6 +180,7 @@ export const useSprintStore = defineStore('sprint-store', {
       query?: IQuery,
       signal?: AbortSignal,
     ) {
+      if (!this.sprint) return;
       return api.post(
         `/api/auth/workspaces/${wsSlug}/sprints/${sprintSlug}/issues/search/`,
         { ...filters },
