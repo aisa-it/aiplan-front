@@ -1,10 +1,5 @@
 <template>
-  <ExpansionItem
-    full-open
-    :is-open-disable="sprints.length === 0"
-    :is-expanding="sprints.length === 0 ? false : undefined"
-    itemName="sprints"
-  >
+  <ExpansionItem full-open is-default-open itemName="sprints">
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
