@@ -102,6 +102,50 @@ const popoverStyle = ref<Record<string, any>>({});
 
 const popoverEl = ref<HTMLElement | null>(null);
 
+let mutationObserver: MutationObserver | null = null;
+let resizeObserver: ResizeObserver | null = null;
+let rafId = 0;
+
+const scheduleUpdate = () => {
+  cancelAnimationFrame(rafId);
+
+  rafId = requestAnimationFrame(async () => {
+    await nextTick();
+    await attemptFindAndPosition();
+  });
+};
+
+const observeTarget = () => {
+  resizeObserver?.disconnect();
+
+  if (!step.value?.el) return;
+
+  const targets = document.querySelectorAll<HTMLElement>(step.value.el);
+
+  if (!targets.length) return;
+
+  const observer = new ResizeObserver(() => {
+    scheduleUpdate();
+  });
+
+  targets.forEach((target) => observer.observe(target));
+
+  resizeObserver = observer;
+};
+
+const observeDom = () => {
+  mutationObserver?.disconnect();
+
+  mutationObserver = new MutationObserver(() => {
+    scheduleUpdate();
+  });
+
+  mutationObserver.observe(document.body, {
+    subtree: true,
+    childList: true,
+  });
+};
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
@@ -261,7 +305,11 @@ const attemptFindAndPosition = async () => {
   const target = (document.querySelector(step.value.el) as HTMLElement) ?? null;
 
   const rect = target?.getBoundingClientRect();
-  if (rect && (rect.top < 0 || rect.bottom > window.innerHeight)) {
+  if (
+    rect &&
+    (rect.top < 0 || rect.bottom > window.innerHeight) &&
+    !step.value.isOffScroll
+  ) {
     target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     await nextTick();
     docWidth.value = window.innerWidth;
@@ -270,6 +318,10 @@ const attemptFindAndPosition = async () => {
   } else {
     updatePosition();
   }
+  observeTarget();
+
+  mutationObserver?.disconnect();
+  mutationObserver = null;
 };
 
 const nextStep = async () => {
@@ -286,7 +338,7 @@ const nextStep = async () => {
 
     await nextTick();
 
-    attemptFindAndPosition();
+    await attemptFindAndPosition();
   } else {
     endTour();
   }
@@ -311,11 +363,17 @@ const onScroll = () => {
 onMounted(() => {
   nextStep();
 
+  observeDom();
+
   window.addEventListener('resize', onResize, { passive: true });
   window.addEventListener('scroll', onScroll, true);
 });
 
 onBeforeUnmount(() => {
+  mutationObserver?.disconnect();
+  resizeObserver?.disconnect();
+  cancelAnimationFrame(rafId);
+
   window.removeEventListener('resize', onResize);
   window.removeEventListener('scroll', onScroll, true);
 });
