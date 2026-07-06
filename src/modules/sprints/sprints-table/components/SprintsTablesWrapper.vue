@@ -6,10 +6,7 @@
     ref="root"
   >
     <div v-for="(folder, index) in sprintFolders" :key="folder.id">
-      <q-item
-        v-if="!folder.sprints?.length"
-        clickable
-      >
+      <q-item v-if="!folder.sprints?.length" clickable>
         <GroupedHeader
           :badge-name="folder?.name"
           :sprints-count="0"
@@ -19,8 +16,7 @@
 
       <q-expansion-item
         v-else-if="folder.sprints.length > 0 && folder.id !== ROOT_FOLDER_ID"
-        class="gantt-margin"
-        >
+      >
         <template #header>
           <GroupedHeader
             :badge-name="folder?.name"
@@ -33,10 +29,7 @@
           <slot :folder="folder" :index="index" />
         </div>
       </q-expansion-item>
-      <q-expansion-item
-        v-else
-        class="gantt-margin"
-        >
+      <q-expansion-item v-else>
         <!-- @click.right="onFolderContextMenu" -->
         <template #header>
           <GroupedHeader
@@ -68,4 +61,3 @@ const props = defineProps<{
   sprintFolders: DtoSprintFolder[];
 }>();
 </script>
-

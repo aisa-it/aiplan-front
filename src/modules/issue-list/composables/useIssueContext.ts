@@ -12,10 +12,12 @@ import {
   SPRINT_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
 import { API_WORKSPACES_PREFIX } from 'src/constants/apiPrefix';
+import { ref } from 'vue';
 
 // НЕ ПЕРЕНОСИТЬ В useIssueContext! Нужно чтобы экземпляр был именно один
 // иначе невозможно будет отменить текущий запрос
 let activeStreamController: AbortController | null = null;
+const isEndStream = ref(true);
 
 async function streamIssuesByEndpoint({
   endpoint,
@@ -43,6 +45,7 @@ async function streamIssuesByEndpoint({
   }
 
   try {
+    isEndStream.value = false;
     const response = await fetch(`${endpoint}?${search.toString()}`, {
       method: 'POST',
       credentials: 'include',
@@ -68,6 +71,7 @@ async function streamIssuesByEndpoint({
 
     while (true) {
       const { done, value } = await reader.read();
+      isEndStream.value = done;
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
@@ -82,6 +86,7 @@ async function streamIssuesByEndpoint({
     }
     throw e;
   } finally {
+    isEndStream.value = true;
     if (activeStreamController === controller) {
       activeStreamController = null;
     }
@@ -94,8 +99,13 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
 
   if (contextType === 'project') {
     const store = useProjectStore();
-    const { projectProps, isGroupingEnabled, isKanbanEnabled, issuesLoader } =
-      storeToRefs(store);
+    const {
+      projectProps,
+      isGroupingEnabled,
+      isKanbanEnabled,
+      isGanttDiagramm,
+      issuesLoader,
+    } = storeToRefs(store);
 
     const updateProps = async (props: TypesViewProps) => {
       const { showSubIssues, ...newProps } = props;
@@ -153,7 +163,9 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       getTableColumns: store.getTableColumns,
       GROUP_BY_OPTIONS: NEW_GROUP_BY_OPTIONS,
       isKanbanEnabled,
+      isGanttDiagramm,
       issuesLoader,
+      isEndStream,
       store,
       updateProps,
       getIssue,
@@ -161,12 +173,16 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       isGroupHide: store.isGroupHide,
       setGroupHide: store.setGroupHide,
     };
-  }
-
-  if (contextType === 'sprint') {
+  } else {
+    //contextType === 'sprint'
     const store = useSprintStore();
-    const { sprintProps, isGroupingEnabled, isKanbanEnabled, issuesLoader } =
-      storeToRefs(store);
+    const {
+      sprintProps,
+      isGroupingEnabled,
+      isKanbanEnabled,
+      isGanttDiagramm,
+      issuesLoader,
+    } = storeToRefs(store);
 
     const updateProps = async (props?: TypesViewProps) => {
       if (props) {
@@ -237,7 +253,9 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
       getTableColumns: store.getTableColumns,
       GROUP_BY_OPTIONS: SPRINT_GROUP_BY_OPTIONS,
       isKanbanEnabled,
+      isGanttDiagramm,
       issuesLoader,
+      isEndStream,
       store,
       updateProps,
       getIssue,

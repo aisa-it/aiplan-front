@@ -20,6 +20,6 @@ import LinkedIssueIcon from './icons/LinkedIssueIcon.vue';
 
 defineProps<{
   type: string;
-  value: string;
+  value: number;
 }>();
 </script>

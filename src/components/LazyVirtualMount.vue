@@ -28,6 +28,7 @@ const props = defineProps<{
   active: boolean;
   estimatedHeight?: number;
   scrollContainer: HTMLElement | null;
+  lazzyOff?: boolean;
 }>();
 
 const root = ref<HTMLElement | null>(null);
@@ -45,6 +46,11 @@ let io: IntersectionObserver | null = null;
 let ro: ResizeObserver | null = null;
 
 const apllyIntersectionObserver = (container: HTMLElement | null) => {
+  if (props.lazzyOff) {
+    intersecting.value = true;
+    return;
+  }
+
   io = new IntersectionObserver(
     ([entry]) => {
       intersecting.value = entry.isIntersecting;
@@ -59,6 +65,12 @@ const apllyIntersectionObserver = (container: HTMLElement | null) => {
 };
 
 onMounted(() => {
+  if (props.lazzyOff) {
+    shouldRender.value = props.active;
+    intersecting.value = true;
+    return;
+  }
+
   apllyIntersectionObserver(props.scrollContainer);
 
   ro = new ResizeObserver(() => {
@@ -71,6 +83,8 @@ onMounted(() => {
 watch(
   () => props.scrollContainer,
   (container) => {
+    if (props.lazzyOff) return;
+
     io?.disconnect();
 
     apllyIntersectionObserver(container);
@@ -81,6 +95,11 @@ watch(
 watch(
   () => props.active,
   (isActive) => {
+    if (props.lazzyOff) {
+      shouldRender.value = isActive;
+      return;
+    }
+
     if (unmountTimer) {
       clearTimeout(unmountTimer);
       unmountTimer = null;
@@ -99,7 +118,7 @@ watch(
 watch(
   () => intersecting.value,
   (isIntersecting) => {
-    if (!props.active) return;
+    if (props.lazzyOff || !props.active) return;
 
     if (isIntersecting) {
       if (unmountTimer) {

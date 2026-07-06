@@ -346,14 +346,14 @@ onBeforeUnmount(() => {
   middle?.removeEventListener('scroll', onMiddleScroll);
 });
 
-const updateIssueField = (
+const updateIssueField = async (
   action?: string,
   row?: any,
   entity?: any,
   status?: any,
 ) => {
   if (isGroupingEnabled.value === true) {
-    emits('updateGroupedIssues', status);
+    await emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
   } else refreshTable();
 };
