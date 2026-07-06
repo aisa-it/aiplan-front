@@ -5,6 +5,7 @@
       unit="%"
       :limits="[0, 100]"
       class="full-width"
+      :separator-style="isPreview ? 'display:none' : ''"
     >
       <template v-slot:before>
         <q-card-section
@@ -36,7 +37,7 @@
           />
         </q-card-section>
       </template>
-      <template v-slot:after>
+      <template v-if="!isPreview" v-slot:after>
         <template v-if="isEndStream">
           <q-card-section v-if="issues.length" class="col q-pa-none">
             <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
@@ -63,6 +64,8 @@ import GroupedIssueList from '../GroupedIssueList.vue';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useIssueContext } from '../../composables/useIssueContext';
+import { useSingleIssueStore } from 'src/stores/single-issue-store.ts';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   sprint?: DtoSprint;
@@ -75,6 +78,8 @@ const issues = shallowRef<any>([]);
 
 const { isGroupHide, contextProps, isGroupingEnabled, isEndStream } =
   useIssueContext(props.contextType);
+
+const { isPreview } = storeToRefs(useSingleIssueStore());
 
 const refresh = (newIssues: DtoIssue[]) => {
   issues.value = newIssues ?? [];
