@@ -124,9 +124,12 @@ const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
 const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { sprintsList } = storeToRefs(sprintStore);
 
 const route = useRoute();
-const sprints = ref([] as DtoSprintLight[]);
+const sprints = computed(
+  () => sprintsList.value?.map((folder) => folder?.sprints || []).flat() ?? [],
+);
 
 const openCreateSprint = ref(false);
 const openEditSprint = ref(false);
@@ -136,17 +139,8 @@ const isDeleteDialogOpen = ref(false);
 const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
-onMounted(async () => {
-  sprints.value =
-    workspaceStore.workspaceSummary?.sprints
-      ?.map((folder) => folder?.sprints || [])
-      .flat() ?? [];
-});
-
 const refreshSprints = async () => {
   await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
-  sprints.value =
-    sprintStore.sprintsList.map((folder) => folder.sprints || []).flat() ?? [];
 };
 
 const reopen = async (id: string) => {
@@ -215,9 +209,10 @@ const headerMenuItems = computed(() => [
 
 watch(
   () => workspaceStore.workspaceSummary?.sprints,
-  (newVal) => {
-    sprints.value = newVal?.map((folder) => folder?.sprints || []).flat() ?? [];
+  (newSprintList) => {
+    sprintsList.value = newSprintList ?? [];
   },
+  { immediate: true },
 );
 
 watch(currentWorkspaceSlug, async (newValue) => {

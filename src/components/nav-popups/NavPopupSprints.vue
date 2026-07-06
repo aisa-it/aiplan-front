@@ -58,9 +58,11 @@
 
 <script setup lang="ts">
 // core
-import { computed } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 // stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -73,10 +75,22 @@ const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const route = useRoute();
 
-const sprints = computed(() => workspaceStore.workspaceSummary?.sprints ?? []);
+const { sprintsList } = storeToRefs(useSprintStore());
+
+const sprints = computed(
+  () => sprintsList.value?.map((folder) => folder?.sprints || []).flat() ?? [],
+);
 
 const formatSprintDates = (start?: string, end?: string): string => {
   if (!start || !end) return '';
   return `${renderShortDate(start)?.toLowerCase()} — ${renderShortDate(end)?.toLowerCase()}`;
 };
+
+watch(
+  () => workspaceStore.workspaceSummary?.sprints,
+  (newSprintList) => {
+    sprintsList.value = newSprintList ?? [];
+  },
+  { immediate: true },
+);
 </script>
