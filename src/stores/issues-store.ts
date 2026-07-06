@@ -146,6 +146,7 @@ export const useIssuesStore = defineStore('issues-store', {
       query: IQuery,
       signal?: AbortSignal,
     ) {
+      if (!workspaceSlug || !projectId) return;
       try {
         const response = await api.post(
           `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectId}/issues/search`,

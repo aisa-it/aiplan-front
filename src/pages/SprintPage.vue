@@ -113,6 +113,7 @@ const load = async (signal?: AbortSignal) => {
 };
 
 const updateSprint = async () => {
+  if (!router.currentRoute.value.params.workspace || !router.currentRoute.value.params.sprint) return;
   sprintLoader.value = true;
   issuesLoader.value = true;
   sprint.value = await getSprint(

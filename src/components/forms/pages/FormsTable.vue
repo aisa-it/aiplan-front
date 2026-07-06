@@ -135,6 +135,8 @@ const openAnswers = (answer) => {
 };
 
 const refresh = async (props) => {
+  if (!route.params.workspace || !route.params.formSlug) return;
+
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
   const offset = (page - 1) * (rowsPerPage == 0 ? 10 : rowsPerPage);
