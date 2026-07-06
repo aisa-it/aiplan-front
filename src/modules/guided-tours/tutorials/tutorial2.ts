@@ -10,6 +10,7 @@ export const steps: Step[] = [
     text: 'Здесь живут все задачи вашего проекта. Хотите послушать про возможности списка задач?',
     activeButtonText: 'Хочу послушать!',
     is_skip: true,
+    isOffScroll: true,
     placement: {
       mode: 'inside',
       primary: 'left',
