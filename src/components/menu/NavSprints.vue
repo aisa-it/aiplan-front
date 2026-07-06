@@ -137,7 +137,10 @@ const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
 onMounted(async () => {
-  sprints.value = workspaceStore.workspaceSummary?.sprints ?? [];
+  sprints.value =
+    workspaceStore.workspaceSummary?.sprints
+      ?.map((folder) => folder?.sprints || [])
+      .flat() ?? [];
 });
 
 const refreshSprints = async () => {
@@ -213,7 +216,7 @@ const headerMenuItems = computed(() => [
 watch(
   () => workspaceStore.workspaceSummary?.sprints,
   (newVal) => {
-    sprints.value = newVal ?? [];
+    sprints.value = newVal?.map((folder) => folder?.sprints || []).flat() ?? [];
   },
 );
 

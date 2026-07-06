@@ -255,7 +255,14 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
     event.preventDefault();
 
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
-    const slice = parser.parseSlice(fragment);
+
+    fragment.querySelectorAll('br.Apple-interchange-newline').forEach((el) => {
+      el.remove();
+    });
+
+    const doc = parser.parse(fragment);
+
+    const slice = doc.slice(0, doc.content.size);
 
     if (isEmptyParagraph) {
       const from = $from.before();
