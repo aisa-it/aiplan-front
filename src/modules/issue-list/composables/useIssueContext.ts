@@ -23,6 +23,8 @@ export function useIssueContext(contextType: 'project' | 'sprint') {
   const issuesStore = useIssuesStore();
   const route = useRoute();
 
+  if (!route.params.workspace) return;
+
   if (contextType === 'project') {
     const store = useProjectStore();
     const {

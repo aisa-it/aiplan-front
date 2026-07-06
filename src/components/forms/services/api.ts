@@ -69,6 +69,7 @@ export const getAnswers = async (
   formSlug: string,
   query?: { offset?: number; limit?: number },
 ) => {
+  if (!workspaceSlug || !formSlug) return;
   return (await api.getAnswers(workspaceSlug, formSlug, query)).data;
 };
 
