@@ -4,6 +4,7 @@
     :group-by="groupBy"
     :show-empty-groups="contextProps?.showEmptyGroups"
     :is-group-open="(group) => !isGroupHide(group.entity?.id ?? group.entity)"
+    :lazzy-off="isGanttDiagramm"
     @toggle-group="
       (group, opened) => setGroupHide(group.entity?.id ?? group.entity, opened)
     "
@@ -59,9 +60,8 @@ const emits = defineEmits<{
   openIssue: [number, DtoIssue];
 }>();
 
-const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
-  props.contextType,
-);
+const { contextProps, isGroupHide, setGroupHide, isGanttDiagramm } =
+  useIssueContext(props.contextType);
 
 const { getGroupedIssues } = useGroupedIssues(props.contextType);
 

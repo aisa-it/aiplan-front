@@ -2,9 +2,11 @@
   Добавляет класс для подсветки выходных дней
 */
 export function highlightWeekendInHeader(container: HTMLElement) {
-  const headerDates = container.querySelectorAll<HTMLDivElement>(
+  const headerDates = container?.querySelectorAll<HTMLDivElement>(
     '.grid-header .lower-text[class*="date_"]',
   );
+
+  if (!headerDates) return;
 
   headerDates.forEach((el) => {
     const dateClass = Array.from(el.classList).find((c) =>

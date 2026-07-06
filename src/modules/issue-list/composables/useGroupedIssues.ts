@@ -86,8 +86,9 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     issuesStore.groupByIssues = pagination.group_by ?? '';
     issuesStore.groupedIssueList = [];
     let hasRenderedFirstChunk = false;
+    issuesLoader.value = true;
 
-    await getIssueStream(filters, pagination, (chunk: any) => {
+    return await getIssueStream(filters, pagination, (chunk: any) => {
       issuesStore.groupedIssueList.push(chunk);
       // Снимаем скелетон сразу после первой пришедшей группы, чтобы
       // дальше группы дорисовывались по мере прихода стрима.
