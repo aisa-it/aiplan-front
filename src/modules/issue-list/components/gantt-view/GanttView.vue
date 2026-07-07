@@ -40,7 +40,11 @@
       <template v-if="!isPreview" v-slot:after>
         <template v-if="isEndStream">
           <q-card-section v-if="issues.length" class="col q-pa-none">
-            <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
+            <FrappeGantt
+              :sprint="isGroupingEnabled ? undefined : sprint"
+              :issues="issues"
+              :view-mode="'Day'"
+            />
           </q-card-section>
         </template>
         <div v-else class="row justify-center">
@@ -91,6 +95,12 @@ const shiftHeight = computed(() => {
   if (isGroupingEnabled.value) {
     return props.contextType === 'sprint' ? 42 : -10;
   }
+
+  if (props.contextType === 'sprint') {
+    return 37;
+  }
+
+  return 0;
 });
 
 let oldSplitter = 50;
@@ -133,7 +143,7 @@ watch(
 </script>
 <style lang="scss" scoped>
 .sprint-margin-default {
-  margin-top: 91px;
+  margin-top: 37px;
 }
 
 .project-margin-default {
@@ -141,7 +151,7 @@ watch(
 }
 
 .sprint-margin-grouped {
-  margin-top: 42px;
+  margin-top: -10px;
 }
 
 .project-margin-grouped {
@@ -153,7 +163,7 @@ watch(
 }
 
 .sprint-margin-grouped :deep(.q-expansion-item__container) {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 :deep(.groupped-table) {
