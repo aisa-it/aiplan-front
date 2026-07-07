@@ -210,11 +210,6 @@ const headerMenuItems = computed(() => [
   },
 ]);
 
-// watch(currentWorkspaceSlug, async (newValue) => {
-//   if (!newValue) return;
-//   refreshSprints();
-// });
-
 watch(
   () => sprintStore.refreshSprintData,
   async (v) => {
