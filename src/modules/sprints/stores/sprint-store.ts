@@ -112,6 +112,7 @@ export const useSprintStore = defineStore('sprint-store', {
       }
       this.refreshSprintData = true;
     },
+
     clearSprintRefresh() {
       this.notUpdated = [] as NotUpdated[];
       this.refreshSprintData = false;

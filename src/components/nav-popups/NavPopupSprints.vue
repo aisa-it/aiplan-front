@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 // core
-import { computed, watch, ref } from 'vue';
+import { computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
@@ -72,14 +72,19 @@ import { renderShortDate } from 'src/utils/time';
 import StatusCircularProgressBar from 'src/components/progress-bars/StatusCircularProgressBar.vue';
 
 const workspaceStore = useWorkspaceStore();
+const sprintStore = useSprintStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const route = useRoute();
 
-const { sprintsList } = storeToRefs(useSprintStore());
+const { sprintsList } = storeToRefs(sprintStore);
 
 const sprints = computed(
   () => sprintsList.value?.map((folder) => folder?.sprints || []).flat() ?? [],
 );
+
+const refreshSprints = async () => {
+  await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
+};
 
 const formatSprintDates = (start?: string, end?: string): string => {
   if (!start || !end) return '';
@@ -92,5 +97,15 @@ watch(
     sprintsList.value = newSprintList ?? [];
   },
   { immediate: true },
+);
+
+watch(
+  () => sprintStore.refreshSprintData,
+  async (v) => {
+    if (v) {
+      await refreshSprints();
+      sprintStore.clearSprintRefresh();
+    }
+  },
 );
 </script>
