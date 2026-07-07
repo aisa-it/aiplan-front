@@ -32,13 +32,13 @@ import { getFullSprintDates } from 'src/modules/sprints/helpres';
 export function buildGanttTasks(issues: DtoIssue[], sprint?: DtoSprint) {
   const result: any[] = [];
 
-  if (sprint) {
+  if (sprint?.start_date && sprint?.end_date) {
     result.push({
       id: `sprint-${sprint.id}`,
-      name: `${sprint.name} ${getFullSprintDates(sprint.start_date as string, sprint.end_date as string)}`,
+      name: `${sprint.name} ${getFullSprintDates(sprint.start_date, sprint.end_date)}`,
       custom_class: 'sprint',
       start: sprint.start_date?.split('T')[0],
-      end: getNextDayDateOnly(sprint.end_date as string),
+      end: getNextDayDateOnly(sprint.end_date),
       sprintStats: sprint.stats,
       progress: 100,
       readonly: true,
