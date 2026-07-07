@@ -73,31 +73,24 @@ import StatusCircularProgressBar from 'src/components/progress-bars/StatusCircul
 
 const workspaceStore = useWorkspaceStore();
 const sprintStore = useSprintStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { currentWorkspaceSlug, workspaceSummary } = storeToRefs(workspaceStore);
 const route = useRoute();
 
-const { sprintsList } = storeToRefs(sprintStore);
-
 const sprints = computed(
-  () => sprintsList.value?.map((folder) => folder?.sprints || []).flat() ?? [],
+  () =>
+    workspaceSummary.value?.sprints
+      ?.map((folder) => folder?.sprints || [])
+      .flat() ?? [],
 );
 
 const refreshSprints = async () => {
-  await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
+  await workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value ?? '');
 };
 
 const formatSprintDates = (start?: string, end?: string): string => {
   if (!start || !end) return '';
   return `${renderShortDate(start)?.toLowerCase()} — ${renderShortDate(end)?.toLowerCase()}`;
 };
-
-watch(
-  () => workspaceStore.workspaceSummary?.sprints,
-  (newSprintList) => {
-    sprintsList.value = newSprintList ?? [];
-  },
-  { immediate: true },
-);
 
 watch(
   () => sprintStore.refreshSprintData,
