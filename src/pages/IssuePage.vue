@@ -14,7 +14,7 @@
 // core
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteLeave, useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
 
 // stores
@@ -95,5 +95,10 @@ const refreshPromise = async () => {
 onMounted(async () => {
   currentIssueID.value = (route.params.issue as string) ?? '';
   await refreshPromise();
+});
+
+onBeforeRouteLeave(async (to, from, next) => {
+  singleIssueStore.clearCurrentIssueState();
+  next();
 });
 </script>
