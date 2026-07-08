@@ -8,6 +8,9 @@
     @toggle-group="
       (group, opened) => setGroupHide(group.entity?.id ?? group.entity, opened)
     "
+    @subscribe-table-updates="
+      (group, index) => subscribeTableUpdates(group.entity.id, currentPagination, index, group.entity)
+    "
   >
     <template #default="{ group, index }">
       <IssueTable
@@ -17,7 +20,8 @@
         :context-type="contextType"
         @updateGroupedIssues="updateGroupedIssues"
         @refresh="
-          (pagination, isFullUpdate) =>
+          (pagination, isFullUpdate) => {
+            currentPagination = pagination;
             emits(
               'refreshTable',
               index,
@@ -25,12 +29,18 @@
               isFullUpdate,
               group?.entity,
             )
+          }
         "
         @open-preview="
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, group?.entity)
         "
         @open-issue="(id, issue) => emits('openIssue', id, issue)"
+        @table-hide="
+          (id, pagination) =>
+            subscribeTableUpdates(id, pagination, index, group.entity)
+        "
+        @table-show="(id) => unSubscribeTableUpdates(id)"
       />
     </template>
   </GroupedTablesWrapper>
@@ -47,6 +57,10 @@ import { useGroupedIssues } from '../../composables/useGroupedIssues';
 
 import GroupedTablesWrapper from './GroupedTablesWrapper.vue';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { inject, ref } from 'vue';
+import { EventBus } from 'quasar';
+
+const bus = inject('bus') as EventBus;
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -64,6 +78,8 @@ const { contextProps, isGroupHide, setGroupHide, isGanttDiagramm } =
   useIssueContext(props.contextType);
 
 const { getGroupedIssues } = useGroupedIssues(props.contextType);
+
+const currentPagination = ref<Record<string, any>>({});
 
 const updateGroupedIssues = async (status: any) => {
   if (!status) {
@@ -88,6 +104,31 @@ const updateGroupedIssues = async (status: any) => {
     };
 
     await emits('refreshTable', groupIndex, pagination, false, status);
+  }
+};
+
+const handlers = ref<Record<string, (field: any, entityId: string) => void>>(
+  {},
+);
+
+const subscribeTableUpdates = (
+  id: string,
+  pagination: Record<string, any>,
+  index: number,
+  entity: any,
+) => {
+  const handler = (field: string, entityId: string) => {
+    if (entityId === id) {
+      emits('refreshTable', index, pagination, false, entity);
+    }
+  };
+  bus.on('updateIssueTable', handler);
+  handlers.value[id] = handler;
+};
+
+const unSubscribeTableUpdates = (id: string) => {
+  if (handlers.value[id]) {
+    bus.off('updateIssueTable', handlers.value[id]);
   }
 };
 </script>
