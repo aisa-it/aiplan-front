@@ -20,6 +20,7 @@
         v-else-if="group.count > 0"
         :model-value="isOpen(group, index)"
         @update:model-value="(val) => onToggle(group, index, val)"
+        @vue:mounted="onExpansionItemMounted(group, index)"
       >
         <template #header>
           <GroupedHeader
@@ -86,6 +87,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   (e: 'toggle-group', group: Group, opened: boolean): void;
+  (e: 'subscribeTableUpdates', group: Group, index: number): void;
 }>();
 
 const scrollContainer = ref();
@@ -114,6 +116,12 @@ const isOpen = (group: Group, index: number) => {
   const key = groupKey(group, index);
   return localOpenState.value[key] ?? true;
 };
+
+const onExpansionItemMounted = (group: Group, index: number) => {
+  if (!isOpen(group, index)) {
+    emits('subscribeTableUpdates', group, index)
+  }
+}
 
 const onToggle = (group: Group, index: number, opened: boolean) => {
   const key = groupKey(group, index);
