@@ -122,7 +122,8 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'priority': {
         // Для "Без приоритета" и др. отправляем пустую строку
-        filters = { priorities: [entity?.id || ''] };
+        // Карточка доски возвращает строку с приоритетом вместо объекта сущности
+        filters = { priorities: [entity?.id || entity || ''] };
         return filters;
       }
       case 'watchers': {
@@ -215,6 +216,11 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'project': {
         bus.emit('updateIssueTable', 'project', initialEntity.id);
+        break;
+      }
+      case 'priority': {
+        bus.emit('updateIssueTable', 'priority', initialEntity);
+        bus.emit('updateIssueTable', 'priority', fieldValue.priority);
         break;
       }
     }

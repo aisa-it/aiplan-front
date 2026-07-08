@@ -57,11 +57,7 @@
         :is-disabled="
           !rolesStore.hasPermissionByIssue(card, 'change-issue-primary')
         "
-        @refresh="
-          () => {
-            emits('updateTable', 'priority', card, entity);
-          }
-        "
+        @refresh="onUpdatePriority"
       />
       <SelectDate
         v-if="contextProps?.columns_to_show?.includes('target_date')"
@@ -198,6 +194,17 @@ const { items, isLoading, error: statesError, loadItems, updateStatus } =
 const avatarText = aiplan.UserName;
 
 const { navigateToActivityPage } = useUserActivityNavigation();
+
+const onUpdatePriority = async (priority: string) => {
+  if (priority === props.card?.priority) return;
+
+  emits(
+    'updateTable',
+    'priority',
+    { ...props.card, priority: priority },
+    props.entity,
+  );
+};
 
 const onUpdateStatus = async (state: DtoStateLight) => {
   if (state.id === props.card?.state_detail?.id) return;

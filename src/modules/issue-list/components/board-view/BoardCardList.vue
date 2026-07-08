@@ -54,7 +54,7 @@
           :entity="table.entity"
           :context-type="contextType"
           @update-table="
-            (field, row, entity) => updateTable(field, row, entity)
+            (field, row, entity) => updateCurrentTable(field, row, entity)
           "
           @openPreview="
             (issue) =>
@@ -155,11 +155,14 @@ const toggleList = async (entity, value) => {
   await setGroupHide(entity, value);
 };
 
-const updateTable = (field, row, entity) => {
-  updateCurrentTable(field, row, entity);
-};
-
 const handleUpdateIssueTable = (field, entityId) => {
+  if (
+    field === 'priority' &&
+    props.table.entity !== null &&
+    entityId === props.table.entity
+  ) {
+    getIssues();
+  }
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }
