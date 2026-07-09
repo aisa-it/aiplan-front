@@ -156,11 +156,7 @@ const toggleList = async (entity, value) => {
 };
 
 const handleUpdateIssueTable = (field, entityId) => {
-  if (
-    field === 'priority' &&
-    props.table.entity !== null &&
-    entityId === props.table.entity
-  ) {
+  if (field === 'priority' && entityId === props.table.entity) {
     getIssues();
   }
   if (props.table.entity?.id && entityId === props.table.entity?.id) {

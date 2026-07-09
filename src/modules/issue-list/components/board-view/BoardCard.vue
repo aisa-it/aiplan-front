@@ -196,8 +196,6 @@ const avatarText = aiplan.UserName;
 const { navigateToActivityPage } = useUserActivityNavigation();
 
 const onUpdatePriority = async (priority: string) => {
-  if (priority === props.card?.priority) return;
-
   emits(
     'updateTable',
     'priority',
