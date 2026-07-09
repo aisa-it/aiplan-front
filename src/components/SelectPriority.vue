@@ -1,12 +1,12 @@
 <template>
   <q-select
     options-dense
-    :clearable="currentPriority !== 'Нет'"
+    :clearable="priority !== 'Нет'"
     dense
     :label="label ? label : undefined"
     :class="`${label ? 'base-selector' : 'base-selector-sm'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     popup-content-class="scrollable-content"
-    :modelValue="currentPriority"
+    :modelValue="priority"
     :disable="isDisabled"
     :options="options"
     :option-label="(v) => options_label[v] || 'Не Выбран'"
@@ -51,7 +51,6 @@ import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { ref } from 'vue';
 
 const props = defineProps<{
   workspaceSlug: string;
@@ -68,11 +67,11 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   refresh: [string];
+  'update:priority': [string];
 }>();
 
 const api = useAiplanStore();
 const { setNotificationView } = useNotificationStore();
-const currentPriority = ref<string>(props.priority ?? 'Не выбран');
 
 const handleUpdateModelValue = async (e: string) => {
   if (props.issueid) {
@@ -82,8 +81,8 @@ const handleUpdateModelValue = async (e: string) => {
       })
       .then(() => {
         setNotificationView({ type: 'success', open: true });
-        currentPriority.value = e;
         emits('refresh', e);
+        emits('update:priority', e);
       });
   }
 };
