@@ -204,7 +204,6 @@ import AvatarImage from 'src/components/AvatarImage.vue';
 
 // directives
 import ClickOutside from 'src/directives/click-outside';
-import { useNotificationStore } from 'stores/notification-store';
 import IssueNameInput from './IssueNameInput.vue';
 import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 
@@ -241,7 +240,6 @@ const workspaceStore = useWorkspaceStore();
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
-const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // vars
@@ -340,11 +338,6 @@ const handleUpdateTitleAndEditor = async () => {
       if (issueData.value) {
         issueData.value.description_html = initialIssueDescription.value;
       }
-
-      setNotificationView({
-        open: true,
-        type: 'success',
-      });
       emits('update:issuePage');
     })
     .catch(() => {

@@ -137,6 +137,7 @@ const props = withDefaults(
     currentMember: any;
     isIssueTransfer?: boolean;
     debounced?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -274,7 +275,9 @@ const updateAssignees = (e: any, currentIds: any) => {
         },
       )
       .then(() => {
-        setNotificationView({ open: true, type: 'success' });
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
         emits('refresh');
       })
       .catch(() => (assignessid.value = currentIds));

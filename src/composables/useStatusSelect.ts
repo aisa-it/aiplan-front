@@ -12,7 +12,7 @@ import {
   NotUpdated,
 } from 'src/modules/sprints/stores/sprint-store';
 
-export function useStatusSelect() {
+export function useStatusSelect(offSuccessNotification?: boolean) {
   const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
   const singleIssueStore = useSingleIssueStore();
   const sprintStore = useSprintStore();
@@ -71,6 +71,9 @@ export function useStatusSelect() {
 
     sprintStore.triggerSprintRefresh(NotUpdated.SprintPage);
     resetItems();
+
+    if (offSuccessNotification) return;
+
     setNotificationView({ open: true, type: 'success' });
   };
 

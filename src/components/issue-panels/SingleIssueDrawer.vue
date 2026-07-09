@@ -95,6 +95,7 @@
             :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
             :current-member="user"
             debounced
+            off-success-notification
             @refresh="handleRefresh"
           ></SelectAssignee>
         </div>
@@ -119,6 +120,7 @@
             :current-member="user"
             :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
             debounced
+            off-success-notification
             @refresh="handleRefresh"
           ></SelectWatchers>
         </div>
@@ -141,6 +143,7 @@
             :workspace-slug="issueData.workspace_detail.slug"
             :projectid="issueData.project"
             editIssue
+            off-success-notification
             :issueid="issueData.id"
             :priority="issueData.priority"
             :issue="issueData"
@@ -196,6 +199,7 @@
         <div class="col flex rounded-borders">
           <SelectDate
             class="full-w"
+            off-success-notification
             :workspace-id="issueData.workspace_detail.slug"
             :project-id="issueData.project"
             :issue-id="issueData.id"
@@ -261,6 +265,7 @@
         <div class="col flex rounded-borders no-wrap">
           <SelectParentIssue
             class="full-w"
+            off-success-notification
             :projectid="issueData.project"
             :issueid="issueData.id"
             :issue="issueData.parent_detail"
@@ -295,6 +300,7 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectBlockIssues
+            off-success-notification
             :workspace-id="issueData.workspace"
             :projectid="issueData.project"
             :issueid="issueData.id"
@@ -320,6 +326,7 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectBlockedIssues
+            off-success-notification
             :workspace-id="issueData.workspace"
             :projectid="issueData.project"
             :issueid="issueData.id"
@@ -345,6 +352,7 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectSprints
+            off-success-notification
             :projectid="issueData.project"
             class="issue-selector"
             :issue="issueData"
@@ -375,6 +383,7 @@
       </SelectLinks>
 
       <IssueCustomProperties
+        off-success-notification
         class="q-pt-md"
         :project-id="issueData.project"
         :issue-id="issueData.id"
@@ -423,7 +432,6 @@ import { useRolesStore } from 'src/stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
 import aiplan from 'src/utils/aiplan';
@@ -465,14 +473,6 @@ import StartDateIcon from 'src/components/icons/StartDateIcon.vue';
 import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 
-// constants
-import {
-  SUCCESS_UPDATE_DATA,
-  SUCCESS_LINK_ADDING,
-  SUCCESS_LINK_EDITING,
-  SUCCESS_LINK_DELETING,
-} from 'src/constants/notifications';
-
 import { setIntervalFunction } from 'src/utils/helpers';
 import {
   DtoIssue,
@@ -486,9 +486,13 @@ const projectStore = useProjectStore();
 const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
-const { setNotificationView } = useNotificationStore();
-const { items, isLoading, error: statesError, loadItems, updateStatus } =
-  useStatusSelect();
+const {
+  items,
+  isLoading,
+  error: statesError,
+  loadItems,
+  updateStatus,
+} = useStatusSelect(true);
 
 // store to refs
 const { user } = storeToRefs(userStore);
@@ -570,11 +574,6 @@ const handleRemoveParentIssue = async () => {
       { parent: null },
     )
     .then(async () => {
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_UPDATE_DATA,
-      });
       issueData.value.parent_detail = null;
       handleRefresh();
     });
@@ -631,11 +630,6 @@ const handleLinkAdd = async (link: DtoIssueLinkLight) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_ADDING,
-  });
 };
 
 const handleLinkDelete = async (linkID: string) => {
@@ -648,11 +642,6 @@ const handleLinkDelete = async (linkID: string) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_DELETING,
-  });
 };
 
 const handleLinkEdit = async (link: DtoIssueLinkLight) => {
@@ -667,11 +656,6 @@ const handleLinkEdit = async (link: DtoIssueLinkLight) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_EDITING,
-  });
 };
 
 const updateParentIssueData = async () => {

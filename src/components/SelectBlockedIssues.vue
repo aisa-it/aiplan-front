@@ -68,6 +68,7 @@ const props = withDefaults(
     issues?: any[];
     target?: string;
     isDisabled?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     issues: () => [],
@@ -99,7 +100,9 @@ const saveBlockIssues = async (items) => {
   api
     .issuePartialUpdate(props.workspaceId, props.projectid, props.issueid, data)
     .then(() => {
-      setNotificationView({ type: 'success', open: true });
+      if (!props.offSuccessNotification) {
+        setNotificationView({ type: 'success', open: true });
+      }
       emits('refresh');
     });
 };
@@ -118,7 +121,9 @@ const updateModelValue = (val: any) => {
   api
     .issuePartialUpdate(props.workspaceId, props.projectid, props.issueid, data)
     .then(() => {
-      setNotificationView({ type: 'success', open: true });
+      if (!props.offSuccessNotification) {
+        setNotificationView({ type: 'success', open: true });
+      }
       emits('refresh');
       delete listDisableIssue.value[val[nameDetail.value].id];
     })

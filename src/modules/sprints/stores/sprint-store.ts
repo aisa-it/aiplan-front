@@ -189,7 +189,6 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     async getSprintsList(wsSlug: string) {
-      // return this.sprintsList = await getSprintList(wsSlug)
       return await sprintApi
         .getSprintList(wsSlug)
         .then((res) => (this.sprintsList = res.data));

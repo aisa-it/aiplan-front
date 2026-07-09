@@ -58,6 +58,7 @@ const props = defineProps<{
   project: IProject;
   isDisabled?: boolean;
   newIssue?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -94,7 +95,10 @@ const saveParentIssue = (issue: any, extendedIssue?: any) => {
         },
       )
       .then(() => {
-        setNotificationView({ type: 'success', open: true });
+        if (!props.offSuccessNotification) {
+          setNotificationView({ type: 'success', open: true });
+        }
+
         emits('refresh', issue);
         onLoad();
       });

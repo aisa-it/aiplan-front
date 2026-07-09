@@ -58,11 +58,7 @@
                 <HintTooltip>Скопировать ссылку</HintTooltip>
               </q-btn>
               <q-btn
-                v-if="
-                  !progress &&
-                  !status &&
-                  (!file.draft || downloadHandler)
-                "
+                v-if="!progress && !status && (!file.draft || downloadHandler)"
                 unelevated
                 dense
                 @click="handleDownload()"
@@ -209,6 +205,7 @@ interface IProps {
     file: IAttachmentCard,
     onProgress: (progress: number) => void,
   ) => Promise<void>;
+  offSuccessNotification?: boolean;
 }
 
 const props = defineProps<IProps>();
@@ -236,11 +233,14 @@ const handleDownload = async () => {
       await props.downloadHandler(props.file, (progress) => {
         internalProgress.value = progress;
       });
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DOWNLOAD_FILE,
-      });
+      if (!props.offSuccessNotification) {
+        setNotificationView({
+          type: 'success',
+          open: true,
+          customMessage: SUCCESS_DOWNLOAD_FILE,
+        });
+      }
+
       return;
     }
 
@@ -256,11 +256,14 @@ const handleDownload = async () => {
           },
         },
       );
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DOWNLOAD_FILE,
-      });
+      if (!props.offSuccessNotification) {
+        setNotificationView({
+          type: 'success',
+          open: true,
+          customMessage: SUCCESS_DOWNLOAD_FILE,
+        });
+      }
+
       return data;
     }, props.file.asset.name);
   } finally {

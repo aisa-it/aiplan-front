@@ -114,6 +114,7 @@ import { ROOT_FOLDER_ID } from 'src/constants/constants';
 const props = defineProps<{
   issue: any;
   checkedSprints?: DtoSprintLight[];
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -221,11 +222,13 @@ const saveIssueSprints = async () => {
     ];
     await Promise.all(updatePromises);
     emits('refresh');
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: SUCCESS_UPDATE_DATA,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: SUCCESS_UPDATE_DATA,
+      });
+    }
   } catch {}
 };
 
