@@ -159,6 +159,9 @@ const handleUpdateIssueTable = (field, entityId) => {
   if (field === 'priority' && entityId === props.table.entity) {
     getIssues();
   }
+  if (field === 'sprint') {
+    getIssues();
+  }
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }

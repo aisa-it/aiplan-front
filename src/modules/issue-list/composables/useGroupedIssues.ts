@@ -201,6 +201,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         break;
       }
       case 'labels': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue?.label_details.forEach((label) => {
           bus.emit('updateIssueTable', 'labels', label.id);
         });
@@ -209,6 +215,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       case 'assignees':
       case 'watchers':
       case 'author': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue.assignee_details.forEach((assignee) => {
           bus.emit('updateIssueTable', 'members', assignee.id);
         });
