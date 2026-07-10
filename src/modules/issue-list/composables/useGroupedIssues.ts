@@ -122,7 +122,8 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'priority': {
         // Для "Без приоритета" и др. отправляем пустую строку
-        filters = { priorities: [entity?.id || ''] };
+        // Карточка доски возвращает строку с приоритетом вместо объекта сущности
+        filters = { priorities: [entity?.id || entity || ''] };
         return filters;
       }
       case 'watchers': {
@@ -200,6 +201,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         break;
       }
       case 'labels': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue?.label_details.forEach((label) => {
           bus.emit('updateIssueTable', 'labels', label.id);
         });
@@ -208,6 +215,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       case 'assignees':
       case 'watchers':
       case 'author': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue.assignee_details.forEach((assignee) => {
           bus.emit('updateIssueTable', 'members', assignee.id);
         });
@@ -215,6 +228,11 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'project': {
         bus.emit('updateIssueTable', 'project', initialEntity.id);
+        break;
+      }
+      case 'priority': {
+        bus.emit('updateIssueTable', 'priority', initialEntity);
+        bus.emit('updateIssueTable', 'priority', fieldValue.priority);
         break;
       }
     }
