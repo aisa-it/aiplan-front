@@ -96,6 +96,10 @@ export const useSprintStore = defineStore('sprint-store', {
   },
 
   actions: {
+    clearSprintsList() {
+      this.sprintsList = [];
+    },
+
     openSprint(sprintId: string, target?: string) {
       const url = `/${this.router.currentRoute.value.params.workspace}/sprints/${sprintId}`;
 

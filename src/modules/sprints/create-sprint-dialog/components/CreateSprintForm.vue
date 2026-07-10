@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -180,6 +180,7 @@ const userStore = useUserStore();
 const sprintStore = useSprintStore();
 const workspaceStore = useWorkspaceStore();
 
+const { sprintsList } = storeToRefs(sprintStore);
 const { user } = storeToRefs(userStore);
 
 const nameRef = ref();
@@ -195,8 +196,8 @@ const folder = ref<DtoSprintFolder | undefined>(
   props.defaultProps?.sprint_folder,
 );
 
-const refreshSprints = async () => {
-  await sprintStore.getSprintsList(
+const refreshSprints = () => {
+  sprintStore.getSprintsList(
     workspaceStore.currentWorkspaceSlug as string,
   );
 };
@@ -340,6 +341,12 @@ const pushData = () => {
     emits('create', data);
   }
 };
+
+onMounted(async () => {
+  if (!sprintsList.value || sprintsList.value.length === 0) {
+    await refreshSprints();
+  }
+})
 
 watch(
   () => props.defaultProps,
