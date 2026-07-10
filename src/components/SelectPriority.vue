@@ -55,7 +55,7 @@ import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 const props = defineProps<{
   workspaceSlug: string;
   projectid: string;
-  issueid: string;
+  issueid?: string;
   priority?: string;
   issue?: DtoIssue;
   label?: string;
@@ -87,6 +87,8 @@ const handleUpdateModelValue = async (e: string) => {
         emits('refresh', e);
         emits('update:priority', e);
       });
+  } else {
+    emits('update:priority', e);
   }
 };
 
