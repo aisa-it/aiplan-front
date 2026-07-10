@@ -213,6 +213,7 @@ const props = defineProps<{
   attachments: IAttachmentCard[];
   loading: boolean;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -279,11 +280,13 @@ const handleCopyLink = (file: IAttachmentCard): void => {
     const query = `?slug=${slug}&type=${type}&from=${from}&name=${name}`;
     const link = base + query;
     copyToClipboard(link);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+      });
+    }
   } catch (e) {
     setNotificationView({
       type: 'error',
@@ -313,11 +316,13 @@ const handleDownload = async (file: IAttachmentCard): Promise<void> => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_DOWNLOAD_FILE,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_DOWNLOAD_FILE,
+      });
+    }
   } finally {
     downloadProgress.value = 0;
   }
@@ -333,11 +338,13 @@ const handleDownloadAll = async (): Promise<void> => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_DOWNLOAD_FILE,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_DOWNLOAD_FILE,
+      });
+    }
   }
 };
 </script>

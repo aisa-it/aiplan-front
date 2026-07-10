@@ -301,7 +301,7 @@ const save = async () => {
   });
 };
 
-const validateDate = (val: string) => {
+const validateDate = (val: string | null) => {
   const minD = validDate(val);
   return minD;
 };

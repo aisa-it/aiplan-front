@@ -55,7 +55,7 @@ import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 const props = defineProps<{
   workspaceSlug: string;
   projectid: string;
-  issueid: string;
+  issueid?: string;
   priority?: string;
   issue?: DtoIssue;
   label?: string;
@@ -63,25 +63,28 @@ const props = defineProps<{
   editIssue?: boolean;
   isDisabled?: boolean;
   isAdaptiveSelect?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
-  refresh: [];
+  refresh: [string];
   'update:priority': [string];
 }>();
 
 const api = useAiplanStore();
 const { setNotificationView } = useNotificationStore();
 
-const handleUpdateModelValue = (e: string) => {
+const handleUpdateModelValue = async (e: string) => {
   if (props.issueid) {
-    api
+    await api
       .issuePartialUpdate(props.workspaceSlug, props.projectid, props.issueid, {
         priority: e,
       })
       .then(() => {
-        setNotificationView({ type: 'success', open: true });
-        emits('refresh');
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
+        emits('refresh', e);
         emits('update:priority', e);
       });
   } else {

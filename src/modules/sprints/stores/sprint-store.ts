@@ -96,6 +96,10 @@ export const useSprintStore = defineStore('sprint-store', {
   },
 
   actions: {
+    clearSprintsList() {
+      this.sprintsList = [];
+    },
+
     openSprint(sprintId: string, target?: string) {
       const url = `/${this.router.currentRoute.value.params.workspace}/sprints/${sprintId}`;
 
@@ -189,7 +193,6 @@ export const useSprintStore = defineStore('sprint-store', {
     },
 
     async getSprintsList(wsSlug: string) {
-      // return this.sprintsList = await getSprintList(wsSlug)
       return await sprintApi
         .getSprintList(wsSlug)
         .then((res) => (this.sprintsList = res.data));

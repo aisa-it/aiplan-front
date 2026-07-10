@@ -341,11 +341,6 @@ const createComment = async () => {
 function onSuccess() {
   refresh();
   clearEditor();
-  setNotificationView({
-    open: true,
-    type: 'success',
-    customMessage: SUCCESS_COMMENT_CREATING,
-  });
 
   isVisibleEditor.value = false;
   isSendComment.value = false;
