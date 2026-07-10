@@ -55,11 +55,15 @@
                 url: prop.value?.url,
               }"
               disableDelete
-              @update="isLinkOpenDialog = true; linkToUpdate = {
-                id: prop.id,
-                title: prop.value?.name,
-                url: prop.value?.url,
-              }; propToUpdate = prop"
+              @update="
+                isLinkOpenDialog = true;
+                linkToUpdate = {
+                  id: prop.id,
+                  title: prop.value?.name,
+                  url: prop.value?.url,
+                };
+                propToUpdate = prop;
+              "
             />
           </div>
 
@@ -123,6 +127,7 @@ import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 const props = defineProps<{
   projectId: string;
   issueId: string;
+  offSuccessNotification?: boolean;
 }>();
 
 //stores
@@ -162,15 +167,20 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
       props.projectId,
       props.issueId,
       prop.template_id as string,
-      prop.type === 'link' ? { url: newValue.url, name: newValue.title } : newValue,
+      prop.type === 'link'
+        ? { url: newValue.url, name: newValue.title }
+        : newValue,
     );
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: 'Параметр сохранен',
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: 'Параметр сохранен',
+      });
+    }
+
     if (prop.type === 'link') {
-      fetchData()
+      fetchData();
     }
   } catch (e) {
     console.error(e);

@@ -352,6 +352,7 @@ const props = defineProps<{
   isUserTextData?: boolean;
   isIssuesTemplate?: boolean;
   loading?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -382,8 +383,13 @@ const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
-const { items, isLoading, error: statesError, loadItems, resetItems } =
-  useStatusSelect();
+const {
+  items,
+  isLoading,
+  error: statesError,
+  loadItems,
+  resetItems,
+} = useStatusSelect();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
@@ -618,16 +624,18 @@ const handleCreateSuccess = async (createdIssueData: any) => {
     issue.sequence_id || createdIssueData.id,
   );
 
-  setNotificationView({
-    open: true,
-    type: 'success',
-    customMessage: props.parentissue
-      ? getSuccessCreateSubissueMessage(link)
-      : getSuccessCreateIssueMessage(
-          link,
-          `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
-        ),
-  });
+  if (!props.offSuccessNotification) {
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: props.parentissue
+        ? getSuccessCreateSubissueMessage(link)
+        : getSuccessCreateIssueMessage(
+            link,
+            `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
+          ),
+    });
+  }
 
   await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
 

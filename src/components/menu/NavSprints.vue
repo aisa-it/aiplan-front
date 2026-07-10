@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, ref, watch } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { QIcon, useQuasar } from 'quasar';
 
@@ -123,10 +123,16 @@ const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
-const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { workspaceInfo, currentWorkspaceSlug, workspaceSummary } =
+  storeToRefs(workspaceStore);
 
 const route = useRoute();
-const sprints = ref([] as DtoSprintLight[]);
+const sprints = computed(
+  () =>
+    workspaceSummary?.value?.sprints
+      ?.map((folder) => folder?.sprints || [])
+      .flat() ?? [],
+);
 
 const openCreateSprint = ref(false);
 const openEditSprint = ref(false);
@@ -136,17 +142,8 @@ const isDeleteDialogOpen = ref(false);
 const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
-onMounted(async () => {
-  sprints.value =
-    workspaceStore.workspaceSummary?.sprints
-      ?.map((folder) => folder?.sprints || [])
-      .flat() ?? [];
-});
-
 const refreshSprints = async () => {
-  await sprintStore.getSprintsList(currentWorkspaceSlug.value ?? '');
-  sprints.value =
-    sprintStore.sprintsList.map((folder) => folder.sprints || []).flat() ?? [];
+  await workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value ?? '');
 };
 
 const reopen = async (id: string) => {
@@ -212,18 +209,6 @@ const headerMenuItems = computed(() => [
     },
   },
 ]);
-
-watch(
-  () => workspaceStore.workspaceSummary?.sprints,
-  (newVal) => {
-    sprints.value = newVal?.map((folder) => folder?.sprints || []).flat() ?? [];
-  },
-);
-
-watch(currentWorkspaceSlug, async (newValue) => {
-  if (!newValue) return;
-  refreshSprints();
-});
 
 watch(
   () => sprintStore.refreshSprintData,

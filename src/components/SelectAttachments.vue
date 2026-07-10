@@ -120,6 +120,7 @@
               :key="attachment.id"
               :isEdit="isEdit"
               :file="attachment"
+              :off-success-notification="offSuccessNotification"
               class="inline-block"
               @copy-link="handleCopyLinkFile"
               @open="
@@ -143,6 +144,7 @@
                 created_at: new Date().toISOString(),
                 id: file.id || '',
               }"
+              :off-success-notification="offSuccessNotification"
               class="inline-block"
               @cancel="cancelUpload(file.name)"
               @delete="
@@ -183,6 +185,7 @@
       :attachments="attachments"
       :loading="loading"
       :download-all-func="downloadAllFunc"
+      :off-success-notification="offSuccessNotification"
       @open="
         (val) => {
           openDoc = true;
@@ -266,6 +269,7 @@ const props = defineProps<{
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
   issueData?: DtoIssue;
   draftMode?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const uploader = useTusUploader({
@@ -283,6 +287,7 @@ const uploader = useTusUploader({
       } `,
     });
   },
+  offSuccessNotification: props.offSuccessNotification,
 });
 
 //core
@@ -370,6 +375,7 @@ const uploadDraftAttachments = async (entityId: string) => {
         } `,
       });
     },
+    offSuccessNotification: props.offSuccessNotification,
   });
   for (const draft of draftFiles.value) {
     uploader.enqueue(draft.file);
@@ -552,11 +558,13 @@ const handleDelete = async () => {
   try {
     if (!props.deleteAttachmentFunc) return;
     await props.deleteAttachmentFunc(currentAttachmentDelete.value.id);
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: SUCCESS_DELETE_ATTACHMENT,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: SUCCESS_DELETE_ATTACHMENT,
+      });
+    }
   } catch (error) {
     setNotificationView({
       open: true,
@@ -580,11 +588,13 @@ const handleDownload = async () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DOWNLOAD_FILE,
-      });
+      if (!props.offSuccessNotification) {
+        setNotificationView({
+          type: 'success',
+          open: true,
+          customMessage: SUCCESS_DOWNLOAD_FILE,
+        });
+      }
     }
   } finally {
     loading.value = false;
@@ -597,16 +607,20 @@ const handleCopyLinkFile = (file: IAttachmentCard) => {
       window.location.origin,
       route.path.includes('aidoc') ? 'aidoc' : 'issue',
       route.params.workspace as string,
-      route.path.includes('aidoc') ? (route.params.doc as string) : `${issueData.value?.project_detail?.identifier}-${issueData.value?.sequence_id}`,
+      route.path.includes('aidoc')
+        ? (route.params.doc as string)
+        : `${issueData.value?.project_detail?.identifier}-${issueData.value?.sequence_id}`,
       file.asset?.name,
       file.asset.id,
     );
     copyToClipboard(link);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+      });
+    }
   } catch (e) {
     setNotificationView({
       type: 'error',

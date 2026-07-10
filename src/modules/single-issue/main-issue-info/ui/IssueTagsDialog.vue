@@ -217,7 +217,6 @@ const handleAddTag = (newTag: ITag | DtoLabelLight) => {
       )
       .then(() => {
         refresh();
-        setNotificationView({ type: 'success', open: true });
         emits('refresh');
       });
   } else {
@@ -267,7 +266,6 @@ const handleSaveTags = () => {
       },
     )
     .then(() => {
-      setNotificationView({ type: 'success', open: true });
       emits('refresh');
     })
     .finally(() => emits('close'));

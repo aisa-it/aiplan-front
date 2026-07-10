@@ -200,6 +200,8 @@ const emits = defineEmits<{
   openPreview: [DtoIssue, any];
   openIssue: [number, DtoIssue];
   updateGroupedIssues: [any];
+  tableHide: [string, Record<string, any>];
+  tableShow: [string];
 }>();
 
 const {
@@ -326,6 +328,7 @@ const onMiddleScroll = () => {
 
 onMounted(async () => {
   bus.on('updateIssueTable', handleUpdateIssueTable);
+  emits('tableShow', props.entity?.id);
 
   await nextTick();
 
@@ -342,6 +345,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   bus.off('updateIssueTable', handleUpdateIssueTable);
+  emits('tableHide', props.entity?.id, parsePagination(quasarPagination.value));
   hScroll.value?.removeEventListener('scroll', onHScroll);
   middle?.removeEventListener('scroll', onMiddleScroll);
 });

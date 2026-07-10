@@ -58,9 +58,11 @@
 
 <script setup lang="ts">
 // core
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 // stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
@@ -70,13 +72,33 @@ import { renderShortDate } from 'src/utils/time';
 import StatusCircularProgressBar from 'src/components/progress-bars/StatusCircularProgressBar.vue';
 
 const workspaceStore = useWorkspaceStore();
-const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const sprintStore = useSprintStore();
+const { currentWorkspaceSlug, workspaceSummary } = storeToRefs(workspaceStore);
 const route = useRoute();
 
-const sprints = computed(() => workspaceStore.workspaceSummary?.sprints ?? []);
+const sprints = computed(
+  () =>
+    workspaceSummary.value?.sprints
+      ?.map((folder) => folder?.sprints || [])
+      .flat() ?? [],
+);
+
+const refreshSprints = async () => {
+  await workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value ?? '');
+};
 
 const formatSprintDates = (start?: string, end?: string): string => {
   if (!start || !end) return '';
   return `${renderShortDate(start)?.toLowerCase()} — ${renderShortDate(end)?.toLowerCase()}`;
 };
+
+watch(
+  () => sprintStore.refreshSprintData,
+  async (v) => {
+    if (v) {
+      await refreshSprints();
+      sprintStore.clearSprintRefresh();
+    }
+  },
+);
 </script>

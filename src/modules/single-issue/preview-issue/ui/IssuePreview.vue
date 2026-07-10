@@ -70,6 +70,7 @@
 
       <SelectAttachments
         entityType="issue"
+        off-success-notification
         :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"

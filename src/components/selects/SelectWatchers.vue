@@ -147,6 +147,7 @@ const props = withDefaults(
     isLoading?: boolean;
     debounced?: boolean;
     isSprint?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -300,7 +301,9 @@ const updateProjectWatchers = async (e: any) => {
         },
       )
       .then(() => {
-        setNotificationView({ open: true, type: 'success' });
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
         emits('refresh');
       })
       .catch(() => (watcherid.value = currentIds));
@@ -330,7 +333,9 @@ const updateDocWatchers = async (e: any) => {
       props.docId as string,
     )
     .then(() => {
-      setNotificationView({ open: true, type: 'success' });
+      if (!props.offSuccessNotification) {
+        setNotificationView({ open: true, type: 'success' });
+      }
       emits('refresh');
     });
 };
@@ -338,7 +343,7 @@ const updateDocWatchers = async (e: any) => {
 const updateSprintWatchers = (e: any) => {
   emits('update:watchers', e);
   return;
-}
+};
 
 const handleUpdateWatchers = async (e) => {
   watcherid.value = e;

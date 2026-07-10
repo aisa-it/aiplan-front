@@ -7,10 +7,15 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { useIssuesStatesFlowStore } from 'src/stores/issues-states-flow-store';
 import { useProjectStatesFlowStore } from 'src/stores/project-states-flow-store';
+import {
+  useSprintStore,
+  NotUpdated,
+} from 'src/modules/sprints/stores/sprint-store';
 
-export function useStatusSelect() {
+export function useStatusSelect(offSuccessNotification?: boolean) {
   const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
   const singleIssueStore = useSingleIssueStore();
+  const sprintStore = useSprintStore();
   const { setNotificationView } = useNotificationStore();
   const issuesStatesFlowStore = useIssuesStatesFlowStore();
   const projectStatesFlowStore = useProjectStatesFlowStore();
@@ -64,7 +69,11 @@ export function useStatusSelect() {
       { state: state.id },
     );
 
+    sprintStore.triggerSprintRefresh(NotUpdated.SprintPage);
     resetItems();
+
+    if (offSuccessNotification) return;
+
     setNotificationView({ open: true, type: 'success' });
   };
 

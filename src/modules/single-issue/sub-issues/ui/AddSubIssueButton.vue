@@ -35,16 +35,12 @@ import { toRefs, ref, inject } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 // stores
-import { useNotificationStore } from 'src/stores/notification-store';
 import { useProjectStore } from 'src/stores/project-store';
 
 // components
 import AddIcon from 'src/components/icons/AddIcon.vue';
 import NewIssueDialog from 'src/components/NewIssueDialog.vue';
 import SelectIssueDialog from 'src/components/dialogs/IssueDialogs/SelectIssueDialog.vue';
-
-// constants
-import { SUCCESS_ADD_SUBISSUE } from 'src/constants/notifications';
 
 // interfaces
 import { IIssueSelectRequest } from 'src/interfaces/issues';
@@ -62,7 +58,6 @@ const props = defineProps<{
 const emits = defineEmits<{ refresh: [] }>();
 
 const $q = useQuasar();
-const { setNotificationView } = useNotificationStore();
 const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 const route = useRoute();
@@ -81,11 +76,6 @@ const addIssue = (items: Array<string>) => {
     currentIssueID.value as string,
     items,
   ).then(() => {
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: SUCCESS_ADD_SUBISSUE,
-    });
     emits('refresh');
   });
 };
@@ -97,13 +87,12 @@ const addNewIssue = () => {
       parent: parentId.value,
       projectid: props.projectid,
       project: props.project,
+      offSuccessNotification: true,
     },
   }).onOk(() => emits('refresh'));
 };
 
 const onRequest = async (params: IIssueSelectRequest) => {
-  console.log(props.project);
-  console.log(props.projectid);
   if (!props.projectid) return;
   getAvailableSubIssues(
     route.params.workspace as string,

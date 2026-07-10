@@ -250,6 +250,22 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   const isEmptyParagraph =
     $from.parent.type.name === 'paragraph' && $from.parent.content.size === 0;
 
+  function replaceBrWithMsoParagraph(fragment: DocumentFragment) {
+    const brs = Array.from(fragment.querySelectorAll('br'));
+
+    for (const br of brs) {
+      const p = document.createElement('p');
+      p.className = 'MsoNormal';
+
+      const o = document.createElement('o:p');
+      o.innerHTML = '&nbsp;';
+
+      p.appendChild(o);
+
+      br.replaceWith(p);
+    }
+  }
+
   // Сценарий с обычной вставкой
   if (!isInTable || !isSingleTableInHTML(fragment)) {
     event.preventDefault();
@@ -259,6 +275,8 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
     fragment.querySelectorAll('br.Apple-interchange-newline').forEach((el) => {
       el.remove();
     });
+
+    if (/docs-internal-guid/i.test(html)) replaceBrWithMsoParagraph(fragment);
 
     const doc = parser.parse(fragment);
 
