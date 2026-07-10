@@ -71,8 +71,8 @@ export const minDate = (date: string) => {
   return date >= dayjs(new Date()).format('YYYY/MM/DD');
 };
 
-export const validDate = (date: string): true | string => {
-  if (date?.length === 0) return true;
+export const validDate = (date: string | null): true | string => {
+  if (!date || date?.length === 0) return true;
 
   const parts = date.split('.');
   if (parts.length !== 3) return 'Некорректная дата';
