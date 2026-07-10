@@ -26,6 +26,7 @@
         <LinkedIssuesPanel />
 
         <SelectAttachments
+          off-success-notification
           entityType="issue"
           :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
           :delete-attachment-func="deleteAttachment"

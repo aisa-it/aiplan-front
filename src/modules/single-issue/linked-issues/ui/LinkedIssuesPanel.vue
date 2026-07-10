@@ -66,7 +66,6 @@ import { useRolesStore } from 'stores/roles-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 
 // components
 import SelectIssueDialog from 'src/components/dialogs/IssueDialogs/SelectIssueDialog.vue';
@@ -100,7 +99,6 @@ const projectStore = useProjectStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const { hasPermissionByIssue } = useRolesStore();
-const { setNotificationView } = useNotificationStore();
 
 const bus = inject('bus') as EventBus;
 
@@ -126,13 +124,7 @@ const handleSaveLinkedIssues = async (ids: string[], type?: string) => {
     props.project_detail?.id ?? currentProjectID.value,
     currentIssueID.value,
     { issue_ids: ids },
-  ).then(() => {
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: type === 'save' ? 'Связь добавлена' : 'Связь удалена',
-    });
-  });
+  );
 
   await refresh();
 };

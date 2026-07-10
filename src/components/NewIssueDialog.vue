@@ -4,6 +4,7 @@
       v-if="workspaceProjects"
       :project_detail="project"
       :parentissue="parent"
+      :off-success-notification="offSuccessNotification"
       class="q-dialog-plugin"
       style="min-width: 80vw"
       @ok="
@@ -54,7 +55,11 @@ import ConfirmLostEditionDialog from './ConfirmLostEditionDialog.vue';
 //types
 import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps<{ parent?: string; project?: DtoProject }>();
+const props = defineProps<{
+  parent?: string;
+  project?: DtoProject;
+  offSuccessNotification?: boolean;
+}>();
 const emits = defineEmits([
   ...useDialogPluginComponent.emits,
   'update',

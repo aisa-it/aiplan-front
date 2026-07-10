@@ -85,11 +85,9 @@ import { computed } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 // api
 import { updateIssueInfo } from '../../services/api';
 import { moveSubIssueDown, moveSubIssueUp } from '../services/api';
-import { SUCCESS_DELETE_SUBISSUE } from 'src/constants/notifications';
 import {
   DtoIssue,
   DtoProject,
@@ -98,7 +96,6 @@ import {
 const userStore = useUserStore();
 const singleIssueStore = useSingleIssueStore();
 const { hasPermissionByIssue } = useRolesStore();
-const { setNotificationView } = useNotificationStore();
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { user } = storeToRefs(userStore);
 
@@ -153,12 +150,6 @@ const removeChild = (id: string) => {
       parent: null,
     },
   ).then(() => {
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_DELETE_SUBISSUE,
-    });
-
     emits('refresh');
   });
 };

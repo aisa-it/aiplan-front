@@ -63,6 +63,7 @@ const props = defineProps<{
   editIssue?: boolean;
   isDisabled?: boolean;
   isAdaptiveSelect?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -80,7 +81,9 @@ const handleUpdateModelValue = (e: string) => {
         priority: e,
       })
       .then(() => {
-        setNotificationView({ type: 'success', open: true });
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
         emits('refresh');
         emits('update:priority', e);
       });

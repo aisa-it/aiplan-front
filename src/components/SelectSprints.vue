@@ -54,6 +54,7 @@
   <ManageIssueSprintsDialog
     v-model="isDialogOpen"
     :issue="issue"
+    :off-success-notification="offSuccessNotification"
     :checked-sprints="currentSprints"
     @refresh="emits('refresh')"
     @hide="() => selectSprintRef.hidePopup()"
@@ -100,6 +101,7 @@ const props = withDefaults(
     isAdaptiveSelect?: boolean;
     hideDropdownIcon?: boolean;
     isLoading?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -172,7 +174,9 @@ const handleUpdateSprints = async (
       sprintStore.triggerSprintRefresh();
     }
 
-    setNotificationView({ open: true, type: 'success' });
+    if (!props.offSuccessNotification) {
+      setNotificationView({ type: 'success', open: true });
+    }
     emits('refresh');
   }
 };

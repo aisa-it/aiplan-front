@@ -155,6 +155,7 @@ const props = withDefaults(
     maxYearMonth?: string;
     placeholder?: string;
     type?: 'kanban' | 'table' | 'issue';
+    offSuccessNotification?: boolean;
   }>(),
   {
     minYearMonth: `${dayjs(new Date()).year()}/01`,
@@ -269,7 +270,8 @@ function save(notify: boolean = false): void {
         target_date: targetDateValue,
       })
       .then(() => {
-        if (notify) setNotificationView({ type: 'success', open: true });
+        if (notify && !props.offSuccessNotification)
+          setNotificationView({ type: 'success', open: true });
         emits('refresh', proxyDate.value);
       });
   } else {

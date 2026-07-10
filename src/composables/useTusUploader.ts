@@ -25,6 +25,7 @@ interface UseUploaderOptions {
     message?: string;
     onClick?: () => void;
   }) => void;
+  offSuccessNotification?: boolean;
 }
 
 export function useTusUploader(options: UseUploaderOptions) {
@@ -50,6 +51,7 @@ export function useTusUploader(options: UseUploaderOptions) {
     message?: string,
     onClick?: () => void,
   ) => {
+    if (options.offSuccessNotification && type === 'success') return;
     options.onNotify?.({ type, message, file, onClick });
   };
 
