@@ -164,8 +164,16 @@ const handleDelete = async (id: string) => {
 const handleOpen = (file: IAttachmentCard) => {
   if (!file) return;
 
-  if (file.draft && props.field.pendingAttachment?.previewUrl) {
-    previewFile.value = { asset: props.field.pendingAttachment.previewUrl };
+  if (file.draft && props.field.pendingAttachment) {
+    const pendingAttachment = props.field.pendingAttachment;
+
+    previewFile.value = {
+      ...file,
+      asset: {
+        ...file.asset,
+        url: pendingAttachment.previewUrl,
+      },
+    };
   } else {
     previewFile.value = file;
   }

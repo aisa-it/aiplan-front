@@ -267,7 +267,7 @@ const saveChanges = () => {
 onMounted(async () => {
   const res = await workspaceStore.getWorkspaceMembers(
     currentWorkspaceSlug.value as string,
-    { offset: 0, limit: -1, order_by: 'id', desc: false },
+    { order_by: 'id', desc: false },
     false,
   );
   if (!res) return;
