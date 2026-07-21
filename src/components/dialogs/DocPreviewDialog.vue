@@ -28,7 +28,7 @@
       :class="{ document: isDocument, 'zoom-preview--loading': isImageLoading }"
       @mouseup.right.capture.stop
       @mousedown.right.capture.stop
-      >
+    >
       <ZoomImg
         ref="zoomImgRef"
         class="zoom-img-container flex items-center justify-center"
@@ -101,6 +101,10 @@ const isAudio = computed(() => getIsExtension(EXTENSION_AUDIO));
 const isIFrame = computed(() => getIsExtension(EXTENSION_IFRAME));
 
 const src = computed(() => {
+  if (props.file?.asset?.url) {
+    return props.file.asset.url;
+  }
+
   if (props.file?.asset?.id) {
     return prefix + props.file.asset.id;
   }
