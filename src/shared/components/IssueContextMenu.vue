@@ -109,6 +109,7 @@
     v-model="isDeletingOpen"
     :issue="props.row"
     @refresh="emits('refresh')"
+    @hide="menuRef.hide()"
   />
   <ManageIssueSprintsDialog
     v-model="isManageSprintsOpen"
