@@ -9,19 +9,14 @@
     >
       <AvatarImage
         :key="user?.id"
-        :tooltip="aiplan.UserName(user).join(' ')"
-        :text="
-          [
-            aiplan.UserName(user)[0]?.at(0),
-            aiplan.UserName(user)[1]?.at(0),
-          ].join(' ')
-        "
-        :image="user.avatar_id"
+        :tooltip="userFullName"
+        :text="userInitials"
+        :image="user?.avatar_id"
         :member="user"
         disable-popup
       ></AvatarImage>
       <span :class="isNight ? 'conference-night-text ' : 'conference-text'">
-        {{ aiplan.UserName(user).join(' ') }}</span
+        {{ userFullName }}</span
       >
     </div>
   </div>
@@ -30,6 +25,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 import AvatarImage from 'src/components/AvatarImage.vue';
 
 // stores
@@ -39,6 +35,16 @@ import { useUserStore } from 'src/stores/user-store';
 import aiplan from 'src/utils/aiplan';
 
 const { user } = storeToRefs(useUserStore());
+
+const userFullName = computed(() => {
+  return user.value ? aiplan.UserName(user.value).join(' ') : '';
+});
+
+const userInitials = computed(() => {
+  if (!user.value) return '';
+  const [firstName, lastName] = aiplan.UserName(user.value);
+  return [firstName?.at(0), lastName?.at(0)].filter(Boolean).join(' ');
+});
 
 defineProps<{
   isNight: boolean;

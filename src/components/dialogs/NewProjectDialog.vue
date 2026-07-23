@@ -83,7 +83,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
@@ -107,7 +107,10 @@ import { sortStates } from 'src/utils/sort';
 import { getRandomEmoji } from 'src/utils/helpers';
 
 // constants
-import { NETWORK_CHOICES, PROJECT_IDENTIFIER_LENGTH } from 'src/constants/constants';
+import {
+  NETWORK_CHOICES,
+  PROJECT_IDENTIFIER_LENGTH,
+} from 'src/constants/constants';
 import { PROJECT_EMOJIS, PROJECT_EMOJI_OPTIONS } from 'src/constants/emojis';
 import { SUCCESS_PROJECT_CREATE } from 'src/constants/notifications';
 
@@ -198,10 +201,13 @@ const createIdentifier = () => {
 };
 
 const createNewProject = async () => {
+  const workspaceSlug = currentWorkspaceSlug.value;
+  if (!workspaceSlug) return;
+
   const payload = {
     cover_image: '/images/vercel.jpeg',
     description: '',
-    emoji: projectValues.value.emoji_and_icon.value
+    emoji: projectValues.value.emoji_and_icon?.value
       ? projectValues.value.emoji_and_icon.value
       : getRandomEmoji(PROJECT_EMOJIS),
     identifier: projectValues.value.identifier,
@@ -209,18 +215,16 @@ const createNewProject = async () => {
     public: projectValues.value.public.value,
   };
   await projectStore
-    .createProject(currentWorkspaceSlug.value, payload)
+    .createProject(workspaceSlug, payload)
     .then(async () => {
-      await workspaceStore
-        .getAllWorkspaceStates(currentWorkspaceSlug.value)
-        .then(() => {
-          let obj: IStateResponse = {};
-          for (let o in workspaceStore.allWorkspaceStates) {
-            obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
-          }
+      await workspaceStore.getAllWorkspaceStates(workspaceSlug).then(() => {
+        let obj: IStateResponse = {};
+        for (let o in workspaceStore.allWorkspaceStates) {
+          obj[o] = sortStates(workspaceStore.allWorkspaceStates[o]);
+        }
 
-          statesCache.value = obj;
-        });
+        statesCache.value = obj;
+      });
       setNotificationView({
         open: true,
         type: 'success',
@@ -230,8 +234,10 @@ const createNewProject = async () => {
       clear();
     })
     .then(async () => {
-      await workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value);
+      await workspaceStore.getWorkspaceProjects(workspaceSlug);
+      await workspaceStore.getWorkspaceSummary(workspaceSlug);
       await userStore.getUserProjects();
+      await userStore.getUserProjectsMemberships();
     });
 };
 watch(

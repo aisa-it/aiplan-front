@@ -9,13 +9,7 @@
         :class="{ 'q-ml-none full-w': preview }"
       >
         <q-btn
-          v-if="
-            hasPermissionByIssue(
-              issueData,
-              issueData.project_detail ?? project,
-              'change-issue-primary',
-            )
-          "
+          v-if="hasPermissionByIssue(issueData, 'change-issue-primary')"
           :class="
             issueData.draft ? 'orange-btn-only-icon' : 'secondary-btn-only-icon'
           "
@@ -27,13 +21,7 @@
           }}</HintTooltip>
         </q-btn>
         <q-btn
-          v-if="
-            hasPermissionByIssue(
-              issueData,
-              issueData.project_detail ?? project,
-              'change-issue-primary',
-            )
-          "
+          v-if="hasPermissionByIssue(issueData, 'change-issue-primary')"
           class="secondary-btn-only-icon"
           icon="move_up"
           @click="() => (isTransferOpen = !isTransferOpen)"
@@ -132,11 +120,9 @@ const isTransferOpen = ref(false);
 const canDeleteIssue = computed(() => {
   const proj = issueData.value?.project_detail ?? project.value;
   if (proj?.issue_deletion_allowed === false) {
-    return (
-      hasPermissionByProject(proj, 'delete-issue')
-    );
+    return hasPermissionByProject(proj, 'delete-issue');
   }
-  return hasPermissionByIssue(issueData.value, proj, 'delete-issue');
+  return hasPermissionByIssue(issueData.value, 'delete-issue');
 });
 
 const switchDraft = async () => {

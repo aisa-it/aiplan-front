@@ -47,6 +47,26 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'link'">
+            <LinkItem
+              :link="{
+                id: prop.id,
+                title: prop.value?.name,
+                url: prop.value?.url,
+              }"
+              disableDelete
+              @update="
+                isLinkOpenDialog = true;
+                linkToUpdate = {
+                  id: prop.id,
+                  title: prop.value?.name,
+                  url: prop.value?.url,
+                };
+                propToUpdate = prop;
+              "
+            />
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
@@ -63,6 +83,11 @@
           </div>
         </div>
       </div>
+      <LinkDialog
+        v-model="isLinkOpenDialog"
+        :link="linkToUpdate"
+        @edit="(link) => updateValue(propToUpdate, link)"
+      />
     </div>
     <div v-if="isLoading" class="q-gutter-y-sm">
       <div v-for="n in 3" :key="n" class="row items-center q-py-xs">
@@ -95,11 +120,14 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 //components
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
+import LinkItem from 'src/components/LinkItem.vue';
+import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 
 //props
 const props = defineProps<{
   projectId: string;
   issueId: string;
+  offSuccessNotification?: boolean;
 }>();
 
 //stores
@@ -111,7 +139,9 @@ const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 //variables
 const properties = ref<DtoIssueProperty[]>([]);
 const isLoading = ref(false);
-
+const isLinkOpenDialog = ref(false);
+const linkToUpdate = ref();
+const propToUpdate = ref();
 //methods
 const fetchData = async () => {
   if (!props.issueId) return;
@@ -137,13 +167,21 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
       props.projectId,
       props.issueId,
       prop.template_id as string,
-      newValue,
+      prop.type === 'link'
+        ? { url: newValue.url, name: newValue.title }
+        : newValue,
     );
-    setNotificationView({
-      open: true,
-      type: 'success',
-      customMessage: 'Параметр сохранен',
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        open: true,
+        type: 'success',
+        customMessage: 'Параметр сохранен',
+      });
+    }
+
+    if (prop.type === 'link') {
+      fetchData();
+    }
   } catch (e) {
     console.error(e);
     setNotificationView({

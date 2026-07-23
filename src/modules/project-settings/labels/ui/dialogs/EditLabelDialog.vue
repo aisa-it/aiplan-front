@@ -1,5 +1,5 @@
 <template>
-  <q-dialog @hide="emit('close')">
+  <q-dialog @hide="emits('close')">
     <q-card class="modal-card">
       <q-card-section class="column q-pt-none">
         <h6>Изменение тега</h6>
@@ -60,7 +60,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
@@ -76,7 +76,7 @@ const props = defineProps<{
   currentLabel?: DtoLabelLight;
 }>();
 
-const emit = defineEmits(['close']);
+const emits = defineEmits<{ close: [] }>();
 
 const { getCorrectColor } = usePalette();
 
@@ -100,7 +100,7 @@ const handleSubmit = async () => {
       currentWorkspaceSlug.value as string,
       project.value.id,
     );
-    emit('close');
+    emits('close');
     setNotificationView({
       open: true,
       type: 'success',

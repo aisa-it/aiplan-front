@@ -21,17 +21,14 @@
           :projectid="issueData.project"
           :project="issueData.project_detail"
           :issueid="issueData.id"
-          :is-disabled="
-            hasPermissionByIssue(issueData, project, 'add-sub-issue')
-          "
+          :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
         />
         <LinkedIssuesPanel />
 
         <SelectAttachments
+          off-success-notification
           entityType="issue"
-          :is-edit="
-            hasPermissionByIssue(issueData, project, 'change-issue-secondary')
-          "
+          :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
           :delete-attachment-func="deleteAttachment"
           :get-attachment-func="getAttachmentsList"
           :upload-attachment-func="uploadAttachments"
@@ -46,7 +43,7 @@
   </q-layout>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';

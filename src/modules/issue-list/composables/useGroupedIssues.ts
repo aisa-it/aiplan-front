@@ -17,8 +17,15 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
   const bus = inject('bus') as EventBus;
 
-  const { contextProps, isKanbanEnabled, getIssue, GROUP_BY_OPTIONS, store } =
-    useIssueContext(contextType);
+  const {
+    contextProps,
+    isKanbanEnabled,
+    getIssue,
+    getIssueStream,
+    GROUP_BY_OPTIONS,
+    store,
+    issuesLoader,
+  } = useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
   function parsePagination(pagination: QuasarPagination) {
@@ -44,7 +51,7 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     };
   }
 
-  async function getGroupedIssues() {
+  async function getGroupedIssues(signal?: AbortSignal) {
     const quasarPagination: QuasarPagination = {
       page: 1,
       rowsNumber: 0,
@@ -56,7 +63,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         : (contextProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
-
     const filters = {
       states: [] as string[],
       assigned_to_me: contextProps.value?.filters.assignedToMe,
@@ -66,10 +72,31 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
     }
-    const response = await getIssue(filters, parsePagination(quasarPagination));
 
-    issuesStore.groupedIssueList = response?.data.issues;
-    issuesStore.groupByIssues = response?.data.group_by;
+    // const response = await getIssue(
+    //   filters,
+    //   parsePagination(quasarPagination),
+    //   signal,
+    // );
+
+    // issuesStore.groupedIssueList = response?.data.issues;
+    // issuesStore.groupByIssues = response?.data.group_by;
+
+    const pagination = parsePagination(quasarPagination);
+    issuesStore.groupByIssues = pagination.group_by ?? '';
+    issuesStore.groupedIssueList = [];
+    let hasRenderedFirstChunk = false;
+    issuesLoader.value = true;
+
+    return await getIssueStream(filters, pagination, (chunk: any) => {
+      issuesStore.groupedIssueList.push(chunk);
+      // Снимаем скелетон сразу после первой пришедшей группы, чтобы
+      // дальше группы дорисовывались по мере прихода стрима.
+      if (!hasRenderedFirstChunk && issuesLoader?.value) {
+        hasRenderedFirstChunk = true;
+        issuesLoader.value = false;
+      }
+    });
   }
 
   function defineFiltersByEntity(entity) {
@@ -95,7 +122,8 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'priority': {
         // Для "Без приоритета" и др. отправляем пустую строку
-        filters = { priorities: [entity || ''] };
+        // Карточка доски возвращает строку с приоритетом вместо объекта сущности
+        filters = { priorities: [entity?.id || entity || ''] };
         return filters;
       }
       case 'watchers': {
@@ -126,12 +154,6 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
-    const response = await getIssue(filters, pagination);
-
-    const data = response?.data?.issues;
-    const issues =
-      Array.isArray(data) && data[0]?.issues ? data[0]?.issues : (data ?? []);
-    const count = response?.data?.count ?? 0;
 
     const groups = issuesStore.groupedIssueList as any[];
 
@@ -145,18 +167,30 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         ? index
         : groups.findIndex((g) => sameEntity(g?.entity, entity));
 
-    if (targetIndex < 0) {
-      groups.push({ entity, issues, count });
-      return;
-    }
+    const upsertGroup = (issues: any[], count: number) => {
+      if (targetIndex < 0) {
+        groups.push({ entity, issues, count });
+        return;
+      }
 
-    if (!groups[targetIndex]) {
-      groups[targetIndex] = { entity, issues, count };
-      return;
-    }
+      if (!groups[targetIndex]) {
+        groups[targetIndex] = { entity, issues, count };
+        return;
+      }
 
-    groups[targetIndex].issues = issues;
-    groups[targetIndex].count = count;
+      groups[targetIndex].issues = issues;
+      groups[targetIndex].count = count;
+    };
+
+    await getIssueStream(
+      filters,
+      pagination,
+      (chunk: any) => {
+        upsertGroup(chunk.issues, chunk.count);
+      },
+      // запросы идут дважды — не отменяем.
+      { cancelPrevious: false },
+    );
   }
 
   async function updateCurrentTable(field, fieldValue, initialEntity) {
@@ -167,6 +201,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         break;
       }
       case 'labels': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue?.label_details.forEach((label) => {
           bus.emit('updateIssueTable', 'labels', label.id);
         });
@@ -175,6 +215,12 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       case 'assignees':
       case 'watchers':
       case 'author': {
+        if (field === 'priority') {
+          bus.emit('updateIssueTable', 'priority', initialEntity);
+        }
+        if (field === 'sprint') {
+          bus.emit('updateIssueTable', 'sprint', initialEntity?.id);
+        }
         fieldValue.assignee_details.forEach((assignee) => {
           bus.emit('updateIssueTable', 'members', assignee.id);
         });
@@ -182,6 +228,11 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       case 'project': {
         bus.emit('updateIssueTable', 'project', initialEntity.id);
+        break;
+      }
+      case 'priority': {
+        bus.emit('updateIssueTable', 'priority', initialEntity);
+        bus.emit('updateIssueTable', 'priority', fieldValue.priority);
         break;
       }
     }

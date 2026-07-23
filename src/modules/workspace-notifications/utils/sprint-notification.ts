@@ -1,4 +1,5 @@
 import { getFullName } from 'src/utils/helpers';
+import { getSprintLink } from 'src/utils/links';
 
 const link = (href: string, text: string) => `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
@@ -8,8 +9,9 @@ const link = (href: string, text: string) => `<a target="_blank"
 export function sprintNotificationRender(data: any, detail: any) {
   const sprintDetail = detail?.sprint || null;
   const sprintName = sprintDetail?.name || '';
-  const sprintLink = sprintDetail?.url
-    ? link(sprintDetail.url, `${sprintName}`)
+  const sprintHref = sprintDetail ? getSprintLink(detail?.workspace?.slug, sprintDetail?.sequence_id || sprintDetail?.id) : null;
+  const sprintLink = sprintHref
+    ? link(sprintHref, `${sprintName}`)
     : sprintName
       ? `"${sprintName}"`
       : '';
@@ -18,8 +20,9 @@ export function sprintNotificationRender(data: any, detail: any) {
     data?.verb === 'removed' ? data?.old_entity_detail : data?.new_entity_detail;
   const issueKey = data?.verb === 'removed' ? data?.old_value : data?.new_value;
   const issueName = issueEntity?.name || '';
+  const issueHref = `/${detail.workspace?.slug}/projects/${issueKey.split("-")[0]}/issues/${issueKey.split("-")[1]}`;
   const issueLink = issueEntity?.url
-    ? link(issueEntity.url, `${issueKey ? issueKey + ' ' : ''}"${issueName}"`)
+    ? link(issueHref, `${issueKey ? issueKey + ' ' : ''}"${issueName}"`)
     : issueKey
       ? `"${issueKey}"`
       : issueName
@@ -70,10 +73,10 @@ export function sprintNotificationRender(data: any, detail: any) {
     case 'issues':
     case 'issue':
       if (data?.verb === 'added') {
-        return `добавил(-а) задачу ${issueLink || ''} в спринт ${sprintLink || ''}`;
+        return `добавил(-а) в спринт ${sprintLink || ''} задачу ${issueLink || ''}`;
       }
       if (data?.verb === 'removed') {
-        return `убрал(-а) задачу ${issueLink || ''} из спринта ${sprintLink || ''}`;
+        return `убрал(-а) из спринта ${sprintLink || ''} задачу ${issueLink || ''}`;
       }
       break;
 

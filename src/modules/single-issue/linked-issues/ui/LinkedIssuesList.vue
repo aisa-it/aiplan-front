@@ -23,14 +23,9 @@
               rounded
               class="q-mr-xs"
               :style="{
-                backgroundColor: statesCache[i.project]?.find(
-                  (state) => state?.id === i.state,
-                )?.color,
+                backgroundColor: i.state_detail.color,
               }"
-              ><HintTooltip>{{
-                statesCache[i.project]?.find((state) => state?.id === i.state)
-                  ?.name
-              }}</HintTooltip></q-badge
+              ><HintTooltip>{{ i.state_detail.name }}</HintTooltip></q-badge
             >
 
             {{ props.project_detail?.identifier ?? project?.identifier }}-{{
@@ -55,7 +50,11 @@
 
 <script setup lang="ts">
 //stores
-import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoProject,
+  DtoProjectLight,
+  DtoWorkspaceLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { storeToRefs } from 'pinia';
 import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
@@ -70,7 +69,10 @@ const props = defineProps<{
   hasPermissionByIssue: boolean | 'author';
 }>();
 
-const emits = defineEmits(['update:linkedIssues', 'removeIssue']);
+const emits = defineEmits<{
+  'update:linkedIssues': [any[]];
+  removeIssue: [any];
+}>();
 
 const userStore = useUserStore();
 const statesStore = useStatesStore();
@@ -87,10 +89,12 @@ const issues = computed({
 
 const getUrl = (value: {
   workspace: string;
+  workspace_detail?: DtoWorkspaceLight;
   project: string;
+  project_detail?: DtoProjectLight;
   sequence_id: string;
 }) => {
-  return `/${value.workspace}/projects/${value.project}/issues/${value?.sequence_id}`;
+  return `/${value.workspace_detail?.slug || value.workspace}/projects/${value.project_detail?.identifier || value.project}/issues/${value?.sequence_id}`;
 };
 </script>
 

@@ -8,7 +8,7 @@
       <SettingsTabs
         :current-tab="projectSettingsTab"
         :list-tabs="listTabs"
-        @set="(val: number) => (projectSettingsTab = val)"
+        @set="handleSet"
       />
 
       <div
@@ -19,7 +19,14 @@
         <DefaultLoader class="self-center q-mt-md q-mb-md" />
       </div>
 
-      <component v-else :is="activeTab" @update="projectInfoRefresh" />
+      <component
+        v-else
+        :is="activeTab"
+        :open-dialog="isLeavingTabRestricted ? showDialog : false"
+        @update="projectInfoRefresh"
+        @set-restriction="handleRestrictionUpdate"
+        @back-to-edition="resetTabRouting"
+      />
     </div>
   </q-page>
 </template>
@@ -128,6 +135,14 @@ const activeTab = computed(() => {
             'src/modules/project-settings/custom-properties/ui/CustomPropertiesSettings.vue'
           ),
       );
+
+    case 9:
+      return asyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/workflow/WorkflowProjectSettings.vue'
+          ),
+      );
     default:
       return asyncImport(
         () =>
@@ -177,6 +192,10 @@ const listTabs = computed(() => {
       label: 'Параметры',
       allowedRoles: ['owner', 'admin'],
     },
+    {
+      name: 9,
+      label: 'Бизнес-процессы',
+    },
   ];
 
   return tabs.filter((tab) => {
@@ -186,6 +205,9 @@ const listTabs = computed(() => {
     return true;
   });
 });
+
+const isLeavingTabRestricted = ref<boolean>(false);
+const showDialog = ref<boolean>(false);
 
 useMeta(() => {
   return {
@@ -209,6 +231,41 @@ const projectInfoRefresh = async () => {
         window.location.href = '/access-denied';
       }
     });
+};
+
+const pendingTab = ref<number | null>();
+const handleSet = (val: number) => {
+  if (projectSettingsTab.value === 7) {
+    if (isLeavingTabRestricted.value) {
+      showDialog.value = true;
+      pendingTab.value = val;
+      return;
+    } else {
+      projectSettingsTab.value = val;
+      if (pendingTab.value) {
+        pendingTab.value = null;
+      }
+    }
+  } else {
+    projectSettingsTab.value = val;
+  }
+};
+
+const handleRestrictionUpdate = (isRestricted: boolean) => {
+  isLeavingTabRestricted.value = isRestricted;
+  if (!isRestricted) {
+    showDialog.value = false;
+    if (pendingTab.value) {
+      handleSet(pendingTab.value);
+    }
+  }
+};
+
+const resetTabRouting = () => {
+  showDialog.value = false;
+  if (pendingTab.value) {
+    pendingTab.value = null;
+  }
 };
 
 onMounted(() => {

@@ -61,7 +61,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { ref, watch } from 'vue';
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
@@ -171,7 +171,10 @@ const handleCreateWorkspace = async () => {
       slug: newWorkspaceSlug.value,
     })
     .then(async () => {
-      await userStore.getUserWorkspaces();
+      await Promise.all([
+        userStore.getUserWorkspaces(),
+        userStore.getUserWorkspacesMemberships(),
+      ]);
       showOK();
       emits('wsName', newWorkspaceSlug.value);
       dialogRef.value.hide();

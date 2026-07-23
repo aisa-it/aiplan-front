@@ -14,9 +14,10 @@ export interface HistoryEntry {
   new_entity_detail?: any;
   target_user?: any;
   project_id?: string;
-  workspace_detail?: { name: string };
+  workspace_detail?: { name: string, slug?: string };
   project_detail?: { name: string };
   entity_type?: string;
+  doc_detail?: { id: string, title: string }
 }
 
 export type HistoryRenderer = (

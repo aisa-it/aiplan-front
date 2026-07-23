@@ -157,7 +157,7 @@ defineProps<{
   mini?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -192,7 +192,7 @@ const setVersion = async () => {
       type: 'success',
       customMessage: SUCCESS_SETUP_VERSION,
     });
-    emit('refresh');
+    emits('refresh');
   } catch {
     setNotificationView({
       open: true,

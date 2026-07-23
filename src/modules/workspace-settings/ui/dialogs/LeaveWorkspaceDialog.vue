@@ -47,42 +47,48 @@ import { computed } from 'vue';
 import { useUserStore } from 'src/stores/user-store';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { deleteWorkspaceMember } from 'src/modules/workspace-settings/services/api';
+import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // props
 const props = defineProps<{
-  members: [];
+  members: DtoWorkspaceMember[];
   currentWsSlug: string;
   currentWsInfo: object;
   isInAdminPanel: boolean;
 }>();
-const emit = defineEmits(['refreshData']);
 
 // store
 const userStore = useUserStore();
+const workspaceStore = useWorkspaceStore();
+
 const { setNotificationView } = useNotificationStore();
 // refs
 const router = useRouter();
-const { user, userWorkspaces } = storeToRefs(userStore);
+const { userWorkspaces } = storeToRefs(userStore);
+const { meInWorkspace } = storeToRefs(workspaceStore);
 
 const computedWorkspaceInfo = computed(() => props.currentWsInfo);
 
 const leaveWorkspace = async () => {
   await deleteWorkspaceMember(
     props.currentWsSlug as string,
-    props.members?.find((member: any) => member.member_id === user.value.id)
-      ?.id,
+    meInWorkspace.value?.id || '',
   ).then(async () => {
-    await userStore.getUserWorkspaces().then(() => {
-      if (props.isInAdminPanel) {
-        emit('refreshData');
-      } else {
-        router.push(
-          userWorkspaces.value.length
-            ? `/${userWorkspaces.value[0]?.slug}`
-            : '/no-workspace',
-        );
-      }
-    });
+    await Promise.all([
+      userStore.getUserWorkspaces(),
+      userStore.getUserWorkspacesMemberships(),
+      userStore.getUserProjectsMemberships(),
+    ]);
+    if (props.isInAdminPanel) {
+      router.push('/admin-panel/workspaces')
+    } else {
+      router.push(
+        userWorkspaces.value.length
+          ? `/${userWorkspaces.value[0]?.slug}`
+          : '/no-workspace',
+      );
+    }
     setNotificationView({
       open: true,
       type: 'success',

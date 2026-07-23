@@ -258,3 +258,13 @@ export const hasObjectChanges = (
     return val1 !== val2;
   });
 };
+
+export const isObjectsEqual = (a: unknown, b: unknown): boolean => {
+  if (Object.is(a, b)) return true;
+  if (a == null || b == null) return a == b;
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+};

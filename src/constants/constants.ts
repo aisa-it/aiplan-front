@@ -82,14 +82,19 @@ export const PROJECT_VIEWS = [
   { value: 'list', label: 'Список' },
   { value: 'kanban', label: 'Доска' },
   { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
+  { value: 'calendar', label: 'Календарь', hideInMobile: true },
+];
+
+export const SPRINT_VIEWS = [
+  { value: 'list', label: 'Список' },
+  { value: 'kanban', label: 'Доска' },
+  { value: 'gantt_chart', label: 'Диаграмма Ганта', hideInMobile: true },
 ];
 
 export const PROJECT_IDENTIFIER_LENGTH = {
   MAX: 15,
   MIN: 3,
 };
-
-export const SPRINT_VIEWS = [...PROJECT_VIEWS];
 
 export const GROUP_BY_OPTIONS = [
   { value: 'None', label: 'Нет' },
@@ -437,3 +442,5 @@ export const TIMEZONES = [
   { value: 'Pacific/Pago_Pago', label: '-11:00 Паго-Паго, Ниуэ, Мидуэй' },
   { value: 'Etc/GMT-12', label: '-12:00 Острова Бейкер и Хауленд' },
 ];
+
+export const ROOT_FOLDER_ID = '00000000-0000-0000-0000-000000000000';

@@ -142,20 +142,8 @@
         v-model="showTagsDialog"
         :tags="issueData.label_details"
         :project-id="issueData.project"
-        :isDisabled="
-          !hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
-        :can-create-tags="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'create-tag',
-          )
-        "
+        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary')"
+        :can-create-tags="hasPermissionByIssue(issueData, 'create-tag')"
         @close="showTagsDialog = !showTagsDialog"
         @refresh="refresh"
       />
@@ -216,7 +204,6 @@ import AvatarImage from 'src/components/AvatarImage.vue';
 
 // directives
 import ClickOutside from 'src/directives/click-outside';
-import { useNotificationStore } from 'stores/notification-store';
 import IssueNameInput from './IssueNameInput.vue';
 import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 
@@ -235,11 +222,11 @@ defineProps<{
   preview?: boolean;
 }>();
 
-const emit = defineEmits([
-  'update:issuePage',
-  'toggleDrawer',
-  'uploadAttachment',
-]);
+const emits = defineEmits<{
+  'update:issuePage': [];
+  toggleDrawer: [];
+  uploadAttachment: [];
+}>();
 
 // stores
 const userStore = useUserStore();
@@ -253,7 +240,6 @@ const workspaceStore = useWorkspaceStore();
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
-const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // vars
@@ -352,12 +338,7 @@ const handleUpdateTitleAndEditor = async () => {
       if (issueData.value) {
         issueData.value.description_html = initialIssueDescription.value;
       }
-
-      setNotificationView({
-        open: true,
-        type: 'success',
-      });
-      emit('update:issuePage');
+      emits('update:issuePage');
     })
     .catch(() => {
       if (issueData.value) {
@@ -414,11 +395,7 @@ const hideSettings = computed(() => {
 });
 
 const isAdminOrAuthor = computed(() => {
-  return hasPermissionByIssue(
-    issueData.value,
-    issueData.value.project_detail ?? project.value,
-    'change-issue-primary',
-  );
+  return hasPermissionByIssue(issueData.value, 'change-issue-primary');
 });
 
 const isAutoSave = computed(() => user.value?.view_props?.autoSave);
@@ -461,7 +438,7 @@ const refresh = async () => {
 };
 
 const toggleDrawer = () => {
-  emit('toggleDrawer');
+  emits('toggleDrawer');
 };
 
 const editorContainer = ref<HTMLElement>();
@@ -475,7 +452,7 @@ const { handleDrop } = useAttachmentsWithEditor(
       issueData.value.project,
       issueData.value.id,
     ),
-  () => emit('uploadAttachment'),
+  () => emits('uploadAttachment'),
 );
 
 onMounted(() => {

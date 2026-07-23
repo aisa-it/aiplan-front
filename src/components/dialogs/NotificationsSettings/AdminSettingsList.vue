@@ -1,6 +1,11 @@
 <template>
   <q-card class="setting-card">
-    <div class="sub-text q-ml-sm q-my-sm"><slot name="subtitle"></slot></div>
+    <div class="sub-text q-ml-sm q-my-sm">
+      <p v-if="disable" class="text-warning q-mb-sm">
+        Уведомления данного типа отключены глобально в профиле
+      </p>
+      <slot name="subtitle"></slot>
+    </div>
     <div class="notification-header">
       <span style="font-size: 14px; font-weight: 600">Название</span>
       <span style="text-align: center">Включить</span>
@@ -10,6 +15,7 @@
         <span class="centered-horisontally">Все</span>
         <q-checkbox
           class="justify-center"
+          :disable="disable"
           :model-value="allSettings"
           @update:model-value="(value: boolean) => setAll(!value)"
         />
@@ -22,6 +28,7 @@
         <span>{{ setting.title }}</span>
         <q-checkbox
           class="justify-center"
+          :disable="disable"
           :model-value="!settings[setting.field]"
           @update:model-value="
             (value: boolean) =>
@@ -39,6 +46,7 @@ import { computed } from 'vue';
 const props = defineProps<{
   settings: any;
   settingsList: { title: string; field: string }[];
+  disable?: boolean;
 }>();
 const emits = defineEmits<{ update: [{ field: string; value: boolean }] }>();
 
@@ -55,14 +63,12 @@ const setAll = (value: boolean) => {
 
 <style scoped lang="scss">
 .notification-setting {
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 8px;
 }
+
 .notification-list {
   max-height: calc(100vh - 400px);
   overflow-y: scroll;
@@ -77,7 +83,7 @@ const setAll = (value: boolean) => {
 
 .notification-header {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr;
   padding: 0px 8px;
 }
 
@@ -98,10 +104,5 @@ const setAll = (value: boolean) => {
     width: 100% !important;
     margin: 0px !important;
   }
-}
-
-.notification-setting {
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
 }
 </style>

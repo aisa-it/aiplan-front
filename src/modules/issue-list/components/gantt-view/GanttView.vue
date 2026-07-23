@@ -5,6 +5,7 @@
       unit="%"
       :limits="[0, 100]"
       class="full-width"
+      :separator-style="isPreview ? 'display:none' : ''"
     >
       <template v-slot:before>
         <q-card-section
@@ -36,10 +37,22 @@
           />
         </q-card-section>
       </template>
-      <template v-slot:after>
-        <q-card-section v-if="issues.length" class="col q-pa-none">
-          <FrappeGantt :sprint="sprint" :issues="issues" :view-mode="'Day'" />
-        </q-card-section>
+      <template v-if="!isPreview" v-slot:after>
+        <template v-if="isEndStream">
+          <q-card-section v-if="issues.length" class="col q-pa-none">
+            <FrappeGantt
+              :sprint="isGroupingEnabled ? undefined : sprint"
+              :issues="issues"
+              :view-mode="'Day'"
+            />
+          </q-card-section>
+        </template>
+        <div v-else class="row justify-center">
+          <DefaultLoader
+            class="fixed"
+            style="top: 50%; transform: translate(-50%, -50%)"
+          />
+        </div>
       </template>
     </q-splitter>
   </q-card>
@@ -52,8 +65,11 @@ import { DtoIssue, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import DefaultIssueList from '../DefaultIssueList.vue';
 import GroupedIssueList from '../GroupedIssueList.vue';
+import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { useIssuesStore } from 'src/stores/issues-store';
 import { useIssueContext } from '../../composables/useIssueContext';
+import { useSingleIssueStore } from 'src/stores/single-issue-store.ts';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
   sprint?: DtoSprint;
@@ -64,9 +80,10 @@ const issuesStore = useIssuesStore();
 
 const issues = shallowRef<any>([]);
 
-const { isGroupHide, contextProps, isGroupingEnabled } = useIssueContext(
-  props.contextType,
-);
+const { isGroupHide, contextProps, isGroupingEnabled, isEndStream } =
+  useIssueContext(props.contextType);
+
+const { isPreview } = storeToRefs(useSingleIssueStore());
 
 const refresh = (newIssues: DtoIssue[]) => {
   issues.value = newIssues ?? [];
@@ -78,6 +95,12 @@ const shiftHeight = computed(() => {
   if (isGroupingEnabled.value) {
     return props.contextType === 'sprint' ? 42 : -10;
   }
+
+  if (props.contextType === 'sprint') {
+    return 37;
+  }
+
+  return 0;
 });
 
 let oldSplitter = 50;
@@ -91,11 +114,15 @@ const closePreview = () => {
 };
 
 watch(
-  () => [issuesStore.groupedIssueList, contextProps.value.group_tables_hide],
+  () => [
+    issuesStore.groupedIssueList?.length,
+    isEndStream.value,
+    contextProps.value.group_tables_hide,
+  ],
   () => {
-    if (!issuesStore.groupedIssueList) return;
+    if (!issuesStore.groupedIssueList?.length || !isEndStream.value) return;
     let result = [] as DtoIssue[];
-    issuesStore.groupedIssueList.map((el) => {
+    issuesStore.groupedIssueList.forEach((el) => {
       if (isGroupHide(el?.entity?.id || el?.entity)) {
         result = [...result, { id: null }];
         return;
@@ -116,7 +143,7 @@ watch(
 </script>
 <style lang="scss" scoped>
 .sprint-margin-default {
-  margin-top: 91px;
+  margin-top: 37px;
 }
 
 .project-margin-default {
@@ -124,7 +151,7 @@ watch(
 }
 
 .sprint-margin-grouped {
-  margin-top: 42px;
+  margin-top: -10px;
 }
 
 .project-margin-grouped {
@@ -136,14 +163,10 @@ watch(
 }
 
 .sprint-margin-grouped :deep(.q-expansion-item__container) {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 :deep(.groupped-table) {
   height: 100%;
-}
-
-:deep(.gantt-margin) {
-  margin-bottom: 14.17px;
 }
 </style>

@@ -71,9 +71,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { defineComponent, onMounted, toRef, ref, computed, onBeforeMount, onUnmounted } from 'vue';
+import { onMounted, toRef, ref, computed, onBeforeMount, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { Screen } from 'quasar';
 
@@ -92,127 +92,102 @@ import { useUtilsStore } from 'stores/utils-store';
 import UserStatus from 'src/components/selects/components/UserStatus.vue';
 import { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'UserActivitiesPage',
-  components: { ActivityHotMap, AvatarImage, ActivitiesList, UserStatus },
-  setup() {
-    const route = useRoute();
+const route = useRoute();
 
-    // stores
-    const userStore = useUserStore();
-    const { userActivityMap } = storeToRefs(userStore);
-    const utilsStore = useUtilsStore();
-    const { ny } = storeToRefs(utilsStore);
+// stores
+const userStore = useUserStore();
+const { userActivityMap } = storeToRefs(userStore);
+const utilsStore = useUtilsStore();
+const { ny } = storeToRefs(utilsStore);
 
-    //vars
-    const userId = toRef(route.params.id);
-    const userInfo = ref<DtoUser>({});
-    const loadReq = ref(true);
-    const loadingInfo = ref(true);
-    const rows = ref([]);
-    const rowsCount = ref(0);
-    const pagination = {
-      orderBy: 'created_at',
-      descending: true,
-      page: 1,
-      rowsPerPage: 10,
-      rowsNumber: 0,
-    };
-    const currentDay = ref<string>('');
+//vars
+const userId = toRef(route.params.id);
+const userInfo = ref<DtoUser>({});
+const loadReq = ref(true);
+const loadingInfo = ref(true);
+const rows = ref([]);
+const rowsCount = ref(0);
+const pagination = {
+  orderBy: 'created_at',
+  descending: true,
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+};
+const currentDay = ref<string>('');
 
-    const onUpdateActivity = async (day: string) => {
-      currentDay.value = day;
-      await onRequest({ pagination });
-    };
+const onUpdateActivity = async (day: string) => {
+  currentDay.value = day;
+  await onRequest({ pagination });
+};
 
-    const isMobile = computed(() => Screen.width <= 650);
+const isMobile = computed(() => Screen.width <= 650);
 
-    const getFullName = computed(() =>
-      userInfo.value
-        ? `${userInfo.value.first_name} ${userInfo.value.last_name}`
-        : '',
-    );
+const getFullName = computed(() =>
+  userInfo.value
+    ? `${userInfo.value.first_name} ${userInfo.value.last_name}`
+    : '',
+);
 
-    const closeCurrentActivity = async () => {
-      currentDay.value = '';
-      await onRequest({ pagination });
-    };
+const closeCurrentActivity = async () => {
+  currentDay.value = '';
+  await onRequest({ pagination });
+};
 
-    async function onRequest(p: any) {
-      //TODO sortBy, descending не используются
-      const { page, rowsPerPage, rowsNumber } =
-        p.pagination;
+async function onRequest(p: any) {
+  //TODO sortBy, descending не используются
+  const { page, rowsPerPage, rowsNumber } =
+    p.pagination;
 
-      await userStore
-        .getUserActivitiesByID(userId.value as string, {
-          day:
-            currentDay.value !== ''
-              ? currentDay.value.split('.').join('')
-              : undefined,
-          offset: (page - 1) * (rowsPerPage == 0 ? 10 : rowsPerPage),
-          limit: rowsPerPage == 0 ? rowsNumber || 10 : rowsPerPage,
-        })
-        .then((res) => {
-          rowsCount.value = res.count || 0;
-          rows.value = res.result;
-        });
-    }
-
-    const handleMembers = (members: any) => {
-      return aiplan
-        .UserName(members)
-        .map((m) => m[0])
-        .join(' ');
-    };
-
-    // onUnmounted(() => {
-    //   userActivityMap.$destroy();
-    // })
-    onBeforeMount(() => {
-      userStore.clearUserActivityMap();
+  await userStore
+    .getUserActivitiesByID(userId.value as string, {
+      day:
+        currentDay.value !== ''
+          ? currentDay.value.split('.').join('')
+          : undefined,
+      offset: (page - 1) * (rowsPerPage == 0 ? 10 : rowsPerPage),
+      limit: rowsPerPage == 0 ? rowsNumber || 10 : rowsPerPage,
     })
-
-    onMounted(async () => {
-      userInfo.value = await userStore
-        .getUserById(userId.value as string)
-        .finally(() => (loadingInfo.value = false));
-
-      const today = new Date();
-      const todayString = today.toISOString().split('T')[0];
-
-      const dates = todayString.split('-').reverse();
-      const from = `${dates[0]}${dates[1]}${String(
-        Number(dates[2]) - 1,
-      ).padStart(2, '0')}`;
-      const to = `${dates[0]}${dates[1]}${dates[2]}`;
-      await userStore
-        .getUserActivityDateById(userId.value as string, { from: from, to: to })
-        .finally(() => (loadReq.value = false));
+    .then((res) => {
+      rowsCount.value = res.count || 0;
+      rows.value = res.result;
     });
+}
 
-    onUnmounted(() => {
-      userStore.clearUserActivityMap();
-    });
+const handleMembers = (members: any) => {
+  return aiplan
+    .UserName(members)
+    .map((m) => m[0])
+    .join(' ');
+};
 
-    return {
-      userId,
-      userInfo,
-      avatarText: aiplan.UserName,
-      loadReq,
-      loadingInfo,
-      rows,
-      rowsCount,
-      userActivityMap,
-      currentDay,
-      ny,
-      getFullName,
-      isMobile,
-      onUpdateActivity,
-      onRequest,
-      closeCurrentActivity,
-      handleMembers,
-    };
-  },
+// onUnmounted(() => {
+//   userActivityMap.$destroy();
+// })
+onBeforeMount(() => {
+  userStore.clearUserActivityMap();
+})
+
+onMounted(async () => {
+  userInfo.value = await userStore
+    .getUserById(userId.value as string)
+    .finally(() => (loadingInfo.value = false));
+
+  const today = new Date();
+  const todayString = today.toISOString().split('T')[0];
+
+  const dates = todayString.split('-').reverse();
+  const from = `${dates[0]}${dates[1]}${String(
+    Number(dates[2]) - 1,
+  ).padStart(2, '0')}`;
+  const to = `${dates[0]}${dates[1]}${dates[2]}`;
+  await userStore
+    .getUserActivityDateById(userId.value as string, { from: from, to: to })
+    .finally(() => (loadReq.value = false));
+});
+
+onUnmounted(() => {
+  userStore.clearUserActivityMap();
 });
 </script>
 

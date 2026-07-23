@@ -114,7 +114,7 @@ const loadSettings = async () => {
   const slug = currentWorkspaceSlug.value as string;
   if (!slug) return;
 
-  await workspaceStore.getWorkspaceNotifications(slug).then((data: any) => {
+  await workspaceStore.getMeInWorkspace(slug).then((data: any) => {
     if (!data) return;
 
     settings.value.notification_author_settings_email = {
@@ -156,4 +156,3 @@ const handleSaveSettings = async () => {
 
 const { loading, onLoad } = useLoad(loadSettings);
 </script>
-

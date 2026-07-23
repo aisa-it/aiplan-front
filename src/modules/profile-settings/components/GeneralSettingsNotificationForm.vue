@@ -13,7 +13,7 @@
       >
         {{ el.title }}
         <q-toggle
-          :model-value="el.value"
+          :model-value="localToggles[el.key]"
           size="32px"
           @update:model-value="el.update"
         />
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from 'src/stores/user-store';
@@ -57,11 +57,21 @@ import {
   hoursToNanoseconds,
   nanosecondsToHours,
 } from 'src/utils/hoursToNanoseconds';
+import { debounce } from 'quasar';
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const { setNotificationView } = useNotificationStore();
+
+const localToggles = ref<Partial<TypesUserSettings>>({});
+const pendingTogglesChanges = ref<Partial<TypesUserSettings>>({});
+
+const toggleConfig = [
+  { title: 'Email', key: 'email_notification_mute' as const },
+  { title: 'Telegram', key: 'telegram_notification_mute' as const },
+  { title: 'Система', key: 'app_notification_mute' as const },
+];
 
 const notificationOptions: {
   text: string;
@@ -101,24 +111,47 @@ const changeNotificationSettings = async (data: TypesUserSettings) => {
         ...data,
       },
     })
-    .then(() => showNotification('success', SUCCESS_UPDATE_DATA))
-    .catch(() => showNotification('error', BASE_ERROR));
+    .then(() => {
+      showNotification('success', SUCCESS_UPDATE_DATA);
+      pendingTogglesChanges.value = {};
+    })
+    .catch(() => {
+      showNotification('error', BASE_ERROR);
+      pendingTogglesChanges.value = {};
+      updateLocalToggles();
+    });
 };
 
-const toggleConfig = [
-  { title: 'Email', key: 'email_notification_mute' as const },
-  { title: 'Telegram', key: 'telegram_notification_mute' as const },
-  { title: 'Система', key: 'app_notification_mute' as const },
-];
+const debouncedChangeNotificationSettings = debounce(() => {
+  if (Object.keys(pendingTogglesChanges.value).length > 0) {
+    changeNotificationSettings(pendingTogglesChanges.value);
+  }
+}, 1000);
+
+const updateLocalToggles = () => {
+  if (!user.value?.settings) return;
+  toggleConfig.forEach((item) => {
+    const key = item.key;
+    localToggles.value[key] = !user.value.settings![key];
+  });
+};
 
 const toggles = computed(() =>
   toggleConfig.map((el) => ({
     title: el.title,
-    value: !user.value?.settings?.[el.key],
-    update: (newValue: boolean) =>
-      changeNotificationSettings({ [el.key]: !newValue }),
+    key: el.key,
+    value: localToggles.value[el.key],
+    update: (newValue: boolean) => {
+      localToggles.value[el.key] = newValue;
+      pendingTogglesChanges.value[el.key] = !newValue;
+      debouncedChangeNotificationSettings();
+    },
   })),
 );
+
+onMounted(() => updateLocalToggles());
+
+watch(() => user.value?.settings, updateLocalToggles);
 
 watch(
   () => user.value?.settings?.deadline_notification,

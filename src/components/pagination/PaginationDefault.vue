@@ -29,83 +29,55 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { QSelectProps } from 'quasar';
 
-export default defineComponent({
-  name: 'PaginationDefault',
-  emits: ['update:selectedPage', 'update:rowsPerPage', 'request'],
-  props: {
-    selectedPage: {
-      type: Number,
-      required: true,
-      default: () => 1,
-    },
-    rowsPerPage: {
-      type: Number,
-      required: false,
-      default: 10,
-    },
-    rowsNumber: {
-      type: Number,
-      required: true,
-      default: 10,
-    },
-    maxPages: {
-      type: Number,
-      required: false,
-      default: 6,
-    },
-    rowsPerPageOptions: {
-      type: Array as PropType<Array<number>>,
-      required: false,
-      default: () => [10, 25, 50, 100],
-    },
-    showRowsPerPage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    labelRowsPerPage: {
-      type: String,
-      required: false,
-      default: 'Строк на странице:',
-    },
-    menuSelf: {
-      type: String as PropType<QSelectProps['menuSelf']>,
-      required: false,
-      default: 'top middle',
-    },
-    menuAnchor: {
-      type: String as PropType<QSelectProps['menuAnchor']>,
-      required: false,
-      default: 'bottom middle',
-    },
+const props = withDefaults(
+  defineProps<{
+    selectedPage?: number;
+    rowsPerPage?: number;
+    rowsNumber?: number;
+    maxPages?: number;
+    rowsPerPageOptions?: number[];
+    showRowsPerPage?: boolean;
+    labelRowsPerPage?: string;
+    menuSelf?: QSelectProps['menuSelf'];
+    menuAnchor?: QSelectProps['menuAnchor'];
+  }>(),
+  {
+    selectedPage: 1,
+    rowsPerPage: 10,
+    rowsNumber: 10,
+    maxPages: 6,
+    rowsPerPageOptions: () => [10, 25, 50, 100],
+    showRowsPerPage: false,
+    labelRowsPerPage: 'Строк на странице:',
+    menuSelf: 'top middle',
+    menuAnchor: 'bottom middle',
   },
-  setup(props, { emit }) {
-    const maxRowsNumber = computed(() => {
-      return Math.ceil(props.rowsNumber / props.rowsPerPage);
-    });
+);
 
-    const updateSelectedPage = (val: number) => {
-      emit('update:selectedPage', val);
-      emit('request', { page: val }, 'selectedPage');
-    };
+const emits = defineEmits<{
+  'update:selectedPage': [number];
+  'update:rowsPerPage': [number];
+  request: [{ page: number; rowsPerPage?: number }, string];
+}>();
 
-    const updateRowsPerPage = (val: number) => {
-      emit('update:rowsPerPage', val);
-      emit('update:selectedPage', 1);
-      emit('request', { page: 1, rowsPerPage: val }, 'rowsPerPage');
-    };
-
-    return {
-      maxRowsNumber,
-      updateRowsPerPage,
-      updateSelectedPage,
-    };
-  },
+const maxRowsNumber = computed(() => {
+  return Math.ceil(props.rowsNumber / props.rowsPerPage);
 });
+
+const updateSelectedPage = (val: number) => {
+  emits('update:selectedPage', val);
+  emits('request', { page: val }, 'selectedPage');
+};
+
+const updateRowsPerPage = (val: number) => {
+  emits('update:rowsPerPage', val);
+  emits('update:selectedPage', 1);
+  emits('request', { page: 1, rowsPerPage: val }, 'rowsPerPage');
+};
 </script>
 
 <style lang="scss">

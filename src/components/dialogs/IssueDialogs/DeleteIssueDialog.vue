@@ -32,13 +32,12 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
 // stores
-import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useNotificationStore } from 'src/stores/notification-store';
@@ -49,17 +48,15 @@ const props = defineProps<{
   issue: any;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
 // store
-const projectStore = useProjectStore();
 const issueStore = useSingleIssueStore();
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
 // store to refs
-const { currentProjectID } = storeToRefs(projectStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { issueData, isPreview } = storeToRefs(issueStore);
 
@@ -69,13 +66,21 @@ const handleDeleteIssue = async () => {
   await issueStore
     .deleteIssue(
       currentWorkspaceSlug.value,
-      issueData.value?.project ?? currentProjectID.value,
+      props.issue?.project || props.issue.project_detail?.id,
       props.issue ? props.issue.sequence_id : issueData.value.id,
     )
     .then(() => {
-      router.push(
-        `/${currentWorkspaceSlug.value}/projects/${issueData.value?.project ?? currentProjectID.value}`,
-      );
+      if (router.currentRoute.value.params.project) {
+        router.push(
+          `/${currentWorkspaceSlug.value}/projects/${router.currentRoute.value.params.project}`,
+        );
+      } else if (router.currentRoute.value.params.sprint) {
+        router.push(
+          `/${currentWorkspaceSlug.value}/sprints/${
+            router.currentRoute.value.params.sprint
+          }`,
+        );
+      }
       setNotificationView({
         open: true,
         type: 'success',
@@ -90,18 +95,40 @@ const handleDeleteIssue = async () => {
         ),
       });
       if (props.issue || isPreview.value) {
-        emit('refresh');
+        emits('refresh');
         isPreview.value = false;
       }
     })
     .catch(() => {
-      router.push(
-        `/${currentWorkspaceSlug.value}/projects/${
-          issueData.value.project ?? currentProjectID.value
-        }/issues/${
-          props.issue ? props.issue.sequence_id : issueData.value.sequence_id
-        }`,
-      );
+      // Если открыта задача
+      if (
+        router.currentRoute.value.params.issue &&
+        router.currentRoute.value.params.project
+      ) {
+        router.push(
+          `/${currentWorkspaceSlug.value}/projects/${
+            router.currentRoute.value.params.project
+          }/issues/${router.currentRoute.value.params.issue}`,
+        );
+      }
+
+      // Если открыт проект:
+      else if (router.currentRoute.value.params.project) {
+        router.push(
+          `/${currentWorkspaceSlug.value}/projects/${
+            router.currentRoute.value.params.project
+          }`,
+        );
+      }
+
+      // Если открыт спринт
+      else if (router.currentRoute.value.params.sprint) {
+        router.push(
+          `/${currentWorkspaceSlug.value}/sprints/${
+            router.currentRoute.value.params.sprint
+          }`,
+        );
+      }
     });
 };
 </script>

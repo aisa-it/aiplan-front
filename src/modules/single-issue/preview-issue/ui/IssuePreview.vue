@@ -64,25 +64,14 @@
         :projectid="issueData.project"
         :project="issueData.project_detail"
         :issueid="issueData.id"
-        :is-disabled="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'add-sub-issue',
-          )
-        "
+        :is-disabled="hasPermissionByIssue(issueData, 'add-sub-issue')"
       />
       <LinkedIssuesPanel :project_detail="issueData.project_detail" />
 
       <SelectAttachments
         entityType="issue"
-        :is-edit="
-          hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
+        off-success-notification
+        :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
         :upload-attachment-func="uploadAttachments"
@@ -101,11 +90,11 @@
       style="top: 62px"
       @refresh="(v) => refreshData(v)"
     />
-
   </q-drawer>
 
   <Teleport to="body">
     <div
+      v-if="model"
       class="handle-resize"
       :style="{ left: `calc(100vw - ${adaptiveWidth}px)` }"
       @pointerdown="onPointerDown"
@@ -124,7 +113,6 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useIssuesStore } from 'src/stores/issues-store';
 
 // directives
 import clickOutside from 'src/directives/click-outside';
@@ -167,7 +155,6 @@ const { hasPermissionByIssue } = useRolesStore();
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-const { fetchPinnedIssues } = useIssuesStore();
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 900;
@@ -187,7 +174,6 @@ const hideSettings = computed(() => {
 });
 
 const refreshData = (args?: any): void => {
-  fetchPinnedIssues(issueData.value.project ?? currentProjectID.value);
   emits('refresh', args);
 };
 
@@ -202,19 +188,11 @@ const uploadAttachments = async (
   ev: object,
   onProgress?: FileAttUploadProgressFunc,
 ) => {
-  await aiplanStore
-    .issueAttachmentsUpload(ev, issueData.value.id, onProgress)
-    ?.then(() =>
-      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
-    );
+  await aiplanStore.issueAttachmentsUpload(ev, issueData.value.id, onProgress);
 };
 
 const deleteAttachment = async (attachmentId: string) => {
-  await aiplanStore
-    .issueAttachmentDelete(currentIssueID.value, attachmentId)
-    ?.then(() =>
-      fetchPinnedIssues(issueData.value.project ?? currentProjectID.value),
-    );
+  await aiplanStore.issueAttachmentDelete(currentIssueID.value, attachmentId);
 };
 
 // заменить на сервис после обновления апи

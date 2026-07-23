@@ -36,7 +36,7 @@ const props = defineProps<{
   hasPermissionByIssue: boolean | 'author';
 }>();
 
-const emits = defineEmits(['update:isExpanded', 'onAddClick']);
+const emits = defineEmits<{ 'update:isExpanded': [boolean]; onAddClick: [] }>();
 
 const expanded = computed({
   get: () => props.isExpanded,

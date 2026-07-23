@@ -71,7 +71,17 @@
               dense
               flat
               size="8px"
-              @click.prevent.stop="copyFunc(comment.id)"
+              @click.prevent.stop="handleOpenHistoryComment"
+            >
+              <q-icon name="history" dense size="18px" />
+              <HintTooltip> История изменений </HintTooltip>
+            </q-btn>
+            <q-btn
+              class="stamp-btn"
+              dense
+              flat
+              size="8px"
+              @click.prevent.stop="copyFunc(comment.id ?? '')"
             >
               <LinkIcon :width="18" :height="18" />
               <HintTooltip> Скопировать ссылку </HintTooltip>
@@ -132,20 +142,23 @@ import { useUserStore } from 'src/stores/user-store';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { getFullName } from 'src/utils/helpers';
+import { DtoDocComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  comment: { type: Object, required: true },
-  members: { type: Array, required: true },
-  getMembersForMention: { type: Function, required: false },
-  copyFunc: { type: Function, required: true },
-});
-const emit = defineEmits([
-  'handle-edit',
-  'handle-delete',
-  'handle-reply',
-  'add-reaction',
-  'delete-reaction',
-]);
+const props = defineProps<{
+  comment: DtoDocComment;
+  members: any[];
+  getMembersForMention?: (data: any) => any;
+  copyFunc: (id: string) => Promise<void>;
+}>();
+
+const emits = defineEmits<{
+  'handle-edit': [];
+  'handle-delete': [];
+  'handle-reply': [];
+  'handle-history': [];
+  'add-reaction': [string];
+  'delete-reaction': [string];
+}>();
 
 const userStore = useUserStore();
 const { user } = userStore;
@@ -161,7 +174,7 @@ const isAuthor = computed(() => {
 });
 
 const editComment = () => {
-  emit('handle-edit');
+  emits('handle-edit');
   isUpdateComment.value = false;
   isTouchStart.value = false;
   isHoverMessageText.value = false;
@@ -169,14 +182,21 @@ const editComment = () => {
 };
 
 const handleDeleteComment = () => {
-  emit('handle-delete');
+  emits('handle-delete');
   isTouchReaction.value = false;
   isTouchStart.value = false;
   isHoverMessageText.value = false;
 };
 
 const handleClickReply = () => {
-  emit('handle-reply');
+  emits('handle-reply');
+  isTouchReaction.value = false;
+  isTouchStart.value = false;
+  isHoverMessageText.value = false;
+};
+
+const handleOpenHistoryComment = () => {
+  emits('handle-history');
   isTouchReaction.value = false;
   isTouchStart.value = false;
   isHoverMessageText.value = false;
@@ -205,8 +225,9 @@ const reactionList = computed(() => {
     const users = [];
 
     commentReactionsFilter.forEach((r) => {
-      const member = props.members.find((m) => r.user_id === m.member_id)
-        ?.member;
+      const member = props.members.find(
+        (m) => r.user_id === m.member_id,
+      )?.member;
 
       const user = {
         ...r,
@@ -280,11 +301,11 @@ const handleTouchStart = (e: TouchEvent) => {
 };
 
 const addReaction = (value: string) => {
-  emit('add-reaction', value);
+  emits('add-reaction', value);
 };
 
 const deleteReaction = (value: string) => {
-  emit('delete-reaction', value);
+  emits('delete-reaction', value);
 };
 
 const handleUpdateReaction = (value: string) => {
@@ -401,7 +422,7 @@ pre {
     right: 0;
     left: auto;
   }
-  
+
   &__name {
     margin: 7px 0 0 !important;
     font-size: 14px;

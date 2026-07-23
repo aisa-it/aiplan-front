@@ -3,16 +3,22 @@
     ref="menuRef"
     class="context-menu"
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
-    v-bind="menuProps"
+    :context-menu="!isControlled"
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
       <q-item
-        v-if="!isPinned"
+        v-if="!props.row?.pinned"
         clickable
         v-close-popup
         @click="
-          pinIssue(props.row, workspaceSlug, project.identifier, project.id)
+          pinAndUnpinIssue(() =>
+            pinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
+          )
         "
       >
         <q-item-section thumbnail class="q-px-md">
@@ -25,7 +31,13 @@
         clickable
         v-close-popup
         @click="
-          unpinIssue(props.row, workspaceSlug, project.identifier, project.id)
+          pinAndUnpinIssue(() =>
+            unpinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
+          )
         "
       >
         <q-item-section thumbnail class="q-px-md">
@@ -86,22 +98,24 @@
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
-    <TransferTaskDialog
-      v-model="isTransferOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
-    <DeleteIssueDialog
-      v-model="isDeletingOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
-    <ManageIssueSprintsDialog
-      v-model="isManageSprintsOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
   </q-menu>
+  <TransferTaskDialog
+    v-if="isTransferOpen"
+    v-model="isTransferOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <DeleteIssueDialog
+    v-model="isDeletingOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+    @hide="menuRef.hide()"
+  />
+  <ManageIssueSprintsDialog
+    v-model="isManageSprintsOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -131,13 +145,14 @@ import PinIcon from 'src/components/icons/PinIcon.vue';
 import UnpinIcon from 'src/components/icons/UnpinIcon.vue';
 import SprintIcon from 'src/components/icons/SprintIcon.vue';
 import ParentIcon from 'src/components/icons/ParentIcon.vue';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
-  row: object | null;
+  row: DtoIssue | null;
   anchorEvent?: MouseEvent | null;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -145,14 +160,12 @@ const menuRef = ref<any>(null);
 
 const isControlled = computed(() => !!props.anchorEvent);
 
-const menuProps = computed(() => {
-  return isControlled.value ? {} : { 'context-menu': true };
-});
-
-const { sprintsList } = storeToRefs(useSprintStore());
+const issuesStore = useIssuesStore();
+const sprintStore = useSprintStore();
+const { sprintsList } = storeToRefs(sprintStore);
 const { project } = storeToRefs(useProjectStore());
-const { pinIssue, unpinIssue } = useIssuesStore();
-const { pinnedIssues } = storeToRefs(useIssuesStore());
+const { pinIssue, unpinIssue } = issuesStore;
+const { refreshIssues } = storeToRefs(issuesStore);
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
@@ -163,14 +176,10 @@ const workspaceSlug = computed<string>(() => {
   return route.params.workspace as string;
 });
 
-let issueLink = props.row?.short_url;
+let issueLink = computed(() => props.row?.short_url ?? '');
 const isDeletingOpen = ref<boolean>(false);
 const isTransferOpen = ref<boolean>(false);
 const isManageSprintsOpen = ref<boolean>(false);
-
-const isPinned = computed<boolean>(() => {
-  return pinnedIssues.value?.some((issue) => issue.id === props.row?.id);
-});
 
 const isAdmin = computed(() => {
   return hasPermission('create-sprint');
@@ -178,18 +187,18 @@ const isAdmin = computed(() => {
 
 const copyIssueLink = (): void => {
   try {
-    navigator.clipboard.writeText(issueLink);
+    navigator.clipboard.writeText(issueLink.value);
   } catch {
     console.error('Произошла ошибка при копировании ссылки');
   }
 };
 
 const openInNewTab = (): void => {
-  window.open(issueLink, '_blank');
+  window.open(issueLink.value, '_blank');
 };
 
 const openInNewWindow = (): void => {
-  window.open(issueLink, '_blank', 'popup');
+  window.open(issueLink.value, '_blank', 'popup');
 };
 
 const copyIssueTitle = (): void => {
@@ -202,6 +211,22 @@ const copyIssueTitle = (): void => {
   }
 };
 
+const pinAndUnpinIssue = async (func: () => Promise<void>) => {
+  try {
+    await func();
+    if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
+    refreshIssues.value = true;
+    emits('refresh');
+  } catch (err) {
+    setNotificationView({
+      open: true,
+      type: 'error',
+      customMessage: 'Произошла ошибка при закреплении/откреплении задачи',
+    });
+    throw err;
+  }
+};
+
 const transferIssue = (): void => {
   isTransferOpen.value = true;
 };
@@ -210,15 +235,18 @@ const deleteIssue = (): void => {
   isDeletingOpen.value = true;
 };
 
-const manageIssueSprints = (): void => {
+const manageIssueSprints = async (): Promise<void> => {
   if (!sprintsList.value.length) {
-    setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage:
-        'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
-    });
-    return;
+    await sprintStore.getSprintsList(workspaceSlug.value);
+    if (!sprintsList.value.length) {
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage:
+          'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
+      });
+      return;
+    }
   }
   isManageSprintsOpen.value = true;
 };
@@ -230,7 +258,7 @@ const addNewIssue = () => {
       parent: props.row?.id,
       project: props.row?.project_detail,
     },
-  }).onOk(() => emit('refresh'));
+  }).onOk(() => emits('refresh'));
 };
 
 watch(
@@ -240,7 +268,6 @@ watch(
       menuRef.value.hide();
       await nextTick();
       menuRef.value.show(evt);
-      issueLink = props.row?.short_url;
     }
   },
 );

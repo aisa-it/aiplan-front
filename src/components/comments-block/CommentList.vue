@@ -11,6 +11,7 @@
         @handle-delete="changeCommit(comment, 'delete')"
         @handle-edit="changeCommit(comment, 'edit')"
         @handle-reply="handleReply(comment)"
+        @handle-history="openCommentHistory(comment)"
         @add-reaction="handleAddReaction(comment, $event)"
         @delete-reaction="handleDeleteReaction(comment, $event)"
       />
@@ -28,6 +29,12 @@
       :comment="currentCommitUsage"
       @on-delete="handleDeleteComment()"
     />
+    <CommentHistoryDialog
+      v-model="isOpenCommentHistoryDialog"
+      :comment="currentCommitUsage"
+      :members="members"
+      :context="'doc'"
+    />
   </q-list>
 </template>
 
@@ -35,41 +42,57 @@
 import { ref } from 'vue';
 import CommentEditDialog from './dialogs/CommentEditDialog.vue';
 import CommentDeleteDialog from './dialogs/CommentDeleteDialog.vue';
+import CommentHistoryDialog from '../dialogs/CommentHistoryDialog.vue';
 import CommentListItem from './items/CommentListItem.vue';
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+import { DtoDocComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps({
-  comments: { type: Array, required: true },
-  docId: { type: String, required: true },
-  members: { type: Array, required: false },
-  workspaceSlug: { type: String, required: true },
-  getMembersForMention: { type: Function, required: false },
-  isAutoSave: { type: Boolean, required: true },
-});
+const props = defineProps<{
+  comments: DtoDocComment[];
+  docId: string;
+  members?: any[];
+  workspaceSlug: string;
+  getMembersForMention?: (data: any) => any;
+  isAutoSave: boolean;
+}>();
 
-const emit = defineEmits([
-  'refresh',
-  'handle-reply',
-  'updateCommit',
-  'deleteCommit',
-]);
+export interface updateBodyType {
+  workspaceSlug: string;
+  docId: string;
+  commentId: any;
+  data: {
+    comment: {
+      comment_html: string | null | undefined;
+      reply_to_comment_id: any;
+    };
+    files: File[] | never[];
+  };
+}
+
+const emits = defineEmits<{
+  refresh: [];
+  'handle-reply': [DtoDocComment];
+  updateCommit: [updateBodyType];
+  deleteCommit: [{ workspaceSlug: string; docId: string; commentId: string }];
+}>();
 
 const aidocStore = useAiDocStore();
 
-const isOpenCommentEditDialog = ref(false);
-const isOpenCommentDeleteDialog = ref(false);
+const isOpenCommentEditDialog = ref<boolean>(false);
+const isOpenCommentDeleteDialog = ref<boolean>(false);
+const isOpenCommentHistoryDialog = ref<boolean>(false);
 const currentChangeCommitId = ref();
 const currentCommitUsage = ref({});
 
-const changeCommit = (comment: object, type: string) => {
+const changeCommit = (comment: DtoDocComment, type: string) => {
   currentCommitUsage.value = comment;
   currentChangeCommitId.value = comment.id;
   if (type === 'edit') isOpenCommentEditDialog.value = true;
   else isOpenCommentDeleteDialog.value = true;
 };
 
-const handleUpdateComment = async (data: object) => {
+const handleUpdateComment = async (data: { content: string; text: string }) => {
   const contents = await handleEditorValue(data.content);
   const updateBody = {
     workspaceSlug: props.workspaceSlug,
@@ -85,7 +108,7 @@ const handleUpdateComment = async (data: object) => {
       files: contents.files,
     },
   };
-  emit('updateCommit', updateBody);
+  emits('updateCommit', updateBody);
 };
 
 const handleDeleteComment = async () => {
@@ -94,26 +117,41 @@ const handleDeleteComment = async () => {
     docId: props.docId,
     commentId: currentChangeCommitId.value,
   };
-  emit('deleteCommit', deleteBody);
+  emits('deleteCommit', deleteBody);
 };
 
-const handleAddReaction = async (comment: any, reaction: string) => {
+const openCommentHistory = (comment: DtoDocComment) => {
+  currentCommitUsage.value = comment;
+  isOpenCommentHistoryDialog.value = true;
+};
+
+const handleAddReaction = async (comment: DtoDocComment, reaction: string) => {
   await aidocStore
-    .addReaction(props.workspaceSlug, props.docId, comment.id, { reaction })
+    .addReaction(props.workspaceSlug, props.docId, comment.id as string, {
+      reaction,
+    })
     .then(() => {
-      emit('refresh');
+      emits('refresh');
     });
 };
 
-const handleDeleteReaction = async (comment: any, reaction: string) => {
+const handleDeleteReaction = async (
+  comment: DtoDocComment,
+  reaction: string,
+) => {
   await aidocStore
-    .deleteReaction(props.workspaceSlug, props.docId, comment.id, reaction)
+    .deleteReaction(
+      props.workspaceSlug,
+      props.docId,
+      comment.id as string,
+      reaction,
+    )
     .then(() => {
-      emit('refresh');
+      emits('refresh');
     });
 };
 
-const handleReply = (comment: any) => emit('handle-reply', comment);
+const handleReply = (comment: DtoDocComment) => emits('handle-reply', comment);
 </script>
 
 <style lang="scss" scoped>

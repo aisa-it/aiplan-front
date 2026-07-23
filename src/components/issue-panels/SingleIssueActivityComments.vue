@@ -52,13 +52,7 @@
           }"
         />
         <div
-          v-if="
-            hasPermissionByIssue(
-              issueData,
-              issueData.project_detail ?? project,
-              'add-comment',
-            )
-          "
+          v-if="hasPermissionByIssue(issueData, 'add-comment')"
           class="q-my-sm"
         >
           <q-btn
@@ -249,7 +243,6 @@ const aidocStore = useAiDocStore();
 // store to refs
 const { user } = storeToRefs(userStore);
 const { hasPermission } = useRolesStore();
-const { project } = storeToRefs(projectStore);
 const { currentProjectID, projectMembers } = storeToRefs(projectStore);
 const { issueCommentsData, issueData, currentIssueID } =
   storeToRefs(singleIssueStore);
@@ -283,7 +276,13 @@ const localProjectMembers = ref<Array<any>>(
 const isMobile = computed(() => {
   return q.platform.is.mobile && Screen.lt.md;
 });
-const isEmpty = computed(() => isEditorEmpty(editorDOMvalue.value));
+const isEmpty = computed<boolean>(() => {
+  // Если есть активный editor — берём актуальное состояние из него
+  if (editor.value) {
+    return isEditorEmpty(editor.value.state.doc);
+  }
+  return isEditorEmpty(editorDOMvalue.value);
+});
 const singleComment = ref<DtoIssueComment>();
 const singleCommentInfo = ref<IDatasetComment>();
 
@@ -323,7 +322,7 @@ const createComment = async () => {
   } else {
     await singleIssueStore
       .issueCommentCreateReply(
-        currentWorkspaceSlug.value,
+        currentWorkspaceSlug.value as string,
         issueReplyComment.value.project_id,
         issueReplyComment.value.issue_id,
         comment,
@@ -342,11 +341,6 @@ const createComment = async () => {
 function onSuccess() {
   refresh();
   clearEditor();
-  setNotificationView({
-    open: true,
-    type: 'success',
-    customMessage: SUCCESS_COMMENT_CREATING,
-  });
 
   isVisibleEditor.value = false;
   isSendComment.value = false;
@@ -362,7 +356,11 @@ function onError() {
 const clearEditor = () => {
   editorValue.value = '';
   issueReplyComment.value = {};
-  isEditorEmpty.value = true;
+  editorDOMvalue.value = null;
+  if (editor.value) {
+    editor.value.commands.clearContent();
+    editorDOMvalue.value = editor.value.state.doc;
+  }
 };
 
 const clearReply = () => {
@@ -398,7 +396,7 @@ const getMembers = async () => {
       issueData.value.project ?? currentProjectID.value,
     )
     .then((data) => {
-      localProjectMembers.value = data.result || [];
+      localProjectMembers.value = data?.result || [];
     });
 };
 
@@ -456,7 +454,7 @@ const toggleFullScreen = () => {
 };
 
 // hook
-onBeforeRouteLeave(async (to, from, next) => {
+onBeforeRouteLeave(async (_to, _from, next) => {
   if (
     isAutoSave.value &&
     isVisibleEditor.value &&
@@ -469,31 +467,20 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
 });
 
-const handleAddListener = () => {
-  window.addEventListener('beforeunload', (e) => {
-    if (
-      isAutoSave.value &&
-      isVisibleEditor.value &&
-      editor.value?.getText().trim().length
-    ) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
+const beforeUnloadHandler = (e: any) => {
+  if (
+    isAutoSave.value &&
+    isVisibleEditor.value &&
+    editor.value?.getText().trim().length
+  ) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
 };
-
-const handleRemoveListener = () => {
-  window.removeEventListener('beforeunload', (e) => {
-    if (
-      isAutoSave.value &&
-      isVisibleEditor.value &&
-      editor.value?.getText().trim().length
-    ) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
-};
+const handleAddListener = () =>
+  window.addEventListener('beforeunload', beforeUnloadHandler);
+const handleRemoveListener = () =>
+  window.removeEventListener('beforeunload', beforeUnloadHandler);
 
 const clearLink = () => {
   singleComment.value = undefined;
@@ -573,6 +560,10 @@ watch(
       clearInterval(msgsCycle.value);
     } else {
       resetAndRefresh();
+      // Синхронизация состояний редактора
+      if (editor.value) {
+        editorDOMvalue.value = editor.value.state.doc;
+      }
     }
   },
 );
@@ -597,30 +588,24 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Для вертикального расположения */
   width: 100%;
   min-height: 200px;
   overflow-y: auto;
-  /* Вертикальный скролл */
   overflow-x: auto;
-  /* Горизонтальный скролл при необходимости */
   gap: 10px;
-  /* Отступ между элементами */
 }
 
 .image-preview {
   width: 100%;
-  /* Каждый элемент занимает всю доступную ширину */
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Центрируем содержимое по ширине */
 }
 
 .image-container {
-  position: relative; // Теперь управление позиционированием внутри контейнера
-  width: 100%; // или другой фиксированный размер, если нужно
-  margin-bottom: 10px; // Добавляем отступы между элементами
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
 }
 </style>
 

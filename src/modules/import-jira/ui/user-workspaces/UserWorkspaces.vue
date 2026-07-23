@@ -45,22 +45,24 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 // stores
 import { useUserStore } from 'src/stores/user-store';
+import { useRolesStore } from 'src/stores/roles-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useImportStore } from 'src/modules/import-jira/stores/import-store';
 
 // emits
-const emits = defineEmits(['next', 'get-back']);
+const emits = defineEmits<{ next: []; 'get-back': [] }>();
 
 // stores
 const userStore = useUserStore();
 const importStore = useImportStore();
 const workspaceStore = useWorkspaceStore();
+const { getWsRole } = useRolesStore();
 
 // stores to ref
 const { userWorkspaces } = storeToRefs(userStore);
@@ -71,9 +73,7 @@ const loading = ref(false);
 
 // computed
 const filterOptions = computed(() => {
-  return userWorkspaces.value.filter(
-    (ws) => ws?.current_user_membership?.role === 15,
-  );
+  return userWorkspaces.value.filter((ws) => getWsRole(ws.id ?? '') === 15);
 });
 
 onMounted(() => {

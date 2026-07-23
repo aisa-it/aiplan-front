@@ -8,7 +8,7 @@ export function getURLDoc(
 ) {
   if (!activity?.[field]) return fallback;
   return `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${`/${activity.workspace_detail?.slug}/aidoc/${activity?.[field]?.id}`}>
                     "${activity?.[field]?.title}"<a/>`;
 }
@@ -18,7 +18,7 @@ export function docActivityRender(activity: DtoEntityActivityFull) {
     if (!entityDetail) return fallback;
 
     return `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${`/${activity.workspace_detail?.slug}/aidoc/${entityDetail.id}`}>
                     "${entityDetail.title}"<a/>`;
   }
@@ -38,6 +38,16 @@ export function docActivityRender(activity: DtoEntityActivityFull) {
       return `<span>изменил(-а) описание документа ${createLinkByDocDetail()}<span/>`;
     case 'title':
       return `<span>изменил(-а) название документа ${createLinkByDocDetail()}<span/>`;
+
+    case 'watchers':
+      if (activity.verb === 'added') {
+        const person = userName(activity.new_entity_detail) || activity.new_value;
+        return `<span>добавил(-а) наблюдателя ${person} в документ ${createLinkByDocDetail()}<span/>`;
+      } else if (activity.verb === 'removed') {
+        const person = userName(activity.old_entity_detail) || activity.old_value;
+        return `<span>убрал(-а) наблюдателя ${person} из документа ${createLinkByDocDetail()}<span/>`;
+      }
+      return;
 
     case 'readers': {
       const person =

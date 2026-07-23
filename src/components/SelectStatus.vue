@@ -7,21 +7,36 @@
     v-model="open"
     no-wrap
     no-caps
-    :options="states"
+    :options="items"
     :option-label="(v) => v.name"
     :option-value="(v) => v.id"
     :class="`${issue ? 'base-selector-sm' : 'base-selector'} ${isAdaptiveSelect ? 'adaptive-select' : ''}`"
     :style="{ width: isAdaptiveSelect ? '' : '160px' }"
     dense
-    @popup-show="() => refresh()"
+    @popup-show="emits('popup-show')"
+    @popup-hide="emits('popup-hide')"
   >
+    <template v-slot:no-option>
+      <div
+        v-if="loading"
+        class="row justify-center items-center q-pa-sm"
+      >
+        <q-spinner color="primary" size="24px" />
+      </div>
+      <div
+        v-else-if="error"
+        class="q-pa-md text-center text-white"
+      >
+        {{ error }}
+      </div>
+    </template>
     <template v-slot:option="scope">
       <q-item
         clickable
         v-close-popup
         :key="scope.opt.id"
         class="word-wrap"
-        @click="async () => await issueStateUpdate(scope.opt)"
+        @click="emits('update:status', scope.opt)"
       >
         <q-item-section>
           <div class="full-w" style="display: flex; align-items: center">
@@ -54,155 +69,43 @@
   </q-select>
 </template>
 
-<script lang="ts">
-// core
-import { storeToRefs } from 'pinia';
-import { defineComponent, ref, watch, onMounted } from 'vue';
-
-// store
-import { useAiplanStore } from 'src/stores/aiplan-store';
-import { useStatesStore } from 'src/stores/states-store';
-import {
-  NotUpdated,
-  useSprintStore,
-} from 'src/modules/sprints/stores/sprint-store';
-import { useWorkspaceStore } from 'src/stores/workspace-store';
-import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useNotificationStore } from 'src/stores/notification-store';
-
-// utils
+<script setup lang="ts">
+import { ref, watch } from 'vue';
 import { useResizeObserverSelect } from 'src/utils/useResizeObserverSelect';
+import type { DtoStateLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-// interfaces
-import { IState } from 'src/interfaces/states';
-
-export default defineComponent({
+defineOptions({
   name: 'SelectStatus',
-  props: {
-    projectid: {
-      type: String,
-      required: true,
-    },
-    issueid: {
-      type: String,
-      required: false,
-    },
-    status: {
-      type: Object,
-      required: false,
-    },
-    issue: {
-      type: Object,
-      required: false,
-    },
-    statesFromCache: {
-      type: Object,
-      required: false,
-    },
-    isAdaptiveSelect: {
-      type: Boolean,
-      required: false,
-      default: () => false,
-    },
-    isDisabled: { type: Boolean, required: false, default: () => false },
-    label: { type: String, required: false, default: () => '' },
-  },
-  emits: ['setStatus', 'update-initial-status', 'update:status', 'refresh'],
-  setup(props, { emit }) {
-    const api = useAiplanStore();
-    const statesStore = useStatesStore();
-    const workspaceStore = useWorkspaceStore();
-    const singleIssueStore = useSingleIssueStore();
-    const { setNotificationView } = useNotificationStore();
-
-    const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
-
-    const states = ref<IState[]>([]);
-    const open = ref();
-
-    const selectStatusRef = ref();
-    const { getWidthStyle: selectStatusWidth } =
-      useResizeObserverSelect(selectStatusRef);
-
-    const refresh = async () => {
-      const { data } = props.issue?.project_detail
-        ? { data: props.statesFromCache }
-        : await statesStore.getStatesByProject(
-            currentWorkspaceSlug.value,
-            props.projectid,
-          );
-      let arr: any = [];
-      for (const n in data) {
-        arr = arr.concat(data[n]);
-      }
-      states.value = arr;
-
-      if (!props.status) {
-        emit(
-          'update-initial-status',
-          arr.find((status) => status.default === true) || arr[0],
-        );
-      }
-    };
-
-    const showNotification = (type: 'success' | 'error', msg?: string) => {
-      setNotificationView({
-        open: true,
-        type: type,
-        customMessage: msg,
-      });
-    };
-
-    const issueStateUpdate = async (state: IState) => {
-      if (state.id === props.status?.id) return;
-
-      if (!props.issueid) {
-        emit('update:status', state);
-      } else {
-        await singleIssueStore
-          .updateIssueData(
-            currentWorkspaceSlug.value,
-            props.projectid,
-            props.issueid,
-            {
-              state: state.id,
-            },
-          )
-          .then(() => {
-            useSprintStore().triggerSprintRefresh(NotUpdated.SprintPage);
-            showNotification('success');
-            emit('setStatus', state);
-            emit('refresh');
-          });
-      }
-    };
-
-    watch(
-      () => props.projectid,
-      () => refresh(),
-    );
-
-    watch(
-      () => props.statesFromCache,
-      () => refresh(),
-    );
-
-    watch(
-      () => props.status,
-      () => (open.value = props.status),
-    );
-    onMounted(() => {
-      refresh();
-    });
-    return {
-      api,
-      open,
-      states,
-      refresh,
-      selectStatusRef,
-      issueStateUpdate,
-      selectStatusWidth,
-    };
-  },
 });
+
+const props = defineProps<{
+  status?: {
+    id?: string;
+    color?: string;
+    name?: string;
+  };
+  items?: DtoStateLight[];
+  issue?: unknown;
+  isAdaptiveSelect?: boolean;
+  isDisabled?: boolean;
+  label?: string;
+  loading?: boolean;
+  error?: string;
+}>();
+
+const emits = defineEmits<{
+  'update:status': [DtoStateLight];
+  'popup-show': [];
+  'popup-hide': [];
+}>();
+
+const open = ref();
+
+const selectStatusRef = ref();
+useResizeObserverSelect(selectStatusRef);
+
+watch(
+  () => props.status,
+  () => (open.value = props.status),
+);
 </script>

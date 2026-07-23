@@ -85,7 +85,9 @@
               s.slug === currentWorkspaceSlug ? 'q-router-link--active' : ''
             "
             @click="
-              router.currentRoute.value.params.workspace !== s.slug ? useGlobalLoading() : ''
+              router.currentRoute.value.params.workspace !== s.slug
+                ? useGlobalLoading()
+                : ''
             "
           >
             <q-item-section avatar>
@@ -146,7 +148,9 @@
     >
       <HomeIcon
         :color="`${
-          router.currentRoute.value.path === `/${currentWorkspaceSlug}` ? activeIconColor : ''
+          router.currentRoute.value.path === `/${currentWorkspaceSlug}`
+            ? activeIconColor
+            : ''
         }`"
       />
     </q-btn>
@@ -175,24 +179,37 @@
       <q-tooltip>Git Repositories</q-tooltip>
     </q-btn>
     <q-btn
-    v-if="hasPermissionByWorkspace(workspaceInfo, 'ws-settings')"
+      v-if="hasPermissionByWorkspace(workspaceInfo, 'ws-settings')"
       class="nav-menu__top-nav-button"
       id="workspace-settings-button-top"
       :to="`/${workspaceInfo.slug}/settings`"
-      >
-      <SettingsIcon :width="24" :height="24"
-       :color="`${router.currentRoute.value.path.includes(workspaceInfo.slug + '/settings') ? activeIconColor : ''}`"
+    >
+      <SettingsIcon
+        :width="24"
+        :height="24"
+        :color="`${router.currentRoute.value.path.includes(workspaceInfo.slug + '/settings') ? activeIconColor : ''}`"
       />
     </q-btn>
   </q-btn-group>
+  <div v-else>
+    <q-item class="flex flex-row justify-around">
+      <q-skeleton type="QBtn" size="40px"></q-skeleton>
+      <q-skeleton type="QBtn" size="40px"></q-skeleton>
+      <q-skeleton type="QBtn" size="40px"></q-skeleton>
+      <q-skeleton type="QBtn" size="40px"></q-skeleton>
+    </q-item>
+  </div>
   <NewWorkspaceDialog v-model="isNewSpaceModalOpen" />
-  <NotificationsWorkspaceSettingsDialog v-model="notificationSettingsOpen" :workspace="selectedWorkspace"/>
+  <NotificationsWorkspaceSettingsDialog
+    v-model="notificationSettingsOpen"
+    :workspace="selectedWorkspace"
+  />
 </template>
 
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 // store
@@ -247,6 +264,10 @@ const isNewSpaceModalOpen = ref(false);
 const notificationSettingsOpen = ref(false);
 
 const selectedWorkspace = ref();
+
+onMounted(async () => {
+  await userStore.getUserWorkspaces();
+});
 
 const getWorkspaceMenuItems = (s) => {
   return [

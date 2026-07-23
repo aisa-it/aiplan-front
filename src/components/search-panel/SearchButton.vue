@@ -3,12 +3,13 @@
     flat
     dense
     @click="isSearchOpened = true"
-    class="btn-only-icon-sm bordered"
+    class="btn-only-icon-sm"
+    :class="isMobile ?  'q-mr-sm' : 'bordered'"
     data-tour="search"
   >
     <SearchIcon />
   </q-btn>
-  <SearchByFiltersDialog v-model="isSearchOpened" />
+  <SearchByFiltersDialog  v-if="!isMobile" v-model="isSearchOpened" />
 </template>
 <script setup lang="ts">
 //core
@@ -22,6 +23,10 @@ import SearchIcon from 'src/components/icons/SearchIcon.vue';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 
 const filterStore = useFiltersStore();
+
+const props = defineProps<{
+  isMobile?: boolean;
+}>();
 
 const isSearchOpened = ref(false);
 

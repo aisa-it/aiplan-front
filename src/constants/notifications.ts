@@ -65,7 +65,9 @@ const SUCCESS_SCRIPT_SAVE = 'Сценарий создан';
 
 // избранное
 const SUCCESS_ADD_TO_FAVORITE = 'Проект добавлен в избранное';
+const ERROR_ADD_TO_FAVORITE = 'Ошибка при добавлении проекта в избранное';
 const SUCCESS_REMOVE_FROM_FAVORITE = 'Проект удален из избранного';
+const ERROR_REMOVE_FROM_FAVORITE = 'Ошибка при удалении проекта из избранного';
 
 // задача
 const SUCCESS_CREATE_ISSUE = 'Задача создана';
@@ -102,6 +104,7 @@ const SUCCESS_DOWNLOAD_FILE = 'Файл скачан';
 
 const ERROR_IDENTITY_PASSWORD = 'Пароли не совпадает';
 const SUCCESS_IDENTITY_PASSWORD = 'Пароль обновлён';
+const ERROR_CHANGE_PASSWORD = 'Ошибка при смене пароля';
 const ERROR_SAVE_SETTINGS_PROJECT = 'Настройки проекта не сохранены';
 const ERROR_IDENTIFIER_PROJECT = 'Идентификатор уже существует';
 const ERROR_BLOCK_USER = 'Возникла ошибка при блокировке пользователя';
@@ -155,7 +158,9 @@ export {
   SUCCESS_DELETE_SUBISSUE,
   DOWNLOAD_FILE_DEMO,
   SUCCESS_ADD_TO_FAVORITE,
+  ERROR_ADD_TO_FAVORITE,
   SUCCESS_REMOVE_FROM_FAVORITE,
+  ERROR_REMOVE_FROM_FAVORITE,
   ERROR_AUTH,
   ERROR_AUTH_BLOCKED,
   SUCCESS_ADD_ATTACHMENT,
@@ -253,4 +258,5 @@ export {
   ERROR_SETUP_VERSION,
   BASE_ERROR_RULES,
   BASE_ERROR_MESSAGE,
+  ERROR_CHANGE_PASSWORD,
 };

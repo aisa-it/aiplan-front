@@ -95,11 +95,13 @@
             <CheckStatusIcon class="issue-selector-icon mr-12" />
 
             <select-status
-              :projectid="project.id || ''"
               v-model:status="status"
-              @updateInitialStatus="(s: any) => (status = s)"
+              :items="items"
+              :loading="isLoading"
+              :error="statesError"
               label="Выберите статус"
               class="col centered-horisontally"
+              @popup-show="loadItems(project.id || '')"
             ></select-status>
           </div>
         </div>
@@ -193,9 +195,10 @@
             </div>
             <SprintIcon class="issue-selector-icon mr-12" />
             <select-sprints
-              v-model="sprints"
+              :current-sprints="sprints"
               class="col centered-horisontally"
               label="Выберите спринт"
+              @update-selected="updateCurrentSprints"
             />
           </div>
         </div>
@@ -267,10 +270,10 @@
           </q-btn>
         </div>
       </q-card-actions>
+      <q-inner-loading :showing="creationLoading">
+        <DefaultLoader />
+      </q-inner-loading>
     </div>
-    <q-inner-loading :showing="creationLoading">
-      <DefaultLoader />
-    </q-inner-loading>
     <NewIssuePanelSkeleton v-if="loading" />
   </q-card>
 </template>
@@ -306,6 +309,8 @@ import {
 
 //composables
 import { useSingleIssueTemplate } from 'src/modules/single-issue/linked-issues/composables/useSingleIssueTemplate';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
+import { useRouter } from 'vue-router';
 
 // components
 import SelectDate from './SelectDate.vue';
@@ -347,6 +352,7 @@ const props = defineProps<{
   isUserTextData?: boolean;
   isIssuesTemplate?: boolean;
   loading?: boolean;
+  offSuccessNotification?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -358,6 +364,7 @@ const emits = defineEmits<{
 
 //composables
 const route = useRoute();
+const router = useRouter();
 const {
   options: templatesOptions,
   loading: loadingTemplates,
@@ -375,14 +382,21 @@ const issuesStore = useIssuesStore();
 const singleIssueStore = useSingleIssueStore();
 const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
-const { hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByWorkspace, getProjectRole } = useRolesStore();
+const {
+  items,
+  isLoading,
+  error: statesError,
+  loadItems,
+  resetItems,
+} = useStatusSelect();
 
 //storesToRefs
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 const { projectMembers } = storeToRefs(projectStore);
-
 const { user } = storeToRefs(userStore);
 const { refreshIssues } = storeToRefs(issuesStore);
+const { sprint } = storeToRefs(sprintStore);
 
 //variables
 const projects = ref<DtoProject[]>([]);
@@ -395,7 +409,9 @@ const status = ref<any>(null);
 const priority = ref<any>(null);
 const assigness = ref<any[]>([]);
 const watchers = ref<any[]>([]);
-const sprints = ref<DtoSprintLight[]>([]);
+const sprints = ref<DtoSprintLight[]>(
+  router.currentRoute.value.params.sprint ? [sprint.value] : [],
+);
 const tags = ref<any[]>([]);
 const date = ref(null);
 const parent = ref<any>(null);
@@ -431,10 +447,11 @@ const loading = computed({
 const refresh = async () => {
   loading.value = true;
   await workspaceStore
-    .getWorkspaceProjects(currentWorkspaceSlug.value)
+    .getWorkspaceProjects(currentWorkspaceSlug.value as string)
     .then((d) => {
+      if (!d) return;
       projects.value = d.filter(
-        (project) => project?.current_user_membership?.role > 5,
+        (project) => getProjectRole(project.id ?? '') > 5,
       );
       if (project.value == null) {
         if (route.params?.project || props.project_detail?.id) {
@@ -604,25 +621,29 @@ const handleCreateSuccess = async (createdIssueData: any) => {
   const link = getIssueLink(
     workspaceSlug.value,
     project.value?.identifier,
-    createdIssueData.id,
+    issue.sequence_id || createdIssueData.id,
   );
 
-  setNotificationView({
-    open: true,
-    type: 'success',
-    customMessage: props.parentissue
-      ? getSuccessCreateSubissueMessage(link)
-      : getSuccessCreateIssueMessage(
-          link,
-          `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
-        ),
-  });
+  if (!props.offSuccessNotification) {
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: props.parentissue
+        ? getSuccessCreateSubissueMessage(link)
+        : getSuccessCreateIssueMessage(
+            link,
+            `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
+          ),
+    });
+  }
 
   await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
 
-  sprints.value.forEach((sprint) => {
-    updateSprint(sprint, issue.id);
-  });
+  if (hasPermissionByWorkspace(workspaceInfo?.value, 'change-sprint')) {
+    sprints.value.forEach((sprint) => {
+      updateSprint(sprint, issue.id);
+    });
+  }
 
   emits('ok');
 };
@@ -632,10 +653,16 @@ const handleClearIssueTemplate = () => {
   selectedIssueTemplate.value = null;
 };
 
+const updateCurrentSprints = (value: DtoSprintLight[]) => {
+  sprints.value = value;
+};
+
 //hooks
 onMounted(async () => {
   await refresh();
-  await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  if (project.value?.id) {
+    await fetchTemplates(workspaceSlug.value, project.value?.id, true);
+  }
   refreshIssues.value = false;
   props.parentissue &&
     api
@@ -719,6 +746,16 @@ watch(
 );
 
 watch(
+  () => project.value?.id,
+  async (id) => {
+    if (!id) return;
+    resetItems();
+    await loadItems(id);
+    status.value = items.value.find((s) => s.default) || items.value[0] || null;
+  },
+);
+
+watch(
   () => selectedIssueTemplate.value,
   (newTemplate) => {
     if (newTemplate && newTemplate.template && editorInstance.value) {
@@ -741,6 +778,11 @@ watch(
 :deep(.tiptap) {
   min-height: 15rem;
 }
+
+:deep(.q-inner-loading) {
+  z-index: 10;
+}
+
 @media screen and (max-width: 1350px) {
   .new-issue-card {
     min-width: calc(100vw - 200px) !important;

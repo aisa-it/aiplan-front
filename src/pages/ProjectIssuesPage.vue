@@ -4,7 +4,10 @@
       <IssuesListTitle />
       <q-space />
 
-      <ProjectFiltersList :columns="projectStore.sortAllColumns" />
+      <ProjectFiltersList
+        v-if="!isCalendar"
+        :columns="projectStore.sortAllColumns"
+      />
     </div>
     <q-tabs
       v-model="tab"
@@ -58,7 +61,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 
@@ -78,7 +81,7 @@ import AnalyticsIcon from 'src/components/icons/AnalyticsIcon.vue';
 const q = useQuasar();
 
 const projectStore = useProjectStore();
-const { project } = storeToRefs(projectStore);
+const { project, isCalendar } = storeToRefs(projectStore);
 const tab = ref('general');
 </script>
 

@@ -54,25 +54,25 @@
 </template>
 
 <script setup lang="ts">
-import { DaoIssueLink } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { QDialog, QInput } from 'quasar';
 import { computed, ref, watch } from 'vue';
 import { isValidURL } from 'src/utils/validation';
 
 const props = defineProps<{
   issue?: string;
-  link?: DaoIssueLink;
+  link?: DtoIssueLinkLight;
 }>();
 const emits = defineEmits<{
-  create: [link: DaoIssueLink];
-  edit: [link: DaoIssueLink];
+  create: [link: DtoIssueLinkLight];
+  edit: [link: DtoIssueLinkLight];
 }>();
 
 const formRef = ref();
 const dialogRef = ref<QDialog | null>(null);
 const urlInput = ref<QInput | null>(null);
 const titleInput = ref<QInput | null>(null);
-const form = ref<DaoIssueLink>({
+const form = ref<DtoIssueLinkLight>({
   url: '',
   title: '',
 });

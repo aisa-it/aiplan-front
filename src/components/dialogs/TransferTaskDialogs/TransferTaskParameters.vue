@@ -28,23 +28,16 @@
           <div class="col flex rounded-borders">
             <SelectStatus
               class="issue-selector full-w"
-              :projectid="props.project_id"
               :status="issueSettings.state_detail"
+              :items="items"
+              :loading="isLoading"
+              :error="statesError"
               :isDisabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-status')
+                !hasPermissionByIssue(issueData, 'change-issue-status')
               "
               isAdaptiveSelect
-              :states-from-cache="statesCache[issueData?.project]"
-              @update:status="
-                (val) => {
-                  return (issueSettings.state_detail = val);
-                }
-              "
-              @updateInitialStatus="
-                (val) => {
-                  return (issueSettings.state_detail = val);
-                }
-              "
+              @popup-show="loadItems(project_id)"
+              @update:status="(val) => (issueSettings.state_detail = val)"
             />
           </div>
         </div>
@@ -65,7 +58,7 @@
               :projectid="props.project_id"
               :assigness="issueSettings.assignees"
               :isDisabled="
-                !hasPermissionByIssue(issueData, project, 'change-issue-basic')
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               :current-member="user"
               isAdaptiveSelect
@@ -94,11 +87,7 @@
               :current-member="user"
               isAdaptiveSelect
               :isDisabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  issueData.project_detail ?? project,
-                  'change-issue-basic',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-basic')
               "
               @update:watchers="
                 (val) => {
@@ -127,11 +116,7 @@
               :priority="issueSettings.priority"
               isAdaptiveSelect
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               @update:priority="
                 (val) => {
@@ -161,11 +146,7 @@
               :date="issueSettings.target_date"
               :issue="issueData"
               :is-disabled="
-                !hasPermissionByIssue(
-                  issueData,
-                  project,
-                  'change-issue-primary',
-                )
+                !hasPermissionByIssue(issueData, 'change-issue-primary')
               "
               :style="{ padding: 0 }"
               @update:date="
@@ -205,7 +186,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
@@ -231,6 +212,7 @@ import { useProjectStore } from 'src/stores/project-store';
 import { useStatesStore } from 'src/stores/states-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 import {
   DtoIssue,
   DtoProjectMemberLight,
@@ -243,10 +225,9 @@ const projectStore = useProjectStore();
 const { hasPermissionByIssue } = useRolesStore();
 const statesStore = useStatesStore();
 const workspaceStore = useWorkspaceStore();
-const { statesCache } = storeToRefs(statesStore);
+const { items, isLoading, error: statesError, loadItems } = useStatusSelect();
 
 // store to refs
-const { project } = storeToRefs(projectStore);
 const { user } = storeToRefs(userStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
@@ -269,7 +250,7 @@ const props = defineProps<{
 }>();
 
 // emits
-const emit = defineEmits(['save']);
+const emits = defineEmits<{ save: any }>();
 
 const dialogRef = ref();
 const issueData = ref<DtoIssue>(props.issue);
@@ -363,7 +344,7 @@ const checkParameters = async () => {
         await checkWatchers();
       }
     } finally {
-      emit('save', issueSettings.value);
+      emits('save', issueSettings.value);
     }
   }
 };
@@ -381,7 +362,7 @@ const resetSettings = () => {
 const close = () => {
   if (isSave.value) {
     isSave.value = false;
-    emit('save', issueSettings.value);
+    emits('save', issueSettings.value);
   } else {
     resetSettings();
   }

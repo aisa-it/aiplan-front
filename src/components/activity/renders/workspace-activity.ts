@@ -112,7 +112,7 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
     case 'form':
       const formLink = activity?.new_entity_detail
         ? `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${
                       activity?.entity_url ??
                       `/f/${activity?.new_entity_detail?.slug}`
@@ -130,7 +130,7 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
     case 'project':
       const projectLink = activity.new_entity_detail
         ? `<a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 400;"
+                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
                     href=${activity?.new_entity_detail?.url}>
                     ${activity?.new_value} "${activity.new_entity_detail.name}"<a/>`
         : `"${activity.new_value || activity.old_value}"`;
@@ -139,24 +139,39 @@ export function workspaceActivityRender(activity: any, onlyWorkspace = false) {
       } else if (activity.verb === 'deleted') {
         return `<span>удалил(-а) проект ${projectLink} ${onlyWorkspace ? '' : fromWorkspace}<span/>`;
       }
-
+      return;
     case 'integration':
       if (activity.verb === 'added') {
         return `<span>добавил(-а) интеграцию ${activity.new_value} ${inWorkspace}<span/>`;
       } else if (activity.verb === 'removed') {
         return `<span>удалил(-а) интеграцию ${activity.old_value} ${onlyWorkspace ? '' : fromWorkspace}<span/>`;
       }
-
+      return;
     case 'sprint':
+      const sprintLink = activity.new_entity_detail
+        ? `<a target="_blank"
+            style="color: #3F76FF; text-decoration: none; font-weight: 600;" href=${`/${activity.workspace_detail?.slug}/sprints/${activity.new_entity_detail.id}`}>
+            "${activity.new_value}"<a/>`
+        : `${activity.new_value || activity.old_value}`;
       if (activity.verb === 'created') {
-        return `<span>создал(-а) спринт  <a target="_blank"
-                    style="color: #3F76FF; text-decoration: none; font-weight: 600;"
-                    href=${`/${activity.workspace_detail?.slug}/sprints/${activity.new_entity_detail.id}`}>
-                    "${activity.new_value}"<a/><span/>`;
+        return `<span>создал(-а) спринт ${sprintLink}  <span/>`;
       } else if (activity.verb === 'deleted') {
-        return `<span>удалил(-а) спринт ${activity.old_value}<span/>`;
+        return `<span>удалил(-а) спринт ${sprintLink}<span/>`;
       }
-
+      return;
+    case 'sprint_folder':
+      if (activity.verb === 'created') {
+        return `<span>создал(-а) папку спринтов "${activity.new_value}"<span/>`;
+      }
+      if (activity.verb === 'deleted') {
+        return `<span>удалил(-а) папку спринтов "${activity.old_value}"<span/>`;
+      }
+      return;
+    case 'sprint_folder_name':
+      if (activity.verb === 'updated') {
+        return `<span>изменил(-а) название папки спринтов с "${activity.old_value}" на "${activity.new_value}"<span/>`;
+      }
+      return;
     default:
       break;
   }

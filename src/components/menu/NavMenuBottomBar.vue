@@ -9,33 +9,16 @@
   </div>
 </template>
 
-<script lang="ts">
-// core
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import JitsiDialog from 'src/components/dialogs/JitsiDialog.vue';
 
-//components
 import NavMenuBottomBarHelpAndSupport from 'components/menu/NavMenuBottomBarHelpAndSupport.vue';
 
-export default defineComponent({
-  name: 'NavMenuBottomBar',
-  setup() {
-    // ordinary vars
-    const unstableRelease = ref(
-      location.hostname === 'test.aiplan.aisa.ru' ||
-        location.hostname === 'localhost',
-    );
-
-    return {
-      unstableRelease,
-    };
-  },
-
-  components: {
-    JitsiDialog,
-    NavMenuBottomBarHelpAndSupport,
-  },
-});
+const unstableRelease = ref(
+  location.hostname === 'test.aiplan.aisa.ru' ||
+    location.hostname === 'localhost',
+);
 </script>
 
 <style scoped lang="scss">

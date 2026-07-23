@@ -59,6 +59,7 @@ const formatType = (type: string) => {
     string: 'Строка',
     boolean: 'Флаг',
     select: 'Список',
+    link: 'Ссылка',
   };
   return typeMap[type] || type;
 };

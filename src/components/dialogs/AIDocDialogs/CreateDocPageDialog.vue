@@ -225,7 +225,10 @@ import {
 } from 'src/constants/aidocFiles';
 import { DtoWorkspaceMember } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const emit = defineEmits<{ successCreate: [] }>();
+const emits = defineEmits<{
+  successCreate: [];
+  hide: [];
+}>();
 
 //core
 const route = useRoute();
@@ -389,7 +392,7 @@ const onSave = async () => {
       );
     }
 
-    emit('successCreate');
+    emits('successCreate');
     const link = getDocumentLink(workspaceSlug.value, resId);
     setNotificationView({
       open: true,
@@ -547,6 +550,7 @@ watch(
 
 onBeforeUnmount(() => {
   clearExpandedCache();
+  emits('hide');
 });
 
 onMounted(() => {

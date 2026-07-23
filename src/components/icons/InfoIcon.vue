@@ -24,27 +24,17 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'InfoIcon',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: 'currentColor',
-    },
-    width: {
-      type: String,
-      required: false,
-      default: () => '16',
-    },
-    height: {
-      type: String,
-      required: false,
-      default: () => '16',
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: 'currentColor',
+    width: 16,
+    height: 16,
   },
-});
+);
 </script>

@@ -8,7 +8,10 @@ import {
 
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
-import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssueSearchResult,
+  TypesIssuesListFilters,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const issuesApi = new (withInterceptors(Issues))();
 
@@ -47,6 +50,7 @@ export interface IQuery {
   only_count?: boolean;
   only_pinned?: boolean;
   group_by?: string;
+  stream?: boolean;
 }
 
 export const useIssuesStore = defineStore('issues-store', {
@@ -57,7 +61,6 @@ export const useIssuesStore = defineStore('issues-store', {
       groupedIssueList: [],
       groupByIssues: '',
       ungroupedIssueList: [],
-      pinnedIssues: [] as any[],
     };
   },
   actions: {
@@ -141,52 +144,52 @@ export const useIssuesStore = defineStore('issues-store', {
       projectId: string,
       filters: TypesIssuesListFilters,
       query: IQuery,
+      signal?: AbortSignal,
     ) {
+      if (!workspaceSlug || !projectId) return;
       try {
         const response = await api.post(
           `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectId}/issues/search`,
           filters,
-          { params: query },
+          { params: query, signal },
         );
         return response;
       } catch {}
     },
 
-    async fetchPinnedIssues(projectID: string): Promise<void> {
+    async fetchPinnedIssues(
+      projectID: string,
+      query?: IQuery,
+    ): Promise<DtoIssueSearchResult> {
       const response = await this.getIssueList(
         { projects: [projectID] },
-        { only_pinned: true },
+        { ...query, only_pinned: true },
       );
-      this.pinnedIssues = response.data?.issues || [];
+      return response.data;
     },
 
     async pinIssue(
       issue: any,
       workspaceSlug: string,
       projectIdentifier: string,
-      projectID: string,
     ): Promise<void> {
-      await api.post(
+      return await api.post(
         `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/pin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
-      await this.fetchPinnedIssues(projectID);
     },
 
     async unpinIssue(
       issue: any,
       workspaceSlug: string,
       projectIdentifier: string,
-      projectID: string,
     ): Promise<void> {
-      await api.post(
+      return await api.post(
         `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectIdentifier}/issues/${issue.id}/unpin`,
         {},
         { headers: { 'Content-Type': 'application/json' } },
       );
-
-      await this.fetchPinnedIssues(projectID);
     },
   },
 });

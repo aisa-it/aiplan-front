@@ -31,7 +31,16 @@ export default configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['i18n', 'axios', 'mitt', 'bus', 'hint-tooltip', 'theme-color', 'git'],
+    boot: [
+      'i18n',
+      'axios',
+      'mitt',
+      'bus',
+      'hint-tooltip',
+      'theme-color',
+      'git',
+      'app-settings',
+    ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
@@ -66,44 +75,25 @@ export default configure(function (ctx) {
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
 
-      // Увеличиваем лимит предупреждения о размере chunks
       chunkSizeWarningLimit: 1000,
-
-      extendViteConf(viteConf) {
-        // Добавляем оптимизацию chunks
-        if (viteConf.build && viteConf.build.rollupOptions) {
-          viteConf.build.rollupOptions.output = {
-            ...viteConf.build.rollupOptions.output,
-            manualChunks(id) {
-              // Разделяем node_modules на отдельные chunks
-              if (id.includes('node_modules')) {
-                if (id.includes('quasar')) {
-                  return 'quasar-vendor';
-                }
-                if (id.includes('vue')) {
-                  return 'vue-vendor';
-                }
-                if (id.includes('chart.js') || id.includes('apexcharts')) {
-                  return 'charts-vendor';
-                }
-                if (id.includes('@tiptap')) {
-                  return 'tiptap-vendor';
-                }
-                return 'vendor';
-              }
-
-              // Разделяем собственный код на chunks по модулям
-              if (id.includes('src/modules/')) {
-                const moduleName = id.split('src/modules/')[1]?.split('/')[0];
-                if (moduleName) {
-                  return `module-${moduleName}`;
-                }
-              }
-            },
-          };
-        }
+      extendViteConf(viteConf, env) {
+        viteConf.build = viteConf.build || {};
+        viteConf.build.rollupOptions = viteConf.build.rollupOptions || {};
+        viteConf.build.rollupOptions.output =
+          viteConf.build.rollupOptions.output || {};
+        viteConf.build.rollupOptions.output.sanitizeFileName = (name) => {
+          let cleanName = name.replace(/\x00/g, '');
+          cleanName = cleanName.replace(/^plugin-vue:/, '');
+          if (cleanName.startsWith('_')) {
+            cleanName = cleanName.substring(1);
+          }
+          cleanName = cleanName.replace(/:/g, '-');
+          if (cleanName.includes('?')) {
+            cleanName = cleanName.split('?')[0];
+          }
+          return cleanName;
+        };
       },
-
       vitePlugins: [
         [
           '@intlify/vite-plugin-vue-i18n',

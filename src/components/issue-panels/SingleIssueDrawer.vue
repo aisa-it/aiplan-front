@@ -21,20 +21,16 @@
         <div class="col flex rounded-borders">
           <SelectStatus
             class="issue-selector full-w"
-            :projectid="issueData.project"
-            :issueid="issueData.id"
             :issue="issueData"
             :status="issueData.state_detail"
+            :items="items"
+            :loading="isLoading"
+            :error="statesError"
             :isDisabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-status',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-status')
             "
-            :states-from-cache="statesCache[issueData?.project]"
-            @set-status="(val) => (issueData.state_detail = val)"
-            @refresh="handleRefresh"
+            @popup-show="loadItems(issueData.project, issueData.id)"
+            @update:status="onUpdateStatus"
           />
         </div>
       </div>
@@ -96,15 +92,10 @@
             :projectid="issueData.project"
             :issueid="issueData.id"
             :assigness="assignees"
-            :isDisabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-basic',
-              )
-            "
+            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
             :current-member="user"
             debounced
+            off-success-notification
             @refresh="handleRefresh"
           ></SelectAssignee>
         </div>
@@ -127,14 +118,9 @@
             :issueid="issueData.id"
             :watchers="watchers"
             :current-member="user"
-            :isDisabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-basic',
-              )
-            "
+            :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-basic')"
             debounced
+            off-success-notification
             @refresh="handleRefresh"
           ></SelectWatchers>
         </div>
@@ -157,15 +143,12 @@
             :workspace-slug="issueData.workspace_detail.slug"
             :projectid="issueData.project"
             editIssue
+            off-success-notification
             :issueid="issueData.id"
             :priority="issueData.priority"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @update:priority="(val) => (issueData.priority = val)"
             @refresh="handleRefresh"
@@ -198,23 +181,32 @@
         <div class="col">
           <div class="row items-center">
             <ExecuteDateIcon :height="19" class="issue-icon" />
-            <span class="q-ml-sm">Срок исполнения </span>
+            <span class="q-mx-sm">Срок исполнения </span>
+            <div v-if="isSubIssueTargetOverTime" class="row items-center">
+              <AlertIcon
+                width="19"
+                height="19"
+                :color="'rgb(236, 177, 104)'"
+                class="issue-icon"
+              />
+
+              <HintTooltip>
+                Срок исполнения родительской задачи меньше текущего срока
+              </HintTooltip>
+            </div>
           </div>
         </div>
         <div class="col flex rounded-borders">
           <SelectDate
             class="full-w"
+            off-success-notification
             :workspace-id="issueData.workspace_detail.slug"
             :project-id="issueData.project"
             :issue-id="issueData.id"
             :date="issueData.target_date"
             :issue="issueData"
             :is-disabled="
-              !hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              !hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -273,27 +265,20 @@
         <div class="col flex rounded-borders no-wrap">
           <SelectParentIssue
             class="full-w"
+            off-success-notification
             :projectid="issueData.project"
             :issueid="issueData.id"
             :issue="issueData.parent_detail"
             :project="issueData.project_detail ?? project"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           ></SelectParentIssue>
           <q-btn
             v-if="
               issueData.parent_detail &&
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             class="btn-only-icon-sm q-ml-xs"
             style="padding: 0 3px"
@@ -315,17 +300,14 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectBlockIssues
+            off-success-notification
             :workspace-id="issueData.workspace"
             :projectid="issueData.project"
             :issueid="issueData.id"
             :issues="issueData.blocker_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -344,17 +326,14 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectBlockedIssues
+            off-success-notification
             :workspace-id="issueData.workspace"
             :projectid="issueData.project"
             :issueid="issueData.id"
             :issues="issueData.blocked_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(
-                issueData,
-                issueData.project_detail ?? project,
-                'change-issue-primary',
-              )
+              hasPermissionByIssue(issueData, 'change-issue-primary')
             "
             @refresh="handleRefresh"
           />
@@ -373,8 +352,10 @@
         </div>
         <div class="col flex rounded-borders column">
           <SelectSprints
+            off-success-notification
+            :projectid="issueData.project"
             class="issue-selector"
-            :issueid="issueData.id"
+            :issue="issueData"
             :label="'Спринт'"
             :currentSprints="issueData.sprints"
             :isDisabled="
@@ -394,13 +375,7 @@
         :issueid="issueData.id"
         :links="issueData.issue_link"
         :project="issueData.project_detail"
-        :isDisabled="
-          !hasPermissionByIssue(
-            issueData,
-            issueData.project_detail ?? project,
-            'change-issue-secondary',
-          )
-        "
+        :isDisabled="!hasPermissionByIssue(issueData, 'change-issue-secondary')"
         @add="handleLinkAdd"
         @delete="handleLinkDelete"
         @edit="handleLinkEdit"
@@ -408,6 +383,7 @@
       </SelectLinks>
 
       <IssueCustomProperties
+        off-success-notification
         class="q-pt-md"
         :project-id="issueData.project"
         :issue-id="issueData.id"
@@ -453,11 +429,9 @@ import { storeToRefs } from 'pinia';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
-import { useStatesStore } from 'src/stores/states-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
-import { useNotificationStore } from 'src/stores/notification-store';
 
 // utils
 import aiplan from 'src/utils/aiplan';
@@ -465,6 +439,7 @@ import { formatDateTime, msToRussianTime } from 'src/utils/time';
 
 // composables
 import { useUserActivityNavigation } from 'src/composables/useUserActivityNavigation';
+import { useStatusSelect } from 'src/composables/useStatusSelect';
 
 // components - core
 import AvatarImage from 'src/components/AvatarImage.vue';
@@ -498,34 +473,34 @@ import StartDateIcon from 'src/components/icons/StartDateIcon.vue';
 import EndDateIcon from 'src/components/icons/EndDateIcon.vue';
 import SprintIcon from '../icons/SprintIcon.vue';
 
-// constants
-import {
-  SUCCESS_UPDATE_DATA,
-  SUCCESS_LINK_ADDING,
-  SUCCESS_LINK_EDITING,
-  SUCCESS_LINK_DELETING,
-} from 'src/constants/notifications';
-
 import { setIntervalFunction } from 'src/utils/helpers';
-import { DtoIssueLinkLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  DtoIssue,
+  DtoIssueLinkLight,
+  DtoStateLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 // stores
 const userStore = useUserStore();
-const statesStore = useStatesStore();
 const projectStore = useProjectStore();
 const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
-const { setNotificationView } = useNotificationStore();
+const {
+  items,
+  isLoading,
+  error: statesError,
+  loadItems,
+  updateStatus,
+} = useStatusSelect(true);
 
 // store to refs
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
-const { statesCache } = storeToRefs(statesStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
 
-defineProps<{
+const props = defineProps<{
   preview?: boolean;
 }>();
 
@@ -533,18 +508,35 @@ const emits = defineEmits<{
   refresh: [isFullRefresh?: boolean];
 }>();
 
+const parentIssueData = ref<DtoIssue>();
+
 const { navigateToActivityPage } = useUserActivityNavigation();
 
 const hideSettings = computed(() => {
   return project.value?.hide_fields ?? [];
 });
 
+const isSubIssueTargetOverTime = computed(
+  () =>
+    parentIssueData.value?.target_date &&
+    issueData.value.target_date > parentIssueData.value?.target_date,
+);
+
 //refs
 const refreshCycle = ref();
 
 // functions
+const onUpdateStatus = async (state: DtoStateLight) => {
+  if (state.id === issueData.value.state_detail?.id) return;
+
+  await updateStatus(issueData.value.project, issueData.value.id, state);
+  issueData.value.state_detail = state;
+  handleRefresh();
+};
+
 const handleRefresh = async () => {
   await refresh();
+  await updateParentIssueData();
   emits('refresh');
 };
 
@@ -582,11 +574,6 @@ const handleRemoveParentIssue = async () => {
       { parent: null },
     )
     .then(async () => {
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_UPDATE_DATA,
-      });
       issueData.value.parent_detail = null;
       handleRefresh();
     });
@@ -643,11 +630,6 @@ const handleLinkAdd = async (link: DtoIssueLinkLight) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_ADDING,
-  });
 };
 
 const handleLinkDelete = async (linkID: string) => {
@@ -660,11 +642,6 @@ const handleLinkDelete = async (linkID: string) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_DELETING,
-  });
 };
 
 const handleLinkEdit = async (link: DtoIssueLinkLight) => {
@@ -679,15 +656,23 @@ const handleLinkEdit = async (link: DtoIssueLinkLight) => {
   );
 
   await handleRefresh();
-  setNotificationView({
-    type: 'success',
-    open: true,
-    customMessage: SUCCESS_LINK_EDITING,
-  });
 };
 
-onMounted(() => {
+const updateParentIssueData = async () => {
+  if (issueData.value.parent) {
+    parentIssueData.value = (
+      await singleIssueStore.getIssueDataById(
+        currentWorkspaceSlug.value,
+        issueData.value.project ?? currentProjectID.value,
+        issueData.value.parent,
+      )
+    ).data;
+  }
+};
+
+onMounted(async () => {
   refreshCycle.value = setIntervalFunction(refresh);
+  await updateParentIssueData();
 });
 
 onBeforeUnmount(() => {

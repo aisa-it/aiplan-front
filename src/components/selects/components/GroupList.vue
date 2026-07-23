@@ -12,7 +12,7 @@
           v-for="(option, index) in options"
           :key="index"
           clickable
-          @click="emit('select', option)"
+          @click="emits('select', option)"
         >
           <div style="display: flex; align-items: center">
             <q-badge
@@ -29,7 +29,7 @@
                 'item-selected': selected.includes(option.value.id),
               }"
             >
-              {{ option.name ?? option.label}}
+              {{ option.name ?? option.label }}
             </span>
           </div>
         </q-item>
@@ -41,10 +41,9 @@
 <script setup lang="ts">
 defineProps<{
   label: string;
-  // quasar scope option
   options: any;
   selected: (string | number)[];
 }>();
 
-const emit = defineEmits(['select']);
+const emits = defineEmits<{ select: [any] }>();
 </script>

@@ -17,26 +17,16 @@
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'StarFullIcon',
-  props: {
-    color: {
-      type: String,
-      required: false,
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

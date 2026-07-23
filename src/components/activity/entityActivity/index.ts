@@ -18,9 +18,17 @@ import { renderParent, renderBlocking, renderSubIssue } from './renders/issues';
 import { renderComment } from './renders/comments';
 import { renderLabels, renderLabel } from './renders/labels';
 import { renderSprint } from './renders/sprints';
-import { renderDoc, renderSeqId, renderDescription } from './renders/docs';
+import {
+  renderDoc,
+  renderDocSort,
+  renderSeqId,
+  renderDescription,
+  renderTitle
+} from './renders/docs';
 import { renderIssueTransfer, renderProject } from './renders/projects';
 import { renderPriority, renderDefault } from './renders/priority';
+import { renderReader, renderReaderRole } from 'src/components/activity/entityActivity/renders/readers';
+import { renderEditor, renderEditorRole } from 'src/components/activity/entityActivity/renders/editors';
 
 const fieldRenderers: Record<string, HistoryRenderer> = {
   blocks: renderBlocks,
@@ -42,11 +50,17 @@ const fieldRenderers: Record<string, HistoryRenderer> = {
   label: renderLabel,
   sprint: renderSprint,
   doc: renderDoc,
+  doc_sort: renderDocSort,
   seq_id: renderSeqId,
   description: renderDescription,
   issue_transfer: renderIssueTransfer,
   project: renderProject,
   priority: renderPriority,
+  readers: renderReader,
+  editors: renderEditor,
+  reader_role: renderReaderRole,
+  editor_role: renderEditorRole,
+  title: renderTitle,
 };
 
 export function entityActivityRenderer(

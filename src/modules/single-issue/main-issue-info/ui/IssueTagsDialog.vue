@@ -135,7 +135,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   close: [];
   add: [];
   refresh: [];
@@ -217,18 +217,17 @@ const handleAddTag = (newTag: ITag | DtoLabelLight) => {
       )
       .then(() => {
         refresh();
-        setNotificationView({ type: 'success', open: true });
-        emit('refresh');
+        emits('refresh');
       });
   } else {
     refresh();
-    emit('update:tags', [...currentTags.value, newTag]);
+    emits('update:tags', [...currentTags.value, newTag]);
   }
 };
 
 const refresh = async (resetTags = true) => {
   if (resetTags) {
-    emit('update:tags', []);
+    emits('update:tags', []);
   }
 
   await projectStore
@@ -254,7 +253,7 @@ const handleSaveTags = () => {
       type: 'error',
       customMessage: BASE_ERROR_RULES,
     });
-    emit('close');
+    emits('close');
     return;
   }
   api
@@ -267,10 +266,9 @@ const handleSaveTags = () => {
       },
     )
     .then(() => {
-      setNotificationView({ type: 'success', open: true });
-      emit('refresh');
+      emits('refresh');
     })
-    .finally(() => emit('close'));
+    .finally(() => emits('close'));
 };
 
 const updateTagState = (val: string[], tag: ITag) => {
@@ -292,7 +290,7 @@ const resetData = () => {
 };
 
 const closeDialog = () => {
-  emit('close');
+  emits('close');
   resetData();
 };
 

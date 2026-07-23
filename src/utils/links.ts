@@ -114,3 +114,10 @@ export function getProjectLink(
 export function getDocumentLink(workspaceSlug: string, docId: string) {
   return `${location.protocol}//${location.host}/${workspaceSlug}/aidoc/${docId}`;
 }
+
+export function getSprintLink(workspaceSlug?: string, sprintId?: string) {
+  if (!workspaceSlug || !sprintId) {
+    return;
+  }
+  return `${location.protocol}//${location.host}/${workspaceSlug}/sprints/${sprintId}`;
+}

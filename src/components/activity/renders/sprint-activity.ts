@@ -27,8 +27,6 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
 
     case 'issue':
     case 'issues': {
-      action = translateAction('issues', Boolean(activity.new_value));
-
       const issueEntity =
         activity?.verb === 'removed'
           ? activity?.old_entity_detail
@@ -48,9 +46,9 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
             ? `"${issueName}"`
             : '';
 
-      return `<span>${action} ${issueLink || ''} ${
-        activity?.verb === 'added' ? 'в спринт' : 'из спринта'
-      } ${sprintLink}<span/>`;
+      return `<span>${
+        activity?.verb === 'removed' ? 'убрал(-а) из спринта' : 'добавил(-а) в спринт'
+      } ${sprintLink} задачу ${issueLink || ''} <span/>`;
     }
 
     case 'watchers':
@@ -67,6 +65,11 @@ export function sprintActivityRender(activity: DtoEntityActivityFull) {
     case 'end_date':
       return `<span>изменил(-а) дату конца спринта ${sprintLink}<span/>`;
 
+    case 'sprint_folder':
+      const newVal = activity.new_value ? activity.new_value : "Без папки";
+      const oldVal = activity.old_value ? activity.old_value : "Без папки";
+      return `<span>изменил(-а) папку спринта ${sprintLink} с "${oldVal}" на "${newVal}"<span/>`;
+        
     default:
       break;
   }

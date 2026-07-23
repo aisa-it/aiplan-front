@@ -1,15 +1,11 @@
 <template>
-  <q-header
-    style="z-index: 1000"
-    :style="utilsStore.ny === true ? 'background-color: transparent' : ''"
-  >
+  <q-header style="z-index: 1000">
     <q-toolbar
       :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''"
-      class="header text-grey-9 main-toolbar"
+      class="header"
     >
-      <q-btn flat dense round aria-label="Menu" @click="$emit('toggle')">
-        <MenuIcon />
-      </q-btn>
+      <WorkspaceButton></WorkspaceButton>
+
       <template v-if="workspaceInfo">
         <q-breadcrumbs
           active-color="grey-9"
@@ -36,6 +32,7 @@
               : [breadCrumbsHistory[breadCrumbsHistory.length - 1]]"
             :key="index"
             :to="crumb?.url"
+            @click="crumb?.click?.()"
           >
             <HomeIcon
               v-if="!workspaceInfo?.logo && crumb?.type === 'workspace'"
@@ -85,7 +82,7 @@
             <span
               v-show="crumb?.name"
               :style="`max-width: calc((100vw - ${
-                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 250
+                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 150
               }px) / ${
                 Screen.width > 600 ? breadCrumbsHistory.length : 1
               }) !important`"
@@ -106,7 +103,7 @@
   </q-header>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -131,6 +128,7 @@ import HomeIcon from 'src/components/icons/HomeIcon.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
 import FlowerLine from 'src/components/FlowerLine.vue';
+import WorkspaceButton from 'src/modules/select-workspace/components/WorkspaceButton.vue';
 
 // stores
 const userStore = useUserStore();
@@ -198,6 +196,7 @@ const breadCrumbsHistory = computed(() => {
       name: ` ${project.value?.name ?? ''}`,
       url: `/${workspaceInfo.value?.slug}/projects/${project.value?.identifier || project.value?.id}`,
       type: 'project',
+      click: () => singleIssueStore.closePreview(),
     };
   else if (user.value && currentPath.includes('profile'))
     existPath[1] = {
@@ -223,7 +222,7 @@ const breadCrumbsHistory = computed(() => {
               issueData.value?.parent_detail.sequence_id
             : ''
         } `,
-        url: `/${workspaceInfo.value.slug}/projects/${project.value?.identifier || project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
+        url: `/${workspaceInfo.value.slug}/projects/${issueData.value?.project_detail.identifier ?? project.value?.identifier ?? project.value?.id}/issues/${issueData.value?.parent_detail.sequence_id}`,
 
         type: 'issue',
       };

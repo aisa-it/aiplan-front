@@ -39,10 +39,10 @@ import { toRefs } from 'vue';
 import { useRouter } from 'vue-router';
 
 // stores
-import { useUserStore } from 'src/stores/user-store';
 import { useProjectStore } from 'src/stores/project-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'src/stores/notification-store';
+import { useUserStore } from 'src/stores/user-store';
 
 // constants
 import { SUCCESS_DELETE_PROJECT } from 'src/constants/notifications';
@@ -76,28 +76,31 @@ const router = useRouter();
 
 const handleDeleteProject = async () => {
   emits('startLoading');
-  await deleteProject(
-    currentWorkspaceSlug.value as string,
-    currentProjectID.value,
-  )
-    .then(async () => {
-      await workspaceStore.getWorkspaceProjects(
-        currentWorkspaceSlug.value as string,
-      );
-      await userStore.getFavouriteProjects(
-        currentWorkspaceSlug.value as string,
-      );
+  try {
+    await deleteProject(
+      currentWorkspaceSlug.value as string,
+      currentProjectID.value,
+    );
 
-      router.push(`/${currentWorkspaceSlug.value}/`);
-      project.value = null;
+    if (currentWorkspaceSlug.value) {
+      await Promise.all([
+        workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value),
+        workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value),
+        userStore.getUserProjects(),
+        userStore.getUserProjectsMemberships()
+      ]);
+    }
 
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_DELETE_PROJECT,
-      });
-    })
+    router.push(`/${currentWorkspaceSlug.value}/`);
+    project.value = null;
 
-    .finally(() => emits('endLoading'));
+    setNotificationView({
+      type: 'success',
+      open: true,
+      customMessage: SUCCESS_DELETE_PROJECT,
+    });
+  } finally {
+    emits('endLoading');
+  }
 };
 </script>

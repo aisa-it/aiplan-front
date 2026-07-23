@@ -267,7 +267,6 @@ const updateStores = async () => {
       project.value.id,
     ),
     workspaceStore.getWorkspaceProjects(currentWorkspaceSlug.value as string),
-    userStore.getFavouriteProjects(currentWorkspaceSlug.value as string),
   ]);
   router.replace({
     name: 'project-settings',
@@ -346,6 +345,24 @@ const validateIdentifier = (val: string): boolean | string => {
   return true;
 };
 
+const checkPublic = (val: any) => {
+  if (typeof val === 'boolean') {
+    return {
+      value: val,
+      label: NETWORK_CHOICES.find((el) => el.value === val)?.label,
+    }
+  } else return val;
+}
+
+const chekcEmoji = (val: any) => {
+  if (typeof val === 'string') {
+    return {
+      value: val,
+      label: PROJECT_EMOJI_OPTIONS.find(el => el.value === val)?.label,
+    }
+  } else return val;
+}
+
 const toggleUploaderState = () => {
   isOpenUploadDialog.value = true;
 };
@@ -385,6 +402,9 @@ watch(
   (newValue) => {
     if (newValue) {
       projectForm.value = Object.assign({}, newValue);
+      projectForm.value.public = checkPublic(projectForm.value.public);
+      projectForm.value.emoji = chekcEmoji(projectForm.value.emoji);
+
       validateName(projectForm.value.name);
       validateIdentifier(projectForm.value.identifier);
       init();

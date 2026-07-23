@@ -29,11 +29,12 @@ export const useUtilsStore = defineStore('utils-store', {
       isSingUp: false,
       version: '',
       ny: false,
-      wd: true,
+      wd: false,
       localVersion: localStorage.getItem('appVersion'),
       openReleaseNote: false,
       isEnabledJitsi: false,
       isEnabledCaptcha: false,
+      release: [],
     };
   },
 
@@ -133,7 +134,9 @@ export const useUtilsStore = defineStore('utils-store', {
     // ------------- Release Notes -------------
 
     async getReleaseNotes(): Promise<DtoReleaseNoteLight[]> {
-      return releaseNotesApi.getProductUpdateList().then((res) => res.data);
+      return releaseNotesApi
+        .getProductUpdateList()
+        .then((res) => (this.release = res.data));
     },
 
     async getReleaseNote(noteId: string): Promise<DtoReleaseNoteLight> {

@@ -282,38 +282,80 @@ export const CustomImagePlugin = ResizeImage.extend({
             },
             paste(view, event) {
               const html = event.clipboardData?.getData('text/html') || '';
-              if (html.includes('<table')) {
+              if (!html || html.includes('<table')) {
                 return false;
               }
-              const hasFiles =
-                event.clipboardData &&
-                event.clipboardData.files &&
-                event.clipboardData.files.length;
+              const hasFiles = event.clipboardData?.files?.length;
 
-              if (!hasFiles) {
-                return false;
+              // Стандартная вставка изображения не из редактора
+              if (hasFiles) {
+                const images = Array.from(event.clipboardData.files).filter(
+                  (file) => /image/i.test(file.type),
+                );
+                if (images.length === 0) {
+                  return false;
+                }
+
+                event.preventDefault();
+                const { schema } = view.state;
+
+                images.forEach((image) => {
+                  processImageFile(image, schema, (node) => {
+                    const transaction =
+                      view.state.tr.replaceSelectionWith(node);
+                    view.dispatch(transaction);
+                  });
+                });
+                return true;
               }
 
-              const images = Array.from(event.clipboardData.files).filter(
-                (file) => /image/i.test(file.type),
+              // Вставка из редактора в редактор
+              const pastedHtml = new DOMParser().parseFromString(
+                html,
+                'text/html',
+              );
+              const images = Array.from(
+                pastedHtml.querySelectorAll('img[src]'),
               );
 
-              if (images.length === 0) {
-                return false;
-              }
+              if (images.length > 0) {
+                event.preventDefault();
+                const { schema } = view.state;
 
-              event.preventDefault();
+                // Выгрузка всех изображений для конвертации и вставки с гарантией загрузки
+                const promises = images.map((img) => {
+                  const src = img.getAttribute('src');
+                  if (!src || src.startsWith('data:')) return Promise.resolve();
 
-              const { schema } = view.state;
+                  return fetch(src)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                      return new Promise<void>((resolve) => {
+                        const file = new File([blob], 'image', {
+                          type: blob.type || 'image/png',
+                        });
 
-              images.forEach((image) => {
-                processImageFile(image, schema, (node) => {
-                  const transaction = view.state.tr.replaceSelectionWith(node);
-                  view.dispatch(transaction);
+                        processImageFile(file, schema, (node) => {
+                          const newSrc = node.attrs.src;
+                          if (newSrc) {
+                            img.setAttribute('src', newSrc);
+                            img.setAttribute('alt', node.attrs.alt || 'pasted-image');
+                          }
+                          resolve();
+                        });
+                      });
+                    })
+                    .catch(() => {
+                      console.error('Не удалось загрузить изображение:', src);
+                      return Promise.resolve();
+                    });
                 });
-              });
 
-              return true;
+                Promise.all(promises).then(() => {
+                  view.pasteHTML(pastedHtml.body.innerHTML);
+                });
+                return true;
+              }
             },
           },
         },
