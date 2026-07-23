@@ -278,26 +278,35 @@ const removeAndAddArrayHelper = <T extends { id?: string }>(
 };
 
 const removeAndAddWatcher = () => {
-  if (!watchers.value) return { remove: [], add: [] };
+  const watchersIds = ref<string[]>([]);
 
-  const watchersIds = watchers.value.map((watcher) => watcher.member?.id);
+  if (watchers.value) {
+    watchersIds.value = watchers.value.map((watcher) => watcher.member?.id);
+  }
 
   if (!props.defaultProps?.watchers || !props.defaultProps?.watchers.length) {
     return {
-      add: watchersIds,
+      add: watchersIds.value,
       remove: [],
     };
   }
 
+  const currentWatchersIds = computed(() => props.defaultProps?.watchers?.map((watcher) => watcher.id) || []);
+
+  const add =
+    watchersIds.value
+      ?.filter((id) => !currentWatchersIds.value.includes(id));
+
   const remove =
     props.defaultProps?.watchers
-      ?.filter((el) => !watchersIds.some((i) => i === el.id))
+      ?.filter((el) => !watchersIds.value.some((i) => i === el.id))
       .map((el) => el.id) ?? [];
 
   return {
     remove: remove,
-    add: watchersIds,
+    add: add,
   };
+
 };
 
 const createDateForSprintData = (date: string | undefined) => {
