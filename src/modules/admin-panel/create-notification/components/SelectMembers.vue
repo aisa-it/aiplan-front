@@ -22,13 +22,13 @@ const props = defineProps<{
   members: string[] | undefined;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   'update:members': [value: string[] | undefined];
 }>();
 
 const innerRecipients = computed({
   get: () => props.members,
-  set: (value) => emit('update:members', value),
+  set: (value) => emits('update:members', value),
 });
 
 const { loading, users, getMembers, handleSearchMembers, resetPagination } =

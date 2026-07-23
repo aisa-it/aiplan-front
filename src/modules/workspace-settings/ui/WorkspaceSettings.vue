@@ -28,7 +28,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 // components
@@ -51,13 +51,7 @@ const { loading, onLoad } = useLoad(workspaceStore.getWorkspaceInfo);
 
 const currentWsSlug = computed(() => route.params.workspace as string);
 
-const props = defineProps({
-  isInAdminPanel: {
-    type: Boolean,
-    required: false,
-    default: () => false,
-  },
-});
+const props = defineProps<{ isInAdminPanel?: boolean }>();
 
 const wsSettingsTab = ref(0);
 

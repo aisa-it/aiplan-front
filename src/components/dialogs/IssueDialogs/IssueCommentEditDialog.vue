@@ -50,136 +50,99 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { Editor } from '@tiptap/vue-3';
-import {
-  defineComponent,
-  onMounted,
-  ref,
-  watch,
-  PropType,
-  computed,
-} from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 
 // components
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 
 // directives
-import ClickOutside from 'src/directives/click-outside';
+import vClickOutside from 'src/directives/click-outside';
 
 //interfaces
 import { IIssueCommentUpdate } from 'src/interfaces/issues';
 import { isEditorEmpty } from 'src/components/editorV2/utils/editorUtils';
+import {
+  DtoIssueComment,
+  DtoProjectMember,
+  DtoProjectMemberLight,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'IssueCommentEditDialog',
-  directives: {
-    ClickOutside,
-  },
-  props: {
-    modelValue: {
-      type: Boolean,
-    },
-    comment: {
-      type: Object,
-      required: true,
-    },
-    members: {
-      type: Array,
-      required: true,
-    },
-    isAutoSave: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    getMembersForMention: {
-      type: Function as PropType<
-        (search: string) => Promise<Array<any> | void>
-      >,
-      required: true,
-    },
-  },
-  emits: ['onSave', 'update:modelValue'],
-  setup(props, { emit }) {
-    // vars
-    const isShow = ref<boolean>(true);
-    const isCancel = ref<boolean>(false);
-    const editor = ref<Editor | null>();
-    const editorDOMvalue = ref();
-    const issueCommentHtml = ref(props.comment.comment_html);
-    const preventClickClass = 'prevent-click-comments-edit';
-    const isEmpty = computed(() => isEditorEmpty(editorDOMvalue.value));
+const props = defineProps<{
+  modelValue: boolean;
+  comment: DtoIssueComment;
+  members: DtoProjectMember[] | DtoProjectMemberLight[];
+  isAutoSave?: boolean;
+  getMembersForMention: (
+    search: string,
+  ) => (search: string) => Promise<Array<any> | void>;
+}>();
 
-    const handleUpdateMessage = () => {
-      if (!editor.value) return;
+const emits = defineEmits<{
+  onSave: [saveData: IIssueCommentUpdate];
+  'update:modelValue': [boolean];
+}>();
 
-      if (isEmpty.value) return;
+const isShow = ref<boolean>(true);
+const isCancel = ref<boolean>(false);
+const editor = ref<Editor | null>();
+const editorDOMvalue = ref();
+const issueCommentHtml = ref(props.comment.comment_html);
+const preventClickClass = 'prevent-click-comments-edit';
+const isEmpty = computed(() => isEditorEmpty(editorDOMvalue.value));
 
-      const saveData: IIssueCommentUpdate = {
-        content: issueCommentHtml.value,
-        text: editor.value.getText(),
-      };
-      emit('onSave', saveData);
-    };
+const handleUpdateMessage = () => {
+  if (!editor.value) return;
 
-    const getEditor = (value: Editor | null) => {
-      editor.value = value;
-    };
+  if (isEmpty.value) return;
 
-    const updateEditorDOM = (value: boolean) => {
-      editorDOMvalue.value = value;
-    };
+  const saveData: IIssueCommentUpdate = {
+    content: issueCommentHtml.value ?? '',
+    text: editor.value.getText(),
+  };
+  emits('onSave', saveData);
+};
 
-    const updateModelValue = (value: boolean) => {
-      emit('update:modelValue', value);
-      isShow.value = false;
-      handleAutoSave();
-    };
+const getEditor = (value: Editor | null) => {
+  editor.value = value;
+};
 
-    const handleAutoSave = () => {
-      if (isCancel.value) {
-        isShow.value = true;
-        return;
-      }
+const updateEditorDOM = (value: boolean) => {
+  editorDOMvalue.value = value;
+};
 
-      if (props.isAutoSave && !isShow.value) {
-        handleUpdateMessage();
-        isShow.value = true;
-      }
-    };
+const updateModelValue = (value: boolean) => {
+  emits('update:modelValue', value);
+  isShow.value = false;
+  handleAutoSave();
+};
 
-    // hooks
+const handleAutoSave = () => {
+  if (isCancel.value) {
+    isShow.value = true;
+    return;
+  }
 
-    onMounted(() => {
-      editor.value = null;
-    });
+  if (props.isAutoSave && !isShow.value) {
+    handleUpdateMessage();
+    isShow.value = true;
+  }
+};
 
-    watch(
-      () => props.comment,
-      () => {
-        issueCommentHtml.value = props.comment.comment_html;
-      },
-    );
+// hooks
 
-    return {
-      isShow,
-      isCancel,
-      getEditor,
-      handleAutoSave,
-      updateModelValue,
-      issueCommentHtml,
-      preventClickClass,
-      handleUpdateMessage,
-      updateEditorDOM,
-      isEmpty,
-    };
-  },
-  components: {
-    EditorTipTapV2,
-  },
+onMounted(() => {
+  editor.value = null;
 });
+
+watch(
+  () => props.comment,
+  () => {
+    issueCommentHtml.value = props.comment.comment_html;
+  },
+);
 </script>
 
 <style scoped lang="scss">

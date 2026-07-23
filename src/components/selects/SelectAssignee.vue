@@ -102,18 +102,10 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import {
-  onMounted,
-  ref,
-  watch,
-  toRef,
-  defineProps,
-  withDefaults,
-  computed,
-} from 'vue';
+import { onMounted, ref, watch, toRef, computed } from 'vue';
 import { debounce } from 'quasar';
 //stores
 import { useProjectStore } from 'stores/project-store';
@@ -145,6 +137,7 @@ const props = withDefaults(
     currentMember: any;
     isIssueTransfer?: boolean;
     debounced?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -154,7 +147,10 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(['refresh', 'update:assigness']);
+const emits = defineEmits<{
+  refresh: [];
+  'update:assigness': [any[]];
+}>();
 
 //stores
 const projectStore = useProjectStore();
@@ -279,12 +275,14 @@ const updateAssignees = (e: any, currentIds: any) => {
         },
       )
       .then(() => {
-        setNotificationView({ open: true, type: 'success' });
-        emit('refresh');
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
+        emits('refresh');
       })
       .catch(() => (assignessid.value = currentIds));
   } else {
-    emit('update:assigness', e ? e.map((d) => d) : []);
+    emits('update:assigness', e ? e.map((d) => d) : []);
   }
 };
 
@@ -321,7 +319,7 @@ watch(
     if (props.defaultAssignee !== undefined) {
       defAssignee.value = props.defaultAssignee;
       assignessid.value = !!defAssignee.value ? defAssignee.value : [];
-      emit('update:assigness', assignessid.value);
+      emits('update:assigness', assignessid.value);
     }
   },
   {

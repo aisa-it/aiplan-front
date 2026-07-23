@@ -109,18 +109,10 @@
   </q-select>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import {
-  onMounted,
-  ref,
-  watch,
-  toRef,
-  defineProps,
-  withDefaults,
-  computed,
-} from 'vue';
+import { onMounted, ref, watch, toRef, computed } from 'vue';
 import { debounce } from 'quasar';
 //utils
 import aiplan from 'src/utils/aiplan';
@@ -155,6 +147,7 @@ const props = withDefaults(
     isLoading?: boolean;
     debounced?: boolean;
     isSprint?: boolean;
+    offSuccessNotification?: boolean;
   }>(),
   {
     isDisabled: () => false,
@@ -165,7 +158,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(['refresh', 'update:watchers']);
+const emits = defineEmits<{ refresh: []; 'update:watchers': [any[]] }>();
 
 //stores
 const projectStore = useProjectStore();
@@ -308,12 +301,14 @@ const updateProjectWatchers = async (e: any) => {
         },
       )
       .then(() => {
-        setNotificationView({ open: true, type: 'success' });
-        emit('refresh');
+        if (!props.offSuccessNotification) {
+          setNotificationView({ open: true, type: 'success' });
+        }
+        emits('refresh');
       })
       .catch(() => (watcherid.value = currentIds));
   } else {
-    emit('update:watchers', e ? e.map((d) => d) : []);
+    emits('update:watchers', e ? e.map((d) => d) : []);
   }
 };
 
@@ -323,7 +318,7 @@ const updateDocWatchers = async (e: any) => {
     : [];
 
   if (!props.docId) {
-    emit('update:watchers', watchersIds);
+    emits('update:watchers', watchersIds);
     return;
   }
 
@@ -338,15 +333,17 @@ const updateDocWatchers = async (e: any) => {
       props.docId as string,
     )
     .then(() => {
-      setNotificationView({ open: true, type: 'success' });
-      emit('refresh');
+      if (!props.offSuccessNotification) {
+        setNotificationView({ open: true, type: 'success' });
+      }
+      emits('refresh');
     });
 };
 
 const updateSprintWatchers = (e: any) => {
-  emit('update:watchers', e);
+  emits('update:watchers', e);
   return;
-}
+};
 
 const handleUpdateWatchers = async (e) => {
   watcherid.value = e;
@@ -394,7 +391,7 @@ watch(
     if (props.defaultWatcher !== undefined) {
       defWatcher.value = props.defaultWatcher;
       watcherid.value = !!defWatcher.value ? defWatcher.value : [];
-      emit('update:watchers', watcherid.value);
+      emits('update:watchers', watcherid.value);
     }
   },
   {

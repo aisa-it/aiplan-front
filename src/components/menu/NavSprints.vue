@@ -1,13 +1,12 @@
 <template>
-  <ExpansionItem
-    full-open
-    :is-expanding="sprints.length > 0"
-    itemName="sprints"
-  >
+  <ExpansionItem full-open is-default-open itemName="sprints">
     <template v-slot:header>
       <div class="row centered-horisontally justify-between full-w">
         <q-item-section avatar>
-          <SprintIcon :is-dark="$q.dark.isActive" />
+          <SprintIcon
+            :is-dark="$q.dark.isActive"
+            :color="active ? '#3f75ff' : ''"
+          />
         </q-item-section>
         <q-item-section>Спринты</q-item-section>
         <MenuActions
@@ -45,7 +44,7 @@
               :stats="sprint.stats ?? {}"
             />
           </q-item-section>
-          <q-item-section>
+          <q-item-section class="sprint_name">
             <q-item-label class="abbriviated-text">
               {{ sprint.name }}
               {{
@@ -86,8 +85,8 @@
   </ExpansionItem>
 </template>
 
-<script lang="ts" setup>
-import { computed, h, onMounted, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, h, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { QIcon, useQuasar } from 'quasar';
 
@@ -113,7 +112,10 @@ import { getSprintDates } from 'src/modules/sprints/helpres';
 import LinkIcon from '../icons/LinkIcon.vue';
 import MenuActions from './MenuActions.vue';
 import BellIcon from '../icons/BellIcon.vue';
-import AddIcon from '../icons/AddIcon.vue';
+
+const props = defineProps<{
+  active?: boolean;
+}>();
 
 const $q = useQuasar();
 const workspaceStore = useWorkspaceStore();
@@ -121,10 +123,16 @@ const sprintStore = useSprintStore();
 const { setNotificationView } = useNotificationStore();
 const { hasPermission } = useRolesStore();
 
-const { workspaceInfo, currentWorkspaceSlug } = storeToRefs(workspaceStore);
+const { workspaceInfo, currentWorkspaceSlug, workspaceSummary } =
+  storeToRefs(workspaceStore);
 
 const route = useRoute();
-const sprints = ref([] as DtoSprintLight[]);
+const sprints = computed(
+  () =>
+    workspaceSummary?.value?.sprints
+      ?.map((folder) => folder?.sprints || [])
+      .flat() ?? [],
+);
 
 const openCreateSprint = ref(false);
 const openEditSprint = ref(false);
@@ -134,15 +142,8 @@ const isDeleteDialogOpen = ref(false);
 const openSprintNotifications = ref(false);
 const canCreateSprint = computed(() => hasPermission('create-sprint'));
 
-onMounted(async () => {
-  if (!currentWorkspaceSlug.value) return;
-  refreshSprints();
-});
-
 const refreshSprints = async () => {
-  sprints.value = await sprintStore.getSprintsList(
-    currentWorkspaceSlug.value as string,
-  );
+  await workspaceStore.getWorkspaceSummary(currentWorkspaceSlug.value ?? '');
 };
 
 const reopen = async (id: string) => {
@@ -191,24 +192,23 @@ const getSprintMenuItems = (sprint: DtoSprintLight) => {
   ];
 };
 
-const headerMenuItems = [
+const headerMenuItems = computed(() => [
   {
     text: 'Создать спринт',
     icon: h(QIcon, { name: 'add' }),
-    onClick: () => (openCreateSprint.value = true),
-    show: canCreateSprint,
+    onClick: () => {
+      openCreateSprint.value = true;
+    },
+    show: canCreateSprint.value,
   },
   {
     text: 'Настроить уведомления',
     icon: BellIcon,
-    onClick: () => (openSprintNotifications.value = true),
+    onClick: () => {
+      openSprintNotifications.value = true;
+    },
   },
-];
-
-watch(currentWorkspaceSlug, async (newValue) => {
-  if (!newValue) return;
-  sprints.value = await sprintStore.getSprintsList(newValue as string);
-});
+]);
 
 watch(
   () => sprintStore.refreshSprintData,
@@ -219,4 +219,17 @@ watch(
     }
   },
 );
+
+watch(() => currentWorkspaceSlug.value,
+  () => {
+    sprintStore.clearSprintsList();
+  },
+  { immediate: true }
+)
 </script>
+
+<style lang="scss" scoped>
+.sprint_name {
+  width: 100px;
+}
+</style>

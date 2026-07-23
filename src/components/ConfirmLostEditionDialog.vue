@@ -35,16 +35,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const emit = defineEmits(['closeIssue', 'closeConfirm']);
+const emits = defineEmits<{ closeIssue: []; closeConfirm: [] }>();
 
 const dialogRef = ref(null);
 
 const handleConfirm = () => {
-  emit('closeIssue');
+  emits('closeIssue');
 };
 
 const closeConfirm = () => {
-  emit('closeConfirm');
+  emits('closeConfirm');
 };
 </script>
 

@@ -3,7 +3,7 @@
     ref="menuRef"
     class="context-menu"
     :style="`z-index: ${isTransferOpen || isDeletingOpen || isManageSprintsOpen ? 6000 : 9001}`"
-    v-bind="menuProps"
+    :context-menu="!isControlled"
     touch-position
   >
     <q-list class="context-menu__options-list" separator>
@@ -13,7 +13,11 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            pinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            pinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
           )
         "
       >
@@ -28,7 +32,11 @@
         v-close-popup
         @click="
           pinAndUnpinIssue(() =>
-            unpinIssue(props.row, workspaceSlug, project?.identifier || props.row?.project_detail?.identifier),
+            unpinIssue(
+              props.row,
+              workspaceSlug,
+              project?.identifier || props.row?.project_detail?.identifier,
+            ),
           )
         "
       >
@@ -90,22 +98,24 @@
         <q-item-section>Удалить</q-item-section>
       </q-item>
     </q-list>
-    <TransferTaskDialog
-      v-model="isTransferOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
-    <DeleteIssueDialog
-      v-model="isDeletingOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
-    <ManageIssueSprintsDialog
-      v-model="isManageSprintsOpen"
-      :issue="props.row"
-      @refresh="emit('refresh')"
-    />
   </q-menu>
+  <TransferTaskDialog
+    v-if="isTransferOpen"
+    v-model="isTransferOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
+  <DeleteIssueDialog
+    v-model="isDeletingOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+    @hide="menuRef.hide()"
+  />
+  <ManageIssueSprintsDialog
+    v-model="isManageSprintsOpen"
+    :issue="props.row"
+    @refresh="emits('refresh')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -142,7 +152,7 @@ const props = defineProps<{
   anchorEvent?: MouseEvent | null;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   refresh: [];
 }>();
 
@@ -150,12 +160,9 @@ const menuRef = ref<any>(null);
 
 const isControlled = computed(() => !!props.anchorEvent);
 
-const menuProps = computed(() => {
-  return isControlled.value ? {} : { 'context-menu': true };
-});
-
 const issuesStore = useIssuesStore();
-const { sprintsList } = storeToRefs(useSprintStore());
+const sprintStore = useSprintStore();
+const { sprintsList } = storeToRefs(sprintStore);
 const { project } = storeToRefs(useProjectStore());
 const { pinIssue, unpinIssue } = issuesStore;
 const { refreshIssues } = storeToRefs(issuesStore);
@@ -209,13 +216,12 @@ const pinAndUnpinIssue = async (func: () => Promise<void>) => {
     await func();
     if (props.row?.pinned !== undefined) props.row.pinned = !props.row?.pinned;
     refreshIssues.value = true;
-    emit('refresh');
+    emits('refresh');
   } catch (err) {
     setNotificationView({
       open: true,
       type: 'error',
-      customMessage:
-      'Произошла ошибка при закреплении/откреплении задачи',
+      customMessage: 'Произошла ошибка при закреплении/откреплении задачи',
     });
     throw err;
   }
@@ -229,15 +235,18 @@ const deleteIssue = (): void => {
   isDeletingOpen.value = true;
 };
 
-const manageIssueSprints = (): void => {
+const manageIssueSprints = async (): Promise<void> => {
   if (!sprintsList.value.length) {
-    setNotificationView({
-      open: true,
-      type: 'error',
-      customMessage:
-        'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
-    });
-    return;
+    await sprintStore.getSprintsList(workspaceSlug.value);
+    if (!sprintsList.value.length) {
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage:
+          'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
+      });
+      return;
+    }
   }
   isManageSprintsOpen.value = true;
 };
@@ -249,7 +258,7 @@ const addNewIssue = () => {
       parent: props.row?.id,
       project: props.row?.project_detail,
     },
-  }).onOk(() => emit('refresh'));
+  }).onOk(() => emits('refresh'));
 };
 
 watch(

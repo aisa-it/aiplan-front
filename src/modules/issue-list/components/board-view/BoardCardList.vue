@@ -53,9 +53,8 @@
           :card="card"
           :entity="table.entity"
           :context-type="contextType"
-          @refresh="(isFullUpdate) => getIssues(quasarPagination, isFullUpdate)"
           @update-table="
-            (field, row, entity) => updateTable(field, row, entity)
+            (field, row, entity) => updateCurrentTable(field, row, entity)
           "
           @openPreview="
             (issue) =>
@@ -96,9 +95,6 @@
 <script setup lang="ts">
 import { inject, onMounted, onBeforeUnmount, ref } from 'vue';
 import { EventBus } from 'quasar';
-import { storeToRefs } from 'pinia';
-
-import { useProjectStore } from 'src/stores/project-store';
 
 import GroupedHeader from '../ui/GroupedHeader.vue';
 import BoardCard from './BoardCard.vue';
@@ -114,6 +110,7 @@ import { useIssueContext } from '../../composables/useIssueContext';
 import { defineEntityName } from '../../utils/defineEntityName';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   table: any;
@@ -121,9 +118,11 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits(['refresh', 'openPreview', 'openIssue']);
-
-const { project } = storeToRefs(useProjectStore());
+const emits = defineEmits<{
+  refresh: [any];
+  openPreview: [DtoIssue, any];
+  openIssue: [number, string];
+}>();
 
 const { contextProps, isGroupHide, setGroupHide } = useIssueContext(
   props.contextType,
@@ -145,10 +144,10 @@ const quasarPagination = ref<QuasarPagination>({
   rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
 });
 
-const getIssues = async (p?: any, isFullUpdate = false) => {
+const getIssues = async (p?: any) => {
   if (p) quasarPagination.value.page = await p;
 
-  emits('refresh', parsePagination(quasarPagination.value), isFullUpdate);
+  emits('refresh', parsePagination(quasarPagination.value));
 };
 
 const toggleList = async (entity, value) => {
@@ -156,11 +155,13 @@ const toggleList = async (entity, value) => {
   await setGroupHide(entity, value);
 };
 
-const updateTable = (field, row, entity) => {
-  updateCurrentTable(field, row, entity);
-};
-
 const handleUpdateIssueTable = (field, entityId) => {
+  if (field === 'priority' && entityId === props.table.entity) {
+    getIssues();
+  }
+  if (field === 'sprint') {
+    getIssues();
+  }
   if (props.table.entity?.id && entityId === props.table.entity?.id) {
     getIssues();
   }

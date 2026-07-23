@@ -23,8 +23,8 @@ h6 {
 }
 
 .header {
-  background-color: $bg-color !important;
   box-shadow: none !important;
+  background-color: $bg-color;
   border-bottom: 1px solid $darkest-border-color;
 }
 
@@ -1447,3 +1447,24 @@ select:-ms-autofill {
 
 /* import the default theme (optional) */
 @import '@vue-flow/core/dist/theme-default.css';
+
+// --------------------- nav-popup (Проекты / Спринты / Формы) ---------------------
+.nav-popup {
+  min-width: 280px;
+  max-width: 320px;
+  max-height: inherit;
+  display: grid;
+
+  // Используем Grid (вместо flex-column), чтобы обойти баг позиционирования QMenu в Firefox
+  grid-template-rows: max-content minmax(0, 1fr) max-content max-content;
+  overflow: hidden;
+
+  &__item--active {
+    background-color: var(--active-tab-color);
+    color: $primary !important;
+  }
+}
+
+.q-layout__section--marginal {
+  background-color: inherit !important;
+}

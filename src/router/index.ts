@@ -7,6 +7,9 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
+import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useProjectStore } from 'src/stores/project-store';
 
 /*
  * If not building with SSR mode, you can
@@ -35,6 +38,23 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
+    if (
+      to.meta.requiredWorkspace === true &&
+      to.params.workspace !== from.params.workspace
+    ) {
+      const projectStore = useProjectStore();
+      projectStore.$reset();
+      const newSlug = to.params.workspace as string | undefined;
+
+      const workspaceStoreV2 = useWorkspaceStoreV2();
+      if (newSlug && newSlug !== 'undefined') {
+        workspaceStoreV2.getWorkspaceInfo(newSlug);
+      }
+
+      const workspaceStore = useWorkspaceStore();
+      workspaceStore.changeWorkspace(newSlug || null);
+    }
+
     if (to.fullPath.includes('/reset-password')) {
       next();
       return;
@@ -50,6 +70,7 @@ export default route(function (/* { store, ssrContext } */) {
       to.fullPath === '/' ||
       to.fullPath === '/signin' ||
       to.fullPath === '/signup' ||
+      to.path === '/onboarding' ||
       to.fullPath === '/#/' ||
       to.fullPath.includes('/f/')
     )

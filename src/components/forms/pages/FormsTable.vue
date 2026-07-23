@@ -88,7 +88,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -135,6 +135,8 @@ const openAnswers = (answer) => {
 };
 
 const refresh = async (props) => {
+  if (!route.params.workspace || !route.params.formSlug) return;
+
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
   const offset = (page - 1) * (rowsPerPage == 0 ? 10 : rowsPerPage);

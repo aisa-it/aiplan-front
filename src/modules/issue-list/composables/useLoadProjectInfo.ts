@@ -10,6 +10,7 @@ export const useLoadProjectInfo = () => {
   const route = useRoute();
 
   const getProjectInfo = async () => {
+    if (!route.params.workspace || !route.params.project) return;
     await projectStore.getProjectInfo(
       route.params.workspace as string,
       route.params.project as string,
@@ -17,6 +18,7 @@ export const useLoadProjectInfo = () => {
   };
 
   const getMeInProject = async () => {
+    if (!route.params.workspace || !route.params.project) return;
     await projectStore.getMeInProject(
       route.params.workspace as string,
       route.params.project as string,
@@ -24,6 +26,7 @@ export const useLoadProjectInfo = () => {
   };
 
   const getStatuses = async () => {
+    if (!route.params.workspace || !route.params.project) return;
     await projectStore.getProjectStatuses(
       route.params.workspace as string,
       route.params.project as string,
@@ -31,6 +34,7 @@ export const useLoadProjectInfo = () => {
   };
 
   const getLabels = async () => {
+    if (!route.params.workspace || !route.params.project) return;
     await projectStore.getProjectLabels(
       route.params.workspace as string,
       route.params.project as string,
@@ -38,6 +42,7 @@ export const useLoadProjectInfo = () => {
   };
 
   const getMembers = async () => {
+    if (!route.params.workspace || !route.params.project) return;
     await projectStore.getProjectMembers(
       route.params.workspace as string,
       route.params.project as string,

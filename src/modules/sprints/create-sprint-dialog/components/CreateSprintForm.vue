@@ -28,10 +28,10 @@
             label="Выберите наблюдателя"
             class="col centered-horisontally"
             @update:watchers="
-                (val) => {
-                  return (watchers = val);
-                }
-              "
+              (val) => {
+                return (watchers = val);
+              }
+            "
           />
         </div>
 
@@ -50,6 +50,33 @@
           <div v-if="dateError" class="text-negative text-caption q-mt-xs">
             {{ dateError }}
           </div>
+        </div>
+
+        <div class="row q-mb-md centered-horisontally">
+          <div class="col centered-horisontally">
+            <FolderIcon />
+            <span class="q-ml-sm"> Папка </span>
+            <q-btn
+              class="btn btn-only-icon-sm self-center q-ml-xs"
+              no-caps
+              @click="isCreateFolderOpen = true"
+            >
+              <div class="full-w centered-horisontally justify-between">
+                <AddIcon />
+                <q-tooltip>Создать</q-tooltip>
+              </div>
+            </q-btn>
+          </div>
+          <SelectFolder
+            :sprint-id="defaultProps?.id"
+            :folder="folder"
+            class="col centered-horisontally"
+            @update:folder="
+              (val) => {
+                return (folder = val);
+              }
+            "
+          />
         </div>
       </div>
 
@@ -76,7 +103,7 @@
         <SelectSprintIssues
           v-if="issues && issues.length > 0"
           :issues="issues"
-          @delete="(id) => emit('delete', id)"
+          @delete="(id) => emits('delete', id)"
           class="visible-scroll issues-scroll"
           style="min-height: 216px; height: 100%"
         />
@@ -92,11 +119,16 @@
       style="width: 100%"
       @click="pushData"
     />
+
+    <CreateFolderDialog
+      v-model="isCreateFolderOpen"
+      @success="refreshSprints"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -109,20 +141,28 @@ dayjs.extend(timezone);
 
 import { storeToRefs } from 'pinia';
 import { useUserStore } from 'src/stores/user-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 import SelectWatchers from 'src/components/selects/SelectWatchers.vue';
 import CreateSprintDateRange from './CreateSprintDateRange.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
 import { TIPTAP_TABS } from 'src/constants/tiptap';
 import SelectSprintIssues from './SelectSprintIssues.vue';
+import CreateFolderDialog from 'src/modules/sprints/create-folder-dialog/CreateFolderDialog.vue';
 
 import ObserveIcon from 'src/components/icons/ObserveIcon.vue';
+import FolderIcon from 'src/components/icons/FolderIcon.vue';
+import AddIcon from 'src/components/icons/AddIcon.vue';
 import WatchDashedIcon from 'src/components/icons/WatchDashedIcon.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import {
   DtoIssueLight,
   DtoSprint,
+  DtoSprintFolder,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import SelectFolder from 'src/components/selects/SelectFolder.vue';
+import { ROOT_FOLDER_ID } from 'src/constants/constants.ts';
 
 const props = defineProps<{
   issues?: DtoIssueLight[];
@@ -130,36 +170,63 @@ const props = defineProps<{
   isMobile?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   delete: [id: string];
   create: [data: any];
   edit: [data: any];
 }>();
 
 const userStore = useUserStore();
+const sprintStore = useSprintStore();
+const workspaceStore = useWorkspaceStore();
 
+const { sprintsList } = storeToRefs(sprintStore);
 const { user } = storeToRefs(userStore);
 
 const nameRef = ref();
+const isCreateFolderOpen = ref(false);
 
 const sprintName = ref(props.defaultProps?.name ?? '');
 const watchers = ref<any>(
   props.defaultProps?.watchers?.map((watcher) => ({
     member: watcher,
-  })) || []
+  })) || [],
+);
+const folder = ref<DtoSprintFolder | undefined>(
+  props.defaultProps?.sprint_folder,
 );
 
-const dateRange = ref({
-  from: props.defaultProps?.start_date
-    ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
-    : dayjs.utc().format('DD.MM.YYYY'),
+const refreshSprints = () => {
+  sprintStore.getSprintsList(
+    workspaceStore.currentWorkspaceSlug as string,
+  );
+};
 
-  to: props.defaultProps?.end_date
-    ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
-    : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
-});
+const createDefaultDate = () => {
+  if (
+    props.defaultProps?.id &&
+    !(props.defaultProps?.start_date && props.defaultProps?.end_date)
+  )
+    return { from: undefined, to: undefined };
+
+  if (props.defaultProps?.start_date && props.defaultProps?.end_date) {
+    return {
+      from: dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY'),
+      to: dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY'),
+    };
+  }
+
+  return {
+    from: dayjs.utc().format('DD.MM.YYYY'),
+    to: dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
+  };
+};
+
+const dateRange = ref(createDefaultDate());
 
 const dateError = computed(() => {
+  if (!dateRange.value.from && !dateRange.value.to) return '';
+
   const from = toISO(dateRange.value.from);
   const to = toISO(dateRange.value.to);
 
@@ -222,17 +289,24 @@ const removeAndAddWatcher = () => {
     };
   }
 
-
   const remove =
-    props.defaultProps?.watchers?.filter(
-      (el) => !watchersIds.some((i) => i === el.id),
-    ).map((el) => el.id) ?? [];
-
+    props.defaultProps?.watchers
+      ?.filter((el) => !watchersIds.some((i) => i === el.id))
+      .map((el) => el.id) ?? [];
 
   return {
     remove: remove,
     add: watchersIds,
   };
+};
+
+const createDateForSprintData = (date: string | undefined) => {
+  if (!date) {
+    if (props.defaultProps) return null;
+    else return undefined;
+  }
+
+  return toISO(date);
 };
 
 const pushData = () => {
@@ -253,19 +327,26 @@ const pushData = () => {
     createSprintData: {
       name: sprintName.value,
       description: description.value,
-      start_date: toISO(dateRange.value.from),
-      end_date: toISO(dateRange.value.to),
+      start_date: createDateForSprintData(dateRange.value.from),
+      end_date: createDateForSprintData(dateRange.value.to),
+      sprint_folder_id: folder.value?.id || ROOT_FOLDER_ID,
     },
     issuesSprint: { issues_add: addIssues, issues_remove: removeIssues },
     membersSprint: { members_add: addWatchers, members_remove: removeWatchers },
   };
 
   if (props.defaultProps) {
-    emit('edit', data);
+    emits('edit', data);
   } else {
-    emit('create', data);
+    emits('create', data);
   }
 };
+
+onMounted(async () => {
+  if (!sprintsList.value || sprintsList.value.length === 0) {
+    await refreshSprints();
+  }
+})
 
 watch(
   () => props.defaultProps,
@@ -273,19 +354,13 @@ watch(
     if (!props.defaultProps) return;
 
     sprintName.value = props.defaultProps?.name ?? '';
-    watchers.value = props.defaultProps?.watchers?.map((watcher) => ({
-    member: watcher,
-  })) || [];
+    watchers.value =
+      props.defaultProps?.watchers?.map((watcher) => ({
+        member: watcher,
+      })) || [];
+    folder.value = props.defaultProps?.sprint_folder;
 
-    dateRange.value = {
-      from: props.defaultProps?.start_date
-        ? dayjs.utc(props.defaultProps.start_date).format('DD.MM.YYYY')
-        : dayjs.utc().format('DD.MM.YYYY'),
-
-      to: props.defaultProps?.end_date
-        ? dayjs.utc(props.defaultProps.end_date).format('DD.MM.YYYY')
-        : dayjs.utc().add(7, 'day').format('DD.MM.YYYY'),
-    };
+    dateRange.value = createDefaultDate();
 
     description.value = props.defaultProps?.description ?? '';
   },

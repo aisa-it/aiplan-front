@@ -134,16 +134,16 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <IssueContextMenu
-    :row="contextRow"
-    :anchor-event="contextEvent"
-    @refresh="refreshTable"
-  />
+    <IssueContextMenu
+      :row="contextRow"
+      :anchor-event="contextEvent"
+      @refresh="refreshTable"
+    />
+  </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import {
   inject,
   ref,
@@ -155,9 +155,6 @@ import {
   nextTick,
 } from 'vue';
 import { EventBus, QTable } from 'quasar';
-import { storeToRefs } from 'pinia';
-
-import { useProjectStore } from 'src/stores/project-store';
 
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import IssueContextMenu from 'src/shared/components/IssueContextMenu.vue';
@@ -180,6 +177,7 @@ import { useIssueContext } from '../composables/useIssueContext';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 interface QuasarPagination {
   page: number;
@@ -189,23 +187,22 @@ interface QuasarPagination {
   rowsPerPage: number;
 }
 
-const emits = defineEmits([
-  'refresh',
-  'updateIssueField',
-  'openPreview',
-  'openIssue',
-  'updateGroupedIssues',
-]);
-const props = defineProps([
-  'entity',
-  'rows',
-  'rowsCount',
-  'loading',
-  'columns',
-  'contextType',
-]);
+const props = defineProps<{
+  entity?: any;
+  rows: DtoIssue[];
+  rowsCount: number;
+  loading?: boolean;
+  contextType: 'project' | 'sprint';
+}>();
 
-const { project } = storeToRefs(useProjectStore());
+const emits = defineEmits<{
+  refresh: [any, boolean | undefined];
+  openPreview: [DtoIssue, any];
+  openIssue: [number, DtoIssue];
+  updateGroupedIssues: [any];
+  tableHide: [string, Record<string, any>];
+  tableShow: [string];
+}>();
 
 const {
   contextProps,
@@ -217,7 +214,7 @@ const {
 const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
 const columns = computed(() => {
-  return props.columns ?? getTableColumns;
+  return getTableColumns;
 });
 
 const bus = inject('bus') as EventBus;
@@ -331,6 +328,7 @@ const onMiddleScroll = () => {
 
 onMounted(async () => {
   bus.on('updateIssueTable', handleUpdateIssueTable);
+  emits('tableShow', props.entity?.id);
 
   await nextTick();
 
@@ -347,18 +345,19 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   bus.off('updateIssueTable', handleUpdateIssueTable);
+  emits('tableHide', props.entity?.id, parsePagination(quasarPagination.value));
   hScroll.value?.removeEventListener('scroll', onHScroll);
   middle?.removeEventListener('scroll', onMiddleScroll);
 });
 
-const updateIssueField = (
+const updateIssueField = async (
   action?: string,
   row?: any,
   entity?: any,
   status?: any,
 ) => {
   if (isGroupingEnabled.value === true) {
-    emits('updateGroupedIssues', status);
+    await emits('updateGroupedIssues', status);
     updateCurrentTable(action, row, entity);
   } else refreshTable();
 };

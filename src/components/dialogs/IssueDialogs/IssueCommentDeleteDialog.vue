@@ -35,40 +35,23 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
-import { computed, defineComponent } from 'vue';
+import { computed } from 'vue';
 
 // utils
 import aiplan from 'src/utils/aiplan';
 import { formatDateTime } from 'src/utils/time';
+import { DtoIssueComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export default defineComponent({
-  name: 'IssueCommentDeleteDialog',
-  props: {
-    isOpenDialog: {
-      type: Boolean,
-      default: false,
-    },
-    comment: {
-      type: Object,
-      required: true,
-    },
-  },
-  emits: ['onDelete'],
-  setup(props) {
-    const commentUserName = computed(() => {
-      return aiplan.UserName(props.comment.actor_detail).join(' ');
-    });
+const props = defineProps<{ comment: DtoIssueComment }>();
+defineEmits<{ onDelete: [] }>();
 
-    const commentCreatedAt = computed(() => {
-      return formatDateTime(props.comment.created_at);
-    });
+const commentUserName = computed(() => {
+  return aiplan.UserName(props.comment.actor_detail).join(' ');
+});
 
-    return {
-      commentUserName,
-      commentCreatedAt,
-    };
-  },
+const commentCreatedAt = computed(() => {
+  return formatDateTime(props.comment.created_at ?? '');
 });
 </script>

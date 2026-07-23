@@ -204,7 +204,6 @@ import AvatarImage from 'src/components/AvatarImage.vue';
 
 // directives
 import ClickOutside from 'src/directives/click-outside';
-import { useNotificationStore } from 'stores/notification-store';
 import IssueNameInput from './IssueNameInput.vue';
 import IssueDescriptionEditor from './IssueDescriptionEditor.vue';
 
@@ -223,11 +222,11 @@ defineProps<{
   preview?: boolean;
 }>();
 
-const emit = defineEmits([
-  'update:issuePage',
-  'toggleDrawer',
-  'uploadAttachment',
-]);
+const emits = defineEmits<{
+  'update:issuePage': [];
+  toggleDrawer: [];
+  uploadAttachment: [];
+}>();
 
 // stores
 const userStore = useUserStore();
@@ -241,7 +240,6 @@ const workspaceStore = useWorkspaceStore();
 const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
-const { setNotificationView } = useNotificationStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 // vars
@@ -340,12 +338,7 @@ const handleUpdateTitleAndEditor = async () => {
       if (issueData.value) {
         issueData.value.description_html = initialIssueDescription.value;
       }
-
-      setNotificationView({
-        open: true,
-        type: 'success',
-      });
-      emit('update:issuePage');
+      emits('update:issuePage');
     })
     .catch(() => {
       if (issueData.value) {
@@ -445,7 +438,7 @@ const refresh = async () => {
 };
 
 const toggleDrawer = () => {
-  emit('toggleDrawer');
+  emits('toggleDrawer');
 };
 
 const editorContainer = ref<HTMLElement>();
@@ -459,7 +452,7 @@ const { handleDrop } = useAttachmentsWithEditor(
       issueData.value.project,
       issueData.value.id,
     ),
-  () => emit('uploadAttachment'),
+  () => emits('uploadAttachment'),
 );
 
 onMounted(() => {

@@ -154,7 +154,10 @@ const props = defineProps<{
   isAdminOrAuthor: boolean;
 }>();
 
-const emit = defineEmits(['update:roles', 'update:modelValue']);
+const emits = defineEmits<{
+  'update:roles': [Roles | null];
+  'update:modelValue': [boolean];
+}>();
 
 const currentRole = ref<Roles | null>(null);
 const workspaceMmebers = ref<DtoWorkspaceMember[]>([]);
@@ -252,11 +255,11 @@ const getUsersBySearch = (): void => {
   );
 };
 
-const updateModelValue = (value: boolean) => emit('update:modelValue', value);
+const updateModelValue = (value: boolean) => emits('update:modelValue', value);
 
 const saveChanges = () => {
   if (currentRole.value) {
-    emit('update:roles', currentRole.value);
+    emits('update:roles', currentRole.value);
   }
   updateModelValue(false);
 };
@@ -264,7 +267,7 @@ const saveChanges = () => {
 onMounted(async () => {
   const res = await workspaceStore.getWorkspaceMembers(
     currentWorkspaceSlug.value as string,
-    { offset: 0, limit: -1, order_by: 'id', desc: false },
+    { order_by: 'id', desc: false },
     false,
   );
   if (!res) return;

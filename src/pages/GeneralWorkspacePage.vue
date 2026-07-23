@@ -134,6 +134,7 @@ watch(
   (newVal) => {
     if (newVal?.name) metadata.value.title = `Пространство ${newVal.name}`;
   },
+  { immediate: true },
 );
 </script>
 

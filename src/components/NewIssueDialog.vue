@@ -4,11 +4,12 @@
       v-if="workspaceProjects"
       :project_detail="project"
       :parentissue="parent"
+      :off-success-notification="offSuccessNotification"
       class="q-dialog-plugin"
       style="min-width: 80vw"
       @ok="
         () => {
-          $emit('update');
+          emits('update');
           onDialogOK();
         }
       "
@@ -37,7 +38,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 // core
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -54,8 +55,12 @@ import ConfirmLostEditionDialog from './ConfirmLostEditionDialog.vue';
 //types
 import { DtoProject } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = defineProps<{ parent?: string; project?: DtoProject }>();
-const emit = defineEmits([
+const props = defineProps<{
+  parent?: string;
+  project?: DtoProject;
+  offSuccessNotification?: boolean;
+}>();
+const emits = defineEmits([
   ...useDialogPluginComponent.emits,
   'update',
   'onProjectCreated',
@@ -97,10 +102,10 @@ const closeBothDialog = () => {
 
 const createProject = () => {
   onDialogCancel();
-  emit('onProjectCreated');
+  emits('onProjectCreated');
 };
 
 onBeforeUnmount(() => {
-  emit('hide');
+  emits('hide');
 });
 </script>

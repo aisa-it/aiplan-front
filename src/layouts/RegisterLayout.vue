@@ -16,7 +16,7 @@
             Регистрация
           </h5>
 
-          <RegisterPanel @registerRequestSent="() => $router.push('/signin')" />
+          <RegisterPanel @registerRequestSent="() => router.push('/signin')" />
 
           <q-btn
             v-if="isSingUp"
@@ -25,7 +25,7 @@
             no-caps
             color="primary"
             class="q-mt-sm"
-            @click="() => $router.push('/signin')"
+            @click="() => router.push('/signin')"
           >
             Уже есть аккаунт? Войдите
           </q-btn>
@@ -51,10 +51,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { defineComponent, onMounted } from 'vue';
+import { onMounted } from 'vue';
 
 // stores
 import { useUtilsStore } from 'src/stores/utils-store';
@@ -64,27 +64,15 @@ import AiplanVersion from 'src/components/AiplanVersion.vue';
 import RegisterPanel from 'src/components/RegisterPanel.vue';
 import logo from 'src/assets/logo.svg';
 import loginBg from 'src/assets/login-bg.svg';
+import { useRouter } from 'vue-router';
 
-export default defineComponent({
-  name: 'LoginPanel',
-  components: {
-    AiplanVersion,
-    RegisterPanel,
-  },
-  setup() {
-    const utilsStore = useUtilsStore();
-    const { isSingUp } = storeToRefs(utilsStore);
+const utilsStore = useUtilsStore();
+const { isSingUp } = storeToRefs(utilsStore);
+const router = useRouter();
 
-    onMounted(async () => await utilsStore.getVersion());
-
-    return {
-      isSingUp,
-      logo,
-      loginBg,
-    };
-  },
-});
+onMounted(async () => await utilsStore.getVersion());
 </script>
+
 <style lang="scss" scoped>
 .login-bg {
   position: fixed;

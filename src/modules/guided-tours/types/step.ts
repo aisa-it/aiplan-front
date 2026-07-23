@@ -7,6 +7,7 @@ export interface Step {
   activeButtonText?: string;
   is_skip?: boolean;
   padding?: number;
+  isOffScroll?: boolean;
 
   onEnter?: () => void;
   onLeave?: () => void;

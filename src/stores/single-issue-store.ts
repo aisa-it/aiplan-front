@@ -107,6 +107,9 @@ export const useSingleIssueStore = defineStore('single-issue-store', {
       this.isPreview = false;
       this.currentIssueID = '';
     },
+    clearCurrentIssueState() {
+      this.currentIssueID = '';
+    },
     async getIssueData(workspaceSlug: string, projectID: string) {
       try {
         const res = await issuesApi.getIssue(

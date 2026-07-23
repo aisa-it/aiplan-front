@@ -2,6 +2,7 @@ import { valToRole } from 'src/utils/translator';
 import { translateVerb } from 'src/utils/translator';
 import { getFullName } from 'src/utils/helpers';
 import { getDocLink } from '../helpers/getDocLink';
+import { getProjectLink } from 'src/utils/links';
 
 export function workspaceNotificationRender(activity: any, detail: any) {
   let action = '';
@@ -56,7 +57,7 @@ export function workspaceNotificationRender(activity: any, detail: any) {
         if (activity.new_entity_detail) {
           link = `<a target="_blank"
                     style="color: #3F76FF; text-decoration: none; font-weight: 400;"
-                    href=${activity.new_entity_detail.url}>${activity.new_value} "${activity.new_entity_detail.name}"</a>`;
+                    href=${getProjectLink(detail?.workspace?.slug, activity.new_entity_detail.identifier)}>${activity.new_value} "${activity.new_entity_detail.name}"</a>`;
         }
         return `${action} создал(-а) проект ${link ? link : activity.new_value}`;
       }

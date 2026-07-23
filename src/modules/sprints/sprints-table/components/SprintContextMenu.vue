@@ -1,0 +1,223 @@
+<template>
+  <q-menu
+    context-menu
+    ref="menuRef"
+    class="context-menu"
+    :style="`z-index: ${ isDeletingOpen || isFolderEditingOpen || isSprintEditingOpen ? 6000 : 9001}`"
+    v-bind="menuProps"
+    touch-position
+  >
+    <q-list class="context-menu__options-list" separator>
+      <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint')"
+        clickable
+        @click="openEditSprint"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <SettingsIcon />
+        </q-item-section>
+        <q-item-section>Настройки</q-item-section>
+      </q-item>
+      <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'edit-sprint-folders')"
+        clickable
+        @click="addToFolder"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <FolderAddIcon />
+        </q-item-section>
+        <q-item-section>Добавить к папке ...</q-item-section>
+      </q-item>
+      <q-item clickable v-close-popup @click="copySprintLink">
+        <q-item-section thumbnail class="q-px-md">
+          <CopyLinkIcon />
+        </q-item-section>
+        <q-item-section>Скопировать ссылку</q-item-section>
+      </q-item>
+      <q-item clickable v-close-popup @click="openInNewTab">
+        <q-item-section thumbnail class="q-px-md">
+          <OpenNewTabIcon :height="24" />
+        </q-item-section>
+        <q-item-section>Открыть в новой вкладке</q-item-section>
+      </q-item>
+      <q-item clickable v-close-popup @click="openInNewWindow">
+        <q-item-section thumbnail class="q-px-md">
+          <OpenNewWindowIcon />
+        </q-item-section>
+        <q-item-section>Открыть в новом окне</q-item-section>
+      </q-item>
+      <q-item clickable v-close-popup @click="copySprintTitle">
+        <q-item-section thumbnail class="q-px-md">
+          <CopyNameIcon />
+        </q-item-section>
+        <q-item-section>Скопировать название</q-item-section>
+      </q-item>
+      <q-item
+        v-if="hasPermissionByWorkspace(workspaceInfo as DtoWorkspace, 'delete-sprint')"
+        class="context-menu__options-item_red"
+        clickable
+        @click="deleteSprint"
+      >
+        <q-item-section thumbnail class="q-px-md">
+          <BinIcon color="#cd5c5c" />
+        </q-item-section>
+        <q-item-section>Удалить</q-item-section>
+      </q-item>
+    </q-list>
+  </q-menu>
+  <DeleteSprintDialog
+    v-model="isDeletingOpen"
+    :sprint="props.row"
+    @success="successDeleteHandle"
+    @error="errorDeleteHandle"
+  />
+  <EditFolderDialog
+    v-model="isFolderEditingOpen"
+    :sprint="sprintForManageFolder"
+    @hide="menuRef.hide()"
+  />
+  <CreateSprintDialog
+    v-model="isSprintEditingOpen"
+    :sprint-id="sprintForEditId"
+    @update-sprints="emit('refresh')"
+    @hide="menuRef.hide()"
+  />
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch, nextTick } from 'vue';
+import { useNotificationStore } from 'src/stores/notification-store';
+import { useRolesStore } from 'src/stores/roles-store.ts';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+
+import SettingsIcon from 'src/components/icons/SettingsIcon.vue';
+import FolderAddIcon from 'src/components/icons/FolderAddIcon.vue';
+import CopyLinkIcon from 'src/components/icons/CopyLinkIcon.vue';
+import OpenNewTabIcon from 'src/components/icons/OpenNewTabIcon.vue';
+import OpenNewWindowIcon from 'src/components/icons/OpenNewWindowIcon.vue';
+import CopyNameIcon from 'src/components/icons/CopyNameIcon.vue';
+import BinIcon from 'src/components/icons/BinIcon.vue';
+import { DtoSprintLight, DtoWorkspace } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import DeleteSprintDialog from 'src/modules/sprints/delete-sprint-dialog/DeleteSprintDialog.vue'
+import EditFolderDialog from 'src/modules/sprints/edit-folder-dialog/EditFolderDialog.vue'
+import CreateSprintDialog from 'src/modules/sprints/create-sprint-dialog/CreateSprintDialog.vue';
+import { storeToRefs } from 'pinia';
+
+const props = defineProps<{
+  row: DtoSprintLight | null;
+  anchorEvent?: MouseEvent | null;
+}>();
+
+const emit = defineEmits<{
+  refresh: [];
+}>();
+
+const menuRef = ref<any>(null);
+
+const isControlled = computed(() => !!props.anchorEvent);
+
+const menuProps = computed(() => {
+  return isControlled.value ? {} : { 'context-menu': true };
+});
+
+const { setNotificationView } = useNotificationStore();
+const { hasPermissionByWorkspace } = useRolesStore();
+const workspaceStore = useWorkspaceStore();
+const { workspaceInfo } = storeToRefs(workspaceStore);
+
+let sprintLink = computed(() => props.row?.short_url ?? props.row?.url ?? '');
+const isDeletingOpen = ref<boolean>(false);
+const isFolderEditingOpen = ref<boolean>(false);
+const isSprintEditingOpen = ref<boolean>(false);
+const sprintForManageFolder = ref<DtoSprintLight | null>();
+const sprintForEditId = ref<string>();
+
+const addToFolder = () => {
+  sprintForManageFolder.value = props.row;
+  isFolderEditingOpen.value = true;
+}
+
+const openEditSprint = () => {
+  sprintForEditId.value = props.row?.id;
+  isSprintEditingOpen.value = true;
+}
+
+const copySprintLink = (): void => {
+  try {
+    navigator.clipboard.writeText(sprintLink.value);
+  } catch {
+    console.error('Произошла ошибка при копировании ссылки');
+  }
+};
+
+const openInNewTab = (): void => {
+  window.open(sprintLink.value, '_blank');
+};
+
+const openInNewWindow = (): void => {
+  window.open(sprintLink.value, '_blank', 'popup');
+};
+
+const copySprintTitle = (): void => {
+  try {
+    navigator.clipboard.writeText(props.row?.name as string);
+  } catch {
+    console.error('Произошла ошибка при копировании названия');
+  }
+};
+
+const deleteSprint = (): void => {
+  isDeletingOpen.value = true;
+};
+
+const showNotification = (type: 'success' | 'error', msg?: string) => {
+  setNotificationView({
+    open: true,
+    type: type,
+    customMessage: msg,
+  });
+};
+
+const successDeleteHandle = () => {
+  showNotification('success', 'Спринт удален');
+  emit('refresh');
+};
+
+const errorDeleteHandle = () => {
+  showNotification('error', 'Ошибка удаления спринта');
+}
+
+watch(
+  () => props.anchorEvent,
+  async (evt) => {
+    if (evt && menuRef.value) {
+      menuRef.value.hide();
+      await nextTick();
+      menuRef.value.show(evt);
+    }
+  },
+);
+</script>
+
+<style lang="scss" scoped>
+.context-menu {
+  &__options-item {
+    &_red {
+      color: red;
+    }
+  }
+
+  &__options-item_red {
+    > .q-item__section {
+      color: #cd5c5c !important;
+    }
+
+    &:hover > .q-item__section {
+      color: red !important;
+      ::v-deep(svg path) {
+        fill: red !important;
+      }
+    }
+  }
+}
+</style>

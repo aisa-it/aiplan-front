@@ -44,124 +44,94 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, ref, watch } from 'vue';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
 import { Editor } from '@tiptap/vue-3';
 // utils
 import aiplan from 'src/utils/aiplan';
 import { getUrlFile } from 'src/utils/helpers';
 
-export default defineComponent({
-  name: 'EditorMentionList',
-  props: {
-    items: {
-      type: Array as PropType<Record<string, any>[]>,
-      required: true,
-    },
-    command: {
-      type: Function as PropType<(payload: { id: string; label: any }) => void>,
-      required: true,
-    },
-    query: {
-      type: String,
-      required: true,
-    },
-    editor: {
-      type: Object as PropType<Editor | null>,
-      required: true,
-    },
-  },
+const props = defineProps<{
+  items: Record<string, any>[];
+  command: (payload: { id: string; label: any }) => void;
+  query: string;
+  editor: Editor | null;
+}>();
 
-  setup(props) {
-    const selectedIndex = ref(0);
-    const classPrevent = computed(() => {
-      return props.editor?.options.classPrevent;
-    });
-
-    const onKeyDown = ({ event }: { event: KeyboardEvent }) => {
-      if (event.key === 'ArrowUp') {
-        upHandler();
-        return true;
-      }
-
-      if (event.key === 'ArrowDown') {
-        downHandler();
-        return true;
-      }
-
-      if (event.key === 'Enter') {
-        enterHandler();
-        return true;
-      }
-
-      return false;
-    };
-
-    const upHandler = () => {
-      selectedIndex.value =
-        (selectedIndex.value + props.items.length - 1) % props.items.length;
-    };
-
-    const downHandler = () => {
-      selectedIndex.value = (selectedIndex.value + 1) % props.items.length;
-    };
-
-    const enterHandler = () => {
-      selectItem(selectedIndex.value);
-    };
-
-    const selectItem = (index: number) => {
-      const item = props.items[index];
-      if (item) {
-        props.command({
-          id: item.member.username,
-          label: item.member.email,
-        });
-      }
-    };
-
-    const autoSelect = () => {
-      const fullMatchIndex = props.items.findIndex(
-        (item) =>
-          item.member.username.toLowerCase() === props.query.toLowerCase(),
-      );
-      if (fullMatchIndex !== -1) {
-        selectItem(fullMatchIndex);
-      }
-    };
-
-    const handleMember = (member: any, isUserName?: boolean): string => {
-      if (isUserName) {
-        return aiplan.UserName(member).join(' ');
-      }
-
-      return aiplan
-        .UserName(member)
-        .map((m) => m[0])
-        .join(' ');
-    };
-
-    watch(
-      () => props.items,
-      () => {
-        selectedIndex.value = 0;
-        autoSelect();
-      },
-    );
-
-    return {
-      onKeyDown,
-      upHandler,
-      selectItem,
-      getUrlFile,
-      downHandler,
-      classPrevent,
-      enterHandler,
-      handleMember,
-      selectedIndex,
-    };
-  },
+const selectedIndex = ref(0);
+const classPrevent = computed(() => {
+  return props.editor?.options.classPrevent;
 });
+
+const onKeyDown = ({ event }: { event: KeyboardEvent }) => {
+  if (event.key === 'ArrowUp') {
+    upHandler();
+    return true;
+  }
+
+  if (event.key === 'ArrowDown') {
+    downHandler();
+    return true;
+  }
+
+  if (event.key === 'Enter') {
+    enterHandler();
+    return true;
+  }
+
+  return false;
+};
+
+const upHandler = () => {
+  selectedIndex.value =
+    (selectedIndex.value + props.items.length - 1) % props.items.length;
+};
+
+const downHandler = () => {
+  selectedIndex.value = (selectedIndex.value + 1) % props.items.length;
+};
+
+const enterHandler = () => {
+  selectItem(selectedIndex.value);
+};
+
+const selectItem = (index: number) => {
+  const item = props.items[index];
+  if (item) {
+    props.command({
+      id: item.member.username,
+      label: item.member.email,
+    });
+  }
+};
+
+const autoSelect = () => {
+  const fullMatchIndex = props.items.findIndex(
+    (item) => item.member.username.toLowerCase() === props.query.toLowerCase(),
+  );
+  if (fullMatchIndex !== -1) {
+    selectItem(fullMatchIndex);
+  }
+};
+
+const handleMember = (member: any, isUserName?: boolean): string => {
+  if (isUserName) {
+    return aiplan.UserName(member).join(' ');
+  }
+
+  return aiplan
+    .UserName(member)
+    .map((m) => m[0])
+    .join(' ');
+};
+
+watch(
+  () => props.items,
+  () => {
+    selectedIndex.value = 0;
+    autoSelect();
+  },
+);
 </script>
 <style>
 .tippy-box {

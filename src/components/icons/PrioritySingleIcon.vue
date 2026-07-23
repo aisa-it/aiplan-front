@@ -66,26 +66,17 @@
     />
   </svg>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue';
 
-export default defineComponent({
-  name: 'PrioritySingleIcon',
-  props: {
-    type: {
-      type: String,
-      required: true,
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 20,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 20,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    type: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    width: 20,
+    height: 20,
   },
-});
+);
 </script>

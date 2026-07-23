@@ -14,7 +14,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { api } from '../services/api';
 
 import BaseReleaseNoteDialog from './BaseReleaseNotesDialog.vue';

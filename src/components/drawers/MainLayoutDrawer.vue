@@ -10,12 +10,22 @@
     :behavior="isMobile ? 'mobile' : 'desktop'"
     :overlay="isOverlay"
     :width="isMobile ? defaultWidth : adaptiveWidth"
-    class="sidebar scrollable-content disable-x-scroll relative-position"
+    class="sidebar scrollable-content disable-x-scroll main-nav-bar"
     @update:model-value="(value) => emits('update:drawer-open', value)"
     @before-show="updateClientWidth"
+    @mouseenter="isBtnShow = true"
+    @mouseleave="isBtnShow = false"
   >
     <NavMenu></NavMenu>
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
+    <div class="absolute" style="top: 15px; right: -10px">
+      <q-btn
+        v-show="isBtnShow"
+        class="drawer-btn"
+        :icon="!leftDrawerOpen ? 'chevron_right' : 'chevron_left'"
+        @click="onDrawerBtnClick"
+      />
+    </div>
   </q-drawer>
 </template>
 
@@ -24,12 +34,33 @@
 import { LocalStorage, Screen, useQuasar } from 'quasar';
 import { computed, ref, toRefs, watch } from 'vue';
 
+// services
+import { useWorkspaceStore } from 'src/stores/workspace-store';
+
 // components
 import NavMenu from 'components/NavMenu.vue';
 import { useRoute } from 'vue-router';
 import { useUIStore } from 'src/stores/ui-store';
 import { storeToRefs } from 'pinia';
 import { useDrawerResize } from 'src/composables/useDrawerResize';
+
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+const emits = defineEmits<{
+  'update:drawer-open': [value: boolean];
+  close: [];
+}>();
+
+const leftDrawerOpen = ref(true);
+const isBtnShow = ref(false);
+
+const onDrawerBtnClick = () => emits('close');
+
+const $q = useQuasar();
+const route = useRoute();
+
+const uiStore = useUIStore();
 
 const props = withDefaults(
   defineProps<{
@@ -39,22 +70,12 @@ const props = withDefaults(
     drawerOpen: false,
   },
 );
-
-const emits = defineEmits<{
-  'update:drawer-open': [value: boolean];
-}>();
-
-const { drawerOpen: leftDrawerOpen } = toRefs(props);
-
-const $q = useQuasar();
-const route = useRoute();
-
-const uiStore = useUIStore();
+const { drawerOpen } = toRefs(props);
 
 const { menuSidebarWidth } = storeToRefs(uiStore);
 
 const defaultWidth = 300;
-const clientWidth = ref(document.documentElement.clientWidth)
+const clientWidth = ref(document.documentElement.clientWidth);
 const minWidth = computed(() => defaultWidth);
 const maxWidth = computed(() =>
   isMobile.value ? defaultWidth : clientWidth.value / 2,
@@ -79,11 +100,19 @@ watch(
     isOverlay.value = newValue;
     if (isOverlay.value || isMobile.value) {
       emits('update:drawer-open', false);
+      emits('close');
     } else {
       emits('update:drawer-open', true);
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => drawerOpen.value,
+  () => {
+    leftDrawerOpen.value = drawerOpen.value;
+  },
 );
 
 watch(
@@ -128,9 +157,15 @@ watch(
 watch(adaptiveWidth, (width) => {
   if (leftDrawerOpen.value) menuSidebarWidth.value = width;
 });
+
+watch(currentWorkspaceSlug, (newSlug) => {
+  if (newSlug) {
+    workspaceStore.getWorkspaceSummary(newSlug);
+  }
+});
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 :deep(.disable-x-scroll) {
   overflow-x: hidden;
 }
@@ -144,6 +179,10 @@ watch(adaptiveWidth, (width) => {
   cursor: col-resize;
   user-select: none;
   touch-action: none;
+}
+
+.drawer-btn {
+  z-index: 1000;
 }
 </style>
 

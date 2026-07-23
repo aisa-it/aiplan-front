@@ -1,5 +1,6 @@
 import { AdminPanel } from '@aisa-it/aiplan-api-ts/src/AdminPanel';
 import {
+  AiplanRoleUpdRequest,
   DaoPaginationResponse,
   DtoUserLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -23,5 +24,29 @@ export const api = {
   },
   deleteUser: async (userId: string) => {
     return apiAdminPanel.deleteUser(userId).then((res) => res.data);
-  }
+  },
+  changeUserRoleInWorkspace: async (
+    wsId: string,
+    userId: string,
+    data: AiplanRoleUpdRequest,
+  ): Promise<void> => {
+    return apiAdminPanel
+      .authAdminUsersWorkspacesMemberCreate(wsId, userId, data)
+      .then((res) => res.data);
+  },
+  changeUserRoleInProject: async (
+    wsId: string,
+    userId: string,
+    projectId: string,
+    data: AiplanRoleUpdRequest,
+  ): Promise<void> => {
+    return apiAdminPanel
+      .authAdminUsersWorkspacesProjectsMemberCreate(
+        wsId,
+        userId,
+        projectId,
+        data,
+      )
+      .then((res) => res.data);
+  },
 };

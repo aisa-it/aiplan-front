@@ -87,7 +87,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('open', props.row)"
+                @click="emits('open', props.row)"
                 v-if="!props.row.draft"
               >
                 <ZoomIcon :width="20" :height="20" />
@@ -98,7 +98,7 @@
                 dense
                 size="sm"
                 class="rounded-btn"
-                @click="emit('delete', props.row)"
+                @click="emits('delete', props.row)"
               >
                 <BinIcon :width="20" :height="20" color="#DC3E3E" />
                 <HintTooltip>Удалить</HintTooltip>
@@ -132,7 +132,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('open', props.row)"
+                    @click="emits('open', props.row)"
                     v-if="!props.row.draft"
                   >
                     <q-item-section class="col-auto q-pr-sm">
@@ -143,7 +143,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="emit('delete', props.row)"
+                    @click="emits('delete', props.row)"
                   >
                     <q-item-section class="col-auto q-pr-sm">
                       <BinIcon :width="20" :height="20" color="#DC3E3E" />
@@ -213,9 +213,10 @@ const props = defineProps<{
   attachments: IAttachmentCard[];
   loading: boolean;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
+  offSuccessNotification?: boolean;
 }>();
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   open: [value: IAttachmentCard];
   delete: [value: IAttachmentCard];
 }>();
@@ -279,11 +280,13 @@ const handleCopyLink = (file: IAttachmentCard): void => {
     const query = `?slug=${slug}&type=${type}&from=${from}&name=${name}`;
     const link = base + query;
     copyToClipboard(link);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_COPY_LINK_TO_CLIPBOARD,
+      });
+    }
   } catch (e) {
     setNotificationView({
       type: 'error',
@@ -313,11 +316,13 @@ const handleDownload = async (file: IAttachmentCard): Promise<void> => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_DOWNLOAD_FILE,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_DOWNLOAD_FILE,
+      });
+    }
   } finally {
     downloadProgress.value = 0;
   }
@@ -333,11 +338,13 @@ const handleDownloadAll = async (): Promise<void> => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setNotificationView({
-      type: 'success',
-      open: true,
-      customMessage: SUCCESS_DOWNLOAD_FILE,
-    });
+    if (!props.offSuccessNotification) {
+      setNotificationView({
+        type: 'success',
+        open: true,
+        customMessage: SUCCESS_DOWNLOAD_FILE,
+      });
+    }
   }
 };
 </script>

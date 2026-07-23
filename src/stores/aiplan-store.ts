@@ -8,9 +8,6 @@ import { IProject, IProjectView } from 'src/interfaces/projects';
 import { IIssueLabel } from 'src/interfaces/issues';
 import { IPassword, IUser, IUserActivityResponse } from 'src/interfaces/users';
 
-// notifications
-import { useNotificationStore } from './notification-store';
-
 // constants
 import { NON_VALIDATED_ROUTES } from 'src/constants/constants';
 import {
@@ -21,8 +18,8 @@ import {
 } from 'src/constants/apiPrefix';
 import { NOT_FOUND_ERROR_CODES } from 'src/constants/notFoundErrorCodes';
 import { FileAttUploadProgressFunc } from 'src/interfaces/files';
+import { handleNotify } from 'src/utils/notify';
 
-const toast = useNotificationStore();
 export const api = axios.create({ baseURL: '', withCredentials: true });
 
 export const useAiplanStore = defineStore('aiplan', {
@@ -142,7 +139,11 @@ export const useAiplanStore = defineStore('aiplan', {
         this.me = data;
         if (!data.is_onboarded) return this.router.replace('/onboarding');
 
-        const url = LocalStorage.getItem('next_url') || '/';
+        const nextUrl = LocalStorage.getItem('next_url');
+        const url =
+          typeof nextUrl === 'string' && nextUrl.startsWith('/onboarding')
+            ? '/'
+            : (nextUrl ?? '/');
         this.router.replace(url as string);
       });
     },
@@ -557,7 +558,7 @@ api.interceptors.response.use(
           window.location.href = '/signin';
         } else {
           //TODO: убрать после переноса логина в стор юзера
-          toast.setNotificationView({
+          handleNotify({
             open: true,
             type: 'error',
             customMessage: data.code ? data.ru_error : data.error,
@@ -574,7 +575,7 @@ api.interceptors.response.use(
         }
         return Promise.reject(error);
       default:
-        toast.setNotificationView({
+        handleNotify({
           open: true,
           type: 'error',
           customMessage: data.code ? data.ru_error : data.error,

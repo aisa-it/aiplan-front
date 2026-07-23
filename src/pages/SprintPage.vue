@@ -41,7 +41,7 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { is } from 'quasar';
 import { useRouter } from 'vue-router';
 import {
@@ -61,8 +61,8 @@ import SprintHeader from 'src/modules/sprints/ui/SprintHeader.vue';
 import SprintHeaderSkeleton from 'src/modules/sprints/sceletons/SprintHeaderSkeleton.vue';
 
 import {
-  NotUpdated,
   useSprintStore,
+  NotUpdated,
 } from 'src/modules/sprints/stores/sprint-store';
 import { storeToRefs } from 'pinia';
 import { useDefaultIssues } from 'src/modules/issue-list//composables/useDefaultIssues';
@@ -95,19 +95,29 @@ const { ny } = storeToRefs(utilsStore);
 
 const { refreshIssues } = storeToRefs(useIssuesStore());
 
-const load = async () => {
+let currentRequestId = 0;
+
+const load = async (signal?: AbortSignal) => {
+  const requestId = ++currentRequestId;
   issuesLoader.value = true;
 
   if (isGroupingEnabled.value === false) {
-    await onRequest();
+    await onRequest(undefined, signal);
   } else if (isGroupingEnabled.value === true) {
-    await getGroupedIssues();
+    await getGroupedIssues(signal);
   }
 
-  issuesLoader.value = false;
+  if (requestId === currentRequestId) {
+    issuesLoader.value = false;
+  }
 };
 
 const updateSprint = async () => {
+  if (
+    !router.currentRoute.value.params.workspace ||
+    !router.currentRoute.value.params.sprint
+  )
+    return;
   sprintLoader.value = true;
   issuesLoader.value = true;
   sprint.value = await getSprint(
@@ -145,13 +155,22 @@ watch(
   },
 );
 
+let controller: AbortController | null = null;
+
 watch(
   () => refreshIssues.value,
-  async () => {
-    if (refreshIssues.value === true) {
-      await load();
-      refreshIssues.value = false;
-    }
+  async (value) => {
+    if (!value) return;
+
+    refreshIssues.value = false;
+
+    controller?.abort();
+
+    controller = new AbortController();
+
+    try {
+      await load(controller.signal);
+    } catch {}
   },
 );
 

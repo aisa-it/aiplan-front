@@ -1,7 +1,7 @@
 <template>
   <q-page class="row flex items-stretch content-stretch fit q-pa-none">
     <IssuePanel
-      v-if="projectStore.currentProject && !isRefreshIssue"
+      v-if="projectStore.project && !isRefreshIssue"
       @update:issue-page="updateIssue"
     />
     <q-inner-loading v-else showing>
@@ -14,7 +14,7 @@
 // core
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteLeave, useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
 
 // stores
@@ -95,5 +95,10 @@ const refreshPromise = async () => {
 onMounted(async () => {
   currentIssueID.value = (route.params.issue as string) ?? '';
   await refreshPromise();
+});
+
+onBeforeRouteLeave(async (to, from, next) => {
+  singleIssueStore.clearCurrentIssueState();
+  next();
 });
 </script>

@@ -11,31 +11,22 @@
       :stroke="color"
       stroke-width="1.4"
       stroke-linecap="round"
-      stroke-linejoin="round"/>
+      stroke-linejoin="round"
+    />
   </svg>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'FormatIcon',
-  props: {
-    color: {
-      type: String,
-      required: false,
-      default: () => 'currentColor',
-    },
-    width: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
-    height: {
-      type: Number,
-      required: false,
-      default: () => 24,
-    },
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>(),
+  {
+    color: 'currentColor',
+    width: 24,
+    height: 24,
   },
-});
+);
 </script>

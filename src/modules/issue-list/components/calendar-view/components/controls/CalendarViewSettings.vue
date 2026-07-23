@@ -80,7 +80,7 @@
         multiple
         clearable
         map-options
-        emit-value
+        emits-value
         label="Приоритеты"
         class="base-selector q-mb-sm"
         option-value="id"
@@ -160,7 +160,7 @@ const filters = ref<CalendarFilters>({
   priorities: [],
 });
 
-const emit = defineEmits<{
+const emits = defineEmits<{
   (e: 'update:filters', value: CalendarFilters): void;
 }>();
 
@@ -177,10 +177,11 @@ watch(
 );
 
 const { project } = storeToRefs(useProjectStore());
-const { workspaceInfo } = useWorkspaceStore();
+const workspaceStore = useWorkspaceStore();
+const { workspaceInfo } = storeToRefs(workspaceStore);
 const calendarFiltersStore = useCalendarFiltersStore();
 
-const workspaceId = computed(() => workspaceInfo?.id ?? '');
+const workspaceId = computed(() => workspaceInfo.value?.id ?? '');
 const projectId = computed(() => project.value?.id ?? '');
 
 const priorities = [

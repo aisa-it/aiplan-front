@@ -149,7 +149,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
@@ -221,7 +221,7 @@ const dialogRef = ref();
 const formRef = ref();
 const formTitle = ref();
 
-const initialFormState = {
+const getInitialFormState = (): AiplanReqForm => ({
   title: '',
   description: '',
   fields: [],
@@ -233,9 +233,9 @@ const initialFormState = {
     app: false,
     email: false,
   },
-};
+});
 
-const form = ref<AiplanReqForm>(initialFormState);
+const form = ref<AiplanReqForm>(getInitialFormState());
 const visible = ref('all');
 const isAutoCreateProject = ref(false);
 const projects = ref<DtoProjectLight[]>([]);
@@ -250,14 +250,9 @@ const setIssueNameField = (id: number) => {
 };
 
 const clear = () => {
-  form.value = initialFormState;
+  form.value = getInitialFormState();
   visible.value = 'all';
   isAutoCreateProject.value = false;
-  form.value.notification_channels = {
-    telegram: false,
-    app: false,
-    email: false,
-  };
 };
 
 const save = async () => {
@@ -306,7 +301,7 @@ const save = async () => {
   });
 };
 
-const validateDate = (val: string) => {
+const validateDate = (val: string | null) => {
   const minD = validDate(val);
   return minD;
 };

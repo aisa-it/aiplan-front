@@ -247,12 +247,50 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
     });
   }
 
+  const isEmptyParagraph =
+    $from.parent.type.name === 'paragraph' && $from.parent.content.size === 0;
+
+  function replaceBrWithMsoParagraph(fragment: DocumentFragment) {
+    const brs = Array.from(fragment.querySelectorAll('br'));
+
+    for (const br of brs) {
+      const p = document.createElement('p');
+      p.className = 'MsoNormal';
+
+      const o = document.createElement('o:p');
+      o.innerHTML = '&nbsp;';
+
+      p.appendChild(o);
+
+      br.replaceWith(p);
+    }
+  }
+
   // Сценарий с обычной вставкой
   if (!isInTable || !isSingleTableInHTML(fragment)) {
     event.preventDefault();
+
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+
+    fragment.querySelectorAll('br.Apple-interchange-newline').forEach((el) => {
+      el.remove();
+    });
+
+    if (/docs-internal-guid/i.test(html)) replaceBrWithMsoParagraph(fragment);
+
+    const doc = parser.parse(fragment);
+
+    const slice = doc.slice(0, doc.content.size);
+
+    if (isEmptyParagraph) {
+      const from = $from.before();
+      const to = $from.after();
+
+      dispatch(state.tr.replace(from, to, slice));
+    } else {
+      dispatch(state.tr.replaceSelection(slice));
+    }
+
     return true;
   }
 
@@ -261,8 +299,8 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   if (!pastedTableEl) {
     event.preventDefault();
     const parser = DOMParser.fromSchema(editorInstance.value.schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+    const slice = parser.parseSlice(fragment);
+    dispatch(state.tr.replaceSelection(slice));
     return true;
   }
 
@@ -284,8 +322,15 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   // Если таблица не нашлась - обычная вставка
   if (tableDepth === -1) {
     const parser = DOMParser.fromSchema(schema);
-    const nodes = parser.parse(fragment);
-    dispatch(state.tr.replaceSelectionWith(nodes, false));
+    const slice = parser.parseSlice(fragment);
+    if (isEmptyParagraph) {
+      const from = $from.before();
+      const to = $from.after();
+
+      dispatch(state.tr.replace(from, to, slice));
+    } else {
+      dispatch(state.tr.replaceSelection(slice));
+    }
     return true;
   }
 

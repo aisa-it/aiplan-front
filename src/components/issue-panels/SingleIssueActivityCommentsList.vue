@@ -132,14 +132,7 @@ const handleUpdateComment = async (data: IIssueCommentUpdate) => {
       data.text,
       issueComment.value.reply_to_comment_id,
     )
-    .then(() => emits('refresh'))
-    .then(() =>
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_COMMENT_EDITING,
-      }),
-    );
+    .then(() => emits('refresh'));
 };
 
 const handleDeleteComment = async () => {
@@ -150,14 +143,7 @@ const handleDeleteComment = async () => {
     )
     .then(() => {
       emits('refresh');
-    })
-    .then(() =>
-      setNotificationView({
-        type: 'success',
-        open: true,
-        customMessage: SUCCESS_COMMENT_DELETING,
-      }),
-    );
+    });
 };
 
 const handleAddReaction = async (

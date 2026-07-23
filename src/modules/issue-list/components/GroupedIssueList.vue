@@ -28,8 +28,8 @@
       :group-by="issuesStore.groupByIssues"
       :context-type="contextType"
       @refresh-card="
-        (index, pagination, isFullUpdate, entity) =>
-          refreshTable(index, pagination, isFullUpdate, entity)
+        (index, pagination, entity) =>
+          refreshTable(index, pagination, false, entity)
       "
       @open-preview="
         (issue, index, pagination, entity) =>

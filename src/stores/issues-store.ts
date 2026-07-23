@@ -50,6 +50,7 @@ export interface IQuery {
   only_count?: boolean;
   only_pinned?: boolean;
   group_by?: string;
+  stream?: boolean;
 }
 
 export const useIssuesStore = defineStore('issues-store', {
@@ -143,12 +144,14 @@ export const useIssuesStore = defineStore('issues-store', {
       projectId: string,
       filters: TypesIssuesListFilters,
       query: IQuery,
+      signal?: AbortSignal,
     ) {
+      if (!workspaceSlug || !projectId) return;
       try {
         const response = await api.post(
           `${API_WORKSPACES_PREFIX}/${workspaceSlug}/projects/${projectId}/issues/search`,
           filters,
-          { params: query },
+          { params: query, signal },
         );
         return response;
       } catch {}

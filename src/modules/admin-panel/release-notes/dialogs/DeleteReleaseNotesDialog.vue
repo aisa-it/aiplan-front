@@ -10,7 +10,7 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { api } from '../services/api';
 
 import { DtoReleaseNoteLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';

@@ -1,14 +1,14 @@
 <template>
   <div class="horizontal-scroll-enable board-wrapper">
-    <div v-for="(table, index) in defineIssues" :key="index">
+    <div v-for="(table, index) in props.issues" :key="index">
+      <!-- Не менять v-show на v-if это связанно с handleUpdateIssueTable -->
+      <!-- Иначе компонент не подпишется на updateIssueTable и не сможет получить задачи если в него их переведут -->
       <BoardCardList
+        v-show="table.count > 0 || showEmptyGroups"
         :table="table"
         :group-by="groupBy"
         :context-type="contextType"
-        @refresh="
-          (pagination, isFullUpdate) =>
-            refreshTable(index, pagination, isFullUpdate, table.entity)
-        "
+        @refresh="(pagination) => refreshTable(index, pagination, table.entity)"
         @open-preview="
           (issue, pagination) =>
             emits('openPreview', issue, index, pagination, table?.entity)
@@ -26,6 +26,7 @@ import BoardCardList from './BoardCardList.vue';
 
 import { useIssueContext } from '../../composables/useIssueContext';
 import { IGroupedResponse } from '../../types';
+import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{
   issues: IGroupedResponse[];
@@ -33,27 +34,22 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 
-const emits = defineEmits([
-  'refreshCard',
-  'refresh',
-  'openPreview',
-  'openIssue',
-]);
+const emits = defineEmits<{
+  refreshCard: [number, any, any];
+  openPreview: [DtoIssue, number, any, any];
+  openIssue: [number, string];
+}>();
 
 const { contextProps } = useIssueContext(props.contextType);
 
-const refreshTable = (index: number, pagination, isFullUpdate, entity) => {
+const refreshTable = (index: number, pagination, entity) => {
   const p = pagination;
   delete p.group_by;
 
-  emits('refreshCard', index, pagination, isFullUpdate, entity);
+  emits('refreshCard', index, pagination, entity);
 };
 
-const defineIssues = computed(() => {
-  return !contextProps.value?.showEmptyGroups
-    ? props.issues.filter((table) => table.issues?.length)
-    : props.issues;
-});
+const showEmptyGroups = computed(() => { return contextProps.value?.showEmptyGroups });
 </script>
 
 <style scoped lang="scss">

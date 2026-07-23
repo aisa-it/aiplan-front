@@ -25,7 +25,6 @@
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="email">
               <SettingList
                 v-if="project"
-                :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_email"
                 :memberSettings="settings.notification_settings_email"
                 :disable="user.settings?.email_notification_mute"
@@ -74,7 +73,6 @@
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="tg">
               <SettingList
                 v-if="project"
-                :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_tg"
                 :memberSettings="settings.notification_settings_tg"
                 :disable="user.settings?.telegram_notification_mute"
@@ -114,7 +112,6 @@
             <q-tab-panel style="padding: 8px 0px 0px 0px" name="app">
               <SettingList
                 v-if="project"
-                :project="props.project.id"
                 :authorSettings="settings.notification_author_settings_app"
                 :memberSettings="settings.notification_settings_app"
                 :disable="user.settings?.app_notification_mute"

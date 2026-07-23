@@ -20,7 +20,7 @@
         v-else-if="group.count > 0"
         :model-value="isOpen(group, index)"
         @update:model-value="(val) => onToggle(group, index, val)"
-        class="gantt-margin"
+        @vue:mounted="onExpansionItemMounted(group, index)"
       >
         <template #header>
           <GroupedHeader
@@ -46,6 +46,7 @@
             :scroll-container="scrollContainer"
             :active="isOpen(group, index)"
             :estimated-height="getEstimatedHeight(group?.issues?.length)"
+            :lazzy-off="lazzyOff"
           >
             <slot :group="group" :index="index" />
 
@@ -80,11 +81,13 @@ const props = defineProps<{
   groups: Group[];
   groupBy: string;
   showEmptyGroups?: boolean;
+  lazzyOff?: boolean;
   isGroupOpen?: (group: Group) => boolean;
 }>();
 
 const emits = defineEmits<{
   (e: 'toggle-group', group: Group, opened: boolean): void;
+  (e: 'subscribeTableUpdates', group: Group, index: number): void;
 }>();
 
 const scrollContainer = ref();
@@ -113,6 +116,12 @@ const isOpen = (group: Group, index: number) => {
   const key = groupKey(group, index);
   return localOpenState.value[key] ?? true;
 };
+
+const onExpansionItemMounted = (group: Group, index: number) => {
+  if (!isOpen(group, index)) {
+    emits('subscribeTableUpdates', group, index)
+  }
+}
 
 const onToggle = (group: Group, index: number, opened: boolean) => {
   const key = groupKey(group, index);

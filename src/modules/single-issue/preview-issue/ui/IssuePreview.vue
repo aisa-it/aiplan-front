@@ -70,6 +70,7 @@
 
       <SelectAttachments
         entityType="issue"
+        off-success-notification
         :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
@@ -93,6 +94,7 @@
 
   <Teleport to="body">
     <div
+      v-if="model"
       class="handle-resize"
       :style="{ left: `calc(100vw - ${adaptiveWidth}px)` }"
       @pointerdown="onPointerDown"
@@ -186,13 +188,11 @@ const uploadAttachments = async (
   ev: object,
   onProgress?: FileAttUploadProgressFunc,
 ) => {
-  await aiplanStore
-    .issueAttachmentsUpload(ev, issueData.value.id, onProgress)
+  await aiplanStore.issueAttachmentsUpload(ev, issueData.value.id, onProgress);
 };
 
 const deleteAttachment = async (attachmentId: string) => {
-  await aiplanStore
-    .issueAttachmentDelete(currentIssueID.value, attachmentId)
+  await aiplanStore.issueAttachmentDelete(currentIssueID.value, attachmentId);
 };
 
 // заменить на сервис после обновления апи

@@ -99,7 +99,12 @@
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { useRoute, useRouter, onBeforeRouteLeave, RouteLocationNormalizedGeneric } from 'vue-router';
+import {
+  useRoute,
+  useRouter,
+  onBeforeRouteLeave,
+  RouteLocationNormalizedGeneric,
+} from 'vue-router';
 import { ref, onMounted, watch, computed } from 'vue';
 import { Editor } from '@tiptap/vue-3';
 // stores
@@ -126,7 +131,11 @@ import ConfirmLostEditionTemplate from 'src/modules/project-settings/new-issue-t
 const props = defineProps<{
   openDialog: boolean;
 }>();
-const emit = defineEmits(['setRestriction', 'backToEdition']);
+
+const emits = defineEmits<{
+  setRestriction: [boolean];
+  backToEdition: [];
+}>();
 
 //composables
 const route = useRoute();
@@ -175,7 +184,9 @@ const isIssueTemplateSelected = computed(() => {
   return issueTemplate.value && issueTemplate.value.id;
 });
 const isMobile = computed(() => Screen.width <= 720);
-const areUnsavedData = computed(() => (isContentUnsaved.value || isNameUnsaved.value));
+const areUnsavedData = computed(
+  () => isContentUnsaved.value || isNameUnsaved.value,
+);
 
 //methods
 const handleCreateIssueTemplate = async () => {
@@ -267,7 +278,7 @@ const resetSavedData = () => {
   savedName.value = '';
   isContentUnsaved.value = false;
   isNameUnsaved.value = false;
-}
+};
 
 const handleClear = () => {
   issueTemplate.value = null;
@@ -283,8 +294,8 @@ const handleClear = () => {
 const handleBackToEdition = () => {
   showDialog.value = false;
   pendingRoute.value = null;
-  emit('backToEdition');
-}
+  emits('backToEdition');
+};
 
 const handleCloseEdition = () => {
   showDialog.value = false;
@@ -293,8 +304,8 @@ const handleCloseEdition = () => {
   if (pendingRoute.value) {
     router.push(pendingRoute.value);
   }
-  emit('setRestriction', false)
-}
+  emits('setRestriction', false);
+};
 
 const savedContent = ref<string | null>();
 const savedName = ref<string | null>();
@@ -348,30 +359,40 @@ watch(
 
       isContentUnsaved.value = false;
       isNameUnsaved.value = false;
-
     } else {
       resetSavedData();
     }
   },
 );
 
-watch(() => name.value, (newName) => {
-  isNameUnsaved.value = newName !== savedName.value;
-});
+watch(
+  () => name.value,
+  (newName) => {
+    isNameUnsaved.value = newName !== savedName.value;
+  },
+);
 
-watch(() => editorValue.value, (newContent) => {
-  isContentUnsaved.value = newContent !== savedContent.value;
-});
+watch(
+  () => editorValue.value,
+  (newContent) => {
+    isContentUnsaved.value = newContent !== savedContent.value;
+  },
+);
 
-watch(() => areUnsavedData.value, () => {
-  emit('setRestriction', areUnsavedData.value);
-  isLeavingTabRestricted.value = areUnsavedData.value;
-});
+watch(
+  () => areUnsavedData.value,
+  () => {
+    emits('setRestriction', areUnsavedData.value);
+    isLeavingTabRestricted.value = areUnsavedData.value;
+  },
+);
 
-watch(() => props.openDialog, () => {
-  showDialog.value = props.openDialog;
-})
-
+watch(
+  () => props.openDialog,
+  () => {
+    showDialog.value = props.openDialog;
+  },
+);
 </script>
 
 <style lang="scss" scoped>
