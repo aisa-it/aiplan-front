@@ -15,12 +15,6 @@ Install dependencies
 yarn install
 ```
 
-Run linter
-
-```bash
-yarn lint
-```
-
 Run in development mode
 
 ```bash
@@ -42,21 +36,4 @@ VITE_API_URL="https://domain.com"
 
 // Minio endpoint
 VITE_MINIO_URL="https://domain.com"
-```
-
-## Running in SPA Mode
-
-By default, the project runs in PWA mode. If necessary, you can disable it by modifying the startup scripts.
-
-Run in development mode
-
-```bash
-quasar dev
-```
-
-Build application
-
-
-```bash
-quasar build
 ```
