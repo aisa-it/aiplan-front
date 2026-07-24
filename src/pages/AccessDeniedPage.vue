@@ -33,11 +33,11 @@ const userStore = useUserStore();
 const { user, userWorkspaces } = storeToRefs(userStore);
 
 onBeforeMount(async () => {
-  workspaceStore.$reset();
+  workspaceStore.changeWorkspace(null);
+  await userStore.getUserInfo();
   await userStore.getUserWorkspaces();
   await userStore.getUserWorkspacesMemberships();
   await userStore.getUserProjectsMemberships();
-  await userStore.getUserInfo();
 });
 
 const currentRoute = computed(() => {
