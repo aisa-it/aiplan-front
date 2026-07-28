@@ -1,0 +1,50 @@
+export const TIMEZONES = [
+  { value: 'Europe/London', label: '±00:00 Лондон, Лиссабон, Рейкьявик' },
+  { value: 'Europe/Berlin', label: '+1:00 Берлин, Париж, Рим' },
+  { value: 'Europe/Kaliningrad', label: '+2:00 Калининград, Вильнюс, Киев' },
+  { value: 'Europe/Moscow', label: '+3:00 Москва, Санкт-Петербург, Минск' },
+  { value: 'Europe/Samara', label: '+4:00 Самара, Ижевск, Баку' },
+  {
+    value: 'Asia/Yekaterinburg',
+    label: '+5:00 Екатеринбург, Челябинск, Исламабад',
+  },
+  { value: 'Asia/Omsk', label: '+6:00 Омск, Алматы, Дакка' },
+  {
+    value: 'Asia/Krasnoyarsk',
+    label: '+7:00 Красноярск, Новосибирск, Бангкок',
+  },
+  { value: 'Asia/Irkutsk', label: '+8:00 Иркутск, Пекин, Сингапур' },
+  { value: 'Asia/Yakutsk', label: '+9:00 Якутск, Токио, Сеул' },
+  { value: 'Asia/Vladivostok', label: '+10:00 Владивосток, Хабаровск, Сидней' },
+  { value: 'Asia/Magadan', label: '+11:00 Магадан, Сахалин, Хониара' },
+  {
+    value: 'Asia/Kamchatka',
+    label: '+12:00 Петропавловск-Камчатский, Окленд, Фиджи',
+  },
+  { value: 'Pacific/Apia', label: '+13:00 Апиа, Нукуалофа' },
+  { value: 'Pacific/Kiritimati', label: '+14:00 Остров Киритимати' },
+  { value: 'Atlantic/Azores', label: '-1:00 Азорские острова, Кабо-Верде' },
+  {
+    value: 'Atlantic/South_Georgia',
+    label: '-2:00 Южная Георгия, Гренландия (Итокортоормиит)',
+  },
+  {
+    value: 'America/Argentina/Buenos_Aires',
+    label: '-3:00 Буэнос-Айрес, Сан-Паулу, Рио-де-Жанейро',
+  },
+  { value: 'America/Santiago', label: '-4:00 Сантьяго, Каракас, Ла-Пас' },
+  { value: 'America/New_York', label: '-5:00 Нью-Йорк, Торонто, Гавана' },
+  { value: 'America/Chicago', label: '-6:00 Чикаго, Мехико, Сан-Хосе' },
+  { value: 'America/Denver', label: '-7:00 Денвер, Феникс, Эдмонтон' },
+  {
+    value: 'America/Los_Angeles',
+    label: '-8:00 Лос-Анджелес, Ванкувер, Тихий океан',
+  },
+  { value: 'America/Anchorage', label: '-9:00 Аляска (Анкоридж), Гамбье' },
+  {
+    value: 'Pacific/Honolulu',
+    label: '-10:00 Гавайи, Алеутские острова, Таити',
+  },
+  { value: 'Pacific/Pago_Pago', label: '-11:00 Паго-Паго, Ниуэ, Мидуэй' },
+  { value: 'Etc/GMT-12', label: '-12:00 Острова Бейкер и Хауленд' },
+];

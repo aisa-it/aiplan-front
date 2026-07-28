@@ -1,1 +1,17 @@
+@layer properties, theme, base, components, vuetify-components, vuetify-overrides, vuetify-final, vuetify-utilities, utilities;
 @import 'tailwindcss';
+/* @import './css/layers.scss'; */
+
+:root {
+  --text-primary: #474a52;
+  --text-secondary: #8b8b98;
+}
+
+.dark {
+  --text-primary: #bac4d5;
+}
+
+@theme {
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+}

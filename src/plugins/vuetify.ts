@@ -1,14 +1,14 @@
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
-import { md3 } from 'vuetify/blueprints'
+//import 'vuetify/styles';
+import '@mdi/font/css/materialdesignicons.css';
+import { createVuetify } from 'vuetify';
+// import * as components from 'vuetify/components';
+// import * as directives from 'vuetify/directives';
+import { md3 } from 'vuetify/blueprints';
 
 const vuetify = createVuetify({
   blueprint: md3,
-  components,
-  directives,
+  // components,
+  // directives,
   theme: {
     defaultTheme: 'light',
     themes: {
@@ -40,6 +40,6 @@ const vuetify = createVuetify({
     VBtn: { variant: 'flat' },
     VCard: { elevation: 1 },
   },
-})
+});
 
-export default vuetify
+export default vuetify;
