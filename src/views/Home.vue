@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <v-app>
@@ -11,5 +10,9 @@
         <v-btn icon="mdi-account-circle" />
       </template>
     </v-app-bar>
+
+    <v-main>
+      <router-view />
+    </v-main>
   </v-app>
 </template>
