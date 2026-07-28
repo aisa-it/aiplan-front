@@ -13,13 +13,3 @@
     </v-menu>
   </v-btn>
 </template>
-
-<style scoped>
-.profile-btn {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  padding: 0 !important;
-  margin-right: 4px;
-}
-</style>
