@@ -1,1 +1,5 @@
 @import 'tailwindcss';
+
+@utility workspace-btn {
+  @apply !h-8 !w-8 !min-w-8 !p-0;
+}
