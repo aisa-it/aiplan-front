@@ -1,15 +1,15 @@
 <template>
-  <v-btn icon variant="text" rounded="lg" :ripple="false" class="workspace-btn">
+  <v-btn icon variant="text" rounded="lg" :ripple="false" class="workspace-btn ml-3">
     <WorkspaceAvatar :name="currentWorkspaceName" />
 
     <v-menu activator="parent" location="bottom start" :offset="4" :close-on-content-click="false">
       <v-list min-width="280" rounded="lg" class="py-1">
         <v-list-item>
           <template #title>
-            <span class="text-sm text-header-icon">Пространства</span>
+            <span class="text-sm text-text">Пространства</span>
           </template>
           <template #append>
-            <AddIcon :width="20" :height="20" class="text-header-icon" />
+            <AddIcon :width="24" :height="24" class="text-icon" />
           </template>
         </v-list-item>
 
@@ -26,7 +26,7 @@
 
           <v-list-item-title
             class="!text-[14px]"
-            :class="workspace.active ? '!text-primary' : '!text-header-icon'"
+            :class="workspace.active ? 'text-primary' : 'text-text'"
           >
             {{ workspace.name }}
           </v-list-item-title>
@@ -65,13 +65,13 @@
 
                 <v-list min-width="180" rounded="lg" density="compact">
                   <v-list-item>
-                    <div class="flex items-center gap-2 text-header-icon">
+                    <div class="flex items-center gap-2 text-text">
                       <BellIcon :width="16" :height="16" color="#474a52" />
                       <span class="text-xs font-normal">Уведомления</span>
                     </div>
                   </v-list-item>
                   <v-list-item>
-                    <div class="flex items-center gap-2 text-header-icon">
+                    <div class="flex items-center gap-2 text-text">
                       <SettingsIcon :width="16" :height="16" color="#474a52" />
                       <span class="text-xs font-normal">Настройки</span>
                     </div>
