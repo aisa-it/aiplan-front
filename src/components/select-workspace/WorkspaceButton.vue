@@ -93,6 +93,9 @@ import SettingsIcon from '@/components/icons/SettingsIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
 import WorkspaceAvatar from './components/WorkspaceAvatar.vue'
 
+// currentWorkspaceName и workspaces временные тестовые данные
+// TODO: удалить после подключения к API
+
 const currentWorkspaceName = 'testViktor1'
 
 const workspaces = [
