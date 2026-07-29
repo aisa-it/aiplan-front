@@ -69,6 +69,7 @@ import { watch } from 'vue';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';
+import { isServerVersionNewer } from 'src/utils/helpers';
 
 // stores
 const api = useAiplanStore();
@@ -140,6 +141,19 @@ onBeforeMount(async () => {
     );
     return;
   }
+
+  await utilsStore.getVersion().then(async (data) => {
+    await utilsStore.getReleaseNotes().then((d) => {
+      if (!d?.length) return;
+
+      if (d[0].tag_name !== data.version) return;
+
+      if (isServerVersionNewer(data.version)) {
+        localStorage.setItem('appVersion', data.version);
+        utilsStore.openReleaseNote = true;
+      }
+    });
+  });
 
   isShowReleaseNote.value = openReleaseNote.value;
 });

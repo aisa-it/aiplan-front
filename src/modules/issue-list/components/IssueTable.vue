@@ -480,7 +480,7 @@ th.count-column {
 }
 
 :deep(.q-table__middle) {
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .issue-table-wrapper {
@@ -500,8 +500,8 @@ th.count-column {
 }
 
 .table-h-scroll {
-  height: 8px;
-  overflow-x: auto;
+  height: 0px;
+  overflow-x: hidden;
   overflow-y: hidden;
   opacity: 0;
   transition: opacity 0.15s;
@@ -511,13 +511,13 @@ th.count-column {
   opacity: 1;
 }
 
-@media (pointer: coarse) {
-  :deep(.q-table__middle) {
-    overflow-x: auto;
-  }
+// @media (pointer: coarse) {
+//   :deep(.q-table__middle) {
+//     overflow-x: auto;
+//   }
 
-  .table-h-scroll {
-    display: none !important;
-  }
-}
+//   .table-h-scroll {
+//     display: none !important;
+//   }
+// }
 </style>
