@@ -3,7 +3,7 @@
     >{{
       route.fullPath.includes('signin') || route.fullPath.includes('signup')
         ? version
-        : version.split('v')[1]
+        : version.replace(/^v/, '')
     }}
   </span>
 </template>

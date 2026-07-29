@@ -127,8 +127,7 @@
       </div>
     </div>
     <div
-      style="position: absolute; left: 0; bottom: 0; padding: 8px 0px 8px 16px"
-      class="centered-horisontally justify-center"
+      class="centered-horisontally justify-center version"
     >
       <AiplanVersion />
     </div>

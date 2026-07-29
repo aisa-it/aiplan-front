@@ -59,7 +59,7 @@
               @click="currentReleaseNote = release"
             >
               <span class="centered-horisontally">
-                Версия {{ release.tag_name?.split('v')[1] }}
+                Версия {{ release.tag_name?.replace(/^v/, '') }}
               </span>
             </q-item>
           </q-list>
@@ -74,7 +74,7 @@
               Описания версий не найдены
             </div>
             <div v-if="currentReleaseNote" class="text-h4 q-mb-md">
-              Версия {{ currentReleaseNote?.tag_name.split('v')[1] }}
+              Версия {{ currentReleaseNote?.tag_name.replace(/^v/, '') }}
             </div>
             <EditorTipTapV2
               v-if="currentReleaseNote"

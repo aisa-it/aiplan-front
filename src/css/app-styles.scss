@@ -129,6 +129,21 @@ h6 {
   z-index: 1;
   min-width: 280px;
 }
+
+.version {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 8px 0px 8px 16px;
+}
+@media screen and (max-width: 1600px) and (min-width: 1000px) {
+  .help-footer {
+    position: absolute;
+    left: 0;
+    bottom: 24px;
+    padding: 8px 0px 8px 16px;
+  }
+}
 @media screen and (max-width: 1000px) {
   .login-wrap {
     width: 60vw;
