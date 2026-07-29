@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@aisa-it/aiplan-api-ts": "^1.139.0",
     "@mdi/font": "^7.4.47",
+    "altcha": "^3.2.1",
     "pinia": "^4.0.2",
     "vue": "^3.5.39",
     "vue-router": "^4.6.4",
