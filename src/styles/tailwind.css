@@ -5,6 +5,7 @@
 @theme {
   --color-border: #dde2ea;
   --color-header-icon: #474a52;
+  --color-base: #474a52;
 }
 
 @utility header-icon-btn {
