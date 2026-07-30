@@ -1,17 +1,12 @@
 <template>
-  <nav
+  <v-breadcrumbs
     v-if="items.length"
-    class="ml-4 flex min-w-0 items-center overflow-x-auto text-[14px] font-extrabold text-[#474a52]"
+    :items="vuetifyItems"
+    divider="/"
+    class="app-breadcrumbs"
   >
-    <template v-for="(item, index) in items" :key="`${item.title}-${index}`">
-      <span v-if="index > 0" class="mx-2 shrink-0 select-none">/</span>
-
-      <component
-        :is="item.to ? 'router-link' : 'span'"
-        :to="item.to"
-        class="breadcrumbs-title inline-flex min-w-0 items-center gap-1 no-underline"
-        :class="item.to ? 'cursor-pointer text-[#474a52]' : 'text-[#474a52]'"
-      >
+    <template #title="{ item }">
+      <span class="breadcrumbs-title">
         <HomeIcon
           v-if="item.icon === 'home'"
           :width="20"
@@ -19,21 +14,23 @@
           class="shrink-0"
         />
         <span class="truncate">{{ item.title }}</span>
-      </component>
+      </span>
     </template>
-  </nav>
+  </v-breadcrumbs>
 </template>
 
 <script setup lang="ts">
-import { useBreadcrumbs } from '@/composables/useBreadcrumbs'
-
+import { computed } from 'vue'
 import HomeIcon from '@/components/icons/HomeIcon.vue'
+import { useBreadcrumbs } from '@/composables/useBreadcrumbs'
+import type { BreadcrumbItem } from '@/composables/useBreadcrumbs'
 
 const { items } = useBreadcrumbs()
-</script>
 
-<style scoped>
-.breadcrumbs-title {
-  max-width: 240px;
-}
-</style>
+const vuetifyItems = computed(() =>
+  items.value.map((item: BreadcrumbItem, index) => ({
+    ...item,
+    disabled: index === items.value.length - 1 || !item.to,
+  })),
+)
+</script>

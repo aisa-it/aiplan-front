@@ -16,3 +16,21 @@
 @utility profile-btn {
   @apply !h-8 !w-8 !min-w-8 !p-0 !mr-1;
 }
+
+@utility app-breadcrumbs {
+  @apply ml-4 !min-h-0 !overflow-x-auto !py-0 text-[14px] font-extrabold text-header-icon;
+
+  .v-breadcrumbs-item,
+  .v-breadcrumbs-item--disabled,
+  .v-breadcrumbs-item--link {
+    @apply !p-0 !text-header-icon !opacity-100;
+  }
+
+  .v-breadcrumbs-divider {
+    @apply !px-2 !py-0 !text-header-icon !opacity-100;
+  }
+
+  .breadcrumbs-title {
+    @apply inline-flex max-w-60 min-w-0 items-center gap-1;
+  }
+}
