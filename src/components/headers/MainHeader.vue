@@ -1,6 +1,6 @@
 <template>
   <v-app-bar flat border="b" height="50">
-    <v-app-bar-title></v-app-bar-title>
+    <AppBreadcrumbs />
     <template #append>
       <SearchPanel />
     </template>
@@ -8,5 +8,6 @@
 </template>
 
 <script setup lang="ts">
+import AppBreadcrumbs from '@/components/headers/AppBreadcrumbs.vue'
 import SearchPanel from '@/components/search-panel/SearchPanel.vue'
 </script>
