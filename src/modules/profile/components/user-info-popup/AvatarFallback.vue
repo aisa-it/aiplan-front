@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-full w-full items-center justify-center bg-gray-400 text-red-500"
+    class="flex h-full w-full items-center justify-center bg-primary-light text-primary"
   >
     {{ text }}
   </div>

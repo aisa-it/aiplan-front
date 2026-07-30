@@ -3,15 +3,23 @@
 /* @import './css/layers.scss'; */
 
 :root {
-  --text-primary: #474a52;
+  --text-general: #474a52;
   --text-secondary: #8b8b98;
+  --primary-light: #ccdbff;
 }
 
 .dark {
-  --text-primary: #bac4d5;
+  --text-general: #bac4d5;
+}
+
+body,
+.app,
+.v-application__wrap {
+  color: var(--text-general);
 }
 
 @theme {
-  --color-primary: var(--text-primary);
+  --color-general: var(--text-general);
   --color-secondary: var(--text-secondary);
+  --color-primary-light: var(--primary-light);
 }

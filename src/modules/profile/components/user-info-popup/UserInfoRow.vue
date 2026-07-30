@@ -1,11 +1,6 @@
 <template>
   <div class="flex items-center">
-    <span
-      class="wrap-break-word text-sm"
-      :class="{
-        'text-center': center,
-      }"
-    >
+    <span class="wrap-break-word text-sm">
       {{ text }}
     </span>
 
@@ -18,6 +13,5 @@
 <script setup lang="ts">
 defineProps<{
   text: string;
-  center: boolean;
 }>();
 </script>

@@ -1,44 +1,72 @@
 <template>
-  <v-avatar ::size="size" class="relative rounded-lg text-white">
-    <v-img v-if="image" :src="getUrlFile(image)" cover>
-      <template #error>
-        <AvatarFallback :text="error || text" />
-      </template>
-    </v-img>
+  <div class="relative">
+    <v-avatar :size="AVATAR_SIZES[size]" class="text-white" :class="roundClass">
+      <v-img v-if="user.avatar_id" :src="getUrlFile(user.avatar_id)" cover>
+        <template #error>
+          <AvatarFallback
+            :text="avatarText"
+            :class="FALLBACK_TEXT_SIZE[size]"
+          />
+        </template>
+      </v-img>
 
-    <AvatarFallback v-else :text="text" />
-
+      <AvatarFallback
+        v-else
+        :text="avatarText"
+        :class="FALLBACK_TEXT_SIZE[size]"
+      />
+    </v-avatar>
     <HatXmasIcon
-      v-if="ny"
-      class="pointer-events-none absolute z-10 left-[40%] top-[-55%] w-full -translate-x-1/2 -translate-y-1/2 scale-[0.7]"
+      v-if="ny && !noHat"
+      class="pointer-events-none absolute z-10 left-[85%] top-[-5%] w-full -translate-x-1/2 -translate-y-1/2 scale-[1.4]"
       :class="{
-        'drop-shadow-[-3px_-1px_4px_rgba(0,0,0,0.7)]': theme === 'light',
+        'drop-shadow-[-3px_-1px_4px_rgba(0,0,0,0.7)]': !isDark,
       }"
-      :width="44"
-      :height="44"
+      :width="proportionHat"
+      :height="proportionHat"
     />
-  </v-avatar>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useAppTheme } from '../../composables/useAppTheme.ts';
 import { getUrlFile } from '../../utils/helpers';
 
 import HatXmasIcon from '../../icons/HatXmasIcon.vue';
 import AvatarFallback from './AvatarFallback.vue';
+import { computed, ref } from 'vue';
+import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
 
-withDefaults(
-  defineProps<{
-    image?: string | null | undefined;
-    text?: string;
-    error?: string;
-    theme?: string;
-    ny?: boolean;
-    size?: number | string;
-  }>(),
-  {
-    theme: 'light',
-    ny: false,
-    size: 38,
-  },
+import {
+  type DisplayOptions,
+  DEFAULT_OPTIONS,
+  AVATAR_SIZES,
+  FALLBACK_TEXT_SIZE,
+} from './UserAvatar.config.ts';
+
+const props = withDefaults(
+  defineProps<
+    {
+      user: DtoUser;
+    } & DisplayOptions
+  >(),
+  DEFAULT_OPTIONS,
 );
+
+const proportionHat = ref(AVATAR_SIZES[props.size]);
+
+const { isDark } = useAppTheme();
+
+const avatarText = computed(() =>
+  [props.user.last_name?.[0], props.user.first_name?.[0]]
+    .filter(Boolean)
+    .join(['extralarge', 'large'].includes(props.size) ? ' ' : '')
+    .toUpperCase(),
+);
+
+const roundClass = computed(() =>
+  props.rounded ? 'rounded-full' : 'rounded-lg',
+);
+
+const ny = false; // TODO: вытаскивать ny из utils стор, когда появится
 </script>

@@ -21,6 +21,7 @@ const vuetify = createVuetify({
           info: '#2196F3',
           success: '#4CAF50',
           warning: '#FFC107',
+          background: '#fff',
         },
       },
       dark: {
@@ -32,6 +33,7 @@ const vuetify = createVuetify({
           info: '#64B5F6',
           success: '#81C784',
           warning: '#FFD54F',
+          background: '#1f2228',
         },
       },
     },

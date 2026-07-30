@@ -1,17 +1,12 @@
 <template>
   <div class="flex items-center">
-    <UserAvatar
-      :image="user.avatar_id"
-      :text="avatarText"
-      :size="avatarSize"
-      :ny="ny"
-    />
+    <UserAvatarMenu :user="user" size="extralarge" hide-full-name />
 
     <div class="ml-4">
       <div class="flex items-center gap-2">
         <h4
           class="wrap-break-word font-medium"
-          :class="isMobile ? 'text-lg' : 'text-3xl'"
+          :class="mobile ? 'text-lg' : 'text-3xl'"
         >
           {{ fullName }}
         </h4>
@@ -19,7 +14,7 @@
         <!-- <SelectUserStatus /> -->
       </div>
 
-      <p class="text-lg text-medium-emphasis">
+      <p class="text-lg text-medium-emphasis text-secondary">
         {{ user.email }}
       </p>
     </div>
@@ -28,33 +23,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-
-import UserAvatar from './user-info-popup/UserAvatar.vue';
+import { useDisplay } from 'vuetify';
+import UserAvatarMenu from './user-info-popup/UserAvatarMenu.vue';
+import { getUserName } from '../utils/helpers.ts';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const props = withDefaults(
-  defineProps<{
-    user: DtoUser;
-    isMobile?: boolean;
-    ny?: boolean;
-  }>(),
-  {
-    isMobile: false,
-    ny: false,
-  },
-);
+const { mobile } = useDisplay();
 
-const avatarSize = computed(() => (props.isMobile ? 60 : 100));
+const props = defineProps<{
+  user: DtoUser;
+}>();
 
-const fullName = computed(() =>
-  `${props.user.first_name ?? ''} ${props.user.last_name ?? ''}`.trim(),
-);
-
-const avatarText = computed(() =>
-  [props.user.first_name?.[0], props.user.last_name?.[0]]
-    .filter(Boolean)
-    .join('')
-    .toUpperCase(),
-);
+const fullName = computed(() => getUserName(props.user, false));
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 text-primary">
+  <div class="p-4">
     <h3 class="mt-2 mb-0 text-5xl">Настройки профиля</h3>
     <div class="relative">
       <div class="flex items-center justify-between mt-4 gap-4">
