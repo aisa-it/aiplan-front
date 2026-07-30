@@ -1,10 +1,10 @@
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css'
-import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
-import { md3 } from 'vuetify/blueprints'
+import '@mdi/font/css/materialdesignicons.css';
+import 'vuetify/styles';
+import '@mdi/font/css/materialdesignicons.css';
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
+import { md3 } from 'vuetify/blueprints';
 
 const vuetify = createVuetify({
   blueprint: md3,
@@ -38,9 +38,29 @@ const vuetify = createVuetify({
     },
   },
   defaults: {
-    VBtn: { variant: 'flat' },
+    VBtn: {
+      variant: 'flat',
+      rounded: 'lg',
+      color: 'primary',
+    },
     VCard: { elevation: 1 },
+    VTextField: {
+      color: 'primary',
+      variant: 'underlined',
+      baseColor: '#dde2ea',
+    },
+    VSelect: { color: 'primary', variant: 'underlined', baseColor: '#dde2ea' },
+    VTextarea: {
+      color: 'primary',
+      variant: 'underlined',
+      baseColor: '#dde2ea',
+    },
+    VAutocomplete: {
+      color: 'primary',
+      variant: 'underlined',
+      baseColor: '#dde2ea',
+    },
   },
-})
+});
 
-export default vuetify
+export default vuetify;
