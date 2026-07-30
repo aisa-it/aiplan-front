@@ -25,7 +25,7 @@
           </template>
 
           <v-list-item-title
-            class="!text-[14px]"
+            class="text-[14px]"
             :class="workspace.active ? 'text-primary' : 'text-text'"
           >
             {{ workspace.name }}
@@ -56,7 +56,7 @@
                     variant="text"
                     size="x-small"
                     :ripple="false"
-                    class="!w-5 !h-5"
+                    class="h-5 w-5"
                     @click.stop
                   >
                     <v-icon size="18" color="#474a52">mdi-dots-horizontal</v-icon>
