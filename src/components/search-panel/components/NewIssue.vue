@@ -3,7 +3,7 @@
     color="primary"
     variant="flat"
     :ripple="false"
-    class="!h-8 !min-h-8 !min-w-0 !rounded-lg !px-2 !py-0 !text-sm !font-medium !normal-case"
+    class="new-issue-btn"
   >
     <AddIcon />
     <span class="leading-none">Создать</span>
