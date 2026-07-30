@@ -28,3 +28,21 @@
 @utility abbreviated-text {
   @apply w-full overflow-hidden text-ellipsis whitespace-nowrap;
 }
+
+@utility app-breadcrumbs {
+  @apply ml-4 flex min-h-0 items-center overflow-x-auto py-0 text-[14px] leading-none font-extrabold text-icon;
+
+  .v-breadcrumbs-item,
+  .v-breadcrumbs-item--disabled,
+  .v-breadcrumbs-item--link {
+    @apply flex items-center p-0 text-icon opacity-100;
+  }
+
+  .v-breadcrumbs-divider {
+    @apply flex items-center px-2 py-0 text-icon opacity-100;
+  }
+
+  .breadcrumbs-title {
+    @apply inline-flex max-w-60 min-w-0 items-center gap-1 leading-none;
+  }
+}
