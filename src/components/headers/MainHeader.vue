@@ -1,6 +1,7 @@
 <template>
   <v-app-bar flat border="b" height="50">
-    <v-app-bar-title></v-app-bar-title>
+    <WorkspaceButton />
+    <AppBreadcrumbs />
     <template #append>
       <SearchPanel />
     </template>
@@ -8,5 +9,7 @@
 </template>
 
 <script setup lang="ts">
+import AppBreadcrumbs from '@/components/headers/AppBreadcrumbs.vue'
 import SearchPanel from '@/components/search-panel/SearchPanel.vue'
+import WorkspaceButton from '@/components/select-workspace/WorkspaceButton.vue'
 </script>
