@@ -1,10 +1,8 @@
-@import 'tailwindcss';
+@import 'tailwindcss/theme' layer(tailwind-theme);
+@import 'tailwindcss/preflight' layer(tailwind-reset);
+@import 'tailwindcss/utilities' layer(tailwind-utilities);
 
 @theme {
-  --color-primary: rgb(var(--v-theme-primary));
-  --color-primary-light: #ccdbff;
-  --color-base: #ffffff;
-  --color-secondary: rgb(71, 74, 82);
   --color-border: #dde2ea;
   --color-header-icon: #474a52;
 }
