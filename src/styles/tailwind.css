@@ -24,3 +24,7 @@
 @utility workspace-btn {
   @apply h-8 w-8 min-w-8 p-0;
 }
+
+@utility abbreviated-text {
+  @apply w-full overflow-hidden text-ellipsis whitespace-nowrap;
+}

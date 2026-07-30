@@ -25,7 +25,7 @@
           </template>
 
           <v-list-item-title
-            class="text-[14px]"
+            class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
             :class="workspace.active ? 'text-primary' : 'text-text'"
           >
             {{ workspace.name }}
@@ -99,7 +99,7 @@ import WorkspaceAvatar from './components/WorkspaceAvatar.vue'
 const currentWorkspaceName = 'testViktor1'
 
 const workspaces = [
-  { id: '1', name: 'testViktor1', active: true, favorite: true },
+  { id: '1', name: 'testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1', active: true, favorite: true },
   { id: '2', name: 'New ssss 11', active: false, favorite: false },
   { id: '3', name: 'новое', active: false, favorite: false },
   { id: '4', name: 'тест тест тест', active: false, favorite: false },
