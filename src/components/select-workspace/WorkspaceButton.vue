@@ -1,6 +1,6 @@
 <template>
   <v-btn icon variant="text" rounded="lg" :ripple="false" class="workspace-btn ml-3">
-    <WorkspaceAvatar :name="currentWorkspaceName" />
+    <WorkspaceAvatar :name="currentWorkspace?.name" />
 
     <v-menu activator="parent" location="bottom start" :offset="4" :close-on-content-click="false">
       <v-list min-width="280" rounded="lg" class="py-1">
@@ -13,38 +13,41 @@
           </template>
         </v-list-item>
 
+        <v-list-item v-if="isLoading">
+          <v-list-item-title class="text-[14px] text-text">Загрузка...</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item v-else-if="!workspaces.length">
+          <v-list-item-title class="text-[14px] text-text">Нет пространств</v-list-item-title>
+        </v-list-item>
+
         <v-list-item
-          v-for="workspace in workspaces"
-          :key="workspace.id"
-          :active="workspace.active"
+          v-for="item in workspaces"
+          :key="item.id"
+          :active="item.slug === workspaceSlug"
           color="primary"
           rounded="lg"
+          @click="goToWorkspace(item.slug)"
         >
           <template #prepend>
-            <WorkspaceAvatar :name="workspace.name" />
+            <WorkspaceAvatar :name="item.name" />
           </template>
 
           <v-list-item-title
             class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
-            :class="workspace.active ? 'text-primary' : 'text-text'"
+            :class="item.slug === workspaceSlug ? 'text-primary' : 'text-text'"
           >
-            {{ workspace.name }}
+            {{ item.name }}
           </v-list-item-title>
 
           <template #append>
             <div class="ml-2 flex items-center" @click.stop>
-              <v-btn
-                icon
-                variant="text"
-                size="x-small"
-                :ripple="false"
-                @click.stop
-              >
+              <v-btn icon variant="text" size="x-small" :ripple="false" @click.stop>
                 <StarIcon
                   :width="16"
                   :height="16"
-                  :filled="workspace.favorite"
-                  :color="workspace.favorite ? '#F2994A' : '#474a52'"
+                  :filled="!!item.is_favorite"
+                  :color="item.is_favorite ? '#F2994A' : '#474a52'"
                 />
               </v-btn>
 
@@ -87,21 +90,40 @@
 </template>
 
 <script setup lang="ts">
+import { computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import AddIcon from '@/components/icons/AddIcon.vue'
 import BellIcon from '@/components/icons/BellIcon.vue'
 import SettingsIcon from '@/components/icons/SettingsIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
 import WorkspaceAvatar from './components/WorkspaceAvatar.vue'
+import { useWorkspacesStore } from '@/stores/workspaces-store'
 
-// currentWorkspaceName и workspaces временные тестовые данные
-// TODO: удалить после подключения к API
+const route = useRoute()
+const router = useRouter()
+const workspacesStore = useWorkspacesStore()
+const { workspaces, workspace, isLoading } = storeToRefs(workspacesStore)
 
-const currentWorkspaceName = 'testViktor1'
+const workspaceSlug = computed(() => (route.params.workspace as string) || '')
 
-const workspaces = [
-  { id: '1', name: 'testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1', active: true, favorite: true },
-  { id: '2', name: 'New ssss 11', active: false, favorite: false },
-  { id: '3', name: 'новое', active: false, favorite: false },
-  { id: '4', name: 'тест тест тест', active: false, favorite: false },
-]
+const currentWorkspace = computed(
+  () =>
+    workspace.value ??
+    workspaces.value.find((item) => item.slug === workspaceSlug.value) ??
+    null,
+)
+
+watch(
+  workspaceSlug,
+  (slug) => {
+    if (slug) workspacesStore.fetchWorkspace(slug)
+  },
+  { immediate: true },
+)
+
+const goToWorkspace = (slug?: string) => {
+  if (!slug) return
+  router.push(`/${slug}`)
+}
 </script>
