@@ -343,7 +343,7 @@ async function refresh() {
   await workspaceStore
     .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
       offset: 0,
-      limit: -1,
+      limit: 1000,
     })
     .then((res) => (wsMembers.value = res?.result ?? []));
 
@@ -362,6 +362,7 @@ async function onSuccess(msg?: string) {
   emits('update');
 }
 
+// TODO Убрать, вместо него смотреть на props.row?.workspace_admin
 const isAdminWs = (member_id: string) => {
   return (
     wsMembers.value?.find((member) => member_id === member.member_id)?.role ===
