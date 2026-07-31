@@ -13,6 +13,14 @@ const validateRouteCheck = (route: string): boolean =>
 export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
   instance.interceptors.response.use(
     (response: AxiosResponse) => {
+      const url = response.config.url;
+      if (
+        url &&
+        (url.endsWith('/api/auth/sign-out/') ||
+          url.endsWith('/api/auth/sign-out-everywhere/'))
+      ) {
+        window.location.href = '/signin';
+      }
       return response;
     },
     async (error) => {
@@ -29,7 +37,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
 
       if (status.toString().startsWith('5')) {
         return fetch('/api/_health/').catch(() => {
-          //FIXME: реализовать систему нотификаций handleNotify
+          //TODO: реализовать систему нотификаций handleNotify
           /*   handleNotify({
             open: true,
             type: 'error',
@@ -70,6 +78,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
           return Promise.reject(error);
         case 409:
         default:
+        //TODO: реализовать систему нотификаций handleNotify
         /*  handleNotify({
             open: true,
             type: 'error',

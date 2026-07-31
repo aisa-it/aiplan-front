@@ -45,7 +45,7 @@
           variant="flat"
           color="primary"
           @click="restore"
-          :loading="authStore.loading"
+          :loading="loading"
           :disabled="isEnabledCaptcha ? !captchaPayload : false"
           class="text-none"
         >
@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useAuthStore } from '../stores/auth-store';
+import { AuthService } from '../api/auth.service';
 import { useUtilsStore } from '@/stores/utils-store';
 import { storeToRefs } from 'pinia';
 import CaptchaWidget from './CaptchaWidget.vue';
@@ -78,7 +78,7 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const authStore = useAuthStore();
+const loading = ref(false);
 const utilsStore = useUtilsStore();
 const { isEnabledCaptcha } = storeToRefs(utilsStore);
 
@@ -101,10 +101,13 @@ const closeDialog = () => {
 const restore = async () => {
   if (!email.value || !isEmail(email.value)) return;
 
-  const success = await authStore.forgotPassword(
+  loading.value = true;
+  const success = await AuthService.forgotPassword(
     email.value,
     captchaPayload.value,
   );
+  loading.value = false;
+
   if (success) {
     successMessage.value = SUCCESS_RESTORE_PASS;
     setTimeout(() => {

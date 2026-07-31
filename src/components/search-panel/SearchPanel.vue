@@ -5,8 +5,8 @@
     <SearchButton />
     <NewIssue />
     <ProfileButton
-      @sign-out="authStore.signOut()"
-      @sign-out-everywhere="authStore.signOutEverywhere()"
+      @sign-out="AuthService.signOut()"
+      @sign-out-everywhere="AuthService.signOutEverywhere()"
     />
   </div>
 </template>
@@ -17,7 +17,5 @@ import ConferenceButton from './components/ConferenceButton.vue'
 import NewIssue from './components/NewIssue.vue'
 import SearchButton from './components/SearchButton.vue'
 import WorkspaceNotificationsButton from './components/WorkspaceNotificationsButton.vue'
-import { useAuthStore } from '@/modules/auth';
-
-const authStore = useAuthStore()
+import { AuthService } from '@/modules/auth/api/auth.service';
 </script>

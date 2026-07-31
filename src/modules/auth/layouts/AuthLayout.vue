@@ -1,16 +1,8 @@
 <template>
-  <div
-    class="min-h-screen bg-[url('@/assets/login-bg.svg')] bg-cover bg-center bg-no-repeat flex items-center min-w-[280px] justify-start max-[1000px]:justify-center"
-  >
-    <div
-      class="flex flex-col justify-between h-screen w-[40vw] max-[1000px]:w-[60vw] max-[1000px]:h-auto"
-    >
+  <div class="auth-wrapper">
+    <div class="auth-container">
       <div class="flex-1 flex justify-center items-center">
-        <v-card
-          variant="flat"
-          color="background"
-          class="flex flex-col content-center rounded-2xl shadow-none self-center min-w-[280px] w-[80%] px-8 py-4 z-10 max-[1000px]:w-[60vw] max-[1000px]:p-4 max-[1000px]:shadow-[0px_1px_3px_0px_#0a0d241f,0px_1px_1px_0px_#0a0d2424,0px_2px_1px_-1px_#0a0d2433,0px_0px_1px_0px_#0a0d2433]"
-        >
+        <v-card variant="flat" color="background" class="auth-card">
           <v-card-title class="w-full text-center">
             <v-img
               class="w-[160px] mx-auto"
@@ -33,9 +25,7 @@
         </v-card>
       </div>
 
-      <div
-        class="bg-[rgb(var(--v-theme-background))] rounded-lg self-center p-2 z-10 min-w-[280px] text-sm max-[1000px]:mt-8 max-[1000px]:!w-[60vw] max-[1000px]:flex max-[1000px]:justify-center max-[1000px]:shadow-[0px_1px_3px_0px_#0a0d241f,0px_1px_1px_0px_#0a0d2424,0px_2px_1px_-1px_#0a0d2433,0px_0px_1px_0px_#0a0d2433]"
-      >
+      <div class="auth-footer-info">
         <div>
           Написать нам в
           <a
@@ -60,17 +50,55 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, onUnmounted, onMounted } from 'vue';
+import { onBeforeMount, onUnmounted, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import logo from '@/assets/logo.svg';
-import { useAuthStore } from '../stores/auth-store';
+import { useUserStore } from '@/stores/user-store';
 import { useUtilsStore } from '@/stores/utils-store';
 import AiplanVersion from '@/components/AiplanVersion.vue';
 
-const authStore = useAuthStore();
+const router = useRouter();
+const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 
+const sessionPollInterval = ref<ReturnType<typeof setInterval> | null>(null);
+
+const checkSession = async () => {
+  try {
+    await userStore.getUserInfo();
+
+    const path = router.currentRoute.value.path;
+    if (path === '/signin' || path === '/signup' || path === '/') {
+      const nextUrl = localStorage.getItem('next_url');
+      const url =
+        typeof nextUrl === 'string' && nextUrl.startsWith('/onboarding')
+          ? '/'
+          : (nextUrl ?? '/');
+      router.replace(url as string);
+    }
+  } catch (e) {}
+};
+
+const startSessionPolling = () => {
+  if (sessionPollInterval.value) {
+    clearInterval(sessionPollInterval.value);
+  }
+  checkSession();
+
+  sessionPollInterval.value = setInterval(() => {
+    checkSession();
+  }, 10000);
+};
+
+const stopSessionPolling = () => {
+  if (sessionPollInterval.value) {
+    clearInterval(sessionPollInterval.value);
+    sessionPollInterval.value = null;
+  }
+};
+
 onMounted(() => {
-  authStore.startSessionPolling();
+  startSessionPolling();
 });
 
 onBeforeMount(() => {
@@ -78,6 +106,6 @@ onBeforeMount(() => {
 });
 
 onUnmounted(() => {
-  authStore.stopSessionPolling();
+  stopSessionPolling();
 });
 </script>

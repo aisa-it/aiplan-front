@@ -73,13 +73,14 @@
   </v-form>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { isEmail } from '@/utils/validation';
 import CaptchaWidget from './CaptchaWidget.vue';
 import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
-import { useAuthStore } from '../stores/auth-store';
+import { AuthService } from '../api/auth.service';
 import { useUtilsStore } from '@/stores/utils-store';
+import router from '@/router';
 
 const props = defineProps<{ isRegister?: boolean }>();
 
@@ -89,22 +90,33 @@ const isPassword = ref(true);
 const captchaPayload = ref('');
 const updateKey = ref(0);
 
-const authStore = useAuthStore();
-const { loading, loginError } = storeToRefs(authStore);
+const loading = ref(false);
+const loginError = ref(false);
 
 const utilsStore = useUtilsStore();
 const { isEnabledCaptcha } = storeToRefs(utilsStore);
 
 const login = async () => {
   loginError.value = false;
+  loading.value = true;
 
-  if (props.isRegister) {
-    await authStore.registerViaEmail(email.value, captchaPayload.value);
-  } else {
-    await authStore.login(email.value, password.value, captchaPayload.value);
+  try {
+    if (props.isRegister) {
+      await AuthService.registerViaEmail(email.value, captchaPayload.value);
+    } else {
+      await AuthService.login(
+        email.value,
+        password.value,
+        captchaPayload.value,
+      );
+    }
+    await router.push('/');
+  } catch (e) {
+    loginError.value = true;
+  } finally {
+    loading.value = false;
+    updateKey.value += 1;
   }
-
-  updateKey.value += 1;
 };
 
 const showRestoreDialog = ref(false);

@@ -21,6 +21,5 @@
   </AuthLayout>
 </template>
 <script setup lang="ts">
-import AuthLayout from '../layouts/AuthLayout.vue';
-import LoginForm from '../components/LoginForm.vue';
+import { AuthLayout, LoginForm } from '@/modules/auth';
 </script>

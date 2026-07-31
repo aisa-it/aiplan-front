@@ -45,7 +45,6 @@ const vuetify = createVuetify({
     VBtn: {
       variant: 'flat',
       rounded: 'lg',
-      color: 'primary',
     },
     VTextField: {
       color: 'primary',
