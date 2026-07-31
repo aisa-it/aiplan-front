@@ -43,6 +43,7 @@ const vuetify = createVuetify({
   defaults: {
     VBtn: { variant: 'flat' },
     VCard: { elevation: 1 },
+    VTextField: { variant: 'underlined', color: 'primary'}
   },
 })
 

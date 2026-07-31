@@ -585,6 +585,13 @@ alien-signals@^3.2.1:
   resolved "https://registry.npmjs.org/alien-signals/-/alien-signals-3.2.1.tgz#eb66256949bce90b7d30d055e2752e62d6930c7c"
   integrity sha512-I8FjmltrfnDFoZedi5CG8DghVYNhzb/Ijluz7tCSJH0xpd0484Kowhbb1XDYOxfJpU1p5wnM2X54dA+IfGyD1g==
 
+altcha@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.npmjs.org/altcha/-/altcha-3.2.1.tgz#2c84776b986cfa24ab864f75fd95c3495350a62e"
+  integrity sha512-MXsnNmgg3BGJja0DXbflv9Bp29uyGv6wUImaaT1yLxCKOj+x9QBMpi/Vdh6XbP4Uf0PykaeQwl8ivJAvIhoo0A==
+  dependencies:
+    hash-wasm "^4.12.0"
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -774,6 +781,11 @@ has-tostringtag@^1.0.2:
   integrity sha512-NqADB8VjPFLM2V0VvHUewwwsw0ZWBaIdgo+ieHtK3hasLz4qeCRjYcqfB6AQrBggRKppKF8L52/VqdVsO47Dlw==
   dependencies:
     has-symbols "^1.0.3"
+
+hash-wasm@^4.12.0:
+  version "4.12.0"
+  resolved "https://registry.npmjs.org/hash-wasm/-/hash-wasm-4.12.0.tgz#f9f1a9f9121e027a9acbf6db5d59452ace1ef9bb"
+  integrity sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==
 
 hasown@^2.0.2, hasown@^2.0.4:
   version "2.0.4"

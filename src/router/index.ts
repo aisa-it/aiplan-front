@@ -9,6 +9,14 @@ const router = createRouter({
       component: () => import('@/layouts/MainLayout.vue'),
       children: [],
     },
+    {
+      path: '/signin',
+      component: () => import('@/pages/SignInPage.vue'),
+    },
+    {
+      path: '/signup',
+      component: () => import('@/pages/SignUpPage.vue'),
+    },
   ],
 })
 
