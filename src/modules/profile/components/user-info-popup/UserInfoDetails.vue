@@ -1,7 +1,17 @@
 <template>
   <div class="flex flex-col flex-1 gap-0.5 w-full">
-    <UserInfoRow v-for="row in visibleRows" :key="row.key" :text="row.text">
-      <UserStatusBadge v-if="row.showBadge" :member="user" />
+    <UserInfoRow
+      v-for="row in visibleRows"
+      :key="row.key"
+      :text="row.text"
+      :text-style="row.class"
+    >
+      <UserStatus
+        v-if="row.showBadge && user.status"
+        :user="user"
+        class="absolute left-2"
+        only-show
+      />
     </UserInfoRow>
     <span v-if="!hideTime" class="w-full text-sm wrap-break-word">
       {{ formattedTime }}
@@ -16,7 +26,8 @@ import { formatTime, getCityFromTimezone } from '../../utils/time';
 import { getUserName } from '../../utils/helpers.ts';
 
 import UserInfoRow from './UserInfoRow.vue';
-import UserStatusBadge from './UserStatusBadge.vue';
+import UserStatus from './UserStatus.vue';
+
 import { computed } from 'vue';
 import {
   type DisplayOptions,
@@ -39,6 +50,7 @@ const allRows = computed(() => [
     key: 'fullName',
     text: fullName.value,
     visible: !props.hideFullName,
+    class: 'font-bold text-base!',
   },
   {
     key: 'userName',

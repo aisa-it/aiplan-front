@@ -1,10 +1,10 @@
 <template>
-  <div class="flex items-center">
-    <span class="wrap-break-word text-sm">
+  <div class="flex items-center gap-1">
+    <div class="wrap-break-word text-sm" :class="textStyle">
       {{ text }}
-    </span>
+    </div>
 
-    <div class="relative h-6 w-6">
+    <div class="relative">
       <slot />
     </div>
   </div>
@@ -13,5 +13,6 @@
 <script setup lang="ts">
 defineProps<{
   text: string;
+  textStyle?: string;
 }>();
 </script>

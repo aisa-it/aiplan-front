@@ -1,28 +1,23 @@
 <template>
-  <v-btn
-    icon
-    density="compact"
-    class="h-auto! w-auto! min-w-0! p-0! hover:cursor-pointer"
+  <v-menu
+    open-on-hover
+    transition="scale-transition"
+    :location="isShowPopupMiddle ? 'bottom center' : undefined"
+    :origin="isShowPopupMiddle ? 'top center' : undefined"
   >
-    <UserAvatar :user="user" v-bind="displayUserAvatarOptions" />
-
-    <v-menu
-      open-on-hover
-      activator="parent"
-      transition-show="slide-y-transition"
-      transition-hide="slide-y-transition"
-      :location="isShowPopupMiddle ? 'bottom center' : undefined"
-      :origin="isShowPopupMiddle ? 'top center' : undefined"
-    >
-      <div
-        class="shadow-menu flex max-h-60 max-w-85 items-center justify-center gap-2.5 p-2.5 rounded-2xl"
-      >
-        <UserAvatar :user="user" :rounded="false" />
-
-        <UserInfoDetails :user="user" v-bind="displayUserInfoOptions" />
+    <template #activator="{ props: activatorProps }">
+      <div v-bind="activatorProps" class="inline-flex cursor-pointer">
+        <UserAvatar :user="user" v-bind="displayUserAvatarOptions" />
       </div>
-    </v-menu>
-  </v-btn>
+    </template>
+    <div
+      class="shadow-menu flex max-h-60 max-w-85 items-center justify-center gap-4 p-2.5 rounded-2xl"
+    >
+      <UserAvatar :user="user" :rounded="false" />
+
+      <UserInfoDetails :user="user" v-bind="displayUserInfoOptions" />
+    </div>
+  </v-menu>
 </template>
 
 <script setup lang="ts">

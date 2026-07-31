@@ -1,78 +1,58 @@
 <template>
-  <v-tooltip v-if="status" location="top">
+  <v-tooltip location="bottom">
     <template #activator="{ props: tooltipProps }">
       <div
         v-bind="tooltipProps"
         class="flex items-center justify-center gap-2 text-center"
       >
         <v-btn
-          v-if="!icon"
           variant="text"
           density="compact"
-          rounded="xl"
+          rounded
           :size="size ?? 18"
-          class="min-w-0 p-0"
+          class="min-w-0 p-6"
+          :class="{ 'p-0!': onlyShow }"
         >
-          {{ statusEmoji || '➕' }}
+          {{ status_emoji || '➕' }}
         </v-btn>
-
-        <span v-else-if="statusEmoji" class="text-base leading-none">
-          {{ statusEmoji }}
-        </span>
       </div>
     </template>
 
     <div class="text-center">
       <span class="text-sm font-medium">
-        {{ status }}
+        {{ status || 'Выбрать статус' }}
 
-        <span v-if="formattedStatusEndTime" class="text-xs">
-          (до {{ formattedStatusEndTime }})
+        <span v-if="formattedStatusEndDate" class="text-xs">
+          (до {{ formattedStatusEndDate }})
         </span>
       </span>
     </div>
   </v-tooltip>
-
-  <div v-else class="flex items-center justify-center gap-2 text-center">
-    <v-btn
-      v-if="!icon"
-      variant="text"
-      density="compact"
-      rounded="xl"
-      :size="size ?? 18"
-      class="min-w-0 p-0"
-    >
-      {{ statusEmoji || '➕' }}
-    </v-btn>
-
-    <span v-else-if="statusEmoji" class="text-base leading-none">
-      {{ statusEmoji }}
-    </span>
-  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, toRefs } from 'vue';
 
 import { formatDateTime, formatTime, isTodayDate } from '../../utils/time';
+import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 interface Props {
-  status: string;
-  statusEmoji?: string | null;
-  statusEndTime?: string | null;
+  user: DtoUser;
   size?: number | string;
-  icon?: boolean;
+  onlyShow?: boolean;
 }
 
 const props = defineProps<Props>();
 
-const formattedStatusEndTime = computed(() => {
-  if (!props.statusEndTime) {
+const { status, status_emoji, status_end_date } = toRefs(props.user);
+
+const formattedStatusEndDate = computed(() => {
+  if (!status_end_date || !status_end_date.value) {
     return null;
   }
 
-  return isTodayDate(props.statusEndTime)
-    ? formatTime(props.statusEndTime)
-    : formatDateTime(props.statusEndTime);
+  return isTodayDate(status_end_date.value)
+    ? formatTime(status_end_date.value)
+    : formatDateTime(status_end_date.value);
 });
 </script>

@@ -3,14 +3,14 @@
     <UserAvatarMenu :user="user" size="extralarge" hide-full-name />
 
     <div class="ml-4">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1">
         <h4
           class="wrap-break-word font-medium"
           :class="mobile ? 'text-lg' : 'text-3xl'"
         >
           {{ fullName }}
         </h4>
-
+        <UserStatus :user="user" />
         <!-- <SelectUserStatus /> -->
       </div>
 
@@ -26,6 +26,7 @@ import { computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import UserAvatarMenu from './user-info-popup/UserAvatarMenu.vue';
 import { getUserName } from '../utils/helpers.ts';
+import UserStatus from './user-info-popup/UserStatus.vue';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 

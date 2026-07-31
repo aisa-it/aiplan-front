@@ -13,9 +13,6 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       vuetify({
         autoImport: true,
-        styles: {
-          configFile: 'src/css/settings.scss',
-        },
       }),
     ],
     resolve: {
