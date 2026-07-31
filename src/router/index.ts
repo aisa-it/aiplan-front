@@ -5,14 +5,21 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/Home.vue'),
-      children: [
-        {
-          path: 'profile',
-          component: () => import('@/views/Profile.vue'),
-        },
-      ],
+      name: 'main',
+      component: () => import('@/layouts/MainLayout.vue'),
+      children: [],
+    },
+    {
+      path: '/signin',
+      component: () => import('@/pages/SignInPage.vue'),
+    },
+    {
+      path: '/signup',
+      component: () => import('@/pages/SignUpPage.vue'),
+    },
+    {
+      path: 'profile',
+      component: () => import('@/pages/Profile.vue'),
     },
   ],
 });

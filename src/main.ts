@@ -1,11 +1,11 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import './styles/tailwind.css';
+import './css/fonts.scss';
+import './styles/main.scss';
 import App from './App.vue';
 import router from './router';
-import './style.css';
 import vuetify from './plugins/vuetify';
-import './css/fonts.scss';
-
 const app = createApp(App);
 
 app.use(createPinia());

@@ -1,0 +1,51 @@
+@import 'tailwindcss/theme' layer(tailwind-theme);
+@import 'tailwindcss/preflight' layer(tailwind-reset);
+@import 'tailwindcss/utilities' layer(tailwind-utilities);
+
+@theme {
+  --color-base: rgb(var(--v-theme-text));
+  --color-border: rgb(var(--v-theme-border));
+  --color-icon: rgb(var(--v-theme-icon));
+  --color-text: rgb(var(--v-theme-text));
+  --color-primary: rgb(var(--v-theme-primary));
+  --color-secondary: #8b8b98;
+  --color-primary-light: #ccdbff;
+}
+
+@utility header-icon-btn {
+  @apply h-8 w-8 min-w-8 p-0 rounded-lg border border-border bg-transparent text-icon;
+}
+
+@utility new-issue-btn {
+  @apply h-8 min-h-8 min-w-0 rounded-lg px-2 py-0 text-sm font-medium normal-case;
+}
+
+@utility profile-btn {
+  @apply h-8 w-8 min-w-8 p-0 mr-1;
+}
+
+@utility workspace-btn {
+  @apply h-8 w-8 min-w-8 p-0;
+}
+
+@utility abbreviated-text {
+  @apply w-full overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+@utility app-breadcrumbs {
+  @apply ml-4 flex min-h-0 items-center overflow-x-auto py-0 text-[14px] leading-none font-extrabold text-icon;
+
+  .v-breadcrumbs-item,
+  .v-breadcrumbs-item--disabled,
+  .v-breadcrumbs-item--link {
+    @apply flex items-center p-0 text-icon opacity-100;
+  }
+
+  .v-breadcrumbs-divider {
+    @apply flex items-center px-2 py-0 text-icon opacity-100;
+  }
+
+  .breadcrumbs-title {
+    @apply inline-flex max-w-60 min-w-0 items-center gap-1 leading-none;
+  }
+}

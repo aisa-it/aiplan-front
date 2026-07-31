@@ -22,6 +22,9 @@ const vuetify = createVuetify({
           success: '#4CAF50',
           warning: '#FFC107',
           background: '#fff',
+          border: '#dde2ea',
+          text: '#474a52',
+          icon: '#474a52',
         },
       },
       dark: {
@@ -34,6 +37,7 @@ const vuetify = createVuetify({
           success: '#81C784',
           warning: '#FFD54F',
           background: '#1f2228',
+          text: '#bac4d5',
         },
       },
     },
@@ -41,6 +45,7 @@ const vuetify = createVuetify({
   defaults: {
     VBtn: { variant: 'flat' },
     VCard: { elevation: 1 },
+    VTextField: { variant: 'underlined', color: 'primary' },
   },
 });
 
