@@ -343,7 +343,7 @@ async function refresh() {
   await workspaceStore
     .getWorkspaceMembers(currentWorkspaceSlug.value as string, {
       offset: 0,
-      limit: -1,
+      limit: 100,
     })
     .then((res) => (wsMembers.value = res?.result ?? []));
 
