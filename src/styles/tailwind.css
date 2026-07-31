@@ -6,7 +6,7 @@
   --color-base: rgb(var(--v-theme-text));
   --color-border: rgb(var(--v-theme-border));
   --color-icon: rgb(var(--v-theme-icon));
-  --color-text: rgb(var(--v-theme-text));
+  --color-text-default: rgb(var(--v-theme-text));
   --color-primary: rgb(var(--v-theme-primary));
   --color-secondary: #8b8b98;
   --color-primary-light: #ccdbff;

@@ -1,21 +1,17 @@
 <template>
   <v-tooltip location="bottom">
     <template #activator="{ props: tooltipProps }">
-      <div
+      <v-btn
         v-bind="tooltipProps"
-        class="flex items-center justify-center gap-2 text-center"
+        variant="text"
+        density="compact"
+        rounded
+        class="min-w-0 p-6 text-lg"
+        size="18"
+        :class="{ 'p-0!': onlyShow }"
       >
-        <v-btn
-          variant="text"
-          density="compact"
-          rounded
-          :size="size ?? 18"
-          class="min-w-0 p-6"
-          :class="{ 'p-0!': onlyShow }"
-        >
-          {{ status_emoji || '➕' }}
-        </v-btn>
-      </div>
+        {{ statusEmoji || '➕' }}
+      </v-btn>
     </template>
 
     <div class="text-center">
@@ -31,28 +27,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue';
+import { computed } from 'vue';
 
-import { formatDateTime, formatTime, isTodayDate } from '../../utils/time';
+import { formatDateTime, formatTime, isTodayDate } from '@/utils/time';
+
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 interface Props {
   user: DtoUser;
-  size?: number | string;
   onlyShow?: boolean;
 }
 
 const props = defineProps<Props>();
 
-const { status, status_emoji, status_end_date } = toRefs(props.user);
+const status = computed(() => props.user.status);
+const statusEmoji = computed(() => props.user.status_emoji);
+const statusEndDate = computed(() => props.user.status_end_date);
 
 const formattedStatusEndDate = computed(() => {
-  if (!status_end_date || !status_end_date.value) {
+  if (!statusEndDate.value) {
     return null;
   }
 
-  return isTodayDate(status_end_date.value)
-    ? formatTime(status_end_date.value)
-    : formatDateTime(status_end_date.value);
+  return isTodayDate(statusEndDate.value)
+    ? formatTime(statusEndDate.value)
+    : formatDateTime(statusEndDate.value);
 });
 </script>

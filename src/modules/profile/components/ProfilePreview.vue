@@ -10,7 +10,7 @@
         >
           {{ fullName }}
         </h4>
-        <UserStatus :user="user" />
+        <UserStatusMenu :user="user" />
         <!-- <SelectUserStatus /> -->
       </div>
 
@@ -18,19 +18,25 @@
         {{ user.email }}
       </p>
     </div>
+    <v-btn color="primary" @click="toggleTheme">Смена темы</v-btn>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useDisplay } from 'vuetify';
-import UserAvatarMenu from './user-info-popup/UserAvatarMenu.vue';
-import { getUserName } from '../utils/helpers.ts';
-import UserStatus from './user-info-popup/UserStatus.vue';
+
+import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
+import UserStatus from '@/components/user-status/shared/UserStatus.vue';
+import UserStatusMenu from '@/components/user-status/UserStatusMenu.vue';
+
+import { getUserName } from '@/utils/helpers.ts';
+import { useAppTheme } from '@/composables/useAppTheme';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const { mobile } = useDisplay();
+const { toggleTheme } = useAppTheme();
 
 const props = defineProps<{
   user: DtoUser;

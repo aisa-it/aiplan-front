@@ -10,10 +10,13 @@
 </template>
 
 <script setup lang="ts">
-import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import ProfilePreview from '../components/ProfilePreview.vue';
 import { ref } from 'vue';
 
+import ProfilePreview from '../components/ProfilePreview.vue';
+
+import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+// TODO: Достаем из user-store, когда появится
 const user = ref<DtoUser>({
   id: 'e0dfe559-88af-48c4-931c-4cdc88b2d057',
   username: 'dmitriy.zheleznev',
@@ -21,6 +24,7 @@ const user = ref<DtoUser>({
   first_name: 'Дмитрий',
   last_name: 'Железнев',
   avatar: '',
+  // avatar_id: 'b6b0c82f-a307-444d-8690-70c6cecd25fb', Проверка на изображении
   avatar_id: null,
   user_timezone: 'Europe/Moscow',
   last_active: '2026-07-28T12:13:19.938469439+03:00',

@@ -22,20 +22,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import UserAvatar from './UserAvatar.vue';
-import UserInfoDetails from './UserInfoDetails.vue';
-import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
+
+import UserAvatar from '@/components/user-avatar/UserAvatar.vue';
+import UserInfoDetails from './components/UserInfoDetails.vue';
+
+import { pickDefinedKeys } from '@/utils/object.ts';
+
 import {
   type DisplayOptions as AvatarDisplayOptions,
   DEFAULT_OPTIONS as AVATAR_DEFAULT,
-} from './UserAvatar.config.ts';
+} from '../user-avatar/UserAvatar.config.ts';
 
 import {
   type DisplayOptions as InfoDisplayOptions,
   DEFAULT_OPTIONS as INFO_DEFAULT,
-} from './UserInfoDetails.config.ts';
+} from './components/UserInfoDetails.config.ts';
 
-import { pickDefinedKeys } from '../../utils/object.ts';
+import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
 
 const props = withDefaults(
   defineProps<

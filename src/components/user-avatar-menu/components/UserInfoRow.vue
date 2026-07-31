@@ -4,9 +4,7 @@
       {{ text }}
     </div>
 
-    <div class="relative">
-      <slot />
-    </div>
+    <slot />
   </div>
 </template>
 

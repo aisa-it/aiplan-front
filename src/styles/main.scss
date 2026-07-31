@@ -1,1 +1,6 @@
 @layer vuetify-overrides;
+
+body,
+.v-application {
+  color: rgb(var(--v-theme-text));
+}

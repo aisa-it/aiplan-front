@@ -25,16 +25,20 @@
       :width="proportionHat"
       :height="proportionHat"
     />
+
+    <slot />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAppTheme } from '../../composables/useAppTheme.ts';
-import { getUrlFile } from '../../utils/helpers';
-
-import HatXmasIcon from '../../icons/HatXmasIcon.vue';
-import AvatarFallback from './AvatarFallback.vue';
 import { computed, ref } from 'vue';
+
+import { useAppTheme } from '@/composables/useAppTheme.ts';
+import { getUrlFile } from '@/utils/helpers.ts';
+
+import AvatarFallback from './components/AvatarFallback.vue';
+import HatXmasIcon from '@/components/icons/HatXmasIcon.vue';
+
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
 
 import {

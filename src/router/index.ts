@@ -7,7 +7,12 @@ const router = createRouter({
       path: '/',
       name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
-      children: [],
+      children: [
+        {
+          path: '/profile',
+          component: () => import('@/pages/Profile.vue'),
+        },
+      ],
     },
     {
       path: '/signin',
@@ -16,10 +21,6 @@ const router = createRouter({
     {
       path: '/signup',
       component: () => import('@/pages/SignUpPage.vue'),
-    },
-    {
-      path: 'profile',
-      component: () => import('@/pages/Profile.vue'),
     },
   ],
 });

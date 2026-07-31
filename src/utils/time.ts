@@ -3,7 +3,7 @@ import 'dayjs/locale/ru';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
-import { TIMEZONES } from '../constants/constants';
+import { TIMEZONES } from '@/constants/timezones';
 
 dayjs.locale('ru');
 dayjs.extend(utc);

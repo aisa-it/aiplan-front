@@ -6,12 +6,7 @@
       :text="row.text"
       :text-style="row.class"
     >
-      <UserStatus
-        v-if="row.showBadge && user.status"
-        :user="user"
-        class="absolute left-2"
-        only-show
-      />
+      <UserStatus v-if="row.showBadge && user.status" :user="user" only-show />
     </UserInfoRow>
     <span v-if="!hideTime" class="w-full text-sm wrap-break-word">
       {{ formattedTime }}
@@ -21,18 +16,19 @@
 </template>
 
 <script setup lang="ts">
-import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { formatTime, getCityFromTimezone } from '../../utils/time';
-import { getUserName } from '../../utils/helpers.ts';
+import { computed } from 'vue';
 
 import UserInfoRow from './UserInfoRow.vue';
-import UserStatus from './UserStatus.vue';
+import UserStatus from '@/components/user-status/shared/UserStatus.vue';
 
-import { computed } from 'vue';
+import { formatTime, getCityFromTimezone } from '@/utils/time.ts';
+import { getUserName } from '@/utils/helpers.ts';
+
 import {
   type DisplayOptions,
   DEFAULT_OPTIONS,
 } from './UserInfoDetails.config.ts';
+import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = withDefaults(
   defineProps<
