@@ -1,0 +1,24 @@
+export function isEmail(val: string) {
+  const langEn = /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(val);
+  const langRu = /^[\wа-яА-ЯёЁ.-]+@[а-яА-ЯёЁ\d.-]+\.[а-яА-ЯёЁ]{2,}$/.test(val);
+  return (val && val.length > 0 && (langEn || langRu)) || 'Некорректный email';
+}
+
+export function allowedNotFoundServices(url: string): boolean {
+  const allowedPaths = [
+    '/api/auth/workspaces/:workspace/doc/:docId/comments/:commentId',
+    '/api/auth/workspaces/:workspace/projects/:projectId/issues/:issueId/comments/:commentId',
+  ];
+
+  function matchUrl(path: string, url: string): boolean {
+    const pathParts = path.split('/').filter(Boolean);
+    const urlParts = url.split('/').filter(Boolean);
+    if (pathParts.length !== urlParts.length) return false;
+
+    return pathParts.every(
+      (part, i) => part.startsWith(':') || part === urlParts[i],
+    );
+  }
+
+  return allowedPaths.some((path) => matchUrl(path, url));
+}

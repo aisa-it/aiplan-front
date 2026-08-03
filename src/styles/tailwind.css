@@ -3,10 +3,14 @@
 @import 'tailwindcss/utilities' layer(tailwind-utilities);
 
 @theme {
+  --color-base: rgb(var(--v-theme-text));
   --color-border: rgb(var(--v-theme-border));
   --color-icon: rgb(var(--v-theme-icon));
   --color-text: rgb(var(--v-theme-text));
   --color-primary: rgb(var(--v-theme-primary));
+  --shadow-default:
+    0px 1px 3px 0px #0a0d241f, 0px 1px 1px 0px #0a0d2424,
+    0px 2px 1px -1px #0a0d2433, 0px 0px 1px 0px #0a0d2433;
 }
 
 @utility header-icon-btn {
@@ -49,4 +53,20 @@
   .breadcrumbs-title {
     @apply inline-flex max-w-60 min-w-0 items-center gap-1 leading-none;
   }
+}
+
+@utility auth-wrapper {
+  @apply min-h-screen bg-[url('@/assets/login-bg.svg')] bg-cover bg-center bg-no-repeat flex items-center min-w-[280px] justify-center lg:justify-start;
+}
+
+@utility auth-container {
+  @apply flex flex-col justify-between h-auto w-[60vw] lg:h-screen lg:w-[40vw];
+}
+
+@utility auth-card {
+  @apply flex flex-col content-center rounded-2xl self-center min-w-[280px] w-[60vw] lg:w-[80%] p-4 lg:px-8 lg:py-4 z-10 shadow-default lg:shadow-none;
+}
+
+@utility auth-footer-info {
+  @apply bg-[rgb(var(--v-theme-background))] rounded-lg self-center p-2 z-10 min-w-[280px] text-sm mt-8 lg:mt-0 !w-[60vw] lg:!w-auto flex justify-center lg:block shadow-default lg:shadow-none;
 }

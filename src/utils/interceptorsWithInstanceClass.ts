@@ -1,4 +1,4 @@
-import { applyInterceptors } from '@/utils/interceptors'
+import { applyInterceptors } from './interceptors';
 
 export function withInterceptors<T extends { new (...args: any[]): object }>(
   generatedClass: T,

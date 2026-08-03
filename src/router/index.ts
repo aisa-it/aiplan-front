@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,7 +8,15 @@ const router = createRouter({
       name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
     },
+    {
+      path: '/signin',
+      component: () => import('@/pages/SignInPage.vue'),
+    },
+    {
+      path: '/signup',
+      component: () => import('@/pages/SignUpPage.vue'),
+    },
   ],
-})
+});
 
-export default router
+export default router;
