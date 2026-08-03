@@ -1,13 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user-store'
+import { useWorkspacesStore } from '@/stores/workspaces-store'
+
+const AUTH_ROUTES = ['/signin', '/signup']
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/:workspace?',
-      name: 'main',
-      component: () => import('@/layouts/MainLayout.vue'),
-    },
     {
       path: '/signin',
       component: () => import('@/pages/SignInPage.vue'),
@@ -16,7 +15,37 @@ const router = createRouter({
       path: '/signup',
       component: () => import('@/pages/SignUpPage.vue'),
     },
-  ],
-});
+    {
+      path: '/:workspace?',
+      name: 'main',
+      component: () => import('@/layouts/MainLayout.vue'),
+      async beforeEnter(to) {
+        const userStore = useUserStore()
+        const workspacesStore = useWorkspacesStore()
 
-export default router;
+        try {
+          await userStore.getUserInfo()
+          await workspacesStore.fetchWorkspaces()
+        } catch {
+          return '/signin'
+        }
+
+        if (!to.params.workspace) {
+          const slug =
+            userStore.user?.last_workspace_slug ||
+            workspacesStore.workspaces[0]?.slug
+
+          if (slug) return `/${slug}`
+        }
+      },
+    },
+  ],
+})
+
+router.beforeEach((to) => {
+  if (AUTH_ROUTES.includes(to.path) || to.path.includes('/f/')) return
+
+  localStorage.setItem('next_url', to.fullPath)
+})
+
+export default router
