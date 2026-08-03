@@ -54,14 +54,12 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
 
         await getMeInWorkspace(workspaceSlug);
 
-        // TODO: Архитектурный долг - Циклическая зависимость.
-        // roles-store и workspace-store зависят друг от друга. Нужно будет вынести эту логику в сервис или на уровень выше.
-        rolesStore.defineWorkspaceRole(meInWorkspace.value);
+        rolesStore.setWorkspaceRole(meInWorkspace.value);
 
         // Проверяем есть ли доступ к рабочему пространству
         if (
           !rolesStore.hasPermissionByWorkspace(
-            workspaceInfo.value,
+            meInWorkspace.value,
             'show-ws',
           ) &&
           !isInAdminPanel

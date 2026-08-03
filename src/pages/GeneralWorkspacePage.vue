@@ -6,7 +6,7 @@
     >
       <v-skeleton-loader
         type="image"
-        class="w-[96px] h-[96px] max-w-[96px] rounded-2xl"
+        class="w-[96px] h-[96px] max-w-[96px] rounded-2xl overflow-hidden"
       />
       <v-skeleton-loader type="heading" class="mt-4 w-[200px]" />
       <v-divider class="w-full my-4" />
