@@ -19,18 +19,30 @@ export function useUserStatusForm() {
     customTime: '',
   });
 
+  const getStatusKey = (status: string | null | undefined): string => {
+    if (!status) {
+      return USER_STATUS.none.value;
+    }
+
+    const found = Object.values(USER_STATUS).find(
+      (item) => item.label === status,
+    );
+
+    return found?.value ?? USER_STATUS.custom.value;
+  };
+
   const setUser = (user: DtoUser) => {
-    const { status, status_emoji, status_end_date } = user;
+    const { status, status_emoji } = user;
     reset();
-    form.status = status ?? USER_STATUS.none.value;
+    form.status = getStatusKey(status);
     form.statusEmoji = status_emoji ?? '';
-    //form.selectEndDate = resolveDuration(user.status_end_date);
+
+    if (form.status === USER_STATUS.custom.value) {
+      form.customStatusText = user.status ?? '';
+    }
   };
 
   const reset = () => {
-    form.status = USER_STATUS.none.value;
-    form.statusEmoji = '';
-
     form.selectEndDate = '';
 
     form.customStatusText = '';
@@ -48,6 +60,13 @@ export function useUserStatusForm() {
     }
 
     const statusData = USER_STATUS[form.status as keyof typeof USER_STATUS];
+
+    if (!statusData) {
+      return {
+        status: form.status,
+        emoji: USER_STATUS.custom.emoji,
+      };
+    }
 
     return {
       status:
