@@ -2,9 +2,13 @@
   <div class="p-4">
     <h3 class="mt-2 mb-0 text-5xl">Настройки профиля</h3>
     <div class="relative">
-      <div class="flex items-center justify-between mt-4 gap-4">
+      <div class="flex items-center justify-between my-4 gap-4">
         <ProfilePreview :user="user" />
       </div>
+
+      <v-tabs v-model="profileSettingsTab" color="primary" class="">
+        <v-tab v-for="tab in listTabs" :value="tab.name">{{ tab.label }}</v-tab>
+      </v-tabs>
     </div>
   </div>
 </template>
@@ -14,7 +18,12 @@ import { ref } from 'vue';
 
 import ProfilePreview from '../components/ProfilePreview.vue';
 
+import { useProfileTabs } from '../composables/useProfileTabs.ts';
+
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const { listTabs, profileSettingsTab, setTab, isLoadingComponent } =
+  useProfileTabs();
 
 // TODO: Достаем из user-store, когда появится
 const user = ref<DtoUser>({

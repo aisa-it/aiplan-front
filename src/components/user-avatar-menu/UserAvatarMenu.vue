@@ -70,6 +70,7 @@ const displayUserAvatarOptions = computed(() =>
     0 1px 5px rgba(0, 0, 0, 0.2),
     0 2px 2px rgba(0, 0, 0, 0.14),
     0 3px 1px -2px rgba(0, 0, 0, 0.12);
+  background-color: rgb(var(--v-theme-surface));
 }
 
 .dark .shadow-menu {
