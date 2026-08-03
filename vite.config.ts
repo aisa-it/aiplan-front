@@ -9,7 +9,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      vue(),
+      vue({
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag: string) => tag.startsWith('altcha-'),
+          },
+        },
+      }),
       vuetify({
         autoImport: true,
       }),

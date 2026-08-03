@@ -4,7 +4,10 @@
     <WorkspaceNotificationsButton />
     <SearchButton />
     <NewIssue />
-    <ProfileButton />
+    <ProfileButton
+      @sign-out="AuthService.signOut()"
+      @sign-out-everywhere="AuthService.signOutEverywhere()"
+    />
   </div>
 </template>
 
@@ -14,4 +17,5 @@ import ConferenceButton from './components/ConferenceButton.vue'
 import NewIssue from './components/NewIssue.vue'
 import SearchButton from './components/SearchButton.vue'
 import WorkspaceNotificationsButton from './components/WorkspaceNotificationsButton.vue'
+import { AuthService } from '@/modules/auth/api/auth.service';
 </script>

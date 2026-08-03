@@ -22,6 +22,9 @@ const vuetify = createVuetify({
           info: '#2196F3',
           success: '#4CAF50',
           warning: '#FFC107',
+          border: '#dde2ea',
+          text: '#474a52',
+          icon: '#474a52',
         },
       },
       dark: {
@@ -38,27 +41,34 @@ const vuetify = createVuetify({
     },
   },
   defaults: {
+    VCard: { elevation: 1 },
     VBtn: {
       variant: 'flat',
       rounded: 'lg',
-      color: 'primary',
     },
-    VCard: { elevation: 1 },
     VTextField: {
       color: 'primary',
       variant: 'underlined',
-      baseColor: '#dde2ea',
     },
-    VSelect: { color: 'primary', variant: 'underlined', baseColor: '#dde2ea' },
+    VSelect: { color: 'primary', variant: 'underlined' },
     VTextarea: {
       color: 'primary',
       variant: 'underlined',
-      baseColor: '#dde2ea',
     },
     VAutocomplete: {
       color: 'primary',
       variant: 'underlined',
-      baseColor: '#dde2ea',
+    },
+    VDialog: {
+      VCardText: {
+        class: 'px-4 py-2',
+      },
+      VCardTitle: {
+        class: 'px-4 pt-4 pb-2',
+      },
+      VCardActions: {
+        class: 'px-4 pb-4 pt-2',
+      },
     },
   },
 });
