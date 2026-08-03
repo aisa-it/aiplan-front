@@ -1,9 +1,9 @@
 <template>
-  <LoginLayout>
+  <AuthLayout>
     <template #title>Регистрация</template>
 
     <template #default>
-      <LoginForm is-register/>
+      <LoginForm is-register />
     </template>
 
     <template #actions>
@@ -11,17 +11,15 @@
         density="compact"
         variant="text"
         color="primary"
-        class="text-primary text-sm rounded-none mt-2"
+        class="text-primary text-sm rounded-lg mt-4"
         @click="() => $router.push('/signin')"
         size="large"
       >
         Уже есть аккаунт? Войдите
       </v-btn>
     </template>
-  </LoginLayout>
+  </AuthLayout>
 </template>
 <script setup lang="ts">
-import LoginLayout from '@/layouts/LoginLayout.vue';
-import LoginForm from '@/shared/LoginForm.vue'
-
+import { AuthLayout, LoginForm } from '@/modules/auth';
 </script>
