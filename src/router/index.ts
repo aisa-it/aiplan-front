@@ -12,6 +12,7 @@ const router = createRouter({
           path: '',
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({ slug: route.query.workspace }),
         },
       ],
     },
