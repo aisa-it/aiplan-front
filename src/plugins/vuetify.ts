@@ -1,14 +1,11 @@
+import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 import { createVuetify } from 'vuetify';
-// import * as components from 'vuetify/components';
-// import * as directives from 'vuetify/directives';
 import { md3 } from 'vuetify/blueprints';
 
 const vuetify = createVuetify({
   blueprint: md3,
-  // components,
-  // directives,
   theme: {
     defaultTheme: 'light',
     themes: {
@@ -43,9 +40,35 @@ const vuetify = createVuetify({
     },
   },
   defaults: {
-    VBtn: { variant: 'flat' },
     VCard: { elevation: 1 },
-    VTextField: { variant: 'underlined', color: 'primary' },
+    VBtn: {
+      variant: 'flat',
+      rounded: 'lg',
+    },
+    VTextField: {
+      color: 'primary',
+      variant: 'underlined',
+    },
+    VSelect: { color: 'primary', variant: 'underlined' },
+    VTextarea: {
+      color: 'primary',
+      variant: 'underlined',
+    },
+    VAutocomplete: {
+      color: 'primary',
+      variant: 'underlined',
+    },
+    VDialog: {
+      VCardText: {
+        class: 'px-4 py-2',
+      },
+      VCardTitle: {
+        class: 'px-4 pt-4 pb-2',
+      },
+      VCardActions: {
+        class: 'px-4 pb-4 pt-2',
+      },
+    },
   },
 });
 

@@ -4,3 +4,20 @@ body,
 .v-application {
   color: rgb(var(--v-theme-text));
 }
+/*
+  Глобальный фикс бага автозаполнения Chrome для Vuetify 3.
+  Проблема: Chrome визуально вставляет сохраненные данные, не обновляя значение JS-переменной (из соображений безопасности).
+  В результате Vuetify думает, что поле пустое, и лейбл остается внизу, налезая на текст автозаполнения.
+  Решение: Используем CSS :has() для отлова состояния :-webkit-autofill.
+  Скрываем неактивный основной лейбл и принудительно показываем верхний (floating), чтобы он сразу оказался наверху.
+*/
+.v-field:not(.v-field--active):has(input:-webkit-autofill) {
+  .v-field-label:not(.v-field-label--floating) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  .v-field-label--floating {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

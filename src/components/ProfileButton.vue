@@ -7,8 +7,16 @@
         <v-list-item title="Профиль" @click="$router.push('/profile')" />
         <v-list-item title="Админ. панель" />
         <v-divider />
-        <v-list-item title="Выйти" base-color="error" />
-        <v-list-item title="Выйти из всех сессий" base-color="error" />
+        <v-list-item
+          title="Выйти"
+          base-color="error"
+          @click="$emit('signOut')"
+        />
+        <v-list-item
+          title="Выйти из всех сессий"
+          base-color="error"
+          @click="$emit('signOutEverywhere')"
+        />
       </v-list>
     </v-menu>
   </v-btn>
@@ -77,4 +85,9 @@ const user = ref<DtoUser>({
   last_workspace_slug: 'new',
   notification_count: 364,
 });
+
+defineEmits<{
+  (e: 'signOut'): void;
+  (e: 'signOutEverywhere'): void;
+}>();
 </script>

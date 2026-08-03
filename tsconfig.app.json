@@ -5,7 +5,8 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
     "paths": {
-      "@/*": ["${configDir}/src/*"]
+      "@/*": ["./src/*"],
+      "src/*": ["./src/*"]
     },
 
     /* Linting */

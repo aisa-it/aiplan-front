@@ -9,18 +9,26 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      vue(),
-      tailwindcss(),
+      vue({
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag: string) => tag.startsWith('altcha-'),
+          },
+        },
+      }),
       vuetify({
         autoImport: true,
       }),
+      tailwindcss(),
     ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        src: fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
     server: {
+      host: true,
       proxy: {
         '/api': {
           target: env.VITE_API_URL,

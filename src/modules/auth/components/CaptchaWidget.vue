@@ -1,9 +1,8 @@
 <template>
   <altcha-widget
-    :challengeurl="`/api/captcha/`"
-    hidefooter
-    hidelogo
-    :strings="JSON.stringify(ALTCHA_RUS)"
+    challenge="/api/captcha/"
+    configuration='{"hideFooter":true,"hideLogo":true}'
+    language="ru"
     style="--altcha-width: 300px"
     auto="onload"
     workers="12"
@@ -17,13 +16,15 @@
 </template>
 <script setup lang="ts">
 import 'altcha';
-import { ALTCHA_RUS } from '@/constants/constants';
+import 'altcha/i18n/ru';
 
 defineEmits<{ verified: [payload: any] }>();
 </script>
 
 <style scoped lang="scss">
-:deep(.altcha) {
-  border: none;
+altcha-widget {
+  --altcha-border-width: 0;
+  --altcha-color-primary: rgb(var(--v-theme-primary));
+  --altcha-color-success: rgb(var(--v-theme-primary));
 }
 </style>
