@@ -44,7 +44,7 @@ const handleSave = async () => {
   props.user.status = payload.status;
   props.user.status_emoji = payload.status_emoji;
   props.user.status_end_date = payload.status_end_date;
-  // await userStore.updateCurrentUser(payload);
+  // await userStore.updateCurrentUser(payload); //TODO: добавить обновление статуса юзера, когда появится user-store
 
   menu.value = false;
 };

@@ -7,7 +7,7 @@ export function useAppTheme() {
   const isDark = computed(() => theme.global.name.value === 'dark');
 
   function toggleTheme() {
-    theme.global.name.value = isDark.value ? 'light' : 'dark';
+    theme.change(isDark.value ? 'light' : 'dark');
 
     document.documentElement.classList.toggle('dark', isDark.value);
   }
