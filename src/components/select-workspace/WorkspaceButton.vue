@@ -123,7 +123,7 @@ const currentWorkspace = computed(
 watch(
   workspaceSlug,
   (slug) => {
-    if (slug) workspacesStore.fetchWorkspace(slug)
+    if (slug) workspacesStore.getWorkspace(slug)
   },
   { immediate: true },
 )

@@ -25,7 +25,7 @@ const router = createRouter({
 
         try {
           await userStore.getUserInfo()
-          await workspacesStore.fetchWorkspaces()
+          await workspacesStore.getUserWorkspaces()
         } catch {
           return '/signin'
         }

@@ -14,7 +14,7 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
   const workspace = ref<DtoWorkspace | null>(null)
   const isLoading = ref(false)
 
-  const fetchWorkspaces = async () => {
+  const getUserWorkspaces = async () => {
     isLoading.value = true
     try {
       const { data } = await workspaceApi.getUserWorkspaceList()
@@ -24,7 +24,7 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
     }
   }
 
-  const fetchWorkspace = async (slug: string) => {
+  const getWorkspace = async (slug: string) => {
     if (!slug) return
     const { data } = await workspaceApi.getWorkspace(slug)
     workspace.value = data
@@ -50,8 +50,8 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
     workspaces,
     workspace,
     isLoading,
-    fetchWorkspaces,
-    fetchWorkspace,
+    getUserWorkspaces,
+    getWorkspace,
     toggleFavorite,
   }
 })
