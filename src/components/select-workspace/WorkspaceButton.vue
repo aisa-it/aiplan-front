@@ -14,11 +14,9 @@
         </v-list-item>
 
         <v-list-item v-if="isLoading">
-          <v-list-item-title class="text-[14px] text-text">Загрузка...</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item v-else-if="!workspaces.length">
-          <v-list-item-title class="text-[14px] text-text">Нет пространств</v-list-item-title>
+          <div class="flex w-full justify-center py-2">
+            <DefaultLoader :size="32" :width="4" />
+          </div>
         </v-list-item>
 
         <v-list-item
@@ -41,47 +39,53 @@
           </v-list-item-title>
 
           <template #append>
-            <div class="ml-2 flex items-center" @click.stop>
-              <v-btn icon variant="text" size="x-small" :ripple="false" @click.stop>
-                <StarIcon
-                  :width="16"
-                  :height="16"
-                  :filled="!!item.is_favorite"
-                  :color="item.is_favorite ? '#F2994A' : '#474a52'"
-                />
-              </v-btn>
+            <v-btn
+              icon
+              variant="text"
+              rounded="sm"
+              :ripple="false"
+              class="workspace-action-btn"
+              @mousedown.stop
+              @click.stop="toggleFavorite(item.id)"
+            >
+              <StarIcon
+                :width="16"
+                :height="16"
+                :filled="!!item.is_favorite"
+                :color="item.is_favorite ? '#F2994A' : '#474a52'"
+              />
+            </v-btn>
 
-              <v-menu location="end" :offset="4" open-on-click :close-on-content-click="false">
-                <template #activator="{ props: menuProps }">
-                  <v-btn
-                    v-bind="menuProps"
-                    icon
-                    variant="text"
-                    size="x-small"
-                    :ripple="false"
-                    class="h-5 w-5"
-                    @click.stop
-                  >
-                    <v-icon size="18" color="#474a52">mdi-dots-horizontal</v-icon>
-                  </v-btn>
-                </template>
+            <v-menu location="end" :offset="4" open-on-click :close-on-content-click="false">
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  icon
+                  variant="text"
+                  rounded="sm"
+                  :ripple="false"
+                  class="workspace-action-btn"
+                  @mousedown.stop
+                >
+                  <v-icon size="16" color="#474a52">mdi-dots-horizontal</v-icon>
+                </v-btn>
+              </template>
 
-                <v-list min-width="180" rounded="lg" density="compact">
-                  <v-list-item>
-                    <div class="flex items-center gap-2 text-text">
-                      <BellIcon :width="16" :height="16" color="#474a52" />
-                      <span class="text-xs font-normal">Уведомления</span>
-                    </div>
-                  </v-list-item>
-                  <v-list-item>
-                    <div class="flex items-center gap-2 text-text">
-                      <SettingsIcon :width="16" :height="16" color="#474a52" />
-                      <span class="text-xs font-normal">Настройки</span>
-                    </div>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </div>
+              <v-list min-width="180" rounded="lg" density="compact">
+                <v-list-item>
+                  <div class="flex items-center gap-2 text-text">
+                    <BellIcon :width="16" :height="16" color="#474a52" />
+                    <span class="text-xs font-normal">Уведомления</span>
+                  </div>
+                </v-list-item>
+                <v-list-item>
+                  <div class="flex items-center gap-2 text-text">
+                    <SettingsIcon :width="16" :height="16" color="#474a52" />
+                    <span class="text-xs font-normal">Настройки</span>
+                  </div>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </template>
         </v-list-item>
       </v-list>
@@ -97,6 +101,7 @@ import AddIcon from '@/components/icons/AddIcon.vue'
 import BellIcon from '@/components/icons/BellIcon.vue'
 import SettingsIcon from '@/components/icons/SettingsIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
+import DefaultLoader from '@/components/loaders/DefaultLoader.vue'
 import WorkspaceAvatar from './components/WorkspaceAvatar.vue'
 import { useWorkspacesStore } from '@/stores/workspaces-store'
 
@@ -104,6 +109,7 @@ const route = useRoute()
 const router = useRouter()
 const workspacesStore = useWorkspacesStore()
 const { workspaces, workspace, isLoading } = storeToRefs(workspacesStore)
+const { toggleFavorite } = workspacesStore
 
 const workspaceSlug = computed(() => (route.params.workspace as string) || '')
 

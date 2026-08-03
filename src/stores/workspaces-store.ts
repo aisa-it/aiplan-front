@@ -30,11 +30,28 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
     workspace.value = data
   }
 
+  const toggleFavorite = async (workspaceId?: string) => {
+    if (!workspaceId) return
+
+    const item = workspaces.value.find((w) => w.id === workspaceId)
+    if (!item) return
+
+    if (item.is_favorite) {
+      await workspaceApi.removeWorkspaceFromFavorites(workspaceId)
+    } else {
+      await workspaceApi.addWorkspaceToFavorites({ workspace: workspaceId })
+    }
+
+    const { data } = await workspaceApi.getUserWorkspaceList()
+    workspaces.value = data ?? []
+  }
+
   return {
     workspaces,
     workspace,
     isLoading,
     fetchWorkspaces,
     fetchWorkspace,
+    toggleFavorite,
   }
 })

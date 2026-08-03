@@ -25,6 +25,10 @@
   @apply h-8 w-8 min-w-8 p-0;
 }
 
+@utility workspace-action-btn {
+  @apply h-5 w-5 min-h-5 min-w-5 rounded-[4px] p-0;
+}
+
 @utility abbreviated-text {
   @apply w-full overflow-hidden text-ellipsis whitespace-nowrap;
 }

@@ -1,13 +1,15 @@
 <template>
   <router-view v-if="isReady" />
   <div v-else class="flex h-screen items-center justify-center text-text">
-    {{ error ?? 'Загрузка' }}
+    <span v-if="error">{{ error }}</span>
+    <DefaultLoader v-else />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import DefaultLoader from '@/components/loaders/DefaultLoader.vue'
 import { useUserStore } from '@/stores/user-store'
 import { useWorkspacesStore } from '@/stores/workspaces-store'
 
