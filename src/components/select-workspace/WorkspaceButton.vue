@@ -3,7 +3,7 @@
     <WorkspaceAvatar :name="currentWorkspace?.name" />
 
     <v-menu activator="parent" location="bottom start" :offset="4" :close-on-content-click="false">
-      <v-list min-width="280" rounded="lg" class="py-1">
+      <v-list min-width="280" rounded="lg" class="max-h-[50vh] overflow-y-auto py-1">
         <v-list-item>
           <template #title>
             <span class="text-sm text-text">Пространства</span>
