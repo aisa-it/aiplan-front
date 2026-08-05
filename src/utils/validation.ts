@@ -4,6 +4,12 @@ export function isEmail(val: string) {
   return (val && val.length > 0 && (langEn || langRu)) || 'Некорректный email';
 }
 
+export function isValidURL(val: string) {
+  const regURL =
+    /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/((localhost|(\d{1,3}\.){3}\d{1,3}|\[[a-fA-F0-9:]+\]|[-a-zA-Z0-9@:%._\+~#=]{1,256}(\.[a-zA-Z0-9]{1,63})?|xn--[a-zA-Z0-9]{1,59}))(:\d+)?(\/[\wа-яА-ЯёЁ0-9()@:%_\+.~#?&\/=\-\u0400-\u04FF]*)?$/u;
+  return regURL.test(val);
+}
+
 export function allowedNotFoundServices(url: string): boolean {
   const allowedPaths = [
     '/api/auth/workspaces/:workspace/doc/:docId/comments/:commentId',
