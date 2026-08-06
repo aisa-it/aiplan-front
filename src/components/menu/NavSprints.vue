@@ -219,13 +219,6 @@ watch(
     }
   },
 );
-
-watch(() => currentWorkspaceSlug.value,
-  () => {
-    sprintStore.clearSprintsList();
-  },
-  { immediate: true }
-)
 </script>
 
 <style lang="scss" scoped>
