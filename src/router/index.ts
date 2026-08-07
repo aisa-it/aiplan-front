@@ -1,12 +1,25 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/user-store'
-import { useWorkspacesStore } from '@/stores/workspaces-store'
+import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '@/stores/user-store';
+import { useWorkspacesStore } from '@/stores/workspaces-store';
 
-const AUTH_ROUTES = ['/signin', '/signup']
+const AUTH_ROUTES = ['/signin', '/signup'];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'main',
+      component: () => import('@/layouts/MainLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'general-workspace',
+          component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({ slug: route.query.workspace }),
+        },
+      ],
+    },
     {
       path: '/signin',
       component: () => import('@/pages/SignInPage.vue'),
@@ -20,32 +33,32 @@ const router = createRouter({
       name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
       async beforeEnter(to) {
-        const userStore = useUserStore()
-        const workspacesStore = useWorkspacesStore()
+        const userStore = useUserStore();
+        const workspacesStore = useWorkspacesStore();
 
         try {
-          await userStore.getUserInfo()
-          await workspacesStore.getUserWorkspaces()
+          await userStore.getUserInfo();
+          await workspacesStore.getUserWorkspaces();
         } catch {
-          return '/signin'
+          return '/signin';
         }
 
         if (!to.params.workspace) {
           const slug =
             userStore.user?.last_workspace_slug ||
-            workspacesStore.workspaces[0]?.slug
+            workspacesStore.workspaces[0]?.slug;
 
-          if (slug) return `/${slug}`
+          if (slug) return `/${slug}`;
         }
       },
     },
   ],
-})
+});
 
 router.beforeEach((to) => {
-  if (AUTH_ROUTES.includes(to.path) || to.path.includes('/f/')) return
+  if (AUTH_ROUTES.includes(to.path) || to.path.includes('/f/')) return;
 
-  localStorage.setItem('next_url', to.fullPath)
-})
+  localStorage.setItem('next_url', to.fullPath);
+});
 
-export default router
+export default router;
