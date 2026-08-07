@@ -18,6 +18,10 @@ const router = createRouter({
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
           props: (route) => ({ slug: route.query.workspace }),
         },
+        {
+          path: '/profile',
+          component: () => import('@/pages/Profile.vue'),
+        },
       ],
     },
     {

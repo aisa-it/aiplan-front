@@ -8,13 +8,18 @@ import type {
   AiplanRequestAddFavorite,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
+import type {
+  AiplanUserUpdateRequest,
+  DtoUser,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const usersApi = new (withInterceptors(Users))();
 const workspaceApi = new (withInterceptors(Workspace))();
 
 export const useUserStore = defineStore('user-store', () => {
   const router = useRouter();
-  const user = ref<any>(null);
+
+  const user = ref<DtoUser | null>(null);
   const userWorkspaces = ref<DtoWorkspaceWithCount[]>([]);
   const userWorkspacesMemberships = ref<Record<string, any>>({});
 
@@ -69,7 +74,7 @@ export const useUserStore = defineStore('user-store', () => {
     });
   }
 
-  async function updateCurrentUser(data: any) {
+  async function updateCurrentUser(data: AiplanUserUpdateRequest) {
     const res = await usersApi.updateCurrentUser(data);
     user.value = res.data;
     return user.value;

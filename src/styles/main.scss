@@ -1,5 +1,9 @@
 @layer vuetify-overrides;
 
+body,
+.v-application {
+  color: rgb(var(--v-theme-text));
+}
 /*
   Глобальный фикс бага автозаполнения Chrome для Vuetify 3.
   Проблема: Chrome визуально вставляет сохраненные данные, не обновляя значение JS-переменной (из соображений безопасности).

@@ -1,31 +1,29 @@
 <template>
-  <v-btn icon variant="text" rounded="lg" :ripple="false" class="profile-btn">
-    <UserAvatar :user="user" :rounded="false" />
+  <div class="p-4">
+    <h3 class="mt-2 mb-0 text-5xl">Настройки профиля</h3>
+    <div class="relative">
+      <div class="flex items-center justify-between my-4 gap-4">
+        <ProfilePreview :user="user" />
+      </div>
 
-    <v-menu activator="parent" location="bottom end" :offset="4">
-      <v-list min-width="200" rounded="lg">
-        <v-list-item title="Профиль" @click="$router.push('/profile')" />
-        <v-list-item title="Админ. панель" />
-        <v-divider />
-        <v-list-item
-          title="Выйти"
-          base-color="error"
-          @click="$emit('signOut')"
-        />
-        <v-list-item
-          title="Выйти из всех сессий"
-          base-color="error"
-          @click="$emit('signOutEverywhere')"
-        />
-      </v-list>
-    </v-menu>
-  </v-btn>
+      <v-tabs v-model="profileSettingsTab" color="primary" class="">
+        <v-tab v-for="tab in listTabs" :value="tab.name">{{ tab.label }}</v-tab>
+      </v-tabs>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import UserAvatar from './user-avatar/UserAvatar.vue';
+
+import ProfilePreview from '../components/ProfilePreview.vue';
+
+import { useProfileTabs } from '../composables/useProfileTabs.ts';
+
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const { listTabs, profileSettingsTab, setTab, isLoadingComponent } =
+  useProfileTabs();
 
 // TODO: Достаем из user-store, когда появится
 const user = ref<DtoUser>({
@@ -85,9 +83,4 @@ const user = ref<DtoUser>({
   last_workspace_slug: 'new',
   notification_count: 364,
 });
-
-defineEmits<{
-  (e: 'signOut'): void;
-  (e: 'signOutEverywhere'): void;
-}>();
 </script>
