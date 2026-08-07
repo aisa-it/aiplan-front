@@ -31,12 +31,16 @@
   @apply h-8 w-8 min-w-8 p-0;
 }
 
+@utility workspace-action-btn {
+  @apply h-5 w-5 min-h-5 min-w-5 rounded-[4px] p-0;
+}
+
 @utility abbreviated-text {
   @apply w-full overflow-hidden text-ellipsis whitespace-nowrap;
 }
 
 @utility app-breadcrumbs {
-  @apply ml-4 flex min-h-0 items-center overflow-x-auto py-0 text-[14px] leading-none font-extrabold text-icon;
+  @apply ml-1 flex min-h-0 items-center overflow-x-auto py-0 text-[14px] leading-none font-extrabold text-icon;
 
   .v-breadcrumbs-item,
   .v-breadcrumbs-item--disabled,
