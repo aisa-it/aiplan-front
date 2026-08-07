@@ -2,14 +2,10 @@ import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 import { createVuetify } from 'vuetify';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
 import { md3 } from 'vuetify/blueprints';
 
 const vuetify = createVuetify({
   blueprint: md3,
-  components,
-  directives,
   theme: {
     defaultTheme: 'light',
     themes: {
@@ -22,6 +18,7 @@ const vuetify = createVuetify({
           info: '#2196F3',
           success: '#4CAF50',
           warning: '#FFC107',
+          background: '#fff',
           border: '#dde2ea',
           text: '#474a52',
           icon: '#474a52',
@@ -41,6 +38,8 @@ const vuetify = createVuetify({
           info: '#64B5F6',
           success: '#81C784',
           warning: '#FFD54F',
+          background: '#1f2228',
+          text: '#bac4d5',
         },
       },
     },
