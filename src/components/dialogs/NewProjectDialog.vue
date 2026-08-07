@@ -46,7 +46,7 @@
 
           <v-select
             v-model="projectValues.emoji_and_icon"
-            :items="emojiOptions"
+            :items="PROJECT_EMOJI_OPTIONS"
             item-title="label"
             item-value="value"
             return-object
@@ -85,24 +85,28 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import ConfirmCloseProjectCreateDialog from './ConfirmCloseProjectCreateDialog.vue';
+// @ts-ignore
+import CyrillicToTranslit from 'cyrillic-to-translit-js';
+import { useWorkspaceStore } from '@/stores/workspace-store';
+import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
+import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
+import {
+  NETWORK_CHOICES,
+  PROJECT_IDENTIFIER_LENGTH,
+} from '@/constants/constants';
+import { PROJECT_EMOJI_OPTIONS, PROJECT_EMOJIS } from '@/constants/emojis';
+import { getRandomEmoji } from '@/utils/helpers';
+
+const projectsApi = new (withInterceptors(Projects))();
+const cyrillicToTranslit = CyrillicToTranslit();
+
+const route = useRoute();
+const workspaceStore = useWorkspaceStore();
 
 const isOpen = defineModel<boolean>();
 
-// --- ЗАГЛУШКИ КОНСТАНТ (т.к. src/constants пока не перенесены) ---
-const NETWORK_CHOICES = [
-  { value: true, label: 'Публичный' },
-  { value: false, label: 'Приватный' },
-];
-
-const emojiOptions = [
-  { value: '💼', label: '💼' },
-  { value: '🚀', label: '🚀' },
-  { value: '📝', label: '📝' },
-  { value: '⭐', label: '⭐' },
-];
-
-// Состояние валидации
 const isProjectIdentifier = ref(false);
 const errorMessageProjectIdentifier = ref('');
 const isValidName = ref(false);
@@ -114,7 +118,7 @@ const projectValues = ref({
   identifier: '',
   description: '',
   public: NETWORK_CHOICES[0],
-  emoji_and_icon: emojiOptions[0],
+  emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
   cover_image: '',
 });
 
@@ -124,7 +128,7 @@ const clear = () => {
     identifier: '',
     description: '',
     public: NETWORK_CHOICES[0],
-    emoji_and_icon: emojiOptions[0],
+    emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
     cover_image: '',
   };
   isProjectIdentifier.value = false;
@@ -153,28 +157,44 @@ const validateName = (val: string) => {
 };
 
 const validateIdentifier = (val: string) => {
-  isValidIdentifier.value = val.trim().length >= 3;
+  isValidIdentifier.value = val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN;
   return (
-    val.trim().length >= 3 ||
-    'Идентификатор должен содержать 3 и более символов'
+    val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
+    `Идентификатор должен содержать ${PROJECT_IDENTIFIER_LENGTH.MIN} и более символов`
   );
 };
 
 const createIdentifier = () => {
   if (projectValues.value.name) {
-    // Временно упрощенная транслитерация (без CyrillicToTranslit)
-    projectValues.value.identifier = projectValues.value.name
-      .replace(/ /g, '')
-      .substring(0, 3)
+    projectValues.value.identifier = cyrillicToTranslit
+      .transform(projectValues.value.name.replace(/ /g, '').substring(0, 3))
       .toUpperCase();
   }
 };
 
-const createNewProject = () => {
-  // Заглушка вместо вызова projectStore.createProject
-  console.log('Создание проекта (заглушка):', projectValues.value);
-  isOpen.value = false;
-  clear();
+const createNewProject = async () => {
+  const workspaceSlug = route.params.workspace as string;
+  if (!workspaceSlug) return;
+
+  const payload = {
+    cover_image: '/images/vercel.jpeg',
+    description: projectValues.value.description || '',
+    emoji:
+      projectValues.value.emoji_and_icon?.value ||
+      getRandomEmoji(PROJECT_EMOJIS),
+    identifier: projectValues.value.identifier,
+    name: projectValues.value.name,
+    public: projectValues.value.public.value,
+  };
+
+  try {
+    await projectsApi.createProject(workspaceSlug, payload);
+    await workspaceStore.getWorkspaceProjects(workspaceSlug);
+    isOpen.value = false;
+    clear();
+  } catch (error) {
+    console.error('Ошибка при создании проекта:', error);
+  }
 };
 
 const onDialogUpdate = (val: boolean) => {

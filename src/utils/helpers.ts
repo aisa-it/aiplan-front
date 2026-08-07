@@ -17,3 +17,8 @@ export function getFirstSymbol(value = '', isUpperCase = true) {
 
   return value.trim()[0].toUpperCase();
 }
+
+export function getRandomEmoji(emojis: Array<string>) {
+  const randomEmojiIndex = Math.floor(Math.random() * emojis.length);
+  return emojis[randomEmojiIndex];
+}

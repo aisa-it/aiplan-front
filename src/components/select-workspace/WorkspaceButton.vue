@@ -20,16 +20,24 @@
             <span class="text-sm text-text">Пространства</span>
           </template>
           <template #append>
-            <AddIcon :width="24" :height="24" class="text-icon" />
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              :ripple="false"
+              class="h-6 w-6"
+              @click.stop="isWorkspaceCreateOpen = true"
+            >
+              <AddIcon :width="24" :height="24" class="text-icon" />
+            </v-btn>
           </template>
         </v-list-item>
 
         <v-list-item
-          v-for="workspace in userWorkspaces"
+          v-for="workspace in workspaces"
           :key="workspace.id"
-          :active="workspace.slug === route.query.workspace"
+          :active="workspace.slug === route.params.workspace"
           color="primary"
-          rounded="lg"
           @click="selectWorkspace(workspace.slug)"
         >
           <template #prepend>
@@ -39,7 +47,7 @@
           <v-list-item-title
             class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
             :class="
-              workspace.slug === route.query.workspace
+              workspace.slug === route.params.workspace
                 ? 'text-primary'
                 : 'text-text'
             "
@@ -108,6 +116,11 @@
       </v-list>
     </v-menu>
   </v-btn>
+
+  <NewWorkspaceDialog
+    v-model="isWorkspaceCreateOpen"
+    @ws-name="selectWorkspace"
+  />
 </template>
 
 <script setup lang="ts">
@@ -117,39 +130,33 @@ import SettingsIcon from '@/components/icons/SettingsIcon.vue';
 import StarIcon from '@/components/icons/StarIcon.vue';
 import WorkspaceAvatar from './components/WorkspaceAvatar.vue';
 import type { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useUserStore } from '@/stores/user-store';
+import { useWorkspacesStore } from '@/stores/workspaces-store';
 import { useWorkspaceStore } from '@/stores/workspace-store';
+import NewWorkspaceDialog from '@/components/dialogs/NewWorkspaceDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-const userStore = useUserStore();
-const { userWorkspaces } = storeToRefs(userStore);
+const workspacesStore = useWorkspacesStore();
+const { workspaces } = storeToRefs(workspacesStore);
 
 const workspaceStore = useWorkspaceStore();
 const { workspaceName } = storeToRefs(workspaceStore);
 
-const currentWorkspaceName = computed(() => workspaceName.value || '');
+const isWorkspaceCreateOpen = ref(false);
 
-onMounted(() => {
-  userStore.getUserWorkspaces();
-});
+const currentWorkspaceName = computed(() => workspaceName.value || '');
 
 const selectWorkspace = (slug?: string) => {
   if (slug) {
-    router.push({ query: { ...route.query, workspace: slug } });
+    router.push({ name: 'general-workspace', params: { workspace: slug } });
   }
 };
 
 const toggleFavorite = (workspace: DtoWorkspaceWithCount) => {
-  const isFav = workspace.is_favorite;
-  if (isFav) {
-    userStore.deleteFavoriteWorkspace(workspace.id);
-  } else {
-    userStore.addFavoriteWorkspace({ workspace: workspace.id });
-  }
+  workspacesStore.toggleFavorite(workspace.id);
 };
 </script>

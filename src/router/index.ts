@@ -3,31 +3,9 @@ import { useUserStore } from '@/stores/user-store';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 
 const AUTH_ROUTES = ['/signin', '/signup'];
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/',
-      name: 'main',
-      component: () => import('@/layouts/MainLayout.vue'),
-      children: [
-        {
-          path: '',
-          name: 'general-workspace',
-          component: () => import('@/pages/GeneralWorkspacePage.vue'),
-          props: (route) => ({ slug: route.query.workspace }),
-        },
-      ],
-    },
-    {
-      path: '/signin',
-      component: () => import('@/pages/SignInPage.vue'),
-    },
-    {
-      path: '/signup',
-      component: () => import('@/pages/SignUpPage.vue'),
-    },
     {
       path: '/:workspace?',
       name: 'main',
@@ -44,13 +22,34 @@ const router = createRouter({
         }
 
         if (!to.params.workspace) {
+          const workspaces = workspacesStore.workspaces;
           const slug =
-            userStore.user?.last_workspace_slug ||
-            workspacesStore.workspaces[0]?.slug;
+            userStore.user?.last_workspace_slug || workspaces[0]?.slug;
 
           if (slug) return `/${slug}`;
         }
       },
+      children: [
+        {
+          path: '',
+          name: 'general-workspace',
+          component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({ slug: route.params.workspace }),
+        },
+      ],
+    },
+    {
+      path: '/signin',
+      component: () => import('@/pages/SignInPage.vue'),
+    },
+    {
+      path: '/signup',
+      component: () => import('@/pages/SignUpPage.vue'),
+    },
+    {
+      path: '/not-found',
+      name: 'not-found',
+      component: () => import('@/pages/NotFoundPage.vue'),
     },
   ],
 });
