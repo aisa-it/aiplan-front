@@ -1,0 +1,44 @@
+/* Temporary editor theme tokens (from Quasar variables on origin/dev).
+   TODO: move into global Vuetify theme tokens when design system is ready. */
+
+$primary: var(--primary, #3f75ff);
+$primary-light: var(--primary-light, #ccdbff);
+$bg-color: var(--bg-color, #fff);
+$text-color: var(--text-color, #474a52);
+$sub-text-color: var(--sub-text-color, #8b8b98);
+$border-color: var(--border-color, #dde2ea);
+$dark-border-color: var(--dark-border-color, #dde2ea);
+$darkest-border-color: var(--darkest-border-color, #dde2ea);
+$active-tab-color: var(--active-tab-color, #dde2ea);
+
+$tiptap-border-color: var(--tiptap-border-color, #ccc);
+$tiptap-th-bg-color: var(--tiptap-th-bg-color, #e4ebf5);
+$tiptap-codeblock-bg-color: var(--tiptap-codeblock-bg-color, #efeff6);
+
+$positive: #21ba45;
+$base: #fff;
+$grey-4: #f0f0f0;
+$gray: #bac4d5;
+$dark-gray: #8b8b98;
+$night: #1f2228;
+$extra-light: #bac4d5;
+
+$tiptap-color-picker-light-bg: (
+  'red': #fce4ec,
+  'blue': #e1f5fe,
+  'cyan': #dcf7f9,
+  'green': #e8f5e9,
+  'orange': #ffe4cc,
+  'yellow': #fff1e1,
+  'pink': #fedcf2,
+);
+
+$tiptap-color-picker-dark-bg: (
+  'red': #47000b,
+  'blue': #052c48,
+  'cyan': #0c4246,
+  'green': #17351a,
+  'orange': #522c00,
+  'yellow': #524400,
+  'pink': #530436,
+);

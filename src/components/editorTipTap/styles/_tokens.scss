@@ -1,0 +1,16 @@
+/* CSS custom properties for the editor (imported once from main/editor.scss). */
+:root {
+  --primary: #3f75ff;
+  --primary-light: #ccdbff;
+  --bg-color: #fff;
+  --text-color: #474a52;
+  --sub-text-color: #8b8b98;
+  --border-color: #dde2ea;
+  --dark-border-color: #dde2ea;
+  --darkest-border-color: #dde2ea;
+  --active-tab-color: #dde2ea;
+  --tiptap-th-bg-color: #e4ebf5;
+  --tiptap-border-color: #ccc;
+  --tiptap-codeblock-bg-color: #efeff6;
+  --border-color-picker: #dde2ea;
+}

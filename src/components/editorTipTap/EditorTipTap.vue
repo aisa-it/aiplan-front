@@ -238,7 +238,13 @@ const emits = defineEmits<{
   updateEditorDOM: [any];
 }>();
 
-const { mdAndDown, mobile } = useDisplay();
+const { width } = useDisplay();
+
+const isMobileDevice =
+  typeof navigator !== 'undefined' &&
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
+    navigator.userAgent,
+  );
 const theme = useTheme();
 const injectedBus = inject<EditorEventBus | undefined>('bus', undefined);
 const bus = injectedBus ?? createEditorEventBus();
@@ -266,7 +272,7 @@ const isTocPopupOpen = ref<boolean>(false);
 // TODO: useMenuHandler(tocPopupRef);
 const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
 
-const isMobile = computed(() => mobile.value && mdAndDown.value);
+const isMobile = computed(() => isMobileDevice && width.value < 1024);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
 provide('isEditorReadOnly', isReadOnly);
 const editorExtensions = computed(() => getEditorExtensions(props));
