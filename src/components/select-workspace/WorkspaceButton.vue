@@ -1,8 +1,19 @@
 <template>
-  <v-btn icon variant="text" rounded="lg" :ripple="false" class="workspace-btn ml-3">
+  <v-btn
+    icon
+    variant="text"
+    rounded="lg"
+    :ripple="false"
+    class="workspace-btn ml-3"
+  >
     <WorkspaceAvatar :name="currentWorkspaceName" />
 
-    <v-menu activator="parent" location="bottom start" :offset="4" :close-on-content-click="false">
+    <v-menu
+      activator="parent"
+      location="bottom start"
+      :offset="4"
+      :close-on-content-click="false"
+    >
       <v-list min-width="280" rounded="lg" class="py-1">
         <v-list-item>
           <template #title>
@@ -14,11 +25,12 @@
         </v-list-item>
 
         <v-list-item
-          v-for="workspace in workspaces"
+          v-for="workspace in userWorkspaces"
           :key="workspace.id"
-          :active="workspace.active"
+          :active="workspace.slug === route.query.workspace"
           color="primary"
           rounded="lg"
+          @click="selectWorkspace(workspace.slug)"
         >
           <template #prepend>
             <WorkspaceAvatar :name="workspace.name" />
@@ -26,7 +38,11 @@
 
           <v-list-item-title
             class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
-            :class="workspace.active ? 'text-primary' : 'text-text'"
+            :class="
+              workspace.slug === route.query.workspace
+                ? 'text-primary'
+                : 'text-text'
+            "
           >
             {{ workspace.name }}
           </v-list-item-title>
@@ -43,12 +59,18 @@
                 <StarIcon
                   :width="16"
                   :height="16"
-                  :filled="workspace.favorite"
-                  :color="workspace.favorite ? '#F2994A' : '#474a52'"
+                  :filled="workspace.is_favorite"
+                  :color="workspace.is_favorite ? '#F2994A' : '#474a52'"
+                  @click.stop="toggleFavorite(workspace)"
                 />
               </v-btn>
 
-              <v-menu location="end" :offset="4" open-on-click :close-on-content-click="false">
+              <v-menu
+                location="end"
+                :offset="4"
+                open-on-click
+                :close-on-content-click="false"
+              >
                 <template #activator="{ props: menuProps }">
                   <v-btn
                     v-bind="menuProps"
@@ -59,7 +81,9 @@
                     class="h-5 w-5"
                     @click.stop
                   >
-                    <v-icon size="18" color="#474a52">mdi-dots-horizontal</v-icon>
+                    <v-icon size="18" color="#474a52"
+                      >mdi-dots-horizontal</v-icon
+                    >
                   </v-btn>
                 </template>
 
@@ -87,21 +111,45 @@
 </template>
 
 <script setup lang="ts">
-import AddIcon from '@/components/icons/AddIcon.vue'
-import BellIcon from '@/components/icons/BellIcon.vue'
-import SettingsIcon from '@/components/icons/SettingsIcon.vue'
-import StarIcon from '@/components/icons/StarIcon.vue'
-import WorkspaceAvatar from './components/WorkspaceAvatar.vue'
+import AddIcon from '@/components/icons/AddIcon.vue';
+import BellIcon from '@/components/icons/BellIcon.vue';
+import SettingsIcon from '@/components/icons/SettingsIcon.vue';
+import StarIcon from '@/components/icons/StarIcon.vue';
+import WorkspaceAvatar from './components/WorkspaceAvatar.vue';
+import type { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '@/stores/user-store';
+import { useWorkspaceStore } from '@/stores/workspace-store';
 
-// currentWorkspaceName и workspaces временные тестовые данные
-// TODO: удалить после подключения к API
+const route = useRoute();
+const router = useRouter();
 
-const currentWorkspaceName = 'testViktor1'
+const userStore = useUserStore();
+const { userWorkspaces } = storeToRefs(userStore);
 
-const workspaces = [
-  { id: '1', name: 'testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1testViktor1', active: true, favorite: true },
-  { id: '2', name: 'New ssss 11', active: false, favorite: false },
-  { id: '3', name: 'новое', active: false, favorite: false },
-  { id: '4', name: 'тест тест тест', active: false, favorite: false },
-]
+const workspaceStore = useWorkspaceStore();
+const { workspaceName } = storeToRefs(workspaceStore);
+
+const currentWorkspaceName = computed(() => workspaceName.value || '');
+
+onMounted(() => {
+  userStore.getUserWorkspaces();
+});
+
+const selectWorkspace = (slug?: string) => {
+  if (slug) {
+    router.push({ query: { ...route.query, workspace: slug } });
+  }
+};
+
+const toggleFavorite = (workspace: DtoWorkspaceWithCount) => {
+  const isFav = workspace.is_favorite;
+  if (isFav) {
+    userStore.deleteFavoriteWorkspace(workspace.id);
+  } else {
+    userStore.addFavoriteWorkspace({ workspace: workspace.id });
+  }
+};
 </script>
