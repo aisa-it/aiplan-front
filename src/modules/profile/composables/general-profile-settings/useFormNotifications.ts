@@ -5,7 +5,7 @@ import {
   NOTIFICATION_CHANNELS,
   hoursToNanoseconds,
   nanosecondsToHours,
-} from '../../profile.config';
+} from '../../configs/notifications-settings.config';
 
 import type {
   DtoUser,
@@ -81,9 +81,7 @@ export function useFormNotifications({
 
   const updateDeadlineNotification = () => {
     changeNotificationSettings({
-      deadline_notification: hoursToNanoseconds(
-        deadlineNotificationTime.value,
-      ),
+      deadline_notification: hoursToNanoseconds(deadlineNotificationTime.value),
     });
   };
 

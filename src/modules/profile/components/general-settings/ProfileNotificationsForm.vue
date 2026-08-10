@@ -50,7 +50,7 @@ import { toRef } from 'vue';
 import {
   DEADLINE_NOTIFICATION_OPTIONS,
   NOTIFICATION_CHANNELS,
-} from '../../profile.config';
+} from '../../configs/notifications-settings.config';
 import { useFormNotifications } from '../../composables/general-profile-settings/useFormNotifications';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';

@@ -17,6 +17,25 @@ const router = createRouter({
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
           props: (route) => ({ slug: route.query.workspace }),
+          async beforeEnter(to) {
+            const userStore = useUserStore();
+            const workspacesStore = useWorkspacesStore();
+
+            try {
+              await userStore.getUserInfo();
+              await workspacesStore.getUserWorkspaces();
+            } catch {
+              return '/signin';
+            }
+
+            if (!to.params.workspace) {
+              const slug =
+                userStore.user?.last_workspace_slug ||
+                workspacesStore.workspaces[0]?.slug;
+
+              if (slug) return `/${slug}`;
+            }
+          },
         },
         {
           path: '/profile',
@@ -31,30 +50,6 @@ const router = createRouter({
     {
       path: '/signup',
       component: () => import('@/pages/SignUpPage.vue'),
-    },
-    {
-      path: '/:workspace?',
-      name: 'main',
-      component: () => import('@/layouts/MainLayout.vue'),
-      async beforeEnter(to) {
-        const userStore = useUserStore();
-        const workspacesStore = useWorkspacesStore();
-
-        try {
-          await userStore.getUserInfo();
-          await workspacesStore.getUserWorkspaces();
-        } catch {
-          return '/signin';
-        }
-
-        if (!to.params.workspace) {
-          const slug =
-            userStore.user?.last_workspace_slug ||
-            workspacesStore.workspaces[0]?.slug;
-
-          if (slug) return `/${slug}`;
-        }
-      },
     },
   ],
 });

@@ -15,10 +15,7 @@ type UseFormUserdataOptions = {
   updateUser: (data: Partial<DtoUser>) => void;
 };
 
-export function useFormUserdata({
-  user,
-  updateUser,
-}: UseFormUserdataOptions) {
+export function useFormUserdata({ user, updateUser }: UseFormUserdataOptions) {
   const form = reactive({
     email: '',
     firstName: '',
@@ -58,10 +55,6 @@ export function useFormUserdata({
 
   const setFormRef = (value: unknown) => {
     formRef.value = value as FormRef | null;
-  };
-
-  const handleUpdateUserName = () => {
-    usernameError.value = '';
   };
 
   const updateCurrentUser = async () => {
@@ -128,7 +121,6 @@ export function useFormUserdata({
     emailRules,
     firstNameRules,
     form,
-    handleUpdateUserName,
     isUploaderOpen,
     lastNameRules,
     saving,

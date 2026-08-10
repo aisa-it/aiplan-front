@@ -1,7 +1,5 @@
 import type { TypesUserSettings } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-export const MAX_AVATAR_SIZE_MB = 20;
-
 export const NOTIFICATION_CHANNELS = [
   { title: 'Email', key: 'email_notification_mute' },
   { title: 'Telegram', key: 'telegram_notification_mute' },

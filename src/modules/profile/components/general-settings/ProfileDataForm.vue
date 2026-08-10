@@ -9,12 +9,7 @@
           <v-avatar v-if="avatarPreviewUrl" size="40" rounded="lg">
             <v-img :src="avatarPreviewUrl" cover />
           </v-avatar>
-          <UserAvatar
-            v-else
-            :user="user"
-            size="large"
-            :rounded="false"
-          />
+          <UserAvatar v-else :user="user" size="large" :rounded="false" />
 
           <v-btn
             class="normal-case"
@@ -27,7 +22,6 @@
             v-if="user.avatar_id || avatarPreviewUrl"
             class="normal-case"
             color="error"
-            variant="tonal"
             :loading="avatarDeleting"
             @click="deleteUserAvatar"
           >
@@ -89,7 +83,6 @@
           :rules="usernameRules"
           :error-messages="usernameError"
           :disabled="saving"
-          @update:model-value="handleUpdateUserName"
         />
       </ProfileSettingsRow>
 
@@ -135,10 +128,7 @@
         />
       </ProfileSettingsRow>
 
-      <ProfileSettingsRow
-        title="Токен"
-        description="Токен для авторизации"
-      >
+      <ProfileSettingsRow title="Токен" description="Токен для авторизации">
         <v-text-field
           :model-value="authToken"
           :type="isToken ? 'password' : 'text'"
@@ -151,7 +141,6 @@
               <v-btn
                 icon="mdi-lock-reset"
                 color="error"
-                variant="tonal"
                 size="small"
                 data-id="reset-token-settings"
                 aria-label="Сбросить токен"
@@ -226,7 +215,6 @@ const {
   emailRules,
   firstNameRules,
   form,
-  handleUpdateUserName,
   isUploaderOpen,
   lastNameRules,
   saving,

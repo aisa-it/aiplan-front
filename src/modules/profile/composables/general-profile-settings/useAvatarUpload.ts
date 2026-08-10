@@ -1,8 +1,7 @@
 import { onBeforeUnmount, ref } from 'vue';
 
-import { MAX_AVATAR_SIZE_MB } from '../../profile.config';
-
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/gif', 'image/jpeg'];
+export const MAX_AVATAR_SIZE_MB = 20;
 
 export function useAvatarUpload(isProfile: () => boolean) {
   const image = ref<File | null>(null);
