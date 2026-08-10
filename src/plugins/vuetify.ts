@@ -22,6 +22,11 @@ const vuetify = createVuetify({
           border: '#dde2ea',
           text: '#474a52',
           icon: '#474a52',
+          surface: '#ffffff',
+          background: '#ffffff',
+        },
+        variables: {
+          'hover-opacity': 0.08,
         },
       },
       dark: {
@@ -60,7 +65,7 @@ const vuetify = createVuetify({
     },
     VDialog: {
       VCardText: {
-        class: 'px-4 py-2',
+        class: 'px-4 py-2 pt-4',
       },
       VCardTitle: {
         class: 'px-4 pt-4 pb-2',

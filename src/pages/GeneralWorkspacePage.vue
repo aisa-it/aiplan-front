@@ -145,19 +145,9 @@ watch(
   () => props.slug,
   async (newSlug) => {
     if (!newSlug) {
-      isLoading.value = true;
-      const workspaces = await userStore.getUserWorkspaces();
-
-      if (workspaces && workspaces.length > 0) {
-        const fav = workspaces.find((w) => w.is_favorite);
-        const defaultSlug = fav ? fav.slug : workspaces[0].slug;
-        router.replace({ query: { ...route.query, workspace: defaultSlug } });
-      } else {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
       return;
     }
-
     isLoading.value = true;
 
     try {
