@@ -13,6 +13,7 @@
     "@mdi/font": "^7.4.47",
     "@vueuse/core": "^14.4.0",
     "altcha": "^3.2.1",
+    "cyrillic-to-translit-js": "^3.2.1",
     "dayjs": "^1.11.21",
     "maska": "^3.2.0",
     "axios": "^1.19.0",
