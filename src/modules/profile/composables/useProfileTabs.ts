@@ -1,6 +1,5 @@
-import { markRaw, ref, type Component } from 'vue';
-
-import GeneralProfileSettings from '../components/GeneralProfileSettings.vue';
+import { defineAsyncComponent, ref, type Component } from 'vue';
+import PageLoader from '@/components/loaders/PageLoader.vue';
 
 type ProfileTab = {
   name: string;
@@ -8,16 +7,28 @@ type ProfileTab = {
   component: Component | null;
 };
 
+const createAsyncTab = (loader: () => Promise<Component>) =>
+  defineAsyncComponent({
+    loader,
+    loadingComponent: PageLoader,
+    delay: 200,
+    suspensible: false,
+  });
+
 const PROFILE_TABS: ProfileTab[] = [
   {
     name: 'general',
     label: 'Основные',
-    component: markRaw(GeneralProfileSettings),
+    component: createAsyncTab(
+      () => import('../components/GeneralProfileSettings.vue'),
+    ),
   },
   {
     name: 'activities',
     label: 'Активности',
-    component: null,
+    component: createAsyncTab(
+      () => import('../components/ActivitiesProfileSettings.vue'),
+    ),
   },
   {
     name: 'appearance',
