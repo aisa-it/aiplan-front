@@ -72,5 +72,9 @@ const roundClass = computed(() =>
   props.rounded ? 'rounded-full' : 'rounded-lg',
 );
 
-const ny = false; // TODO: вытаскивать ny из utils стор, когда появится
+import { useUtilsStore } from '@/stores/utils-store';
+import { storeToRefs } from 'pinia';
+
+const utilsStore = useUtilsStore();
+const { ny } = storeToRefs(utilsStore);
 </script>

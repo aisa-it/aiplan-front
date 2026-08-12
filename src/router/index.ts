@@ -39,6 +39,16 @@ const router = createRouter({
       ],
     },
     {
+      path: '/conf',
+      name: 'conference',
+      component: () => import('@/pages/ConferencePage.vue'),
+    },
+    {
+      path: '/conf/:roomName',
+      name: 'conferenceByRoom',
+      component: () => import('@/pages/ConferencePage.vue'),
+    },
+    {
       path: '/signin',
       component: () => import('@/pages/SignInPage.vue'),
     },
@@ -54,7 +64,18 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+import { useUtilsStore } from '@/stores/utils-store';
+
+router.beforeEach(async (to) => {
+  const utilsStore = useUtilsStore();
+  if (!utilsStore.version) {
+    await utilsStore.getVersion();
+  }
+
+  if (to.path.startsWith('/conf') && utilsStore.isEnabledJitsi === false) {
+    return '/';
+  }
+
   if (AUTH_ROUTES.includes(to.path) || to.path.includes('/f/')) return;
 
   localStorage.setItem('next_url', to.fullPath);
