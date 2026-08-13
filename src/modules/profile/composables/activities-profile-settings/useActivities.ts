@@ -1,6 +1,6 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-import { createMockActivityMap } from '../../configs/activities-settings.config';
+import { ProfileService } from '../../api/profile.service';
 
 import type { TypesActivityTable } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -33,11 +33,12 @@ export function useActivities() {
     };
 
     try {
-      // userActivityMap.value = await ProfileService.getActivitiesTable(requestParams); // TODO: подключить после настройки авторизации
-      userActivityMap.value = createMockActivityMap(
-        requestParams.from,
-        requestParams.to,
-      );
+      userActivityMap.value =
+        await ProfileService.getActivitiesTable(requestParams);
+    } catch (error) {
+      void error;
+      clearUserActivityMap();
+      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
     } finally {
       loadReq.value = false;
     }

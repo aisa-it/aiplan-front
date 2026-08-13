@@ -133,6 +133,7 @@
           :model-value="authToken"
           :type="isToken ? 'password' : 'text'"
           readonly
+          :loading="tokenLoading"
           :append-inner-icon="isToken ? 'mdi-eye-off' : 'mdi-eye'"
           @click:append-inner="toggleToken"
         >
@@ -145,6 +146,7 @@
                 data-id="reset-token-settings"
                 aria-label="Сбросить токен"
                 :loading="tokenResetting"
+                :disabled="tokenLoading"
                 @click="handleResetProfileToken"
               />
               <v-btn
@@ -153,7 +155,7 @@
                 size="small"
                 data-id="copy-token-settings"
                 aria-label="Скопировать токен"
-                :disabled="!authToken"
+                :disabled="tokenLoading || !authToken"
                 @click="handleCopyProfileToken"
               />
             </div>
@@ -202,12 +204,7 @@ const props = defineProps<{
   user: DtoUser;
 }>();
 
-const emit = defineEmits<{
-  'update-user': [data: Partial<DtoUser>];
-}>();
-
 const user = toRef(props, 'user');
-const updateUser = (data: Partial<DtoUser>) => emit('update-user', data);
 
 const {
   changeEmail,
@@ -225,20 +222,21 @@ const {
   updateCurrentUser,
   usernameError,
   usernameRules,
-} = useFormUserdata({ user, updateUser });
+} = useFormUserdata(user);
 
 const {
   avatarDeleting,
   avatarPreviewUrl,
   deleteUserAvatar,
   handleRefreshAvatar,
-} = useFormAvatar({ updateUser });
+} = useFormAvatar();
 
 const {
   authToken,
   handleCopyProfileToken,
   handleResetProfileToken,
   isToken,
+  tokenLoading,
   tokenResetting,
   toggleToken,
 } = useFormToken();

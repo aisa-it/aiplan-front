@@ -1,7 +1,10 @@
-import { reactive, ref, watch, type Ref } from 'vue';
+import { onMounted, reactive, ref, watch, type Ref } from 'vue';
+import { isAxiosError } from 'axios';
 
+import { useUserStore } from '@/stores/user-store';
 import { isEmail } from '@/utils/validation';
 
+import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -10,12 +13,12 @@ type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
 };
 
-type UseFormUserdataOptions = {
-  user: Ref<DtoUser>;
-  updateUser: (data: Partial<DtoUser>) => void;
+type ApiErrorData = {
+  code?: number;
 };
 
-export function useFormUserdata({ user, updateUser }: UseFormUserdataOptions) {
+export function useFormUserdata(user: Ref<DtoUser>) {
+  const userStore = useUserStore();
   const form = reactive({
     email: '',
     firstName: '',
@@ -73,11 +76,16 @@ export function useFormUserdata({ user, updateUser }: UseFormUserdataOptions) {
         username: form.username.trim(),
       };
 
-      // await userStore.updateCurrentUser(data); // TODO: подключить после настройки авторизации.
-      updateUser(data);
+      await userStore.updateCurrentUser(data);
       // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
     } catch (error) {
-      void error;
+      if (
+        isAxiosError<ApiErrorData>(error) &&
+        error.response?.status === 409 &&
+        error.response.data?.code === 6002
+      ) {
+        usernameError.value = 'Пользователь с таким именем уже существует';
+      }
       // TODO: обработать ERROR_IDENTITY_USER и показать уведомление после переноса системы уведомлений.
     } finally {
       saving.value = false;
@@ -90,7 +98,7 @@ export function useFormUserdata({ user, updateUser }: UseFormUserdataOptions) {
 
     emailLoading.value = true;
     try {
-      // await ProfileService.changeEmail({ new_email: email }); // TODO: подключить после настройки авторизации.
+      await ProfileService.changeEmail({ new_email: email });
       // TODO: показать уведомление об отправке ссылки после переноса системы уведомлений.
     } catch (error) {
       void error;
@@ -113,7 +121,14 @@ export function useFormUserdata({ user, updateUser }: UseFormUserdataOptions) {
     { immediate: true },
   );
 
-  // TODO: загрузить ссылку через ProfileService.getTelegramBotUrl после настройки авторизации.
+  onMounted(async () => {
+    try {
+      telegramBotUrl.value = await ProfileService.getTelegramBotUrl();
+    } catch (error) {
+      void error;
+      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+    }
+  });
 
   return {
     changeEmail,
