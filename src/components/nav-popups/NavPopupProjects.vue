@@ -7,9 +7,10 @@
     class="nav-popup"
   >
     <div
-      class="text-caption text-weight-bold text-uppercase text-grey-7 q-pt-sm q-px-md q-pb-xs non-selectable shrink"
+      class="text-caption text-weight-bold text-uppercase text-grey-7 q-pt-sm q-px-md q-pb-xs non-selectable shrink row items-center justify-between"
     >
-      Проекты
+      <span>Проекты</span>
+      <NavAddProjectButton v-if="hasPermission('create-project')" />
     </div>
     <div class="scroll">
       <q-list dense>
@@ -57,14 +58,15 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 // components
 import NavPopupItem from './NavPopupItem.vue';
+import NavAddProjectButton from 'src/components/menu/NavAddProjectButton.vue';
 import { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts.ts';
 import { useRolesStore } from 'src/stores/roles-store.ts';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationStore } from 'src/stores/notification-store.ts';
 import { BASE_ERROR_RULES } from 'src/constants/notifications.ts';
-import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue'
+import ProjectContextMenu from 'src/shared/components/ProjectContextMenu.vue';
 
-const { getProjectRole, getWsRole } = useRolesStore();
+const { getProjectRole, getWsRole, hasPermission } = useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const router = useRouter();
