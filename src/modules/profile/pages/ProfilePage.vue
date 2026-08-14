@@ -1,31 +1,45 @@
 <template>
-  <div class="p-4">
+  <main class="w-full p-4 sm:p-6">
     <h3 class="mt-2 mb-0 text-5xl">Настройки профиля</h3>
+
     <div class="relative">
-      <div class="flex items-center justify-between my-4 gap-4">
+      <div class="my-4 flex items-center justify-between gap-4">
         <ProfilePreview :user="user" />
       </div>
 
-      <v-tabs v-model="profileSettingsTab" color="primary" class="">
-        <v-tab v-for="tab in listTabs" :value="tab.name">{{ tab.label }}</v-tab>
+      <v-tabs v-model="profileSettingsTab" color="primary">
+        <v-tab
+          v-for="tab in listTabs"
+          :key="tab.name"
+          :value="tab.name"
+        >
+          {{ tab.label }}
+        </v-tab>
       </v-tabs>
     </div>
-  </div>
+
+    <template v-for="tab in listTabs" :key="tab.name">
+      <component
+        :is="tab.component"
+        v-if="tab.name === profileSettingsTab && tab.component"
+        :user="user"
+        @update-user="updateMockUser"
+      />
+    </template>
+  </main>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 
 import ProfilePreview from '../components/ProfilePreview.vue';
-
-import { useProfileTabs } from '../composables/useProfileTabs.ts';
+import { useProfileTabs } from '../composables/useProfileTabs';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-const { listTabs, profileSettingsTab, setTab, isLoadingComponent } =
-  useProfileTabs();
+const { listTabs, profileSettingsTab } = useProfileTabs();
 
-// TODO: Достаем из user-store, когда появится
+// TODO: заменить мок на user-store после подключения авторизации.
 const user = ref<DtoUser>({
   id: 'e0dfe559-88af-48c4-931c-4cdc88b2d057',
   username: 'dmitriy.zheleznev',
@@ -33,7 +47,6 @@ const user = ref<DtoUser>({
   first_name: 'Дмитрий',
   last_name: 'Железнев',
   avatar: '',
-  // avatar_id: 'b6b0c82f-a307-444d-8690-70c6cecd25fb', Проверка на изображении
   avatar_id: null,
   user_timezone: 'Europe/Moscow',
   last_active: '2026-07-28T12:13:19.938469439+03:00',
@@ -43,7 +56,6 @@ const user = ref<DtoUser>({
   created_at: '2025-07-14T15:18:20.087072+03:00',
   is_superuser: false,
   is_active: true,
-  blocked_until: undefined,
   is_onboarded: true,
   is_bot: false,
   is_integration: false,
@@ -61,15 +73,10 @@ const user = ref<DtoUser>({
     issueView: 'gantt_chart',
     filters: {
       orderDesc: false,
-      states: undefined,
-      workspaces: undefined,
-      projects: undefined,
       assignedToMe: false,
       watchedToMe: false,
       authoredToMe: false,
     },
-    group_tables_hide: undefined,
-    columns_to_show: undefined,
     draft: false,
   },
   settings: {
@@ -79,8 +86,11 @@ const user = ref<DtoUser>({
     app_notification_mute: false,
   },
   tutorial: 2,
-  last_workspace_id: undefined,
   last_workspace_slug: 'new',
   notification_count: 364,
 });
+
+const updateMockUser = (data: Partial<DtoUser>) => {
+  user.value = { ...user.value, ...data };
+};
 </script>

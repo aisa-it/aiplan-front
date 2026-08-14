@@ -14,7 +14,6 @@
         {{ user.email }}
       </p>
     </div>
-    <v-btn color="primary" @click="toggleTheme">Смена темы</v-btn>
   </div>
 </template>
 
@@ -25,11 +24,8 @@ import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
 import UserStatusMenu from '@/components/user-status/UserStatusMenu.vue';
 
 import { getUserName } from '@/utils/helpers.ts';
-import { useAppTheme } from '@/composables/useAppTheme';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-
-const { toggleTheme } = useAppTheme();
 
 const props = defineProps<{
   user: DtoUser;

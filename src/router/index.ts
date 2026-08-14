@@ -34,6 +34,11 @@ const router = createRouter({
           path: '',
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({ slug: route.query.workspace }),
+        },
+        {
+          path: '/profile',
+          component: () => import('@/pages/Profile.vue'),
           props: (route) => ({ slug: route.params.workspace }),
         },
       ],

@@ -1,57 +1,36 @@
-import { ref, defineAsyncComponent, type Component } from 'vue';
+import { markRaw, ref, type Component } from 'vue';
 
-interface ISettingsTab {
-  name: number;
+import GeneralProfileSettings from '../components/GeneralProfileSettings.vue';
+
+type ProfileTab = {
+  name: string;
   label: string;
-  dataId?: string;
-  isDisabled?: boolean;
-  component?: Component | null;
-}
+  component: Component | null;
+};
+
+const PROFILE_TABS: ProfileTab[] = [
+  {
+    name: 'general',
+    label: 'Основные',
+    component: markRaw(GeneralProfileSettings),
+  },
+  {
+    name: 'activities',
+    label: 'Активности',
+    component: null,
+  },
+  {
+    name: 'appearance',
+    label: 'Оформление',
+    component: null,
+  },
+];
 
 export const useProfileTabs = () => {
-  const isLoadingComponent = ref(false);
+  const profileSettingsTab = ref(PROFILE_TABS[0].name);
 
-  function asyncImport(loader: () => Promise<any>) {
-    return defineAsyncComponent(async () => {
-      isLoadingComponent.value = true;
-
-      const component = await loader();
-
-      isLoadingComponent.value = false;
-      return component;
-    });
-  }
-
-  const listTabs = [
-    {
-      name: 0,
-      label: 'Основные',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/GeneralProfileSettings.vue'),
-      // ),
-    },
-    {
-      name: 1,
-      label: 'Активности',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/ActivitiesProfileSettings.vue'),
-      // ),
-    },
-    {
-      name: 2,
-      label: 'Оформление',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/DesignProfileSettings.vue'),
-      // ),
-    },
-  ] as ISettingsTab[];
-
-  const profileSettingsTab = ref<number>(0);
-  const setTab = (value: number): void => {
-    profileSettingsTab.value = value;
+  return {
+    listTabs: PROFILE_TABS,
+    profileSettingsTab,
   };
-  return { listTabs, profileSettingsTab, setTab, isLoadingComponent };
 };
