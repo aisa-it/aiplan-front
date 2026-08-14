@@ -5,11 +5,11 @@ import { ProfileService } from '../../api/profile.service';
 import type { TypesActivityTable } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const formatRequestDate = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
 
-  return `${year}-${month}-${day}`;
+  return `${day}${month}${year}`;
 };
 
 export function useActivities() {

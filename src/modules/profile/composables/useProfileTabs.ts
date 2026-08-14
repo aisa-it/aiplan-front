@@ -31,9 +31,11 @@ const PROFILE_TABS: ProfileTab[] = [
     ),
   },
   {
-    name: 'appearance',
+    name: 'design',
     label: 'Оформление',
-    component: null,
+    component: createAsyncTab(
+      () => import('../components/DesignProfileSettings.vue'),
+    ),
   },
 ];
 

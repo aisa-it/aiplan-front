@@ -33,7 +33,7 @@ export function useUserStatusForm() {
 
   const setUser = (user: DtoUser) => {
     const { status, status_emoji } = user;
-    reset();
+
     form.status = getStatusKey(status);
     form.statusEmoji = status_emoji ?? '';
 

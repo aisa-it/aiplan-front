@@ -1,5 +1,5 @@
 <template>
-  <div class="heatmap-wrapper">
+  <div class="heatmap-wrapper" :class="{ 'heatmap-wrapper--dark': isDark }">
     <div class="flex">
       <div v-if="!loadReq" class="mt-7 mr-2">
         <div
@@ -82,6 +82,8 @@
 <script setup lang="ts">
 import { nextTick, ref, toRef, watch } from 'vue';
 
+import { useAppTheme } from '@/composables/useAppTheme';
+
 import {
   ACTIVITY_LEVEL_LABELS,
   ACTIVITY_WEEKDAYS,
@@ -105,6 +107,7 @@ const props = withDefaults(
 
 const activeSquare = ref<number | null>(null);
 const heatmapRef = ref<HTMLDivElement | null>(null);
+const { isDark } = useAppTheme();
 const { monthPositions, squares } = useActivityHotMap(
   toRef(props, 'activities'),
 );
@@ -137,7 +140,7 @@ watch(
   --heatmap-level-4: #2a2b59;
 }
 
-:global(.v-theme--dark) .heatmap-wrapper {
+.heatmap-wrapper--dark {
   --heatmap-level-0: #2e2e31;
   --heatmap-level-1: #242758;
   --heatmap-level-2: #39488e;
