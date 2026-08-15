@@ -5,8 +5,12 @@
     :horizontal-thumb-style="{ height: '0px' }"
     ref="root"
   >
-    <div v-for="(group, index) in groups" :key="groupKey(group, index)">
-      <q-item v-if="!group.issues?.length && showEmptyGroups">
+    <div
+      v-for="(group, index) in groups"
+      :key="groupKey(group, index)"
+      :class="{ 'group-with-top-border': index > 0 }"
+    >
+      <q-item v-if="!group.issues?.length && showEmptyGroups" dense>
         <GroupedHeader
           :entity="group?.entity"
           :group-by="groupBy"
@@ -18,6 +22,7 @@
 
       <q-expansion-item
         v-else-if="group.count > 0"
+        dense
         :model-value="isOpen(group, index)"
         @update:model-value="(val) => onToggle(group, index, val)"
         @vue:mounted="onExpansionItemMounted(group, index)"
@@ -161,6 +166,18 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+// разделитель 1px над шапками групп, кроме первой группы
+.group-with-top-border {
+  border-top: 1px solid $border-color;
+}
+
+// компактные шапки групп
+.grouped-table :deep(.q-item) {
+  min-height: 32px !important;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 .new-year-scroll-container {
   height: calc(100vh - 135px);
   overflow-y: auto;

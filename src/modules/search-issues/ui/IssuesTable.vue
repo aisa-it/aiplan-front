@@ -23,6 +23,15 @@
         @update:model-value="handleSearchIssues"
       ></q-input>
 
+      <q-checkbox
+        v-if="!isCreateSprint"
+        v-model="jqlMode"
+        dense
+        label="JQL"
+        class="q-ml-sm jql-mode-checkbox"
+        @update:model-value="onJqlToggle"
+      />
+
       <q-btn
         flat
         dense
@@ -30,7 +39,7 @@
         style="height: 30px; width: 30px"
         class="q-ml-sm"
         @click="downloadZip(pagination)"
-        v-if="!isCreateSprint"
+        v-if="!isCreateSprint && !jqlMode"
       >
         <FileZIPIcon />
         <q-tooltip>Скачать задачи архивом</q-tooltip>
@@ -61,6 +70,7 @@
               <FilterGroupsOptions
                 v-model:group_by="group_by"
                 :options-group="SPRINT_GROUP_BY_OPTIONS"
+                :disable="jqlMode"
                 @update:group_by="onRequest(pagination)"
               />
             </q-item>
@@ -82,7 +92,7 @@
       </q-btn>
     </div>
     <IssuesTableUI
-      v-if="!loading && rows?.length && group_by === 'none'"
+      v-if="!loading && rows?.length && (group_by === 'none' || jqlMode)"
       :rows="rows"
       :columns="visibleColumns"
       :loading="loading"
@@ -95,7 +105,7 @@
     />
 
     <GroupedTablesWrapper
-      v-if="!loading && rows?.length && group_by !== 'none'"
+      v-if="!loading && rows?.length && group_by !== 'none' && !jqlMode"
       :groups="rows"
       :group-by="group_by"
     >
@@ -183,9 +193,11 @@ import GroupedTablesWrapper from 'src/modules/issue-list/components/table-view/G
 
 import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
 import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { jqlSearch } from 'src/modules/search-issues/services/api';
 
 const props = defineProps<{
   currentFilter: any;
+  jqlQuery?: string | null;
   checkedRows?: any[];
   selection?: 'single' | 'multiple' | 'none';
   isCreateSprint?: boolean;
@@ -199,6 +211,7 @@ const emits = defineEmits<{
 }>();
 
 const group_by = ref(SPRINT_GROUP_BY_OPTIONS[0].value);
+const jqlMode = ref(false);
 
 //stores
 const { extendedSearchIssues, exportIssues } = useIssuesStore();
@@ -286,6 +299,41 @@ const onRequestGroupTable = async (group, p) => {
 const onRequest = async (p) => {
   if (props.isCreateSprint && !filter.value) return;
   loading.value = true;
+
+  // JQL-режим: строка поиска интерпретируется как JQL-запрос
+  if (jqlMode.value) {
+    if (!searchQuery.value.trim()) {
+      rows.value = [];
+      pagination.value.rowsNumber = 0;
+      loading.value = false;
+      return;
+    }
+    try {
+      const perPage = p.rowsPerPage == 0 ? 10 : p.rowsPerPage;
+      const data = await jqlSearch(
+        searchQuery.value.trim(),
+        perPage,
+        (p.page - 1) * perPage,
+      );
+      rows.value = data.issues ?? [];
+      pagination.value.rowsNumber = data.count ?? 0;
+      pagination.value.rowsPerPage = perPage;
+      pagination.value.page = p.page;
+    } catch (e: any) {
+      rows.value = [];
+      pagination.value.rowsNumber = 0;
+      setNotificationView({
+        open: true,
+        type: 'error',
+        customMessage:
+          e?.response?.data?.error ?? 'Не удалось выполнить JQL-запрос',
+      });
+    } finally {
+      loading.value = false;
+    }
+    return;
+  }
+
   // TODO: удалять only_active из req, так как он будет отправляться в query
   let req = Object.assign((filter.value as any) ?? {}, {
     search_query: searchQuery.value,
@@ -313,6 +361,18 @@ const onRequest = async (p) => {
   pagination.value.sortBy = p.sortBy;
   pagination.value.descending = p.descending;
   loading.value = false;
+};
+
+// включение/выключение режима JQL - перезапуск поиска
+const onJqlToggle = () => {
+  pagination.value = {
+    sortBy: null,
+    descending: true,
+    page: 1,
+    rowsPerPage: pagination.value.rowsPerPage,
+    rowsNumber: 0,
+  };
+  onRequest(pagination.value);
 };
 
 const downloadZip = async (p) => {
@@ -368,6 +428,29 @@ watch(
     onRequest(pagination.value);
   },
   { deep: true },
+);
+
+// внешний JQL-запрос (сохраненный фильтр с полем jql)
+watch(
+  () => props.jqlQuery,
+  (q) => {
+    if (q) {
+      jqlMode.value = true;
+      searchQuery.value = q;
+    } else {
+      jqlMode.value = false;
+      searchQuery.value = '';
+    }
+    pagination.value = {
+      sortBy: null,
+      descending: true,
+      page: 1,
+      rowsPerPage: pagination.value.rowsPerPage,
+      rowsNumber: 0,
+    };
+    onRequest(pagination.value);
+  },
+  { immediate: true },
 );
 
 const columns = [

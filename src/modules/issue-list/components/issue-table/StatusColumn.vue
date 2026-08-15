@@ -48,3 +48,10 @@ const onUpdateStatus = async (state: DtoStateLight) => {
   emits('refresh', state);
 };
 </script>
+
+<style scoped lang="scss">
+// убираем нижнюю линию у селекта статуса в таблице
+.q-td :deep(.q-field__control:before) {
+  border-bottom: none;
+}
+</style>
