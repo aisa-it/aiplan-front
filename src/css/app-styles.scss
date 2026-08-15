@@ -28,6 +28,41 @@ h6 {
   border-bottom: 1px solid $darkest-border-color;
 }
 
+// синяя верхняя панель (breadcrumbs)
+.q-header .header {
+  background-color: $primary;
+  color: #fff;
+
+  .q-breadcrumbs,
+  .q-breadcrumbs__el,
+  .breadcrumbs-title {
+    color: #fff !important;
+  }
+
+  .q-toolbar__title {
+    color: #fff;
+  }
+
+  // белые иконки (поиск, уведомления и пр.)
+  .default-icon-color path {
+    stroke: #fff;
+  }
+
+  .q-btn {
+    color: #fff !important;
+  }
+}
+
+// светлосерый фон левого меню
+body .main-nav-bar,
+body .main-nav-bar .q-drawer__content {
+  background-color: $bg-surface-2 !important;
+}
+
+body .main-nav-bar .q-list {
+  background-color: transparent !important;
+}
+
 .q-drawer__content {
   background-color: $bg-color !important;
 }
@@ -525,6 +560,68 @@ li > a {
 
 .q-table {
   background-color: $bg-color !important ;
+
+  // компактные строки во всех таблицах
+  // (Quasar по умолчанию задаёт thead tr и tbody td фиксированную height: 48px)
+  thead tr,
+  tbody tr,
+  tbody td {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  tbody td {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    line-height: 1.2;
+
+    // компактные круглые кнопки-аватарки в ячейках
+    .q-btn--round {
+      width: 24px !important;
+      height: 24px !important;
+      min-width: 24px !important;
+      min-height: 24px !important;
+      font-size: 12px !important;
+    }
+
+    // компактные контролы внутри ячеек (кнопки, селекты, чипы)
+    .q-btn {
+      min-height: 24px !important;
+    }
+    .q-field__control,
+    .q-field__native {
+      min-height: 24px !important;
+    }
+    .q-field__append {
+      height: 24px !important;
+    }
+    .base-chip {
+      min-height: 20px !important;
+      line-height: 16px;
+      padding-top: 2px !important;
+      padding-bottom: 2px !important;
+    }
+    .table-chip-wrap {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  }
+
+  tbody td.name-row {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+  }
+
+  thead th {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .q-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 24px !important;
+  }
 }
 
 td {

@@ -34,13 +34,6 @@
             :to="crumb?.url"
             @click="crumb?.click?.()"
           >
-            <HomeIcon
-              v-if="!workspaceInfo?.logo && crumb?.type === 'workspace'"
-              class="q-mr-xs"
-              :width="20"
-              :height="20"
-            />
-
             <q-icon
               v-if="crumb?.icon === 'settings'"
               name="settings"
@@ -61,19 +54,8 @@
               v-else-if="!crumb?.icon && crumb?.type === 'aidoc'"
             />
 
-            <div
-              v-else-if="crumb?.icon && crumb?.type === 'project'"
-              class="q-mr-xs"
-            >
-              <q-img
-                v-if="crumb?.logo"
-                :src="getUrlFile(crumb?.logo)"
-                :style="`width: 20px; height: 20px; border-radius: 4px; color: white;`"
-              />
-              <div v-else>{{ crumb?.icon }}</div>
-            </div>
             <q-img
-              v-else-if="crumb?.icon"
+              v-else-if="crumb?.icon && crumb?.type !== 'project'"
               :src="crumb?.icon"
               :style="'width: 18px; height: 18px; margin: 0 4px 0 0; border-radius: 4px; color: white'"
               spinner-size="18px"
@@ -119,12 +101,9 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
-import { getUrlFile } from 'src/utils/helpers';
-
 // components
 import UserIcon from 'src/components/icons/UserIcon.vue';
 import SearchPanel from 'src/components/search-panel/SearchPanel.vue';
-import HomeIcon from 'src/components/icons/HomeIcon.vue';
 import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
 import FlowerLine from 'src/components/FlowerLine.vue';

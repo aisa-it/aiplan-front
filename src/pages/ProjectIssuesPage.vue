@@ -12,7 +12,7 @@
     <q-tabs
       v-model="tab"
       dense
-      class="text-grey q-mb-sm"
+      class="text-grey q-mb-sm project-tabs"
       active-color="primary"
       indicator-color="primary"
       align="left"
@@ -86,6 +86,11 @@ const tab = ref('general');
 </script>
 
 <style lang="scss" scoped>
+// однопиксельная полоска под табами
+.project-tabs {
+  border-bottom: 1px solid $border-color;
+}
+
 :deep(.q-tab__content) {
   text-transform: none;
   font-size: 16px;

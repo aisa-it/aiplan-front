@@ -17,7 +17,7 @@ defineProps<{
 <style scoped lang="scss">
    .sequence_id-column {
     font-size: 12px;
-    padding: 7px 4px;
+    padding: 2px 4px;
     cursor: pointer;
     white-space: pre-wrap;
     overflow-wrap: normal;

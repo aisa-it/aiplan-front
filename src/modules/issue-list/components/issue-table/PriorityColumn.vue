@@ -27,3 +27,10 @@ defineProps<{
 const emits = defineEmits<{ refresh: [] }>();
 const rolesStore = useRolesStore();
 </script>
+
+<style scoped lang="scss">
+// убираем нижнюю линию у селекта приоритета в таблице
+.q-td :deep(.q-field__control:before) {
+  border-bottom: none;
+}
+</style>
