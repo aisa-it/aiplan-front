@@ -141,6 +141,9 @@
   --login-panel__forget-btn-bgc: #fff;
   --login-panel__forget-btn-color: #000;
   --login-panel__input-color: #000;
+  --header-bg: #ffffff;
+  --header-text: #474a52;
+  --sidebar-bg: #ffffff;
 }
 
 [data-theme='dark'] {
@@ -285,6 +288,16 @@
   --login-panel__forget-btn-bgc: #474a52;
   --login-panel__forget-btn-color: #fff;
   --login-panel__input-color: #fff;
+  --header-bg: #1f2228;
+  --header-text: #e9f4fc;
+  --sidebar-bg: #1f2228;
+}
+
+// Светлая 2.0: синяя шапка, светло-серое меню
+[data-theme='light2'] {
+  --header-bg: #3f75ff;
+  --header-text: #ffffff;
+  --sidebar-bg: #f0f4fa;
 }
 
 [data-theme='visually-impaired'] {

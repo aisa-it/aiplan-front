@@ -38,10 +38,23 @@ export const useDesignSettings = () => {
     })),
   );
   const isSystemTheme = ref<boolean>(user.value.theme?.system ?? false);
-  const currentTheme = ref<ICurrentTheme>(
-    NEW_THEMES_OBJ.find((el) => el.is_dark === user.value.theme?.dark) ??
-      NEW_THEMES_OBJ[1],
-  );
+
+  // вариант темы хранится в localStorage (light | dark | light2)
+  const initTheme = (): ICurrentTheme => {
+    const variant = localStorage.getItem('themeVariant');
+    if (variant === 'light2') {
+      return (
+        NEW_THEMES_OBJ.find((el) => el.value === 'light2') ??
+        NEW_THEMES_OBJ[1]
+      );
+    }
+    return (
+      NEW_THEMES_OBJ.find((el) => el.is_dark === user.value.theme?.dark) ??
+      NEW_THEMES_OBJ[1]
+    );
+  };
+
+  const currentTheme = ref<ICurrentTheme>(initTheme());
   const currentOpenIssue = ref<IIssue | false>(
     ISSUE_OPEN.find((el) => el.value === user.value.theme?.open_in_new) ??
       false,
@@ -65,6 +78,10 @@ export const useDesignSettings = () => {
 
   // functions
   const handleThemeSelect = async (): Promise<void> => {
+    // вариант фиксируем до сохранения: после обновления user
+    // watch может переинициализировать currentTheme из localStorage
+    const variant = currentTheme.value?.value ?? 'light';
+    localStorage.setItem('themeVariant', variant);
     await userStore
       .updateCurrentUser({
         theme: {
@@ -82,6 +99,9 @@ export const useDesignSettings = () => {
       })
       .then(() => {
         localStorage.setItem('dark', String(user.value?.theme?.dark));
+        document
+          .querySelector('body')
+          ?.setAttribute('data-theme', variant);
         $q.dark.set(userStore.getTheme === 'dark');
         setNotificationView({
           open: true,
@@ -104,20 +124,13 @@ export const useDesignSettings = () => {
   };
 
   // hooks
-  onMounted(
-    () =>
-      (currentTheme.value =
-        NEW_THEMES_OBJ.find((el) => el.is_dark === user.value?.theme?.dark) ??
-        NEW_THEMES_OBJ[1]),
-  );
+  onMounted(() => (currentTheme.value = initTheme()));
 
   watch(
     () => user.value,
     (newValue) => {
       if (newValue) {
-        currentTheme.value =
-          NEW_THEMES_OBJ.find((el) => el.is_dark === user.value.theme?.dark) ??
-          NEW_THEMES_OBJ[1];
+        currentTheme.value = initTheme();
         currentOpenIssue.value =
           ISSUE_OPEN.find((el) => el.value === user.value.theme?.open_in_new) ??
           false;

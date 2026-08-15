@@ -44,6 +44,11 @@ export const NEW_THEMES_OBJ = [
     label: 'Светлая',
     is_dark: false,
   },
+  {
+    value: 'light2',
+    label: 'Светлая 2.0',
+    is_dark: false,
+  },
 
   // {
   //   value: 'visually-impaired',

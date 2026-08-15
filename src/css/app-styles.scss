@@ -28,35 +28,34 @@ h6 {
   border-bottom: 1px solid $darkest-border-color;
 }
 
-// синяя верхняя панель (breadcrumbs)
+// цвет верхней панели (breadcrumbs) зависит от темы
 .q-header .header {
-  background-color: $primary;
-  color: #fff;
+  background-color: var(--header-bg);
+  color: var(--header-text);
 
   .q-breadcrumbs,
   .q-breadcrumbs__el,
   .breadcrumbs-title {
-    color: #fff !important;
+    color: var(--header-text) !important;
   }
 
   .q-toolbar__title {
-    color: #fff;
+    color: var(--header-text);
   }
 
-  // белые иконки (поиск, уведомления и пр.)
   .default-icon-color path {
-    stroke: #fff;
+    stroke: var(--header-text);
   }
 
   .q-btn {
-    color: #fff !important;
+    color: var(--header-text) !important;
   }
 }
 
-// светлосерый фон левого меню
+// фон левого меню зависит от темы
 body .main-nav-bar,
 body .main-nav-bar .q-drawer__content {
-  background-color: $bg-surface-2 !important;
+  background-color: var(--sidebar-bg) !important;
 }
 
 body .main-nav-bar .q-list {

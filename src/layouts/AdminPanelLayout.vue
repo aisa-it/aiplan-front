@@ -69,6 +69,9 @@ onBeforeMount(async () => {
   if (userStore.getTheme === 'dark') {
     theme.value = 'dark';
     document.querySelector('body')?.setAttribute('data-theme', 'dark');
+  } else if (localStorage.getItem('themeVariant') === 'light2') {
+    theme.value = 'light2';
+    document.querySelector('body')?.setAttribute('data-theme', 'light2');
   } else if (me.value?.theme.contrast === true) {
     theme.value = 'visually-impaired';
     document
