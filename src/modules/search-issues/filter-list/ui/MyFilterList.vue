@@ -30,40 +30,42 @@
       class="filters__list scrollable-content"
     >
       <q-list>
-        <q-item v-for="filter in myFilterList" :key="filter.id" clickable>
+        <q-item
+          v-for="filter in myFilterList"
+          :key="filter.id"
+          clickable
+          @click="toggleFilter(filter, $event)"
+        >
           <q-item-section class="no-wrap centered-horisontally">
             <q-radio
               dense
               v-model="currentFilter"
               :val="filter?.id"
               class="q-mr-sm"
-              @click="
+              @update:model-value="
                 () => {
-                  if (cachedFilter && cachedFilter === currentFilter) {
-                    currentFilter = null;
-                    cachedFilter = ' ';
-                    emits('update-filter', {});
-                  } else {
-                    cachedFilter = currentFilter;
+                  const found = myFilterList.find(
+                    (el: DtoSearchFilterFull) => el.id === currentFilter,
+                  );
+                  if (found) {
+                    emits('update-filter', found?.filter);
+                    emits('select-filter', found);
                   }
                 }
               "
-              @update:model-value="
-                (e) => {
-                  emits(
-                    'update-filter',
-                    myFilterList.find(
-                      (el: DtoSearchFilterFull) => el.id === currentFilter,
-                    )?.filter,
-                  );
-                }
-              "
+            />
+            <q-badge
+              v-if="filter?.jql"
+              color="primary"
+              label="JQL"
+              class="q-mr-xs"
+              outline
             />
             <span class="abbriviated-text">{{ filter?.name }}</span>
             <q-btn
               flat
               dense
-              @click="
+              @click.stop="
                 () => {
                   filterToEdit = filter;
                   isOpenAddingFilter = true;
@@ -76,7 +78,7 @@
             <q-btn
               flat
               dense
-              @click="
+              @click.stop="
                 () => {
                   isDeletingOpen = true;
                   filterToDelete = filter;
@@ -165,6 +167,7 @@ import { getMyFilters, getFilterById } from '../../services/api';
 
 const emits = defineEmits<{
   'update-filter': [value?: TypesIssuesListFilters];
+  'select-filter': [value: DtoSearchFilterFull];
 }>();
 
 // store
@@ -183,7 +186,25 @@ const filters = ref<DtoSearchFilterFull[]>([]);
 const filterToEdit = ref<DtoSearchFilterFull | null>(null);
 const currentFilter = ref();
 const filterToDelete = ref<DtoSearchFilterFull>({});
-const cachedFilter = ref('');
+
+// Клик по фильтру: выбрать; повторный клик по выбранному — сбросить.
+// Клики по самому q-radio пропускаем — их обрабатывает @update:model-value radio.
+const toggleFilter = (filter: DtoSearchFilterFull, evt: Event) => {
+  const target = evt.target as HTMLElement | null;
+  if (target && target.closest('.q-radio')) return;
+
+  if (currentFilter.value === filter.id) {
+    currentFilter.value = null;
+    emits('update-filter', {});
+    return;
+  }
+  currentFilter.value = filter.id;
+  const found = myFilterList.value.find((el) => el.id === filter.id);
+  if (found) {
+    emits('update-filter', found?.filter);
+    emits('select-filter', found);
+  }
+};
 const getUserFilters = async () => {
   loading.value = true;
   filters.value = await getMyFilters();
@@ -192,7 +213,12 @@ const getUserFilters = async () => {
 
 onMounted(async () => {
   if (!!filtersStore.filterIdFromRoute) {
-    filterToEdit.value = await getFilterById(filtersStore.filterIdFromRoute);
+    const routeFilter = await getFilterById(filtersStore.filterIdFromRoute);
+    if (routeFilter?.jql) {
+      emits('select-filter', routeFilter);
+      return;
+    }
+    filterToEdit.value = routeFilter;
     isOpenAddingFilter.value = true;
   }
 });
