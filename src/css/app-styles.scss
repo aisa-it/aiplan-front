@@ -592,7 +592,8 @@ li > a {
       min-height: 24px !important;
     }
     .q-field__append {
-      height: 24px !important;
+      height: auto !important;
+      align-self: stretch;
     }
     .base-chip {
       min-height: 20px !important;
