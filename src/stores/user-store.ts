@@ -15,8 +15,11 @@ export const useUserStore = defineStore('user-store', () => {
       const res = await usersApi.getCurrentUser();
       user.value = res.data;
 
-      if (router?.currentRoute?.value?.path.includes('not-found')) {
-        return;
+      if (
+        router?.currentRoute?.value?.path.includes('not-found') ||
+        router?.currentRoute?.value?.path === '/onboarding'
+      ) {
+        return user.value;
       }
 
       if (!res.data.is_onboarded) {
