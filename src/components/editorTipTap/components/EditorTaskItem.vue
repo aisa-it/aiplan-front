@@ -1,9 +1,9 @@
 <template>
   <node-view-wrapper as="li" class="task-item">
-    <v-checkbox
+    <v-checkbox-btn
       :model-value="isChecked"
+      color="primary"
       density="compact"
-      hide-details
       :disabled="isDisabled"
       @update:model-value="toggleChecked"
     />
@@ -35,21 +35,26 @@ const toggleChecked = (value: boolean) => {
 <style lang="scss" scoped>
 .task-item {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-bottom: 0.5rem;
-  align-items: baseline;
+  align-items: center;
 
-  .v-checkbox.v-input--disabled {
-    opacity: 1 !important;
+  .v-checkbox-btn {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    transform: translateY(-2px);
   }
 
-  .v-checkbox {
-    position: relative;
-    top: 5px;
+  :deep(.v-selection-control) {
+    min-height: 18px;
+    height: 18px;
   }
 
   .content {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
 }
 </style>

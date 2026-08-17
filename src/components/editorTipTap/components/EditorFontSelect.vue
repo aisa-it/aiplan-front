@@ -3,32 +3,24 @@
     v-model="fontValue"
     class="html-editor__select"
     :items="listFont"
-    variant="plain"
+    variant="underlined"
     density="compact"
     hide-details
-    menu-icon=""
+    color="primary"
     :menu-props="{
-      contentClass: `html-editor__select-option scrollable-content ${classPrevent}`,
+      contentClass: `html-editor__select-option ${classPrevent}`,
+      maxHeight: 225,
     }"
     @update:model-value="updateFont($event)"
-    @update:menu="isOpenSelect = $event"
   >
     <HintTooltip>Шрифт</HintTooltip>
-
-    <template #append-inner>
-      <v-icon
-        icon="mdi-chevron-down"
-        class="chevron-rotate"
-        :class="{ 'rotate-180': isOpenSelect }"
-      />
-    </template>
   </v-select>
 </template>
 
 <script setup lang="ts">
 // core
 import { Editor } from '@tiptap/vue-3';
-import { ref, shallowRef, watch } from 'vue';
+import { shallowRef, watch } from 'vue';
 // components
 import HintTooltip from './HintTooltip.vue';
 // utils
@@ -45,9 +37,6 @@ const props = defineProps<{
 const listFont = ListFont;
 const defaultFontValue = listFont[0];
 const fontValue = shallowRef(ListFont[0]);
-const isOpenSelect = ref(false);
-// const fontMenu = ref<any>(null);
-// if (!props.isMobile) useMenuHandler(fontMenu); // TODO: useMenuHandler
 const updateFont = (font: string) => {
   if (props.isMobile) {
     props.editorInstance.chain().setFontFamily(font).run();

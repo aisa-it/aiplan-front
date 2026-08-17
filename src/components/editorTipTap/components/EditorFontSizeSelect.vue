@@ -3,33 +3,25 @@
     v-model="sizeValue"
     class="html-editor__select"
     :items="listSize"
-    variant="plain"
+    variant="underlined"
     density="compact"
     hide-details
-    menu-icon=""
+    color="primary"
     :menu-props="{
-      contentClass: `html-editor__select-option scrollable-content ${classPrevent}`,
+      contentClass: `html-editor__select-option ${classPrevent}`,
+      maxHeight: 225,
     }"
     :disabled="canChangeFontSize"
     @update:model-value="updateSize($event)"
-    @update:menu="isOpenSelect = $event"
   >
     <HintTooltip>Шрифт</HintTooltip>
-
-    <template #append-inner>
-      <v-icon
-        icon="mdi-chevron-down"
-        class="chevron-rotate"
-        :class="{ 'rotate-180': isOpenSelect }"
-      />
-    </template>
   </v-select>
 </template>
 
 <script setup lang="ts">
 import { Editor } from '@tiptap/vue-3';
 import type { Editor as CoreEditor } from '@tiptap/core';
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
 // components
 import HintTooltip from './HintTooltip.vue';
 // utils
@@ -47,10 +39,6 @@ const props = defineProps<{
 const listSize = ListSize;
 const defaultSizeValue = listSize[2];
 const sizeValue = shallowRef(defaultSizeValue);
-const isOpenSelect = ref(false);
-// const fontSizeMenu = ref<any>(null);
-// function
-// if (!props.isMobile) useMenuHandler(fontSizeMenu); // TODO: useMenuHandler
 
 const updateSize = (size: string) => {
   if (props.isMobile) {

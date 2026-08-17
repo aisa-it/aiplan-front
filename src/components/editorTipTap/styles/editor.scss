@@ -81,13 +81,28 @@
 
     .html-editor__select,
     .html-editor__select-sm {
-      .v-input__control,
-      .v-field {
-        --v-input-control-height: 24px;
-        min-height: 24px !important;
-        max-height: 24px !important;
-        height: 24px !important;
+      --v-input-control-height: 24px;
+      --v-input-padding-top: 0px;
+      --v-field-padding-top: 0px;
+      --v-field-padding-bottom: 0px;
+      flex: none;
+      align-self: center;
+      font-size: 14px;
+    }
+
+    .html-editor__select {
+      width: 120px;
+
+      .v-select__selection-text {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: $text-color;
       }
+    }
+
+    .html-editor__select-sm {
+      width: 24px;
     }
 
     .default-icon-color path {
@@ -100,62 +115,10 @@
     }
 
     .v-field {
-      min-height: 24px;
-      padding: 0;
-      height: 24px;
-
       svg {
         position: static;
         margin: 0;
         width: 24px;
-      }
-    }
-
-    .html-editor__select {
-      .v-field {
-        width: 120px;
-        overflow: hidden;
-        min-height: 24px !important;
-        max-height: 24px !important;
-        height: 24px !important;
-        padding: 0 12px;
-        font-size: 14px;
-        &::before {
-          border-bottom: 1px solid $dark-border-color;
-        }
-      }
-
-      .v-select__selection-text {
-        span {
-          display: inline-block;
-          width: 110px;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          color: $text-color;
-        }
-      }
-
-      .v-field__append-inner {
-        height: 24px;
-        align-items: center;
-      }
-
-      .v-field__append-inner svg {
-        position: absolute;
-        right: 0;
-        margin: 0;
-        top: inherit;
-        width: 18px;
-      }
-    }
-
-    .html-editor__select-sm {
-      .v-select__selection-text {
-        color: $text-color;
-      }
-      .v-field::before {
-        border-bottom: 1px solid $dark-border-color;
       }
     }
   }
@@ -184,50 +147,50 @@
     ol {
       padding-left: 0;
       margin: 1.25rem 1.5em 1.25rem 1.5em;
+      list-style: none;
+      counter-reset: ol-counter;
 
       li.list-item {
         position: relative;
-        margin-left: 1.5em;
         display: block;
+        padding-left: 1.75em;
       }
 
       .list-item__mark {
-        display: list-item;
         position: absolute;
         left: 0;
-        list-style-position: inside;
+        top: 0;
+        width: 1.15em;
+        line-height: 1.5;
+        text-align: right;
       }
-    }
 
-    ul li.list-item > .list-item__mark {
-      list-style-type: disc;
-    }
-
-    ol {
-      counter-reset: ol-counter;
-
-      li.list-item > .list-item__mark {
-        list-style-type: none;
-        counter-increment: ol-counter;
-
-        &::before {
-          content: counter(ol-counter) '.';
-        }
+      .list-content p {
+        margin: 0;
       }
-    }
-
-    ul,
-    ol {
 
       ul,
       ol {
         margin-top: 0.5em;
         margin-left: 0.5em;
       }
+    }
 
-      li p {
-        margin-top: 0.25em;
-        margin-bottom: 0.25em;
+    ul > li.list-item > .list-item__mark::before {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 5px;
+      margin: 0.58em 0.4em 0 auto;
+      border-radius: 50%;
+      background: $text-color;
+    }
+
+    ol > li.list-item {
+      counter-increment: ol-counter;
+
+      > .list-item__mark::before {
+        content: counter(ol-counter) '.';
       }
     }
 
@@ -235,11 +198,17 @@
       list-style: none;
       margin-left: 0;
       padding: 0;
+
       :first-child {
         margin-top: 0;
       }
+
       li {
-        margin-left: 1.5rem;
+        margin-left: 0;
+      }
+
+      p {
+        margin: 0;
       }
     }
 
@@ -595,6 +564,19 @@
 
   &__select-option {
     max-height: 225px !important;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      display: none;
+    }
+
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
     .v-list-item {
       padding-left: 10px;

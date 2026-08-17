@@ -4,13 +4,15 @@
     :items="alignOptions"
     item-value="value"
     return-object
-    variant="plain"
+    variant="underlined"
     density="compact"
     hide-details
+    color="primary"
     menu-icon=""
     class="html-editor__select-sm"
     :menu-props="{
-      contentClass: `html-editor__select-option scrollable-content ${classPrevent}`,
+      contentClass: `html-editor__select-option ${classPrevent}`,
+      maxHeight: 225,
     }"
     :disabled="canChangeAlign"
     @update:model-value="updateAlign($event)"
