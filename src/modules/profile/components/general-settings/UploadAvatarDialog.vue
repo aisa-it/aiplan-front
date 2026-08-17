@@ -54,6 +54,7 @@
           width="110"
           class="normal-case"
           variant="outlined"
+          :disabled="loading"
           @click="model = false"
         >
           Отменить
@@ -64,6 +65,7 @@
           variant="flat"
           class="rounded-lg px-2 py-0 min-w-0"
           :disabled="!image"
+          :loading="loading"
           @click="onUpload"
         >
           Загрузить
@@ -80,10 +82,12 @@ const props = withDefaults(
   defineProps<{
     title?: string;
     isProfile?: boolean;
+    loading?: boolean;
   }>(),
   {
     title: '',
     isProfile: false,
+    loading: false,
   },
 );
 
@@ -107,6 +111,5 @@ const onUpload = () => {
   if (!image.value) return;
 
   emit('upload', image.value);
-  model.value = false;
 };
 </script>

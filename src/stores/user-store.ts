@@ -2,13 +2,21 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
+import type {
+  AiplanUserUpdateRequest,
+  DtoUser,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
 
 const usersApi = new (withInterceptors(Users))();
 
+type UpdateCurrentUserRequest = AiplanUserUpdateRequest & {
+  tutorial?: DtoUser['tutorial'];
+};
+
 export const useUserStore = defineStore('user-store', () => {
   const router = useRouter();
-  const user = ref<any>(null);
+  const user = ref<DtoUser | null>(null);
 
   async function getUserInfo() {
     try {
@@ -40,15 +48,20 @@ export const useUserStore = defineStore('user-store', () => {
     }
   }
 
-  async function updateCurrentUser(data: any) {
+  async function updateCurrentUser(data: UpdateCurrentUserRequest) {
     const res = await usersApi.updateCurrentUser(data);
     user.value = res.data;
     return user.value;
   }
 
+  function replaceUser(updatedUser: DtoUser) {
+    user.value = updatedUser;
+  }
+
   return {
     user,
     getUserInfo,
+    replaceUser,
     updateCurrentUser,
   };
 });

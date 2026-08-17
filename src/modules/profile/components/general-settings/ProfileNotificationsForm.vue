@@ -59,12 +59,7 @@ const props = defineProps<{
   user: DtoUser;
 }>();
 
-const emit = defineEmits<{
-  'update-user': [data: Partial<DtoUser>];
-}>();
-
 const user = toRef(props, 'user');
-const updateUser = (data: Partial<DtoUser>) => emit('update-user', data);
 
 const {
   channels,
@@ -72,5 +67,5 @@ const {
   saving,
   updateChannel,
   updateDeadlineNotification,
-} = useFormNotifications({ user, updateUser });
+} = useFormNotifications(user);
 </script>

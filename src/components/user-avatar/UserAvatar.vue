@@ -32,7 +32,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
+import { useUtilsStore } from '@/stores/utils-store.ts';
 import { useAppTheme } from '@/composables/useAppTheme.ts';
 import { getUrlFile } from '@/utils/helpers.ts';
 
@@ -72,5 +74,5 @@ const roundClass = computed(() =>
   props.rounded ? 'rounded-full' : 'rounded-lg',
 );
 
-const ny = false; // TODO: вытаскивать ny из utils стор, когда появится
+const { ny } = storeToRefs(useUtilsStore());
 </script>
