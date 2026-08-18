@@ -1,4 +1,4 @@
-// core
+﻿// core
 import tippy from 'tippy.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Extension, mergeAttributes, Node } from '@tiptap/core';
@@ -38,7 +38,6 @@ import EditorTaskItem from '../components/EditorTaskItem.vue';
 import EditorListItem from '../components/EditorListItem.vue';
 import EditorMentionList from '../components/EditorMentionList.vue';
 import EditorResizeImageWrapper from '../components/EditorResizeImageWrapper.vue';
-import EditorResizeDrawioWrapper from '../components/EditorResizeDrawioWrapper.vue';
 import EditorTiptapCodeBlockSelect from '../components/EditorTiptapCodeBlockSelect.vue';
 
 // TODO: notification-store / notifications — not migrated yet
@@ -1319,7 +1318,6 @@ export const UnsetSubSuperOnEnter = Extension.create({
     };
   },
 });
-
 //плагин из @rcode-link/tiptap-drawio
 const baseImage =
   'data:image/png;base64,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';
@@ -1349,82 +1347,3 @@ declare module '@tiptap/core' {
   }
 }
 
-export const DrawIoExtension = Node.create({
-  name: 'drawio',
-  group: 'inline',
-  inline: true,
-  atom: true,
-
-  addAttributes() {
-    return {
-      src: {
-        default: '',
-      },
-      xml: {
-        default: '',
-      },
-      class: {
-        default: 'drawio',
-      },
-      draggable: { default: true },
-    };
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [
-      'img',
-      mergeAttributes(HTMLAttributes, {
-        class: 'drawio',
-        'data-drawio': 'true',
-      }),
-    ];
-  },
-  parseHTML() {
-    return [{ tag: 'img.drawio' }, { tag: 'img[data-drawio]' }];
-  },
-
-  addOptions() {
-    return {
-      inline: false,
-      allowBase64: false,
-      drawIoLink: url,
-      baseImage: baseImage,
-      width: '99vw',
-      height: '99vh',
-      openDialog: 'click',
-      HTMLAttributes: {},
-    };
-  },
-
-  addNodeView() {
-    return VueNodeViewRenderer(EditorResizeDrawioWrapper, {
-      extension: this,
-    });
-  },
-
-  addCommands() {
-    return {
-      insertDrawIo:
-        () =>
-        ({ commands }) => {
-          return commands.insertContent({
-            type: this.name,
-            attrs: {
-              src: this.options.baseImage,
-              class: 'drawio',
-              draggable: true,
-            },
-          });
-        },
-      updateDrawIo:
-        (image: string) =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, {
-            src: image,
-            class: 'drawio',
-            draggable: true,
-          });
-        },
-    };
-  },
-});

@@ -22,7 +22,6 @@
       <ColorPicker
         :model-value="color"
         :is-bg-color="true"
-        :is-spoiler="false"
         :isTableCell="true"
         @selectBgColor="(key) => selectColor(key)"
         :class-prevent="classPrevent"

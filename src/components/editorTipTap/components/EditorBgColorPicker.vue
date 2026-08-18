@@ -21,7 +21,6 @@
         :model-value="bgColorValue"
         @select-bg-color="updateBgColor"
         :is-bg-color="true"
-        :is-spoiler="false"
       />
     </v-card>
   </v-menu>

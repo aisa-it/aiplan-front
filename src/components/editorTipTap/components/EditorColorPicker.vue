@@ -21,7 +21,6 @@
         :model-value="colorValue"
         @select-text-color="updateColor"
         :is-bg-color="false"
-        :is-spoiler="false"
         :class-prevent="classPrevent"
       />
     </v-card>

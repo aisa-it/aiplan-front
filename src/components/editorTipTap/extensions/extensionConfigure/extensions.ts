@@ -19,14 +19,10 @@ import {
 } from '@tiptap/extension-table-of-contents';
 
 // TODO: external node extensions — not migrated yet (outside editorV2 folder)
-// import { DateNode } from 'src/utils/dateEditor';
-// import { Spoiler } from 'src/utils/spoiler';
-// import { InfoBlock } from 'src/utils/infoBlock';
 // import { CommentLinkMention } from 'src/utils/commentLinkEditor';
 // import { IssueLinkMention } from 'src/utils/issueLinkEditor';
 // import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 // import { TableOfContentsCustom } from 'src/utils/tableOfContents';
-// import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
 import {
   IndentExtend,
@@ -40,7 +36,6 @@ import {
   useEditorMarks,
   CustomImagePlugin,
   CustomLink,
-  DrawIoExtension,
 } from '../../utils/tiptap';
 import { useMention } from './customMention';
 
@@ -54,14 +49,10 @@ export const getEditorExtensions = (props: Record<string, any>) => {
     TaskList,
     TextStyle,
     FontFamily,
-    // TODO: Spoiler / InfoBlock / DateNode — disabled until utils migrated
-    // Spoiler,
-    // InfoBlock,
     Superscript,
     Subscript,
     FormatSample,
     TaskItemExtend,
-    // DateNode,
     CustomLink.configure({
       openOnClick: false,
     }),
@@ -143,11 +134,6 @@ export const getEditorExtensions = (props: Record<string, any>) => {
           },
         };
       },
-    }),
-    // TODO: drawio base image not migrated — DrawIo still registered without asset
-    DrawIoExtension.configure({
-      openDialog: props.isReadOnly ? undefined : 'dblclick',
-      // baseImage: drawioBaseImage,
     }),
   ];
 

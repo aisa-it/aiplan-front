@@ -181,36 +181,6 @@
               icon-name="subScriptIcon"
               format-name="subscript"
             />
-            <EditorSpoilerButton
-              :editorInstance="editorInstance"
-              :class-prevent="classPrevent"
-              :isMobile="isMobile"
-              :isSpoilerButtonClicked="isSpoilerButtonClicked"
-              command="setSpoiler"
-              tooltip="Спойлер"
-              icon-name="spoilerIcon"
-              format-name="spoiler"
-              @reset-click-state="(value) => setSpoilerButtonValue(value)"
-            />
-            <EditorFormatButton
-              :editorInstance="editorInstance"
-              :isMobile="isMobile"
-              focus-after-run
-              command="insertDate"
-              tooltip="Дата"
-              icon-name="calendarIcon"
-              format-name="date-node"
-            />
-            <EditorInfoBlockButton
-              :editorInstance="editorInstance"
-              :isMobile="isMobile"
-              :class-prevent="classPrevent"
-              command="setInfoBlock"
-              tooltip="Информация"
-              icon-name="infoIcon"
-              style="width: 24px"
-              format-name="info-block"
-            />
           </div>
 
           <div class="html-editor__formats">
@@ -306,11 +276,6 @@
             />
           </div>
 
-          <EditorDrawioButton
-            v-if="!excludedTabs.includes(TIPTAP_TABS.drawio)"
-            @click="editorInstance.commands.insertDrawIo"
-          />
-
           <EditorFullScreenButton
             v-if="$props.isFullScreen"
             :style="`margin: ${isMobile ? '0 auto' : ' 0 0 0 auto'}`"
@@ -355,13 +320,7 @@ import EditorFormatSampleButton from './EditorFormatSampleButton.vue';
 import EditorFullScreenButton from './EditorFullScreenButton.vue';
 import EditorMarkListButton from './EditorMarkListButton.vue';
 import EditorLinkButtonTwo from './EditorLinkButtonTwo.vue';
-import EditorSpoilerButton from './EditorSpoilerButton.vue';
-import EditorInfoBlockButton from './EditorInfoBlockButton.vue';
-import EditorDrawioButton from './EditorDrawioButton.vue';
 import EditorHeadingSelect from './EditorHeadingSelect.vue';
-
-/** Temporary constant until src/constants/tiptap is migrated */
-const TIPTAP_TABS = { drawio: 'drawio' };
 
 interface IEditorTiptapToolbarProps {
   editorInstance: Editor | null;
@@ -371,8 +330,6 @@ interface IEditorTiptapToolbarProps {
   disableImages?: boolean;
   isFullScreen?: boolean;
   isMobile?: boolean;
-  isEditorV2?: boolean;
-  excludedTabs?: string[];
   showHeadings?: boolean;
 }
 
@@ -382,8 +339,6 @@ const props = withDefaults(defineProps<IEditorTiptapToolbarProps>(), {
   disableImages: false,
   isFullScreen: false,
   isMobile: false,
-  isEditorV2: false,
-  excludedTabs: () => [],
   showHeadings: false,
 });
 
@@ -399,7 +354,6 @@ const editorToolbar = ref<HTMLElement | null>(null);
 const editorToolbarScroll = ref<HTMLElement | null>(null);
 const showToolbarTable = ref<boolean>(false);
 const scrollManager = ref<ScrollManager | null>(null);
-const isSpoilerButtonClicked = ref<boolean>(true);
 
 const scrollSpeed = computed((): number => {
   return smAndDown.value ? 100 : 500;
@@ -420,10 +374,6 @@ const getScrollBtnState = (
   prop: 'showLeftArrow' | 'showRightArrow' | 'showTopArrow' | 'showBottomArrow',
 ) => {
   return !scrollManager.value?.scrollState[prop] ? 'visibility: hidden;' : '';
-};
-
-const setSpoilerButtonValue = (value: boolean): void => {
-  isSpoilerButtonClicked.value = value;
 };
 
 const handleSuperscript = (command: string) => {
