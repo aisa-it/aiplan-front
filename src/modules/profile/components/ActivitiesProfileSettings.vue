@@ -5,14 +5,26 @@
       :activities="userActivityMap"
       :load-req="loadReq"
     />
-    <div v-else>У пользователя не было активности</div>
+    <div v-else>
+      {{
+        activities.length
+          ? 'Недостаточно данных для отображения активности по дням'
+          : 'У пользователя не было активности'
+      }}
+    </div>
 
-    <!-- TODO: перенести ActivitiesList -->
+    <ActivitiesList
+      :rows="activities"
+      :rows-count="activitiesCount"
+      :loading="loadList"
+      @request="loadActivitiesList"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import ActivityHotMap from '@/components/activity-hot-map/ActivityHotMap.vue';
+import { ActivitiesList } from '@/modules/activities';
 
 import { useActivities } from '../composables/activities-profile-settings/useActivities';
 
@@ -22,5 +34,12 @@ defineProps<{
   user: DtoUser;
 }>();
 
-const { loadReq, userActivityMap } = useActivities();
+const {
+  activities,
+  activitiesCount,
+  loadActivitiesList,
+  loadList,
+  loadReq,
+  userActivityMap,
+} = useActivities();
 </script>
