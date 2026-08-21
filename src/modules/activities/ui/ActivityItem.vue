@@ -25,7 +25,7 @@ import UserAvatar from '@/components/user-avatar/UserAvatar.vue';
 import ActivityMessage from './ActivityMessage.vue';
 import { formatActivityDate } from '../utils/formatActivityDate';
 
-import type { ActivityMessage as ActivityMessageModel } from '../rendering/activity-renderer.types';
+import type { ActivityMessage as ActivityMessageModel } from '../renders/activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{

@@ -3,17 +3,18 @@ import type {
   ActivityMessagePart,
 } from '../activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { getActivityVerbText } from '../activity-value.helpers';
 
 const FORM_ACTION_BY_FIELD: Readonly<Record<string, string>> = {
-  title: 'обновил(-а) название в форме',
-  description: 'обновил(-а) описание в форме',
-  end_date: 'обновил(-а) дату окончания в форме',
-  fields: 'обновил(-а) поля в форме',
+  title: 'название в форме',
+  description: 'описание в форме',
+  end_date: 'дату окончания в форме',
+  fields: 'поля в форме',
 };
 
-const DEFAULT_FORM_ACTION = 'обновил(-а) форму';
+const DEFAULT_FORM_ACTION = 'форму';
 
-const createFormReference = (
+const createFormLink = (
   activity: DtoActivityEventFull,
 ): ActivityMessagePart => {
   const form = activity.form_detail;
@@ -28,14 +29,15 @@ const createFormReference = (
 export const renderFormActivity = (
   activity: DtoActivityEventFull,
 ): ActivityMessage => {
-  const action =
+  const target =
     (activity.field && FORM_ACTION_BY_FIELD[activity.field]) ??
     DEFAULT_FORM_ACTION;
+  const action = getActivityVerbText(activity.verb);
 
   return {
     parts: [
-      { type: 'text', text: `${action} ` },
-      createFormReference(activity),
+      { type: 'text', text: `${action} ${target} ` },
+      createFormLink(activity),
     ],
   };
 };

@@ -63,7 +63,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
 
 import ActivityItem from './ActivityItem.vue';
-import { renderActivity } from '../rendering/renderActivity';
+import { renderActivity } from '../renders/renderActivity';
 
 import type {
   ActivitiesListRequest,

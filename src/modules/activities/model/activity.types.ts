@@ -15,6 +15,24 @@ export const isActivityEntityType = (
 ): value is ActivityEntityType =>
   ACTIVITY_ENTITY_TYPES.includes(value as ActivityEntityType);
 
+export const ACTIVITY_VERBS = [
+  'updated',
+  'removed',
+  'added',
+  'deleted',
+  'created',
+  'move',
+  'copied',
+  'move_doc_to_workspace',
+  'move_doc_to_doc',
+  'move_workspace_to_doc',
+] as const;
+
+export type ActivityVerb = (typeof ACTIVITY_VERBS)[number];
+
+export const isActivityVerb = (value?: string): value is ActivityVerb =>
+  ACTIVITY_VERBS.includes(value as ActivityVerb);
+
 export type ActivityPlacement = 'entity' | 'aggregate';
 
 export interface ActivityEntityReference {

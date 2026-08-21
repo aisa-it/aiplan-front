@@ -12,12 +12,14 @@ export interface ActivityExternalLinkPart {
   type: 'external-link';
   href: string;
   text: string;
+  emphasized?: boolean;
 }
 
 export interface ActivityRouteLinkPart {
   type: 'route-link';
   text: string;
   to: RouteLocationRaw;
+  emphasized?: boolean;
 }
 
 export type ActivityMessagePart =
@@ -32,4 +34,4 @@ export interface ActivityMessage {
 export type ActivityRenderer = (
   activity: DtoActivityEventFull,
   context: ActivityRenderContext,
-) => ActivityMessage;
+) => ActivityMessage | null;

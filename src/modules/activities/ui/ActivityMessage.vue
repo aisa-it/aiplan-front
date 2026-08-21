@@ -6,7 +6,8 @@
         :href="part.href"
         target="_blank"
         rel="noopener noreferrer"
-        class="font-normal text-primary no-underline"
+        class="text-primary no-underline"
+        :class="part.emphasized ? 'font-semibold' : 'font-normal'"
       >
         {{ part.text }}
       </a>
@@ -14,7 +15,8 @@
       <RouterLink
         v-else-if="part.type === 'route-link'"
         :to="part.to"
-        class="font-normal text-primary no-underline"
+        class="text-primary no-underline"
+        :class="part.emphasized ? 'font-semibold' : 'font-normal'"
       >
         {{ part.text }}
       </RouterLink>
@@ -25,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityMessage } from '../rendering/activity-renderer.types';
+import type { ActivityMessage } from '../renders/activity-renderer.types';
 
 defineProps<{
   message: ActivityMessage;

@@ -1,7 +1,7 @@
 export { default as ActivityMessage } from './ui/ActivityMessage.vue';
 export { default as ActivitiesList } from './ui/ActivitiesList.vue';
 
-export { renderActivity } from './rendering/renderActivity';
+export { renderActivity } from './renders/renderActivity';
 
 export type {
   ActivitiesListRequest,
@@ -9,9 +9,10 @@ export type {
   ActivityEntityType,
   ActivityPlacement,
   ActivityRenderContext,
+  ActivityVerb,
 } from './model/activity.types';
 export type {
   ActivityMessage as ActivityMessageModel,
   ActivityMessagePart,
   ActivityRenderer,
-} from './rendering/activity-renderer.types';
+} from './renders/activity-renderer.types';

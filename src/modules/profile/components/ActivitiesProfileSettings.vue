@@ -17,6 +17,7 @@
       :rows="activities"
       :rows-count="activitiesCount"
       :loading="loadList"
+      :context="PROFILE_ACTIVITY_CONTEXT"
       @request="loadActivitiesList"
     />
   </div>
@@ -24,11 +25,18 @@
 
 <script setup lang="ts">
 import ActivityHotMap from '@/components/activity-hot-map/ActivityHotMap.vue';
-import { ActivitiesList } from '@/modules/activities';
+import {
+  ActivitiesList,
+  type ActivityRenderContext,
+} from '@/modules/activities';
 
 import { useActivities } from '../composables/activities-profile-settings/useActivities';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+const PROFILE_ACTIVITY_CONTEXT = {
+  placement: 'aggregate',
+} satisfies ActivityRenderContext;
 
 defineProps<{
   user: DtoUser;
