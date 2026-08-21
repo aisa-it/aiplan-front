@@ -1,9 +1,26 @@
 import { DtoFormAttachmentLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { Forms } from '@aisa-it/aiplan-api-ts/src/Forms';
+import { PropertyTemplates } from '@aisa-it/aiplan-api-ts/src/PropertyTemplates';
 import axios from 'axios';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 
 const api = new (withInterceptors(Forms))();
+const propertyTemplatesApi = new (withInterceptors(PropertyTemplates))();
+
+/**
+ * Параметры проекта для привязки полей формы к кастомным полям задачи
+ * (пример использования: src/modules/project-settings/custom-properties/services/api.ts)
+ */
+export const getFormProjectPropertyTemplates = async (
+  workspaceSlug: string,
+  projectID: string,
+) => {
+  const response = await propertyTemplatesApi.getPropertyTemplateList(
+    workspaceSlug,
+    projectID,
+  );
+  return response.data;
+};
 
 export interface UploadFormAttachmentOptions {
   formSlug: string;

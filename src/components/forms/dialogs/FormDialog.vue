@@ -120,6 +120,7 @@
                 :show-arrow="form?.fields?.length > 1"
                 :all-fields="form?.fields"
                 :is-auto-create-project="isAutoCreateProject"
+                :property-templates="propertyTemplates"
                 @set-issue-name-field="setIssueNameField(id)"
               />
             </template>
@@ -152,7 +153,7 @@
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
 //store
@@ -163,7 +164,11 @@ import { useRolesStore } from 'src/stores/roles-store';
 import {
   AiplanReqForm,
   DtoProjectLight,
+  DtoProjectPropertyTemplate,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+// interfaces
+import { ExtendedFormFields } from 'src/interfaces/forms';
 
 // utils
 import { isEmpty } from 'src/utils/validation';
@@ -185,6 +190,7 @@ import {
   createForm,
   updateForm,
   getFormAuth,
+  getFormProjectPropertyTemplates,
 } from 'src/components/forms/services/api';
 
 // constants
@@ -240,6 +246,8 @@ const visible = ref('all');
 const isAutoCreateProject = ref(false);
 const projects = ref<DtoProjectLight[]>([]);
 const isLoading = ref(false);
+// null — целевой проект не выбран; [] — выбран, но параметров нет
+const propertyTemplates = ref<DtoProjectPropertyTemplate[] | null>(null);
 
 //methods
 const setIssueNameField = (id: number) => {
@@ -253,7 +261,51 @@ const clear = () => {
   form.value = getInitialFormState();
   visible.value = 'all';
   isAutoCreateProject.value = false;
+  propertyTemplates.value = null;
 };
+
+// Сброс настроек полей, зависящих от целевого проекта: привязки к параметрам
+// (бэк вернёт 3217, если останутся привязки к старому проекту) и «Название задачи»
+const resetProjectDependentSettings = () => {
+  form.value.fields?.forEach((field) => {
+    const extendedField = field as ExtendedFormFields;
+    extendedField.property_template_id = null;
+    extendedField.issue_name_field = false;
+  });
+};
+
+const loadPropertyTemplates = async () => {
+  const projectId = form.value.target_project_id?.id;
+  if (!projectId || !currentWorkspaceSlug.value) {
+    propertyTemplates.value = null;
+    return;
+  }
+  try {
+    const data = await getFormProjectPropertyTemplates(
+      currentWorkspaceSlug.value,
+      projectId,
+    );
+    propertyTemplates.value = Array.isArray(data)
+      ? data
+      : (data as any).result || [];
+  } catch (e) {
+    console.error(e);
+    propertyTemplates.value = [];
+  }
+};
+
+watch(
+  () => form.value.target_project_id?.id,
+  (newProjectId, oldProjectId) => {
+    if (newProjectId === oldProjectId) return;
+    // При первом открытии формы (в т.ч. редактировании) настройки не сбрасываем —
+    // сбрасываем только при реальной смене проекта пользователем
+    if (newProjectId && oldProjectId) {
+      resetProjectDependentSettings();
+    }
+    loadPropertyTemplates();
+  },
+);
 
 const save = async () => {
   formRef.value.validate().then(async (res: boolean) => {
@@ -291,10 +343,17 @@ const save = async () => {
         await createForm(currentWorkspaceSlug.value, requestBody);
       }
       onSuccess();
+      isLoading.value = false;
+      dialogRef.value.hide();
+      emits('success-create');
     } catch (e) {
       isLoading.value = false;
-    } finally {
-      isLoading.value = false;
+      // Код 3217 — привязка поля к параметру задачи некорректна (например, осталась
+      // привязка к старому проекту). Текст ошибки с бэка показывает interceptor,
+      // диалог оставляем открытым, чтобы пользователь исправил привязки
+      if ((e as any)?.response?.data?.code === 3217) {
+        return;
+      }
       dialogRef.value.hide();
       emits('success-create');
     }
