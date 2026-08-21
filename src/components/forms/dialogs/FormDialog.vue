@@ -79,6 +79,13 @@
               label="Проект"
               style="min-width: 200px"
             />
+            <select-priority
+              v-if="isAutoCreateProject"
+              v-model:priority="form.default_issue_priority"
+              :workspace-slug="currentWorkspaceSlug || ''"
+              :projectid="form.target_project_id?.id ?? ''"
+              label="Приоритет задачи"
+            />
           </div>
           <div>
             <div class="q-mt-sm">Присылать уведомления о прохождении</div>
@@ -203,6 +210,7 @@ import FormsButton from '../components/formsButton.vue';
 import FormsDate from '../components/formsDate.vue';
 import AiFormItemBody from '../components/AiFormItemBody.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+import SelectPriority from 'src/components/SelectPriority.vue';
 
 const props = defineProps<{
   formSlug?: string;
@@ -234,6 +242,7 @@ const getInitialFormState = (): AiplanReqForm => ({
   auth_require: false,
   end_date: getDate(),
   target_project_id: '',
+  default_issue_priority: null,
   notification_channels: {
     telegram: false,
     app: false,
@@ -327,6 +336,8 @@ const save = async () => {
       target_project_id: isAutoCreateProject.value
         ? form.value.target_project_id.id
         : null,
+      // PATCH «полный» — поле отправляем всегда, null сбрасывает приоритет
+      default_issue_priority: form.value.default_issue_priority ?? null,
       notification_channels: form.value.notification_channels,
     };
 
