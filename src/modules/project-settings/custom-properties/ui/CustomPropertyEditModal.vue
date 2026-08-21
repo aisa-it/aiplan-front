@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="emits('update:modelValue', $event)"
   >
-    <q-card style="min-width: 400px; border-radius: 12px">
+    <q-card style="width: min(400px, 95vw); border-radius: 12px">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">
           {{ isEdit ? 'Редактировать параметр' : 'Создать параметр' }}
@@ -72,6 +72,86 @@
             </div>
           </div>
 
+          <div v-if="isLookupType" class="q-mt-md">
+            <q-select
+              v-model="form.dictionary_id"
+              :options="dictionaryOptions"
+              class="base-selector"
+              label="Справочник проекта"
+              dense
+              emit-value
+              map-options
+              :loading="isDictionariesLoading"
+              :rules="[(val) => !!val || 'Выберите справочник']"
+              lazy-rules
+            />
+          </div>
+
+          <div v-if="isDependencySupportedType" class="q-mt-md">
+            <span class="text-grey-7">Зависимость:</span>
+
+            <q-select
+              v-model="form.dependency!.parent_template_id"
+              :options="parentTemplateOptions"
+              class="base-selector q-mt-sm"
+              label="Родительский параметр"
+              dense
+              clearable
+              emit-value
+              map-options
+              @update:model-value="onParentTemplateChange"
+            />
+
+            <q-select
+              v-if="dependencyModes.length > 1"
+              v-model="form.dependency!.mode"
+              :options="dependencyModes"
+              class="base-selector q-mt-sm"
+              label="Режим"
+              dense
+              emit-value
+              map-options
+            />
+            <div
+              v-else-if="dependencyModes.length === 1"
+              class="text-caption text-grey-7 q-mt-sm"
+            >
+              Режим: {{ dependencyModes[0].label }}
+            </div>
+
+            <!-- options_map: вариант родителя → допустимые варианты ребёнка -->
+            <div v-if="isOptionsMapMode" class="q-mt-sm">
+              <div
+                v-for="parentOption in parentOptions"
+                :key="parentOption"
+                class="row items-center q-mb-sm"
+              >
+                <div class="col-12 col-sm-4 q-pr-sm word-wrap text-grey-7">
+                  {{ parentOption }}
+                </div>
+                <q-select
+                  v-model="form.dependency!.options_map![parentOption]"
+                  :options="form.options"
+                  class="base-selector col-12 col-sm-8 q-mt-xs q-mt-sm-none"
+                  label="Допустимые варианты"
+                  dense
+                  multiple
+                  clearable
+                  emit-value
+                  map-options
+                />
+              </div>
+            </div>
+
+            <q-input
+              v-else-if="isRowFilterMode"
+              v-model="form.dependency!.row_filter_attr"
+              class="base-input q-mt-sm"
+              label="Имя атрибута строки справочника (в attrs)"
+              dense
+            />
+          </div>
+
           <div>
             <span class="text-grey-7">Видимость:</span>
             <div class="row q-mt-sm">
@@ -121,27 +201,120 @@
 <script setup lang="ts">
 //cores
 import { ref, watch, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+
+//stores
+import { useProjectStore } from 'src/stores/project-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 //api
 import { PropertyTemplate } from '../services/api';
+import { getDictionaries, Dictionary } from '../../dictionaries/services/api';
+
+// локальный тип формы зависимости: снятие = parent_template_id: null («все нули»),
+// тип пакета (TypesPropertyDependency) null не допускает
+interface PropertyDependencyForm {
+  parent_template_id: string | null;
+  mode: string | null;
+  options_map: Record<string, string[]> | null;
+  row_filter_attr: string | null;
+}
+
+type PropertyTemplateForm = Omit<PropertyTemplate, 'dependency'> & {
+  dependency?: PropertyDependencyForm;
+};
 
 const props = defineProps<{
   modelValue: boolean;
   editItem?: PropertyTemplate | null;
+  templates?: PropertyTemplate[];
 }>();
 
 const emits = defineEmits<{ submit: [any]; 'update:modelValue': [boolean] }>();
 
-//variables
-const form = ref<PropertyTemplate>({
+//stores
+const projectStore = useProjectStore();
+const workspaceStore = useWorkspaceStore();
+const { currentProjectID } = storeToRefs(projectStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
+
+//переменные
+// options_map в форме всегда объект — редактор карты не должен падать на null
+const emptyDependency = (): PropertyDependencyForm => ({
+  parent_template_id: null,
+  mode: null,
+  options_map: {},
+  row_filter_attr: null,
+});
+
+const form = ref<PropertyTemplateForm>({
   name: '',
   type: 'string',
   only_admin: true,
   options: [],
+  dependency: emptyDependency(),
 });
+
+const dictionaries = ref<Dictionary[]>([]);
+const isDictionariesLoading = ref(false);
 
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+const isLookupType = computed(() => form.value.type === 'lookup');
+// зависимость поддерживается только для select (options_map) и lookup (row_filter)
+const isDependencySupportedType = computed(
+  () => isSelectType.value || isLookupType.value,
+);
+
+const dependencyModes = computed(() => {
+  if (isSelectType.value) {
+    return [{ label: 'Список вариантов', value: 'options_map' }];
+  }
+  if (isLookupType.value) {
+    return [{ label: 'Фильтр по атрибуту', value: 'row_filter' }];
+  }
+  return [];
+});
+
+const isOptionsMapMode = computed(
+  () => form.value.dependency?.mode === 'options_map',
+);
+const isRowFilterMode = computed(
+  () => form.value.dependency?.mode === 'row_filter',
+);
+
+const selectedParentTemplate = computed(() =>
+  (props.templates || []).find(
+    (t) => t.id === form.value.dependency?.parent_template_id,
+  ),
+);
+
+// варианты родителя — для редактора options_map
+const parentOptions = computed(() => selectedParentTemplate.value?.options || []);
+
+// родители, совместимые с режимом: options_map — только select, row_filter — select/lookup
+const parentTemplateOptions = computed(() => {
+  const allowedTypes = isOptionsMapMode.value
+    ? ['select']
+    : isRowFilterMode.value
+      ? ['select', 'lookup']
+      : [];
+  return (props.templates || [])
+    .filter(
+      (t) =>
+        t.id !== props.editItem?.id &&
+        t.type &&
+        allowedTypes.includes(t.type),
+    )
+    .map((t) => ({ label: t.name, value: t.id }));
+});
+
+const dictionaryOptions = computed(() =>
+  dictionaries.value.map((item) => ({
+    label: item.name,
+    value: item.id,
+  })),
+);
 
 const hasEmptyOptions = computed(() => {
   if (!isSelectType) return false;
@@ -154,6 +327,7 @@ const hasEmptyOptions = computed(() => {
 const canSubmit = computed(() => {
   if (!form.value.name) return false;
   if (isSelectType.value && hasEmptyOptions.value) return false;
+  if (isLookupType.value && !form.value.dictionary_id) return false;
   return true;
 });
 
@@ -163,14 +337,61 @@ const typeOptions = [
   { label: 'Флаг', value: 'boolean' },
   { label: 'Список', value: 'select' },
   { label: 'Ссылка', value: 'link' },
+  { label: 'Справочник', value: 'lookup' },
 ];
 
 //methods
+const loadDictionaries = async () => {
+  isDictionariesLoading.value = true;
+  try {
+    const data = await getDictionaries(
+      currentWorkspaceSlug.value as string,
+      currentProjectID.value,
+    );
+    dictionaries.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isDictionariesLoading.value = false;
+  }
+};
+
 const onSubmit = () => {
   const data = { ...form.value };
   if (data.type !== 'select') {
     delete data.options;
   }
+  if (data.type !== 'lookup') {
+    delete data.dictionary_id;
+  }
+
+  const parentId = form.value.dependency?.parent_template_id;
+  if (parentId) {
+    // зависимость задана — собираем полный объект
+    data.dependency = {
+      parent_template_id: parentId,
+      mode: form.value.dependency?.mode || null,
+      options_map:
+        form.value.dependency?.mode === 'options_map'
+          ? form.value.dependency?.options_map || {}
+          : null,
+      row_filter_attr:
+        form.value.dependency?.mode === 'row_filter'
+          ? form.value.dependency?.row_filter_attr || null
+          : null,
+    };
+  } else if (props.editItem?.dependency?.parent_template_id) {
+    // снятие зависимости — нулевой parent_template_id (все нули)
+    data.dependency = {
+      parent_template_id: null,
+      mode: null,
+      options_map: null,
+      row_filter_attr: null,
+    };
+  } else {
+    delete data.dependency;
+  }
+
   emits('submit', data);
 };
 
@@ -185,15 +406,35 @@ const removeOption = (index: number) => {
   form.value.options?.splice(index, 1);
 };
 
+// карта/атрибут привязаны к родителю — сбрасываем только при пользовательской
+// смене родителя (не при инициализации формы из editItem)
+const onParentTemplateChange = () => {
+  if (form.value.dependency) {
+    form.value.dependency.options_map = {};
+    form.value.dependency.row_filter_attr = null;
+  }
+};
+
 //lifecycle hooks
 watch(
   () => props.modelValue,
   (val) => {
     if (val) {
+      loadDictionaries();
       if (props.editItem) {
         form.value = {
           ...props.editItem,
           options: props.editItem.options || [],
+          dependency: props.editItem.dependency
+            ? {
+                parent_template_id:
+                  props.editItem.dependency.parent_template_id ?? null,
+                mode: props.editItem.dependency.mode ?? null,
+                options_map: props.editItem.dependency.options_map || {},
+                row_filter_attr:
+                  props.editItem.dependency.row_filter_attr ?? null,
+              }
+            : emptyDependency(),
         };
       } else {
         form.value = {
@@ -201,6 +442,8 @@ watch(
           type: 'string',
           only_admin: true,
           options: [],
+          dictionary_id: null,
+          dependency: emptyDependency(),
         };
       }
     }
@@ -215,6 +458,15 @@ watch(
       (!form.value.options || form.value.options.length === 0)
     ) {
       form.value.options = [''];
+    }
+    // режим однозначно определяется типом ребёнка
+    if (newType === 'select') {
+      form.value.dependency!.mode = 'options_map';
+    } else if (newType === 'lookup') {
+      form.value.dependency!.mode = 'row_filter';
+    } else {
+      // зависимость поддерживается только для select/lookup — полный сброс
+      form.value.dependency = emptyDependency();
     }
   },
 );

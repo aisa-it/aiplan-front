@@ -60,6 +60,7 @@ const formatType = (type: string) => {
     boolean: 'Флаг',
     select: 'Список',
     link: 'Ссылка',
+    lookup: 'Справочник',
   };
   return typeMap[type] || type;
 };
