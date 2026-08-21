@@ -67,6 +67,21 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'lookup'">
+            <SelectDictionaryRow
+              class="issue-selector"
+              :dictionary-id="(prop.dictionary_id as string) || ''"
+              :model-value="(prop.value as string) || null"
+              :current-label="prop.value_label"
+              @update:model-value="
+                (val) => {
+                  prop.value = val;
+                  updateValue(prop, val);
+                }
+              "
+            />
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
@@ -122,6 +137,7 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
 import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
+import SelectDictionaryRow from 'src/components/selects/SelectDictionaryRow.vue';
 
 //props
 const props = defineProps<{
@@ -179,7 +195,7 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
       });
     }
 
-    if (prop.type === 'link') {
+    if (prop.type === 'link' || prop.type === 'lookup') {
       fetchData();
     }
   } catch (e) {

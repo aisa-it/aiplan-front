@@ -143,6 +143,13 @@ const activeTab = computed(() => {
             'src/modules/project-settings/workflow/WorkflowProjectSettings.vue'
           ),
       );
+    case 10:
+      return asyncImport(
+        () =>
+          import(
+            'src/modules/project-settings/dictionaries/ui/DictionariesSettings.vue'
+          ),
+      );
     default:
       return asyncImport(
         () =>
@@ -195,6 +202,11 @@ const listTabs = computed(() => {
     {
       name: 9,
       label: 'Бизнес-процессы',
+    },
+    {
+      name: 10,
+      label: 'Справочники',
+      allowedRoles: ['owner', 'admin'],
     },
   ];
 

@@ -72,6 +72,21 @@
             </div>
           </div>
 
+          <div v-if="isLookupType" class="q-mt-md">
+            <q-select
+              v-model="form.dictionary_id"
+              :options="dictionaryOptions"
+              class="base-selector"
+              label="Справочник проекта"
+              dense
+              emit-value
+              map-options
+              :loading="isDictionariesLoading"
+              :rules="[(val) => !!val || 'Выберите справочник']"
+              lazy-rules
+            />
+          </div>
+
           <div>
             <span class="text-grey-7">Видимость:</span>
             <div class="row q-mt-sm">
@@ -121,9 +136,15 @@
 <script setup lang="ts">
 //cores
 import { ref, watch, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+
+//stores
+import { useProjectStore } from 'src/stores/project-store';
+import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 //api
 import { PropertyTemplate } from '../services/api';
+import { getDictionaries, Dictionary } from '../../dictionaries/services/api';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -131,6 +152,12 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{ submit: [any]; 'update:modelValue': [boolean] }>();
+
+//stores
+const projectStore = useProjectStore();
+const workspaceStore = useWorkspaceStore();
+const { currentProjectID } = storeToRefs(projectStore);
+const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
 const form = ref<PropertyTemplate>({
@@ -140,8 +167,19 @@ const form = ref<PropertyTemplate>({
   options: [],
 });
 
+const dictionaries = ref<Dictionary[]>([]);
+const isDictionariesLoading = ref(false);
+
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+const isLookupType = computed(() => form.value.type === 'lookup');
+
+const dictionaryOptions = computed(() =>
+  dictionaries.value.map((item) => ({
+    label: item.name,
+    value: item.id,
+  })),
+);
 
 const hasEmptyOptions = computed(() => {
   if (!isSelectType) return false;
@@ -154,6 +192,7 @@ const hasEmptyOptions = computed(() => {
 const canSubmit = computed(() => {
   if (!form.value.name) return false;
   if (isSelectType.value && hasEmptyOptions.value) return false;
+  if (isLookupType.value && !form.value.dictionary_id) return false;
   return true;
 });
 
@@ -163,13 +202,32 @@ const typeOptions = [
   { label: 'Флаг', value: 'boolean' },
   { label: 'Список', value: 'select' },
   { label: 'Ссылка', value: 'link' },
+  { label: 'Справочник', value: 'lookup' },
 ];
 
 //methods
+const loadDictionaries = async () => {
+  isDictionariesLoading.value = true;
+  try {
+    const data = await getDictionaries(
+      currentWorkspaceSlug.value as string,
+      currentProjectID.value,
+    );
+    dictionaries.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isDictionariesLoading.value = false;
+  }
+};
+
 const onSubmit = () => {
   const data = { ...form.value };
   if (data.type !== 'select') {
     delete data.options;
+  }
+  if (data.type !== 'lookup') {
+    delete data.dictionary_id;
   }
   emits('submit', data);
 };
@@ -190,6 +248,7 @@ watch(
   () => props.modelValue,
   (val) => {
     if (val) {
+      loadDictionaries();
       if (props.editItem) {
         form.value = {
           ...props.editItem,
@@ -201,6 +260,7 @@ watch(
           type: 'string',
           only_admin: true,
           options: [],
+          dictionary_id: null,
         };
       }
     }
