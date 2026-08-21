@@ -233,6 +233,14 @@
             "
           />
         </div>
+
+        <div class="col-12 order-last">
+          <SelectCustomProperties
+            ref="customPropertiesRef"
+            :project-id="project.id"
+            :workspace-slug="workspaceSlug"
+          />
+        </div>
       </q-card-section>
 
       <SelectAttachments
@@ -324,6 +332,7 @@ import SelectSingleIssueTemplate from '../modules/project-settings/new-issue-tem
 import SelectAttachments from './SelectAttachments.vue';
 import SelectSprints from 'src/components/SelectSprints.vue';
 import SelectLinks from './SelectLinks.vue';
+import SelectCustomProperties from './SelectCustomProperties.vue';
 import NewIssuePanelSkeleton from './NewIssuePanelSkeleton.vue';
 import DefaultLoader from './loaders/DefaultLoader.vue';
 
@@ -424,6 +433,7 @@ const links = ref<DtoIssueLinkLight[]>([]);
 const creationLoading = ref(false);
 
 const selectAttachments = ref();
+const customPropertiesRef = ref();
 
 //computeds
 const workspaceSlug = computed(() => {
@@ -635,6 +645,10 @@ const handleCreateSuccess = async (createdIssueData: any) => {
             `${issue.project_detail.identifier}-${issue.sequence_id || 0}`,
           ),
     });
+  }
+
+  if (customPropertiesRef.value) {
+    await customPropertiesRef.value.saveProperties(createdIssueData.id);
   }
 
   await selectAttachments.value.uploadDraftAttachments(createdIssueData.id);
