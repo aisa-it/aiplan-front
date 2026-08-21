@@ -1,5 +1,9 @@
 <template>
-  <div v-if="editorInstance" class="html-editor">
+  <div
+    v-if="editorInstance"
+    class="html-editor"
+    :class="{ 'html-editor--readonly': readonly }"
+  >
     <EditorContent :id="editorId" :editor="editorInstance" />
   </div>
 </template>
@@ -24,6 +28,7 @@ import {
 const props = defineProps<{
   editorId?: string;
   content?: string;
+  readonly?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -42,6 +47,7 @@ const onUpdate = () => {
 
 const initialEditor = () => {
   editorInstance.value = new Editor({
+    editable: !props.readonly,
     extensions: [
       Document,
       Text,
@@ -107,8 +113,28 @@ watch(
   .html-editor {
     :deep(.tiptap) {
       pre {
-        border: 1px solid $extra-light;
+        // border: 1px solid $dark-border-color;
         background-color: inherit;
+      }
+    }
+  }
+}
+
+.html-editor--readonly {
+  :deep(.tiptap) {
+    pre {
+      border: none;
+      background-color: $tiptap-codeblock-bg-color;
+    }
+  }
+}
+
+.body--dark {
+  .html-editor--readonly {
+    :deep(.tiptap) {
+      pre {
+        border: none;
+        background-color: $tiptap-codeblock-bg-color;
       }
     }
   }
