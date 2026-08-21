@@ -44,6 +44,21 @@
             вносит изменения
           </li>
         </ul>
+        <p class="q-mb-none">Поля контекста (первый аргумент хука - params):</p>
+        <ul>
+          <li>
+            <b>params:getProp("Имя поля")</b> - значение дополнительного
+            параметра задачи по имени (boolean → true/false, незаполненные
+            select/link → nil);
+          </li>
+          <li>
+            <b>params.properties</b> - список заполненных параметров вида {name,
+            type, value} для перебора;
+          </li>
+          <li>
+            <b>params.issue.attachment_count</b> - количество вложений задачи.
+          </li>
+        </ul>
         <p class="q-mb-none">
           Функции должны возвращать таблицу со следующими объектами:
         </p>
@@ -51,6 +66,16 @@
           <li><b>status</b> - boolean, если true - статус меняется</li>
           <li><b>error</b> - string, текст ошибки</li>
         </ul>
+        <p class="q-mb-none">
+          Пример скрипта - запрет закрытия задачи без вложения и с незаполненным
+          полем:
+        </p>
+        <EditorCodeProjectSettings
+        class="q-mt-sm"
+          editor-id="editor-code-example"
+          readonly
+          :content="rulesExample"
+        />
       </div>
     </div>
     <div class="col">
@@ -139,7 +164,6 @@ import LogsProjectSettings from 'src/modules/project-settings/rules/ui/LogsProje
 import { updateProject } from '../../services/api';
 import { loadLogsList, loadRulesScript } from '../services/api';
 
-
 // core
 const route = useRoute();
 
@@ -152,6 +176,18 @@ const { project } = storeToRefs(projectStore);
 
 // vars
 const logsFilterOptions: LogType[] = ['error', 'print', 'success', 'fail'];
+const rulesExample = `function BeforeStatusChange(params, newstatus)
+  if newstatus.group == "completed" then
+    if params.issue.attachment_count == 0 then
+      return { status = false, error = "Прикрепите файл перед закрытием задачи" }
+    end
+    local resolution = params:getProp("Резолюция")
+    if resolution == nil or resolution == "" then
+      return { status = false, error = "Заполните поле Резолюция" }
+    end
+  end
+  return { status = true }
+end`;
 const rulesField = ref('');
 const editorCode = ref<Editor>();
 const metadata = ref({
@@ -220,7 +256,10 @@ async function loadLogs() {
 }
 
 async function loadScript() {
-  await loadRulesScript(project.value.workspace_detail?.slug, project.value.id).then((response) => {
+  await loadRulesScript(
+    project.value.workspace_detail?.slug,
+    project.value.id,
+  ).then((response) => {
     rulesField.value = response?.rules_script ?? '';
   });
 }
