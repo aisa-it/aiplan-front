@@ -40,6 +40,13 @@
             @update="openLinkDialog(prop)"
           />
 
+          <SelectDictionaryRow
+            v-else-if="prop.type === 'lookup'"
+            class="issue-selector"
+            :dictionary-id="(prop.dictionary_id as string) || ''"
+            v-model="prop.value"
+          />
+
           <q-input v-else class="base-input" v-model="prop.value" dense />
         </div>
       </div>
@@ -81,6 +88,7 @@ import { DtoIssueProperty } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
 import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
+import SelectDictionaryRow from 'src/components/selects/SelectDictionaryRow.vue';
 
 //props
 const props = defineProps<{
@@ -126,7 +134,13 @@ const fetchData = async () => {
         name: t.name,
         type: t.type,
         options: t.options,
-        value: t.type === 'boolean' ? false : t.type === 'link' ? null : '',
+        dictionary_id: t.dictionary_id,
+        value:
+          t.type === 'boolean'
+            ? false
+            : t.type === 'link' || t.type === 'lookup'
+              ? null
+              : '',
       }));
   } catch (e) {
   } finally {
