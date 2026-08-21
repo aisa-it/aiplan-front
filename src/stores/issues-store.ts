@@ -105,10 +105,14 @@ export const useIssuesStore = defineStore('issues-store', {
     async exportIssues(
       filters: TypesIssuesListFilters,
       pagination: Omit<IPagination, 'offset' | 'limit'>,
+      includeProperties = false,
     ) {
       try {
         const res = await api.post('/api/auth/issues/search/export/', filters, {
-          params: pagination,
+          params: {
+            ...pagination,
+            ...(includeProperties ? { include_properties: true } : {}),
+          },
           responseType: 'blob',
           headers: {
             'Content-Type': 'application/json',

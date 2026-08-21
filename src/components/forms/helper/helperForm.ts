@@ -137,6 +137,7 @@ export const onError = () => {
 export const addQuestion = (object: any, linkSelect: any[]) => {
   if (typeof object === 'object' && object !== null) {
     object.depend_on = null;
+    object.property_template_id = null;
     if (object.type === 'select') {
       object.validate = { opt: [] };
     }
@@ -151,6 +152,7 @@ export const validateFormWithSlug = (data) => {
     auth_require: data.auth_require,
     end_date: serializationDate(data.end_date, false),
     target_project_id: data.target_project_id,
+    default_issue_priority: data.default_issue_priority ?? null,
     notification_channels: data.notification_channels || {
       app: false,
       telegram: false,
@@ -164,6 +166,7 @@ export const validateFormWithSlug = (data) => {
         depend_on: el.depend_on || null,
         issue_name_field:
           el.type === 'input' ? (el.issue_name_field ?? false) : undefined,
+        property_template_id: el.property_template_id ?? null,
         validate:
           el.type === 'date'
             ? undefined

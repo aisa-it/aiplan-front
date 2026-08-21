@@ -57,6 +57,22 @@ async function streamIssuesByEndpoint({
       signal: controller.signal,
     });
 
+    if (!response.ok) {
+      // Парсим JSON-ошибку бэка ({code, error, ru_error}) и пробрасываем её
+      // наверх — иначе 4xx молча превращается в пустой список.
+      let data: { code?: number; error?: string; ru_error?: string } | null =
+        null;
+      try {
+        data = await response.json();
+      } catch {}
+      const err: any = new Error(
+        data?.ru_error || data?.error || `HTTP ${response.status}`,
+      );
+      err.code = data?.code;
+      err.data = data;
+      throw err;
+    }
+
     if (!response?.body) return;
 
     const reader = response.body.getReader();

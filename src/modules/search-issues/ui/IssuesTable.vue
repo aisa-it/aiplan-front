@@ -29,11 +29,29 @@
         round
         style="height: 30px; width: 30px"
         class="q-ml-sm"
-        @click="downloadZip(pagination)"
         v-if="!isCreateSprint"
       >
         <FileZIPIcon />
         <q-tooltip>Скачать задачи архивом</q-tooltip>
+        <q-popup-proxy ref="exportPopupRef">
+          <q-card style="min-width: 300px">
+            <q-card-section class="q-pa-md">
+              <q-checkbox
+                v-model="includeProperties"
+                label="Выгружать дополнительные параметры"
+              />
+            </q-card-section>
+            <q-card-actions align="right" class="q-px-md q-pb-md">
+              <q-btn
+                flat
+                no-caps
+                color="primary"
+                label="Скачать"
+                @click="downloadZip(pagination)"
+              />
+            </q-card-actions>
+          </q-card>
+        </q-popup-proxy>
       </q-btn>
       <q-btn
         flat
@@ -209,6 +227,8 @@ const rows = ref([] as any);
 const loading = ref(true);
 const searchQuery = ref('');
 const filter = ref();
+const includeProperties = ref(false);
+const exportPopupRef = ref();
 const pagination = ref({
   sortBy: null,
   descending: true,
@@ -333,8 +353,9 @@ const downloadZip = async (p) => {
       group_by: group_by.value !== 'none' ? group_by.value : undefined,
     };
 
-    await exportIssues(req, pagination);
+    await exportIssues(req, pagination, includeProperties.value);
 
+    exportPopupRef.value?.hide();
     setNotificationView({
       open: true,
       type: 'success',
