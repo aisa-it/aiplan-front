@@ -94,6 +94,32 @@
         </div>
       </template>
 
+      <template v-slot:property-binding>
+        <div v-if="showPropertyBinding" class="row items-center gap-x-md q-mt-md">
+          <q-select
+            :model-value="computedValue.property_template_id"
+            :options="propertyBindingOptions"
+            @update:model-value="onPropertyTemplateSelect"
+            label="Записывать в параметр задачи"
+            dense
+            clearable
+            emit-value
+            map-options
+            class="base-selector"
+            style="min-width: 260px"
+            hide-bottom-space
+            option-value="id"
+            option-label="name"
+          />
+          <div
+            v-if="boundSelectTemplate"
+            class="text-caption text-grey"
+          >
+            Варианты поля должны входить в options параметра
+          </div>
+        </div>
+      </template>
+
       <template
         v-slot:nested
         v-if="
@@ -167,15 +193,36 @@ import {
 import AddQuestionTypeField from './AddQuestionTypeField.vue';
 
 //types
+import { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { ExtendedFormFields } from 'src/interfaces/forms';
 
-const props = defineProps<{
-  modelValue: ExtendedFormFields;
-  number: number;
-  showArrow: boolean;
-  allFields?: any[];
-  isAutoCreateProject?: boolean;
-}>();
+// Какие типы параметров проекта совместимы с типами полей формы.
+// Параметры типа link не предлагаем — их нет в маппинге.
+// attachment/multiselect/date — привязка не поддерживается бэком, селект не показываем.
+const FIELD_TYPE_TO_PROPERTY_TYPES: Record<string, string[]> = {
+  input: ['string'],
+  textarea: ['string'],
+  numeric: ['string'],
+  color: ['string'],
+  checkbox: ['boolean'],
+  select: ['select'],
+};
+
+const props = withDefaults(
+  defineProps<{
+    modelValue: ExtendedFormFields;
+    number: number;
+    showArrow: boolean;
+    allFields?: any[];
+    isAutoCreateProject?: boolean;
+    // null — целевой проект не выбран (селект не показываем),
+    // [] — проект выбран, но подходящих параметров нет
+    propertyTemplates?: DtoProjectPropertyTemplate[] | null;
+  }>(),
+  {
+    propertyTemplates: null,
+  },
+);
 
 const emits = defineEmits<{
   'update:model-value': [value: ExtendedFormFields];
@@ -268,9 +315,74 @@ const dependOnValue = computed({
   },
 });
 
+// Селект «Записывать в параметр задачи» показываем только при выбранном
+// целевом проекте формы (propertyTemplates !== null), для совместимых типов
+// полей и при наличии доступных параметров. Исключение: у поля уже есть
+// привязка, которой нет в списке (параметр удалён на бэке) — селект показываем,
+// чтобы можно было снять привязку
+const showPropertyBinding = computed(() => {
+  return (
+    props.propertyTemplates !== null &&
+    !!FIELD_TYPE_TO_PROPERTY_TYPES[computedValue.value.type ?? ''] &&
+    (propertyBindingOptions.value.length > 0 ||
+      !!computedValue.value.property_template_id)
+  );
+});
+
+// Параметры, уже привязанные к другим полям формы, не предлагаем
+const usedPropertyTemplateIds = computed(() => {
+  const currentField = computedValue.value;
+  return (props.allFields ?? [])
+    .filter((field) => field !== currentField)
+    .map((field) => field.property_template_id)
+    .filter(Boolean);
+});
+
+const propertyBindingOptions = computed(() => {
+  const compatibleTypes =
+    FIELD_TYPE_TO_PROPERTY_TYPES[computedValue.value.type ?? ''];
+  if (!compatibleTypes) return [];
+
+  const usedIds = new Set(usedPropertyTemplateIds.value);
+  return (props.propertyTemplates ?? []).filter(
+    (template) =>
+      compatibleTypes.includes(template.type ?? '') && !usedIds.has(template.id),
+  );
+});
+
+// Для select-поля бэк требует, чтобы варианты поля входили в options параметра —
+// предзаполняем варианты поля options параметра, если они ещё не заданы
+const boundSelectTemplate = computed(() => {
+  if (computedValue.value.type !== 'select') return null;
+  return (
+    props.propertyTemplates?.find(
+      (template) => template.id === computedValue.value.property_template_id,
+    ) ?? null
+  );
+});
+
 //methods
 const updateCheckbox = (el: any) => {
   el.type = el.type === 'select' ? 'multiselect' : 'select';
+};
+
+const onPropertyTemplateSelect = (templateId: string | null) => {
+  const field = computedValue.value;
+  field.property_template_id = templateId;
+
+  const template = props.propertyTemplates?.find(
+    (item) => item.id === templateId,
+  );
+  if (
+    field.type === 'select' &&
+    template?.options?.length &&
+    !field.validate?.opt?.length
+  ) {
+    field.validate = {
+      ...(field.validate ?? {}),
+      opt: [...template.options],
+    };
+  }
 };
 
 //hooks

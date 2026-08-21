@@ -15,6 +15,8 @@ export interface DtoDependOn {
 
 export type ExtendedFormFields = TypesFormFields & {
   depend_on?: DtoDependOn | null;
+  // fixme убрать, когда обновится тип в data-contracts (BAK-359)
+  property_template_id?: string | null;
 };
 
 export type GroupedFormField = ExtendedFormFields & {

@@ -137,6 +137,7 @@ export const onError = () => {
 export const addQuestion = (object: any, linkSelect: any[]) => {
   if (typeof object === 'object' && object !== null) {
     object.depend_on = null;
+    object.property_template_id = null;
     if (object.type === 'select') {
       object.validate = { opt: [] };
     }
@@ -164,6 +165,7 @@ export const validateFormWithSlug = (data) => {
         depend_on: el.depend_on || null,
         issue_name_field:
           el.type === 'input' ? (el.issue_name_field ?? false) : undefined,
+        property_template_id: el.property_template_id ?? null,
         validate:
           el.type === 'date'
             ? undefined
