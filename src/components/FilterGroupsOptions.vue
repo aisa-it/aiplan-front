@@ -15,7 +15,7 @@
     <template v-slot:option="{ itemProps, opt }">
       <q-item v-bind="itemProps" class="selector-option__wrapper">
         <q-item-section>
-          <q-item-label>
+          <q-item-label class="selector-option__label">
             {{ opt.label }}
           </q-item-label>
         </q-item-section>
@@ -44,5 +44,17 @@ const emits = defineEmits<{
   &-columns__wrapper {
     padding-left: 12px;
   }
+}
+
+// перекрываем глобальный лимит ширины .fit-select-popup .q-item__label
+// (120px с обрезанием в три точки) — длинные названия параметров
+// должны показываться полностью
+.fit-select-popup .q-item__label.selector-option__label {
+  min-width: 240px !important;
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: inherit !important;
+  word-break: break-word;
 }
 </style>

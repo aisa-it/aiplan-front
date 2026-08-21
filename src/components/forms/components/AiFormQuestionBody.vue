@@ -52,6 +52,7 @@
       </div>
     </div>
     <slot name="dependency-config"></slot>
+    <slot name="property-binding"></slot>
     <slot name="nested"></slot>
     <slot name="buttonAdd"></slot>
   </q-item-section>
