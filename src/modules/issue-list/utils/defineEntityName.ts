@@ -7,6 +7,11 @@ function userName(user: DtoUser) {
 }
 
 export function defineEntityName(entity: any, groupBy: string) {
+  // группировка по дополнительному параметру (property:<uuid>):
+  // entity — сырое значение (строка) или null для «не заполнено»
+  if (typeof groupBy === 'string' && groupBy.startsWith('property:')) {
+    return entity ? String(entity) : 'Не заполнено';
+  }
   switch (groupBy) {
     case 'project':
     case 'state': {
