@@ -71,6 +71,7 @@
     <CustomPropertyEditModal
       v-model="showModal"
       :edit-item="editingItem"
+      :templates="templates"
       @submit="handleModalSubmit"
     />
 

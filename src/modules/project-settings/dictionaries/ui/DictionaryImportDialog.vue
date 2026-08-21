@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="emits('update:modelValue', $event)"
   >
-    <q-card style="min-width: 600px; max-width: 95vw; border-radius: 12px">
+    <q-card style="width: min(600px, 95vw); border-radius: 12px">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Импорт строк</div>
         <q-space />
@@ -76,7 +76,7 @@
             dense
             no-caps
             class="primary-btn"
-            style="width: 130px"
+            style="min-width: 170px"
             label="Импортировать"
             :loading="isImporting"
             :disable="!jsonText.trim()"
