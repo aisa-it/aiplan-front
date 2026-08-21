@@ -152,6 +152,7 @@ export const validateFormWithSlug = (data) => {
     auth_require: data.auth_require,
     end_date: serializationDate(data.end_date, false),
     target_project_id: data.target_project_id,
+    default_issue_priority: data.default_issue_priority ?? null,
     notification_channels: data.notification_channels || {
       app: false,
       telegram: false,
