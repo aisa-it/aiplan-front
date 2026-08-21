@@ -109,8 +109,6 @@ export const useIssuesStore = defineStore('issues-store', {
     ) {
       try {
         const res = await api.post('/api/auth/issues/search/export/', filters, {
-          // include_properties: после выката BAK-362 появится в типах
-          // клиента aiplan-api-ts (exportIssueList, src/Issues.ts)
           params: {
             ...pagination,
             ...(includeProperties ? { include_properties: true } : {}),
