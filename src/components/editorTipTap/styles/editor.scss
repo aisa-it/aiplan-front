@@ -3,12 +3,20 @@
 
 .html-editor {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   position: relative;
   line-height: 1.5;
   border-radius: 8px;
   border: 1px solid $dark-border-color;
   &__toolbar {
-    position: relative;
+    overflow: hidden;
+    position: sticky;
+    flex-shrink: 0;
+    top: 0;
+    z-index: 10;
+    background-color: $bg-color;
     padding: 0 8px 0 8px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -123,8 +131,83 @@
     }
   }
 
+  &__outer {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: stretch;
+  }
+
+  &__btn-edit {
+    display: flex;
+    width: 34px;
+    box-sizing: border-box;
+    padding: 6px 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    cursor: pointer;
+    background-color: $bg-color;
+    border-radius: 0 8px 8px 0;
+    border-left: 1px solid $dark-border-color;
+    position: sticky;
+    top: 50px;
+    z-index: 10;
+    visibility: hidden;
+
+    svg {
+      overflow: hidden;
+      position: sticky;
+      top: 50px;
+      right: 0;
+      width: 30px;
+      flex-shrink: 0;
+      height: 30px;
+      z-index: 10;
+    }
+  }
+
+  &__btn-edit--force {
+    visibility: visible;
+  }
+
+  &__btn-toc {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 6px;
+    position: sticky;
+    top: 86px;
+    z-index: 10;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
   &__wrapper {
+    overflow-y: hidden;
+    flex-grow: 1;
     position: relative;
+  }
+
+  &__loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &__loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
   }
 
   &__container {
@@ -595,19 +678,23 @@
       margin-top: 5px;
     }
     &-link {
+      display: block;
       text-decoration: none;
+      color: $primary;
+      padding: 2px 0;
+
       &::before {
-        content: 'тАв ';
+        content: '• ';
         display: inline-block;
         width: 1em;
-        color: var(--text-color);
+        color: $text-color;
       }
     }
   }
 
   &:hover {
     .html-editor__btn-edit {
-      display: flex;
+      visibility: visible;
     }
   }
 }

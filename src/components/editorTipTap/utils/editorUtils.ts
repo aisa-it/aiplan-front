@@ -1,12 +1,8 @@
 import { TextSelection } from '@tiptap/pm/state';
 import { Editor } from '@tiptap/vue-3';
 import type { Ref } from 'vue';
-import { inject } from 'vue';
 import { bgColorMap, colorMap } from '@/utils/editorColorMap';
 import { handleTipTapPaste } from './handleTipTapPaste';
-import type { EditorEventBus } from './eventBus';
-
-const bus = inject('bus') as EditorEventBus | undefined;
 
 export const isEditorEmpty = (editor) => {
   if (!editor || typeof editor.childCount !== 'number') return true;
@@ -85,58 +81,6 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
 
     if (event.key === 'Enter') {
       const editor = editorInstance.value;
-
-      // TODO Убрать как функции или подключить через composable
-
-      function isCursorInsideSpoiler(): boolean {
-        const { state } = editorInstance.value;
-        const { $from } = state.selection;
-        for (let depth = 0; depth < $from.depth; depth++) {
-          const node = $from.node(depth);
-          if (node.type.name === 'spoiler') {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      function isLastEmptyParagraph(): boolean {
-        const { state } = editorInstance.value;
-        const { $from } = state.selection;
-        const lastNode = $from.node($from.depth);
-
-        console.log('Последний узел', lastNode);
-        if (
-          lastNode.type.name !== 'paragraph' ||
-          lastNode.textContent.trim() !== ''
-        ) {
-          return false;
-        }
-        console.log('Проверка не прошла');
-
-        // Проверка на последний параграф
-        // return lastNode.type.name !== 'paragraph' ||
-        //   lastNode.textContent.trim() !== ''
-        //   ? false
-        //   : true;
-      }
-
-      const clearSpoilerVars = (): void => {
-        const { state } = editorInstance.value;
-        const { $from } = state.selection;
-        bus?.emit(
-          'focusSpoiler',
-          $from.pos,
-          { bgColor: '', textColor: '' },
-          false,
-          false,
-        );
-      };
-
-      if (isCursorInsideSpoiler() && isLastEmptyParagraph()) {
-        console.log('Enter внутри спойлера!');
-        clearSpoilerVars();
-      }
 
       if (editor.isActive('subscript')) {
         editor.chain().focus().unsetSubscript().run();
@@ -288,31 +232,3 @@ export const replaceColor = (content: string, theme: string) => {
 
   return replaceContent;
 };
-
-// Генерация 8 значаного hex для спойлера
-export function hexWithOpacity(hex: string, opacity: number): string {
-  if (hex === '') return '';
-  hex = hex.replace('#', '');
-
-  const alpha = Math.round(opacity * 255);
-  const alphaHex = alpha.toString(16).padStart(2, '0').toUpperCase();
-
-  return `#${hex.toUpperCase()}${alphaHex}`;
-}
-
-// Получение прозрачности из hex
-export function getOpacityFromHex(hex: string): number {
-  hex = hex.replace('#', '');
-  switch (hex.length) {
-    case 4: {
-      const a = hex[3];
-      return Math.round((parseInt(a + a, 16) / 255) * 100) / 100;
-    }
-    case 8: {
-      const a = hex.slice(6, 8);
-      return Math.round((parseInt(a, 16) / 255) * 100) / 100;
-    }
-    default:
-      return 0.2;
-  }
-}
