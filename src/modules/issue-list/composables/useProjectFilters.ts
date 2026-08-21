@@ -12,6 +12,10 @@ import {
   GROUP_BY_OPTIONS,
   NEW_GROUP_BY_OPTIONS,
 } from 'src/constants/constants';
+import { getPropertyTemplates } from 'src/modules/issue-list/services/api';
+
+// значение группировки по дополнительному параметру: property:<uuid шаблона>
+const PROPERTY_GROUP_BY_PREFIX = 'property:';
 
 export function useProjectFilters() {
   const route = useRoute();
@@ -22,7 +26,17 @@ export function useProjectFilters() {
   const { refreshIssues } = storeToRefs(useIssuesStore());
 
   const viewForm = ref(DEFAULT_VIEW_PROPS);
-  const optionsGroup = ref(NEW_GROUP_BY_OPTIONS);
+  // опции группировки по дополнительным параметрам проекта («Параметр: <имя>»)
+  const propertyOptions = ref<{ value: string; label: string }[]>([]);
+
+  // единая композиция: стандартные опции + параметры проекта;
+  // для канбана недоступна группировка «Нет»
+  const optionsGroup = computed(() => {
+    const list = [...NEW_GROUP_BY_OPTIONS, ...propertyOptions.value];
+    return viewForm.value.issueView === 'kanban'
+      ? list.filter((opt) => opt.value !== 'none')
+      : list;
+  });
 
   const isShowIndicators = computed(() => {
     let isShow = false;
@@ -89,21 +103,42 @@ export function useProjectFilters() {
 
   const setOptionsGroupForKanban = () => {
     // если выбран канбан, то убираем возможность выбрать "Нет" в группировке
-    if (viewForm.value.issueView === 'kanban') {
-      optionsGroup.value = optionsGroup.value.filter(
-        (opt) => opt.value !== 'none',
-      );
+    if (
+      viewForm.value.issueView === 'kanban' &&
+      viewForm.value.filters?.group_by === 'none'
+    ) {
+      viewForm.value.filters.group_by = optionsGroup.value[0].value;
+    }
+  };
 
-      if (viewForm.value.filters?.group_by === 'none') {
-        viewForm.value.filters.group_by = optionsGroup.value[0].value;
-      }
-    } else {
-      optionsGroup.value = NEW_GROUP_BY_OPTIONS;
+  // загружаем шаблоны дополнительных параметров проекта для группировки
+  const loadPropertyOptions = async () => {
+    const workspaceSlug = route.params.workspace as string;
+    const projectSlug = route.params.project as string;
+    if (!workspaceSlug || !projectSlug) return;
+
+    try {
+      const templates = await getPropertyTemplates(workspaceSlug, projectSlug);
+      propertyOptions.value = (Array.isArray(templates) ? templates : [])
+        .filter((t) => t?.id && t?.name)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((t) => ({
+          value: `${PROPERTY_GROUP_BY_PREFIX}${t.id}`,
+          label: `Параметр: ${t.name}`,
+        }));
+    } catch (e) {
+      // Ошибка загрузки шаблонов не должна ломать страницу —
+      // просто остаёмся без опций группировки по параметрам
+      console.error(
+        'Не удалось загрузить шаблоны параметров для группировки',
+        e,
+      );
     }
   };
 
   onMounted(() => {
     setOptionsGroupForKanban();
+    loadPropertyOptions();
   });
 
   const updateIssueView = async () => {
@@ -125,14 +160,6 @@ export function useProjectFilters() {
     () => {
       if (is.object(projectProps.value)) {
         viewForm.value = JSON.parse(JSON.stringify(projectProps.value));
-
-        if (viewForm.value.issueView === 'kanban') {
-          optionsGroup.value = optionsGroup.value.filter(
-            (opt) => opt.value !== 'none',
-          );
-        } else {
-          optionsGroup.value = NEW_GROUP_BY_OPTIONS;
-        }
       }
     },
     { immediate: true, deep: true },
