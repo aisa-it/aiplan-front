@@ -7,6 +7,7 @@ import {
   DtoIssueProperty,
   DtoSetIssuePropertyRequest,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { DictionaryRow } from 'src/modules/project-settings/dictionaries/services/api';
 
 const api = new (withInterceptors(Issues))();
 const issuePropertiesApi = new (withInterceptors(IssueProperties))();
@@ -119,6 +120,41 @@ export const updateIssueProperty = async (
     issueId,
     templateId,
     request,
+  );
+  return response.data;
+};
+
+// коды ошибок каскадных зависимостей (BAK-366)
+export const INCOMPATIBLE_VALUE_ERROR_CODE = 4518; // значение недопустимо при текущем значении родителя
+
+export interface AvailablePropertyValues {
+  type?: string;
+  /** restricted — применён ли каскадный фильтр (у поля есть зависимость и родитель заполнен) */
+  restricted?: boolean;
+  /** options — допустимые варианты (для типа select) */
+  options?: string[];
+  /** rows — допустимые строки справочника с пагинацией (для типа lookup) */
+  rows?: {
+    count?: number;
+    offset?: number;
+    limit?: number;
+    result?: DictionaryRow[];
+  } | null;
+}
+
+export const getAvailablePropertyValues = async (
+  workspaceSlug: string,
+  projectID: string,
+  issueIdOrSeq: string,
+  templateId: string,
+  query?: { offset?: number; limit?: number; search_query?: string },
+): Promise<AvailablePropertyValues> => {
+  const response = await issuePropertiesApi.getAvailablePropertyValues(
+    workspaceSlug,
+    projectID,
+    issueIdOrSeq,
+    templateId,
+    query,
   );
   return response.data;
 };

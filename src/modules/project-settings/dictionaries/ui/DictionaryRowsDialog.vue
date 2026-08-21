@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="emits('update:modelValue', $event)"
   >
-    <q-card style="min-width: 900px; max-width: 95vw; border-radius: 12px">
+    <q-card style="width: min(900px, 95vw); border-radius: 12px">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Строки справочника: {{ dictionary?.name }}</div>
         <q-space />
@@ -11,13 +11,13 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="row items-center q-mb-sm q-gutter-sm">
+        <div class="row items-center q-mb-sm q-gutter-sm wrap">
           <q-input
             v-model="searchQuery"
             label="Поиск"
             dense
             class="base-input"
-            style="width: 300px"
+            style="width: 300px; max-width: 100%"
             @update:model-value="handleSearch"
           >
             <template v-slot:prepend>
@@ -51,19 +51,21 @@
           />
         </div>
 
-        <q-table
-          flat
-          :columns="columns"
-          :rows="rows"
-          row-key="id"
-          :hide-no-data="!loading"
-          :loading="loading"
-          loading-label="Загружается..."
-          :rows-per-page-options="[10, 25, 50, 100]"
-          v-model:pagination="pagination"
-          @request="onRequest"
-          style="max-height: 60vh"
-        >
+        <!-- горизонтальный скролл таблицы на узких экранах -->
+        <div style="overflow-x: auto">
+          <q-table
+            flat
+            :columns="columns"
+            :rows="rows"
+            row-key="id"
+            :hide-no-data="!loading"
+            :loading="loading"
+            loading-label="Загружается..."
+            :rows-per-page-options="[10, 25, 50, 100]"
+            v-model:pagination="pagination"
+            @request="onRequest"
+            style="max-height: 60vh"
+          >
           <template #pagination>
             <PaginationDefault
               v-model:selected-page="pagination.page"
@@ -111,7 +113,8 @@
               </q-btn>
             </q-td>
           </template>
-        </q-table>
+          </q-table>
+        </div>
       </q-card-section>
     </q-card>
 

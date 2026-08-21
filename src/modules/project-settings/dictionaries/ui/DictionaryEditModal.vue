@@ -3,7 +3,7 @@
     :model-value="modelValue"
     @update:model-value="emits('update:modelValue', $event)"
   >
-    <q-card style="min-width: 400px; border-radius: 12px">
+    <q-card style="width: min(400px, 95vw); border-radius: 12px">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">
           {{ isEdit ? 'Переименовать справочник' : 'Создать справочник' }}
