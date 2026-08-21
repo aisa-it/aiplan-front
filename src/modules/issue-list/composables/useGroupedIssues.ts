@@ -4,6 +4,8 @@ import { TypesIssuesListFilters } from '@aisa-it/aiplan-api-ts/src/data-contract
 import { inject } from 'vue';
 import { EventBus } from 'quasar';
 import { useIssueContext } from './useIssueContext';
+import { handleNotify } from 'src/utils/notify';
+import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 
 export interface QuasarPagination {
   page: number;
@@ -12,6 +14,13 @@ export interface QuasarPagination {
   descending: boolean;
   rowsPerPage: number;
 }
+
+// префикс группировки по значению дополнительного параметра (BAK-361):
+// group_by=property:<uuid шаблона>
+export const PROPERTY_GROUP_BY_PREFIX = 'property:';
+
+const isPropertyGroupBy = (value: unknown): value is string =>
+  typeof value === 'string' && value.startsWith(PROPERTY_GROUP_BY_PREFIX);
 
 export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   const issuesStore = useIssuesStore();
@@ -25,19 +34,23 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     GROUP_BY_OPTIONS,
     store,
     issuesLoader,
+    updateProps,
   } = useIssueContext(contextType);
 
   // преобразуем quasar пагинацию в пагинацию бека
   function parsePagination(pagination: QuasarPagination) {
+    const rawGroupBy = contextProps.value?.filters?.group_by;
+
     return {
       only_count: false,
       hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
       only_active: contextProps.value?.showOnlyActive ?? true,
       group_by:
-        PARSED_GROUP[contextProps.value?.filters?.group_by]?.value ||
-        GROUP_BY_OPTIONS.find(
-          (option) => option.value === contextProps.value?.filters?.group_by,
-        )?.value,
+        PARSED_GROUP[rawGroupBy]?.value ||
+        GROUP_BY_OPTIONS.find((option) => option.value === rawGroupBy)?.value ||
+        // значение property:<uuid> не входит ни в PARSED_GROUP, ни в
+        // GROUP_BY_OPTIONS — прокидываем его в запрос как есть
+        (isPropertyGroupBy(rawGroupBy) ? rawGroupBy : undefined),
       order_by: pagination.sortBy ?? 'sequence_id',
       desc: pagination.descending,
       draft: contextProps.value?.draft,
@@ -88,15 +101,47 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
     let hasRenderedFirstChunk = false;
     issuesLoader.value = true;
 
-    return await getIssueStream(filters, pagination, (chunk: any) => {
-      issuesStore.groupedIssueList.push(chunk);
-      // Снимаем скелетон сразу после первой пришедшей группы, чтобы
-      // дальше группы дорисовывались по мере прихода стрима.
-      if (!hasRenderedFirstChunk && issuesLoader?.value) {
-        hasRenderedFirstChunk = true;
-        issuesLoader.value = false;
+    try {
+      return await getIssueStream(filters, pagination, (chunk: any) => {
+        issuesStore.groupedIssueList.push(chunk);
+        // Снимаем скелетон сразу после первой пришедшей группы, чтобы
+        // дальше группы дорисовывались по мере прихода стрима.
+        if (!hasRenderedFirstChunk && issuesLoader?.value) {
+          hasRenderedFirstChunk = true;
+          issuesLoader.value = false;
+        }
+      });
+    } catch (e: any) {
+      // 4023 — параметр не поддерживается для группировки,
+      // 4501 — шаблон удалён (например, в сохранённой вьюхе).
+      // Показываем текст ошибки и сбрасываем группировку на дефолт.
+      const isGroupingError = [4023, 4501].includes(e?.code);
+      const rawGroupBy = contextProps.value?.filters?.group_by;
+      const isPropertyGroup = isPropertyGroupBy(rawGroupBy);
+
+      if (contextType === 'project' && isGroupingError && isPropertyGroup) {
+        handleNotify({
+          open: true,
+          type: 'error',
+          customMessage:
+            e?.data?.ru_error ||
+            e?.ru_error ||
+            'Ошибка группировки по параметру',
+        });
+
+        issuesStore.groupByIssues = '';
+        issuesStore.groupedIssueList = [];
+
+        // сбрасываем group_by в 'none' с сохранением во вьюхе (аналог onUpdate)
+        const props = JSON.parse(JSON.stringify(contextProps.value));
+        props.filters.group_by = DEFAULT_VIEW_PROPS.filters.group_by;
+        await updateProps(props);
+
+        // после сброса group_by = 'none', рекурсии не будет
+        return await getGroupedIssues(signal);
       }
-    });
+      throw e;
+    }
   }
 
   function defineFiltersByEntity(entity) {
@@ -143,6 +188,20 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       case 'project': {
         if (entity?.id) {
           filters = { projects: [entity.id] };
+        }
+        return filters;
+      }
+      default: {
+        if (isPropertyGroupBy(issuesStore.groupByIssues)) {
+          const templateId = issuesStore.groupByIssues.slice(
+            PROPERTY_GROUP_BY_PREFIX.length,
+          );
+          // Поле properties появится в TypesIssuesListFilters после выката
+          // новой версии @aisa-it/aiplan-api-ts (BAK-361).
+          // TODO: убрать каст после бампа пакета.
+          (filters as any).properties = {
+            [templateId]: [entity ?? ''],
+          };
         }
         return filters;
       }
