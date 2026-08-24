@@ -3,7 +3,11 @@ import { onMounted, onUnmounted, Ref } from 'vue';
 const menuSet = new Set<Ref>();
 let globalListener = false;
 
-const hideAllMenus = () => {
+const hideAllMenus = (e: Event) => {
+  const target = e.target;
+  if (target instanceof Element && target.closest('.q-menu, .q-select__dialog')) {
+    return;
+  }
   menuSet.forEach((menuRef) => {
     if (menuRef.value && typeof menuRef.value.hide === 'function') {
       menuRef.value.hide();
@@ -16,7 +20,7 @@ const hideAllMenus = () => {
 
 function addGlobalListener() {
   if (typeof window !== 'undefined' && !globalListener) {
-    window.addEventListener('scroll', hideAllMenus);
+    window.addEventListener('scroll', hideAllMenus, true);
     window.addEventListener('resize', hideAllMenus);
     globalListener = true;
   }
@@ -24,7 +28,7 @@ function addGlobalListener() {
 
 function removeGlobalListener() {
   if (typeof window !== 'undefined' && globalListener) {
-    window.removeEventListener('scroll', hideAllMenus);
+    window.removeEventListener('scroll', hideAllMenus, true);
     window.removeEventListener('resize', hideAllMenus);
     globalListener = false;
   }
