@@ -66,53 +66,87 @@
             @request="onRequest"
             style="max-height: 60vh"
           >
-          <template #pagination>
-            <PaginationDefault
-              v-model:selected-page="pagination.page"
-              :rows-number="pagination.rowsNumber"
-              :rows-per-page="pagination.rowsPerPage"
-              @update:selectedPage="() => onRequest({ pagination })"
-            />
-          </template>
+            <template #pagination>
+              <PaginationDefault
+                v-model:selected-page="pagination.page"
+                :rows-number="pagination.rowsNumber"
+                :rows-per-page="pagination.rowsPerPage"
+                @update:selectedPage="() => onRequest({ pagination })"
+              />
+            </template>
 
-          <template v-slot:body-cell-value="props">
-            <q-td :props="props">
-              <span :class="{ 'text-grey': props.row.archived }">
-                {{ props.row.value }}
-              </span>
-            </q-td>
-          </template>
+            <template v-slot:body-cell-value="props">
+              <q-td :props="props">
+                <span :class="{ 'text-grey': props.row.archived }">
+                  {{ props.row.value }}
+                </span>
+              </q-td>
+            </template>
 
-          <template v-slot:body-cell-archived="props">
-            <q-td :props="props">
-              <q-badge v-if="props.row.archived" color="grey-6">В архиве</q-badge>
-            </q-td>
-          </template>
+            <template v-slot:body-cell-attrs="props">
+              <q-td :props="props">
+                <template v-if="attrEntries(props.row.attrs).length">
+                  <q-badge
+                    v-for="[key, val] in visibleAttrEntries(props.row.attrs)"
+                    :key="key"
+                    outline
+                    color="grey-7"
+                    class="q-mr-xs"
+                  >
+                    {{ key }}: {{ formatAttrValue(val) }}
+                  </q-badge>
+                  <q-badge
+                    v-if="hiddenAttrCount(props.row.attrs) > 0"
+                    outline
+                    color="grey-7"
+                  >
+                    +{{ hiddenAttrCount(props.row.attrs) }}
+                    <HintTooltip>
+                      <div
+                        v-for="[key, val] in attrEntries(props.row.attrs)"
+                        :key="key"
+                      >
+                        {{ key }}: {{ formatAttrValue(val, 200) }}
+                      </div>
+                    </HintTooltip>
+                  </q-badge>
+                </template>
+                <span v-else class="text-grey">—</span>
+              </q-td>
+            </template>
 
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props" class="q-gutter-x-xs">
-              <q-btn dense flat @click="editRow(props.row)">
-                <EditIcon />
-                <HintTooltip> Редактировать </HintTooltip>
-              </q-btn>
+            <template v-slot:body-cell-archived="props">
+              <q-td :props="props">
+                <q-badge v-if="props.row.archived" color="grey-6"
+                  >В архиве</q-badge
+                >
+              </q-td>
+            </template>
 
-              <q-btn dense flat @click="toggleArchive(props.row)">
-                <q-icon
-                  :name="props.row.archived ? 'unarchive' : 'archive'"
-                  size="20px"
-                  color="grey"
-                />
-                <HintTooltip>
-                  {{ props.row.archived ? 'Восстановить' : 'Архивировать' }}
-                </HintTooltip>
-              </q-btn>
+            <template v-slot:body-cell-actions="props">
+              <q-td :props="props" class="q-gutter-x-xs">
+                <q-btn dense flat @click="editRow(props.row)">
+                  <EditIcon />
+                  <HintTooltip> Редактировать </HintTooltip>
+                </q-btn>
 
-              <q-btn dense flat @click="confirmDeleteRow(props.row)">
-                <BinIcon color="#DC3E3E" />
-                <HintTooltip> Удалить </HintTooltip>
-              </q-btn>
-            </q-td>
-          </template>
+                <q-btn dense flat @click="toggleArchive(props.row)">
+                  <q-icon
+                    :name="props.row.archived ? 'unarchive' : 'archive'"
+                    size="20px"
+                    color="grey"
+                  />
+                  <HintTooltip>
+                    {{ props.row.archived ? 'Восстановить' : 'Архивировать' }}
+                  </HintTooltip>
+                </q-btn>
+
+                <q-btn dense flat @click="confirmDeleteRow(props.row)">
+                  <BinIcon color="#DC3E3E" />
+                  <HintTooltip> Удалить </HintTooltip>
+                </q-btn>
+              </q-td>
+            </template>
           </q-table>
         </div>
       </q-card-section>
@@ -169,8 +203,8 @@
           <div class="text-h6">На строку ссылаются задачи</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          Строку «{{ rowToArchive?.value }}» удалить нельзя — она используется
-          в значениях задач. Строку можно заархивировать: она перестанет
+          Строку «{{ rowToArchive?.value }}» удалить нельзя — она используется в
+          значениях задач. Строку можно заархивировать: она перестанет
           выбираться, но её значение в задачах сохранится.
         </q-card-section>
         <q-card-actions align="right">
@@ -290,7 +324,6 @@ const columns = [
     label: 'Атрибуты',
     field: 'attrs',
     align: 'left' as const,
-    format: (val: any) => formatAttrs(val),
   },
   {
     name: 'archived',
@@ -307,10 +340,26 @@ const columns = [
 ];
 
 //methods
-const formatAttrs = (attrs: any): string => {
-  if (!attrs || Object.keys(attrs).length === 0) return '—';
-  const text = JSON.stringify(attrs);
-  return text.length > 60 ? `${text.slice(0, 60)}…` : text;
+// атрибуты в таблице: бейджи «ключ: значение», первые MAX_VISIBLE_ATTRS видны,
+// остальные — за «+N» с тултипом на полный список
+const MAX_VISIBLE_ATTRS = 3;
+
+const attrEntries = (attrs: any): [string, unknown][] =>
+  Object.entries(attrs || {});
+
+const visibleAttrEntries = (attrs: any) =>
+  attrEntries(attrs).slice(0, MAX_VISIBLE_ATTRS);
+
+const hiddenAttrCount = (attrs: any) =>
+  Math.max(0, attrEntries(attrs).length - MAX_VISIBLE_ATTRS);
+
+const formatAttrValue = (val: unknown, maxLen = 40): string => {
+  const text = Array.isArray(val)
+    ? val.join(', ')
+    : typeof val === 'string'
+      ? val
+      : JSON.stringify(val);
+  return text.length > maxLen ? `${text.slice(0, maxLen)}…` : text;
 };
 
 const dictionaryId = computed(() => props.dictionary?.id || '');
@@ -368,7 +417,10 @@ const editRow = (row: DictionaryRow) => {
   showRowEditModal.value = true;
 };
 
-const handleRowSubmit = async (data: { value: string; attrs?: Record<string, any> }) => {
+const handleRowSubmit = async (data: {
+  value: string;
+  attrs?: Record<string, any>;
+}) => {
   try {
     if (rowToEdit.value?.id) {
       await updateDictionaryRow(
@@ -421,7 +473,9 @@ const toggleArchive = async (row: DictionaryRow) => {
     setNotificationView({
       open: true,
       type: 'success',
-      customMessage: row.archived ? 'Строка восстановлена' : 'Строка архивирована',
+      customMessage: row.archived
+        ? 'Строка восстановлена'
+        : 'Строка архивирована',
     });
     await refresh();
   } catch (e) {
