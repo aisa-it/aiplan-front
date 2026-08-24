@@ -24,8 +24,6 @@ export const useGitStore = defineStore('git-store', {
     /**
      * Загружает конфигурацию Git с сервера
      *
-     * Вызывается автоматически при старте приложения через boot/git.ts
-     *
      * @returns Promise<void>
      */
     async fetchGitConfig(): Promise<void> {

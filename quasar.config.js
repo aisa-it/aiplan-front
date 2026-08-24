@@ -38,7 +38,6 @@ export default configure(function (ctx) {
       'bus',
       'hint-tooltip',
       'theme-color',
-      'git',
       'app-settings',
     ],
 
