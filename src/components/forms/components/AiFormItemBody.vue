@@ -97,11 +97,15 @@
       </template>
 
       <template v-slot:property-binding>
-        <div v-if="showPropertyBinding" class="row items-center gap-x-md q-mt-md">
+        <div
+          v-if="showPropertyBinding"
+          class="row items-center gap-x-md q-mt-md"
+        >
           <q-select
             ref="propertyBindingSelect"
             :model-value="computedValue.property_template_id"
             :options="propertyBindingOptions"
+            :display-value="propertyBindingDisplay || undefined"
             @update:model-value="onPropertyTemplateSelect"
             label="Записывать в параметр задачи"
             dense
@@ -114,10 +118,7 @@
             option-value="id"
             option-label="name"
           />
-          <div
-            v-if="boundSelectTemplate"
-            class="text-caption text-grey"
-          >
+          <div v-if="boundSelectTemplate" class="text-caption text-grey">
             Варианты поля должны входить в options параметра
           </div>
         </div>
@@ -363,8 +364,20 @@ const propertyBindingOptions = computed(() => {
   const usedIds = new Set(usedPropertyTemplateIds.value);
   return (props.propertyTemplates ?? []).filter(
     (template) =>
-      compatibleTypes.includes(template.type ?? '') && !usedIds.has(template.id),
+      compatibleTypes.includes(template.type ?? '') &&
+      !usedIds.has(template.id),
   );
+});
+
+// Имя привязанного параметра ищем в полном списке, не в отфильтрованных options:
+// параметр, выпавший из options (сменил тип, удалён), иначе отображался бы голым uuid
+const propertyBindingDisplay = computed(() => {
+  const id = computedValue.value.property_template_id;
+  if (!id) return '';
+  const template = (props.propertyTemplates ?? []).find(
+    (item) => item.id === id,
+  );
+  return template?.name ?? 'Параметр недоступен';
 });
 
 // Для select-поля бэк требует, чтобы варианты поля входили в options параметра —
