@@ -75,6 +75,7 @@ import { storeToRefs } from 'pinia';
 
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
+import { useRolesStore } from 'src/stores/roles-store';
 
 //api
 import {
@@ -99,6 +100,7 @@ const props = defineProps<{
 //stores
 const route = useRoute();
 const workspaceStore = useWorkspaceStore();
+const rolesStore = useRolesStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 const slug = computed(() => {
@@ -124,7 +126,13 @@ const fetchData = async () => {
   isLoading.value = true;
   try {
     const data = await getPropertyTemplates(slug.value, props.projectId);
-    const list = (data || []) as PropertyTemplate[];
+    let list = (data || []) as PropertyTemplate[];
+
+    const isAdmin = rolesStore.isAdminInProject(props.projectId, slug.value);
+
+    if (!isAdmin) {
+      list = list.filter((t) => !t.only_admin);
+    }
 
     properties.value = list
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
