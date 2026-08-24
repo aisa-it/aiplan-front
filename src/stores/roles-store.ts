@@ -154,10 +154,28 @@ export const useRolesStore = defineStore('roles-store', {
         return false;
 
       const userStore = useUserStore();
-      if (userStore.user?.is_superuser || userStore.user?.is_staff) return true;
+      if (userStore.user?.is_superuser) return true;
 
       if (this.roles.workspace === 'owner' || this.roles.workspace === 'admin')
         return true;
+    },
+
+    isAdminInProject(projectId: string, workspaceSlug: string): boolean {
+      const userStore = useUserStore();
+      if (userStore.user?.is_superuser) return true;
+
+      const wsMembership = this.getWsMembership(workspaceSlug);
+      const wsRoleName = this.getWsNameRole(wsMembership);
+
+      const projMembership = this.getProjectMembership(projectId);
+      const projRoleName = this.getProjectNameRole(projMembership);
+
+      return (
+        wsRoleName === 'admin' ||
+        wsRoleName === 'owner' ||
+        projRoleName === 'admin' ||
+        projRoleName === 'owner'
+      );
     },
   },
 });
