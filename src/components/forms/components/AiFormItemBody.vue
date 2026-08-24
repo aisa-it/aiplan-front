@@ -54,6 +54,7 @@
           <div class="text-subtitle2 q-mb-sm">Появляется если:</div>
           <div class="row gap-x-md items-center">
             <q-select
+              ref="dependOnQuestionSelect"
               v-model="computedValue.depend_on.field_index"
               :options="parentOptions"
               label="Вопрос"
@@ -77,6 +78,7 @@
 
             <q-select
               v-if="selectedParent"
+              ref="dependOnAnswerSelect"
               v-model="dependOnValue"
               :options="answerOptions"
               label="Ответ"
@@ -97,6 +99,7 @@
       <template v-slot:property-binding>
         <div v-if="showPropertyBinding" class="row items-center gap-x-md q-mt-md">
           <q-select
+            ref="propertyBindingSelect"
             :model-value="computedValue.property_template_id"
             :options="propertyBindingOptions"
             @update:model-value="onPropertyTemplateSelect"
@@ -181,6 +184,11 @@ import { computed, ref, watch } from 'vue';
 //components
 import AiFormQuestionBody from './AiFormQuestionBody.vue';
 
+//composables
+// закрывает открытый попап селекта при скролле/ресайзе страницы (иначе
+// выпадающее меню остаётся висеть в старой позиции)
+import { useMenuHandler } from 'src/composables/useMenuHandler';
+
 //utils
 import {
   addQuestion,
@@ -234,6 +242,15 @@ const emits = defineEmits<{
 
 //refs
 const isDepending = ref(!!props.modelValue.depend_on);
+const propertyBindingSelect = ref();
+const dependOnQuestionSelect = ref();
+const dependOnAnswerSelect = ref();
+
+// закрываем попапы селектов при скролле страницы/диалога
+// («Записывать в параметр задачи», «Вопрос», «Ответ»)
+useMenuHandler(propertyBindingSelect);
+useMenuHandler(dependOnQuestionSelect);
+useMenuHandler(dependOnAnswerSelect);
 
 //computeds
 const canBeIssueNameField = computed(() => {
