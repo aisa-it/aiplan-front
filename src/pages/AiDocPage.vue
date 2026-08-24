@@ -6,9 +6,10 @@
       <q-drawer
         show-if-above
         bordered
-        :width="300"
+        :width="isMobile ? DEFAULT_WIDTH : adaptiveWidth"
         :breakpoint="760"
         class="issue-side-drawer"
+        @before-show="updateClientWidth"
       >
         <div ref="menuRef" class="nav-menu-bottom-bar">
           <NavMenuAIDocs
@@ -24,6 +25,11 @@
             filterBy="docs"
           />
         </div>
+        <div
+          v-show="!isMobile"
+          class="handle-resize"
+          @pointerdown="onPointerDown"
+        ></div>
       </q-drawer>
 
       <q-page-container v-if="!isEmptyDoc" class="flex-grow">
@@ -137,8 +143,8 @@
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { computed, ref, onMounted, watch } from 'vue';
-import { useMeta } from 'quasar';
+import { computed, ref, onMounted } from 'vue';
+import { Screen, useMeta, useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -172,8 +178,10 @@ import { Editor } from '@tiptap/vue-3';
 import { useAttachmentsWithEditor } from 'src/composables/useAttachmentsWithEditor';
 import { useExpansionGroupResize } from 'src/composables/useExpansionGroupResize';
 import { useSortable } from 'src/composables/useSortable';
+import { useDrawerResize } from 'src/composables/useDrawerResize';
 //composables
 const route = useRoute();
+const $q = useQuasar();
 
 //stores
 const userStore = useUserStore();
@@ -206,7 +214,8 @@ const docVersionList = ref<DtoHistoryBodyLight[]>([]);
 const loading = ref(false);
 const isDocumentEditPending = ref(false);
 const metadata = ref({
-  title: 'Загрузка...',
+  // на главной странице АИДока тайтл — «АИДок», «Загрузка...» только при открытии документа
+  title: route.params.doc ? 'Загрузка...' : 'АИДок',
 });
 
 //composables
@@ -218,6 +227,7 @@ useMeta(() => {
 
 //consts
 const preventClickClass = 'prevent-click-issue-outside';
+const DEFAULT_WIDTH = 300;
 
 //computeds
 const currentUserRole = computed(() =>
@@ -243,6 +253,21 @@ const isAutoSave = computed(() => user.value?.view_props?.autoSave);
 
 const isEmptyDoc = computed(
   () => Object.keys(documentValue.value).length === 0,
+);
+
+// ресайз бокового меню (ручка у правой кромки дровера)
+const clientWidth = ref(document.documentElement.clientWidth);
+const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
+const minWidth = computed(() => DEFAULT_WIDTH);
+const maxWidth = computed(() =>
+  isMobile.value ? DEFAULT_WIDTH : clientWidth.value / 2,
+);
+const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
+  minWidth,
+  maxWidth,
+  clientWidth,
+  'aidocSidebarWidth',
+  'left',
 );
 
 const updateFavoriteState = (id: string, state: boolean) => {
@@ -409,14 +434,6 @@ onMounted(async () => {
 
   await initSortable();
 });
-
-watch(
-  () => workspaceInfo.value,
-  (newVal) => {
-    if (newVal?.name && !route.params.doc)
-      metadata.value.title = `АИДок ${workspaceInfo?.value?.name}`;
-  },
-);
 </script>
 
 <style lang="scss" scoped>
@@ -479,6 +496,17 @@ watch(
   }
 }
 
+.handle-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
 .nav-menu-bottom-bar {
   height: 100% !important;
 }
@@ -509,7 +537,6 @@ watch(
 :deep(.q-drawer) {
   position: fixed;
   top: 50px;
-  padding: 8px 0;
   margin-right: 10px !important;
   background: none;
 }

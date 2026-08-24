@@ -30,7 +30,7 @@
         class="scrollable-content menu-item--open-full"
       >
         <div
-          class="tree-wrapper"
+          class="tree-wrapper scrollable-content"
           :class="{ 'tree-wrapper--border': favoritesDocs.length }"
         >
           <div
