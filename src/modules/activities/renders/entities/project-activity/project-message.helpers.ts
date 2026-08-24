@@ -2,10 +2,7 @@ import {
   createExternalLinkPart,
   createTextPart,
 } from '../../activity-message.helpers';
-import {
-  getDetailNumber,
-  getDetailString,
-} from '../../activity-value.helpers';
+import { getDetailNumber, getDetailString } from '../../activity-value.helpers';
 
 import type { ActivityRenderContext } from '../../../model/activity.types';
 import type { ActivityMessagePart } from '../../activity-renderer.types';
@@ -21,11 +18,10 @@ const PROJECT_RELATION_TEXT: Readonly<Record<ProjectRelation, string>> = {
 };
 
 const isCurrentProject = (context: ActivityRenderContext) =>
-  context.currentEntity?.type === 'project' ||
-  (context.placement === 'entity' && !context.currentEntity);
+  context.scope === 'entity' && context.entity.type === 'project';
 
 const isCurrentWorkspace = (context: ActivityRenderContext) =>
-  context.currentEntity?.type === 'workspace';
+  context.scope === 'entity' && context.entity.type === 'workspace';
 
 export const createProjectLink = (
   activity: DtoActivityEventFull,
@@ -33,10 +29,9 @@ export const createProjectLink = (
   const project = activity.project_detail;
   const workspaceSlug = activity.workspace_detail?.slug;
   const href =
-    project?.url ??
-    (workspaceSlug && project?.id
-      ? `/${workspaceSlug}/projects/${project.id}`
-      : undefined);
+    (workspaceSlug && project?.identifier
+      ? `/${workspaceSlug}/projects/${project.identifier}`
+      : undefined) ?? project?.url;
 
   return createExternalLinkPart(href, `"${project?.name ?? ''}"`);
 };
@@ -65,7 +60,7 @@ export const createWorkspaceSourceParts = (
   activity: DtoActivityEventFull,
   context: ActivityRenderContext,
 ): ActivityMessagePart[] => {
-  if (context.placement !== 'aggregate' || isCurrentWorkspace(context)) {
+  if (isCurrentWorkspace(context)) {
     return [];
   }
 
@@ -85,9 +80,7 @@ export const createWorkspaceContextParts = (
 ): ActivityMessagePart[] => {
   const workspaceParts = createWorkspaceSourceParts(activity, context);
 
-  return workspaceParts.length
-    ? [createTextPart(' '), ...workspaceParts]
-    : [];
+  return workspaceParts.length ? [createTextPart(' '), ...workspaceParts] : [];
 };
 
 export const createProjectContextParts = (

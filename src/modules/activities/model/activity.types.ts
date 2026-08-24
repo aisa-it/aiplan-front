@@ -33,17 +33,25 @@ export type ActivityVerb = (typeof ACTIVITY_VERBS)[number];
 export const isActivityVerb = (value?: string): value is ActivityVerb =>
   ACTIVITY_VERBS.includes(value as ActivityVerb);
 
-export type ActivityPlacement = 'entity' | 'aggregate';
+export type ActivityRenderScope = 'overview' | 'entity';
 
-export interface ActivityEntityReference {
-  type: ActivityEntityType;
-  id?: string;
-}
+export type ActivityEntityReference =
+  | {
+      type: 'project';
+      identifier: string;
+    }
+  | {
+      type: Exclude<ActivityEntityType, 'project'>;
+    };
 
-export interface ActivityRenderContext {
-  placement: ActivityPlacement;
-  currentEntity?: ActivityEntityReference;
-}
+export type ActivityRenderContext =
+  | {
+      scope: 'overview';
+    }
+  | {
+      scope: 'entity';
+      entity: ActivityEntityReference;
+    };
 
 export interface ActivitiesListRequest {
   page: number;

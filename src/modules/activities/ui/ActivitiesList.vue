@@ -22,6 +22,7 @@
     <ul v-else-if="renderedActivities.length" class="m-0 px-4 py-2">
       <ActivityItem
         v-for="item in renderedActivities"
+        class="mb-3"
         :key="item.activity.id ?? item.index"
         :activity="item.activity"
         :message="item.message"
@@ -30,30 +31,14 @@
 
     <div v-else class="flex min-h-24 items-center px-4">Нет данных</div>
 
-    <!-- TODO: перенести пагинацию -->
-    <div
+    <PaginationDefault
       v-if="!loading && rowsCount > 0"
-      class="flex flex-wrap items-center justify-end gap-3 px-4"
-    >
-      <v-select
-        v-model="rowsPerPage"
-        :items="ROWS_PER_PAGE_OPTIONS"
-        density="compact"
-        hide-details
-        variant="outlined"
-        class="max-w-24"
-        aria-label="Строк на странице"
-        @update:model-value="changeRowsPerPage"
-      />
-
-      <v-pagination
-        v-model="page"
-        :length="pagesCount"
-        :total-visible="6"
-        density="compact"
-        @update:model-value="requestActivities"
-      />
-    </div>
+      v-model:selected-page="page"
+      class="justify-end px-4"
+      :rows-number="rowsCount"
+      :rows-per-page="rowsPerPage"
+      @request="requestActivities"
+    />
   </section>
 </template>
 
@@ -61,6 +46,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
+import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
 
 import ActivityItem from './ActivityItem.vue';
 import { renderActivity } from '../renders/renderActivity';
@@ -70,8 +56,6 @@ import type {
   ActivityRenderContext,
 } from '../model/activity.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-
-const ROWS_PER_PAGE_OPTIONS = [10, 25, 100] as const;
 
 const props = withDefaults(
   defineProps<{
@@ -84,7 +68,7 @@ const props = withDefaults(
   {
     loading: false,
     currentDay: '',
-    context: () => ({ placement: 'aggregate' }),
+    context: () => ({ scope: 'overview' }),
   },
 );
 
@@ -94,7 +78,7 @@ const emit = defineEmits<{
 }>();
 
 const page = ref(1);
-const rowsPerPage = ref<(typeof ROWS_PER_PAGE_OPTIONS)[number]>(10);
+const rowsPerPage = ref(10);
 
 const renderedActivities = computed(() =>
   props.rows.flatMap((activity, index) => {
@@ -108,16 +92,12 @@ const pagesCount = computed(() =>
   Math.max(1, Math.ceil(props.rowsCount / rowsPerPage.value)),
 );
 
-const requestActivities = () => {
+const requestActivities = (options?: Partial<ActivitiesListRequest>) => {
+  rowsPerPage.value = options?.rowsPerPage ?? rowsPerPage.value;
   emit('request', {
-    page: page.value,
+    page: options?.page ?? page.value,
     rowsPerPage: rowsPerPage.value,
   });
-};
-
-const changeRowsPerPage = () => {
-  page.value = 1;
-  requestActivities();
 };
 
 const closeCurrentDay = () => {

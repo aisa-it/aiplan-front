@@ -11,11 +11,17 @@ import { createWorkspaceRelationParts } from './workspace-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
 
-export const renderMemberAdded: ActivityRenderer = (activity, context) =>
-  createActivityMessage(
+export const renderMemberAdded: ActivityRenderer = (activity, context) => {
+  const workspaceParts = createWorkspaceRelationParts(
+    activity,
+    context,
+    'in',
+  );
+
+  return createActivityMessage(
     createTextPart(`${getActivityVerbText(activity.verb)} `),
-    ...createWorkspaceRelationParts(activity, context, 'in'),
-    ...(context.placement === 'aggregate' ? [createTextPart(' ')] : []),
+    ...workspaceParts,
+    ...(workspaceParts.length ? [createTextPart(' ')] : []),
     createTextPart(
       `пользователя ${getActivityUserName(
         activity.new_entity_detail,
@@ -23,6 +29,7 @@ export const renderMemberAdded: ActivityRenderer = (activity, context) =>
       )} с ролью "${getRoleText(activity.new_value)}"`,
     ),
   );
+};
 
 export const renderMemberRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(

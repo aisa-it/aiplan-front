@@ -7,7 +7,7 @@ export type {
   ActivitiesListRequest,
   ActivityEntityReference,
   ActivityEntityType,
-  ActivityPlacement,
+  ActivityRenderScope,
   ActivityRenderContext,
   ActivityVerb,
 } from './model/activity.types';

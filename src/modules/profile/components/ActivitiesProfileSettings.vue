@@ -35,7 +35,7 @@ import { useActivities } from '../composables/activities-profile-settings/useAct
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const PROFILE_ACTIVITY_CONTEXT = {
-  placement: 'aggregate',
+  scope: 'overview',
 } satisfies ActivityRenderContext;
 
 defineProps<{

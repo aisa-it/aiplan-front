@@ -15,9 +15,7 @@ export const createActivityRenderer = (
   fieldRenderers: ActivityFieldRenderers,
 ): ActivityRenderer => {
   return (activity, context) => {
-    const fieldRenderer = activity.field
-      ? fieldRenderers[activity.field]
-      : undefined;
+    const fieldRenderer = fieldRenderers[activity.field ?? ''];
 
     if (!fieldRenderer) return null;
 

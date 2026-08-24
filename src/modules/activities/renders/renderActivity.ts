@@ -6,7 +6,7 @@ import type { ActivityMessage } from './activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const DEFAULT_RENDER_CONTEXT: ActivityRenderContext = {
-  placement: 'aggregate',
+  scope: 'overview',
 };
 
 export const renderActivity = (

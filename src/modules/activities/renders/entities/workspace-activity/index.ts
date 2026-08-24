@@ -5,26 +5,28 @@ import {
   renderDocCreated,
   renderDocDeleted,
   renderDocSort,
-  renderWorkspaceForm,
-} from './content';
+} from './doc';
+import { renderWorkspaceForm } from './form';
+import {
+  renderIntegrationAdded,
+  renderIntegrationRemoved,
+} from './integration';
 import {
   renderMemberAdded,
   renderMemberRemoved,
   renderMemberRole,
-} from './members';
+} from './member';
+import { renderProject } from './project';
 import {
   renderWorkspaceName,
   renderWorkspaceOwner,
   renderWorkspaceProperty,
-} from './settings';
+} from './property';
 import {
-  renderIntegrationAdded,
-  renderIntegrationRemoved,
-  renderProject,
   renderSprint,
   renderSprintFolder,
   renderSprintFolderName,
-} from './structure';
+} from './sprint';
 
 export const renderWorkspaceActivity = createActivityRenderer({
   logo: renderWorkspaceProperty('аватар'),

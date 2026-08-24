@@ -5,20 +5,20 @@ import {
   renderIssueCreated,
   renderIssueDeleted,
   renderIssueRemoved,
-} from './issues';
+} from './issue';
 import {
   renderLabelColor,
   renderLabelCreated,
   renderLabelDeleted,
   renderLabelName,
-} from './labels';
+} from './label';
 import {
   renderDefaultAssignee,
   renderDefaultWatcher,
   renderProjectMemberAdded,
   renderProjectMemberRemoved,
   renderProjectMemberRole,
-} from './members';
+} from './member';
 import {
   renderProjectIcon,
   renderProjectIdentifier,
@@ -26,7 +26,7 @@ import {
   renderProjectName,
   renderProjectPrivacy,
   renderProjectRules,
-} from './settings';
+} from './property';
 import {
   renderDefaultStatus,
   renderStatusColor,
@@ -36,13 +36,13 @@ import {
   renderStatusDescription,
   renderStatusGroup,
   renderStatusName,
-} from './statuses';
+} from './status';
 import {
   renderTemplateContent,
   renderTemplateCreated,
   renderTemplateDeleted,
   renderTemplateName,
-} from './templates';
+} from './template';
 
 export const renderProjectActivity = createActivityRenderer({
   emoji: renderProjectIcon,

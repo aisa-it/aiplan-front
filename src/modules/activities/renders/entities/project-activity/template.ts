@@ -2,18 +2,29 @@ import {
   createActivityMessage,
   createTextPart,
 } from '../../activity-message.helpers';
-import { getDetailString } from '../../activity-value.helpers';
+import {
+  getActivityVerbText,
+  getDetailString,
+} from '../../activity-value.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderTemplateCreated: ActivityRenderer = (activity) =>
   createActivityMessage(
-    createTextPart(`создал(-а) шаблон задачи "${activity.new_value ?? ''}"`),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} шаблон задачи "${
+        activity.new_value ?? ''
+      }"`,
+    ),
   );
 
 export const renderTemplateDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
-    createTextPart(`удалил(-а) шаблон задачи "${activity.old_value ?? ''}"`),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} шаблон задачи "${
+        activity.old_value ?? ''
+      }"`,
+    ),
   );
 
 export const renderTemplateName: ActivityRenderer = (activity) =>

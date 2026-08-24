@@ -32,7 +32,10 @@ export const createWorkspaceRelationParts = (
   context: ActivityRenderContext,
   relation: WorkspaceRelation,
 ): ActivityMessagePart[] => {
-  if (context.placement === 'aggregate') {
+  const isCurrentWorkspace =
+    context.scope === 'entity' && context.entity.type === 'workspace';
+
+  if (!isCurrentWorkspace) {
     return [
       createTextPart(WORKSPACE_RELATION_TEXT[relation]),
       createWorkspaceLink(activity),
@@ -45,17 +48,25 @@ export const createWorkspaceRelationParts = (
   return [];
 };
 
-export const createAggregateWorkspaceRelationParts = (
+export const createWorkspaceContextParts = (
   activity: DtoActivityEventFull,
   context: ActivityRenderContext,
   relation: WorkspaceRelation,
-): ActivityMessagePart[] =>
-  context.placement === 'aggregate'
-    ? [
-        createTextPart(' '),
-        ...createWorkspaceRelationParts(activity, context, relation),
-      ]
+): ActivityMessagePart[] => {
+  if (context.scope === 'entity' && context.entity.type === 'workspace') {
+    return [];
+  }
+
+  const workspaceParts = createWorkspaceRelationParts(
+    activity,
+    context,
+    relation,
+  );
+
+  return workspaceParts.length
+    ? [createTextPart(' '), ...workspaceParts]
     : [];
+};
 
 export const createDocLink = (
   activity: DtoActivityEventFull,

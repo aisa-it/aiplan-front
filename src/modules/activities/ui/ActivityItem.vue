@@ -1,8 +1,9 @@
 <template>
   <li class="flex items-center gap-2 py-2">
-    <UserAvatar
+    <UserAvatarMenu
       v-if="activity.actor_detail"
       :user="activity.actor_detail"
+      hide-full-name
       no-hat
     />
 
@@ -20,7 +21,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import UserAvatar from '@/components/user-avatar/UserAvatar.vue';
+import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
 
 import ActivityMessage from './ActivityMessage.vue';
 import { formatActivityDate } from '../utils/formatActivityDate';
