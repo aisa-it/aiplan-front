@@ -234,7 +234,6 @@ const refreshChildren = async (parentTemplateId: string) => {
     (prop) => prop.dependency?.parent_template_id === parentTemplateId,
   );
 
-  console.log(children, parentTemplateId, properties.value);
   for (const child of children) {
     if (child.type === 'select' && child.template_id) {
       await refreshSelectOptions(child.template_id);
@@ -312,7 +311,15 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
     }
 
     if (prop.type === 'link' || prop.type === 'lookup') {
-      fetchData();
+      // без перезагрузки всего блока: подставляем свежие значение и label
+      // из ответа сохранения (для lookup бэк возвращает value_label)
+      if (prop.type === 'lookup') {
+        prop.value = saved?.value ?? newValue;
+        prop.value_label = saved?.value_label ?? null;
+      } else if (saved && 'value' in saved) {
+        // в ответе есть value — берём его (в т.ч. null при очистке ссылки)
+        prop.value = saved.value ?? null;
+      }
     }
   } catch (e: any) {
     console.error(e);
