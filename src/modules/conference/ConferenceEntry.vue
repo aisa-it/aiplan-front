@@ -125,21 +125,8 @@ async function createClouds(three, clouds) {
 
     if (isEnableGPU.value) {
       vantaEffect = CLOUDS.default({
-        el: '#vanta-clouds-bg',
+        ...CLOUD_THEMES[getCurrentTimeOfDay().timeOfDay],
         THREE: THREE,
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
-        backgroundColor: 0x0,
-        skyColor: 0x1788e8,
-        cloudColor: 0xafc7e5,
-        cloudShadowColor: 0x182e3d,
-        sunColor: 0xe9eab8,
-        sunGlareColor: 0x744d2f,
-        sunlightColor: 0x422d23,
-        speed: 1.5,
       });
     } else {
       setStaticBg();
