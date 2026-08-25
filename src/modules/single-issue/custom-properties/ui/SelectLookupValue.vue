@@ -1,5 +1,6 @@
 <template>
   <q-select
+    ref="lookupSelect"
     dense
     clearable
     emit-value
@@ -9,7 +10,6 @@
     :model-value="modelValue"
     :options="options"
     :loading="isLoading"
-    :virtual-scroll-slice-ratio-before="30"
     @update:model-value="handleUpdate"
     @popup-show="onPopupShow"
     @virtual-scroll="loadMoreOnScroll"
@@ -54,6 +54,11 @@ import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { debounce } from 'quasar';
 
+//composables
+// закрывает открытый попап селекта при скролле/ресайзе страницы (иначе
+// выпадающее меню остаётся висеть в старой позиции)
+import { useMenuHandler } from 'src/composables/useMenuHandler';
+
 //stores
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 
@@ -88,6 +93,9 @@ const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 
 //variables
+const lookupSelect = ref();
+useMenuHandler(lookupSelect);
+
 const rows = ref<{ label: string; value: string }[]>([]);
 const countRows = ref(0);
 const isLoading = ref(false);
@@ -108,8 +116,7 @@ const options = computed(() => {
       : [];
 
   return [...currentOption, ...rows.value].filter(
-    (item, idx, arr) =>
-      arr.findIndex((v) => v.value === item.value) === idx,
+    (item, idx, arr) => arr.findIndex((v) => v.value === item.value) === idx,
   );
 });
 

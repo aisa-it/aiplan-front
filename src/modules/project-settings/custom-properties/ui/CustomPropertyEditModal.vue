@@ -93,6 +93,7 @@
             <q-select
               v-model="form.dependency!.parent_template_id"
               :options="parentTemplateOptions"
+              :display-value="parentTemplateDisplay || undefined"
               class="base-selector q-mt-sm"
               label="Родительский параметр"
               dense
@@ -290,7 +291,18 @@ const selectedParentTemplate = computed(() =>
 );
 
 // варианты родителя — для редактора options_map
-const parentOptions = computed(() => selectedParentTemplate.value?.options || []);
+const parentOptions = computed(
+  () => selectedParentTemplate.value?.options || [],
+);
+
+// Имя выбранного родителя ищем в полном списке шаблонов, не в отфильтрованных
+// options: родитель, выпавший из options (сменил тип), иначе отображался бы голым uuid
+const parentTemplateDisplay = computed(() => {
+  const id = form.value.dependency?.parent_template_id;
+  if (!id) return '';
+  const template = (props.templates || []).find((item) => item.id === id);
+  return template?.name ?? 'Параметр недоступен';
+});
 
 // родители, совместимые с режимом: options_map — только select, row_filter — select/lookup
 const parentTemplateOptions = computed(() => {
@@ -302,9 +314,7 @@ const parentTemplateOptions = computed(() => {
   return (props.templates || [])
     .filter(
       (t) =>
-        t.id !== props.editItem?.id &&
-        t.type &&
-        allowedTypes.includes(t.type),
+        t.id !== props.editItem?.id && t.type && allowedTypes.includes(t.type),
     )
     .map((t) => ({ label: t.name, value: t.id }));
 });
@@ -406,14 +416,18 @@ const removeOption = (index: number) => {
   form.value.options?.splice(index, 1);
 };
 
-// карта/атрибут привязаны к родителю — сбрасываем только при пользовательской
-// смене родителя (не при инициализации формы из editItem)
+// карта options_map привязана к вариантам родителя — сбрасываем при смене
+// родителя; row_filter_attr не трогаем: имя атрибута относится к справочнику
+// самого поля, а не к родителю
 const onParentTemplateChange = () => {
   if (form.value.dependency) {
     form.value.dependency.options_map = {};
-    form.value.dependency.row_filter_attr = null;
   }
 };
+
+// режим зависимости однозначно определяется типом поля-ребёнка
+const modeForType = (type?: string | null): string | null =>
+  type === 'select' ? 'options_map' : type === 'lookup' ? 'row_filter' : null;
 
 //lifecycle hooks
 watch(
@@ -445,6 +459,12 @@ watch(
           dictionary_id: null,
           dependency: emptyDependency(),
         };
+      }
+      // mode доводим по типу здесь: watch на form.value.type не срабатывает,
+      // если тип совпал с предыдущим открытием модалки, и mode оставался null —
+      // поле «Имя атрибута» пряталось, а сохранение зависимости падало на бэке
+      if (form.value.dependency && !form.value.dependency.mode) {
+        form.value.dependency.mode = modeForType(form.value.type);
       }
     }
   },
