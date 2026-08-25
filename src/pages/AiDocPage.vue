@@ -1,10 +1,9 @@
 <template>
   <q-page v-if="!loading" class="flex justify-center flex-grow">
-    <div
-      class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow"
-    >
+    <div class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow">
       <q-drawer
-        show-if-above
+        :model-value="aidocStore.isMenuOpen"
+        @update:model-value="(v) => aidocStore.setMenuOpen(v)"
         bordered
         :width="isMobile ? DEFAULT_WIDTH : adaptiveWidth"
         :breakpoint="760"
@@ -143,7 +142,7 @@
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { Screen, useMeta, useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
 // stores
@@ -268,6 +267,15 @@ const { adaptiveWidth, onPointerDown, updateClientWidth } = useDrawerResize(
   clientWidth,
   'aidocSidebarWidth',
   'left',
+);
+
+// при навигации (выбор документа и т.п.) закрываем меню на мобильных;
+// на десктопе меню не должно закрываться само
+watch(
+  () => route.path,
+  () => {
+    if (Screen.lt.md) aidocStore.setMenuOpen(false);
+  },
 );
 
 const updateFavoriteState = (id: string, state: boolean) => {
@@ -539,6 +547,11 @@ onMounted(async () => {
   top: 50px;
   margin-right: 10px !important;
   background: none;
+
+  // на мобильных дровер на всю высоту, без отступа под шапку (как в обычном меню)
+  @media screen and (max-width: 1319px) {
+    top: 0;
+  }
 }
 
 :deep(.q-page-container) {

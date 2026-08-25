@@ -4,6 +4,17 @@
       :style="utilsStore.ny === true ? 'margin-bottom: 20px' : ''"
       class="header"
     >
+      <q-btn
+        v-if="Screen.lt.md || isAiDocRoute"
+        flat
+        dense
+        class="q-mr-sm btn-only-icon-sm"
+        aria-label="Menu"
+        @click="emits('toggle')"
+      >
+        <MenuIcon />
+      </q-btn>
+
       <WorkspaceButton></WorkspaceButton>
 
       <template v-if="workspaceInfo">
@@ -129,6 +140,13 @@ import MenuIcon from 'src/components/icons/MenuIcon.vue';
 import AIDocIcon from 'src/components/icons/AIDocIcon.vue';
 import FlowerLine from 'src/components/FlowerLine.vue';
 import WorkspaceButton from 'src/modules/select-workspace/components/WorkspaceButton.vue';
+
+const emits = defineEmits<{
+  toggle: [];
+}>();
+
+// на странице АИДока кнопка меню показывается всегда (сворачивает его меню)
+const isAiDocRoute = computed(() => route.path.includes('/aidoc'));
 
 // stores
 const userStore = useUserStore();

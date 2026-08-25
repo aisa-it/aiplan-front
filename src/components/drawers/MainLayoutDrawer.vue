@@ -20,7 +20,7 @@
     <div class="handle-resize" @pointerdown="onPointerDown"></div>
     <div class="absolute" style="top: 15px; right: -10px">
       <q-btn
-        v-show="isBtnShow"
+        v-show="isBtnShow && !isOverlay"
         class="drawer-btn"
         :icon="!leftDrawerOpen ? 'chevron_right' : 'chevron_left'"
         @click="onDrawerBtnClick"
@@ -113,6 +113,9 @@ watch(
   () => {
     leftDrawerOpen.value = drawerOpen.value;
   },
+  // immediate — чтобы внутреннее состояние совпадало с пропом при монтировании
+  // (иначе на мобильных дровер открывался бы при загрузке)
+  { immediate: true },
 );
 
 watch(

@@ -3,7 +3,7 @@
     v-if="loadingMenu === false"
     class="nav-menu-bottom-bar"
     data-tour="sidebar"
-    style="height: calc(100vh - 50px)"
+    :style="{ height: isMobile ? '100vh' : 'calc(100vh - 50px)' }"
   >
     <ExpansionGroup></ExpansionGroup>
   </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { LocalStorage } from 'quasar';
+import { LocalStorage, Screen, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { computed, onMounted, ref } from 'vue';
 import ExpansionGroup from 'src/components/ExpansionGroup.vue';
@@ -62,6 +62,11 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 
 const formStore = useFormStore();
 const workspaceStore = useWorkspaceStore();
+
+const $q = useQuasar();
+
+// мобильная версия — мобильное устройство или узкий экран
+const isMobile = computed(() => $q.platform.is.mobile || Screen.lt.md);
 
 const loadingMenu = ref(true);
 

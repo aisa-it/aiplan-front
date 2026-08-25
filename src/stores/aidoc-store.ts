@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { Screen } from 'quasar';
 import { useAiplanStore } from './aiplan-store';
 import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
 import { Docs } from '@aisa-it/aiplan-api-ts/src/Docs';
@@ -14,6 +15,9 @@ const aiplan = useAiplanStore();
 const api = aiplan.api;
 const docApi = new (withInterceptors(Docs))();
 
+// ключ localStorage для состояния меню АИДока (открыто/закрыто)
+const AIDOC_MENU_OPEN_KEY = 'aidocMenuOpen';
+
 interface IDocState {
   rootDocs: DtoDocLight[];
   newChildrenDoc: DtoDoc | null;
@@ -26,6 +30,8 @@ interface IDocState {
   updatedDocId: string | null;
   favoritesDocs: DtoDocFavorites[];
   isHierarchyOpened: boolean;
+  // открыто ли меню АИДока на мобильных (управляется кнопкой в шапке)
+  isMenuOpen: boolean;
 }
 
 export const useAiDocStore = defineStore('aidoc-store', {
@@ -42,6 +48,11 @@ export const useAiDocStore = defineStore('aidoc-store', {
       updatedDocId: null,
       favoritesDocs: [],
       isHierarchyOpened: false,
+      // состояние меню АИДока сохраняется в localStorage;
+      // по умолчанию: на десктопе открыто, на мобильных закрыто
+      isMenuOpen: JSON.parse(
+        localStorage.getItem(AIDOC_MENU_OPEN_KEY) ?? String(!Screen.lt.md),
+      ),
     };
   },
   getters: {
@@ -58,6 +69,13 @@ export const useAiDocStore = defineStore('aidoc-store', {
     },
     setUpdatedDoc(id: string | null) {
       this.updatedDocId = id;
+    },
+    setMenuOpen(open: boolean) {
+      this.isMenuOpen = open;
+      localStorage.setItem(AIDOC_MENU_OPEN_KEY, String(open));
+    },
+    toggleMenu() {
+      this.setMenuOpen(!this.isMenuOpen);
     },
     async getAiDoc(workspaceSlug: string, id: string) {
       if (!workspaceSlug) return;

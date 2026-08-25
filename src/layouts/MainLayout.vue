@@ -7,12 +7,13 @@
     <LightsNewYear v-if="utilsStore.ny === true" />
     <SnowFall v-if="utilsStore.ny === true && isSnowEnable" />
     <div>
-      <MainHeader />
+      <MainHeader @toggle="onToggleDrawer" />
       <PrimaryLoader v-show="generalLoader === true" />
 
       <template v-if="!isAiDocRoute">
+        <!-- На мобильных всегда показываем MainLayoutDrawer (NavMenu), управляется кнопкой в шапке -->
         <MainLayoutDrawer
-          v-if="!miniState"
+          v-if="!miniState || isMobileView"
           v-model:drawer-open="leftDrawerOpen"
           @close="miniState = true"
         />
@@ -39,7 +40,7 @@
 
 <script setup lang="ts">
 // core
-import { useQuasar, useMeta } from 'quasar';
+import { useQuasar, useMeta, Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
@@ -69,6 +70,7 @@ import { watch } from 'vue';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';
+import { useAiDocStore } from 'src/stores/aidoc-store';
 import { isServerVersionNewer } from 'src/utils/helpers';
 
 // stores
@@ -86,6 +88,7 @@ const { generalLoader } = storeToRefs(loaderStore);
 
 const rolesStore = useRolesStore();
 const workspaceStore = useWorkspaceStore();
+const aiDocStore = useAiDocStore();
 const { openReleaseNote } = storeToRefs(utilsStore);
 const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
   storeToRefs(workspaceStore);
@@ -95,10 +98,24 @@ const router = useRouter();
 const $q = useQuasar();
 const route = useRoute();
 const { auth } = storeToRefs(api);
-const leftDrawerOpen = ref(true);
+const leftDrawerOpen = ref(!Screen.lt.md);
 const refreshInterval = ref();
 const isShowReleaseNote = shallowRef(false);
 const { workspace } = storeToRefs(useWorkspaceStoreV2());
+
+// на мобильных (узкий вьюпорт) левое меню с NavMenu открывается по кнопке в шапке
+const isMobileView = computed(() => Screen.lt.md);
+
+// открытие/закрытие левого меню по кнопке в шапке (на мобильных)
+const onToggleDrawer = () => {
+  // на странице АИДока кнопка открывает его собственное меню
+  if (isAiDocRoute.value) {
+    aiDocStore.toggleMenu();
+    return;
+  }
+  if (miniState.value) miniState.value = false;
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
 
 const setTheme = () => {
   if (userStore.getTheme === 'dark' || auth.value) {
