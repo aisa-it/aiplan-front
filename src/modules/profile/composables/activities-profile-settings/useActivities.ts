@@ -2,7 +2,11 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { ProfileService } from '../../api/profile.service';
 
-import type { TypesActivityTable } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { ActivitiesListRequest } from '@/modules/activities';
+import type {
+  DtoActivityEventFull,
+  TypesActivityTable,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const formatRequestDate = (date: Date) => {
   const day = String(date.getDate()).padStart(2, '0');
@@ -14,10 +18,18 @@ const formatRequestDate = (date: Date) => {
 
 export function useActivities() {
   const loadReq = ref(true);
+  const loadList = ref(true);
   const userActivityMap = ref<TypesActivityTable>({});
+  const activities = ref<DtoActivityEventFull[]>([]);
+  const activitiesCount = ref(0);
 
   const clearUserActivityMap = () => {
     userActivityMap.value = {};
+  };
+
+  const clearActivities = () => {
+    activities.value = [];
+    activitiesCount.value = 0;
   };
 
   const loadActivities = async () => {
@@ -44,11 +56,42 @@ export function useActivities() {
     }
   };
 
+  const loadActivitiesList = async (
+    { page, rowsPerPage }: ActivitiesListRequest,
+    day?: string,
+  ) => {
+    loadList.value = true;
+
+    try {
+      const response = await ProfileService.getActivitiesList({
+        day: day ? day.replaceAll('.', '') : undefined,
+        offset: (page - 1) * rowsPerPage,
+        limit: rowsPerPage,
+      });
+
+      activities.value = response.result ?? [];
+      activitiesCount.value = response.count ?? 0;
+    } catch (error) {
+      void error;
+      clearActivities();
+      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+    } finally {
+      loadList.value = false;
+    }
+  };
+
   onMounted(loadActivities);
-  onBeforeUnmount(clearUserActivityMap);
+  onBeforeUnmount(() => {
+    clearUserActivityMap();
+    clearActivities();
+  });
 
   return {
+    activities,
+    activitiesCount,
     loadActivities,
+    loadActivitiesList,
+    loadList,
     loadReq,
     userActivityMap,
   };
