@@ -7,7 +7,7 @@
         enter-active-class="animated fadeIn"
         leave-active-class="animated fadeOut"
       >
-        <component :is="Component" :key="route.path" />
+        <component :is="Component" :key="getPageKey(route)" />
       </transition>
     </router-view>
   </q-page>
@@ -20,13 +20,13 @@ import { useRoute } from 'vue-router';
 import { watch } from 'vue';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
+import { getPageKey } from 'src/utils/pageKey';
 
 //core
 const route = useRoute();
 
 //stores
 const singleIssueStore = useSingleIssueStore();
-
 
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 

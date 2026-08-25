@@ -44,7 +44,6 @@ import { useQuasar, useMeta, Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import { useAiplanStore } from 'src/stores/aiplan-store';
 import { ref, computed, onUnmounted, onBeforeMount, shallowRef } from 'vue';
 
@@ -73,6 +72,7 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
 import { isServerVersionNewer } from 'src/utils/helpers';
+import { getPageKey } from 'src/utils/pageKey';
 
 // stores
 const api = useAiplanStore();
@@ -185,17 +185,6 @@ useMeta({
 
 const isSnowEnable = computed(() => localStorage.getItem('snow') === 'enable');
 const isAiDocRoute = computed(() => route.path.includes('/aidoc'));
-
-// Ключ, по которому router-view пересоздаёт страницу.
-// Для АИДока путь содержит id документа, и ключ по route.path пересоздавал
-// страницу на каждый переход — вместе с ней уничтожалось левое меню с деревом.
-// Поэтому все маршруты АИДока в пределах пространства делят один ключ,
-// а перезагрузку документа берёт на себя watch в AiDocPage.
-const AIDOC_ROUTE_NAMES = ['aidoc', 'doc'];
-const getPageKey = (pageRoute: RouteLocationNormalizedLoaded) =>
-  AIDOC_ROUTE_NAMES.includes(pageRoute.name as string)
-    ? `aidoc-${pageRoute.params.workspace}`
-    : pageRoute.path;
 
 // TODO: убрать
 watch(
