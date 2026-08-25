@@ -266,7 +266,13 @@ const isNotificationsSettingsOpen = ref<boolean>(false);
 const isHierarchyDialogOpen = ref<boolean>(false);
 const docInfo = ref({});
 const loading = ref(false);
-const nodesToExpand = ref<string[] | null>(null);
+
+// Ключ узла → колбэки, ждущие окончания ленивой подгрузки его детей.
+const pendingLazyLoads = new Map<string, Set<() => void>>();
+const LAZY_LOAD_TIMEOUT = 10000;
+// Номер актуальной цепочки раскрытия: быстрый переход между документами
+// отменяет предыдущую, чтобы две цепочки не воевали за одно дерево.
+let expandRunId = 0;
 
 const currentUserRole = computed(() =>
   getWsRole(currentWorkspaceSlug.value ?? ''),
@@ -321,6 +327,26 @@ const onSelect = (id: string | null = null) => {
   }
 };
 
+const notifyLazyLoaded = (key: string) => {
+  const resolvers = pendingLazyLoads.get(key);
+  if (!resolvers) return;
+  pendingLazyLoads.delete(key);
+  resolvers.forEach((resolve) => resolve());
+};
+
+const waitForLazyLoad = (key: string) =>
+  new Promise<void>((resolve) => {
+    const finish = () => {
+      clearTimeout(timer);
+      pendingLazyLoads.get(key)?.delete(finish);
+      resolve();
+    };
+    const timer = setTimeout(finish, LAZY_LOAD_TIMEOUT);
+    const resolvers = pendingLazyLoads.get(key) ?? new Set<() => void>();
+    resolvers.add(finish);
+    pendingLazyLoads.set(key, resolvers);
+  });
+
 const lazyLoad = async ({
   key,
   done,
@@ -328,11 +354,15 @@ const lazyLoad = async ({
   key: string;
   done: (children?: readonly any[]) => void;
 }) => {
-  if (!currentWorkspaceSlug || !currentWorkspaceSlug.value) return;
-  const children = (
-    await docStore.getChildDocList(currentWorkspaceSlug.value, key)
-  ).data;
-  done(children.map(mapDocNode));
+  try {
+    if (!currentWorkspaceSlug || !currentWorkspaceSlug.value) return;
+    const children = (
+      await docStore.getChildDocList(currentWorkspaceSlug.value, key)
+    ).data;
+    done(children.map(mapDocNode));
+  } finally {
+    notifyLazyLoaded(key);
+  }
 };
 
 const getFavoriteDocs = async () => {
@@ -598,27 +628,40 @@ watch(
   },
 );
 
-watch(treeRef,
-  () => {
-    if ( treeRef.value && ancestorsDocsIds.value?.length ) {
-      nodesToExpand.value = ancestorsDocsIds.value.slice().reverse();
-      treeRef.value.setExpanded(nodesToExpand.value[0], true);
-      nodesToExpand.value.shift();
-    }
-  }
-);
+// Раскрывает ветку дерева до текущего документа по его breadcrumbs.
+// Раньше цепочку проигрывал remount меню на каждом переходе (ключ router-view
+// в MainLayout), теперь меню живёт постоянно — раскрываем явно и на
+// монтирование дерева, и на каждую смену breadcrumbs.
+const expandAncestors = async (ids: string[] | null) => {
+  const runId = ++expandRunId;
+  const tree = treeRef.value;
+  if (!tree || !ids?.length) return;
 
-watch(() => treeNode.value,
-  () => {
-    if (treeRef.value && nodesToExpand.value?.length) {
-      try {
-        treeRef.value.setExpanded(nodesToExpand.value[0], true);
-        nodesToExpand.value.shift();
-      } catch {
-        return;
-      }
+  // breadcrumbs идут от документа к корню — раскрывать нужно сверху вниз
+  for (const id of ids.slice().reverse()) {
+    if (runId !== expandRunId) return; // запущена более свежая цепочка
+    const node = tree.getNodeByKey(id);
+    if (!node) return; // предка нет в дереве — раскрывать дальше нечего
+
+    if (!tree.isExpanded(id)) {
+      // ждать ленивую подгрузку нужно, только пока детей нет: узел с уже
+      // загруженными детьми QTree раскрывает синхронно и события не шлёт
+      const loaded =
+        node.lazy === true && !Array.isArray(node.children)
+          ? waitForLazyLoad(id)
+          : null;
+      tree.setExpanded(id, true);
+      if (loaded) await loaded;
     }
-  }, { deep: true }
+    await nextTick();
+  }
+};
+
+watch(treeRef, () => expandAncestors(ancestorsDocsIds.value));
+
+watch(
+  () => ancestorsDocsIds.value,
+  (ids) => expandAncestors(ids),
 );
 
 onMounted(async () => {

@@ -1,5 +1,5 @@
 <template>
-  <q-page v-if="!loading" class="flex justify-center flex-grow">
+  <q-page class="flex justify-center flex-grow">
     <div class="issue-panel__layout q-pt-sm flex flex-col no-wrap flex-grow">
       <q-drawer
         :model-value="aidocStore.isMenuOpen"
@@ -31,7 +31,22 @@
         ></div>
       </q-drawer>
 
-      <q-page-container v-if="!isEmptyDoc" class="flex-grow">
+      <q-page-container
+        v-if="loading"
+        class="flex flex-center flex-grow"
+        style="position: relative; min-height: 60vh"
+      >
+        <q-inner-loading showing><DefaultLoader /></q-inner-loading>
+      </q-page-container>
+
+      <!-- ключ по документу: содержимое (редактор, вложения, комментарии)
+           по-прежнему пересоздаётся на каждый документ, как при remount
+           всей страницы раньше, а левое меню при этом остаётся живым -->
+      <q-page-container
+        v-else-if="!isEmptyDoc"
+        :key="route.params.doc as string"
+        class="flex-grow"
+      >
         <div
           class="col items-stretch content-stretch flex column issue-panel__wrapper full-height no-wrap"
           :style="'position: relative'"
@@ -133,10 +148,6 @@
       </q-page-container>
     </div>
   </q-page>
-
-  <q-page v-else class="flex justify-center items-center">
-    <q-inner-loading showing> <DefaultLoader /> </q-inner-loading
-  ></q-page>
 </template>
 
 <script setup lang="ts">
@@ -429,17 +440,45 @@ const { handleDrop } = useAttachmentsWithEditor(
   () => selectAttachments.value.refresh(),
 );
 
-//hooks
-onMounted(async () => {
+// Загрузка документа под лоадером контентной области.
+// Раньше отрабатывала только в onMounted: страница пересоздавалась на каждый
+// документ по ключу router-view. Теперь страница живёт — тот же путь запускает
+// watch на route.params.doc ниже.
+const loadDocument = async () => {
   loading.value = true;
-  await refreshDocument();
-  loading.value = false;
+  try {
+    await refreshDocument();
+  } finally {
+    loading.value = false;
+  }
 
   if (isEmptyDoc.value) {
     aidocStore.selectDoc('', '');
     aidocStore.parentDocId = null;
   }
+};
 
+// Состояние, которое раньше сбрасывалось само за счёт пересоздания страницы.
+const resetDocumentState = () => {
+  isReadOnlyEditor.value = true;
+  updateCurrentEditorValue.value = undefined;
+  showDeleteDialog.value = false;
+  documentValue.value = {};
+  docVersionList.value = [];
+  metadata.value.title = route.params.doc ? 'Загрузка...' : 'АИДок';
+};
+
+watch(
+  () => route.params.doc,
+  async () => {
+    resetDocumentState();
+    await loadDocument();
+  },
+);
+
+//hooks
+onMounted(async () => {
+  await loadDocument();
   await initSortable();
 });
 </script>
