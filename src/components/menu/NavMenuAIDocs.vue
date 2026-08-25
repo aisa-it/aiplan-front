@@ -53,7 +53,9 @@
                     item.doc?.title
                   }}</HintTooltip>
                 </div>
-                <div class="flex items-center no-wrap q-pa-none">
+                <div
+                  class="favorites-docs__actions flex items-center no-wrap q-pa-none"
+                >
                   <q-btn
                     class="menu-link__btn q-ml-sm q-mr-xs"
                     flat
@@ -105,7 +107,9 @@
                     prop.node.title
                   }}</HintTooltip>
                 </div>
-                <div class="flex align-center no-wrap">
+                <div
+                  class="tree-custom-header__actions flex align-center no-wrap"
+                >
                   <q-btn
                     class="menu-link__btn q-ml-sm q-mr-xs"
                     :class="{ 'favorite-btn--inactive': !prop.node.isFavorite }"
@@ -632,19 +636,34 @@ defineExpose({
 .tree-wrapper {
   height: 100%;
   padding: 0 10px 10px 8px;
+
+  // контейнер заголовка узла от Quasar имеет min-width: auto и не даёт
+  // содержимому ужиматься — без этого обрезка не следует за шириной дровера
+  :deep(.q-tree__node-header-content) {
+    min-width: 0;
+  }
 }
 
 .tree-custom-header {
   cursor: default;
+  flex: 1 1 auto;
+  min-width: 0;
 
   &__name {
     display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
     > span {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
-      max-width: 195px;
+      flex: 1 1 auto;
+      min-width: 0;
     }
+  }
+
+  &__actions {
+    flex: 0 0 auto;
   }
 }
 
@@ -691,13 +710,19 @@ defineExpose({
   }
   &__name {
     display: flex;
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     > span {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
-      max-width: 210px;
+      flex: 1 1 auto;
+      min-width: 0;
     }
+  }
+
+  &__actions {
+    flex: 0 0 auto;
   }
 }
 </style>

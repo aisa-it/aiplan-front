@@ -25,7 +25,19 @@
           />
 
           <div>
-            <span class="text-grey-7">Атрибуты:</span>
+            <div class="row items-center">
+              <span class="text-grey-7">Атрибуты:</span>
+              <q-btn
+                flat
+                dense
+                no-caps
+                icon="add"
+                label="Добавить атрибут"
+                color="primary"
+                class="q-ml-sm"
+                @click="addAttr"
+              />
+            </div>
             <div
               v-for="(attr, index) in form.attrs"
               :key="index"
@@ -56,16 +68,6 @@
             <div v-if="attrsError" class="text-negative text-caption q-mt-xs">
               {{ attrsError }}
             </div>
-            <q-btn
-              flat
-              dense
-              no-caps
-              icon="add"
-              label="Добавить атрибут"
-              color="primary"
-              class="q-mt-sm"
-              @click="addAttr"
-            />
             <div class="text-caption text-grey q-mt-xs">
               Несколько значений атрибута — JSON-массивом: ["А", "Б"]
             </div>
