@@ -56,14 +56,15 @@ export function useActivities() {
     }
   };
 
-  const loadActivitiesList = async ({
-    page,
-    rowsPerPage,
-  }: ActivitiesListRequest) => {
+  const loadActivitiesList = async (
+    { page, rowsPerPage }: ActivitiesListRequest,
+    day?: string,
+  ) => {
     loadList.value = true;
 
     try {
       const response = await ProfileService.getActivitiesList({
+        day: day ? day.replaceAll('.', '') : undefined,
         offset: (page - 1) * rowsPerPage,
         limit: rowsPerPage,
       });

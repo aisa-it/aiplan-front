@@ -101,10 +101,16 @@ const requestActivities = (options?: Partial<ActivitiesListRequest>) => {
 };
 
 const closeCurrentDay = () => {
-  page.value = 1;
   emit('closeCurrentDay');
-  requestActivities();
 };
+
+watch(
+  () => props.currentDay,
+  () => {
+    page.value = 1;
+    requestActivities();
+  },
+);
 
 watch(pagesCount, (count) => {
   if (page.value <= count) return;
