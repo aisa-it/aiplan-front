@@ -326,6 +326,7 @@ interface DraftAttachment {
   name: string;
   size: number;
   createdAt: string;
+  previewUrl: string; // blob: для предпросмотра до загрузки на сервер
 }
 
 const draftFiles = ref<DraftAttachment[]>([]);
@@ -339,6 +340,9 @@ const attachments = computed(() => {
         size: f.size,
         id: f.id,
         content_type: f.file.type,
+        // Без url предпросмотр ушёл бы на /api/auth/file/<локальный-uuid> за 404:
+        // черновик ещё не залит и серверного id у него нет.
+        url: f.previewUrl,
       },
       created_at: f.createdAt,
       draft: true,
@@ -502,11 +506,15 @@ const addFilesToDraft = (files: File[]) => {
       name: file.name,
       size: file.size,
       createdAt: new Date().toISOString(),
+      previewUrl: URL.createObjectURL(file),
     });
   });
 };
 
 const deleteDraftFile = (id: string) => {
+  const removed = draftFiles.value.find((f) => f.id === id);
+  if (removed) URL.revokeObjectURL(removed.previewUrl);
+
   draftFiles.value = draftFiles.value.filter((f) => f.id !== id);
 };
 
@@ -644,6 +652,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   abortController.abort();
   clearInterval(refreshCycle.value);
+  draftFiles.value.forEach((f) => URL.revokeObjectURL(f.previewUrl));
 });
 
 watch(

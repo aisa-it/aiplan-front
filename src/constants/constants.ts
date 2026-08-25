@@ -334,7 +334,25 @@ export const ISSUE_AUTO_SAVE = [
 ];
 
 export const EXTENSION_VIDEO = ['mp4', 'mov', 'avi', 'wmv', 'webm', 'mkv'];
-export const EXTENSION_AUDIO = ['wav', 'aiff', 'ape', 'flac', 'mp3', 'ogg'];
+// Расширения, которые DocPreviewDialog отдаёт в AudioPlayer. Сюда попадают и
+// форматы, которые ни один браузер не проигрывает (ape, wma, aiff вне Safari):
+// плеер покажет по ним понятную ошибку с кнопкой скачивания, а не сломанную
+// ветку картинки, как было бы без записи в этом списке.
+export const EXTENSION_AUDIO = [
+  'wav',
+  'aiff',
+  'aif',
+  'ape',
+  'flac',
+  'mp3',
+  'ogg',
+  'oga',
+  'opus',
+  'm4a',
+  'aac',
+  'weba',
+  'wma',
+];
 
 export const EXTENSION_DOCUMENT = ['pdf'];
 

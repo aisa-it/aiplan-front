@@ -23,7 +23,16 @@ export const AIDOC_ACCEPTABLE_FORMATS_IMAGES = [
   'tif',
 ];
 export const AIDOC_ACCEPTABLE_FORMATS_ARCHIVES = ['zip', 'rar', '7z'];
-export const AIDOC_ACCEPTABLE_FORMATS_AUDIO = ['mp3', 'wav', 'ogg'];
+export const AIDOC_ACCEPTABLE_FORMATS_AUDIO = [
+  'mp3',
+  'wav',
+  'ogg',
+  'oga',
+  'opus',
+  'm4a',
+  'aac',
+  'flac',
+];
 export const AIDOC_ACCEPTABLE_FORMATS_VIDEO = ['mp4', 'avi', 'mov', 'mkv'];
 export const AIDOC_ACCEPTABLE_FORMATS_OTHER = [
   'csv',

@@ -68,6 +68,12 @@ const components = {
   ac3: FileMediaIcon, // AC3 audio
   alac: FileMediaIcon, // ALAC audio
   flac: FileMediaIcon, // FLAC audio
+  aac: FileMediaIcon, // AAC audio
+  oga: FileMediaIcon, // OGG audio
+  weba: FileMediaIcon, // WebM audio
+  aif: FileMediaIcon, // AIFF audio
+  ape: FileMediaIcon, // Monkey's Audio
+  wma: FileMediaIcon, // Windows Media Audio
   zip: FileZIPIcon, // Zip archive
   rar: FileZIPIcon, // RAR archive
   tar: FileZIPIcon, // TAR archive

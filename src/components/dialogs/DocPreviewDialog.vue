@@ -14,9 +14,9 @@
       <iframe :src="src"></iframe>
     </div>
 
-    <div v-else-if="isAudio">
-      <audio :src="src" controls />
-    </div>
+    <q-card v-else-if="isAudio" class="audio-preview">
+      <AudioPlayer :src="src" :title="fileName" @download="handleDownload" />
+    </q-card>
 
     <div v-else-if="isIFrame">
       <iframe :src="src" sandbox="allow-scripts" />
@@ -70,6 +70,7 @@ import {
   EXTENSION_IFRAME,
 } from 'src/constants/constants';
 import DefaultLoader from '../loaders/DefaultLoader.vue';
+import AudioPlayer from '../AudioPlayer.vue';
 
 // props
 const props = defineProps<{
@@ -110,6 +111,22 @@ const src = computed(() => {
   }
   return props.file?.asset || '';
 });
+
+const fileName = computed(() => props.file?.asset?.name ?? '');
+
+// methods
+// Аудио отдаётся с Content-Disposition: attachment (в inlineSafeContentTypes на
+// бэкенде его нет), поэтому обычной ссылки хватает — авторизация едет в куках.
+const handleDownload = () => {
+  if (!src.value) return;
+
+  const link = document.createElement('a');
+  link.href = src.value;
+  link.download = fileName.value;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
 </script>
 
 <style lang="scss"></style>
@@ -163,6 +180,12 @@ iframe {
 .video-preview {
   max-width: 80vw;
   max-height: 60vh;
+}
+
+.audio-preview {
+  width: 480px;
+  max-width: 90vw;
+  padding: 16px;
 }
 
 @media screen and (max-width: 1280px) {
