@@ -2,6 +2,8 @@ import { TextSelection } from '@tiptap/pm/state';
 import { Editor } from '@tiptap/vue-3';
 import { EventBus } from 'quasar';
 import { bgColorMap, colorMap } from 'src/utils/editorColorMap';
+import { parseDocAnchorLink } from 'src/utils/links';
+import { scrollToAnchorId } from 'src/utils/scrollToAnchor';
 import { Ref, inject } from 'vue';
 import { handleTipTapPaste } from './handleTipTapPaste';
 
@@ -58,7 +60,23 @@ export const cleanContent = (content: string): string => {
   return cleanedContent;
 };
 
-export const getEditorProps = (editorInstance, onCommentLink) => ({
+/** Разобранная ссылка на якорь: `#id` в текущем документе либо `#id` в чужом. */
+export interface ParsedAnchorLink {
+  slug?: string;
+  docId?: string;
+  anchorId: string;
+}
+
+export type AnchorLinkHandler = (
+  parsed: ParsedAnchorLink,
+  href: string,
+) => void;
+
+export const getEditorProps = (
+  editorInstance,
+  onCommentLink,
+  onAnchorLink?: AnchorLinkHandler,
+) => ({
   handlePaste: (view, event, slice) => {
     return handleTipTapPaste(editorInstance, view, event, slice);
   },
@@ -155,6 +173,65 @@ export const getEditorProps = (editorInstance, onCommentLink) => ({
   },
   handleClick(view, pos, event) {
     const target = event.target as HTMLElement;
+
+    // Ссылки с якорем перехватываем сами: браузер по `#id` ушёл бы в нативную
+    // навигацию и сломал SPA. Проверка идёт до special-link-mention — у тех
+    // ссылок хэша нет, поэтому пересечься ветки не могут.
+    const linkEl = target?.closest?.('a');
+    if (linkEl) {
+      // Именно getAttribute: свойство .href отдаёт абсолютный URL,
+      // и голый `#якорь` в нём уже не отличить от ссылки на другую страницу.
+      const href = linkEl.getAttribute('href') || '';
+      const parsedAnchor = parseDocAnchorLink(href);
+
+      if (parsedAnchor) {
+        event.preventDefault();
+
+        const isEditing = !!editorInstance.value?.isEditable;
+        const isSameDoc = !parsedAnchor.docId;
+
+        if (isEditing) {
+          // Клик по ссылке в режиме правки должен вести себя как обычный
+          // клик по тексту — ставим курсор.
+          try {
+            view.dispatch(
+              view.state.tr.setSelection(
+                TextSelection.near(view.state.doc.resolve(pos)),
+              ),
+            );
+          } catch (e) {
+            // Клик мог прийти по служебной обёртке без позиции в документе —
+            // курсор в этом случае просто остаётся там, где был.
+          }
+        }
+
+        // Уводить со страницы посреди редактирования нельзя — переход на
+        // ДРУГОЙ документ в режиме правки блокируем.
+        //
+        // А вот прокрутка внутри текущего документа безопасна: она ничего не
+        // меняет и не теряет несохранённое, поэтому работает в обоих режимах.
+        // Раньше здесь стоял общий выход по isEditable, и клик по только что
+        // созданной ссылке не делал ровно ничего — а проверяют её как раз
+        // сразу, не выходя из правки.
+        if (isEditing && !isSameDoc) return true;
+
+        if (onAnchorLink) {
+          onAnchorLink(parsedAnchor, href);
+          return true;
+        }
+
+        // Фолбэк без коллбэка: якорь текущего документа прокручиваем сами,
+        // ссылку на чужой документ оставляем тому, кто подключит обработчик.
+        if (isSameDoc) {
+          scrollToAnchorId(editorInstance.value, parsedAnchor.anchorId, {
+            highlight: true,
+          });
+        }
+
+        return true;
+      }
+    }
+
     if (target.classList.contains('special-link-mention')) {
       const {
         type,

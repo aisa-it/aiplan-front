@@ -91,7 +91,7 @@
       </span>
     </transition>
     <DocPreviewDialog v-if="openImage" v-model="openImage" :file="image" />
-    <EditorAnchorDialog
+    <EditorCommentLinkTitleDialog
       v-model="editAnchor"
       :editor-instance="editorInstance"
     />
@@ -165,7 +165,7 @@ import DocPreviewDialog from 'src/components/dialogs/DocPreviewDialog.vue';
 import EditorTipTapToolbar from './EditorTipTapToolbar.vue';
 import EditorTooltipMention from './EditorTooltipMention.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
-import EditorAnchorDialog from './EditorAnchorDialog.vue';
+import EditorCommentLinkTitleDialog from './EditorCommentLinkTitleDialog.vue';
 //image
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 import { TextSelection } from '@tiptap/pm/state';

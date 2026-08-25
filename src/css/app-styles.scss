@@ -1429,6 +1429,26 @@ select:-ms-autofill {
   margin-left: 3px;
 }
 
+// Подсветка места, куда увела ссылка с якорем. Класс навешивается
+// императивно из scrollToAnchor.ts на произвольный элемент (и на заголовок
+// с id, и на span-якорь), поэтому правило обязано быть глобальным.
+//
+// Внешний вид САМОГО якоря сюда не выносим: им управляет AnchorNodeView.vue
+// своими scoped-стилями, и он же знает, показывать фишку или прятать её.
+.doc-anchor-target--active {
+  animation: doc-anchor-flash 1.6s ease-out;
+  border-radius: 4px;
+}
+
+@keyframes doc-anchor-flash {
+  0% {
+    background-color: rgba($primary, 0.35);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 .watchers-selector {
   max-width: 100%;
   min-width: 100%;

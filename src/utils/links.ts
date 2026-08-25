@@ -121,3 +121,54 @@ export function getSprintLink(workspaceSlug?: string, sprintId?: string) {
   }
   return `${location.protocol}//${location.host}/${workspaceSlug}/sprints/${sprintId}`;
 }
+
+/** Ссылка на якорь внутри текущего документа: `#введение`. */
+export function isAnchorHref(href: string): boolean {
+  return typeof href === 'string' && /^#\S+$/.test(href.trim());
+}
+
+/**
+ * Разбирает ссылку с якорем.
+ *
+ * `#vvedenie`                        -> { anchorId }
+ * `/ws-slug/aidoc/<docId>#vvedenie`  -> { slug, docId, anchorId }
+ *
+ * Ссылки на комментарий (`/ws/aidoc/<docId>/<commentId>`) сюда не попадают:
+ * их по-прежнему разбирает parseCommentLink, который смотрит только pathname
+ * и про хэш не знает вовсе.
+ */
+export function parseDocAnchorLink(href: string): {
+  slug?: string;
+  docId?: string;
+  anchorId: string;
+} | null {
+  if (!href) return null;
+
+  try {
+    const url = new URL(href, window.location.origin);
+    const anchorId = decodeURIComponent(url.hash.replace(/^#/, ''));
+    if (!anchorId) return null;
+
+    const parts = url.pathname.split('/').filter(Boolean);
+
+    // Голый `#якорь` — цель в текущем документе, пути в ссылке нет.
+    if (isAnchorHref(href.trim())) return { anchorId };
+
+    if (parts.length === 3 && parts[1] === 'aidoc') {
+      return { slug: parts[0], docId: parts[2], anchorId };
+    }
+  } catch (e) {
+    return null;
+  }
+
+  return null;
+}
+
+/** Полная ссылка на якорь документа — то, что уходит в буфер обмена. */
+export function getDocumentAnchorLink(
+  workspaceSlug: string,
+  docId: string,
+  anchorId: string,
+) {
+  return `${getDocumentLink(workspaceSlug, docId)}#${encodeURIComponent(anchorId)}`;
+}

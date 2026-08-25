@@ -93,6 +93,7 @@
               can-resize
               is-mention
               show-headings
+              enable-anchors
               :members="workspaceUsers"
               :get-members-for-mention="getWorkspaceMembersForMention"
               @enable-editing="handleEnableEdit"
@@ -153,7 +154,7 @@
 <script setup lang="ts">
 //core
 import { storeToRefs } from 'pinia';
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch, nextTick } from 'vue';
 import { Screen, useMeta, useQuasar } from 'quasar';
 import { useRoute } from 'vue-router';
 // stores
@@ -177,6 +178,10 @@ import EditorHeader from 'src/components/EditorHeader.vue';
 import DeleteDocDialog from 'src/components/dialogs/AIDocDialogs/DeleteDocDialog.vue';
 import AidocComments from 'src/components/aidoc/AidocComments.vue';
 import EditorTipTapV2 from 'src/components/editorV2/EditorTipTapV2.vue';
+import {
+  scrollToAnchorWhenReady,
+  keepAnchorInView,
+} from 'src/utils/scrollToAnchor';
 import { cleanContent } from 'src/components/editorV2/utils/editorUtils';
 import DefaultLoader from 'src/components/loaders/DefaultLoader.vue';
 import { SUCCESS_UPDATE_DOCUMENT } from 'src/constants/notifications';
@@ -456,7 +461,55 @@ const loadDocument = async () => {
     aidocStore.selectDoc('', '');
     aidocStore.parentDocId = null;
   }
+
+  await goToRouteAnchor();
 };
+
+/**
+ * Переход к якорю из адресной строки.
+ *
+ * Одним nextTick не обойтись. Контентный контейнер пересоздаётся по
+ * :key="route.params.doc", а сам EditorTipTapV2 держит содержимое под
+ * `v-if="editorInstance"` и присваивает editorInstance в onMounted — то есть
+ * редактор попадает в DOM только вторым кругом рендера, уже после того, как
+ * первый nextTick отработал. Поэтому ждём появления самой цели.
+ */
+const goToRouteAnchor = async () => {
+  const anchorId = decodeURIComponent(route.hash.replace(/^#/, ''));
+  if (!anchorId) return;
+
+  await nextTick();
+
+  // behavior: 'auto' — намеренно без анимации. Плавная прокрутка длится
+  // 300-500 мс и обрывается любым конкурирующим скроллом или сдвигом
+  // раскладки, а при загрузке документа их хватает.
+  const reached = await scrollToAnchorWhenReady(
+    () =>
+      aidocEditor.value?.scrollToAnchor?.(anchorId, { behavior: 'auto' }) ===
+      true,
+  );
+
+  if (!reached) {
+    console.warn('Якорь не найден в документе:', anchorId);
+    return;
+  }
+
+  // Одного попадания мало: ниже ещё догружаются вложения и комментарии,
+  // внутри документа — картинки. Пока страница короткая, прокрутка к якорю
+  // в конце зажимается текущим максимумом и даёт визуально ноль. Держим
+  // якорь в поле зрения, пока раскладка не устоится.
+  keepAnchorInView(() =>
+    aidocEditor.value?.scrollToAnchor?.(anchorId, {
+      behavior: 'auto',
+      highlight: false,
+    }),
+  );
+};
+
+// Переход между якорями ВНУТРИ одного документа роутер отрабатывает без
+// пересоздания страницы (ключ router-view хэш не учитывает), поэтому
+// onMounted и watch на route.params.doc такой переход не поймают.
+watch(() => route.hash, goToRouteAnchor);
 
 // Состояние, которое раньше сбрасывалось само за счёт пересоздания страницы.
 const resetDocumentState = () => {

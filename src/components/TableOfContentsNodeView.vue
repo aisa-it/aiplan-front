@@ -11,7 +11,7 @@
     <div v-else>
       <div v-for="link in links" :key="link.id">
         <a
-          :href="`#${link.id}`"
+          :href="`#${link.anchorId || link.id}`"
           :style="'padding-left:' + `${30 * (link.originalLevel - 1)}px`"
           class="html-editor__toc-link"
           @click.prevent="onItemClick(link)"
@@ -26,9 +26,12 @@
 
 <script setup lang="ts">
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
-import { TextSelection } from '@tiptap/pm/state';
 import { ref, inject } from 'vue';
 import CloseIcon from 'components/icons/CloseIcon.vue';
+import {
+  scrollToAnchorId,
+  scrollToAnchorElement,
+} from 'src/utils/scrollToAnchor';
 
 const props = defineProps(nodeViewProps);
 
@@ -42,30 +45,33 @@ const hasOwnNumeration = (heading) => {
 };
 
 const onItemClick = (link) => {
-  if (props.editor && !props.editor.options.editable) {
-    const targetLink =
-      props.editor.extensionStorage.tableOfContents.content.find(
-        (el) =>
-          el.textContent === link.text &&
-          el.originalLevel === link.originalLevel,
-      );
+  if (!props.editor || props.editor.options.editable) return;
 
-    if (targetLink) {
-      const element = props.editor.view.dom.querySelector(
-        `[data-toc-id="${targetLink.id}"]`,
-      );
-      const pos = props.editor.view.posAtDOM(element, 0);
-      const tr = props.editor.view.state.tr;
-      tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
-      props.editor.view.dispatch(tr);
-      props.editor.view.focus();
-
-      window.scrollTo({
-        top: element.getBoundingClientRect().top + window.scrollY - 60,
-        behavior: 'smooth',
-      });
-    }
+  // Основной путь: постоянный id заголовка, сохранённый в документе.
+  if (
+    link.anchorId &&
+    scrollToAnchorId(props.editor, link.anchorId, {
+      focus: true,
+    })
+  ) {
+    return;
   }
+
+  // Запасной путь для старых документов, где заголовки ещё без id: ищем цель
+  // сопоставлением текста и уровня. Способ ненадёжный (два одинаковых
+  // заголовка уводят не туда), поэтому он именно запасной.
+  const targetLink = props.editor.extensionStorage.tableOfContents.content.find(
+    (el) =>
+      el.textContent === link.text && el.originalLevel === link.originalLevel,
+  );
+
+  if (!targetLink) return;
+
+  const element = props.editor.view.dom.querySelector(
+    `[data-toc-id="${targetLink.id}"]`,
+  );
+
+  if (element) scrollToAnchorElement(props.editor, element, { focus: true });
 };
 
 const removeNode = () => {

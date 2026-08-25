@@ -22,6 +22,7 @@
       :style="{ height: isMobile ? `${editorToolbarHeight}px` : 'auto' }"
       :isFullScreen="isFullScreenView"
       :showHeadings="props.showHeadings"
+      :enableAnchors="props.enableAnchors"
       @toggle-format-sample="isFormatSampleActive = !isFormatSampleActive"
       @enable-editing="emits('enableEditing')"
       @toggle-fullscreen="emits('toggle-fullscreen')"
@@ -68,7 +69,7 @@
                   <div v-for="link in tocLinks" :key="link.id">
                     <a
                       v-close-popup
-                      href="#"
+                      :href="`#${link.anchorId || link.id}`"
                       :style="
                         'padding-left:' + `${30 * (link.originalLevel - 1)}px`
                       "
@@ -121,7 +122,7 @@
       :file="image"
       :isDiagram="isOpenDiagram"
     />
-    <EditorAnchorDialog
+    <EditorCommentLinkTitleDialog
       v-model="editAnchor"
       :editor-instance="editorInstance"
     />
@@ -144,7 +145,6 @@ import { useQuasar, Screen, EventBus } from 'quasar';
 
 // TipTap
 import { Editor, EditorContent } from '@tiptap/vue-3';
-import { TextSelection } from '@tiptap/pm/state';
 import { generateHeadingLinks } from 'src/utils/tableOfContents';
 
 // Components
@@ -158,9 +158,14 @@ import {
   useHandleMouseUp,
   replaceColor,
 } from './utils/editorUtils';
-import EditorAnchorDialog from './components/EditorAnchorDialog.vue';
+import EditorCommentLinkTitleDialog from './components/EditorCommentLinkTitleDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import aiplan from 'src/utils/aiplan';
+import { useRoute, useRouter } from 'vue-router';
+import {
+  scrollToAnchorId,
+  scrollToAnchorElement,
+} from 'src/utils/scrollToAnchor';
 import { ICONS } from 'src/utils/icons';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
 import { useFloatScroll } from './composables/useFloatScroll';
@@ -184,6 +189,7 @@ interface IEditorV2Props {
   isFullScreen?: boolean;
   isFullScreenView?: boolean;
   showHeadings?: boolean;
+  enableAnchors?: boolean;
 }
 
 interface ContentMention {
@@ -211,6 +217,7 @@ const props = withDefaults(defineProps<IEditorV2Props>(), {
   isFullScreen: false,
   isFullScreenView: false,
   showHeadings: false,
+  enableAnchors: false,
   excludedTabs: undefined,
 });
 
@@ -224,6 +231,8 @@ const emits = defineEmits<{
 }>();
 
 const $q = useQuasar();
+const route = useRoute();
+const router = useRouter();
 const bus = inject<EventBus>('bus');
 const editorInstance = ref<Editor | null>(null);
 const isFormatSampleActive = ref<boolean>(false);
@@ -335,7 +344,7 @@ function createEditor() {
       refreshTocLinks();
       floatScroll();
     },
-    editorProps: getEditorProps(editorInstance, onCommentLink),
+    editorProps: getEditorProps(editorInstance, onCommentLink, onAnchorLink),
     classPrevent: props.classPrevent,
   } as any);
   const { addMouseUpListener } = useHandleMouseUp(
@@ -358,28 +367,56 @@ const refreshTocLinks = () => {
 };
 
 const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
-  if (!editorInstance.value) return;
   const editor = editorInstance.value;
+  if (!editor) return;
 
-  const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
-
-  if (!element) return;
-
-  try {
-    const pos = editor.view.posAtDOM(element, 0);
-    const tr = editor.view.state.tr;
-    tr.setSelection(new TextSelection(tr.doc.resolve(pos)));
-    editor.view.dispatch(tr);
-    editor.view.focus();
-  } catch (e) {
-    // ignore
+  // Сначала постоянный id заголовка, и лишь потом служебный runtime-id
+  // расширения table-of-contents (нужен для документов без проставленных id).
+  if (
+    link.anchorId &&
+    scrollToAnchorId(editor, link.anchorId, { focus: true })
+  ) {
+    return;
   }
 
-  window.scrollTo({
-    top: element.getBoundingClientRect().top + window.scrollY - 60,
-    behavior: 'smooth',
-  });
+  const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
+  if (element) scrollToAnchorElement(editor, element, { focus: true });
 };
+
+/**
+ * Переход по ссылке с якорем. Внутри текущего документа — просто скролл,
+ * на другой документ — навигация роутером с хэшем (дальше подхватит AiDocPage).
+ */
+const onAnchorLink = (
+  parsed: { slug?: string; docId?: string; anchorId: string },
+  href: string,
+) => {
+  const isOtherDoc = !!parsed.docId && parsed.docId !== route.params.doc;
+
+  if (isOtherDoc) {
+    router.push(`/${parsed.slug}/aidoc/${parsed.docId}#${parsed.anchorId}`);
+    return;
+  }
+
+  if (
+    !scrollToAnchorId(editorInstance.value, parsed.anchorId, {
+      highlight: true,
+    })
+  ) {
+    // Якорь удалили, а ссылка на него осталась — молча никуда не прыгаем.
+    console.warn('Якорь не найден в документе:', href);
+  }
+};
+
+/** Переход к якорю извне (например, по хэшу в адресной строке). */
+const scrollToAnchor = (
+  anchorId: string,
+  options: Parameters<typeof scrollToAnchorId>[2] = {},
+) =>
+  scrollToAnchorId(editorInstance.value, anchorId, {
+    highlight: true,
+    ...options,
+  });
 
 function handleClickEditor(e: MouseEvent | TouchEvent) {
   const target = e.target as HTMLElement;
@@ -402,7 +439,7 @@ const onResize = (size: any) => {
 
 const onCommentLink = (commentData: any) => {
   if (isReadOnly.value) {
-    if (commentData) bus?.emits('openSingleComment', commentData);
+    if (commentData) bus?.emit('openSingleComment', commentData);
   } else {
     editAnchor.value = true;
   }
@@ -468,6 +505,7 @@ onBeforeUnmount(() => {
 
 defineExpose({
   updateToC,
+  scrollToAnchor,
 });
 </script>
 

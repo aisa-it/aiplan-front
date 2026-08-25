@@ -44,7 +44,26 @@
             no-caps
           />
         </div>
-        <div @click.stop class="q-pb-sm q-px-sm input-link">
+
+        <!-- Переключатель: внешняя ссылка или якорь внутри документа -->
+        <div @click.stop class="q-mb-xs q-px-xs q-py-xs input-link">
+          <q-btn-toggle
+            v-model="mode"
+            :options="modeOptions"
+            class="full-w"
+            dense
+            flat
+            no-caps
+            spread
+            toggle-color="primary"
+          />
+        </div>
+
+        <div
+          v-if="mode === 'url'"
+          @click.stop
+          class="q-pb-sm q-px-sm input-link"
+        >
           <q-input
             v-model="linkUrl"
             dense
@@ -56,6 +75,55 @@
             ]"
           />
         </div>
+
+        <div
+          v-else-if="anchorTargets.length"
+          @click.stop
+          class="q-pb-sm q-px-sm input-link"
+        >
+          <q-select
+            ref="anchorSelect"
+            v-model="anchorId"
+            :options="anchorTargets"
+            :display-value="anchorDisplay"
+            option-value="id"
+            option-label="label"
+            emit-value
+            map-options
+            dense
+            hide-bottom-space
+            class="full-w base-input"
+            label="Выберите якорь"
+          >
+            <template v-slot:option="scope">
+              <q-item
+                v-bind="scope.itemProps"
+                :style="{ paddingLeft: `${optionIndent(scope.opt)}px` }"
+              >
+                <q-item-section avatar class="anchor-option-icon">
+                  <q-icon
+                    :name="scope.opt.type === 'heading' ? 'title' : 'tag'"
+                    size="16px"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label lines="1">{{ scope.opt.label }}</q-item-label>
+                  <q-item-label caption lines="1">
+                    {{ optionCaption(scope.opt) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </div>
+
+        <div
+          v-else
+          @click.stop
+          class="q-pa-sm input-link text-caption text-grey"
+        >
+          В документе нет якорей — сначала добавьте якорь или заголовок.
+        </div>
       </q-form>
     </q-card>
   </q-popup-proxy>
@@ -66,20 +134,60 @@ import { Editor } from '@tiptap/vue-3';
 import { computed, ref, watch, nextTick } from 'vue';
 import { ICONS } from 'src/utils/icons';
 import { isValidURL } from 'src/utils/validation';
-import { parseCommentLink } from 'src/utils/links';
+import {
+  isAnchorHref,
+  parseCommentLink,
+  parseDocAnchorLink,
+} from 'src/utils/links';
+import { collectAnchorTargets, type AnchorTarget } from 'src/utils/anchorSlug';
+import { useMenuHandler } from 'src/composables/useMenuHandler';
 
 const props = defineProps<{
   editorInstance: Editor;
 }>();
 
+// Режим попапа: обычная ссылка или якорь внутри документа
+type LinkMode = 'url' | 'anchor';
+
+const modeOptions = [
+  { label: 'Ссылка', value: 'url' },
+  { label: 'Якорь в документе', value: 'anchor' },
+];
+
 const showPicker = ref(false);
 const linkUrl = ref('');
+const mode = ref<LinkMode>('url');
+const anchorId = ref<string | null>(null);
+const anchorTargets = ref<AnchorTarget[]>([]);
+const anchorSelect = ref();
 const popupTarget = ref<HTMLElement | null>(null);
 let virtualAnchor: HTMLElement | null = null;
+
+// закрываем выпадашку якорей при скролле: иначе она отрывается от поля
+useMenuHandler(anchorSelect);
 
 const isActive = computed(() => {
   return props.editorInstance.isActive('link');
 });
+
+// Название выбранного якоря берём по ПОЛНОМУ списку целей: ссылка могла
+// остаться от удалённого якоря, и тогда честнее сказать об этом, чем
+// показывать голый идентификатор.
+const anchorDisplay = computed(() => {
+  if (!anchorId.value) return undefined;
+
+  const target = anchorTargets.value.find((item) => item.id === anchorId.value);
+  return target ? target.label : `${anchorId.value} (якорь не найден)`;
+});
+
+// Заголовки в списке отбиваем вправо по уровню, явные якоря — по левому краю
+const optionIndent = (target: AnchorTarget) =>
+  target.type === 'heading' ? 8 + ((target.level ?? 1) - 1) * 12 : 8;
+
+const optionCaption = (target: AnchorTarget) =>
+  target.type === 'heading'
+    ? `Заголовок H${target.level ?? 1} · #${target.id}`
+    : `Якорь · #${target.id}`;
 
 const toggleLinkTooltip = (e: MouseEvent) => {
   e.stopPropagation();
@@ -94,6 +202,9 @@ const toggleLinkTooltip = (e: MouseEvent) => {
   if (empty && !props.editorInstance.isActive('link')) {
     return;
   }
+
+  // Список целей собираем на открытии: документ мог измениться с прошлого раза
+  anchorTargets.value = collectAnchorTargets(props.editorInstance.state.doc);
 
   const coords = props.editorInstance.view.coordsAtPos(from);
 
@@ -113,16 +224,41 @@ const toggleLinkTooltip = (e: MouseEvent) => {
   showPicker.value = true;
 
   nextTick(() => {
-    if (props.editorInstance.isActive('link')) {
-      const attrs = props.editorInstance.getAttributes('link');
-      linkUrl.value = attrs.href || '';
-    } else {
+    const href = props.editorInstance.isActive('link')
+      ? props.editorInstance.getAttributes('link').href || ''
+      : '';
+
+    // Курсор стоит на ссылке-якоре — сразу открываем нужный режим
+    if (isAnchorHref(href)) {
+      mode.value = 'anchor';
+      anchorId.value = parseDocAnchorLink(href)?.anchorId ?? null;
       linkUrl.value = '';
+      return;
     }
+
+    mode.value = 'url';
+    linkUrl.value = href;
+    anchorId.value = null;
   });
 };
 
 const pasteUrl = () => {
+  // Режим якоря: правило isValidURL здесь не применяется вовсе — `#введение`
+  // это не URL со схемой, а ссылка внутри текущего документа
+  if (mode.value === 'anchor') {
+    if (!anchorId.value) return;
+
+    props.editorInstance
+      .chain()
+      .focus()
+      .extendMarkRange('link')
+      .setLink({ href: `#${anchorId.value}` })
+      .run();
+
+    showPicker.value = false;
+    return;
+  }
+
   const { from, to } = props.editorInstance.state.selection;
   const selectedText = props.editorInstance.state.doc.textBetween(from, to);
   const parsed = parseCommentLink(linkUrl.value, selectedText);
@@ -151,6 +287,9 @@ watch(showPicker, (val) => {
     virtualAnchor = null;
     popupTarget.value = null;
     linkUrl.value = '';
+    mode.value = 'url';
+    anchorId.value = null;
+    anchorTargets.value = [];
   }
 });
 </script>
@@ -184,5 +323,11 @@ watch(showPicker, (val) => {
   border: 1px solid gray;
   border-radius: 8px;
   background: var(--bg-color) !important;
+}
+
+// иконка типа цели не должна съедать ширину у названия
+.anchor-option-icon {
+  min-width: 24px;
+  padding-right: 8px;
 }
 </style>

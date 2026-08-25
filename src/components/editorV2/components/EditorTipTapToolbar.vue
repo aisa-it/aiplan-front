@@ -268,6 +268,10 @@
 
           <div class="html-editor__formats">
             <EditorLinkButtonTwo :editor-instance="editorInstance" />
+            <EditorAnchorButton
+              v-if="enableAnchors && !excludedTabs.includes(TIPTAP_TABS.anchor)"
+              :editor-instance="editorInstance"
+            />
             <EditorUploadButton
               v-if="!disableImages"
               :editor-instance="editorInstance"
@@ -347,6 +351,7 @@ import EditorFormatSampleButton from './EditorFormatSampleButton.vue';
 import EditorFullScreenButton from './EditorFullScreenButton.vue';
 import EditorMarkListButton from './EditorMarkListButton.vue';
 import EditorLinkButtonTwo from './EditorLinkButtonTwo.vue';
+import EditorAnchorButton from './EditorAnchorButton.vue';
 import EditorSpoilerButton from './EditorSpoilerButton.vue';
 import EditorInfoBlockButton from './EditorInfoBlockButton.vue';
 import EditorDrawioButton from './EditorDrawioButton.vue';
@@ -363,6 +368,7 @@ interface IEditorTiptapToolbarProps {
   isEditorV2?: boolean;
   excludedTabs?: string[];
   showHeadings?: boolean;
+  enableAnchors?: boolean;
 }
 
 const props = withDefaults(defineProps<IEditorTiptapToolbarProps>(), {
@@ -374,6 +380,7 @@ const props = withDefaults(defineProps<IEditorTiptapToolbarProps>(), {
   isEditorV2: false,
   excludedTabs: () => [],
   showHeadings: false,
+  enableAnchors: false,
 });
 
 const emits = defineEmits<{

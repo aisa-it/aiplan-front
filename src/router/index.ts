@@ -60,9 +60,19 @@ export default route(function (/* { store, ssrContext } */) {
       return;
     }
 
-    const sanitizedPath = to.fullPath.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\/-]/g, '');
+    // Санитайзер адреса: оставляем только буквы, цифры, слеш и дефис.
+    //
+    // Считаем ИМЕННО по to.path. Раньше здесь стоял to.fullPath, куда входят
+    // query и hash, а их служебные символы (`#`, `?`, `=`, `&`, `_`) под этот
+    // фильтр не подходят и вырезались вместе с содержимым:
+    //   /ws/aidoc/<uuid>#vvedenie      -> /ws/aidoc/<uuid>vvedenie  (документ не найден)
+    //   /invitation?token=abc          -> /invitationtokenabc
+    // То есть любая ссылка с якорем или query-параметром уезжала на битый
+    // адрес. При редиректе query и hash переносим как есть — фильтр защищает
+    // путь, а не их.
+    const sanitizedPath = to.path.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\/-]/g, '');
     if (sanitizedPath !== to.path) {
-      next(sanitizedPath);
+      next({ path: sanitizedPath, query: to.query, hash: to.hash });
     } else {
       next();
     }

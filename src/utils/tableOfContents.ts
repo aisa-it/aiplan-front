@@ -5,6 +5,11 @@ import TableOfContentsNodeView from 'src/components/TableOfContentsNodeView.vue'
 export const generateHeadingLinks = (items: []) => {
   const mappedItems = items.map((link: any) => ({
     id: link.id,
+    // Постоянный id заголовка (расширение HeadingWithAnchor). В отличие от
+    // link.id — служебного идентификатора расширения table-of-contents, который
+    // генерируется заново в каждой сессии, — этот переживает перезагрузку и
+    // сохраняется в HTML документа. По нему и надо навигировать.
+    anchorId: link.node?.attrs?.anchorId ?? null,
     text: link.textContent,
     index: link.itemIndex,
     level: link.level,
