@@ -42,9 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  ref,
-} from 'vue';
+import { ref } from 'vue';
 import { QTable } from 'quasar';
 
 import SprintContextMenu from 'src/modules/sprints/sprints-table/components/SprintContextMenu.vue';
@@ -55,14 +53,8 @@ import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const sprintStore = useSprintStore();
 
-const emits = defineEmits([
-  'refresh',
-]);
-const props = defineProps([
-  'rows',
-  'columns',
-]);
-
+const emits = defineEmits(['refresh']);
+const props = defineProps(['rows', 'columns']);
 
 const contextRow = ref(null);
 const contextEvent = ref<MouseEvent | null>(null);
@@ -73,7 +65,7 @@ const onRowContextMenu = (evt, row) => {
 };
 
 const handleClick = (row: DtoSprintLight) => {
-    sprintStore.openSprint(row.id as string, '_blank');
+  sprintStore.openSprint(row.id as string, '_blank');
 };
 </script>
 
@@ -145,7 +137,7 @@ th.count-column {
 
 <style lang="scss" scoped>
 :deep(.q-table__middle) {
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .folder-table-wrapper {
@@ -157,27 +149,5 @@ th.count-column {
   bottom: 0;
   z-index: 200;
   background: $bg-color;
-}
-
-.table-h-scroll {
-  height: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.folder-table-wrapper:hover .table-h-scroll {
-  opacity: 1;
-}
-
-@media (pointer: coarse) {
-  :deep(.q-table__middle) {
-    overflow-x: auto;
-  }
-
-  .table-h-scroll {
-    display: none !important;
-  }
 }
 </style>

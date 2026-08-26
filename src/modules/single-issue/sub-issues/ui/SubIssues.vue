@@ -7,7 +7,7 @@
       label="Ручная сортировка"
       v-show="
         props.subIssues.length > 1 &&
-        hasPermissionByIssue(issueData, 'change-issue-primary')
+        hasPermissionByIssue(issueData, 'change-issue-relations')
       "
     />
     <q-list class="issue-subtask__list" dense bordered separator>
@@ -155,7 +155,7 @@ const removeChild = (id: string) => {
 };
 
 const canDelete = (subIssue: DtoIssue): boolean => {
-  return !!hasPermissionByIssue(subIssue, 'change-issue-primary');
+  return !!hasPermissionByIssue(subIssue, 'change-issue-relations');
 };
 </script>
 

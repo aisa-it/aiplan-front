@@ -317,13 +317,18 @@ const updateWidth = () => {
 };
 
 const onHScroll = () => {
-  if (!middle) return;
-  middle.scrollLeft = hScroll.value!.scrollLeft;
+  middle ??= getMiddle();
+  if (!middle || !hScroll.value) return;
+  if (middle.scrollLeft !== hScroll.value.scrollLeft) {
+    middle.scrollLeft = hScroll.value.scrollLeft;
+  }
 };
 
 const onMiddleScroll = () => {
-  if (!middle) return;
-  hScroll.value!.scrollLeft = middle.scrollLeft;
+  if (!middle || !hScroll.value) return;
+  if (hScroll.value.scrollLeft !== middle.scrollLeft) {
+    hScroll.value.scrollLeft = middle.scrollLeft;
+  }
 };
 
 onMounted(async () => {
@@ -480,7 +485,14 @@ th.count-column {
 }
 
 :deep(.q-table__middle) {
+  // таблица остаётся скролл-контейнером (колесо/тачпад над строками работают),
+  // но её нативная полоса спрятана — видимая живёт в закреплённом прокси .table-h-scroll
   overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .issue-table-wrapper {
@@ -499,25 +511,23 @@ th.count-column {
   background: $bg-color;
 }
 
+// прокси горизонтального скролла: всегда виден, пока таблица шире контейнера
+// (при вмещении JS ставит display: none в updateWidth)
 .table-h-scroll {
-  height: 0px;
-  overflow-x: hidden;
+  height: 9px;
+  overflow-x: auto;
   overflow-y: hidden;
-  opacity: 0;
-  transition: opacity 0.15s;
+  scrollbar-width: thin;
 }
 
-.issue-table-wrapper:hover .table-h-scroll {
-  opacity: 1;
+// нулевая высота не всегда даёт scrollWidth — контенту нужен хотя бы 1px
+.table-h-scroll__content {
+  height: 1px;
 }
 
-// @media (pointer: coarse) {
-//   :deep(.q-table__middle) {
-//     overflow-x: auto;
-//   }
-
-//   .table-h-scroll {
-//     display: none !important;
-//   }
-// }
+@media (pointer: coarse) {
+  .table-h-scroll {
+    display: none !important;
+  }
+}
 </style>

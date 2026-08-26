@@ -271,14 +271,14 @@
             :issue="issueData.parent_detail"
             :project="issueData.project_detail ?? project"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-relations')
             "
             @refresh="handleRefresh"
           ></SelectParentIssue>
           <q-btn
             v-if="
               issueData.parent_detail &&
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-relations')
             "
             class="btn-only-icon-sm q-ml-xs"
             style="padding: 0 3px"
@@ -307,7 +307,7 @@
             :issues="issueData.blocker_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-relations')
             "
             @refresh="handleRefresh"
           />
@@ -333,7 +333,7 @@
             :issues="issueData.blocked_issues"
             :target="user.theme?.open_in_new ? '_blank' : '_self'"
             :isDisabled="
-              hasPermissionByIssue(issueData, 'change-issue-primary')
+              hasPermissionByIssue(issueData, 'change-issue-relations')
             "
             @refresh="handleRefresh"
           />
