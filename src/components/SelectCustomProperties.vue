@@ -47,6 +47,12 @@
             v-model="prop.value"
           />
 
+          <SelectPropertyDate
+            v-else-if="prop.type === 'date' || prop.type === 'datetime'"
+            :type="prop.type as 'date' | 'datetime'"
+            v-model="prop.value"
+          />
+
           <q-input v-else class="base-input" v-model="prop.value" dense />
         </div>
       </div>
@@ -90,6 +96,7 @@ import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
 import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 import SelectDictionaryRow from 'src/components/selects/SelectDictionaryRow.vue';
+import SelectPropertyDate from 'src/modules/single-issue/custom-properties/ui/SelectPropertyDate.vue';
 
 //props
 const props = defineProps<{
@@ -146,7 +153,10 @@ const fetchData = async () => {
         value:
           t.type === 'boolean'
             ? false
-            : t.type === 'link' || t.type === 'lookup'
+            : t.type === 'link' ||
+                t.type === 'lookup' ||
+                t.type === 'date' ||
+                t.type === 'datetime'
               ? null
               : '',
       }));

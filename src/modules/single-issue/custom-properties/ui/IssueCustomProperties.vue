@@ -89,6 +89,19 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'date' || prop.type === 'datetime'">
+            <SelectPropertyDate
+              :type="prop.type"
+              :model-value="(prop.value as string) || null"
+              @update:model-value="
+                (val) => {
+                  prop.value = val;
+                  updateValue(prop, val);
+                }
+              "
+            />
+          </div>
+
           <div v-else>
             <q-input
               class="base-input"
@@ -147,6 +160,7 @@ import ListDotIcon from 'src/components/icons/ListDotIcon.vue';
 import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 import SelectLookupValue from './SelectLookupValue.vue';
+import SelectPropertyDate from './SelectPropertyDate.vue';
 
 //props
 const props = defineProps<{

@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 import { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import aiplan from 'src/utils/aiplan';
 import { translateFirstCharUpperCasePriority } from 'src/utils/translator';
@@ -56,6 +58,19 @@ export function defineEntityName(entity: any, groupBy: string) {
         (row && typeof row === 'object' && row.value) ||
         propertyLookupLabels.value[templateId]?.[String(rowId)];
       return label ? String(label) : String(entity);
+    }
+    // «Дата» (date): значение — строка YYYY-MM-DD, показываем DD.MM.YYYY
+    if (type === 'date' && entity) {
+      const parsed = dayjs(String(entity));
+      return parsed.isValid() ? parsed.format('DD.MM.YYYY') : String(entity);
+    }
+    // «Дата и время» (datetime): значение — unix time в секундах строкой,
+    // показываем в локальной зоне пользователя
+    if (type === 'datetime' && entity) {
+      const parsed = dayjs.unix(Number(entity));
+      return parsed.isValid()
+        ? parsed.format('DD.MM.YYYY HH:mm')
+        : String(entity);
     }
     return entity ? String(entity) : 'Не заполнено';
   }

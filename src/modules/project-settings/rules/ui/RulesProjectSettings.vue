@@ -2,6 +2,15 @@
   <div class="row mobile-block q-mt-md gap-x-sm">
     <div class="col">
       <h4 class="text-lg font-semibold text-brand-base">Скрипты</h4>
+      <q-banner class="bg-orange-1 text-orange-9 q-mb-md" rounded dense>
+        <template v-slot:avatar>
+          <q-icon name="warning" color="warning" />
+        </template>
+        Сценарии не применяются к администраторам проекта. Администратор при
+        проверке всегда увидит, что действие проходит, даже если правило
+        блокирует его для участников. Проверяйте сценарии под учётной записью с
+        ролью «Участник» или «Гость».
+      </q-banner>
       <div class="text-sm text-brand-secondary">
         <p class="q-mb-none">
           Управление скриптами проекта. Доступные события:
@@ -25,6 +34,13 @@
           </li>
           <li>
             <b>BeforeLabelsChange(params)</b> - вызывается перед сменой тега.
+          </li>
+          <li>
+            <b>BeforeIssuePropertyChange(params, property)</b> - вызывается
+            перед изменением значения дополнительного параметра задачи. property
+            — таблица {name, type, old_value, new_value}; для типа «дата и
+            время» old_value и new_value — unix time числом. Для отказа верните
+            {error = "текст"}.
           </li>
         </ul>
         <p>
@@ -71,7 +87,7 @@
           полем:
         </p>
         <EditorCodeProjectSettings
-        class="q-mt-sm"
+          class="q-mt-sm"
           editor-id="editor-code-example"
           readonly
           :content="rulesExample"

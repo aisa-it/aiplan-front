@@ -212,6 +212,9 @@ import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { PropertyTemplate } from '../services/api';
 import { getDictionaries, Dictionary } from '../../dictionaries/services/api';
 
+//constants
+import { PROPERTY_TYPE_OPTIONS } from '../constants';
+
 // локальный тип формы зависимости: снятие = parent_template_id: null («все нули»),
 // тип пакета (TypesPropertyDependency) null не допускает
 interface PropertyDependencyForm {
@@ -342,13 +345,7 @@ const canSubmit = computed(() => {
 });
 
 //consts
-const typeOptions = [
-  { label: 'Строка', value: 'string' },
-  { label: 'Флаг', value: 'boolean' },
-  { label: 'Список', value: 'select' },
-  { label: 'Ссылка', value: 'link' },
-  { label: 'Справочник', value: 'lookup' },
-];
+const typeOptions = PROPERTY_TYPE_OPTIONS;
 
 //methods
 const loadDictionaries = async () => {

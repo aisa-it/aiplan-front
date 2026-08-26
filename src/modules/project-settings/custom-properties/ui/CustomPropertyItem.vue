@@ -39,6 +39,9 @@
 //api
 import { PropertyTemplate } from '../services/api';
 
+//constants
+import { PROPERTY_TYPE_LABELS } from '../constants';
+
 //components
 import EditIcon from 'src/components/icons/EditIcon.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
@@ -55,13 +58,6 @@ defineEmits<{
 
 //methods
 const formatType = (type: string) => {
-  const typeMap: Record<string, string> = {
-    string: 'Строка',
-    boolean: 'Флаг',
-    select: 'Список',
-    link: 'Ссылка',
-    lookup: 'Справочник',
-  };
-  return typeMap[type] || type;
+  return PROPERTY_TYPE_LABELS[type] || type;
 };
 </script>
