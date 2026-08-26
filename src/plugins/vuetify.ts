@@ -23,7 +23,6 @@ const vuetify = createVuetify({
           text: '#474a52',
           icon: '#474a52',
           surface: '#ffffff',
-          background: '#ffffff',
         },
         variables: {
           'hover-opacity': 0.08,

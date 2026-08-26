@@ -1,13 +1,21 @@
 import { defineStore } from 'pinia';
 
-import { defineRole, checkPermissionByWs } from '@/utils/permissions';
-import type { DtoWorkspaceMemberWithOwner } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import {
+  defineRole,
+  checkPermissionByWs,
+  checkPermissionByProject,
+} from '@/utils/permissions';
+import type {
+  DtoProjectMemberWithLead,
+  DtoWorkspaceMemberWithOwner,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export const useRolesStore = defineStore('roles-store', {
   state: () => {
     return {
       roles: {
         workspace: '',
+        project: '',
       },
     };
   },
@@ -28,6 +36,23 @@ export const useRolesStore = defineStore('roles-store', {
     ) {
       const role = this.getWsNameRole(meInWs);
       return checkPermissionByWs(role, action);
+    },
+
+    getProjectNameRole(meInProject: DtoProjectMemberWithLead) {
+      if (meInProject.is_project_lead) return 'lead';
+      return defineRole(meInProject.role ?? 0);
+    },
+
+    setProjectRole(meInProject: DtoProjectMemberWithLead) {
+      this.roles.project = this.getProjectNameRole(meInProject);
+    },
+
+    hasPermissionByProject(
+      meInProject: DtoProjectMemberWithLead,
+      action: string,
+    ) {
+      const role = this.getProjectNameRole(meInProject);
+      return checkPermissionByProject(role, action);
     },
   },
 });

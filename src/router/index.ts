@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
+import { getStringParam } from '@/utils/object';
+import { useProjectStore } from '@/stores/project-store';
 
 const AUTH_ROUTES = ['/signin', '/signup'];
 const router = createRouter({
@@ -8,7 +10,6 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
       async beforeEnter() {
         const userStore = useUserStore();
@@ -23,23 +24,60 @@ const router = createRouter({
       },
       children: [
         {
-          path: '/profile',
+          path: '',
+          name: 'main',
+          component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          beforeEnter() {
+            const userStore = useUserStore();
+            const workspacesStore = useWorkspacesStore();
+            const workspaces = workspacesStore.workspaces;
+            const slug =
+              userStore.user?.last_workspace_slug || workspaces[0]?.slug;
+
+            if (slug) {
+              return {
+                name: 'general-workspace',
+                params: { workspace: slug },
+              };
+            }
+          },
+        },
+        {
+          path: 'profile',
           component: () => import('@/pages/Profile.vue'),
         },
         {
-          path: ':workspace?',
+          path: ':workspace',
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
-          props: (route) => ({ slug: route.query.workspace }),
-          beforeEnter(to) {
-            if (!to.params.workspace) {
-              const userStore = useUserStore();
-              const workspacesStore = useWorkspacesStore();
-              const workspaces = workspacesStore.workspaces;
-              const slug =
-                userStore.user?.last_workspace_slug || workspaces[0]?.slug;
+          props: (route) => ({
+            slug: getStringParam(route.params.workspace),
+          }),
+        },
+        {
+          path: ':workspace/projects/:project',
+          name: 'project',
+          component: () => import('@/pages/ProjectPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+            projectId: getStringParam(route.params.project),
+          }),
+          async beforeEnter(to) {
+            const workspace = getStringParam(to.params.workspace);
+            const project = getStringParam(to.params.project);
 
-              if (slug) return `/${slug}`;
+            if (!workspace || !project) {
+              return { name: 'not-found' };
+            }
+
+            try {
+              useProjectStore().getProjectInfo(workspace, project);
+            } catch (error: any) {
+              if (error?.response?.status === 404) {
+                return { name: 'not-found' };
+              }
+
+              throw error;
             }
           },
         },

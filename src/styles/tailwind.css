@@ -3,7 +3,7 @@
 @import 'tailwindcss/utilities' layer(tailwind-utilities);
 
 @theme {
-  --color-base: rgb(var(--v-theme-text));
+  --color-default: rgb(var(--v-theme-text));
   --color-border: rgb(var(--v-theme-border));
   --color-icon: rgb(var(--v-theme-icon));
   --color-text-default: rgb(var(--v-theme-text));
