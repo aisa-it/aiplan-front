@@ -84,8 +84,9 @@ export interface IProject {
   workspace: string;
 
   workspace_detail: any;
-  
+
   issue_deletion_allowed?: boolean;
+  member_attachments_allowed?: boolean;
 }
 
 export interface IProjectLeader {

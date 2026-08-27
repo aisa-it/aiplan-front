@@ -120,6 +120,21 @@
     </div>
   </div>
 
+  <div class="row mobile-block q-mt-md">
+    <div class="col">
+      <h4 class="text-lg font-semibold text-brand-base">
+        Разрешить всем прикреплять вложения
+      </h4>
+      <p class="text-sm text-brand-secondary">
+        Участники смогут прикреплять вложения к любым задачам проекта, а не
+        только к своим или назначенным. На гостей не распространяется
+      </p>
+    </div>
+    <div class="col q-mt-xs flex items-center">
+      <q-toggle v-model="projectForm.member_attachments_allowed" />
+    </div>
+  </div>
+
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
       :flat="!hasChanges"
@@ -255,6 +270,7 @@ const { hasChanges, init } = useFormChanges(projectForm, {
       public: unwrapValue(val.public),
       emoji: unwrapValue(val.emoji),
       issue_deletion_allowed: val.issue_deletion_allowed,
+      member_attachments_allowed: val.member_attachments_allowed,
     };
   },
 });
@@ -301,6 +317,7 @@ async function onSubmit() {
     public: projectForm.value.public.value || false,
     emoji: projectForm.value.emoji.value,
     issue_deletion_allowed: projectForm.value.issue_deletion_allowed,
+    member_attachments_allowed: projectForm.value.member_attachments_allowed,
   };
 
   await updateThisProject(payload);
@@ -350,18 +367,18 @@ const checkPublic = (val: any) => {
     return {
       value: val,
       label: NETWORK_CHOICES.find((el) => el.value === val)?.label,
-    }
+    };
   } else return val;
-}
+};
 
 const chekcEmoji = (val: any) => {
   if (typeof val === 'string') {
     return {
       value: val,
-      label: PROJECT_EMOJI_OPTIONS.find(el => el.value === val)?.label,
-    }
+      label: PROJECT_EMOJI_OPTIONS.find((el) => el.value === val)?.label,
+    };
   } else return val;
-}
+};
 
 const toggleUploaderState = () => {
   isOpenUploadDialog.value = true;

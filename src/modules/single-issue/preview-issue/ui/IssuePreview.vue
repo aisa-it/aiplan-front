@@ -72,6 +72,7 @@
         entityType="issue"
         off-success-notification
         :is-edit="hasPermissionByIssue(issueData, 'change-issue-secondary')"
+        :can-upload="canUploadAttachments"
         :delete-attachment-func="deleteAttachment"
         :get-attachment-func="getAttachmentsList"
         :upload-attachment-func="uploadAttachments"
@@ -150,12 +151,20 @@ const singleIssueStore = useSingleIssueStore();
 const aiplanStore = useAiplanStore();
 const workspaceStore = useWorkspaceStore();
 const uiStore = useUIStore();
-const { hasPermissionByIssue } = useRolesStore();
+const { hasPermissionByIssue, getProjectRole } = useRolesStore();
 
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { issueData, currentIssueID } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug } = storeToRefs(workspaceStore);
 const { menuSidebarWidth, previewIssueWidth } = storeToRefs(uiStore);
+
+// настройка проекта member_attachments_allowed: участник (не гость) может прикреплять
+// вложения к любой задаче, но не удалять чужие
+const canUploadAttachments = computed(
+  () =>
+    issueData.value?.project_detail?.member_attachments_allowed === true &&
+    getProjectRole(issueData.value?.project ?? '') >= 10,
+);
 
 const defaultWidth = 900;
 const clientWidth = ref(document.documentElement.clientWidth);

@@ -55,7 +55,7 @@
       </h6>
     </div>
     <q-btn
-      v-if="isEdit === true"
+      v-if="isEdit === true || canUpload === true"
       class="btn upload-btn full-w q-mt-md"
       no-caps
       @click="uploadInput?.click()"
@@ -264,6 +264,8 @@ const props = defineProps<{
   id?: string;
   entityType: 'doc' | 'issue';
   isEdit?: boolean;
+  // Разрешает только загрузку вложений (без удаления) — настройка проекта member_attachments_allowed
+  canUpload?: boolean;
   deleteAttachmentFunc?: (value: string) => Promise<void>;
   getAttachmentFunc?: (projectID: Ref<string>, issueID: Ref<string>) => any; //getAttachmentFunc: () => Promise<void>;
   downloadAllFunc?: () => Promise<{ url: string; fileName: string }>;
