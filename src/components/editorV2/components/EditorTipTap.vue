@@ -173,6 +173,7 @@ import { TextSelection } from '@tiptap/pm/state';
 import { DtoProjectMemberLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { IssueLinkMention } from 'src/utils/issueLinkEditor';
 import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
+import { MermaidBlock } from 'src/utils/mermaidEditor';
 
 const props = withDefaults(
   defineProps<{
@@ -343,6 +344,9 @@ const editorExtensions = computed(() => {
       openDialog: isReadOnly.value ? undefined : 'dblclick',
       baseImage: drawioBaseImage,
     }),
+    // Общий тулбар показывает кнопку Mermaid в обоих редакторах,
+    // поэтому нода обязана быть и в этом списке расширений.
+    MermaidBlock,
   ];
   if (props.isMention) {
     extensions.push(mention);

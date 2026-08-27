@@ -305,6 +305,11 @@
             @click="editorInstance.commands.insertDrawIo"
           />
 
+          <EditorMermaidButton
+            v-if="!excludedTabs.includes(TIPTAP_TABS.mermaid)"
+            @click="editorInstance.commands.insertMermaid"
+          />
+
           <EditorFullScreenButton
             v-if="$props.isFullScreen"
             @click="emits('toggle-fullscreen')"
@@ -355,6 +360,7 @@ import EditorAnchorButton from './EditorAnchorButton.vue';
 import EditorSpoilerButton from './EditorSpoilerButton.vue';
 import EditorInfoBlockButton from './EditorInfoBlockButton.vue';
 import EditorDrawioButton from './EditorDrawioButton.vue';
+import EditorMermaidButton from './EditorMermaidButton.vue';
 import EditorHeadingSelect from './EditorHeadingSelect.vue';
 
 interface IEditorTiptapToolbarProps {

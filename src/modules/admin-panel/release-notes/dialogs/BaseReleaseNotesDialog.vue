@@ -8,7 +8,7 @@
         class="admin-release-note-dialog__editor"
         :can-edit="!readOnly"
         :read-only-editor="readOnly"
-        :excluded-tabs="[TIPTAP_TABS.drawio]"
+        :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
         @updateEditorDOM="updateEditorDOM"
       />
     </q-card-section>

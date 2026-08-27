@@ -41,6 +41,7 @@ import { AttachmentLinkMention } from 'src/utils/attachmentLinkMention';
 import { TableOfContentsCustom } from 'src/utils/tableOfContents';
 import { DocAnchor } from 'src/utils/anchorEditor';
 import { HeadingWithAnchor } from 'src/utils/headingAnchor';
+import { MermaidBlock } from 'src/utils/mermaidEditor';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
 export const getEditorExtensions = (props) => {
@@ -144,6 +145,9 @@ export const getEditorExtensions = (props) => {
       openDialog: props.isReadOnly ? undefined : 'dblclick',
       baseImage: drawioBaseImage,
     }),
+    // parseHTML ноды имеет priority 1000, поэтому pre.mermaid она забирает
+    // себе раньше любого codeBlock — позиция в списке не важна.
+    MermaidBlock,
   ];
 
   if (props.isMention) {

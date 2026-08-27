@@ -50,7 +50,7 @@
             is-mention
             disable-images
             editor-id="new-issue-template-editor"
-            :excluded-tabs="[TIPTAP_TABS.drawio]"
+            :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
           />
         </div>
       </q-card-section>

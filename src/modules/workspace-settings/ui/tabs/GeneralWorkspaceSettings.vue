@@ -136,7 +136,7 @@
         @updateEditorDOM="updateEditorDOM"
         @get-editor="getEditor"
         @toggle-fullscreen="toggleFullscreen"
-        :excluded-tabs="[TIPTAP_TABS.drawio]"
+        :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
       />
     </div>
   </div>
@@ -232,7 +232,7 @@
         @get-editor="getEditor"
         isFullScreen
         isFullScreenView
-        :excluded-tabs="[TIPTAP_TABS.drawio]"
+        :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
       /> </q-card
   ></q-dialog>
 

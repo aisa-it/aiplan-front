@@ -112,7 +112,7 @@
             class="comments-editor q-mt-lg"
             editor-placeholder="Описание"
             disable-images
-            :excluded-tabs="[TIPTAP_TABS.drawio]"
+            :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
           />
         </q-card-section>
         <q-card-section class="column q-pa-none q-mt-lg">

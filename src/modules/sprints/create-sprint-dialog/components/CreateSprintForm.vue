@@ -87,7 +87,7 @@
       >
         <EditorTipTapV2
           v-model="description"
-          :excluded-tabs="[TIPTAP_TABS.drawio]"
+          :excluded-tabs="[TIPTAP_TABS.drawio, TIPTAP_TABS.mermaid]"
           :disableImages="true"
           editor-id="create-sprint-editor"
           style="height: 100%; width: 100%"
@@ -197,9 +197,7 @@ const folder = ref<DtoSprintFolder | undefined>(
 );
 
 const refreshSprints = () => {
-  sprintStore.getSprintsList(
-    workspaceStore.currentWorkspaceSlug as string,
-  );
+  sprintStore.getSprintsList(workspaceStore.currentWorkspaceSlug as string);
 };
 
 const createDefaultDate = () => {
@@ -291,11 +289,13 @@ const removeAndAddWatcher = () => {
     };
   }
 
-  const currentWatchersIds = computed(() => props.defaultProps?.watchers?.map((watcher) => watcher.id) || []);
+  const currentWatchersIds = computed(
+    () => props.defaultProps?.watchers?.map((watcher) => watcher.id) || [],
+  );
 
-  const add =
-    watchersIds.value
-      ?.filter((id) => !currentWatchersIds.value.includes(id));
+  const add = watchersIds.value?.filter(
+    (id) => !currentWatchersIds.value.includes(id),
+  );
 
   const remove =
     props.defaultProps?.watchers
@@ -306,7 +306,6 @@ const removeAndAddWatcher = () => {
     remove: remove,
     add: add,
   };
-
 };
 
 const createDateForSprintData = (date: string | undefined) => {
@@ -355,7 +354,7 @@ onMounted(async () => {
   if (!sprintsList.value || sprintsList.value.length === 0) {
     await refreshSprints();
   }
-})
+});
 
 watch(
   () => props.defaultProps,
