@@ -1464,9 +1464,16 @@ body .q-table th {
 .tree-wrapper {
   overflow: auto;
 }
+// Не возвращать сюда width: fit-content — дерево растягивается до полной ширины
+// nowrap-названий, эллипсис в NavMenuAIDocs перестаёт срабатывать, а кнопки «…»
+// уезжают за правый край дровера в скрытый горизонтальный скролл.
 .tree-wrapper .q-tree {
-  width: fit-content;
   min-width: 100%;
+}
+// flex-элемент с min-width: auto не ужимается ниже min-content — узлы вылезали
+// за контейнер на несколько пикселей
+.tree-wrapper .q-tree__node-header {
+  min-width: 0;
 }
 .q-tree > .q-tree__node {
   padding-left: 5px;

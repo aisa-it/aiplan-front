@@ -707,15 +707,36 @@ defineExpose({
 
   &__actions {
     flex: 0 0 auto;
+    // якорь для абсолютной звезды (favorite-btn--inactive)
+    position: relative;
   }
 }
 
 .favorite-btn--inactive {
   opacity: 0;
   visibility: hidden;
+  // скрытая до наведения звезда не резервирует место в строке:
+  // выводится из потока и при ховере рисуется поверх хвоста текста.
+  // Активная звезда избранного (без этого класса) остаётся в потоке —
+  // иначе она бы постоянно закрывала текст.
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  // подложка: без неё звезда теряется на тексте под ней; $hover-color —
+  // var(--hover-color), сама переключается по теме и близка к квазаровскому
+  // ховеру строки (звезда видна только на наведённой строке)
+  background: $hover-color;
+  box-shadow: 0 0 0 3px $hover-color;
+  border-radius: 4px;
   @media (max-width: 768px) {
     opacity: 1;
     visibility: visible;
+    // на таче ховера нет, звезда видна всегда — возвращаем в поток
+    position: static;
+    transform: none;
+    background: none;
+    box-shadow: none;
   }
 }
 .tree-custom-header:hover .favorite-btn--inactive {
