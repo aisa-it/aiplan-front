@@ -34,6 +34,12 @@ export function useSortable(
       forceFallback: options.forceFallback ?? true,
       fallbackOnBody: options.fallbackOnBody ?? true,
       fallbackTolerance: options.fallbackTolerance ?? 5,
+      // На тач-устройствах драг только после долгого нажатия, иначе Sortable
+      // перехватывает свайп и список невозможно проскроллить пальцем.
+      // На мышь delayOnTouchOnly не влияет.
+      delay: options.delay ?? 300,
+      delayOnTouchOnly: options.delayOnTouchOnly ?? true,
+      touchStartThreshold: options.touchStartThreshold ?? 5,
       onEnd: async (evt: Sortable.SortableEvent) => {
         const { oldIndex, newIndex, item } = evt;
         if (oldIndex == null || newIndex == null) return;
