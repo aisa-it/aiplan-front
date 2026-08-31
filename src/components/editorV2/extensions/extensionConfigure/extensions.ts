@@ -44,7 +44,7 @@ import { HeadingWithAnchor } from 'src/utils/headingAnchor';
 import { MermaidBlock } from 'src/utils/mermaidEditor';
 import drawioBaseImage from 'src/components/icons/drawio/start.drawio.png';
 
-export const getEditorExtensions = (props) => {
+export const getEditorExtensions = (props, onTocUpdate?) => {
   const { mention } = useMention(props.getMembersForMention);
   const { FormatSample } = useEditorMarks();
   const extensions = [
@@ -194,7 +194,10 @@ export const getEditorExtensions = (props) => {
     extensions.push(
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
+        // Первый пересчёт оглавления происходит уже ПОСЛЕ onCreate редактора,
+        // без колбэка компонент о нём не узнает и tocLinks останется пустым.
         onUpdate: (value) => {
+          onTocUpdate?.(value);
           return value;
         },
       }),

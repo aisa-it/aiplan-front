@@ -116,6 +116,76 @@
       </div>
     </div>
 
+    <!-- Мобильная навигация по длинному документу: кнопка hover-оглавления
+         на тач-устройствах недоступна, поэтому дублируем его шторкой снизу -->
+    <template v-if="props.showHeadings">
+      <q-btn
+        v-if="isMobile && isReadOnly && tocLinks.length"
+        round
+        unelevated
+        class="html-editor__toc-fab"
+        title="Оглавление"
+        @click="isTocSheetOpen = true"
+      >
+        <component :is="ICONS.headingsIcon" />
+      </q-btn>
+
+      <!-- Диалог не под летучими условиями (isMobile/isReadOnly/tocLinks)
+           намеренно: v-if, снятый при открытой модалке (поворот экрана,
+           переход в правку), размонтирует её и оставит body с
+           q-body--prevent-scroll — страница перестанет скроллиться.
+           Закрытый q-dialog ничего не рендерит, держать его смонтированным
+           бесплатно. -->
+      <q-dialog
+        v-model="isTocSheetOpen"
+        position="bottom"
+        class="html-editor__toc-sheet-dialog"
+        @hide="onTocSheetHide"
+      >
+        <q-card class="html-editor__toc-sheet">
+          <q-card-section class="text-subtitle2 q-pb-sm">
+            Оглавление
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section class="html-editor__toc-sheet-list q-pt-sm q-pb-sm">
+            <a
+              href="#"
+              class="html-editor__toc-link"
+              @click.prevent="onTocSheetItemClick('top')"
+            >
+              В начало документа
+            </a>
+
+            <q-separator class="q-my-xs" />
+
+            <div v-for="link in tocLinks" :key="link.id">
+              <a
+                :href="`#${link.anchorId || link.id}`"
+                :style="'padding-left:' + `${30 * (link.originalLevel - 1)}px`"
+                class="html-editor__toc-link"
+                @click.prevent="onTocSheetItemClick(link)"
+              >
+                {{ !hasOwnNumeration(link.text) ? link.index + ' ' : ''
+                }}{{ link.text }}
+              </a>
+            </div>
+
+            <q-separator class="q-my-xs" />
+
+            <a
+              href="#"
+              class="html-editor__toc-link"
+              @click.prevent="onTocSheetItemClick('comments')"
+            >
+              К комментариям
+            </a>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+    </template>
+
     <DocPreviewDialog
       v-if="openImage"
       v-model="openImage"
@@ -253,6 +323,10 @@ const isShowEdit = ref<boolean>(false);
 const isOpenDiagram = ref<boolean>(false);
 const isTocPopupOpen = ref<boolean>(false);
 const tocPopupRef = ref();
+const isTocSheetOpen = ref<boolean>(false);
+const pendingTocTarget = ref<null | 'top' | (typeof tocLinks.value)[number]>(
+  null,
+);
 
 useMenuHandler(tocPopupRef);
 const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
@@ -260,7 +334,11 @@ const { floatScroll, clearFloatScroll } = useFloatScroll(editorInstance);
 const isMobile = computed(() => $q.platform.is.mobile && Screen.lt.md);
 const isReadOnly = computed(() => !props.canEdit || props.readOnlyEditor);
 provide('isEditorReadOnly', isReadOnly);
-const editorExtensions = computed(() => getEditorExtensions(props));
+const editorExtensions = computed(() =>
+  getEditorExtensions(props, (items: unknown[]) => {
+    tocLinks.value = generateHeadingLinks(items || []);
+  }),
+);
 
 const hasOwnNumeration = (heading: string) => {
   const firstChar = heading[0];
@@ -381,6 +459,47 @@ const onTocItemClick = (link: (typeof tocLinks.value)[number]) => {
 
   const element = editor.view.dom.querySelector(`[data-toc-id="${link.id}"]`);
   if (element) scrollToAnchorElement(editor, element, { focus: true });
+};
+
+// Переход выполняем после закрытия шторки: q-dialog блокирует скролл body
+// и при закрытии возвращает его на сохранённую позицию — прыжок до @hide
+// был бы молча откатан.
+const onTocSheetItemClick = (
+  target: 'top' | 'comments' | (typeof tocLinks.value)[number],
+) => {
+  pendingTocTarget.value = target;
+  isTocSheetOpen.value = false;
+};
+
+const onTocSheetHide = () => {
+  const target = pendingTocTarget.value;
+  pendingTocTarget.value = null;
+  if (!target) return;
+
+  if (target === 'top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  if (target === 'comments') {
+    // Блок «Активность» живёт на странице, а не в редакторе, поэтому ищем
+    // по классу карточки; без него (редактор вне АИДока) едем в конец.
+    const comments = document.querySelector(
+      '.issue-panel__comments-card',
+    ) as HTMLElement | null;
+    if (comments) {
+      comments.style.scrollMarginTop = '60px';
+      comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+    return;
+  }
+
+  onTocItemClick(target);
 };
 
 /**
@@ -614,6 +733,40 @@ defineExpose({
 
 .html-editor ::-webkit-scrollbar {
   display: block !important;
+}
+
+.html-editor__toc-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 24px;
+  z-index: 11;
+  width: 44px;
+  height: 44px;
+  background-color: $bg-color;
+  border: 1px solid $dark-border-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.html-editor__toc-sheet {
+  display: flex;
+  flex-direction: column;
+  // !important: иначе перебивает квазаровское
+  // `body.platform-* .q-dialog__inner--minimized > div { max-height: calc(100vh - 108px) }`
+  max-height: 60vh !important;
+  // !important на нижних: для position="bottom" квазар обнуляет их правилом
+  // `.q-dialog__inner--bottom:not(...--animating) > div`
+  border-radius: 8px 8px 8px 8px;
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+
+.html-editor__toc-sheet-list {
+  overflow-y: auto;
 }
 
 .html-editor__toc-link {

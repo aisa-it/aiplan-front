@@ -773,3 +773,12 @@
     height: 1px;
   }
 }
+
+// Шторка оглавления на мобильных (EditorTipTapV2): приподнята над нижней
+// гранью экрана — и над iPhone-полосой возврата домой (env даёт её высоту
+// в сборках с viewport-fit=cover, в браузере — 0, отсюда базовые 32px).
+// !important — в app.scss есть глобальное
+// `.q-dialog__inner--minimized { padding: 24px 12px !important }`
+.html-editor__toc-sheet-dialog .q-dialog__inner--bottom {
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)) !important;
+}
