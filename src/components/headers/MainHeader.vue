@@ -21,26 +21,10 @@
         <q-breadcrumbs
           active-color="grey-9"
           style="font-size: 14px; font-weight: 800; overflow-x: auto"
-          class="q-ml-md"
+          class="q-ml-md header-breadcrumbs"
         >
-          <div
-            v-if="Screen.width < 600 && breadCrumbsHistory.length >= 2"
-            style="cursor: pointer"
-            @click="
-              breadCrumbsHistory[breadCrumbsHistory.length - 2]?.type !==
-              'workspace'
-                ? $router.push(
-                    breadCrumbsHistory[breadCrumbsHistory.length - 2]?.url,
-                  )
-                : ''
-            "
-          >
-            ... /
-          </div>
           <q-breadcrumbs-el
-            v-for="(crumb, index) in Screen.width > 600
-              ? breadCrumbsHistory
-              : [breadCrumbsHistory[breadCrumbsHistory.length - 1]]"
+            v-for="(crumb, index) in breadCrumbsHistory"
             :key="index"
             :to="crumb?.url"
             @click="crumb?.click?.()"
@@ -92,11 +76,7 @@
 
             <span
               v-show="crumb?.name"
-              :style="`max-width: calc((100vw - ${
-                Screen.width > 1019 ? 670 : Screen.width > 600 ? 400 : 150
-              }px) / ${
-                Screen.width > 600 ? breadCrumbsHistory.length : 1
-              }) !important`"
+              :style="`max-width: ${crumbMaxWidth} !important`"
               class="breadcrumbs-title"
             >
               {{ crumb?.name }}
@@ -274,6 +254,17 @@ const breadCrumbsHistory = computed(() => {
   }
   return existPath;
 });
+
+// Ширина одной крошки: на десктопе делим свободное место шапки поровну,
+// на мобильных — фиксированный потолок, а длинный хвост уезжает в
+// горизонтальный скролл контейнера (overflow-x: auto на q-breadcrumbs).
+const crumbMaxWidth = computed(() => {
+  if (Screen.width > 600) {
+    const reserved = Screen.width > 1019 ? 670 : 400;
+    return `calc((100vw - ${reserved}px) / ${breadCrumbsHistory.value.length})`;
+  }
+  return '35vw';
+});
 </script>
 
 <style lang="scss">
@@ -281,5 +272,13 @@ const breadCrumbsHistory = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+// Крошки в одну строку: длинный хвост уезжает в горизонтальный скролл
+// контейнера, а не переносится второй строкой в шапке
+.header-breadcrumbs > div,
+.header-breadcrumbs .q-breadcrumbs__el {
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 </style>
