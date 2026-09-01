@@ -99,6 +99,10 @@
         <MenuIcon />
       </q-btn>
     </div>
+    <div v-if="isScopedToWorkspace" class="search-scope-hint q-mb-sm q-ml-sm">
+      Показываются задачи текущего пространства. Для расширенного поиска
+      воспользуйтесь фильтрами.
+    </div>
     <IssuesTableUI
       v-if="!loading && rows?.length && group_by === 'none'"
       :rows="rows"
@@ -179,6 +183,7 @@
 <script setup lang="ts">
 import { debounce, Screen } from 'quasar';
 import { onMounted, ref, watch, computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 // stores
 import { useIssuesStore } from 'src/stores/issues-store';
@@ -218,6 +223,8 @@ const emits = defineEmits<{
 
 const group_by = ref(SPRINT_GROUP_BY_OPTIONS[0].value);
 
+const route = useRoute();
+
 //stores
 const { extendedSearchIssues, exportIssues } = useIssuesStore();
 const { setNotificationView } = useNotificationStore();
@@ -238,6 +245,27 @@ const pagination = ref({
 });
 
 //computeds
+const currentWorkspaceSlug = computed(
+  () => route.params.workspace as string | undefined,
+);
+
+const canScopeToWorkspace = computed(
+  () =>
+    !props.isCreateSprint &&
+    !!currentWorkspaceSlug.value &&
+    !route.path.includes('admin-panel'),
+);
+
+const isScopedToWorkspace = computed(() => {
+  const current = filter.value as TypesIssuesListFilters | undefined;
+  return (
+    canScopeToWorkspace.value &&
+    !current?.workspaces?.length &&
+    !current?.workspace_slugs?.length &&
+    !current?.projects?.length
+  );
+});
+
 const visibleColumns = computed(() => {
   return columnsToShow.value
     .map((name) => columns.find((c) => c.name === name))
@@ -284,11 +312,24 @@ function defineFiltersByEntity(entity): TypesIssuesListFilters {
   return value ? { [filterKey]: [value] } : {};
 }
 
-const onRequestGroupTable = async (group, p) => {
-  let req = Object.assign((filter.value as any) ?? {}, {
+const buildSearchRequest = (): TypesIssuesListFilters => {
+  const req: TypesIssuesListFilters = {
+    ...((filter.value as TypesIssuesListFilters) ?? {}),
     search_query: searchQuery.value,
-  });
-  req = { ...req, ...defineFiltersByEntity(group.entity) };
+  };
+
+  if (isScopedToWorkspace.value) {
+    req.workspace_slugs = [currentWorkspaceSlug.value as string];
+  }
+
+  return req;
+};
+
+const onRequestGroupTable = async (group, p) => {
+  const req = {
+    ...buildSearchRequest(),
+    ...defineFiltersByEntity(group.entity),
+  };
   const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
   const { issues, count, limit } = await extendedSearchIssues(req as any, {
     order_by: order_by,
@@ -307,9 +348,7 @@ const onRequest = async (p) => {
   if (props.isCreateSprint && !filter.value) return;
   loading.value = true;
   // TODO: удалять only_active из req, так как он будет отправляться в query
-  let req = Object.assign((filter.value as any) ?? {}, {
-    search_query: searchQuery.value,
-  });
+  const req = buildSearchRequest();
   const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
   // заменить на общий метод поиск задач
   const { issues, count, limit } = await extendedSearchIssues(req as any, {
@@ -337,9 +376,7 @@ const onRequest = async (p) => {
 
 const downloadZip = async (p) => {
   try {
-    let req = Object.assign((filter.value as any) ?? {}, {
-      search_query: searchQuery.value,
-    });
+    const req = buildSearchRequest();
 
     const order_by = !p.sortBy && searchQuery.value ? 'search_rank' : p.sortBy;
 
@@ -499,6 +536,11 @@ const columnsToShow = ref(columns.map((el) => el.name));
 </script>
 
 <style scoped lang="scss">
+.search-scope-hint {
+  font-size: 12px;
+  color: var(--sub-text-color);
+}
+
 .sticky-fix {
   position: sticky;
   z-index: 110;
