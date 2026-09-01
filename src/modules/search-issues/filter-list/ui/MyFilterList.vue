@@ -83,7 +83,11 @@
                 }
               "
             >
-              <HintTooltip>Удалить фильтр</HintTooltip>
+              <HintTooltip>{{
+                !filter?.author_id || filter.author_id === userStore.user?.id
+                  ? 'Удалить фильтр'
+                  : 'Убрать фильтр из своего списка'
+              }}</HintTooltip>
 
               <BinIcon color="#DC3E3E" :width="16" :height="16"></BinIcon>
             </q-btn>
@@ -146,6 +150,7 @@ import { storeToRefs } from 'pinia';
 
 // stores
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useUserStore } from 'src/stores/user-store';
 
 // interfaces
 import {
@@ -169,6 +174,7 @@ const emits = defineEmits<{
 
 // store
 const filtersStore = useFiltersStore();
+const userStore = useUserStore();
 
 // store to refs
 const { myFilterList } = storeToRefs(filtersStore);
