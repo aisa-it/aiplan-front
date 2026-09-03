@@ -36,6 +36,7 @@ export const useProjectStore = defineStore('project-store', () => {
 
   return {
     project,
+    meInProject,
     isLoading,
     getProjectInfo,
   };
