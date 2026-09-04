@@ -1,0 +1,23 @@
+.issue-table-columns {
+  --issue-table-id-column-width: 130px;
+  --issue-table-wide-column-width: 400px;
+}
+
+@media screen and (max-width: 1920px) {
+  .issue-table-columns {
+    --issue-table-wide-column-width: 300px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .issue-table-columns {
+    --issue-table-wide-column-width: 250px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .issue-table-columns {
+    --issue-table-id-column-width: 100px;
+    --issue-table-wide-column-width: 200px;
+  }
+}
