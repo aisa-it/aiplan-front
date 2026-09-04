@@ -1,11 +1,31 @@
 import { computed, ref, watch } from 'vue';
 import { useIntervalFn } from '@vueuse/core';
 import dayjs from 'dayjs';
-import {
-  getMinimumTargetDate,
-  getTargetDateValue,
-  isValidTargetDate,
-} from '../utils/issue-date.helpers';
+
+export const getMinimumTargetDate = (now = new Date()) =>
+  dayjs(now).add(15, 'minute').startOf('minute');
+
+export const getTargetDateValue = (date: Date | null, time: string | null) => {
+  if (!date || !time || !/^\d{2}:\d{2}$/.test(time)) return null;
+  const [hour, minute] = time.split(':').map(Number);
+  if (hour === undefined || minute === undefined || hour > 23 || minute > 59)
+    return null;
+  const value = dayjs(date).hour(hour).minute(minute).second(0).millisecond(0);
+  return value.isValid() ? value : null;
+};
+
+export const isValidTargetDate = (
+  date: Date | null,
+  time: string | null,
+  now = new Date(),
+) => {
+  const value = getTargetDateValue(date, time);
+  return (
+    !!value &&
+    !value.isBefore(getMinimumTargetDate(now)) &&
+    !value.isAfter(dayjs(now).add(10, 'year').endOf('year'))
+  );
+};
 
 export const useIssueTargetDate = (initialDate?: string | null) => {
   const now = ref(new Date());
@@ -30,7 +50,6 @@ export const useIssueTargetDate = (initialDate?: string | null) => {
     isValidTargetDate(date.value, time.value, now.value),
   );
 
-  // Этот таймер существует только у открытого календаря, а не у каждой строки.
   useIntervalFn(() => {
     now.value = new Date();
   }, 60_000);

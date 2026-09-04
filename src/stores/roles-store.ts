@@ -4,11 +4,14 @@ import {
   defineRole,
   checkPermissionByWs,
   checkPermissionByProject,
+  checkPermissionByIssue,
 } from '@/utils/permissions';
 import type {
+  DtoIssue,
   DtoProjectMemberWithLead,
   DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useUserStore } from './user-store';
 
 export const useRolesStore = defineStore('roles-store', {
   state: () => {
@@ -53,6 +56,33 @@ export const useRolesStore = defineStore('roles-store', {
     ) {
       const role = this.getProjectNameRole(meInProject);
       return checkPermissionByProject(role, action);
+    },
+
+    getIssueNameRole(issue: DtoIssue) {
+      if (!this.roles.project || this.roles.project === 'guest') return '';
+
+      const userStore = useUserStore();
+
+      if (issue?.author_detail?.id === userStore.user?.id) return 'author';
+
+      const isAssignee = issue?.assignee_details?.some(
+        (assignee) => assignee.id === userStore.user?.id,
+      );
+
+      if (isAssignee) return 'assignee';
+
+      return '';
+    },
+
+    hasPermissionByIssue(issue: DtoIssue, action: string) {
+      const issue_role = this.getIssueNameRole(issue);
+
+      return checkPermissionByIssue(
+        this.roles.workspace,
+        this.roles.project,
+        issue_role,
+        action,
+      );
     },
   },
 });

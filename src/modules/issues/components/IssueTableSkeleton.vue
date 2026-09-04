@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-full overflow-hidden bg-[rgb(var(--v-theme-background))]"
+    class="issue-table-columns h-full overflow-hidden bg-[rgb(var(--v-theme-background))]"
     role="status"
     aria-label="Загрузка задач"
     aria-busy="true"
@@ -41,7 +41,9 @@ import { computed } from 'vue';
 import {
   ISSUE_TABLE_COLUMNS,
   type IssueTableColumn,
+  type IssueTableColumnWidth,
 } from '../constants/issue-table-columns';
+import '../styles/issue-table-columns.css';
 
 const props = withDefaults(
   defineProps<{
@@ -55,7 +57,9 @@ const props = withDefaults(
 );
 
 const skeletonWidths = [85, 50, 35, 65, 25, 85];
+const toCssWidth = (width: IssueTableColumnWidth) =>
+  typeof width === 'number' ? `${width}px` : width;
 const gridTemplateColumns = computed(() =>
-  props.columns.map((column) => `${column.width}px`).join(' '),
+  props.columns.map((column) => toCssWidth(column.width)).join(' '),
 );
 </script>

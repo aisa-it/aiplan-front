@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type {
   DtoProject,
   DtoProjectMemberWithLead,
+  TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { ref } from 'vue';
 import { projectService } from '@/services/project-service';
@@ -34,10 +35,45 @@ export const useProjectStore = defineStore('project-store', () => {
     }
   };
 
+  const updateViewSettings = async (
+    workspaceSlug: string,
+    projectId: string,
+    patch: TypesViewProps,
+  ) => {
+    if (meInProject.value?.project_id !== projectId) return;
+
+    const currentSettings = meInProject.value?.view_props;
+    const settings: TypesViewProps = {
+      ...currentSettings,
+      ...patch,
+      filters:
+        currentSettings?.filters || patch.filters
+          ? {
+              ...currentSettings?.filters,
+              ...patch.filters,
+            }
+          : undefined,
+    };
+
+    await projectService.updateViewSettings(
+      workspaceSlug,
+      projectId,
+      settings,
+    );
+
+    if (meInProject.value?.project_id === projectId) {
+      meInProject.value = {
+        ...meInProject.value,
+        view_props: settings,
+      };
+    }
+  };
+
   return {
     project,
     meInProject,
     isLoading,
     getProjectInfo,
+    updateViewSettings,
   };
 });

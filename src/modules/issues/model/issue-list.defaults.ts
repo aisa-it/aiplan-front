@@ -33,6 +33,7 @@ export const createIssueListInitialState = (
       descending: settings?.filters?.orderDesc ?? true,
       hideSubIssues: settings?.hideSubIssues ?? false,
       onlyActive: settings?.showOnlyActive ?? false,
+      draft: settings?.draft ?? true,
     },
     filters: {
       assigned_to_me: settings?.filters?.assignedToMe,

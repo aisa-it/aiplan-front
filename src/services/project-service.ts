@@ -3,6 +3,7 @@ import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import type {
   DtoProject,
   DtoProjectMemberWithLead,
+  TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const projectsApi = new (withInterceptors(Projects))();
@@ -24,5 +25,13 @@ export const projectService = {
     return await projectsApi
       .getProjectCurrentMembership(workspaceSlug, projectId)
       .then((res) => res.data);
+  },
+
+  async updateViewSettings(
+    workspaceSlug: string,
+    projectId: string,
+    settings: TypesViewProps,
+  ): Promise<void> {
+    await projectsApi.updateProjectView(workspaceSlug, projectId, settings);
   },
 };

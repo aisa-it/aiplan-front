@@ -35,16 +35,14 @@ export interface IssueListActions {
   canEdit(issue: DtoIssueWithCount, field: EditableIssueField): boolean;
   update(issue: DtoIssueWithCount, patch: IssueFieldPatch): Promise<DtoIssue>;
   getAvailableStates(issue: DtoIssueWithCount): Promise<DtoStateLight[]>;
+  updateViewSettings(settings: TypesViewProps): Promise<void>;
 }
 
 export interface ProjectIssueListScope {
   type: 'project';
   workspaceSlug: string;
   projectId: string;
-  projectIdentifier: string;
 }
-
-export type IssueListScope = ProjectIssueListScope;
 
 export interface IssueListQuery {
   page: number;
@@ -53,6 +51,7 @@ export interface IssueListQuery {
   descending: boolean;
   hideSubIssues: boolean;
   onlyActive: boolean;
+  draft: boolean;
 }
 
 export interface IssueListResult {
@@ -61,7 +60,6 @@ export interface IssueListResult {
 }
 
 export interface IssueListSource {
-  readonly scope: IssueListScope;
   load(
     filters: TypesIssuesListFilters,
     query: IssueListQuery,

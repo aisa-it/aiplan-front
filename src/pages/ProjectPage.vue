@@ -1,10 +1,10 @@
 <template>
-  <main
-    class="flex h-[calc(100dvh_-_var(--v-layout-top))] min-h-0 flex-col overflow-hidden"
+  <div
+    class="flex h-[calc(100dvh-var(--v-layout-top))] min-h-0 flex-col overflow-hidden"
   >
-    <header class="flex justify-between min-w-0 items-center px-4 py-3">
+    <div class="flex justify-between min-w-0 items-center px-4 py-3">
       <div
-        class="min-w-0 max-w-[calc(100%_-_60px)] text-xl font-normal leading-8"
+        class="min-w-0 max-w-[calc(100%-60px)] text-xl font-normal leading-8"
       >
         <v-skeleton-loader
           v-if="isLoading"
@@ -18,7 +18,7 @@
         </span>
       </div>
       <DotListIcon />
-    </header>
+    </div>
 
     <v-tabs
       v-model="currentTab"
@@ -65,7 +65,7 @@
         <span v-else-if="tab.value !== 'general'">{{ tab.label }}</span>
       </v-tabs-window-item>
     </v-tabs-window>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -77,11 +77,15 @@ import { useProjectStore } from '@/stores/project-store';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
 import PinIcon from '@/components/icons/PinIcon.vue';
-import { ProjectIssueList, IssueTableSkeleton, type ProjectIssueListScope } from '@/modules/issues';
+import {
+  ProjectIssueList,
+  IssueTableSkeleton,
+  type ProjectIssueListScope,
+} from '@/modules/issues';
 
 const props = defineProps<{
-  workspaceSlug?: string;
-  projectId?: string;
+  workspaceSlug: string;
+  projectId: string;
 }>();
 
 type ProjectTab = 'general' | 'pinned' | 'analytics';
@@ -113,9 +117,9 @@ const isMobile = useMediaQuery('(max-width: 639px)');
 const { project, meInProject, isLoading } = storeToRefs(useProjectStore());
 
 const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
-  const workspaceSlug = props.workspaceSlug || project.value?.workspace_detail?.slug;
+  const workspaceSlug = props.workspaceSlug;
 
-  if (!workspaceSlug || !project.value?.id || !project.value.identifier) {
+  if (!props.workspaceSlug || !project.value?.id) {
     return undefined;
   }
 
@@ -123,7 +127,6 @@ const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
     type: 'project',
     workspaceSlug,
     projectId: project.value.id,
-    projectIdentifier: project.value.identifier,
   };
 });
 </script>

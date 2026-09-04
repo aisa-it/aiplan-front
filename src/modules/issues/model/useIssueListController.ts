@@ -1,6 +1,9 @@
 import { reactive, ref, shallowRef } from 'vue';
 
-import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type {
+  DtoIssueWithCount,
+  TypesViewProps,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import type {
   IssueColumnKey,
@@ -19,12 +22,22 @@ export const useIssueListController = (
   const items = shallowRef<DtoIssueWithCount[]>([]);
   const total = ref(0);
   const isLoading = ref(false);
-  const error = shallowRef<unknown>();
   const query = reactive({ ...initialState.query });
   const columns = initialState.columns;
 
   let requestController: AbortController | undefined;
   let requestNumber = 0;
+  let viewSettingsRequest = Promise.resolve();
+
+  const updateViewSettings = (settings: TypesViewProps) => {
+    if (!actions) return;
+
+    viewSettingsRequest = viewSettingsRequest
+      .then(() => actions.updateViewSettings(settings))
+      .catch(() => {
+        // TODO: показать уведомление после переноса общей системы уведомлений.
+      });
+  };
 
   const load = async () => {
     requestController?.abort();
@@ -33,7 +46,6 @@ export const useIssueListController = (
     const currentRequest = ++requestNumber;
 
     isLoading.value = true;
-    error.value = undefined;
 
     try {
       const result = await source.load(
@@ -46,9 +58,8 @@ export const useIssueListController = (
 
       items.value = result.items;
       total.value = result.total;
-    } catch (requestError) {
+    } catch {
       if (controller.signal.aborted || currentRequest !== requestNumber) return;
-      error.value = requestError;
 
       // TODO: показать уведомление после переноса общей системы уведомлений.
     } finally {
@@ -65,8 +76,7 @@ export const useIssueListController = (
     query.page = 1;
     query.rowsPerPage = rowsPerPage;
     void load();
-
-    // TODO: сохранять page_size в настройках отображения пользователя.
+    updateViewSettings({ page_size: rowsPerPage });
   };
 
   const setSort = (column: IssueColumnKey, descending?: boolean) => {
@@ -81,8 +91,12 @@ export const useIssueListController = (
     query.sortBy = column;
     query.page = 1;
     void load();
-
-    // TODO: сохранять сортировку в настройках отображения пользователя.
+    updateViewSettings({
+      filters: {
+        order_by: column,
+        orderDesc: query.descending,
+      },
+    });
   };
 
   const dispose = () => {
@@ -109,7 +123,7 @@ export const useIssueListController = (
     items.value = items.value.map((item) =>
       item.id === issue.id ? { ...item, ...updatedIssue } : item,
     );
-    // Обновляем состав и порядок списка с учётом фильтров и сортировки.
+
     await load();
     // TODO: показать уведомление об успешном сохранении.
   };
@@ -120,11 +134,9 @@ export const useIssueListController = (
       : Promise.resolve([]);
 
   return {
-    scope: source.scope,
     items,
     total,
     isLoading,
-    error,
     query,
     columns,
     load,

@@ -1,5 +1,7 @@
 <template>
-  <div class="issue-table-wrapper flex h-full min-w-0 flex-col">
+  <div
+    class="issue-table-columns issue-table-wrapper flex h-full min-w-0 flex-col"
+  >
     <div
       ref="tableRoot"
       class="issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
@@ -26,6 +28,14 @@
         class="issue-table"
         @update:sort-by="handleSort"
       >
+        <template #no-data>
+          <div
+            class="flex h-[calc(100dvh-var(--v-layout-top)-220px)] min-h-40 flex-col items-center justify-center gap-2"
+          >
+            <DocumentIcon :width="56" :height="56" />
+            <h6 class="text-xl">Нет задач</h6>
+          </div>
+        </template>
         <template #item.sequence_id="{ item }">
           <SequenceIdColumn
             :identifier="item.project_detail?.identifier"
@@ -95,13 +105,17 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useWindowSize } from '@vueuse/core';
 
 import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
+import DocumentIcon from '@/components/icons/DocumentIcon.vue';
 
-import { ISSUE_TABLE_COLUMNS } from '../constants/issue-table-columns';
+import {
+  ISSUE_COUNT_COLUMN_KEYS,
+  ISSUE_TABLE_COLUMNS,
+} from '../constants/issue-table-columns';
 import { useSyncedHorizontalScroll } from '../composables/useSyncedHorizontalScroll';
 import { useIssueListControllerContext } from '../model/issue-list.context';
+import '../styles/issue-table-columns.css';
 import SequenceIdColumn from './issue-table/SequenceIdColumn.vue';
 import NameColumn from './issue-table/NameColumn.vue';
 import PriorityColumn from './issue-table/PriorityColumn.vue';
@@ -117,13 +131,7 @@ import IssueTableSkeleton from './IssueTableSkeleton.vue';
 
 defineProps<{ hideParent?: boolean }>();
 
-const countColumns = [
-  'sub_issues_count',
-  'linked_issues_count',
-  'link_count',
-  'attachment_count',
-] as const;
-const { width: screenWidth } = useWindowSize();
+const countColumns = ISSUE_COUNT_COLUMN_KEYS;
 
 const {
   items,
@@ -139,32 +147,7 @@ const {
 const showSkeleton = computed(() => isLoading.value && !items.value.length);
 
 const tableColumns = computed(() =>
-  columns.map((column) => {
-    const tableColumn = ISSUE_TABLE_COLUMNS[column];
-    let width = tableColumn.width;
-    if (column === 'name' || column === 'labels') {
-      width =
-        screenWidth.value <= 600
-          ? 200
-          : screenWidth.value <= 1200
-            ? 250
-            : screenWidth.value <= 1920
-              ? 300
-              : 400;
-    } else if (column === 'sequence_id' && screenWidth.value <= 600) {
-      width = 100;
-    }
-
-    return {
-      ...tableColumn,
-      width,
-      minWidth: width,
-      maxWidth: width,
-      headerProps: column.endsWith('_count')
-        ? { class: 'issue-count-header' }
-        : undefined,
-    };
-  }),
+  columns.map((column) => ISSUE_TABLE_COLUMNS[column]),
 );
 const sortBy = computed(() => [
   {

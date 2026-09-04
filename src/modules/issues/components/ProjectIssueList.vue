@@ -23,9 +23,8 @@ const props = defineProps<{
   hideParent?: boolean;
 }>();
 
-const source = createProjectIssueListSource(props.scope);
 const controller = useIssueListController(
-  source,
+  createProjectIssueListSource(props.scope),
   createIssueListInitialState(props.viewSettings),
   useProjectIssueListActions(props.scope),
 );
