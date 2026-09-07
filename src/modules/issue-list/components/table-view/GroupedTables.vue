@@ -9,7 +9,13 @@
       (group, opened) => setGroupHide(group.entity?.id ?? group.entity, opened)
     "
     @subscribe-table-updates="
-      (group, index) => subscribeTableUpdates(group.entity.id, currentPagination, index, group.entity)
+      (group, index) =>
+        subscribeTableUpdates(
+          group.entity.id,
+          currentPagination,
+          index,
+          group.entity,
+        )
     "
   >
     <template #default="{ group, index }">
@@ -28,7 +34,7 @@
               pagination,
               isFullUpdate,
               group?.entity,
-            )
+            );
           }
         "
         @open-preview="
@@ -48,6 +54,7 @@
 
 <script setup lang="ts">
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { hasPropertyColumns } from 'src/modules/issue-list/constants/tableColumns';
 
 import IssueTable from '../IssueTable.vue';
 import { IGroupedResponse } from '../../types';
@@ -97,6 +104,9 @@ const updateGroupedIssues = async (status: any) => {
       only_count: false,
       hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
       only_active: contextProps.value?.showOnlyActive ?? true,
+      include_properties: hasPropertyColumns(
+        contextProps.value?.columns_to_show,
+      ),
       order_by: contextProps.value?.filters?.order_by ?? 'sequence_id',
       desc: contextProps.value?.filters?.orderDesc ?? false,
       offset: 0,

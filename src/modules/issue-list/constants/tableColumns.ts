@@ -1,4 +1,47 @@
 import { formatDate, formatDateTime } from 'src/utils/time';
+import { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+
+// имя колонки дополнительного параметра: property:<uuid шаблона>
+// (тот же формат, что у group_by по параметру)
+export const PROPERTY_COLUMN_PREFIX = 'property:';
+
+export const isPropertyColumn = (name?: string) =>
+  !!name?.startsWith(PROPERTY_COLUMN_PREFIX);
+
+// выбрана ли хоть одна колонка дополнительного параметра — тогда список
+// задач запрашивается с include_properties=true
+export const hasPropertyColumns = (columnsToShow?: (string | any)[]) =>
+  !!columnsToShow?.some((c) => isPropertyColumn(c?.name ?? c));
+
+export interface PropertyColumn {
+  name: string;
+  label: string;
+  align: 'left';
+  sortable: false;
+  // шаблон, по которому ячейка находит значение в row.properties
+  property: DtoProjectPropertyTemplate;
+  field: (row: any) => any;
+}
+
+// колонки дополнительных параметров по шаблонам проекта; значение берётся из
+// row.properties (приходит с бэка по include_properties=true)
+export const buildPropertyColumns = (
+  templates: DtoProjectPropertyTemplate[],
+): PropertyColumn[] =>
+  (templates ?? [])
+    .filter((t) => t?.id && t?.name)
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((t) => ({
+      name: `${PROPERTY_COLUMN_PREFIX}${t.id}`,
+      label: t.name as string,
+      align: 'left',
+      sortable: false,
+      property: t,
+      field: (row: any) =>
+        row?.properties?.find((p: any) => p.template_id === t.id)?.value ??
+        null,
+    }));
 
 export const allColumns = [
   {

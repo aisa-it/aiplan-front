@@ -51,6 +51,7 @@ export interface IQuery {
   only_pinned?: boolean;
   group_by?: string;
   stream?: boolean;
+  include_properties?: boolean;
 }
 
 export const useIssuesStore = defineStore('issues-store', {

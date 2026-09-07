@@ -119,6 +119,10 @@ export function useProjectFilters() {
 
     try {
       const templates = await getPropertyTemplates(workspaceSlug, projectSlug);
+      // шаблоны нужны и стору — из них строятся колонки таблицы
+      projectStore.propertyTemplates = Array.isArray(templates)
+        ? templates
+        : [];
       propertyOptions.value = (Array.isArray(templates) ? templates : [])
         .filter((t) => t?.id && t?.name)
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))

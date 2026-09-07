@@ -62,6 +62,7 @@ import { useIssueContext } from '../composables/useIssueContext';
 import { useDefaultIssues } from '../composables/useDefaultIssues';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import { hasPropertyColumns } from 'src/modules/issue-list/constants/tableColumns';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { QuasarPagination } from 'src/modules/issue-list/composables/useGroupedIssues';
 
@@ -157,6 +158,7 @@ function parsePagination(pagination: QuasarPagination) {
     only_active: contextProps.value?.showOnlyActive,
     hide_sub_issues: contextProps.value.hideSubIssues ?? false,
     draft: contextProps.value?.draft ?? true,
+    include_properties: hasPropertyColumns(contextProps.value?.columns_to_show),
     order_by: pagination.sortBy,
     desc: pagination.descending,
     offset:

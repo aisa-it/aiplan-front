@@ -15,10 +15,14 @@ import {
   DtoProjectMember,
   DtoProjectMemberLight,
   DtoProjectMemberWithLead,
+  DtoProjectPropertyTemplate,
   DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { allColumns } from 'src/modules/issue-list/constants/tableColumns';
+import {
+  allColumns,
+  buildPropertyColumns,
+} from 'src/modules/issue-list/constants/tableColumns';
 import axios from 'axios';
 import { NEW_GROUP_BY_OPTIONS, PARSED_GROUP } from 'src/constants/constants';
 
@@ -36,6 +40,8 @@ interface IProjectState {
   projectProps: TypesViewProps | null;
   projectStatuses: Record<string, DtoStateLight[]>;
   issuesLoader: boolean;
+  // шаблоны дополнительных параметров проекта (для колонок таблицы задач)
+  propertyTemplates: DtoProjectPropertyTemplate[];
 }
 export const api = axios.create({ baseURL: '', withCredentials: true });
 
@@ -52,6 +58,7 @@ export const useProjectStore = defineStore('project-store', {
       projectProps: null,
       projectStatuses: {},
       issuesLoader: true,
+      propertyTemplates: [],
     };
   },
 
@@ -98,18 +105,28 @@ export const useProjectStore = defineStore('project-store', {
 
       const sequenceColumn = allColumns.find((c) => c.name === 'sequence_id');
 
+      // колонки дополнительных параметров (property:<uuid>) живут в
+      // columns_to_show наравне с обычными; протухший шаблон просто выпадает
+      const available = [
+        ...allColumns,
+        ...buildPropertyColumns(this.propertyTemplates),
+      ];
+
       const orderedColumns = order
-        .map((name) => allColumns.find((c) => c.name === name))
+        .map((name) => available.find((c) => c.name === name))
         .filter(Boolean);
 
       return [sequenceColumn, ...orderedColumns].filter(Boolean);
     },
 
     sortAllColumns() {
+      // активные в порядке пользователя + неактивные; дополнительные параметры
+      // по умолчанию неактивны и идут после стандартных колонок
       const orderedColumns = this.getTableColumns;
-      const inactive = allColumns.filter(
-        (c) => !orderedColumns?.some((el) => el.name === c.name),
-      );
+      const inactive = [
+        ...allColumns,
+        ...buildPropertyColumns(this.propertyTemplates),
+      ].filter((c) => !orderedColumns?.some((el) => el.name === c.name));
 
       return [...orderedColumns, ...inactive];
     },

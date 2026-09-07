@@ -10,6 +10,7 @@ import UpdatedAtColumn from './UpdatedAtColumn.vue';
 import LabelsColumn from './LabelsColumn.vue';
 import ChipCountColumn from './ChipCountColumn.vue';
 import SprintColumn from './SprintColumn.vue';
+import PropertyColumn from './PropertyColumn.vue';
 
 export {
   CreatedAtColumn,
@@ -24,4 +25,5 @@ export {
   LabelsColumn,
   ChipCountColumn,
   SprintColumn,
+  PropertyColumn,
 };

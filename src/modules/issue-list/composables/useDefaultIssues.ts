@@ -2,6 +2,7 @@ import { useIssuesStore } from 'src/stores/issues-store';
 import { IQuery } from 'src/stores/issues-store';
 import { computed } from 'vue';
 import { useIssueContext } from './useIssueContext';
+import { hasPropertyColumns } from 'src/modules/issue-list/constants/tableColumns';
 
 export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
   const { contextProps, getIssue } = useIssueContext(contextType);
@@ -17,6 +18,9 @@ export const useDefaultIssues = (contextType: 'project' | 'sprint') => {
       offset: 0,
       limit: contextProps.value?.page_size,
       only_active: contextProps.value?.showOnlyActive ?? true,
+      include_properties: hasPropertyColumns(
+        contextProps.value?.columns_to_show,
+      ),
     };
   });
 

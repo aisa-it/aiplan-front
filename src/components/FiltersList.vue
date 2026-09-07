@@ -190,13 +190,19 @@ const viewsOptionsFiltered = computed(() =>
 
 const popupRef = ref<QPopupProxy | null>(null);
 
-const columnsSelector = ref(props.columns);
-
 const isPopupOpen = ref(false);
 const isConfirmResetDialogOpen = ref(false);
 
+// есть ли скрытые колонки (sequence_id в выпадашке не участвует); раньше
+// сравнивалась длина со снимком props.columns при монтировании — снимок
+// протухал, когда список колонок дополнялся позже (шаблоны параметров)
 const isColumnsToShow = computed(() => {
-  return props.columns.length !== columnsSelector.value.length;
+  const shown: string[] = (props.viewForm?.columns_to_show ?? []).map(
+    (c: any) => c?.name ?? c,
+  );
+  return props.columns.some(
+    (c) => c?.name !== 'sequence_id' && !shown.includes(c?.name),
+  );
 });
 
 const popupToggle = () => {

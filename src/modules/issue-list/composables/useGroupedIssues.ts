@@ -6,6 +6,7 @@ import { EventBus } from 'quasar';
 import { useIssueContext } from './useIssueContext';
 import { handleNotify } from 'src/utils/notify';
 import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
+import { hasPropertyColumns } from 'src/modules/issue-list/constants/tableColumns';
 
 export interface QuasarPagination {
   page: number;
@@ -45,6 +46,9 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       only_count: false,
       hide_sub_issues: contextProps.value?.hideSubIssues ?? false,
       only_active: contextProps.value?.showOnlyActive ?? true,
+      include_properties: hasPropertyColumns(
+        contextProps.value?.columns_to_show,
+      ),
       group_by:
         PARSED_GROUP[rawGroupBy]?.value ||
         GROUP_BY_OPTIONS.find((option) => option.value === rawGroupBy)?.value ||

@@ -20,7 +20,7 @@
             v-for="col in columns"
             :key="col.name"
             :props="props"
-            :class="`${col.name.includes('count') ? 'count-column' : ''} ${col.name}-column`"
+            :class="`${col.name.includes('count') ? 'count-column' : ''} ${columnClass(col.name)}-column`"
           >
             {{ col.label }}
           </q-th>
@@ -114,6 +114,15 @@
       <template v-slot:body-cell-attachment_count="props">
         <ChipCountColumn :row-info="props" :chip-name="'attachments'" />
       </template>
+
+      <!-- колонки дополнительных параметров: слоты строятся динамически по шаблонам -->
+      <template
+        v-for="col in propertyColumns"
+        :key="col.name"
+        #[`body-cell-${col.name}`]="props"
+      >
+        <PropertyColumn :row-info="props" :property="col.property" />
+      </template>
     </q-table>
 
     <div class="sticky-bottom">
@@ -126,7 +135,7 @@
           <PaginationDefault
             v-model:selected-page="quasarPagination.page"
             :rows-per-page="quasarPagination.rowsPerPage"
-            :rows-per-page-options="[10, 25, 50]"
+            :rows-per-page-options="[10, 25, 50, 100]"
             :rows-number="quasarPagination.rowsNumber"
             show-rows-per-page
             @request="(pagination, action) => getIssues(pagination, action)"
@@ -171,12 +180,18 @@ import {
   LabelsColumn,
   ChipCountColumn,
   SprintColumn,
+  PropertyColumn,
 } from './issue-table';
 
 import { useIssueContext } from '../composables/useIssueContext';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
+import {
+  hasPropertyColumns,
+  isPropertyColumn,
+  PropertyColumn as PropertyColumnDef,
+} from '../constants/tableColumns';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 interface QuasarPagination {
@@ -207,15 +222,24 @@ const emits = defineEmits<{
 const {
   contextProps,
   isGroupingEnabled,
-  getTableColumns,
   store: contextStore,
 } = useIssueContext(props.contextType);
 
 const { updateCurrentTable } = useGroupedIssues(props.contextType);
 
-const columns = computed(() => {
-  return getTableColumns;
-});
+// геттер читаем через стор, а не через снимок из useIssueContext — иначе
+// набор колонок (в т.ч. тумблер дополнительных параметров) не реактивен
+const columns = computed(() => contextStore.getTableColumns);
+
+const propertyColumns = computed(
+  () =>
+    columns.value.filter((c) =>
+      isPropertyColumn(c?.name),
+    ) as unknown as PropertyColumnDef[],
+);
+
+// имя property-колонки содержит «:» и uuid — в css-класс его не тащим
+const columnClass = (name: string) => name.replace(/[^a-zA-Z0-9_-]/g, '-');
 
 const bus = inject('bus') as EventBus;
 
@@ -243,6 +267,7 @@ function parsePagination(pagination: QuasarPagination) {
     only_active: contextProps.value?.showOnlyActive,
     hide_sub_issues: contextProps.value.hideSubIssues ?? false,
     draft: contextProps.value?.draft ?? true,
+    include_properties: hasPropertyColumns(contextProps.value?.columns_to_show),
     order_by: pagination.sortBy,
     desc: pagination.descending,
     offset:
