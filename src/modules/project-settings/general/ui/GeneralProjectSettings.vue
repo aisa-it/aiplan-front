@@ -135,6 +135,22 @@
     </div>
   </div>
 
+  <div class="row mobile-block q-mt-md">
+    <div class="col">
+      <h4 class="text-lg font-semibold text-brand-base">
+        Разрешить всем редактировать дополнительные параметры
+      </h4>
+      <p class="text-sm text-brand-secondary">
+        Участники смогут изменять дополнительные параметры в любых задачах
+        проекта, а не только в своих или назначенных. На гостей не
+        распространяется
+      </p>
+    </div>
+    <div class="col q-mt-xs flex items-center">
+      <q-toggle v-model="projectForm.member_properties_allowed" />
+    </div>
+  </div>
+
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
       :flat="!hasChanges"
@@ -271,6 +287,7 @@ const { hasChanges, init } = useFormChanges(projectForm, {
       emoji: unwrapValue(val.emoji),
       issue_deletion_allowed: val.issue_deletion_allowed,
       member_attachments_allowed: val.member_attachments_allowed,
+      member_properties_allowed: val.member_properties_allowed,
     };
   },
 });
@@ -318,6 +335,7 @@ async function onSubmit() {
     emoji: projectForm.value.emoji.value,
     issue_deletion_allowed: projectForm.value.issue_deletion_allowed,
     member_attachments_allowed: projectForm.value.member_attachments_allowed,
+    member_properties_allowed: projectForm.value.member_properties_allowed,
   };
 
   await updateThisProject(payload);

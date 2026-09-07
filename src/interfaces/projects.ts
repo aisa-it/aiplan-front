@@ -87,6 +87,7 @@ export interface IProject {
 
   issue_deletion_allowed?: boolean;
   member_attachments_allowed?: boolean;
+  member_properties_allowed?: boolean;
 }
 
 export interface IProjectLeader {
