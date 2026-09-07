@@ -387,6 +387,7 @@
         class="q-pt-md"
         :project-id="issueData.project"
         :issue-id="issueData.id"
+        :disabled="!canEditProperties"
       />
     </template>
     <template v-else>
@@ -483,7 +484,8 @@ import {
 // stores
 const userStore = useUserStore();
 const projectStore = useProjectStore();
-const { hasPermissionByIssue, hasPermissionByWorkspace } = useRolesStore();
+const { hasPermissionByIssue, hasPermissionByWorkspace, getProjectRole } =
+  useRolesStore();
 const workspaceStore = useWorkspaceStore();
 const singleIssueStore = useSingleIssueStore();
 const {
@@ -499,6 +501,15 @@ const { user } = storeToRefs(userStore);
 const { currentProjectID, project } = storeToRefs(projectStore);
 const { currentIssueID, issueData } = storeToRefs(singleIssueStore);
 const { currentWorkspaceSlug, workspaceInfo } = storeToRefs(workspaceStore);
+
+// Дополнительные параметры: админ, автор, исполнитель, либо участник (не гость) при
+// включённой настройке проекта member_properties_allowed — зеркало бэка (hasIssuePermissions)
+const canEditProperties = computed(
+  () =>
+    hasPermissionByIssue(issueData.value, 'change-issue-secondary') ||
+    (issueData.value?.project_detail?.member_properties_allowed === true &&
+      getProjectRole(issueData.value?.project ?? '') >= 10),
+);
 
 const props = defineProps<{
   preview?: boolean;

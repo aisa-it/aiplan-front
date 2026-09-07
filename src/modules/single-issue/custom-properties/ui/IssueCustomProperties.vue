@@ -20,6 +20,7 @@
           <div v-if="prop.type === 'boolean'">
             <q-checkbox
               :model-value="!!prop.value"
+              :disable="disabled"
               @update:model-value="
                 (val) => {
                   prop.value = val;
@@ -48,11 +49,13 @@
               clearable
               emit-value
               map-options
+              :disable="disabled"
             />
           </div>
 
           <div v-else-if="prop.type === 'link'">
             <LinkItem
+              :is-disabled="disabled"
               :link="{
                 id: prop.id,
                 title: prop.value?.name,
@@ -80,6 +83,7 @@
               :model-value="(prop.value as string) || null"
               :current-label="prop.value_label"
               :reset-signal="resetSignals[prop.template_id || ''] || 0"
+              :disable="disabled"
               @update:model-value="
                 (val) => {
                   prop.value = val;
@@ -92,6 +96,7 @@
           <div v-else-if="prop.type === 'date' || prop.type === 'datetime'">
             <SelectPropertyDate
               :type="prop.type"
+              :disable="disabled"
               :model-value="(prop.value as string) || null"
               @update:model-value="
                 (val) => {
@@ -114,6 +119,7 @@
               "
               debounce="1000"
               dense
+              :disable="disabled"
             />
           </div>
         </div>
@@ -167,6 +173,8 @@ const props = defineProps<{
   projectId: string;
   issueId: string;
   offSuccessNotification?: boolean;
+  /** Нет прав менять параметры — поля только для чтения (иначе бэк ответит 403, а введённое зависнет до F5) */
+  disabled?: boolean;
 }>();
 
 //stores

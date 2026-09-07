@@ -10,6 +10,7 @@
     :model-value="modelValue"
     :options="options"
     :loading="isLoading"
+    :disable="disable"
     @update:model-value="handleUpdate"
     @popup-show="onPopupShow"
     @virtual-scroll="loadMoreOnScroll"
@@ -75,6 +76,7 @@ const props = withDefaults(
     label?: string;
     /** инкрементируется при каскадном обновлении — сбросить кэш строк */
     resetSignal?: number;
+    disable?: boolean;
   }>(),
   {
     modelValue: null,
