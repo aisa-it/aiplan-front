@@ -29,6 +29,13 @@
             map-options
           />
 
+          <SelectPropertyMultiValue
+            v-else-if="prop.type === 'multiselect'"
+            v-model="prop.value"
+            :options="(prop as any).options || []"
+            :unique="prop.unique_values"
+          />
+
           <LinkItem
             v-else-if="prop.type === 'link'"
             :link="{
@@ -97,6 +104,7 @@ import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 import SelectDictionaryRow from 'src/components/selects/SelectDictionaryRow.vue';
 import SelectPropertyDate from 'src/modules/single-issue/custom-properties/ui/SelectPropertyDate.vue';
+import SelectPropertyMultiValue from 'src/modules/single-issue/custom-properties/ui/SelectPropertyMultiValue.vue';
 
 //props
 const props = defineProps<{
@@ -150,15 +158,18 @@ const fetchData = async () => {
         type: t.type,
         options: t.options,
         dictionary_id: t.dictionary_id,
+        unique_values: t.unique_values,
         value:
           t.type === 'boolean'
             ? false
-            : t.type === 'link' ||
-                t.type === 'lookup' ||
-                t.type === 'date' ||
-                t.type === 'datetime'
-              ? null
-              : '',
+            : t.type === 'multiselect'
+              ? []
+              : t.type === 'link' ||
+                  t.type === 'lookup' ||
+                  t.type === 'date' ||
+                  t.type === 'datetime'
+                ? null
+                : '',
       }));
   } catch (e) {
   } finally {
@@ -190,7 +201,10 @@ const saveProperties = async (createdIssueId: string) => {
   const savePromises = properties.value
     .filter(
       (prop) =>
-        prop.value !== undefined && prop.value !== null && prop.value !== '',
+        prop.value !== undefined &&
+        prop.value !== null &&
+        prop.value !== '' &&
+        !(Array.isArray(prop.value) && prop.value.length === 0),
     )
     .map((prop) => {
       let value = prop.value;

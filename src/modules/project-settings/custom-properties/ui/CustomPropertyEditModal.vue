@@ -31,7 +31,14 @@
             map-options
           />
 
-          <div v-if="isSelectType" class="q-mt-md">
+          <q-toggle
+            v-if="isMultiselectType"
+            v-model="form.unique_values"
+            label="Значения в списке не должны повторяться"
+            dense
+          />
+
+          <div v-if="isOptionsType" class="q-mt-md">
             <span class="text-grey-7">Варианты выбора:</span>
             <div class="q-mt-sm">
               <div
@@ -256,6 +263,7 @@ const form = ref<PropertyTemplateForm>({
   type: 'string',
   only_admin: true,
   options: [],
+  unique_values: false,
   dependency: emptyDependency(),
 });
 
@@ -264,14 +272,20 @@ const isDictionariesLoading = ref(false);
 
 const isEdit = computed(() => !!props.editItem);
 const isSelectType = computed(() => form.value.type === 'select');
+const isMultiselectType = computed(() => form.value.type === 'multiselect');
+// типы с фиксированным набором вариантов (options)
+const isOptionsType = computed(
+  () => isSelectType.value || isMultiselectType.value,
+);
 const isLookupType = computed(() => form.value.type === 'lookup');
-// зависимость поддерживается только для select (options_map) и lookup (row_filter)
+// зависимость поддерживается для select/multiselect (options_map, ребёнок)
+// и lookup (row_filter)
 const isDependencySupportedType = computed(
-  () => isSelectType.value || isLookupType.value,
+  () => isOptionsType.value || isLookupType.value,
 );
 
 const dependencyModes = computed(() => {
-  if (isSelectType.value) {
+  if (isOptionsType.value) {
     return [{ label: 'Список вариантов', value: 'options_map' }];
   }
   if (isLookupType.value) {
@@ -330,16 +344,13 @@ const dictionaryOptions = computed(() =>
 );
 
 const hasEmptyOptions = computed(() => {
-  if (!isSelectType) return false;
-  if (isSelectType && form.value.options.length <= 0) return true;
-  return (
-    form.value.options?.some((opt: string) => !opt || opt.trim() === '') ??
-    false
-  );
+  if (!isOptionsType.value) return false;
+  if (!form.value.options || form.value.options.length <= 0) return true;
+  return form.value.options.some((opt: string) => !opt || opt.trim() === '');
 });
 const canSubmit = computed(() => {
   if (!form.value.name) return false;
-  if (isSelectType.value && hasEmptyOptions.value) return false;
+  if (isOptionsType.value && hasEmptyOptions.value) return false;
   if (isLookupType.value && !form.value.dictionary_id) return false;
   return true;
 });
@@ -365,9 +376,11 @@ const loadDictionaries = async () => {
 
 const onSubmit = () => {
   const data = { ...form.value };
-  if (data.type !== 'select') {
+  if (data.type !== 'select' && data.type !== 'multiselect') {
     delete data.options;
   }
+  // уникальность значений — настройка только multiselect
+  data.unique_values = data.type === 'multiselect' && !!data.unique_values;
   if (data.type !== 'lookup') {
     delete data.dictionary_id;
   }
@@ -424,7 +437,11 @@ const onParentTemplateChange = () => {
 
 // режим зависимости однозначно определяется типом поля-ребёнка
 const modeForType = (type?: string | null): string | null =>
-  type === 'select' ? 'options_map' : type === 'lookup' ? 'row_filter' : null;
+  type === 'select' || type === 'multiselect'
+    ? 'options_map'
+    : type === 'lookup'
+      ? 'row_filter'
+      : null;
 
 //lifecycle hooks
 watch(
@@ -436,6 +453,7 @@ watch(
         form.value = {
           ...props.editItem,
           options: props.editItem.options || [],
+          unique_values: !!props.editItem.unique_values,
           dependency: props.editItem.dependency
             ? {
                 parent_template_id:
@@ -453,6 +471,7 @@ watch(
           type: 'string',
           only_admin: true,
           options: [],
+          unique_values: false,
           dictionary_id: null,
           dependency: emptyDependency(),
         };
@@ -471,13 +490,13 @@ watch(
   () => form.value.type,
   (newType) => {
     if (
-      newType === 'select' &&
+      (newType === 'select' || newType === 'multiselect') &&
       (!form.value.options || form.value.options.length === 0)
     ) {
       form.value.options = [''];
     }
     // режим однозначно определяется типом ребёнка
-    if (newType === 'select') {
+    if (newType === 'select' || newType === 'multiselect') {
       form.value.dependency!.mode = 'options_map';
     } else if (newType === 'lookup') {
       form.value.dependency!.mode = 'row_filter';

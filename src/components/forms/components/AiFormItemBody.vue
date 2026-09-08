@@ -207,7 +207,7 @@ import { ExtendedFormFields } from 'src/interfaces/forms';
 
 // Какие типы параметров проекта совместимы с типами полей формы.
 // Параметры типа link не предлагаем — их нет в маппинге.
-// attachment/multiselect/date — привязка не поддерживается бэком, селект не показываем.
+// attachment/date — привязка не поддерживается бэком, селект не показываем.
 const FIELD_TYPE_TO_PROPERTY_TYPES: Record<string, string[]> = {
   input: ['string'],
   textarea: ['string'],
@@ -215,6 +215,7 @@ const FIELD_TYPE_TO_PROPERTY_TYPES: Record<string, string[]> = {
   color: ['string'],
   checkbox: ['boolean'],
   select: ['select'],
+  multiselect: ['multiselect'],
 };
 
 const props = withDefaults(

@@ -4,6 +4,7 @@ export const PROPERTY_TYPE_OPTIONS = [
   { label: 'Строка', value: 'string' },
   { label: 'Флаг', value: 'boolean' },
   { label: 'Список', value: 'select' },
+  { label: 'Список (несколько значений)', value: 'multiselect' },
   { label: 'Ссылка', value: 'link' },
   { label: 'Справочник', value: 'lookup' },
   { label: 'Дата', value: 'date' },

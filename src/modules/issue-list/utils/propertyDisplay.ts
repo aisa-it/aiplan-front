@@ -23,7 +23,8 @@ export const findIssueProperty = (
 
 // единое отображение значения параметра для таблицы и доски.
 // Контракт значений как в SelectPropertyDate: date — YYYY-MM-DD,
-// datetime — unix time в секундах строкой; lookup — id строки, показываем value_label
+// datetime — unix time в секундах строкой; lookup — id строки, показываем value_label;
+// multiselect — массив строк, показываем через запятую
 export const formatPropertyValue = (
   type: string | undefined,
   prop: DtoIssueProperty | undefined,
@@ -40,6 +41,13 @@ export const formatPropertyValue = (
   if (type === 'link') {
     const url: string = v?.url ?? '';
     return { text: v?.name || url || '—', isEmpty: !url, linkUrl: url };
+  }
+  if (type === 'multiselect') {
+    const items = Array.isArray(v) ? v.map(String).filter(Boolean) : [];
+    return {
+      text: items.length ? items.join(', ') : '—',
+      isEmpty: !items.length,
+    };
   }
   if (v === null || v === undefined || v === '') {
     return { text: '—', isEmpty: true };

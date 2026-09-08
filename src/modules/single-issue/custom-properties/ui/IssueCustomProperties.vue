@@ -53,6 +53,25 @@
             />
           </div>
 
+          <div v-else-if="prop.type === 'multiselect'">
+            <SelectPropertyMultiValue
+              :model-value="(prop.value as string[]) || []"
+              :options="
+                selectOptions[prop.template_id || ''] ||
+                (prop as any).options ||
+                []
+              "
+              :unique="prop.unique_values"
+              :disable="disabled"
+              @update:model-value="
+                (val) => {
+                  prop.value = val;
+                  updateValue(prop, val);
+                }
+              "
+            />
+          </div>
+
           <div v-else-if="prop.type === 'link'">
             <LinkItem
               :is-disabled="disabled"
@@ -167,6 +186,7 @@ import LinkItem from 'src/components/LinkItem.vue';
 import LinkDialog from 'src/components/dialogs/LinkDialog.vue';
 import SelectLookupValue from './SelectLookupValue.vue';
 import SelectPropertyDate from './SelectPropertyDate.vue';
+import SelectPropertyMultiValue from './SelectPropertyMultiValue.vue';
 
 //props
 const props = defineProps<{
@@ -196,8 +216,12 @@ const isLinkOpenDialog = ref(false);
 const linkToUpdate = ref();
 const propToUpdate = ref();
 
-// допустимые варианты select-полей (единая ручка available-values, BAK-366)
+// допустимые варианты select/multiselect-полей (единая ручка available-values, BAK-366)
 const selectOptions = ref<Record<string, string[]>>({});
+
+// типы с фиксированным набором вариантов (options)
+const isOptionsType = (type?: string) =>
+  type === 'select' || type === 'multiselect';
 // счётчики сброса кэша lookup-селектов при каскадном обновлении
 const resetSignals = ref<Record<string, number>>({});
 
@@ -239,7 +263,7 @@ const refreshSelectOptions = async (templateId: string) => {
 // загрузка вариантов всех select-полей
 const refreshAllOptions = async () => {
   const promises = properties.value
-    .filter((prop) => prop.type === 'select' && prop.template_id)
+    .filter((prop) => isOptionsType(prop.type) && prop.template_id)
     .map((prop) => refreshSelectOptions(prop.template_id as string));
   await Promise.all(promises);
 };
@@ -250,7 +274,7 @@ const refreshPropOptions = (prop: DtoIssueProperty) => {
   if (prop.type === 'lookup') {
     resetSignals.value[prop.template_id] =
       (resetSignals.value[prop.template_id] || 0) + 1;
-  } else if (prop.type === 'select') {
+  } else if (isOptionsType(prop.type)) {
     refreshSelectOptions(prop.template_id);
   }
 };
@@ -269,6 +293,9 @@ const refreshChildren = async (parentTemplateId: string) => {
       if (!child.value && options.length === 1) {
         updateValue(child, options[0]);
       }
+    } else if (child.type === 'multiselect' && child.template_id) {
+      // автоподстановки нет: список значений пользователь собирает сам
+      await refreshSelectOptions(child.template_id);
     } else if (child.type === 'lookup' && child.template_id) {
       // автоподстановка для lookup: restricted-список из ровно одной строки
       // (rows.count — полное число отфильтрованных строк, не размер страницы)
@@ -297,7 +324,7 @@ const refreshChildren = async (parentTemplateId: string) => {
 const applyResetProperties = (names: string[]) => {
   for (const prop of properties.value) {
     if (prop.name && names.includes(prop.name)) {
-      prop.value = null;
+      prop.value = prop.type === 'multiselect' ? [] : null;
       prop.value_label = null;
     }
   }
