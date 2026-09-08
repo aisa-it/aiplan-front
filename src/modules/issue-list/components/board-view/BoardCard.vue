@@ -145,6 +145,33 @@
       />
     </div>
 
+    <!-- дополнительные параметры, выбранные в «Колонках» (только проектный контекст) -->
+    <div v-if="propertyCards.length" class="board-card__properties">
+      <div
+        v-for="item in propertyCards"
+        :key="item.name"
+        class="board-card__property"
+      >
+        <span class="board-card__property-name">{{ item.label }}</span>
+        <span
+          class="board-card__property-value"
+          :class="{ 'text-grey-6': item.display.isEmpty }"
+        >
+          <q-icon v-if="item.display.checked" name="check" size="16px" />
+          <a
+            v-else-if="item.display.linkUrl"
+            :href="item.display.linkUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click.stop
+            >{{ item.display.text }}</a
+          >
+          <template v-else>{{ item.display.text }}</template>
+        </span>
+        <HintTooltip>{{ item.label }}: {{ item.display.text }}</HintTooltip>
+      </div>
+    </div>
+
     <div class="flex">
       <QuantityChip :type="'sub-issues'" :value="card?.sub_issues_count" />
       <QuantityChip
@@ -180,6 +207,12 @@ import {
   DtoIssue,
   DtoStateLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useProjectStore } from 'src/stores/project-store';
+import { buildPropertyColumns } from '../../constants/tableColumns';
+import {
+  findIssueProperty,
+  formatPropertyValue,
+} from '../../utils/propertyDisplay';
 
 const { user } = storeToRefs(useUserStore());
 
@@ -189,8 +222,13 @@ const props = defineProps<{
   contextType: 'project' | 'sprint';
 }>();
 const rolesStore = useRolesStore();
-const { items, isLoading, error: statesError, loadItems, updateStatus } =
-  useStatusSelect();
+const {
+  items,
+  isLoading,
+  error: statesError,
+  loadItems,
+  updateStatus,
+} = useStatusSelect();
 const avatarText = aiplan.UserName;
 
 const { navigateToActivityPage } = useUserActivityNavigation();
@@ -226,6 +264,24 @@ const emits = defineEmits<{
   openIssue: [number, string];
 }>();
 const { contextProps } = useIssueContext(props.contextType);
+const projectStore = useProjectStore();
+
+// колонки параметров из columns_to_show → строки «имя: значение» на карточке;
+// у спринта шаблонов нет (задачи из разных проектов) — блок не рисуется
+const propertyCards = computed(() => {
+  if (props.contextType !== 'project') return [];
+  const shown: string[] = contextProps.value?.columns_to_show ?? [];
+  return buildPropertyColumns(projectStore.propertyTemplates)
+    .filter((col) => shown.includes(col.name))
+    .map((col) => ({
+      name: col.name,
+      label: col.label,
+      display: formatPropertyValue(
+        col.property.type,
+        findIssueProperty(props.card, col.property.id),
+      ),
+    }));
+});
 
 const clickCount = ref(0);
 let clickTimeout: NodeJS.Timeout;
@@ -261,6 +317,37 @@ const handleClick = () => {
     flex-direction: row;
     justify-content: space-between;
   }
+}
+
+.board-card__properties {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.board-card__property {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  position: relative;
+}
+
+.board-card__property-name {
+  flex: 0 1 45%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $dark-gray;
+}
+
+.board-card__property-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .name-row {

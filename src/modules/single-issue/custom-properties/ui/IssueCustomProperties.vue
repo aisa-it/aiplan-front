@@ -177,6 +177,12 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
+// updated — значение сохранено на бэке; списки задач (колонки параметров,
+// карточки доски) должны перечитать строку
+const emits = defineEmits<{
+  updated: [prop: DtoIssueProperty];
+}>();
+
 //stores
 const workspaceStore = useWorkspaceStore();
 const { setNotificationView } = useNotificationStore();
@@ -331,6 +337,7 @@ const updateValue = async (prop: DtoIssueProperty, newValue: any) => {
     if (prop.template_id) {
       await refreshChildren(prop.template_id);
     }
+    emits('updated', prop);
 
     if (prop.type === 'link' || prop.type === 'lookup') {
       // без перезагрузки всего блока: подставляем свежие значение и label

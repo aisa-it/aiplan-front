@@ -388,6 +388,7 @@
         :project-id="issueData.project"
         :issue-id="issueData.id"
         :disabled="!canEditProperties"
+        @updated="handleRefresh"
       />
     </template>
     <template v-else>

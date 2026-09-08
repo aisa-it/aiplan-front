@@ -22,7 +22,14 @@
             :props="props"
             :class="`${col.name.includes('count') ? 'count-column' : ''} ${columnClass(col.name)}-column`"
           >
-            {{ col.label }}
+            <!-- имя параметра задаёт админ и оно бывает длинным — режем с тултипом -->
+            <template v-if="isPropertyColumn(col.name)">
+              <span class="property-header">{{ col.label }}</span>
+              <q-tooltip anchor="bottom middle" self="top middle">{{
+                col.label
+              }}</q-tooltip>
+            </template>
+            <template v-else>{{ col.label }}</template>
           </q-th>
         </q-tr>
       </template>
@@ -554,5 +561,14 @@ th.count-column {
   .table-h-scroll {
     display: none !important;
   }
+}
+
+.property-header {
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 </style>
