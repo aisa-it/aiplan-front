@@ -1,5 +1,6 @@
 <template>
   <q-select
+    ref="selectRef"
     :model-value="columnsToShow"
     dense
     label="Колонки"
@@ -27,8 +28,15 @@
           />
         </q-item-section>
 
-        <q-item-section>
-          {{ scope.opt.label }}
+        <!-- имя доп. параметра задаёт админ и оно бывает длинным — режем с тултипом -->
+        <q-item-section class="column-option__label">
+          <span class="ellipsis">{{ scope.opt.label }}</span>
+          <q-tooltip
+            v-if="isPropertyColumn(scope.opt.name)"
+            anchor="bottom middle"
+            self="top middle"
+            >{{ scope.opt.label }}</q-tooltip
+          >
         </q-item-section>
 
         <q-item-section side>
@@ -41,7 +49,9 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
+import { QSelect } from 'quasar';
 import { useSortable } from 'src/composables/useSortable';
+import { isPropertyColumn } from 'src/modules/issue-list/constants/tableColumns';
 
 const props = defineProps<{
   columns: any[];
@@ -52,6 +62,7 @@ const emits = defineEmits<{
   'update:columnsToShow': [string[]];
 }>();
 const sortableContainer = ref<HTMLElement | null>(null);
+const selectRef = ref<QSelect | null>(null);
 
 function onToggle(name: string, checked: boolean) {
   const set = new Set(props.columnsToShow);
@@ -91,6 +102,12 @@ async function onPopupShow() {
 
   if (!menu) return;
 
+  // q-menu с fit задаёт попапу только min-width по ширине поля, а вверх растёт
+  // до max-content самого длинного пункта — зажимаем шириной поля
+  const fieldWidth = (selectRef.value?.$el as HTMLElement | undefined)
+    ?.offsetWidth;
+  if (fieldWidth) menu.style.maxWidth = `${fieldWidth}px`;
+
   const list = menu.querySelector(
     '.q-virtual-scroll__content',
   ) as HTMLElement | null;
@@ -104,6 +121,10 @@ async function onPopupShow() {
 <style scoped lang="scss">
 .drag-handle {
   cursor: grab;
+}
+
+.column-option__label {
+  min-width: 0;
 }
 
 .selector-option-columns__wrapper {
