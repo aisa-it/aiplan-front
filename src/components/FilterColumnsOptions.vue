@@ -144,6 +144,15 @@ async function onPopupShow() {
 
 .column-option__label {
   min-width: 0;
+
+  // span — flex-элемент внутри flex-колонки секции: Chrome отдаёт ему ширину по
+  // max-content nowrap-текста (834px при секции 160px), эллипсис не срабатывает.
+  // max-width: 100% — тот же приём, что у квазаровской .q-item__section--main.
+  // Проверено живым замером на стенде (scrollWidth == width на всей цепочке).
+  > span {
+    max-width: 100%;
+    min-width: 0;
+  }
 }
 
 .selector-option-columns__wrapper {
