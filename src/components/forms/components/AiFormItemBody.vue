@@ -166,12 +166,7 @@
         "
       >
         <div class="q-pl-lg q-mt-xs">
-          <AddQuestionTypeField
-            is-select
-            @addField="
-              (object: any) => addQuestion(object, computedValue.validate!.opt!)
-            "
-          />
+          <AddQuestionTypeField is-select @addField="addOption" />
         </div>
       </template>
     </AiFormQuestionBody>
@@ -268,6 +263,15 @@ const computedValue = computed({
   get: () => props.modelValue,
   set: (val) => emits('update:model-value', val),
 });
+
+// Форма, сохранённая без вариантов, приходит с бэка без validate.opt
+// (omitempty у Opt) - гарантируем массив перед push (BAK-372)
+const addOption = (object: any) => {
+  if (!Array.isArray(computedValue.value.validate.opt)) {
+    computedValue.value.validate.opt = [];
+  }
+  addQuestion(object, computedValue.value.validate.opt);
+};
 
 const eligibleParents = computed(() => {
   if (!props.allFields) return [];
