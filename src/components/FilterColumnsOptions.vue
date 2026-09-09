@@ -30,7 +30,7 @@
 
         <!-- имя доп. параметра задаёт админ и оно бывает длинным — режем с тултипом -->
         <q-item-section class="column-option__label">
-          <span class="ellipsis">{{ scope.opt.label }}</span>
+          <span class="ellipsis">{{ optionLabel(scope.opt) }}</span>
           <q-tooltip
             v-if="isPropertyColumn(scope.opt.name)"
             anchor="bottom middle"
@@ -63,6 +63,15 @@ const emits = defineEmits<{
 }>();
 const sortableContainer = ref<HTMLElement | null>(null);
 const selectRef = ref<QSelect | null>(null);
+
+// имя доп. параметра задаёт админ без ограничений — в списке режем, полное в тултипе
+const MAX_OPTION_LABEL = 100;
+function optionLabel(opt: { name?: string; label?: string }): string {
+  const label = opt.label ?? '';
+  if (!isPropertyColumn(opt.name) || label.length <= MAX_OPTION_LABEL)
+    return label;
+  return `${label.slice(0, MAX_OPTION_LABEL)}…`;
+}
 
 function onToggle(name: string, checked: boolean) {
   const set = new Set(props.columnsToShow);
@@ -103,10 +112,13 @@ async function onPopupShow() {
   if (!menu) return;
 
   // q-menu с fit задаёт попапу только min-width по ширине поля, а вверх растёт
-  // до max-content самого длинного пункта — зажимаем шириной поля
+  // до max-content самого длинного пункта. Инлайновый maxWidth ставить нельзя:
+  // Quasar на каждом updatePosition (показ/скролл/ресайз) перетирает el.style.maxWidth
+  // своим значением — поэтому ширина едет через CSS-переменную + !important (стиль ниже).
   const fieldWidth = (selectRef.value?.$el as HTMLElement | undefined)
     ?.offsetWidth;
-  if (fieldWidth) menu.style.maxWidth = `${fieldWidth}px`;
+  if (fieldWidth)
+    menu.style.setProperty('--columns-menu-width', `${fieldWidth}px`);
 
   const list = menu.querySelector(
     '.q-virtual-scroll__content',
@@ -117,6 +129,13 @@ async function onPopupShow() {
   await initSortable();
 }
 </script>
+
+<style lang="scss">
+/* попап телепортирован в body — scoped-стиль его не достанет */
+.columns-dnd-menu {
+  max-width: var(--columns-menu-width, 100%) !important;
+}
+</style>
 
 <style scoped lang="scss">
 .drag-handle {

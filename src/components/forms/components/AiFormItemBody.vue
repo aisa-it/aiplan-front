@@ -385,10 +385,11 @@ const propertyBindingDisplay = computed(() => {
   return template?.name ?? 'Параметр недоступен';
 });
 
-// Для select-поля бэк требует, чтобы варианты поля входили в options параметра —
-// предзаполняем варианты поля options параметра, если они ещё не заданы
+// Для select/multiselect-поля бэк требует, чтобы варианты поля входили в
+// options параметра — предзаполняем варианты поля options параметра, если они
+// ещё не заданы
 const boundSelectTemplate = computed(() => {
-  if (computedValue.value.type !== 'select') return null;
+  if (!isOptionsFieldType(computedValue.value.type)) return null;
   return (
     props.propertyTemplates?.find(
       (template) => template.id === computedValue.value.property_template_id,
@@ -397,6 +398,9 @@ const boundSelectTemplate = computed(() => {
 });
 
 //methods
+const isOptionsFieldType = (type?: string) =>
+  type === 'select' || type === 'multiselect';
+
 const updateCheckbox = (el: any) => {
   el.type = el.type === 'select' ? 'multiselect' : 'select';
 };
@@ -409,7 +413,7 @@ const onPropertyTemplateSelect = (templateId: string | null) => {
     (item) => item.id === templateId,
   );
   if (
-    field.type === 'select' &&
+    isOptionsFieldType(field.type) &&
     template?.options?.length &&
     !field.validate?.opt?.length
   ) {
