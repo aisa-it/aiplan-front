@@ -80,11 +80,9 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
         : (contextProps.value?.filters?.orderDesc as boolean),
       rowsPerPage: contextProps.value?.page_size ?? DEF_ROWS_PER_PAGE,
     };
-    const filters = {
-      states: [] as string[],
-      assigned_to_me: contextProps.value?.filters.assignedToMe,
-      authored_by_me: contextProps.value?.filters.authoredToMe,
-      watched_by_me: contextProps.value?.filters.watchedToMe,
+    const filters: TypesIssuesListFilters = {
+      states: [],
+      ...personalFilters(),
     };
     if (contextProps.value?.filters?.states?.length) {
       filters.states = contextProps?.value?.filters?.states;
@@ -146,6 +144,17 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
       }
       throw e;
     }
+  }
+
+  // личные фильтры вьюхи («Я исполнитель/автор/наблюдатель»): обязаны попадать
+  // и в первичную загрузку, и в точечные перезапросы групп — иначе после
+  // обновления одной группы она показывает задачи без фильтра
+  function personalFilters(): TypesIssuesListFilters {
+    return {
+      assigned_to_me: contextProps.value?.filters?.assignedToMe,
+      authored_by_me: contextProps.value?.filters?.authoredToMe,
+      watched_by_me: contextProps.value?.filters?.watchedToMe,
+    };
   }
 
   function defineFiltersByEntity(entity) {
@@ -214,7 +223,10 @@ export const useGroupedIssues = (contextType: 'project' | 'sprint') => {
   }
 
   async function getCurrentTable(index: number, pagination: any, entity: any) {
-    const filters: TypesIssuesListFilters = defineFiltersByEntity(entity);
+    const filters: TypesIssuesListFilters = {
+      ...personalFilters(),
+      ...defineFiltersByEntity(entity),
+    };
 
     pagination.order_by = pagination.order_by ?? 'sequence_id';
 
