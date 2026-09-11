@@ -1,5 +1,5 @@
 <template>
-  <div class="issue-table-wrapper" ref="wrapper">
+  <div class="issue-table-wrapper" ref="wrapper" :style="columnVars">
     <q-table
       ref="issueTable"
       v-model:pagination="quasarPagination"
@@ -21,15 +21,25 @@
             :key="col.name"
             :props="props"
             :class="`${col.name.includes('count') ? 'count-column' : ''} ${columnClass(col.name)}-column`"
+            :style="columnStyle(col.name)"
           >
             <!-- имя параметра задаёт админ и оно бывает длинным — режем с тултипом -->
             <template v-if="isPropertyColumn(col.name)">
-              <span class="property-header">{{ col.label }}</span>
+              <span
+                class="property-header"
+                :class="{ 'property-header--fluid': !!columnStyle(col.name) }"
+                >{{ col.label }}</span
+              >
               <q-tooltip anchor="bottom middle" self="top middle">{{
                 col.label
               }}</q-tooltip>
             </template>
             <template v-else>{{ col.label }}</template>
+            <ColumnResizer
+              v-if="isResizableColumn(col.name)"
+              @start="startResize($event, col.name)"
+              @reset="resetWidth(col.name)"
+            />
           </q-th>
         </q-tr>
       </template>
@@ -192,6 +202,8 @@ import {
 
 import { useIssueContext } from '../composables/useIssueContext';
 import { useGroupedIssues } from '../composables/useGroupedIssues';
+import { useColumnResize } from 'src/composables/useColumnResize';
+import ColumnResizer from 'src/components/ColumnResizer.vue';
 
 import { DEF_ROWS_PER_PAGE } from 'src/constants/constants';
 import {
@@ -200,6 +212,7 @@ import {
   PropertyColumn as PropertyColumnDef,
 } from '../constants/tableColumns';
 import { DtoIssue } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useRoute } from 'vue-router';
 
 interface QuasarPagination {
   page: number;
@@ -247,6 +260,16 @@ const propertyColumns = computed(
 
 // имя property-колонки содержит «:» и uuid — в css-класс его не тащим
 const columnClass = (name: string) => name.replace(/[^a-zA-Z0-9_-]/g, '-');
+
+// ширины колонок запоминаются отдельно на проект (в спринте — на спринт);
+// один ключ на все таблицы группировки страницы
+const route = useRoute();
+const { columnStyle, columnVars, startResize, resetWidth, isResizableColumn } =
+  useColumnResize(() =>
+    props.contextType === 'sprint'
+      ? `sprint:${route.params.sprint}`
+      : `project:${route.params.workspace}:${route.params.project}`,
+  );
 
 const bus = inject('bus') as EventBus;
 
@@ -447,15 +470,17 @@ th.count-column {
     background-color: $color-shadow !important;
   }
 
+  // --col-* ставит useColumnResize на обёртке (перетянутая колонка);
+  // без переменной — дефолт из fallback
   .sequence_id-column {
-    width: 130px;
-    max-width: 130px;
-    min-width: 130px;
+    width: var(--col-sequence_id, 130px);
+    max-width: var(--col-sequence_id, 130px);
+    min-width: var(--col-sequence_id, 130px);
 
     @media screen and (max-width: 600px) {
-      width: 100px;
-      max-width: 100px;
-      min-width: 100px;
+      width: var(--col-sequence_id, 100px);
+      max-width: var(--col-sequence_id, 100px);
+      min-width: var(--col-sequence_id, 100px);
     }
   }
 
@@ -484,26 +509,26 @@ th.count-column {
   }
 
   .labels-column {
-    width: 400px;
-    max-width: 400px;
-    min-width: 400px;
+    width: var(--col-labels, 400px);
+    max-width: var(--col-labels, 400px);
+    min-width: var(--col-labels, 400px);
 
     @media screen and (max-width: 1920px) {
-      width: 300px;
-      max-width: 300px;
-      min-width: 300px;
+      width: var(--col-labels, 300px);
+      max-width: var(--col-labels, 300px);
+      min-width: var(--col-labels, 300px);
     }
 
     @media screen and (max-width: 1200px) {
-      width: 250px;
-      max-width: 250px;
-      min-width: 250px;
+      width: var(--col-labels, 250px);
+      max-width: var(--col-labels, 250px);
+      min-width: var(--col-labels, 250px);
     }
 
     @media screen and (max-width: 600px) {
-      width: 200px;
-      max-width: 200px;
-      min-width: 200px;
+      width: var(--col-labels, 200px);
+      max-width: var(--col-labels, 200px);
+      min-width: var(--col-labels, 200px);
     }
   }
 }
@@ -570,5 +595,16 @@ th.count-column {
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
+
+  // колонку растянули руками — заголовок занимает всю её ширину
+  &--fluid {
+    max-width: 100%;
+  }
+}
+
+// th — контейнер для ручки ColumnResizer; у sticky-первой колонки position
+// уже задан, sticky тоже positioned, так что absolute внутри работает
+:deep(thead th) {
+  position: relative;
 }
 </style>

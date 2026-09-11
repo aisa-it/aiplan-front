@@ -18,8 +18,14 @@
             :key="col.name"
             :props="props"
             :class="`${col.name.includes('count') ? 'count-column' : ''} ${col.name}-column`"
+            :style="columnStyle(col.name)"
           >
             {{ col.label }}
+            <ColumnResizer
+              v-if="isResizableColumn(col.name)"
+              @start="startResize($event, col.name)"
+              @reset="resetWidth(col.name)"
+            />
           </q-th>
         </q-tr>
       </template>
@@ -44,6 +50,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { QTable } from 'quasar';
+import { useRoute } from 'vue-router';
+
+import ColumnResizer from 'src/components/ColumnResizer.vue';
+import { useColumnResize } from 'src/composables/useColumnResize';
 
 import SprintContextMenu from 'src/modules/sprints/sprints-table/components/SprintContextMenu.vue';
 
@@ -52,6 +62,11 @@ import { useSprintStore } from 'src/modules/sprints/stores/sprint-store.ts';
 import { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const sprintStore = useSprintStore();
+
+// ширины колонок списка спринтов — на пространство
+const route = useRoute();
+const { columnStyle, startResize, resetWidth, isResizableColumn } =
+  useColumnResize(() => `sprints:${route.params.workspace}`);
 
 const emits = defineEmits(['refresh']);
 const props = defineProps(['rows', 'columns']);
@@ -138,6 +153,11 @@ th.count-column {
 <style lang="scss" scoped>
 :deep(.q-table__middle) {
   overflow-x: auto;
+}
+
+// th — контейнер для ручки ColumnResizer
+:deep(thead th) {
+  position: relative;
 }
 
 .folder-table-wrapper {

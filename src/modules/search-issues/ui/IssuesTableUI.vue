@@ -14,6 +14,31 @@
     class="sprint-checkboxes my-sticky-column-table search-filters-table table-bottom-reverse"
     :class="{ 'table-scroll-off': isCreateSprint }"
   >
+    <template v-slot:header="props">
+      <q-tr :props="props">
+        <q-th v-if="selection && selection !== 'none'" auto-width>
+          <q-checkbox
+            v-if="selection === 'multiple'"
+            v-model="props.selected"
+            dense
+          />
+        </q-th>
+        <q-th
+          v-for="col in props.cols"
+          :key="col.name"
+          :props="props"
+          :style="columnStyle(col.name)"
+        >
+          {{ col.label }}
+          <ColumnResizer
+            v-if="isResizableColumn(col.name)"
+            @start="startResize($event, col.name)"
+            @reset="resetWidth(col.name)"
+          />
+        </q-th>
+      </q-tr>
+    </template>
+
     <template #bottom>
       <PaginationDefault
         v-if="paginationInsideMode"
@@ -166,6 +191,8 @@ import { useRouter } from 'vue-router';
 import { Screen } from 'quasar';
 
 import AvatarImage from 'src/components/AvatarImage.vue';
+import ColumnResizer from 'src/components/ColumnResizer.vue';
+import { useColumnResize } from 'src/composables/useColumnResize';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 
@@ -199,6 +226,10 @@ const emits = defineEmits<{
 
   (e: 'request', pagination: any): void;
 }>();
+
+// глобальный поиск — один набор ширин на всё приложение
+const { columnStyle, startResize, resetWidth, isResizableColumn } =
+  useColumnResize(() => 'search');
 
 const initPagination = {
   sortBy: null,
@@ -317,6 +348,11 @@ const getWordForm = (count: number) => {
 <style lang="scss" scoped>
 :deep(.q-table__progress) {
   display: none;
+}
+
+// th — контейнер для ручки ColumnResizer
+:deep(thead th) {
+  position: relative;
 }
 
 .my-sticky-column-table {
