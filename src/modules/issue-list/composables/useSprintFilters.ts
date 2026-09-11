@@ -4,16 +4,18 @@ import { computed, ref, watch, onMounted, toRaw, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 
 import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
+import { useIssuesStore } from 'src/stores/issues-store';
 
 import { DEFAULT_VIEW_PROPS } from 'src/modules/issue-list/constants/defaultProps';
 import { SPRINT_GROUP_BY_OPTIONS } from 'src/constants/constants';
 import { useRoute } from 'vue-router';
 
-export function useSprintFilters(emits?) {
+export function useSprintFilters() {
   const route = useRoute();
   const sprintStore = useSprintStore();
   const { sprintProps, issuesLoader, getStatusesAsArray } =
     storeToRefs(sprintStore);
+  const { refreshIssues } = storeToRefs(useIssuesStore());
 
   const viewForm = ref(DEFAULT_VIEW_PROPS);
   const optionsGroup = ref(SPRINT_GROUP_BY_OPTIONS);
@@ -72,7 +74,11 @@ export function useSprintFilters(emits?) {
 
       viewForm.value = JSON.parse(JSON.stringify(sprintProps.value));
 
-      emits?.('update', sprintProps.value?.filters?.group_by);
+      // Перезагрузка списка — через refreshIssues (как в проекте), а не синхронным
+      // эмитом: обработчик эмита стартовал load() до finally, finally гасил лоадер,
+      // и до первого чанка стрима страница показывала «Нет задач»
+      await nextTick();
+      refreshIssues.value = true;
     } finally {
       issuesLoader.value = false;
     }

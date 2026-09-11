@@ -12,7 +12,6 @@
         <SprintFiltersList
           v-if="is.object(sprintProps)"
           :columns="sprintStore.sortAllColumns"
-          @update="load()"
         />
       </q-card-section>
       <q-card-section
