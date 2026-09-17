@@ -19,7 +19,7 @@
     </template>
 
     <template v-slot:body-cell-activity="props">
-      <ActivityBlock :activity="props.row" />
+      <ActivityBlock :activity-row="props.row" />
     </template>
 
     <template v-slot:no-data>
@@ -34,7 +34,7 @@
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
 import DocumentIcon from 'src/components/icons/DocumentIcon.vue';
 import EmptyStateTable from '../../ui/EmptyStateTable.vue';
-import ActivityBlock from './ActivityBlock.vue';
+import ActivityBlock from 'src/components/activity/ActivityBlock.vue';
 
 import { api } from '../services/api';
 import { columns } from '../columnConfig';

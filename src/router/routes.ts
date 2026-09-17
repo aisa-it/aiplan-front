@@ -2,7 +2,7 @@ import { RouteRecordRaw } from 'vue-router';
 // ========== GIT EXTENSION ==========
 // Импорт роутов из git расширения (src/modules/git)
 // @see src/modules/git/router.ts
-import { gitRoutes } from 'src/modules/git/index';
+// import { gitRoutes } from 'src/modules/git/index';
 import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useProjectStore } from 'src/stores/project-store';
@@ -159,7 +159,7 @@ const routes: RouteRecordRaw[] = [
   // ========== GIT ROUTES (INDEPENDENT LAYOUT) ==========
   // Git роуты теперь на верхнем уровне с собственным GitLayout
   // @see src/modules/git/router.ts
-  ...gitRoutes,
+  // ...gitRoutes,
   // ====================================================
 
   {
