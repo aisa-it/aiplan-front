@@ -88,6 +88,7 @@ import { computed, inject, ref } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import { copyToClipboard, QMenu } from 'quasar';
 import { useRoute } from 'vue-router';
+import { useAiDocStore } from 'src/stores/aidoc-store';
 import { useMenuHandler } from 'src/composables/useMenuHandler';
 import { useNotificationStore } from 'src/stores/notification-store';
 import { getDocumentAnchorLink } from 'src/utils/links';
@@ -99,6 +100,7 @@ import {
 const props = defineProps(nodeViewProps);
 
 const route = useRoute();
+const aidocStore = useAiDocStore();
 const { setNotificationView } = useNotificationStore();
 
 const readonly = inject('isEditorReadOnly', ref(true));
@@ -115,7 +117,13 @@ const label = computed(
 );
 
 const workspaceSlug = computed(() => route.params.workspace as string);
-const docId = computed(() => route.params.doc as string);
+// Ссылка — по пути из слагов; вне маршрута документа стор может хранить
+// прошлый документ, поэтому смотрим на маршрут.
+const docId = computed(() =>
+  route.name === 'doc'
+    ? (aidocStore.selectedDocPath ?? aidocStore.selectedDocId ?? '')
+    : '',
+);
 
 // Редактор живёт не только в АИДоке: вне документа ссылку строить не из чего.
 const canCopyLink = computed(() =>

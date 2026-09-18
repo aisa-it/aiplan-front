@@ -184,7 +184,7 @@ const setVersion = async () => {
   try {
     await aidocStore.setVersionDoc(
       String(route.params.workspace),
-      String(route.params.doc),
+      String(aidocStore.selectedDocId),
       currentVersion.value.Id,
     );
     setNotificationView({
@@ -213,7 +213,7 @@ const showVersionPreview = async (version: Version) => {
     loadingEditor.value = true;
     oldValueVersion.value = await aidocStore.getVersionPreview(
       String(route.params.workspace),
-      String(route.params.doc),
+      String(aidocStore.selectedDocId),
       version.Id,
     );
   } finally {

@@ -44,7 +44,7 @@
            всей страницы раньше, а левое меню при этом остаётся живым -->
       <q-page-container
         v-else-if="!isEmptyDoc"
-        :key="route.params.doc as string"
+        :key="documentValue.id"
         class="flex-grow"
       >
         <div
@@ -156,11 +156,12 @@
 import { storeToRefs } from 'pinia';
 import { computed, ref, onMounted, watch, nextTick } from 'vue';
 import { Screen, useMeta, useQuasar } from 'quasar';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 // stores
 import { useUserStore } from 'src/stores/user-store';
 import { useRolesStore } from 'src/stores/roles-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+import { parseDocRoute, docRoutePath } from 'src/utils/docRoute';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'stores/notification-store';
@@ -196,6 +197,7 @@ import { useSortable } from 'src/composables/useSortable';
 import { useDrawerResize } from 'src/composables/useDrawerResize';
 //composables
 const route = useRoute();
+const router = useRouter();
 const $q = useQuasar();
 
 //stores
@@ -222,7 +224,9 @@ const { initSortable } = useSortable(menuRef, {
   preventOnFilter: true,
 });
 const isReadOnlyEditor = ref(true);
-const documentValue = ref<DtoDoc>({});
+// slug — адрес документа от корня, пока не попал в сгенерированный клиент
+type DocWithPath = DtoDoc & { slug?: string };
+const documentValue = ref<DocWithPath>({});
 const updateCurrentEditorValue = ref();
 const showDeleteDialog = ref(false);
 const docVersionList = ref<DtoHistoryBodyLight[]>([]);
@@ -230,7 +234,7 @@ const loading = ref(false);
 const isDocumentEditPending = ref(false);
 const metadata = ref({
   // на главной странице АИДока тайтл — «АИДок», «Загрузка...» только при открытии документа
-  title: route.params.doc ? 'Загрузка...' : 'АИДок',
+  title: route.params.docPath ? 'Загрузка...' : 'АИДок',
 });
 
 //composables
@@ -309,25 +313,42 @@ const handleRefreshDocSettings = async () => {
   isDocumentEditPending.value = false;
 };
 const refreshDocument = async () => {
-  if (!route.params.workspace || !route.params.doc) {
+  const docRoute = parseDocRoute(route);
+  if (!route.params.workspace || !docRoute) {
     return;
   }
 
-  const { data } = await aidocStore.getAiDoc(
+  const res = await aidocStore.getAiDocByRef(
     route.params.workspace as string,
-    route.params.doc,
+    docRoute.ref,
   );
+  if (!res) return;
+  const data: DocWithPath = res.data;
   documentValue.value = data;
   documentValue.value.content = data.content;
   const parentDocId = data.parent_doc ? data.parent_doc : null;
   aidocStore.setParentDoc(parentDocId);
   const ancestorsDocsIds = data.breadcrumbs ? data.breadcrumbs.slice(1) : null;
   aidocStore.setAncestorsDocsIds(ancestorsDocsIds);
-  aidocStore.selectDoc(data.id, data.title);
+  aidocStore.selectDoc(data.id, data.title, data.slug ?? null);
   aidocStore.setUpdatedDoc(null);
 
   metadata.value.title = `Документ ${documentValue.value.title}`;
   await getListVersion();
+  canonicalizeRoute(data, docRoute.commentId);
+};
+
+// Ссылки по id продолжают работать, но в адресной строке держим путь
+// по названиям — тот, что уходит в буфер и в закладки.
+const canonicalizeRoute = (doc: DocWithPath, commentId?: string) => {
+  if (!doc.slug) return;
+  const path = docRoutePath(
+    route.params.workspace as string,
+    doc.slug,
+    commentId,
+  );
+  if (route.path.replace(/\/$/, '') === path) return;
+  router.replace({ path, query: route.query, hash: route.hash });
 };
 
 const handleEnableEdit = () => {
@@ -371,7 +392,7 @@ const updateDocument = async (roles = {}) => {
         files: contents.files,
       },
       route.params.workspace,
-      route.params.doc,
+      documentValue.value.id,
     );
     setNotificationView({
       type: 'success',
@@ -406,18 +427,18 @@ const getWorkspaceMembersForMention = async (
 const getAttachmentsList = async () => {
   return await aidocStore.docAttachmentsList(
     route.params.workspace as string,
-    route.params.doc as string,
+    documentValue.value.id as string,
   );
 };
 
 const uploadAttachments = async (ev: object) => {
-  await aidocStore.docAttachmentsUpload(ev, route.params.doc);
+  await aidocStore.docAttachmentsUpload(ev, documentValue.value.id);
 };
 
 const deleteAttachment = async (attachmentId: string) => {
   await aidocStore.docAttachmentDelete(
     route.params.workspace,
-    route.params.doc,
+    documentValue.value.id,
     attachmentId,
   );
 };
@@ -425,7 +446,7 @@ const deleteAttachment = async (attachmentId: string) => {
 const getListVersion = async () => {
   docVersionList.value = await aidocStore.getListVersion(
     route.params.workspace,
-    route.params.doc,
+    documentValue.value.id,
   );
 };
 
@@ -448,7 +469,7 @@ const { handleDrop } = useAttachmentsWithEditor(
 // Загрузка документа под лоадером контентной области.
 // Раньше отрабатывала только в onMounted: страница пересоздавалась на каждый
 // документ по ключу router-view. Теперь страница живёт — тот же путь запускает
-// watch на route.params.doc ниже.
+// watch на route.params.docPath ниже.
 const loadDocument = async () => {
   loading.value = true;
   try {
@@ -469,7 +490,7 @@ const loadDocument = async () => {
  * Переход к якорю из адресной строки.
  *
  * Одним nextTick не обойтись. Контентный контейнер пересоздаётся по
- * :key="route.params.doc", а сам EditorTipTapV2 держит содержимое под
+ * :key="documentValue.id", а сам EditorTipTapV2 держит содержимое под
  * `v-if="editorInstance"` и присваивает editorInstance в onMounted — то есть
  * редактор попадает в DOM только вторым кругом рендера, уже после того, как
  * первый nextTick отработал. Поэтому ждём появления самой цели.
@@ -508,7 +529,7 @@ const goToRouteAnchor = async () => {
 
 // Переход между якорями ВНУТРИ одного документа роутер отрабатывает без
 // пересоздания страницы (ключ router-view хэш не учитывает), поэтому
-// onMounted и watch на route.params.doc такой переход не поймают.
+// onMounted и watch на route.params.docPath такой переход не поймают.
 watch(() => route.hash, goToRouteAnchor);
 
 // Состояние, которое раньше сбрасывалось само за счёт пересоздания страницы.
@@ -518,12 +539,23 @@ const resetDocumentState = () => {
   showDeleteDialog.value = false;
   documentValue.value = {};
   docVersionList.value = [];
-  metadata.value.title = route.params.doc ? 'Загрузка...' : 'АИДок';
+  metadata.value.title = route.params.docPath ? 'Загрузка...' : 'АИДок';
+};
+
+// Подмена адреса на канонический (по слагам) или снятие id комментария —
+// тот же документ, перезагружать нечего.
+const isLoadedDocRoute = () => {
+  const docRoute = parseDocRoute(route);
+  const { id, slug } = documentValue.value;
+  return (
+    !!docRoute && !!id && (docRoute.ref === id || docRoute.ref === slug)
+  );
 };
 
 watch(
-  () => route.params.doc,
+  () => route.params.docPath,
   async () => {
+    if (isLoadedDocRoute()) return;
     resetDocumentState();
     await loadDocument();
   },

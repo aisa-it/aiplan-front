@@ -3,4 +3,7 @@ export interface IDocTreeNode {
   title?: string;
   lazy?: boolean;
   isFavorite?: boolean;
+  /** путь по слагам от корня — адрес документа */
+  slugPath?: string;
+  shortUrl?: string;
 }

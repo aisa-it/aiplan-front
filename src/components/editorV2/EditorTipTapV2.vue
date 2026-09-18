@@ -232,6 +232,7 @@ import EditorCommentLinkTitleDialog from './components/EditorCommentLinkTitleDia
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
 import aiplan from 'src/utils/aiplan';
 import { useRoute, useRouter } from 'vue-router';
+import { useAiDocStore } from 'src/stores/aidoc-store';
 import {
   scrollToAnchorId,
   scrollToAnchorElement,
@@ -303,6 +304,7 @@ const emits = defineEmits<{
 const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
+const aidocStore = useAiDocStore();
 const bus = inject<EventBus>('bus');
 const editorInstance = ref<Editor | null>(null);
 const isFormatSampleActive = ref<boolean>(false);
@@ -510,7 +512,11 @@ const onAnchorLink = (
   parsed: { slug?: string; docId?: string; anchorId: string },
   href: string,
 ) => {
-  const isOtherDoc = !!parsed.docId && parsed.docId !== route.params.doc;
+  // в ссылке может быть и id, и путь по слагам
+  const isOtherDoc =
+    !!parsed.docId &&
+    parsed.docId !== aidocStore.selectedDocId &&
+    parsed.docId !== aidocStore.selectedDocPath;
 
   if (isOtherDoc) {
     router.push(`/${parsed.slug}/aidoc/${parsed.docId}#${parsed.anchorId}`);

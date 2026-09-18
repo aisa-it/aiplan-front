@@ -2,7 +2,7 @@
   <CommentMainBlock
     :comments-list="commentsList"
     :currentWorkspaceSlug="currentWorkspaceSlug"
-    :doc-id="route.params.doc"
+    :doc-id="aidocStore.selectedDocId"
     :is-auto-save="isAutoSave"
     :loading="loading"
     :members="workspaceUsers"
@@ -33,6 +33,7 @@ import { useRoute, useRouter } from 'vue-router';
 // store
 import { useUserStore } from 'stores/user-store';
 import { useAiDocStore } from 'src/stores/aidoc-store';
+import { parseDocRoute, docRoutePath } from 'src/utils/docRoute';
 import { useWorkspaceStore } from 'src/stores/workspace-store';
 import { useNotificationStore } from 'stores/notification-store';
 
@@ -96,7 +97,7 @@ const createComment = async (data: object) => {
         files: contents.files,
       },
       workspaceSlug: route.params.workspace,
-      id: route.params.doc,
+      id: aidocStore.selectedDocId,
     });
     setNotificationView({
       type: 'success',
@@ -136,7 +137,7 @@ const deleteComment = async (data: object) => {
 const refreshList = async () => {
   commentsList.value = await aidocStore.getCommentsList(
     route.params.workspace as string,
-    route.params.doc as string,
+    aidocStore.selectedDocId as string,
   );
 };
 
@@ -154,9 +155,11 @@ const getWorkspaceMembersForMention = async (
 const clearLink = () => {
   singleComment.value = undefined;
   singleCommentInfo.value = undefined;
-  if (!route.params.commentId) return;
-  const { doc } = route.params;
-  router.replace({ name: 'doc', params: { doc } });
+  const docRoute = parseDocRoute(route);
+  if (!docRoute?.commentId) return;
+  router.replace({
+    path: docRoutePath(route.params.workspace as string, docRoute.ref),
+  });
 };
 
 const getSingleComment = async (data: any) => {
@@ -198,12 +201,13 @@ const getSingleComment = async (data: any) => {
 
 onMounted(async () => {
   refreshList();
-  if (route.params.commentId) {
+  const docRoute = parseDocRoute(route);
+  if (docRoute?.commentId) {
     const data = {
       type: 'aidoc',
       slug: route.params.workspace?.toString(),
-      docId: route.params.doc?.toString(),
-      commentId: route.params.commentId,
+      docId: aidocStore.selectedDocId,
+      commentId: docRoute.commentId,
     };
     getSingleComment(data);
   }

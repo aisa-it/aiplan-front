@@ -161,7 +161,7 @@ const getEditor = (edit: Editor) => {
 const getAidocInfo = async () => {
   loading.value = true;
   aidocTitle.value = (
-    await aidocStore.getAiDoc(props.info?.slug, props.info?.docId)
+    await aidocStore.getAiDocByRef(props.info?.slug, props.info?.docId)
   )?.data.title;
   loading.value = false;
 };

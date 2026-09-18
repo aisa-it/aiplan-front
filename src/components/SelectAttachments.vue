@@ -618,7 +618,7 @@ const handleCopyLinkFile = (file: IAttachmentCard) => {
       route.path.includes('aidoc') ? 'aidoc' : 'issue',
       route.params.workspace as string,
       route.path.includes('aidoc')
-        ? (route.params.doc as string)
+        ? (aiDocStore.selectedDocId as string)
         : `${issueData.value?.project_detail?.identifier}-${issueData.value?.sequence_id}`,
       file.asset?.name,
       file.asset.id,

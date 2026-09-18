@@ -108,7 +108,9 @@ const routes: RouteRecordRaw[] = [
             meta: { requiredWorkspace: true },
           },
           {
-            path: 'aidoc/:doc/:commentId?',
+            // путь документа по слагам названий (или id — старые ссылки),
+            // последним сегментом может идти id комментария
+            path: 'aidoc/:docPath+',
             name: 'doc',
             meta: { requiredWorkspace: true },
             component: () => import('pages/AiDocPage.vue'),

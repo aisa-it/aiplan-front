@@ -24,6 +24,8 @@ interface IDocState {
   newRootDoc: DtoDoc | null;
   selectedDocId: string | null;
   selectedDocTitle: string | null;
+  // путь по слагам от корня — адрес открытого документа
+  selectedDocPath: string | null;
   parentDocId: string | null;
   ancestorsDocsIds: string[] | null;
   deletedDocId: string | null;
@@ -42,6 +44,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
       newRootDoc: null,
       selectedDocId: null,
       selectedDocTitle: null,
+      selectedDocPath: null,
       parentDocId: null,
       ancestorsDocsIds: null,
       deletedDocId: null,
@@ -57,7 +60,7 @@ export const useAiDocStore = defineStore('aidoc-store', {
   },
   getters: {
     aidocLink(): string {
-      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/aidoc/${this.router.currentRoute.value.params.doc}`;
+      return `${location.protocol}//${location.host}/${this.router.currentRoute.value.params.workspace}/aidoc/${this.selectedDocPath ?? this.selectedDocId}`;
     },
   },
   actions: {
@@ -80,6 +83,12 @@ export const useAiDocStore = defineStore('aidoc-store', {
     async getAiDoc(workspaceSlug: string, id: string) {
       if (!workspaceSlug) return;
       return await docApi.getDoc(workspaceSlug, id);
+    },
+    // ref — id документа или адрес (слаг от корня); «/» в адресе
+    // экранируем, бэк разбирает :docId как id или слаг
+    async getAiDocByRef(workspaceSlug: string, ref: string) {
+      if (!workspaceSlug) return;
+      return await docApi.getDoc(workspaceSlug, encodeURIComponent(ref));
     },
     async updateDocument(document: object, workspaceSlug: string, id: string) {
       await docApi.updateDoc(workspaceSlug, id, document);
@@ -228,9 +237,10 @@ export const useAiDocStore = defineStore('aidoc-store', {
       return await docApi.getChildDocList(workspaceSlug, id);
     },
 
-    selectDoc(id: string, title: string) {
+    selectDoc(id: string, title: string, path: string | null = null) {
       this.selectedDocId = id;
       this.selectedDocTitle = title;
+      this.selectedDocPath = path;
     },
 
     uploadDocAttachments(workspaceSlug: string, docId: string, files: any) {

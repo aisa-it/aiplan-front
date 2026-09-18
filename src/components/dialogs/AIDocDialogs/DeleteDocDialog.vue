@@ -64,7 +64,7 @@ const deleteDocument = async () => {
     try {
       await docStore.deleteDocument(
         currentWorkspaceSlug?.value,
-        route.params.doc,
+        docStore.selectedDocId,
       );
       setNotificationView({
         type: 'success',

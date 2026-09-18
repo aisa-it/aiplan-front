@@ -188,6 +188,7 @@
 import { ref } from 'vue';
 import { useQuasar, copyToClipboard, QTableProps } from 'quasar';
 import { useRoute } from 'vue-router';
+import { useAiDocStore } from 'src/stores/aidoc-store';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 import { useAiplanStore } from 'src/stores/aiplan-store';
@@ -223,6 +224,7 @@ const emits = defineEmits<{
 
 const $q = useQuasar();
 const route = useRoute();
+const aidocStore = useAiDocStore();
 const { issueData } = useSingleIssueStore();
 const { setNotificationView } = useNotificationStore();
 const api = useAiplanStore();
@@ -275,7 +277,7 @@ const handleCopyLink = (file: IAttachmentCard): void => {
     const from =
       type === 'issue'
         ? `${issueData.project_detail?.identifier}-${issueData?.sequence_id}`
-        : route.params.doc;
+        : aidocStore.selectedDocId;
     const name = file?.asset?.name;
     const query = `?slug=${slug}&type=${type}&from=${from}&name=${name}`;
     const link = base + query;

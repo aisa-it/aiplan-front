@@ -99,7 +99,7 @@
             <template v-slot:default-header="prop">
               <q-item
                 class="tree-custom-header justify-between q-pa-none"
-                :active="prop.key === route.params.doc"
+                :active="prop.key === selectedDocId"
               >
                 <div class="tree-custom-header__name">
                   <span>{{ prop.node.title }}</span>
@@ -137,7 +137,7 @@
                     :items="
                       getAidocMenuItems(
                         prop.node.id,
-                        prop.node.doc?.short_url,
+                        prop.node.shortUrl,
                         prop.node,
                       )
                     "
@@ -252,6 +252,8 @@ const {
   ancestorsDocsIds,
   deletedDocId,
   updatedDocId,
+  selectedDocId,
+  selectedDocPath,
   selectedDocTitle,
   favoritesDocs,
   isHierarchyOpened,
@@ -305,15 +307,7 @@ const setRootDocs = () => {
 };
 
 const onSelect = (id: string | null = null) => {
-  let idPath: string | undefined;
-
-  if (!id) {
-    const arrayRoute = router.currentRoute.value.path.split('/');
-    if (arrayRoute.length > 2) {
-      idPath = arrayRoute[3];
-    }
-  }
-  const currentId = id || idPath;
+  const currentId = id || selectedDocId.value;
   if (!currentId) {
     return;
   }
@@ -321,9 +315,16 @@ const onSelect = (id: string | null = null) => {
   if (!currentDoc) {
     return;
   }
-  docStore.selectDoc(currentDoc.id, currentDoc.title);
+  docStore.selectDoc(
+    currentDoc.id,
+    currentDoc.title,
+    currentDoc.slugPath ??
+      (currentDoc.id === selectedDocId.value ? selectedDocPath.value : null),
+  );
   if (id) {
-    router.push({ path: `/${currentWorkspaceSlug?.value}/aidoc/${id}` });
+    router.push({
+      path: `/${currentWorkspaceSlug?.value}/aidoc/${currentDoc.slugPath ?? id}`,
+    });
   }
 };
 

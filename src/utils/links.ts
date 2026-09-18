@@ -1,3 +1,5 @@
+import { parseDocSegments } from 'src/utils/docRoute';
+
 export function parseCommentLink(href: string, title?: string) {
   try {
     const url = new URL(href, window.location.origin);
@@ -17,11 +19,14 @@ export function parseCommentLink(href: string, title?: string) {
     }
 
     if (parts.length >= 4 && parts[1] === 'aidoc') {
+      const doc = parseDocSegments(parts.slice(2));
+      // без id комментария в конце это ссылка на вложенный документ
+      if (!doc?.commentId) return null;
       return {
         type: 'aidoc',
         slug: parts[0],
-        docId: parts[2],
-        commentId: parts[3],
+        docId: doc.ref,
+        commentId: doc.commentId,
         ...(title && {
           title: title,
         }),
@@ -132,6 +137,7 @@ export function isAnchorHref(href: string): boolean {
  *
  * `#vvedenie`                        -> { anchorId }
  * `/ws-slug/aidoc/<docId>#vvedenie`  -> { slug, docId, anchorId }
+ * `/ws-slug/aidoc/roditel/doc#vvedenie` -> { slug, docId: 'roditel/doc', anchorId }
  *
  * Ссылки на комментарий (`/ws/aidoc/<docId>/<commentId>`) сюда не попадают:
  * их по-прежнему разбирает parseCommentLink, который смотрит только pathname
@@ -154,8 +160,8 @@ export function parseDocAnchorLink(href: string): {
     // Голый `#якорь` — цель в текущем документе, пути в ссылке нет.
     if (isAnchorHref(href.trim())) return { anchorId };
 
-    if (parts.length === 3 && parts[1] === 'aidoc') {
-      return { slug: parts[0], docId: parts[2], anchorId };
+    if (parts.length >= 3 && parts[1] === 'aidoc') {
+      return { slug: parts[0], docId: parts.slice(2).join('/'), anchorId };
     }
   } catch (e) {
     return null;
