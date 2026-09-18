@@ -6,7 +6,11 @@ import { RouteRecordRaw } from 'vue-router';
 import { useUserStore } from 'src/stores/user-store';
 import { useWorkspaceStoreV2 } from 'src/stores/workspace-store-v2';
 import { useProjectStore } from 'src/stores/project-store';
+import { withInterceptors } from 'src/utils/interceptorsWithInstanceClass';
+import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
 // ===================================
+
+const workspaceApi = new (withInterceptors(Workspace))();
 
 const routes: RouteRecordRaw[] = [
   {
@@ -186,6 +190,24 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/no-workspace',
     component: () => import('layouts/NoWorkspaceLayout.vue'),
+    // Страница только для пользователей без пространств: остальных уводим в рабочее пространство
+    async beforeEnter(to) {
+      const userStore = useUserStore();
+      const user = await userStore.getUserInfo();
+      if (!user?.is_onboarded) return;
+
+      // Стор при пустом списке сам редиректит на /no-workspace — в гарде это зациклит навигацию
+      const workspaces = await workspaceApi
+        .getUserWorkspaceList()
+        .then((res) => res.data);
+      if (!workspaces.length) return;
+
+      userStore.userWorkspaces = workspaces;
+      userStore.setLastWorkspaceSlug();
+
+      if (to.path.startsWith('/no-workspace/profile')) return '/profile';
+      return `/${userStore.user?.last_workspace_slug || workspaces[0].slug}`;
+    },
     children: [
       {
         path: '',

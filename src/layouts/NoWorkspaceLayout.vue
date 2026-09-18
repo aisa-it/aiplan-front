@@ -31,13 +31,7 @@
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useMeta, useQuasar } from 'quasar';
-import {
-  onBeforeMount,
-  ref,
-  onUnmounted,
-  watch,
-  watchEffect,
-} from 'vue';
+import { onBeforeMount, ref, onUnmounted, watch } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -98,9 +92,6 @@ watch(
   () => $q.appVisible,
   () => userStore.getUserInfo(),
 );
-watchEffect(() => {
-  if (user.value?.last_workspace_slug) router.push('/');
-});
 // metadata
 useMeta({
   title: 'АИПлан | Инструмент управления проектами.',
