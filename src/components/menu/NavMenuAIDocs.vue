@@ -328,6 +328,23 @@ const onSelect = (id: string | null = null) => {
   }
 };
 
+// Адрес документа — путь из слагов от корня, поэтому после переименования
+// меняются адреса всего поддерева: у потомков заменяем префикс.
+const renameNodeSubtree = (node: IDocTreeNode, newPath: string) => {
+  const oldPath = node.slugPath;
+  node.slugPath = newPath;
+  if (!oldPath || oldPath === newPath) return;
+  const walk = (children?: IDocTreeNode[]) => {
+    children?.forEach((child) => {
+      if (child.slugPath?.startsWith(`${oldPath}/`)) {
+        child.slugPath = newPath + child.slugPath.slice(oldPath.length);
+      }
+      walk((child as IDocTreeNode & { children?: IDocTreeNode[] }).children);
+    });
+  };
+  walk((node as IDocTreeNode & { children?: IDocTreeNode[] }).children);
+};
+
 const notifyLazyLoaded = (key: string) => {
   const resolvers = pendingLazyLoads.get(key);
   if (!resolvers) return;
@@ -603,7 +620,12 @@ watch(
       getFavoriteDocs();
       if (parentDocId.value) {
         const node = treeRef.value?.getNodeByKey(docId);
-        if (node) node.title = selectedDocTitle.value;
+        if (node) {
+          node.title = selectedDocTitle.value;
+          if (selectedDocPath.value) {
+            renameNodeSubtree(node, selectedDocPath.value);
+          }
+        }
       } else {
         getRootDocs();
       }

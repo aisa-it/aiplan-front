@@ -318,9 +318,11 @@ const refreshDocument = async () => {
     return;
   }
 
+  // Открытый документ перечитываем по id: после переименования адрес
+  // в URL уже не существует, новый придёт в ответе и уйдёт в canonicalizeRoute.
   const res = await aidocStore.getAiDocByRef(
     route.params.workspace as string,
-    docRoute.ref,
+    isLoadedDocRoute() ? (documentValue.value.id as string) : docRoute.ref,
   );
   if (!res) return;
   const data: DocWithPath = res.data;
@@ -547,9 +549,7 @@ const resetDocumentState = () => {
 const isLoadedDocRoute = () => {
   const docRoute = parseDocRoute(route);
   const { id, slug } = documentValue.value;
-  return (
-    !!docRoute && !!id && (docRoute.ref === id || docRoute.ref === slug)
-  );
+  return !!docRoute && !!id && (docRoute.ref === id || docRoute.ref === slug);
 };
 
 watch(

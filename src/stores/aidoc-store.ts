@@ -91,9 +91,15 @@ export const useAiDocStore = defineStore('aidoc-store', {
       return await docApi.getDoc(workspaceSlug, encodeURIComponent(ref));
     },
     async updateDocument(document: object, workspaceSlug: string, id: string) {
-      await docApi.updateDoc(workspaceSlug, id, document);
+      const res = await docApi.updateDoc(workspaceSlug, id, document);
+      // адрес строится из названия, после переименования он новый — берём из ответа
+      const updated = res?.data as (DtoDoc & { slug?: string }) | undefined;
+      if (updated?.title) this.selectedDocTitle = updated.title;
+      else if (document?.doc?.title) this.selectedDocTitle = document.doc.title;
+      if (updated?.id === id && updated?.slug)
+        this.selectedDocPath = updated.slug;
       this.setUpdatedDoc(id);
-      if (document?.doc?.title) this.selectedDocTitle = document.doc.title;
+      return res;
     },
     async deleteDocument(workspaceSlug: string, docId: string) {
       await docApi.deleteDoc(workspaceSlug, docId);

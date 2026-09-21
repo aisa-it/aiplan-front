@@ -2,7 +2,7 @@
 import tippy from 'tippy.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Extension, mergeAttributes, Node } from '@tiptap/core';
-import { Plugin, PluginKey } from 'prosemirror-state';
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state';
 import { Editor, VueNodeViewRenderer, VueRenderer } from '@tiptap/vue-3';
 import { all, createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
@@ -10,12 +10,13 @@ import js from 'highlight.js/lib/languages/javascript';
 import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
 import { Link } from '@tiptap/extension-link';
-import { TextSelection } from 'prosemirror-state';
 import TaskItem from '@tiptap/extension-task-item';
 import ListItem from '@tiptap/extension-list-item';
 import { Mention } from '@tiptap/extension-mention';
 import Indent from '@weiruo/tiptap-extension-indent';
-import ResizeImage from 'tiptap-extension-resize-image';
+import ResizeImage, {
+  type ImageResizeOptions,
+} from 'tiptap-extension-resize-image';
 import { Underline } from '@tiptap/extension-underline';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 
@@ -183,7 +184,12 @@ export const processImageFile = (image, schema, callback) => {
 };
 
 // Расширение ResizeImage
-export const CustomImagePlugin = ResizeImage.extend({
+type CustomImageOptions = ImageResizeOptions & {
+  validate: (file: File) => boolean;
+  onError: () => void;
+};
+
+export const CustomImagePlugin = ResizeImage.extend<CustomImageOptions>({
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -209,7 +215,7 @@ export const CustomImagePlugin = ResizeImage.extend({
 
   addOptions() {
     return {
-      ...this.parent?.(),
+      ...(this.parent?.() as ImageResizeOptions),
       validate: (file) => {
         return file.type.split('/')[0] === 'image';
       },
@@ -339,7 +345,10 @@ export const CustomImagePlugin = ResizeImage.extend({
                           const newSrc = node.attrs.src;
                           if (newSrc) {
                             img.setAttribute('src', newSrc);
-                            img.setAttribute('alt', node.attrs.alt || 'pasted-image');
+                            img.setAttribute(
+                              'alt',
+                              node.attrs.alt || 'pasted-image',
+                            );
                           }
                           resolve();
                         });
