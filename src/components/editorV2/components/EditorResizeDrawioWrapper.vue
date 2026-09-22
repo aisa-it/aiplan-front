@@ -91,11 +91,15 @@ const openDrawioEditor = (source: EventTarget) => {
             base64 = (await urlToBase64(src)) ?? '';
           }
 
+          // Диаграмма встроена в сам файл. drawio читает её из PNG только через
+          // `xmlpng`, а из SVG — только через `xml`: SVG в `xmlpng` даёт пустой холст.
+          const data = String(base64);
+          const payload = data.startsWith('data:image/svg')
+            ? { xml: data }
+            : { xmlpng: data };
+
           iframe.contentWindow?.postMessage(
-            JSON.stringify({
-              action: 'load',
-              xmlpng: base64,
-            }),
+            JSON.stringify({ action: 'load', ...payload }),
             '*',
           );
         }
