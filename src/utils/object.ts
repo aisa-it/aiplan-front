@@ -5,3 +5,7 @@ export function pickDefinedKeys<T extends object>(source: T, config: object) {
     keys.map((key) => [key, source[key]]),
   ) as Partial<T>;
 }
+
+export function getStringParam(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}

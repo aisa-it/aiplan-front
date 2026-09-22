@@ -70,7 +70,7 @@ export const ROLES = {
     guest: ['show-ws'],
   },
   project: {
-    owner: [
+    lead: [
       'delete-project',
       'add-comment',
       'create-issue',
@@ -140,4 +140,3 @@ export const ROLES = {
     ],
   },
 };
-
