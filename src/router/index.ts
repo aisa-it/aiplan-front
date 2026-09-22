@@ -1,8 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from '@/stores/user-store';
-import { useWorkspacesStore } from '@/stores/workspaces-store';
+
 import { getStringParam } from '@/utils/object';
-import { useProjectStore } from '@/stores/project-store';
+import {
+  loadProjectGuard,
+  loadUserDataGuard,
+  loadWorkspaceGuard,
+  redirectToWorkspaceGuard,
+} from './guards';
 
 const AUTH_ROUTES = ['/signin', '/signup'];
 const router = createRouter({
@@ -11,36 +15,13 @@ const router = createRouter({
     {
       path: '/',
       component: () => import('@/layouts/MainLayout.vue'),
-      async beforeEnter() {
-        const userStore = useUserStore();
-        const workspacesStore = useWorkspacesStore();
-
-        try {
-          await userStore.getUserInfo();
-          await workspacesStore.getUserWorkspaces();
-        } catch {
-          return '/signin';
-        }
-      },
+      beforeEnter: loadUserDataGuard,
       children: [
         {
           path: '',
           name: 'main',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
-          beforeEnter() {
-            const userStore = useUserStore();
-            const workspacesStore = useWorkspacesStore();
-            const workspaces = workspacesStore.workspaces;
-            const slug =
-              userStore.user?.last_workspace_slug || workspaces[0]?.slug;
-
-            if (slug) {
-              return {
-                name: 'general-workspace',
-                params: { workspace: slug },
-              };
-            }
-          },
+          beforeEnter: redirectToWorkspaceGuard,
         },
         {
           path: 'profile',
@@ -53,6 +34,7 @@ const router = createRouter({
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
+          beforeEnter: loadWorkspaceGuard,
         },
         {
           path: ':workspace/projects/:project',
@@ -62,24 +44,7 @@ const router = createRouter({
             workspaceSlug: getStringParam(route.params.workspace),
             projectId: getStringParam(route.params.project),
           }),
-          async beforeEnter(to) {
-            const workspace = getStringParam(to.params.workspace);
-            const project = getStringParam(to.params.project);
-
-            if (!workspace || !project) {
-              return { name: 'not-found' };
-            }
-
-            try {
-              useProjectStore().getProjectInfo(workspace, project);
-            } catch (error: any) {
-              if (error?.response?.status === 404) {
-                return { name: 'not-found' };
-              }
-
-              throw error;
-            }
-          },
+          beforeEnter: [loadWorkspaceGuard, loadProjectGuard],
         },
       ],
     },
