@@ -211,7 +211,9 @@ onMounted(() => {
   padding: 8px;
 }
 .spoiler-box-picker {
-  max-width: 248px;
+  /* Явная ширина, не max-width: у детей width: 100%, и Firefox при подборе
+     ширины меню считает такой контейнер нулевым — Quasar тогда меню не показывает */
+  width: 248px;
 }
 
 .background-picker {

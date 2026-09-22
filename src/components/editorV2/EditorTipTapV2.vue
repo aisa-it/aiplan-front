@@ -3,7 +3,11 @@
     v-if="editorInstance"
     :class="[
       'html-editor',
-      { 'html-editor--mobile': isMobile, classPrevent: classPrevent },
+      {
+        'html-editor--mobile': isMobile,
+        'html-editor--fullscreen': props.isFullScreen,
+        classPrevent: classPrevent,
+      },
     ]"
     :style="{ flexDirection: isMobile && !isReadOnly ? 'row' : 'column' }"
     @mousemove="handleMouseMove"
@@ -654,6 +658,25 @@ defineExpose({
     display: flex;
     flex-direction: row-reverse;
     align-items: stretch;
+  }
+
+  // В развёрнутом диалоге высота задана снаружи: без min-height: 0 flex-дети
+  // растут по содержимому, и скроллится вся карточка вместе с тулбаром
+  &--fullscreen {
+    .html-editor__outer {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .html-editor__container {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .tiptap {
+      min-height: 0;
+    }
   }
 
   &__btn-edit {
