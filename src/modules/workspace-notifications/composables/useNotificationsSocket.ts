@@ -19,7 +19,6 @@ export interface UseNotificationsSocketOptions {
   onClose?: (event: CloseEvent) => void;
   onError?: (event: Event) => void;
   onMessage: (payload: unknown, event: MessageEvent) => void;
-  onMessageError?: (error: unknown, event: MessageEvent) => void;
   onOpen?: (context: NotificationsSocketOpenContext) => void;
   url?: string;
 }
@@ -90,14 +89,10 @@ export function useNotificationsSocket(
   };
 
   const handleMessage = (event: MessageEvent) => {
-    try {
-      const payload =
-        typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+    const payload =
+      typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
-      options.onMessage(payload, event);
-    } catch (error) {
-      options.onMessageError?.(error, event);
-    }
+    options.onMessage(payload, event);
   };
 
   const openSocket = () => {

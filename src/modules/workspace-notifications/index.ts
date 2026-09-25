@@ -1,6 +1,8 @@
 export { NotificationsService } from './api';
+export { WorkspaceNotifications } from './components';
 export {
   getNotificationsSocketUrl,
+  useNotificationsController,
   useNotificationsSocket,
 } from './composables';
 export type {
