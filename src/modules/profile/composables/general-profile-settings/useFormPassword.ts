@@ -1,5 +1,7 @@
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
 
 type FormRef = {
@@ -7,6 +9,7 @@ type FormRef = {
 };
 
 export function useFormPassword() {
+  const router = useRouter();
   const formRef = ref<FormRef | null>(null);
   const password = ref({
     new_password: '',
@@ -33,9 +36,11 @@ export function useFormPassword() {
 
     loading.value = true;
     try {
-      // await userStore.changeMyPassword(password.value); // TODO: подключить после настройки авторизации.
+      await ProfileService.changePassword(password.value);
       password.value.new_password = '';
       password.value.confirm_password = '';
+      localStorage.removeItem('next_url');
+      await router.replace('/signin');
       // TODO: показать уведомление SUCCESS_IDENTITY_PASSWORD после переноса системы уведомлений.
     } catch (error) {
       void error;

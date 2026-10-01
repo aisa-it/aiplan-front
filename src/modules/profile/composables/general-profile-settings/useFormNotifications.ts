@@ -1,6 +1,7 @@
 import { reactive, ref, watch, type Ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 
+import { useUserStore } from '@/stores/user-store';
 import {
   NOTIFICATION_CHANNELS,
   hoursToNanoseconds,
@@ -14,15 +15,8 @@ import type {
 
 type NotificationChannelKey = (typeof NOTIFICATION_CHANNELS)[number]['key'];
 
-type UseFormNotificationsOptions = {
-  user: Ref<DtoUser>;
-  updateUser: (data: Partial<DtoUser>) => void;
-};
-
-export function useFormNotifications({
-  user,
-  updateUser,
-}: UseFormNotificationsOptions) {
+export function useFormNotifications(user: Ref<DtoUser>) {
+  const userStore = useUserStore();
   const channels = reactive<Record<NotificationChannelKey, boolean>>({
     app_notification_mute: true,
     email_notification_mute: true,
@@ -51,8 +45,7 @@ export function useFormNotifications({
         ...settings,
       };
 
-      // await userStore.updateCurrentUser({ settings: updatedSettings }); // TODO: подключить после настройки авторизации.
-      updateUser({ settings: updatedSettings });
+      await userStore.updateCurrentUser({ settings: updatedSettings });
       // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
     } catch (error) {
       void error;

@@ -7,13 +7,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/:workspace?',
+      path: '/',
       name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
       beforeEnter: mainGuard,
       children: [
         {
-          path: '',
+          path: '/profile',
+          component: () => import('@/pages/Profile.vue'),
+        },
+        {
+          path: ':workspace?',
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
           props: (route) => ({ slug: route.params.workspace }),

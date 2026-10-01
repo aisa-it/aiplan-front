@@ -1,13 +1,7 @@
 <template>
   <div class="py-6">
-    <ProfileDataForm
-      :user="user"
-      @update-user="emit('update-user', $event)"
-    />
-    <ProfileNotificationsForm
-      :user="user"
-      @update-user="emit('update-user', $event)"
-    />
+    <ProfileDataForm :user="user" />
+    <ProfileNotificationsForm :user="user" />
     <ProfilePasswordForm />
   </div>
 </template>
@@ -21,9 +15,5 @@ import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 defineProps<{
   user: DtoUser;
-}>();
-
-const emit = defineEmits<{
-  'update-user': [data: Partial<DtoUser>];
 }>();
 </script>

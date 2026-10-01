@@ -1,8 +1,11 @@
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+
+import { ProfileService } from '../../api/profile.service';
 
 export function useFormToken() {
-  const authToken = ref('demo-profile-token');
+  const authToken = ref('');
   const isToken = ref(true);
+  const tokenLoading = ref(true);
   const tokenResetting = ref(false);
 
   const toggleToken = () => {
@@ -22,8 +25,7 @@ export function useFormToken() {
   const handleResetProfileToken = async () => {
     tokenResetting.value = true;
     try {
-      // await userStore.resetAuthToken(); // TODO: подключить после настройки авторизации.
-      authToken.value = `demo-profile-token-${Date.now()}`;
+      authToken.value = await ProfileService.resetAuthToken();
       // TODO: показать уведомление SUCCESS_RESET_TOKEN_USER после переноса системы уведомлений.
     } catch (error) {
       void error;
@@ -33,11 +35,23 @@ export function useFormToken() {
     }
   };
 
+  onMounted(async () => {
+    try {
+      authToken.value = await ProfileService.getAuthToken();
+    } catch (error) {
+      void error;
+      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+    } finally {
+      tokenLoading.value = false;
+    }
+  });
+
   return {
     authToken,
     handleCopyProfileToken,
     handleResetProfileToken,
     isToken,
+    tokenLoading,
     tokenResetting,
     toggleToken,
   };

@@ -17,7 +17,10 @@ export const mainGuard: NavigationGuard = async (to) => {
     return '/onboarding';
   }
 
-  if (!to.params.workspace && to.name === 'general-workspace') {
+  if (
+    !to.params.workspace &&
+    (to.name === 'general-workspace' || to.name === 'profile')
+  ) {
     const workspaces = workspacesStore.workspaces;
     const slug = userStore.user?.last_workspace_slug || workspaces[0]?.slug;
 

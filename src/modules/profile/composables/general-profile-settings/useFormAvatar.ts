@@ -1,12 +1,11 @@
 import { onBeforeUnmount, ref } from 'vue';
 
-import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useUserStore } from '@/stores/user-store';
 
-type UseFormAvatarOptions = {
-  updateUser: (data: Partial<DtoUser>) => void;
-};
+import { ProfileService } from '../../api/profile.service';
 
-export function useFormAvatar({ updateUser }: UseFormAvatarOptions) {
+export function useFormAvatar() {
+  const userStore = useUserStore();
   const avatarDeleting = ref(false);
   const avatarPreviewUrl = ref('');
 
@@ -25,9 +24,9 @@ export function useFormAvatar({ updateUser }: UseFormAvatarOptions) {
   const deleteUserAvatar = async () => {
     avatarDeleting.value = true;
     try {
-      // await userStore.deleteUserAvatar(); // TODO: подключить после настройки авторизации.
+      const updatedUser = await ProfileService.deleteAvatar();
+      userStore.replaceUser(updatedUser);
       clearAvatarPreview();
-      updateUser({ avatar_id: null, avatar: '' });
       // TODO: показать уведомление SUCCESS_DELETE_IMG_PROFILE после переноса системы уведомлений.
     } catch (error) {
       void error;
