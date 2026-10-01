@@ -79,6 +79,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import type { VForm } from 'vuetify/components';
 import { useRouter } from 'vue-router';
 import { AuthLayout } from '@/modules/auth';
 import { useUserStore } from '@/stores/user-store';
@@ -94,7 +95,7 @@ const workspacesStore = useWorkspacesStore();
 const { firstNameRules, lastNameRules, usernameRules, telegramIdRules } =
   useProfileValidationRules();
 
-const formRef = ref<any>(null);
+const formRef = ref<VForm | null>(null);
 const saving = ref(false);
 const usernameError = ref('');
 const telegramBotUrl = ref('');
