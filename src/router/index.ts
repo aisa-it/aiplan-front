@@ -1,32 +1,61 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { mainGuard } from './guards/mainGuard';
-import { onboardingGuard } from './guards/onboardingGuard';
-import { globalGuard } from './guards/globalGuard';
+import { getStringParam } from '@/utils/object';
+import {
+  loadProjectGuard,
+  loadUserDataGuard,
+  loadWorkspaceGuard,
+  redirectToWorkspaceGuard,
+  globalGuard,
+  onboardingGuard,
+} from './guards';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'main',
       component: () => import('@/layouts/MainLayout.vue'),
-      beforeEnter: mainGuard,
+      beforeEnter: loadUserDataGuard,
       children: [
         {
-          path: '/profile',
-          component: () => import('@/pages/Profile.vue'),
-        },
-        {
-          path: ':workspace?',
-          name: 'general-workspace',
+          path: '',
+          name: 'main',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
-          props: (route) => ({ slug: route.params.workspace }),
+          beforeEnter: redirectToWorkspaceGuard,
         },
         {
           path: 'profile',
+          name: 'global-profile',
+          component: () => import('@/pages/Profile.vue'),
+          beforeEnter: redirectToWorkspaceGuard,
+        },
+        {
+          path: ':workspace',
+          name: 'general-workspace',
+          component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({
+            slug: getStringParam(route.params.workspace),
+          }),
+          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/profile',
           name: 'profile',
           component: () => import('@/pages/Profile.vue'),
-          props: (route) => ({ slug: route.params.workspace }),
+          props: (route) => ({
+            slug: getStringParam(route.params.workspace),
+          }),
+          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/projects/:project',
+          name: 'project',
+          component: () => import('@/pages/ProjectPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+            projectId: getStringParam(route.params.project),
+          }),
+          beforeEnter: [loadWorkspaceGuard, loadProjectGuard],
         },
       ],
     },

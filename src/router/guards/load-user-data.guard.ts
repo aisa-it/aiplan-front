@@ -1,8 +1,9 @@
 import type { NavigationGuard } from 'vue-router';
+
 import { useUserStore } from '@/stores/user-store';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 
-export const mainGuard: NavigationGuard = async (to) => {
+export const loadUserDataGuard: NavigationGuard = async () => {
   const userStore = useUserStore();
   const workspacesStore = useWorkspacesStore();
 
@@ -15,15 +16,5 @@ export const mainGuard: NavigationGuard = async (to) => {
 
   if (!userStore.user?.is_onboarded) {
     return '/onboarding';
-  }
-
-  if (
-    !to.params.workspace &&
-    (to.name === 'general-workspace' || to.name === 'profile')
-  ) {
-    const workspaces = workspacesStore.workspaces;
-    const slug = userStore.user?.last_workspace_slug || workspaces[0]?.slug;
-
-    if (slug) return `/${slug}`;
   }
 };
