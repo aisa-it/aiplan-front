@@ -17,6 +17,8 @@ type UpdateCurrentUserRequest = AiplanUserUpdateRequest & {
 export const useUserStore = defineStore('user-store', () => {
   const router = useRouter();
   const user = ref<DtoUser | null>(null);
+  const projectRoleName = ref('');
+  const workspaceRoleName = ref('');
 
   async function getUserInfo() {
     try {
@@ -60,6 +62,8 @@ export const useUserStore = defineStore('user-store', () => {
 
   return {
     user,
+    projectRoleName,
+    workspaceRoleName,
     getUserInfo,
     replaceUser,
     updateCurrentUser,
