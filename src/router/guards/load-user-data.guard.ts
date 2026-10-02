@@ -13,4 +13,8 @@ export const loadUserDataGuard: NavigationGuard = async () => {
   } catch {
     return '/signin';
   }
+
+  if (!userStore.user?.is_onboarded) {
+    return '/onboarding';
+  }
 };

@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
-
 import { getStringParam } from '@/utils/object';
 import {
   loadProjectGuard,
   loadUserDataGuard,
   loadWorkspaceGuard,
   redirectToWorkspaceGuard,
+  globalGuard,
+  onboardingGuard,
 } from './guards';
 
-const AUTH_ROUTES = ['/signin', '/signup'];
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -25,12 +25,23 @@ const router = createRouter({
         },
         {
           path: 'profile',
+          name: 'global-profile',
           component: () => import('@/pages/Profile.vue'),
+          beforeEnter: redirectToWorkspaceGuard,
         },
         {
           path: ':workspace',
           name: 'general-workspace',
           component: () => import('@/pages/GeneralWorkspacePage.vue'),
+          props: (route) => ({
+            slug: getStringParam(route.params.workspace),
+          }),
+          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/profile',
+          name: 'profile',
+          component: () => import('@/pages/Profile.vue'),
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
@@ -49,6 +60,12 @@ const router = createRouter({
       ],
     },
     {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: () => import('@/pages/OnBoardingPage.vue'),
+      beforeEnter: onboardingGuard,
+    },
+    {
       path: '/signin',
       component: () => import('@/pages/SignInPage.vue'),
     },
@@ -64,10 +81,6 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
-  if (AUTH_ROUTES.includes(to.path) || to.path.includes('/f/')) return;
-
-  localStorage.setItem('next_url', to.fullPath);
-});
+router.beforeEach(globalGuard);
 
 export default router;
