@@ -4,9 +4,7 @@
       v-if="projectStore.project && !isRefreshIssue"
       @update:issue-page="updateIssue"
     />
-    <q-inner-loading v-else showing>
-      <DefaultLoader />
-    </q-inner-loading>
+    <IssuePageSkeleton v-else />
   </q-page>
 </template>
 
@@ -23,7 +21,7 @@ import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
 // components
 import IssuePanel from 'src/modules/single-issue/ui/IssuePanel.vue';
-import DefaultLoader from 'components/loaders/DefaultLoader.vue';
+import IssuePageSkeleton from 'src/modules/single-issue/ui/IssuePageSkeleton.vue';
 
 // core
 const route = useRoute();
@@ -33,8 +31,13 @@ const projectStore = useProjectStore();
 const singleIssueStore = useSingleIssueStore();
 
 // store to refs
-const { issueData, currentIssueID, issueActivitiesData, issueStatusesData } =
-  storeToRefs(singleIssueStore);
+const {
+  issueData,
+  currentIssueID,
+  issueCommentsData,
+  issueActivitiesData,
+  issueStatusesData,
+} = storeToRefs(singleIssueStore);
 
 // metadata
 const metadata = ref({
@@ -84,11 +87,18 @@ const updateIssue = async () => {
 
 const refreshPromise = async () => {
   isRefreshIssue.value = true;
+  // Сбрасываем данные прошлой задачи: вкладки активности покажут скелетон,
+  // а не чужие комментарии.
+  issueCommentsData.value = undefined;
   issueActivitiesData.value = undefined;
   issueStatusesData.value = undefined;
-  await Promise.allSettled([issuePageInit(), refreshActivities()]).then(
-    () => (isRefreshIssue.value = false),
-  );
+
+  // Комментарии и активность грузятся параллельно и панель не задерживают:
+  // она показывается, как только пришла сама задача.
+  const activities = refreshActivities().catch(() => undefined);
+  await Promise.allSettled([issuePageInit()]);
+  isRefreshIssue.value = false;
+  await activities;
 };
 
 // hooks

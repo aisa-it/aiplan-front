@@ -3,8 +3,9 @@ import tippy from 'tippy.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Extension, mergeAttributes, Node } from '@tiptap/core';
 import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state';
+import type { Node as PMNode } from '@tiptap/pm/model';
 import { Editor, VueNodeViewRenderer, VueRenderer } from '@tiptap/vue-3';
-import { all, createLowlight } from 'lowlight';
+import { common, createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
 import js from 'highlight.js/lib/languages/javascript';
 import ts from 'highlight.js/lib/languages/typescript';
@@ -29,7 +30,6 @@ import {
 } from '../../../utils/links';
 // components
 import EditorTaskItem from '../components/EditorTaskItem.vue';
-import EditorListItem from '../components/EditorListItem.vue';
 import EditorMentionList from '../components/EditorMentionList.vue';
 import EditorResizeImageWrapper from '../components/EditorResizeImageWrapper.vue';
 import EditorResizeDrawioWrapper from '../components/EditorResizeDrawioWrapper.vue';
@@ -1007,8 +1007,11 @@ export const CustomLink = Link.extend({
   },
 });
 
-// для подсветки синтаксиса
-const lowlight = createLowlight(all);
+// Подсветка синтаксиса. Берём только ходовые грамматики (`common`): полный
+// набор ~190 языков нужен лишь автоопределению, которое на больших блоках
+// (логи, дампы) занимает секунды и срабатывает при каждой правке блока.
+// Короткие алиасы — для старых значений атрибута language в сохранённом HTML.
+const lowlight = createLowlight(common);
 lowlight.register('html', html);
 lowlight.register('css', css);
 lowlight.register('js', js);
@@ -1020,6 +1023,8 @@ export const CodeBlockLowlightExtend = CodeBlockLowlight.extend({
   },
 }).configure({
   lowlight,
+  // Блок без языка не автоопределяем — подсветка только по явно выбранному.
+  defaultLanguage: 'plaintext',
 });
 
 // расширение для списков с чекбоксом
@@ -1036,6 +1041,10 @@ export const ListItemExtend = ListItem.extend({
       new Plugin({
         key: new PluginKey('resetTextAlignInListItems'),
         appendTransaction: (transactions, oldState, newState) => {
+          // Обход всего документа — только когда текст менялся, иначе он
+          // выполнялся бы и на каждое движение курсора.
+          if (!transactions.some((tr) => tr.docChanged)) return null;
+
           let tr = newState.tr;
           let modified = false;
 
@@ -1062,10 +1071,58 @@ export const ListItemExtend = ListItem.extend({
       }),
     ];
   },
+  // Нативный node view вместо Vue-компонента: на длинных списках сотни
+  // Vue-инстансов заметно тормозили редактор. DOM-структура и классы
+  // сохранены — стили в css/editor.scss работают как раньше.
   addNodeView() {
-    return VueNodeViewRenderer(EditorListItem);
+    return ({ node }) => {
+      const dom = document.createElement('li');
+      dom.className = 'list-item';
+      dom.style.whiteSpace = 'normal';
+
+      const mark = document.createElement('span');
+      mark.className = 'list-item__mark';
+
+      const contentDOM = document.createElement('div');
+      contentDOM.className = 'list-content';
+      contentDOM.style.whiteSpace = 'inherit';
+
+      dom.append(mark, contentDOM);
+
+      let currentStyle = '';
+      const applyMarkStyle = (listItem: PMNode) => {
+        const style = getListMarkStyle(listItem);
+        if (style === currentStyle) return;
+        currentStyle = style;
+        dom.style.cssText = `white-space: normal;${style}`;
+      };
+      applyMarkStyle(node);
+
+      return {
+        dom,
+        contentDOM,
+        update(updatedNode: PMNode) {
+          if (updatedNode.type !== node.type) return false;
+          applyMarkStyle(updatedNode);
+          return true;
+        },
+      };
+    };
   },
 });
+
+// Маркер списка наследует цвет и размер первого текста пункта.
+const getListMarkStyle = (listItem: PMNode): string => {
+  const marks = listItem.firstChild?.firstChild?.marks ?? [];
+  let style = '';
+  for (const mark of marks) {
+    if (mark.type.name === 'textStyle') {
+      style += `color: ${mark.attrs.color};`;
+      style += `font-size: ${mark.attrs.fontSize};`;
+    }
+  }
+  return style;
+};
 
 // проверка редактора на пустоту
 export const isEditorEmpty = (editor?: Editor) => {

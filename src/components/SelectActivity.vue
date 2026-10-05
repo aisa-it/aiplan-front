@@ -62,6 +62,18 @@
       >
     </div>
   </div>
+  <!-- Данных ещё нет (грузятся) — скелетон под габариты элемента активности.
+       Пустой список — отдельная ветка выше, со своим текстом. -->
+  <div v-else class="q-mt-sm q-px-sm">
+    <div
+      v-for="n in 3"
+      :key="n"
+      class="row centered-horisontally no-wrap q-mb-sm"
+    >
+      <q-skeleton type="circle" size="32px" class="q-mx-sm" />
+      <q-skeleton type="rect" height="56px" class="col" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

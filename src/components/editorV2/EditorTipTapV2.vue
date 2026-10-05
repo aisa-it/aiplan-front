@@ -201,12 +201,29 @@
       :editor-instance="editorInstance"
     />
   </div>
+
+  <!-- Редактор создаётся после первого кадра (см. onMounted): пока ProseMirror
+       строит документ, страница уже отрисована, а на месте текста — скелетон -->
+  <div v-else class="html-editor__skeleton">
+    <q-skeleton
+      v-if="!isReadOnly"
+      type="rect"
+      height="40px"
+      class="html-editor__skeleton-toolbar"
+    />
+    <q-skeleton type="text" width="90%" />
+    <q-skeleton type="text" width="70%" />
+    <q-skeleton type="text" width="85%" />
+    <q-skeleton type="rect" height="56px" class="q-my-sm" />
+    <q-skeleton type="text" width="60%" />
+  </div>
 </template>
 
 <script setup lang="ts">
 // Vue
 import {
   ref,
+  shallowRef,
   computed,
   watch,
   onBeforeUnmount,
@@ -310,7 +327,15 @@ const route = useRoute();
 const router = useRouter();
 const aidocStore = useAiDocStore();
 const bus = inject<EventBus>('bus');
-const editorInstance = ref<Editor | null>(null);
+// shallowRef: глубокий ref оборачивает в реактивный прокси весь ProseMirror
+// (state, doc, тысячи нод) — на больших документах это заметно тормозит.
+const editorInstance = shallowRef<Editor | null>(null);
+// Последняя строка, отданная наверх через update:modelValue. Родитель
+// возвращает её нам тем же v-model, и без этой метки пришлось бы заново
+// сериализовать документ, чтобы понять, что ничего не изменилось.
+let lastEmittedHtml: string | null = null;
+// Отложенное создание редактора (см. onMounted).
+let createEditorFrame = 0;
 const isFormatSampleActive = ref<boolean>(false);
 const editorToolbarHeight = ref<number>(0);
 const openImage = ref<boolean>(false);
@@ -418,7 +443,9 @@ function createEditor() {
     editable: !isReadOnly.value,
     extensions: editorExtensions.value as any,
     onUpdate: () => {
-      emits('update:modelValue', editorInstance.value?.getHTML());
+      const html = editorInstance.value?.getHTML() ?? '';
+      lastEmittedHtml = html;
+      emits('update:modelValue', html);
       emits('updateEditorDOM', editorInstance.value?.state.doc);
       refreshTocLinks();
       floatScroll();
@@ -603,6 +630,8 @@ const updateToC = () => {
 watch(
   () => isReadOnly.value,
   (newVal, oldVal) => {
+    // До создания редактора менять нечего: createEditor сам возьмёт актуальное значение.
+    if (!editorInstance.value) return;
     if (oldVal && !newVal) {
       const scrollY = window.scrollY;
       editorInstance.value.setOptions({ editable: true });
@@ -616,18 +645,36 @@ watch(
 watch(
   () => props.modelValue,
   (newVal) => {
+    if (!editorInstance.value) return;
+    // Эхо нашего же onUpdate: getHTML() табов не содержит, так что строка
+    // совпадает дословно — сравниваем до замены табов и без сериализации.
+    if (newVal === lastEmittedHtml) return;
+
     newVal = newVal.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;');
-    if (editorInstance.value && newVal !== editorInstance.value.getHTML()) {
+    if (newVal !== editorInstance.value.getHTML()) {
       let content = replaceColor(newVal, $q.dark.isActive ? 'dark' : 'light');
       editorInstance.value.commands.setContent(content, { emitUpdate: false });
       refreshTocLinks();
     }
+    // Содержимое пришло извне — прежняя метка больше ничему не соответствует.
+    lastEmittedHtml = null;
   },
 );
 
-onMounted(() => createEditor());
+onMounted(() => {
+  // Конструктор Editor синхронно строит весь документ и на больших текстах
+  // блокирует поток. Двойной rAF гарантирует, что браузер успел отрисовать
+  // страницу со скелетоном (setTimeout(0) такой гарантии не даёт).
+  createEditorFrame = requestAnimationFrame(() => {
+    createEditorFrame = requestAnimationFrame(() => {
+      createEditorFrame = 0;
+      createEditor();
+    });
+  });
+});
 
 onBeforeUnmount(() => {
+  if (createEditorFrame) cancelAnimationFrame(createEditorFrame);
   clearFloatScroll();
   editorInstance.value?.destroy();
 });
@@ -757,6 +804,19 @@ defineExpose({
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
+  }
+}
+
+.html-editor__skeleton {
+  min-height: 120px;
+  padding: 8px 4px;
+
+  .q-skeleton--type-text {
+    margin-bottom: 6px;
+  }
+
+  &-toolbar {
+    margin-bottom: 12px;
   }
 }
 
