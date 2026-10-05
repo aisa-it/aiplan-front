@@ -85,8 +85,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useTitle } from '@vueuse/core';
 import { useDisplay } from 'vuetify';
 
@@ -103,14 +103,14 @@ import { useUtilsStore } from '@/stores/utils-store';
 import { getFirstSymbol, getUrlFile } from '@/utils/helpers';
 
 const route = useRoute();
-const router = useRouter();
 const { mobile } = useDisplay();
 
 const loaderStore = useLoaderStore();
 const { generalLoader } = storeToRefs(loaderStore);
 
 const workspaceStore = useWorkspaceStore();
-const { workspaceInfo, workspaceProjects } = storeToRefs(workspaceStore);
+const { workspaceInfo, workspaceProjects, isLoading } =
+  storeToRefs(workspaceStore);
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
@@ -128,8 +128,6 @@ const props = defineProps<{
   slug?: string;
 }>();
 
-const isLoading = ref(true);
-
 const isProjectCreateOpen = ref(false);
 const defineDescription = computed(() => workspaceInfo.value?.description);
 
@@ -139,24 +137,5 @@ useTitle(
       ? `Пространство ${workspaceInfo.value.name}`
       : 'Загрузка...',
   ),
-);
-
-watch(
-  () => props.slug,
-  async (newSlug) => {
-    if (!newSlug) {
-      isLoading.value = false;
-      return;
-    }
-    isLoading.value = true;
-
-    try {
-      await workspaceStore.getWorkspaceInfo(newSlug);
-      await workspaceStore.getWorkspaceProjects(newSlug);
-    } finally {
-      isLoading.value = false;
-    }
-  },
-  { immediate: true },
 );
 </script>

@@ -1,57 +1,49 @@
-import { ref, defineAsyncComponent, type Component } from 'vue';
+import { defineAsyncComponent, ref, type Component } from 'vue';
+import PageLoader from '@/components/loaders/PageLoader.vue';
 
-interface ISettingsTab {
-  name: number;
+type ProfileTab = {
+  name: string;
   label: string;
-  dataId?: string;
-  isDisabled?: boolean;
-  component?: Component | null;
-}
+  component: Component | null;
+};
+
+const createAsyncTab = (loader: () => Promise<Component>) =>
+  defineAsyncComponent({
+    loader,
+    loadingComponent: PageLoader,
+    delay: 200,
+    suspensible: false,
+  });
+
+const PROFILE_TABS: ProfileTab[] = [
+  {
+    name: 'general',
+    label: 'Основные',
+    component: createAsyncTab(
+      () => import('../components/GeneralProfileSettings.vue'),
+    ),
+  },
+  {
+    name: 'activities',
+    label: 'Активности',
+    component: createAsyncTab(
+      () => import('../components/ActivitiesProfileSettings.vue'),
+    ),
+  },
+  {
+    name: 'design',
+    label: 'Оформление',
+    component: createAsyncTab(
+      () => import('../components/DesignProfileSettings.vue'),
+    ),
+  },
+];
 
 export const useProfileTabs = () => {
-  const isLoadingComponent = ref(false);
+  const profileSettingsTab = ref(PROFILE_TABS[0].name);
 
-  function asyncImport(loader: () => Promise<any>) {
-    return defineAsyncComponent(async () => {
-      isLoadingComponent.value = true;
-
-      const component = await loader();
-
-      isLoadingComponent.value = false;
-      return component;
-    });
-  }
-
-  const listTabs = [
-    {
-      name: 0,
-      label: 'Основные',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/GeneralProfileSettings.vue'),
-      // ),
-    },
-    {
-      name: 1,
-      label: 'Активности',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/ActivitiesProfileSettings.vue'),
-      // ),
-    },
-    {
-      name: 2,
-      label: 'Оформление',
-      component: null,
-      // component: asyncImport(
-      //   () => import('../components/DesignProfileSettings.vue'),
-      // ),
-    },
-  ] as ISettingsTab[];
-
-  const profileSettingsTab = ref<number>(0);
-  const setTab = (value: number): void => {
-    profileSettingsTab.value = value;
+  return {
+    listTabs: PROFILE_TABS,
+    profileSettingsTab,
   };
-  return { listTabs, profileSettingsTab, setTab, isLoadingComponent };
 };

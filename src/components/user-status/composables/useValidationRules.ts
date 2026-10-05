@@ -24,11 +24,36 @@ export function useValidationRules(form: { value: UserStatusFormModel }) {
     );
   };
 
+  const isValidTime = (value: string): boolean => {
+    if (!/^\d{2}:\d{2}$/.test(value)) return false;
+
+    const [hours, minutes] = value.split(':').map(Number);
+    return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+  };
+
+  const validateFutureDateTime = () => {
+    if (
+      !isValidDate(form.value.customDate) ||
+      !isValidTime(form.value.customTime)
+    ) {
+      return true;
+    }
+
+    const [day, month, year] = form.value.customDate.split('.').map(Number);
+    const [hours, minutes] = form.value.customTime.split(':').map(Number);
+    const statusEndDate = new Date(year, month - 1, day, hours, minutes);
+
+    return (
+      statusEndDate.getTime() > Date.now() || 'Дата не может быть в прошлом'
+    );
+  };
+
   const customDateRules = [
     (value: string) => {
       if (form.value.selectEndDate !== 'custom') return true;
       if (!value) return 'Введите дату в формате ДД.ММ.ГГГГ';
-      return isValidDate(value) || 'Некорректная дата';
+      if (!isValidDate(value)) return 'Некорректная дата';
+      return validateFutureDateTime();
     },
   ];
 
@@ -36,9 +61,7 @@ export function useValidationRules(form: { value: UserStatusFormModel }) {
     (value: string) => {
       if (form.value.selectEndDate !== 'custom') return true;
       if (!value) return 'Укажите время';
-      const [h, m] = value.split(':').map(Number);
-      if (h < 0 || h > 23 || m < 0 || m > 59) return 'Некорректное время';
-      return true;
+      return isValidTime(value) || 'Некорректное время';
     },
   ];
   return { customStatusRules, durationRules, customDateRules, customTimeRules };

@@ -15,7 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
+
+import { useUserStore } from '@/stores/user-store.ts';
+
 import UserStatus from './shared/UserStatus.vue';
 import UserStatusForm from './components/UserStatusForm.vue';
 
@@ -26,6 +29,8 @@ import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 const props = defineProps<{
   user: DtoUser;
 }>();
+
+const userStore = useUserStore();
 
 const menu = ref(false);
 
@@ -39,12 +44,10 @@ const handleReset = async () => {
 const handleSave = async () => {
   const payload = buildPayload();
 
-  console.log(payload);
-
   props.user.status = payload.status;
   props.user.status_emoji = payload.status_emoji;
   props.user.status_end_date = payload.status_end_date;
-  // await userStore.updateCurrentUser(payload); //TODO: добавить обновление статуса юзера, когда появится user-store
+  await userStore.updateCurrentUser(payload);
 
   menu.value = false;
 };

@@ -32,7 +32,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
+import { useUtilsStore } from '@/stores/utils-store.ts';
 import { useAppTheme } from '@/composables/useAppTheme.ts';
 import { getUrlFile } from '@/utils/helpers.ts';
 
@@ -71,9 +73,6 @@ const avatarText = computed(() =>
 const roundClass = computed(() =>
   props.rounded ? 'rounded-full' : 'rounded-lg',
 );
-
-import { useUtilsStore } from '@/stores/utils-store';
-import { storeToRefs } from 'pinia';
 
 const utilsStore = useUtilsStore();
 const { ny } = storeToRefs(utilsStore);
