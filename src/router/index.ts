@@ -60,6 +60,16 @@ const router = createRouter({
       ],
     },
     {
+      path: '/conf',
+      name: 'conference',
+      component: () => import('@/pages/ConferencePage.vue'),
+    },
+    {
+      path: '/conf/:roomName',
+      name: 'conferenceByRoom',
+      component: () => import('@/pages/ConferencePage.vue'),
+    },
+    {
       path: '/onboarding',
       name: 'onboarding',
       component: () => import('@/pages/OnBoardingPage.vue'),
