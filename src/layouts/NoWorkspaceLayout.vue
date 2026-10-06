@@ -69,10 +69,6 @@ onBeforeMount(async () => {
     userInfoRefresh,
   ]);
   stopGlobalLoading();
-  if (user.value?.theme) {
-    localStorage.setItem('dark', String(userStore.getTheme === 'dark'));
-    $q.dark.set(userStore.getTheme === 'dark');
-  } else $q.dark.set(false);
   if (userWorkspaces.value.length > 0) {
     router.replace(
       `/${

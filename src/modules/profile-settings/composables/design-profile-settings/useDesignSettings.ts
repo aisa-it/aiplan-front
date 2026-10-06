@@ -1,5 +1,4 @@
 // core
-import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 // stores
@@ -20,8 +19,6 @@ import {
 
 export const useDesignSettings = () => {
   // Подключение настроек интерфейса
-  // core
-  const $q = useQuasar();
   // stores
   const userStore = useUserStore();
   const utilsStore = useUtilsStore();
@@ -81,8 +78,6 @@ export const useDesignSettings = () => {
         },
       })
       .then(() => {
-        localStorage.setItem('dark', String(user.value?.theme?.dark));
-        $q.dark.set(userStore.getTheme === 'dark');
         setNotificationView({
           open: true,
           type: 'success',

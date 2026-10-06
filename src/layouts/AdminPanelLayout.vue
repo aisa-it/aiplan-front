@@ -53,7 +53,6 @@ const leftDrawerOpen = ref(false);
 const api = useAiplanStore();
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
-const { auth } = storeToRefs(api);
 const $q = useQuasar();
 const me = ref(null);
 const theme = ref('light');
@@ -80,35 +79,10 @@ onBeforeMount(async () => {
   }
 });
 
-const setTheme = () => {
-  if (user.value?.theme) {
-    localStorage.setItem('dark', String(userStore.getTheme === 'dark'));
-    $q.dark.set(userStore.getTheme === 'dark');
-  } else $q.dark.set(JSON.parse(localStorage.getItem('dark') ?? 'false'));
-};
-
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
 
-watch(
-  () => auth.value,
-  () => {
-    setTheme();
-  },
-  {
-    deep: true,
-  },
-);
-watch(
-  () => user.value,
-  () => {
-    setTheme();
-  },
-  {
-    deep: true,
-  },
-);
 useMeta({
   title: 'АИПлан | Инструмент управления проектами.',
 });

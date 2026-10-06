@@ -44,7 +44,6 @@ import { useQuasar, useMeta, Screen } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
-import { useAiplanStore } from 'src/stores/aiplan-store';
 import { ref, computed, onUnmounted, onBeforeMount, shallowRef } from 'vue';
 
 // stores
@@ -75,7 +74,6 @@ import { isServerVersionNewer } from 'src/utils/helpers';
 import { getPageKey } from 'src/utils/pageKey';
 
 // stores
-const api = useAiplanStore();
 const userStore = useUserStore();
 const utilsStore = useUtilsStore();
 const loaderStore = useLoaderStore();
@@ -98,7 +96,6 @@ const { workspaceInfo, currentWorkspaceSlug, meInWorkspace } =
 const router = useRouter();
 const $q = useQuasar();
 const route = useRoute();
-const { auth } = storeToRefs(api);
 const leftDrawerOpen = ref(!Screen.lt.md);
 const refreshInterval = ref();
 const isShowReleaseNote = shallowRef(false);
@@ -118,13 +115,6 @@ const onToggleDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
 
-const setTheme = () => {
-  if (userStore.getTheme === 'dark' || auth.value) {
-    localStorage.setItem('dark', String(userStore.getTheme === 'dark'));
-    $q.dark.set(userStore.getTheme === 'dark');
-  } else $q.dark.set(false);
-};
-
 // const STORAGE_KEY = 'leftDrawerOpen';
 const STORAGE_KEY = 'isMiniState';
 
@@ -137,11 +127,6 @@ watch(miniState, (value) => {
 onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
   currentIssueID.value = route.params.issue as string;
-
-  //TODO сделать тему
-  // await userStore.getUserInfo().then(() => {
-  //   setTheme();
-  // });
 
   if (user.value?.status === 'На звонке') {
     await userStore.updateCurrentUser({
