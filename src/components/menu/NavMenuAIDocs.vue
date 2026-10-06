@@ -708,10 +708,16 @@ defineExpose({
   :deep(.q-tree__node-header-content) {
     min-width: 0;
   }
+
+  // глобальный стиль рисует точку-маркер перед дочерними узлами; в меню
+  // документов вложенность и так видна по отступу
+  :deep(.q-tree__node--child::before) {
+    display: none;
+  }
 }
 
 .tree-custom-header {
-  cursor: default;
+  cursor: pointer;
   flex: 1 1 auto;
   min-width: 0;
 
@@ -790,7 +796,7 @@ defineExpose({
     border-radius: 4px;
     padding: 4px;
     margin: 3px 0 0;
-    cursor: default !important;
+    cursor: pointer;
     &:hover .q-focus-helper {
       background-color: $hover-color;
     }
