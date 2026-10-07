@@ -13,6 +13,7 @@ const integrationsApi = new (withInterceptors(Integrations))();
 type ActivitiesTableRequest = Parameters<
   typeof usersApi.getMyActivitiesTable
 >[0];
+type ActivitiesListRequest = Parameters<typeof usersApi.getMyActivityList>[0];
 
 export const ProfileService = {
   async changeEmail(data: AiplanEmailRequest) {
@@ -37,6 +38,10 @@ export const ProfileService = {
 
   async getActivitiesTable(params: ActivitiesTableRequest) {
     return (await usersApi.getMyActivitiesTable(params)).data;
+  },
+
+  async getActivitiesList(params: ActivitiesListRequest) {
+    return (await usersApi.getMyActivityList(params)).data;
   },
 
   async resetAuthToken() {
