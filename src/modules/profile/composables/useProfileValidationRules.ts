@@ -2,19 +2,27 @@ import { isEmail } from '@/utils/validation';
 
 type Rule = (value: string) => true | string;
 
-const required = (fieldName: string): Rule => (value) =>
-  Boolean(value?.trim()) || `Необходимо ввести ${fieldName}`;
+const required =
+  (fieldName: string): Rule =>
+  (value) =>
+    Boolean(value?.trim()) || `Необходимо ввести ${fieldName}`;
 
-const maxLength = (length: number): Rule => (value) =>
-  value.length <= length || `Максимальный размер — ${length} символов`;
+const maxLength =
+  (length: number): Rule =>
+  (value) =>
+    value.length <= length || `Максимальный размер — ${length} символов`;
 
-const nameCharacters = (fieldName: string): Rule => (value) =>
-  /^[а-яёА-ЯЁ-]+$|^[a-zA-Z-]+$/.test(value) ||
-  `${fieldName} может содержать латинские или кириллические буквы и спец. символ дефис (-)`;
+const nameCharacters =
+  (fieldName: string): Rule =>
+  (value) =>
+    /^[а-яёА-ЯЁ-]+$|^[a-zA-Z-]+$/.test(value) ||
+    `${fieldName} может содержать латинские или кириллические буквы и спец. символ дефис (-)`;
 
-const containsLetter = (fieldName: string): Rule => (value) =>
-  /[а-яёА-ЯЁa-zA-Z]/.test(value) ||
-  `${fieldName} пользователя должно содержать минимум одну букву латинского или кириллического алфавита`;
+const containsLetter =
+  (fieldName: string): Rule =>
+  (value) =>
+    /[а-яёА-ЯЁa-zA-Z]/.test(value) ||
+    `${fieldName} пользователя должно содержать минимум одну букву латинского или кириллического алфавита`;
 
 const usernameCharacters: Rule = (value) =>
   /^[A-Za-z0-9._/\\-]+$/.test(value) ||
@@ -50,7 +58,7 @@ export function useProfileValidationRules() {
   ];
 
   const emailRules = [(value: string) => isEmail(value)];
-  const telegramIdRules = [telegramId];
+  const telegramIdRules = [telegramId, maxLength(15)];
   const passwordRules = [required('пароль')];
 
   return {

@@ -14,11 +14,11 @@
             </v-img>
           </v-card-title>
 
-          <v-card-subtitle
-            class="text-center font-medium text-2xl text-header-icon my-2 opacity-100"
+          <div
+            class="text-center font-medium text-2xl text-header-icon my-2"
           >
             <slot name="title">Авторизация</slot>
-          </v-card-subtitle>
+          </div>
 
           <slot name="default" />
           <slot name="actions" />
