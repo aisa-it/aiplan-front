@@ -40,6 +40,15 @@ export const NotificationsService = {
     return response.data.count ?? 0;
   },
 
+  async getWorkspaceMembers(workspaceSlug: string) {
+    const response = await workspaceApi.getWorkspaceMemberList(
+      workspaceSlug,
+      { limit: 100, offset: 0 },
+    );
+
+    return response.data.result ?? [];
+  },
+
   async sendWorkspaceNotification(
     workspaceSlug: string,
     data: AiplanRequestMessage,

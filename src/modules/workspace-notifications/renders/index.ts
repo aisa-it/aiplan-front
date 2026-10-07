@@ -1,1 +1,1 @@
-export {};
+export { getNotificationPresentation } from './notification-presentation';

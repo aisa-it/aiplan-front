@@ -9,19 +9,25 @@
     </template>
 
     <NotificationsMenu
+      :can-create="canCreateNotification"
       :has-notifications="hasNotifications"
       :is-loading="isLoading"
       is-mobile
       @close="isOpen = false"
+      @create="isCreateOpen = true"
     >
       <NotificationsList
         v-model:active-tab="activeTab"
         :has-more-read="hasMoreRead"
         :has-more-unread="hasMoreUnread"
         :is-loading-more="isLoadingMore"
+        :is-marking-all-as-read="isMarkingAllAsRead"
+        :is-marking-as-read="isMarkingAsRead"
         :read-notifications="readNotifications"
         :unread-notifications="unreadNotifications"
         @load-more="loadMore"
+        @read="markNotificationAsRead"
+        @read-all="markAllNotificationsAsRead"
       />
     </NotificationsMenu>
   </v-dialog>
@@ -42,34 +48,60 @@
     </template>
 
     <NotificationsMenu
+      :can-create="canCreateNotification"
       :has-notifications="hasNotifications"
       :is-loading="isLoading"
-      class="h-auto max-h-[75vh] w-[576px] max-w-[calc(100vw-32px)]"
+      class="h-auto max-h-[75vh] w-xl text-default"
+      @create="isCreateOpen = true"
     >
       <NotificationsList
         v-model:active-tab="activeTab"
         :has-more-read="hasMoreRead"
         :has-more-unread="hasMoreUnread"
         :is-loading-more="isLoadingMore"
+        :is-marking-all-as-read="isMarkingAllAsRead"
+        :is-marking-as-read="isMarkingAsRead"
         :read-notifications="readNotifications"
         :unread-notifications="unreadNotifications"
         @load-more="loadMore"
+        @read="markNotificationAsRead"
+        @read-all="markAllNotificationsAsRead"
       />
     </NotificationsMenu>
   </v-menu>
+
+  <CreateWorkspaceNotificationDialog
+    v-if="currentWorkspaceSlug"
+    v-model="isCreateOpen"
+    :workspace-slug="currentWorkspaceSlug"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useDisplay } from 'vuetify';
 
+import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useNotificationsController } from '../composables';
+import { CreateWorkspaceNotificationDialog } from '../dialogs';
 import NotificationsButton from './NotificationsButton.vue';
 import NotificationsList from './NotificationsList.vue';
 import NotificationsMenu from './NotificationsMenu.vue';
 
 const { width } = useDisplay();
+const workspaceStore = useWorkspaceStore();
+const { currentWorkspaceSlug, meInWorkspace } = storeToRefs(workspaceStore);
+
 const isMobile = computed(() => width.value <= 768);
+const isCreateOpen = ref(false);
+
+const canCreateNotification = computed(
+  () =>
+    !!currentWorkspaceSlug.value &&
+    (meInWorkspace.value.is_workspace_owner ||
+      (meInWorkspace.value.role ?? 0) >= 15),
+);
 
 const {
   activeTab,
@@ -77,8 +109,12 @@ const {
   hasMoreUnread,
   isLoading,
   isLoadingMore,
+  isMarkingAllAsRead,
+  isMarkingAsRead,
   isOpen,
   loadMore,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
   notifications,
   readNotifications,
   unreadCount,

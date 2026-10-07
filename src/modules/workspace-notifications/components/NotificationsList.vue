@@ -10,32 +10,40 @@
       ref="virtualScroll"
       :items="rows"
       item-key="key"
-      :item-height="88"
-      class="min-h-0 flex-1"
+      class="min-h-0 max-h-[calc(75vh-112px)] overflow-y-auto flex-1"
       @scroll.passive="onScroll"
     >
-      <template #default="{ item }">
+      <template #default="{ item, index }">
         <div
           v-if="item.type === 'date'"
-          class="py-3 text-center text-sm text-secondary"
+          class="relative flex min-h-12 items-center justify-between py-3 text-sm text-secondary"
         >
-          {{ item.label }}
+          <span>{{ item.label }}</span>
+
+          <v-btn
+            v-if="index === 0 && activeTab === 'unread'"
+            class="normal-case"
+            density="compact"
+            variant="text"
+            color="text"
+            :loading="isMarkingAllAsRead"
+            :disabled="isMarkingAsRead"
+            @click="emit('readAll')"
+          >
+            Прочитать все
+          </v-btn>
         </div>
 
-        <div
+        <NotificationItem
           v-else
-          :data-id="item.notification.id"
-          class="mb-3 min-h-[88px] rounded-lg border border-border bg-background p-2"
-        >
-          <slot name="notification" :notification="item.notification" />
-        </div>
+          :is-marking-as-read="isMarkingAsRead"
+          :notification="item.notification"
+          @read="emit('read', $event)"
+        />
       </template>
     </v-virtual-scroll>
 
-    <div
-      v-else
-      class="grid min-h-[260px] flex-1 place-items-center text-secondary"
-    >
+    <div v-else class="grid min-h-65 flex-1 place-items-center text-secondary">
       Уведомления не найдены
     </div>
 
@@ -49,6 +57,7 @@
 import { computed, nextTick, ref, watch } from 'vue';
 
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
+import NotificationItem from './NotificationItem.vue';
 import type {
   NotificationListRow,
   NotificationTab,
@@ -84,12 +93,16 @@ const props = defineProps<{
   hasMoreRead: boolean;
   hasMoreUnread: boolean;
   isLoadingMore: boolean;
+  isMarkingAllAsRead: boolean;
+  isMarkingAsRead: boolean;
   readNotifications: WorkspaceNotification[];
   unreadNotifications: WorkspaceNotification[];
 }>();
 
 const emit = defineEmits<{
   loadMore: [type: NotificationTab];
+  read: [id: string];
+  readAll: [];
 }>();
 
 const activeTab = defineModel<NotificationTab>('activeTab', {
@@ -158,9 +171,7 @@ const onScroll = (event: Event) => {
   const isNearBottom =
     element.scrollHeight - element.scrollTop - element.clientHeight < 50;
   const hasMore =
-    activeTab.value === 'unread'
-      ? props.hasMoreUnread
-      : props.hasMoreRead;
+    activeTab.value === 'unread' ? props.hasMoreUnread : props.hasMoreRead;
 
   if (isNearBottom && hasMore) {
     emit('loadMore', activeTab.value);

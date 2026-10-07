@@ -14,8 +14,6 @@ export type {
   NotificationDateRow,
   NotificationItemRow,
   NotificationListRow,
-  NotificationsListState,
   NotificationsPageParams,
-  NotificationsPaginationState,
   NotificationTab,
 } from './notification-list.types';

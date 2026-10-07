@@ -1,5 +1,6 @@
 export { NotificationsService } from './api';
 export { WorkspaceNotifications } from './components';
+export { getNotificationPresentation } from './renders';
 export {
   getNotificationsSocketUrl,
   useNotificationsController,
@@ -18,11 +19,9 @@ export type {
   NotificationItemRow,
   NotificationLinkPart,
   NotificationListRow,
-  NotificationsListState,
   NotificationMessageData,
   NotificationMessagePart,
   NotificationsPageParams,
-  NotificationsPaginationState,
   NotificationPresentation,
   NotificationTab,
   NotificationTextPart,

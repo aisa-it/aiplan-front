@@ -9,6 +9,19 @@
       <v-spacer />
 
       <v-btn
+        v-if="canCreate"
+        :aria-label="isMobile ? 'Создать уведомление' : undefined"
+        class="normal-case"
+        color="primary"
+        :icon="isMobile"
+        variant="text"
+        @click="$emit('create')"
+      >
+        <AddIcon />
+        <span v-if="!isMobile" class="ml-1">Создать уведомление</span>
+      </v-btn>
+
+      <v-btn
         v-if="isMobile"
         aria-label="Закрыть уведомления"
         icon="mdi-close"
@@ -20,14 +33,14 @@
 
     <div
       v-if="isLoading && !hasNotifications"
-      class="grid min-h-[260px] flex-1 place-items-center"
+      class="grid min-h-65 flex-1 place-items-center"
     >
       <DefaultLoader />
     </div>
 
     <div
       v-else-if="!hasNotifications"
-      class="grid min-h-[260px] flex-1 place-items-center px-6 text-secondary"
+      class="grid min-h-65 flex-1 place-items-center px-6 text-secondary"
     >
       <span>Уведомления не найдены</span>
     </div>
@@ -39,9 +52,11 @@
 </template>
 
 <script setup lang="ts">
+import AddIcon from '@/components/icons/AddIcon.vue';
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
 
 defineProps<{
+  canCreate?: boolean;
   hasNotifications: boolean;
   isLoading: boolean;
   isMobile?: boolean;
@@ -49,5 +64,6 @@ defineProps<{
 
 defineEmits<{
   close: [];
+  create: [];
 }>();
 </script>

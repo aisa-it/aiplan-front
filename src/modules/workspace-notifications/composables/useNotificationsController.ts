@@ -28,9 +28,10 @@ export function useNotificationsController() {
   const activeTab = ref<NotificationTab>('unread');
   const hasMoreRead = ref(true);
   const hasMoreUnread = ref(true);
-  const hasNewNotifications = ref(false);
   const isLoading = ref(false);
   const isLoadingMore = ref(false);
+  const isMarkingAllAsRead = ref(false);
+  const isMarkingAsRead = ref(false);
   const isOpen = ref(false);
   const notifications = shallowRef<WorkspaceNotification[]>([]);
   const unreadCount = ref(0);
@@ -96,7 +97,6 @@ export function useNotificationsController() {
 
       notifications.value = result;
       unreadCount.value = countUnreadNotifications(result);
-      hasNewNotifications.value = false;
     } catch {
       // TODO: показать ошибку после переноса системы уведомлений.
     } finally {
@@ -148,6 +148,41 @@ export function useNotificationsController() {
     }
   };
 
+  const markNotificationAsRead = async (id: string) => {
+    if (isMarkingAsRead.value) return;
+
+    const notification = notifications.value.find((item) => item.id === id);
+    if (!notification || notification.viewed) return;
+
+    isMarkingAsRead.value = true;
+
+    try {
+      await NotificationsService.markAsRead([id]);
+      await loadNotifications();
+    } catch {
+      // TODO: показать ошибку после переноса системы уведомлений.
+    } finally {
+      isMarkingAsRead.value = false;
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    if (isMarkingAsRead.value || !unreadNotifications.value.length) return;
+
+    isMarkingAllAsRead.value = true;
+    isMarkingAsRead.value = true;
+
+    try {
+      await NotificationsService.markAllAsRead();
+      await loadNotifications();
+    } catch {
+      // TODO: показать ошибку после переноса системы уведомлений.
+    } finally {
+      isMarkingAllAsRead.value = false;
+      isMarkingAsRead.value = false;
+    }
+  };
+
   const scheduleNotificationsRefresh = () => {
     if (refreshTimer !== undefined) return;
 
@@ -169,15 +204,12 @@ export function useNotificationsController() {
       return;
     }
 
-    hasNewNotifications.value = true;
   };
 
   const socket = useNotificationsSocket({
     onMessage: handleSocketMessage,
     onOpen: ({ isReconnect }) => {
       if (!isReconnect) return;
-
-      hasNewNotifications.value = true;
 
       if (isOpen.value) void loadNotifications();
       else void syncUnreadCount();
@@ -206,14 +238,16 @@ export function useNotificationsController() {
     activeTab,
     hasMoreRead,
     hasMoreUnread,
-    hasNewNotifications,
     isLoading,
     isLoadingMore,
+    isMarkingAllAsRead,
+    isMarkingAsRead,
     isOpen,
     loadMore,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
     notifications,
     readNotifications,
-    socketStatus: socket.status,
     unreadCount,
     unreadNotifications,
   };

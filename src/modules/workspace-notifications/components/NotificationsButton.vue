@@ -4,6 +4,9 @@
     :content="count"
     color="error"
     floating
+    location="top right"
+    offset-x="15"
+    offset-y="10"
   >
     <v-btn
       v-bind="$attrs"

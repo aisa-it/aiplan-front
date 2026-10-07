@@ -7,23 +7,6 @@ export interface NotificationsPageParams {
   offset: number;
 }
 
-export interface NotificationsPaginationState {
-  hasMoreRead: boolean;
-  hasMoreUnread: boolean;
-  offset: number;
-}
-
-export interface NotificationsListState {
-  activeTab: NotificationTab;
-  hasNewNotifications: boolean;
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  isOpen: boolean;
-  notifications: WorkspaceNotification[];
-  pagination: NotificationsPaginationState;
-  unreadCount: number;
-}
-
 export interface NotificationDateRow {
   date: string;
   key: string;
