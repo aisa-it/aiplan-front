@@ -72,19 +72,21 @@ const isActive = computed(() => {
 const iconList = ref([
   {
     name: 'infoIcon',
-    color: $q.dark ? colorMap['blue'].dark : colorMap['blue'].light,
+    color: $q.dark.isActive ? colorMap['blue'].dark : colorMap['blue'].light,
   },
   {
     name: 'checkStatusIcon',
-    color: $q.dark ? colorMap['green'].dark : colorMap['green'].light,
+    color: $q.dark.isActive ? colorMap['green'].dark : colorMap['green'].light,
   },
   {
     name: 'closeIconBorder',
-    color: $q.dark ? colorMap['red'].dark : colorMap['red'].light,
+    color: $q.dark.isActive ? colorMap['red'].dark : colorMap['red'].light,
   },
   {
     name: 'alertIcon',
-    color: $q.dark ? colorMap['orange'].dark : colorMap['orange'].light,
+    color: $q.dark.isActive
+      ? colorMap['orange'].dark
+      : colorMap['orange'].light,
   },
 ]);
 

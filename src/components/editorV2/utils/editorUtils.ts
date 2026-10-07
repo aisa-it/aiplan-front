@@ -1,6 +1,12 @@
 import { TextSelection } from '@tiptap/pm/state';
+import { generateJSON } from '@tiptap/core';
 import { Editor } from '@tiptap/vue-3';
 import { EventBus } from 'quasar';
+import {
+  adaptColorToTheme,
+  parseCssColor,
+  toHex,
+} from 'src/utils/adaptColorToTheme';
 import { bgColorMap, colorMap } from 'src/utils/editorColorMap';
 import { parseDocAnchorLink } from 'src/utils/links';
 import { scrollToAnchorId } from 'src/utils/scrollToAnchor';
@@ -317,27 +323,28 @@ const findLogicalColor = (
 };
 
 export const replaceColor = (content: string, theme: string) => {
+  const targetTheme: 'light' | 'dark' = theme === 'dark' ? 'dark' : 'light';
   let replaceContent = content;
-  replaceContent = replaceContent.replace(
-    /(color|background-color)\s*:\s*(#[0-9A-Fa-f]{6,8})/g,
-    (match, prop, hex) => {
-      const isBg = prop === 'background-color';
-      let baseHex = hex;
-      let alpha = '';
-      if (hex.length === 9) {
-        baseHex = hex.slice(0, 7);
-        alpha = hex.slice(7, 9);
-      }
-      const logicalColor = findLogicalColor(baseHex, isBg);
-      if (!logicalColor) return match;
 
-      const map = isBg ? bgColorMap : colorMap;
-      let newHex = map[logicalColor][theme];
-      if (alpha) {
-        newHex = newHex.replace('#', '');
-        return `${prop}: #${newHex}${alpha}`;
+  // Цвет из палитры меняем на пару для темы. Чужой цвет (вставка извне,
+  // rgb() или hex не из палитры) подгоняем по светлоте, чтобы не сливался.
+  replaceContent = replaceContent.replace(
+    /(color|background-color)\s*:\s*(#[0-9A-Fa-f]{3,8}|rgba?\([^)]*\))/g,
+    (match, prop, raw) => {
+      const isBg = prop === 'background-color';
+      const parsed = parseCssColor(raw);
+      if (!parsed) return match;
+
+      const baseHex = toHex({ ...parsed, alpha: undefined });
+      const alpha = parsed.alpha ?? '';
+      const logicalColor = findLogicalColor(baseHex, isBg);
+      if (logicalColor) {
+        const map = isBg ? bgColorMap : colorMap;
+        return `${prop}: ${map[logicalColor][targetTheme]}${alpha}`;
       }
-      return `${prop}: ${newHex}`;
+
+      const adapted = adaptColorToTheme(raw, targetTheme, isBg);
+      return adapted ? `${prop}: ${adapted}` : match;
     },
   );
   replaceContent = replaceContent.replace(
@@ -346,7 +353,7 @@ export const replaceColor = (content: string, theme: string) => {
       const logicalColor = findLogicalColor(hex, true);
       if (!logicalColor) return match;
 
-      const newHex = bgColorMap[logicalColor][theme];
+      const newHex = bgColorMap[logicalColor][targetTheme];
       return `${attr}="${newHex}"`;
     },
   );
@@ -357,13 +364,25 @@ export const replaceColor = (content: string, theme: string) => {
       const logicalColor = findLogicalColor(hex, false);
       if (!logicalColor) return match;
 
-      const newHex = colorMap[logicalColor][theme];
+      const newHex = colorMap[logicalColor][targetTheme];
       return `${attr}="${newHex}"`;
     },
   );
 
   return replaceContent;
 };
+
+// В хранилище цвета всегда в светлой паре: тема автора не должна менять
+// документ. Под тему перекрашиваем только на показ (replaceColor в редакторе).
+export const canonicalHtml = (html: string) => replaceColor(html, 'light');
+
+// JSON строим из канонического HTML той же схемой, что и редактор,
+// чтобы description_json не разошёлся с description_html.
+export const canonicalJson = (editor: Editor) =>
+  generateJSON(
+    canonicalHtml(editor.getHTML()),
+    editor.extensionManager.extensions,
+  );
 
 // Генерация 8 значаного hex для спойлера
 export function hexWithOpacity(hex: string, opacity: number): string {

@@ -309,6 +309,7 @@ import { useSprintStore } from 'src/modules/sprints/stores/sprint-store';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
+import { canonicalJson } from 'src/components/editorV2/utils/editorUtils';
 import { getIssueLink } from 'src/utils/links';
 import {
   getSuccessCreateIssueMessage,
@@ -578,7 +579,9 @@ const create = async () => {
 
   try {
     const content = await handleEditorValue(description.value);
-    const descriptionJson = editorInstance.value?.getJSON();
+    const descriptionJson = editorInstance.value
+      ? canonicalJson(editorInstance.value)
+      : undefined;
 
     const assigneeIds = (assigness.value as any[]).map((assignee) =>
       assignee?.member_id ? assignee?.member_id : assignee,

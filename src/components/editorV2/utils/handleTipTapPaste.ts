@@ -4,6 +4,8 @@ import { findParentNode } from '@tiptap/vue-3';
 import { convertFontSizeToPx } from 'src/utils/convertFontSizeToPx';
 import { isSingleTableInHTML } from 'src/utils/isSingleTableInHTML';
 
+import { isFromProseMirror, stripPastedStyles } from './stripPastedStyles';
+
 // Обработка вставки скопированного содержимого в редактор
 export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   const html = event.clipboardData?.getData('text/html');
@@ -30,6 +32,8 @@ export const handleTipTapPaste = (editorInstance, view, event, slice) => {
   const temp = document.createElement('template');
   temp.innerHTML = html;
   const fragment = temp.content;
+
+  if (!isFromProseMirror(html)) stripPastedStyles(fragment);
 
   // Конвертация размеров шрифта текста Word
   if (isFromMsWord) {

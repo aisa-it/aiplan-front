@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { colorMap, bgColorMap } from 'src/utils/editorColorMap';
 import { hexWithOpacity, getOpacityFromHex } from '../utils/editorUtils';
@@ -154,25 +154,29 @@ const emits = defineEmits<{
 }>();
 
 const $q = useQuasar();
-const theme = $q.dark.isActive ? 'dark' : 'light';
+const theme = computed(() => ($q.dark.isActive ? 'dark' : 'light'));
 
 const selectedBgColor = ref<string>('');
 const selectedTextColor = ref<string>('');
 const opacity = ref<number>(0.2);
 
 // Генерация цветов для текста
-const colors = Object.entries(colorMap).map(([, value]) => ({
-  color: value[theme],
-  label: value.label,
-}));
+const colors = computed(() =>
+  Object.entries(colorMap).map(([, value]) => ({
+    color: value[theme.value],
+    label: value.label,
+  })),
+);
 
 // Генерация фона
-const bgColors = Object.entries(bgColorMap).map(([key, value]) => ({
-  bgColor: value[theme],
-  color: colorMap[key as keyof typeof colorMap]?.[theme] || '#000',
-  label: value.label,
-  key: value.key,
-}));
+const bgColors = computed(() =>
+  Object.entries(bgColorMap).map(([key, value]) => ({
+    bgColor: value[theme.value],
+    color: colorMap[key as keyof typeof colorMap]?.[theme.value] || '#000',
+    label: value.label,
+    key: value.key,
+  })),
+);
 
 const clearValues = () => {
   selectedBgColor.value = '';
@@ -185,7 +189,7 @@ const generateSpoiler = () => {
     bgColor: hexWithOpacity(selectedBgColor.value, opacity.value),
     textColor:
       selectedTextColor.value === ''
-        ? colorMap['default']?.[theme]
+        ? colorMap['default']?.[theme.value]
         : selectedTextColor.value,
   });
   clearValues();

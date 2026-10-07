@@ -248,6 +248,7 @@ import {
   getEditorProps,
   useHandleMouseUp,
   replaceColor,
+  canonicalHtml,
 } from './utils/editorUtils';
 import EditorCommentLinkTitleDialog from './components/EditorCommentLinkTitleDialog.vue';
 import EditorTooltipMention from './components/EditorTooltipMention.vue';
@@ -323,6 +324,7 @@ const emits = defineEmits<{
 }>();
 
 const $q = useQuasar();
+const currentTheme = () => ($q.dark.isActive ? 'dark' : 'light');
 const route = useRoute();
 const router = useRouter();
 const aidocStore = useAiDocStore();
@@ -439,11 +441,14 @@ function createEditor() {
   }
 
   editorInstance.value = new Editor({
-    content: props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
+    content: replaceColor(
+      props.modelValue.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;'),
+      currentTheme(),
+    ),
     editable: !isReadOnly.value,
     extensions: editorExtensions.value as any,
     onUpdate: () => {
-      const html = editorInstance.value?.getHTML() ?? '';
+      const html = canonicalHtml(editorInstance.value?.getHTML() ?? '');
       lastEmittedHtml = html;
       emits('update:modelValue', html);
       emits('updateEditorDOM', editorInstance.value?.state.doc);
@@ -642,6 +647,20 @@ watch(
   },
 );
 
+// Цвета в документе привязаны к теме: при переключении перекрашиваем
+// содержимое на месте, без эмита — иначе каждая смена темы была бы правкой.
+watch(
+  () => $q.dark.isActive,
+  () => {
+    if (!editorInstance.value) return;
+    const html = editorInstance.value.getHTML();
+    const content = replaceColor(html, currentTheme());
+    if (content === html) return;
+    editorInstance.value.commands.setContent(content, { emitUpdate: false });
+    lastEmittedHtml = null;
+  },
+);
+
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -652,7 +671,7 @@ watch(
 
     newVal = newVal.replaceAll('\t', '&nbsp;&nbsp;&nbsp;&nbsp;');
     if (newVal !== editorInstance.value.getHTML()) {
-      let content = replaceColor(newVal, $q.dark.isActive ? 'dark' : 'light');
+      const content = replaceColor(newVal, currentTheme());
       editorInstance.value.commands.setContent(content, { emitUpdate: false });
       refreshTocLinks();
     }

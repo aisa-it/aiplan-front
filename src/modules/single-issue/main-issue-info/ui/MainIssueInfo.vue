@@ -187,6 +187,7 @@ import { useAiplanStore } from 'src/stores/aiplan-store';
 
 // utils
 import { handleEditorValue } from 'src/components/editorV2/utils/tiptap';
+import { canonicalJson } from 'src/components/editorV2/utils/editorUtils';
 import { getFullName } from 'src/utils/helpers';
 import aiplan from 'src/utils/aiplan';
 import { usePalette } from 'src/modules/project-settings/labels/composables/usePalette';
@@ -327,7 +328,7 @@ const handleUpdateTitleAndEditor = async () => {
       description_html: contents.html as string,
       description_stripped: editor.value?.getText(),
       description_type: 1,
-      description_json: editor.value?.getJSON(),
+      description_json: editor.value ? canonicalJson(editor.value) : undefined,
     },
     contents?.files ?? [],
   )
