@@ -24,7 +24,7 @@
       v-model="currentTab"
       align-tabs="start"
       color="primary"
-      :grow="isMobile"
+      :grow="mobile"
       class="mb-2"
     >
       <v-tab
@@ -71,12 +71,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useMediaQuery } from '@vueuse/core';
 
 import { useProjectStore } from '@/stores/project-store';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
 import PinIcon from '@/components/icons/PinIcon.vue';
+
 import {
   ProjectIssueList,
   IssueTableSkeleton,
@@ -87,6 +87,8 @@ const props = defineProps<{
   workspaceSlug: string;
   projectId: string;
 }>();
+
+import { useDisplay } from 'vuetify';
 
 type ProjectTab = 'general' | 'pinned' | 'analytics';
 
@@ -113,7 +115,8 @@ const tabs: Array<{
 ];
 
 const currentTab = ref<ProjectTab>('general');
-const isMobile = useMediaQuery('(max-width: 639px)');
+
+const { mobile } = useDisplay();
 const { project, meInProject, isLoading } = storeToRefs(useProjectStore());
 
 const issueListScope = computed<ProjectIssueListScope | undefined>(() => {

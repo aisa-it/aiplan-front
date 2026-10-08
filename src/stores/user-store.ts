@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import type {
   AiplanUserUpdateRequest,
@@ -15,27 +14,20 @@ type UpdateCurrentUserRequest = AiplanUserUpdateRequest & {
 };
 
 export const useUserStore = defineStore('user-store', () => {
-  const router = useRouter();
   const user = ref<DtoUser | null>(null);
+  const projectRoleName = ref('');
+  const workspaceRoleName = ref('');
 
   async function getUserInfo() {
     try {
       const res = await usersApi.getCurrentUser();
       user.value = res.data;
 
-      if (router?.currentRoute?.value?.path.includes('not-found')) {
-        return;
-      }
-
-      if (!res.data.is_onboarded) {
-        return router.replace('/onboarding');
-      }
-
-      if (user.value.theme?.open_in_new === undefined) {
+      if (user.value?.theme?.open_in_new === undefined) {
         await updateCurrentUser({
           theme: {
-            dark: user.value.theme?.dark,
-            contrast: user.value.theme?.contrast,
+            dark: user.value?.theme?.dark,
+            contrast: user.value?.theme?.contrast,
             open_in_new: false,
           },
         });
@@ -60,6 +52,8 @@ export const useUserStore = defineStore('user-store', () => {
 
   return {
     user,
+    projectRoleName,
+    workspaceRoleName,
     getUserInfo,
     replaceUser,
     updateCurrentUser,

@@ -3,19 +3,31 @@ import type {
   IssueListActions,
   ProjectIssueListScope,
 } from '../model/issue-list.types';
-import { useRolesStore } from '@/stores/roles-store';
 import { useProjectStore } from '@/stores/project-store';
+import { useUserStore } from '@/stores/user-store';
+import { checkPermissionByIssue } from '@/utils/permissions';
 
 export const useProjectIssueListActions = (
   scope: ProjectIssueListScope,
 ): IssueListActions => {
-  const roleStore = useRolesStore();
+  const userStore = useUserStore();
   const projectStore = useProjectStore();
 
   return {
     canEdit(issue, field) {
-      return roleStore.hasPermissionByIssue(
-        issue,
+      let issueRole = '';
+
+      const isAssignee = issue?.assignee_details?.some(
+        (assignee) => assignee.id === userStore.user?.id,
+      );
+      if (isAssignee) issueRole = 'assignee';
+
+      if (issue?.author_detail?.id === userStore.user?.id) issueRole = 'author';
+
+      return checkPermissionByIssue(
+        userStore.workspaceRoleName,
+        userStore.projectRoleName,
+        issueRole,
         field === 'state' ? 'change-issue-status' : 'change-issue-primary',
       );
     },
