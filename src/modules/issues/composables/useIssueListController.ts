@@ -12,7 +12,7 @@ import type {
   IssueListActions,
   IssueListInitialState,
   IssueListSource,
-} from './issue-list.types';
+} from '../model/issue-list.types';
 
 export const useIssueListController = (
   source: IssueListSource,

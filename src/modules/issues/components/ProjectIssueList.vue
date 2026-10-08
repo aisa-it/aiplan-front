@@ -13,7 +13,7 @@ import { createProjectIssueListSource } from '../api/project-issue-list.source';
 import { provideIssueListController } from '../model/issue-list.context';
 import { createIssueListInitialState } from '../model/issue-list.defaults';
 import type { ProjectIssueListScope } from '../model/issue-list.types';
-import { useIssueListController } from '../model/useIssueListController';
+import { useIssueListController } from '../composables/useIssueListController.ts';
 import IssueTable from './IssueTable.vue';
 import { useProjectIssueListActions } from '../composables/useProjectIssueListActions';
 

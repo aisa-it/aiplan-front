@@ -1,6 +1,6 @@
 import { inject, provide, type InjectionKey } from 'vue';
 
-import type { IssueListController } from './useIssueListController';
+import type { IssueListController } from '../composables/useIssueListController';
 
 const ISSUE_LIST_CONTROLLER_KEY: InjectionKey<IssueListController> = Symbol(
   'issue-list-controller',
