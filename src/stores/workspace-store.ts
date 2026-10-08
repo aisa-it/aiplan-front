@@ -33,6 +33,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
     workspaceInfo.value = (await workspaceApi.getWorkspace(workspaceSlug)).data;
+    currentWorkspaceSlug.value = workspaceInfo.value.slug ?? '';
     await getMeInWorkspace(workspaceSlug);
   }
 

@@ -1,8 +1,5 @@
 <template>
-  <v-card
-    :rounded="isMobile ? 0 : 'lg'"
-    class="flex h-full w-full flex-col overflow-hidden"
-  >
+  <v-card class="flex h-full w-full flex-col overflow-hidden">
     <div class="flex items-center px-6 pt-6 pb-4">
       <h5 class="m-0 text-xl font-medium">Уведомления</h5>
 
@@ -10,25 +7,16 @@
 
       <v-btn
         v-if="canCreate"
-        :aria-label="isMobile ? 'Создать уведомление' : undefined"
+        aria-label="Создать уведомление"
         class="normal-case"
         color="primary"
         :icon="isMobile"
-        variant="text"
+        variant="outlined"
         @click="$emit('create')"
       >
         <AddIcon />
         <span v-if="!isMobile" class="ml-1">Создать уведомление</span>
       </v-btn>
-
-      <v-btn
-        v-if="isMobile"
-        aria-label="Закрыть уведомления"
-        icon="mdi-close"
-        variant="text"
-        :ripple="false"
-        @click="$emit('close')"
-      />
     </div>
 
     <div
@@ -63,7 +51,6 @@ defineProps<{
 }>();
 
 defineEmits<{
-  close: [];
   create: [];
 }>();
 </script>

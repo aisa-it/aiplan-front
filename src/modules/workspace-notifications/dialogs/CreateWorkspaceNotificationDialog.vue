@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="isOpen" persistent max-width="576">
-    <v-card class="flex flex-col gap-3 p-6" rounded="xl">
+    <v-card class="flex flex-col gap-3 p-6 text-default" rounded="xl">
       <div class="flex items-center justify-between">
         <h6 class="m-0 text-lg font-semibold">Создать уведомление</h6>
 
@@ -8,6 +8,7 @@
           aria-label="Закрыть"
           icon="mdi-close"
           variant="text"
+          color="text"
           @click="isOpen = false"
         />
       </div>
@@ -24,7 +25,9 @@
         rows="3"
       />
 
-      <div class="flex items-center justify-between gap-4 max-sm:flex-col-reverse max-sm:items-stretch">
+      <div
+        class="flex items-center justify-between gap-4 max-sm:flex-col-reverse max-sm:items-stretch"
+      >
         <v-checkbox
           class="shrink-0"
           density="compact"
@@ -34,9 +37,10 @@
           @update:model-value="setAllSelected"
         />
 
+        <!-- TODO: вставить универсальный выбор пользователя, когда будет реализован -->
         <v-autocomplete
           v-model="form.members"
-          class="w-[336px] max-sm:w-full"
+          class="w-84 max-sm:w-full"
           chips
           clearable
           closable-chips
@@ -54,14 +58,16 @@
           <template #item="{ props: itemProps, item }">
             <v-list-item v-bind="itemProps">
               <template #prepend>
-                <UserAvatar :user="getMemberUser(item)" />
+                <UserAvatarMenu :user="getMemberUser(item)" hide-user-name />
               </template>
             </v-list-item>
           </template>
         </v-autocomplete>
       </div>
 
-      <div class="flex items-start justify-between gap-4 max-sm:flex-col-reverse max-sm:items-stretch">
+      <div
+        class="flex items-start justify-between gap-4 max-sm:flex-col-reverse max-sm:items-stretch"
+      >
         <v-checkbox
           class="shrink-0"
           density="compact"
@@ -71,9 +77,10 @@
           @update:model-value="setSendNow"
         />
 
+        <!-- TODO: вставить универсальный выбор даты с дата пикером, когда будет реализован -->
         <v-text-field
           v-model="form.send_at"
-          class="w-[336px] max-sm:w-full"
+          class="w-84 max-sm:w-full"
           density="compact"
           hide-details="auto"
           label="Дата и время отправки"
@@ -101,6 +108,7 @@
         <v-btn
           class="normal-case max-sm:w-full"
           color="primary"
+          variant="flat"
           :disabled="!isReadyToSend"
           :loading="isSending"
           @click="onSend"
@@ -116,7 +124,7 @@
 import { ref, watch } from 'vue';
 import dayjs from 'dayjs';
 
-import UserAvatar from '@/components/user-avatar/UserAvatar.vue';
+import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
 import { useCreateWorkspaceNotification } from '../composables';
 
 import type {
