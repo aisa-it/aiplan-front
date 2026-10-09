@@ -13,7 +13,7 @@
 import { useMeta } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { onBeforeRouteLeave, useRoute } from 'vue-router';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 // stores
 import { useProjectStore } from 'src/stores/project-store';
@@ -40,35 +40,32 @@ const {
 } = storeToRefs(singleIssueStore);
 
 // metadata
-const metadata = ref({
-  title: 'Загрузка...',
+const metaTitle = computed(() => {
+  const issue = issueData.value;
+  if (!issue || issue.id !== currentIssueID.value) return 'Загрузка...';
+  return `${issue.project_detail.identifier}-${issue.sequence_id}: ${issue.name}`;
 });
 
 useMeta(() => {
   return {
-    title: metadata.value.title,
+    title: metaTitle.value,
   };
 });
 
 const isRefreshIssue = ref(true);
 
 // functions
-const setMetaTitle = () => {
-  metadata.value.title = `Задача ${issueData.value.project_detail.identifier}-${issueData.value.sequence_id}`;
-};
-
 const issuePageInit = async () => {
-  if (issueData.value && issueData.value.id === currentIssueID.value) {
-    setMetaTitle();
-  } else {
+  if (!issueData.value || issueData.value.id !== currentIssueID.value) {
     await refresh();
   }
 };
 
 const refresh = async () => {
-  await singleIssueStore
-    .getIssueData(route.params.workspace, route.params.project)
-    .then(setMetaTitle);
+  await singleIssueStore.getIssueData(
+    route.params.workspace,
+    route.params.project,
+  );
 };
 
 const refreshActivitiesComments = async () => {
