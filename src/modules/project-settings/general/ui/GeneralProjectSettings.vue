@@ -151,6 +151,21 @@
     </div>
   </div>
 
+  <div class="row mobile-block q-mt-md">
+    <div class="col">
+      <h4 class="text-lg font-semibold text-brand-base">
+        Правила действуют на администраторов
+      </h4>
+      <p class="text-sm text-brand-secondary">
+        Скрипт правил и схема переходов статусов будут применяться и к
+        администраторам проекта, а не только к участникам
+      </p>
+    </div>
+    <div class="col q-mt-xs flex items-center">
+      <q-toggle v-model="projectForm.admin_rules_enforced" />
+    </div>
+  </div>
+
   <q-card-actions style="background-color: transparent" align="right">
     <q-btn
       :flat="!hasChanges"
@@ -288,6 +303,7 @@ const { hasChanges, init } = useFormChanges(projectForm, {
       issue_deletion_allowed: val.issue_deletion_allowed,
       member_attachments_allowed: val.member_attachments_allowed,
       member_properties_allowed: val.member_properties_allowed,
+      admin_rules_enforced: val.admin_rules_enforced,
     };
   },
 });
@@ -336,6 +352,7 @@ async function onSubmit() {
     issue_deletion_allowed: projectForm.value.issue_deletion_allowed,
     member_attachments_allowed: projectForm.value.member_attachments_allowed,
     member_properties_allowed: projectForm.value.member_properties_allowed,
+    admin_rules_enforced: projectForm.value.admin_rules_enforced,
   };
 
   await updateThisProject(payload);

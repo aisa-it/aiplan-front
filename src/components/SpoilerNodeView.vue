@@ -10,7 +10,7 @@
           v-model="title"
           :readonly="readonly"
           :input-style="{ color: `${styleColors.color} !important` }"
-          class="title-input-spoiler"
+          :class="['title-input-spoiler', { 'title-input-spoiler--readonly': readonly }]"
           placeholder="Спойлер"
           dense
           borderless
@@ -195,6 +195,10 @@ onMounted(() => {
 
 .title-input-spoiler {
   flex-grow: 1;
+}
+
+.title-input-spoiler--readonly {
+  pointer-events: none;
 }
 
 .title-input-spoiler :deep(.q-field__native) {
