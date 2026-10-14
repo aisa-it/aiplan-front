@@ -522,6 +522,16 @@ const columns = [
   },
   {
     style: 'width: 10px',
+    name: 'watchers',
+    align: 'center',
+    label: 'Наблюдатели',
+    field: (row: any) => {
+      return row.watcher_details;
+    },
+    sortable: true,
+  },
+  {
+    style: 'width: 10px',
     name: 'labels',
     align: 'left',
     label: 'Теги',

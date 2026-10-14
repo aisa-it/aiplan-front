@@ -130,7 +130,11 @@
       </q-td>
     </template>
 
-    <template v-slot:body-cell-assignees="props">
+    <template
+      v-for="slot in ['assignees', 'watchers']"
+      :key="slot"
+      #[`body-cell-${slot}`]="props"
+    >
       <q-td :props="props" style="position: relative">
         <AvatarImage
           v-for="(l, n) in props.value"

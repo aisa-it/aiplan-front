@@ -16,6 +16,7 @@ export const FIXED_WIDTH_COLUMNS = new Set([
   'updated_at',
   'author',
   'assignees',
+  'watchers',
   'sub_issues_count',
   'linked_issues_count',
   'link_count',

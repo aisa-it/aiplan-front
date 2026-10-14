@@ -83,7 +83,7 @@ const params = ref<ParamItem[]>([
   {
     icon: markRaw(ObserveIcon),
     label: 'Наблюдатель',
-    name: 'wathcers',
+    name: 'watchers',
     show: true,
   },
   {

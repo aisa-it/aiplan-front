@@ -105,6 +105,10 @@
         <AssigneesColumn :row-info="props" />
       </template>
 
+      <template v-slot:body-cell-watchers="props">
+        <AssigneesColumn :row-info="props" />
+      </template>
+
       <template v-slot:body-cell-labels="props">
         <LabelsColumn :row-info="props" />
       </template>

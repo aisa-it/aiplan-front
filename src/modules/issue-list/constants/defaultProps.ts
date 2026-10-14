@@ -25,6 +25,7 @@ export const DEFAULT_VIEW_PROPS = {
     'updated_at',
     'author',
     'assignees',
+    'watchers',
     'labels',
     'sub_issues_count',
     'linked_issues_count',

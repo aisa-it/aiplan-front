@@ -127,6 +127,15 @@ export const allColumns = [
     sortable: true,
   },
   {
+    name: 'watchers',
+    align: 'center',
+    label: 'Наблюдатели',
+    field: (row: any) => {
+      return row.watcher_details;
+    },
+    sortable: true,
+  },
+  {
     name: 'labels',
     align: 'left',
     label: 'Теги',

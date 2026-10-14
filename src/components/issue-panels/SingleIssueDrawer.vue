@@ -103,7 +103,7 @@
 
       <div
         class="row q-pt-md centered-horisontally"
-        v-if="!hideSettings.includes('wathcers')"
+        v-if="!hideSettings.includes('watchers')"
       >
         <div class="col">
           <div class="row items-center">

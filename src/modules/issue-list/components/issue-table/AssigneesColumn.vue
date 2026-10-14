@@ -9,7 +9,7 @@
       :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
       :image="l.avatar_id"
       :member="l"
-      @click.stop="navigateToActivityPage(rowInfo.row.assignee_details[n]?.id)"
+      @click.stop="navigateToActivityPage(l?.id)"
     >
     </AvatarImage>
   </q-td>
