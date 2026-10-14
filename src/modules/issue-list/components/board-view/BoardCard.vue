@@ -121,7 +121,26 @@
             :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
             :image="l?.avatar_id"
             :member="l"
-            @click.stop="navigateToActivityPage(card.assignee_details[n]?.id)"
+            @click.stop="navigateToActivityPage(l?.id)"
+          >
+          </AvatarImage>
+        </div>
+
+        <div
+          v-if="contextProps?.columns_to_show?.includes('watchers')"
+          class="q-ml-md"
+          style="position: relative"
+        >
+          <AvatarImage
+            v-for="(l, n) in card?.watcher_details"
+            :style="{ zIndex: card?.watcher_details?.length - n + 2 }"
+            class="overlapping"
+            :key="l?.name"
+            :tooltip="avatarText(l).join(' ')"
+            :text="[avatarText(l)[0]?.at(0), avatarText(l)[1]?.at(0)].join(' ')"
+            :image="l?.avatar_id"
+            :member="l"
+            @click.stop="navigateToActivityPage(l?.id)"
           >
           </AvatarImage>
         </div>

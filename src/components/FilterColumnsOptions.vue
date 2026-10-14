@@ -11,6 +11,7 @@
     :option-label="(col) => col.label"
     :option-value="(col) => col.name"
     popup-content-class="columns-dnd-menu"
+    :virtual-scroll-slice-size="columns.length"
     @popup-show="onPopupShow"
   >
     <template #option="scope">
@@ -85,19 +86,22 @@ const { initSortable } = useSortable(sortableContainer, {
   ghostClass: 'sortable-ghost',
   chosenClass: 'sortable-chosen',
   animation: 150,
-  onEnd: ({ oldIndex, newIndex }) => {
-    if (oldIndex == null || newIndex == null) return;
-    if (oldIndex === newIndex) return;
+  // порядок берём из DOM по data-id, а перенос откатываем: списком владеет Vue
+  onEnd: ({ evt }) => {
+    const { from, item, oldIndex } = evt;
+    const order = Array.from(
+      from.querySelectorAll<HTMLElement>('.draggable-item'),
+      (el) => el.dataset.id,
+    );
 
-    const newOrder = [...props.columns];
-
-    newOrder.splice(newIndex + 1, 0, newOrder.splice(oldIndex + 1, 1)[0]);
+    from.removeChild(item);
+    from.insertBefore(item, from.children[oldIndex ?? 0] ?? null);
 
     emits(
       'update:columnsToShow',
-      newOrder
-        .map((el) => el.name)
-        .filter((el) => props.columnsToShow.includes(el)),
+      order.filter((name): name is string =>
+        props.columnsToShow.includes(name ?? ''),
+      ),
     );
   },
 });
