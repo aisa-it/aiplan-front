@@ -39,10 +39,20 @@ const {
   issueStatusesData,
 } = storeToRefs(singleIssueStore);
 
+// В роуте может быть как UUID, так и sequence_id задачи.
+const isCurrentIssueLoaded = () => {
+  const issue = issueData.value;
+  if (!issue) return false;
+  return (
+    issue.id === currentIssueID.value ||
+    String(issue.sequence_id) === currentIssueID.value
+  );
+};
+
 // metadata
 const metaTitle = computed(() => {
   const issue = issueData.value;
-  if (!issue || issue.id !== currentIssueID.value) return 'Загрузка...';
+  if (!issue || !isCurrentIssueLoaded()) return 'Загрузка...';
   return `${issue.project_detail.identifier}-${issue.sequence_id}: ${issue.name}`;
 });
 
@@ -56,7 +66,7 @@ const isRefreshIssue = ref(true);
 
 // functions
 const issuePageInit = async () => {
-  if (!issueData.value || issueData.value.id !== currentIssueID.value) {
+  if (!isCurrentIssueLoaded()) {
     await refresh();
   }
 };
