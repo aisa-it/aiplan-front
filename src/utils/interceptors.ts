@@ -2,6 +2,7 @@ import type { AxiosInstance, AxiosResponse } from 'axios';
 import { NON_VALIDATED_ROUTES } from '@/constants/constants';
 import { NOT_FOUND_ERROR_CODES } from '@/constants/notFoundErrorCodes';
 import { allowedNotFoundServices } from '@/utils/validation';
+import { toast } from '@/modules/toast';
 // import { handleNotify } from './notify';
 
 const validateRouteCheck = (route: string): boolean =>
@@ -35,15 +36,11 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
       const { status, data } = res ?? {};
       let refreshInterval: any;
 
-      if (status.toString().startsWith('5')) {
+      if (status && status.toString().startsWith('5')) {
         return fetch('/api/_health/').catch(() => {
-          //TODO: реализовать систему нотификаций handleNotify
-          /*   handleNotify({
-            open: true,
-            type: 'error',
-            customMessage: 'Сервер сейчас недоступен. Сохраните свои данные!',
+          toast.error('Сервер сейчас недоступен. Сохраните свои данные!', {
             timeout: 0,
-          }); */
+          });
 
           refreshInterval = setInterval(() => {
             fetch('/api/_health/').then(() => {
@@ -78,12 +75,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
           return Promise.reject(error);
         case 409:
         default:
-        //TODO: реализовать систему нотификаций handleNotify
-        /*  handleNotify({
-            open: true,
-            type: 'error',
-            customMessage: data?.code ? data.ru_error : data.error,
-          }); */
+          toast.error(data?.code ? data.ru_error : data?.error);
       }
       return Promise.reject(error);
     },
