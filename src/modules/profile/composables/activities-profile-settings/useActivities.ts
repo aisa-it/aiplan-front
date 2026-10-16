@@ -35,10 +35,8 @@ export function useActivities() {
     try {
       userActivityMap.value =
         await ProfileService.getActivitiesTable(requestParams);
-    } catch (error) {
-      void error;
+    } catch {
       clearUserActivityMap();
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
     } finally {
       loadReq.value = false;
     }

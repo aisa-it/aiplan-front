@@ -12,6 +12,7 @@ import type {
   DtoUser,
   TypesUserSettings,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { toast } from '@/modules/toast';
 
 type NotificationChannelKey = (typeof NOTIFICATION_CHANNELS)[number]['key'];
 
@@ -46,11 +47,9 @@ export function useFormNotifications(user: Ref<DtoUser>) {
       };
 
       await userStore.updateCurrentUser({ settings: updatedSettings });
-      // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
-    } catch (error) {
-      void error;
+      toast.success();
+    } catch {
       syncSettings(user.value.settings);
-      // TODO: показать уведомление BASE_ERROR после переноса системы уведомлений.
     } finally {
       saving.value = false;
     }
