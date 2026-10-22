@@ -38,6 +38,7 @@ const vuetify = createVuetify({
           success: '#81C784',
           warning: '#FFD54F',
           background: '#1f2228',
+          surface: '#1f2228',
           text: '#bac4d5',
         },
       },
