@@ -62,7 +62,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   'update:selectedPage': [value: number];
   'update:rowsPerPage': [value: number];
-  request: [options: { page: number; rowsPerPage?: number }, source: string];
+  request: [options: { page: number; rowsPerPage?: number }];
 }>();
 
 const pagesCount = computed(() =>
@@ -73,12 +73,12 @@ const pagesCount = computed(() =>
 
 const updateSelectedPage = (value: number) => {
   emit('update:selectedPage', value);
-  emit('request', { page: value }, 'selectedPage');
+  emit('request', { page: value });
 };
 
 const updateRowsPerPage = (value: number) => {
   emit('update:rowsPerPage', value);
   emit('update:selectedPage', 1);
-  emit('request', { page: 1, rowsPerPage: value }, 'rowsPerPage');
+  emit('request', { page: 1, rowsPerPage: value });
 };
 </script>

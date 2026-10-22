@@ -17,6 +17,8 @@ const formatRequestDate = (date: Date) => {
 };
 
 export function useActivities() {
+  let listRequestId = 0;
+
   const loadReq = ref(true);
   const loadList = ref(true);
   const userActivityMap = ref<TypesActivityTable>({});
@@ -47,8 +49,7 @@ export function useActivities() {
     try {
       userActivityMap.value =
         await ProfileService.getActivitiesTable(requestParams);
-    } catch (error) {
-      void error;
+    } catch {
       clearUserActivityMap();
       // TODO: показать уведомление об ошибке после переноса системы уведомлений.
     } finally {
@@ -60,6 +61,7 @@ export function useActivities() {
     { page, rowsPerPage }: ActivitiesListRequest,
     day?: string,
   ) => {
+    const requestId = ++listRequestId;
     loadList.value = true;
 
     try {
@@ -69,19 +71,25 @@ export function useActivities() {
         limit: rowsPerPage,
       });
 
+      if (requestId !== listRequestId) return;
+
       activities.value = response.result ?? [];
       activitiesCount.value = response.count ?? 0;
-    } catch (error) {
-      void error;
+    } catch {
+      if (requestId !== listRequestId) return;
+
       clearActivities();
       // TODO: показать уведомление об ошибке после переноса системы уведомлений.
     } finally {
-      loadList.value = false;
+      if (requestId === listRequestId) {
+        loadList.value = false;
+      }
     }
   };
 
   onMounted(loadActivities);
   onBeforeUnmount(() => {
+    listRequestId += 1;
     clearUserActivityMap();
     clearActivities();
   });

@@ -2,6 +2,10 @@ import {
   createExternalLinkPart,
   createTextPart,
 } from '../../activity-message.helpers';
+import {
+  createProjectLink,
+  createWorkspaceLink,
+} from '../../entity-link.helpers';
 import { getDetailNumber, getDetailString } from '../../activity-value.helpers';
 
 import type { ActivityRenderContext } from '../../../model/activity.types';
@@ -22,19 +26,6 @@ const isCurrentProject = (context: ActivityRenderContext) =>
 
 const isCurrentWorkspace = (context: ActivityRenderContext) =>
   context.scope === 'entity' && context.entity.type === 'workspace';
-
-export const createProjectLink = (
-  activity: DtoActivityEventFull,
-): ActivityMessagePart => {
-  const project = activity.project_detail;
-  const workspaceSlug = activity.workspace_detail?.slug;
-  const href =
-    (workspaceSlug && project?.identifier
-      ? `/${workspaceSlug}/projects/${project.identifier}`
-      : undefined) ?? project?.url;
-
-  return createExternalLinkPart(href, `"${project?.name ?? ''}"`);
-};
 
 export const createProjectRelationParts = (
   activity: DtoActivityEventFull,
@@ -64,13 +55,9 @@ export const createWorkspaceSourceParts = (
     return [];
   }
 
-  const workspace = activity.workspace_detail;
-  const href =
-    workspace?.url ?? (workspace?.slug ? `/${workspace.slug}` : undefined);
-
   return [
     createTextPart('в пространстве '),
-    createExternalLinkPart(href, `"${workspace?.name ?? ''}"`),
+    createWorkspaceLink(activity),
   ];
 };
 

@@ -3,8 +3,8 @@ import {
   createTextPart,
 } from '../../activity-message.helpers';
 import { getActivityUserName } from '../../activity-value.helpers';
+import { createProjectLink } from '../../entity-link.helpers';
 import {
-  createProjectLink,
   createOptionalProjectLinkParts,
   createProjectRelationParts,
   createWorkspaceContextParts,

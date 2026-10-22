@@ -12,7 +12,7 @@ const renderWorkspaceCreated: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(`${getActivityVerbText(activity.verb)} пространство `),
     createExternalLinkPart(
-      activity.entity_url,
+      activity.new_entity_detail.url,
       `"${activity.new_value ?? ''}"`,
     ),
   );

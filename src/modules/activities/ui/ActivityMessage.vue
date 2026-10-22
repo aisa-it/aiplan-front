@@ -12,15 +12,6 @@
         {{ part.text }}
       </a>
 
-      <RouterLink
-        v-else-if="part.type === 'route-link'"
-        :to="part.to"
-        class="text-primary no-underline"
-        :class="part.emphasized ? 'font-semibold' : 'font-normal'"
-      >
-        {{ part.text }}
-      </RouterLink>
-
       <span v-else>{{ part.text }}</span>
     </template>
   </span>

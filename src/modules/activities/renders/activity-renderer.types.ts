@@ -1,6 +1,5 @@
 import type { ActivityRenderContext } from '../model/activity.types';
 
-import type { RouteLocationRaw } from 'vue-router';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 export interface ActivityTextPart {
@@ -15,17 +14,9 @@ export interface ActivityExternalLinkPart {
   emphasized?: boolean;
 }
 
-export interface ActivityRouteLinkPart {
-  type: 'route-link';
-  text: string;
-  to: RouteLocationRaw;
-  emphasized?: boolean;
-}
-
 export type ActivityMessagePart =
   | ActivityTextPart
-  | ActivityExternalLinkPart
-  | ActivityRouteLinkPart;
+  | ActivityExternalLinkPart;
 
 export interface ActivityMessage {
   parts: readonly ActivityMessagePart[];

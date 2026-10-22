@@ -49,7 +49,12 @@
                   ]"
                   :style="getSquarePosition(index)"
                   :aria-label="`Дата: ${square.date} Активность: ${square.count}`"
-                  @click="emit('update:selectedDay', square.date)"
+                  @click="
+                    emit(
+                      'update:selectedDay',
+                      selectedDay === square.date ? '' : square.date,
+                    )
+                  "
                 />
               </template>
               <span>

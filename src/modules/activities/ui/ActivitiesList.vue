@@ -81,11 +81,11 @@ const page = ref(1);
 const rowsPerPage = ref(10);
 
 const renderedActivities = computed(() =>
-  props.rows.flatMap((activity, index) => {
-    const message = renderActivity(activity, props.context);
-
-    return message ? [{ activity, index, message }] : [];
-  }),
+  props.rows.map((activity, index) => ({
+    activity,
+    index,
+    message: renderActivity(activity, props.context),
+  })),
 );
 
 const pagesCount = computed(() =>

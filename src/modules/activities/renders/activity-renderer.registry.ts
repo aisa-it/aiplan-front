@@ -1,3 +1,4 @@
+import { renderDocActivity } from './entities/doc-activity';
 import { renderFormActivity } from './entities/form-activity';
 import { renderIssueActivity } from './entities/issue-activity';
 import { renderRootActivity } from './entities/root-activity';
@@ -9,8 +10,9 @@ import type { ActivityEntityType } from '../model/activity.types';
 import type { ActivityRenderer } from './activity-renderer.types';
 
 export const activityRendererRegistry: Readonly<
-  Partial<Record<ActivityEntityType, ActivityRenderer>>
+  Record<ActivityEntityType, ActivityRenderer>
 > = {
+  doc: renderDocActivity,
   form: renderFormActivity,
   issue: renderIssueActivity,
   project: renderProjectActivity,

@@ -1,13 +1,10 @@
-import dayjs from 'dayjs';
-import 'dayjs/locale/ru';
-import relativeTime from 'dayjs/plugin/relativeTime';
-
-import { formatDateTime, isTodayDate } from '@/utils/time';
-
-dayjs.locale('ru');
-dayjs.extend(relativeTime);
+import {
+  formatDateTime,
+  formatRelativeTime,
+  isTodayDate,
+} from '@/utils/time';
 
 export const formatActivityDate = (date: string) =>
   isTodayDate(date)
-    ? dayjs(date).fromNow().toLowerCase()
+    ? formatRelativeTime(date)
     : formatDateTime(date);

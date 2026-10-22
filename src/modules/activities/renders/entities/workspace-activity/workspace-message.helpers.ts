@@ -1,8 +1,5 @@
-import {
-  createExternalLinkPart,
-  createTextPart,
-} from '../../activity-message.helpers';
-import { getDetailString } from '../../activity-value.helpers';
+import { createTextPart } from '../../activity-message.helpers';
+import { createWorkspaceLink } from '../../entity-link.helpers';
 
 import type { ActivityRenderContext } from '../../../model/activity.types';
 import type { ActivityMessagePart } from '../../activity-renderer.types';
@@ -15,16 +12,6 @@ const WORKSPACE_RELATION_TEXT: Readonly<Record<WorkspaceRelation, string>> = {
   from: 'из пространства ',
   in: 'в пространство ',
   of: 'пространства ',
-};
-
-const createWorkspaceLink = (
-  activity: DtoActivityEventFull,
-): ActivityMessagePart => {
-  const workspace = activity.workspace_detail;
-  const href =
-    workspace?.url ?? (workspace?.slug ? `/${workspace.slug}` : undefined);
-
-  return createExternalLinkPart(href, `"${workspace?.name ?? ''}"`);
 };
 
 export const createWorkspaceRelationParts = (
@@ -66,21 +53,4 @@ export const createWorkspaceContextParts = (
   return workspaceParts.length
     ? [createTextPart(' '), ...workspaceParts]
     : [];
-};
-
-export const createDocLink = (
-  activity: DtoActivityEventFull,
-  detail: unknown,
-  fallback = '',
-) => {
-  const id = getDetailString(detail, 'id');
-  const title = getDetailString(detail, 'title');
-  const workspaceSlug = activity.workspace_detail?.slug;
-
-  return id && title && workspaceSlug
-    ? createExternalLinkPart(
-        `/${workspaceSlug}/aidoc/${id}`,
-        `"${title}"`,
-      )
-    : createTextPart(fallback);
 };

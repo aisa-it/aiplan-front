@@ -2,6 +2,7 @@ import {
   createExternalLinkPart,
   createTextPart,
 } from '../../activity-message.helpers';
+import { createWorkspaceLink } from '../../entity-link.helpers';
 
 import type { ActivityRenderContext } from '../../../model/activity.types';
 import type { ActivityMessagePart } from '../../activity-renderer.types';
@@ -86,13 +87,9 @@ export const createIssueWorkspaceContextParts = (
     return [];
   }
 
-  const workspace = activity.workspace_detail;
-  const href =
-    workspace?.url ?? (workspace?.slug ? `/${workspace.slug}` : undefined);
-
   return [
     createTextPart(' в пространстве '),
-    createExternalLinkPart(href, `"${workspace?.name ?? ''}"`),
+    createWorkspaceLink(activity),
   ];
 };
 

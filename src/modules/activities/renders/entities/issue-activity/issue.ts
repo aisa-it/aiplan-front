@@ -37,8 +37,8 @@ export const renderIssueMoved: ActivityRenderer = (activity, context) => {
     context.entity.type === 'project' &&
     context.entity.identifier === project?.identifier;
   const oldProjectName =
-    activity.old_entity_detail?.name || 'из скрытого/удаленного проекта';
-  const newProjectName = project?.name || 'в скрытый/удаленный проект';
+    activity.old_entity_detail?.name || 'скрытого/удаленного проекта';
+  const newProjectName = project?.name || 'скрытый/удаленный проект';
 
   return createActivityMessage(
     createTextPart(`${getActivityVerbText(activity.verb)} задачу `),

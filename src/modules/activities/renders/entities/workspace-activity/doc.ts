@@ -3,7 +3,7 @@ import {
   createTextPart,
 } from '../../activity-message.helpers';
 import { getActivityVerbText } from '../../activity-value.helpers';
-import { createDocLink } from './workspace-message.helpers';
+import { createDocLink } from '../../entity-link.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
 
