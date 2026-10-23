@@ -1,14 +1,9 @@
-import { Integrations } from '@aisa-it/aiplan-api-ts/src/Integrations';
-import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import type {
   AiplanEmailRequest,
   AiplanPasswordRequest,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
-
-const usersApi = new (withInterceptors(Users))();
-const integrationsApi = new (withInterceptors(Integrations))();
+import { integrationsApi, usersApi } from '@/services/clients';
 
 type ActivitiesTableRequest = Parameters<
   typeof usersApi.getMyActivitiesTable
