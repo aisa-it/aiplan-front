@@ -87,17 +87,21 @@ export const createIssueLink = (
   activity: DtoActivityEventFull,
 ): ActivityMessagePart => {
   const detail = activity.new_entity_detail ?? activity.old_entity_detail;
-  const identifier = activity.new_value ?? activity.old_value ?? '';
+  const identifier = activity.new_value || activity.old_value || '';
   const name = getDetailString(detail, 'name') ?? '';
   const sequenceId =
     getDetailNumber(detail, 'sequence_id') ?? identifier.split('-').at(-1);
   const workspaceSlug = activity.workspace_detail?.slug;
   const project = activity.project_detail;
   const projectIdentifier = project?.identifier ?? project?.id;
-  const href =
+  const generatedHref =
     workspaceSlug && projectIdentifier && sequenceId
       ? `/${workspaceSlug}/projects/${projectIdentifier}/issues/${sequenceId}`
-      : getDetailString(detail, 'url');
+      : undefined;
+  const issueHref =
+    getDetailString(detail, 'short_url') ?? getDetailString(detail, 'url');
+  const href =
+    activity.verb === 'removed' ? issueHref : (generatedHref ?? issueHref);
 
   return createExternalLinkPart(
     href,

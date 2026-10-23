@@ -14,6 +14,17 @@ const FORM_ACTION_BY_FIELD: Readonly<Record<string, string>> = {
 
 const DEFAULT_FORM_ACTION = 'форму';
 
+const getFormActionTarget = (field?: string | null) => {
+  if (
+    !field ||
+    !Object.prototype.hasOwnProperty.call(FORM_ACTION_BY_FIELD, field)
+  ) {
+    return undefined;
+  }
+
+  return FORM_ACTION_BY_FIELD[field];
+};
+
 const createFormLink = (
   activity: DtoActivityEventFull,
 ): ActivityMessagePart => {
@@ -29,14 +40,14 @@ const createFormLink = (
 export const renderFormActivity = (
   activity: DtoActivityEventFull,
 ): ActivityMessage => {
-  const target =
-    (activity.field && FORM_ACTION_BY_FIELD[activity.field]) ??
-    DEFAULT_FORM_ACTION;
-  const action = getActivityVerbText(activity.verb);
+  const target = getFormActionTarget(activity.field);
+  const action = target
+    ? `${getActivityVerbText(activity.verb)} ${target}`
+    : `обновил(-а) ${DEFAULT_FORM_ACTION}`;
 
   return {
     parts: [
-      { type: 'text', text: `${action} ${target} ` },
+      { type: 'text', text: `${action} ` },
       createFormLink(activity),
     ],
   };

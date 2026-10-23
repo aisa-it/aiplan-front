@@ -17,7 +17,7 @@ export const renderWorkspaceForm: ActivityRenderer = (activity) => {
   const value = activity.new_value || activity.old_value || '';
   const formLink = title
     ? createExternalLinkPart(
-        activity.entity_url ?? (slug ? `/f/${slug}` : undefined),
+        (slug ? `/f/${slug}` : undefined) ?? activity.entity_url,
         `"${title}"`,
       )
     : createTextPart(`"${value}"`);

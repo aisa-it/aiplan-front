@@ -3,19 +3,26 @@ import {
   createExternalLinkPart,
   createTextPart,
 } from '../activity-message.helpers';
-import { getActivityVerbText } from '../activity-value.helpers';
+import {
+  getActivityVerbText,
+  getDetailString,
+} from '../activity-value.helpers';
 import { createActivityRenderer } from '../create-activity-renderer';
 
 import type { ActivityRenderer } from '../activity-renderer.types';
 
-const renderWorkspaceCreated: ActivityRenderer = (activity) =>
-  createActivityMessage(
+const renderWorkspaceCreated: ActivityRenderer = (activity) => {
+  const workspace = activity.new_entity_detail;
+  const name = activity.new_value || getDetailString(workspace, 'name') || '';
+
+  return createActivityMessage(
     createTextPart(`${getActivityVerbText(activity.verb)} пространство `),
     createExternalLinkPart(
-      activity.new_entity_detail.url,
-      `"${activity.new_value ?? ''}"`,
+      getDetailString(workspace, 'url'),
+      `"${name}"`,
     ),
   );
+};
 
 const renderWorkspaceDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(

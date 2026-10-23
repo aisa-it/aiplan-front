@@ -15,7 +15,13 @@ export const createActivityRenderer = (
   fieldRenderers: ActivityFieldRenderers,
 ): ActivityRenderer => {
   return (activity, context) => {
-    const fieldRenderer = fieldRenderers[activity.field ?? ''];
+    const field = activity.field ?? '';
+
+    if (!Object.prototype.hasOwnProperty.call(fieldRenderers, field)) {
+      return null;
+    }
+
+    const fieldRenderer = fieldRenderers[field];
 
     if (!fieldRenderer) return null;
 

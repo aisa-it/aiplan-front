@@ -72,7 +72,11 @@ export const renderProjectLead: ActivityRenderer = (activity, context) =>
     createTextPart(
       ` с ${getActivityUserName(
         activity.old_entity_detail,
-      )} на ${getActivityUserName(activity.new_entity_detail)}`,
+        'Пользователь удалён',
+      )} на ${getActivityUserName(
+        activity.new_entity_detail,
+        'Пользователь удалён',
+      )}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );

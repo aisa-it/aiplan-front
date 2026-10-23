@@ -46,6 +46,9 @@ export const renderIssueActivity = createActivityRenderer({
     created: renderIssueCreated,
     move: renderIssueMoved,
   },
+  project: {
+    move: renderIssueMoved,
+  },
   issue: renderIssueField,
   name: renderIssueName,
   description: renderIssueDescription,
