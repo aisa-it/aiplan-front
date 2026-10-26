@@ -4,7 +4,13 @@
       name="toast-stack"
       tag="div"
       class="app-toast-stack"
-      :class="themeClass"
+      :class="[
+        themeClass,
+        { 'app-toast-stack--active': toasts.length > 0 },
+      ]"
+      :tabindex="toasts.length ? 0 : -1"
+      role="region"
+      aria-label="Уведомления"
     >
       <ToastItem
         v-for="item in toasts"
@@ -27,17 +33,26 @@ const themeClass = computed(() => `v-theme--${theme.global.name.value}`);
 const { toasts, removeToast } = useToastStack();
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .app-toast-stack {
   position: fixed;
   z-index: 10000;
-  top: 54px;
+  top: 46px;
   right: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
+  max-height: calc(100dvh - 54px);
+  padding: 8px 8px 8px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   pointer-events: none;
+}
+
+.app-toast-stack--active {
+  pointer-events: auto;
 }
 
 .toast-stack-move,

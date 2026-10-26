@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { DEFAULT_TOAST_TIMEOUT, TOAST_TYPE_CONFIG } from './toast.config';
 import type {
   ShowToastOptions,
+  ToastLink,
   ToastMessage,
   ToastMessagePart,
   ToastOptions,
@@ -14,8 +15,36 @@ const timers = new Map<string, number>();
 
 let lastToastId = 0;
 
-const normalizeMessage = (message: ToastMessage): ToastView['message'] =>
-  typeof message === 'string' ? [message] : [...message];
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isToastLink = (value: unknown): value is ToastLink =>
+  isRecord(value) &&
+  typeof value.text === 'string' &&
+  typeof value.href === 'string' &&
+  (value.target === undefined ||
+    value.target === '_blank' ||
+    value.target === '_self');
+
+export const parseToastMessage = (
+  message: unknown,
+): ToastView['message'] | undefined => {
+  const parts = typeof message === 'string' ? [message] : message;
+
+  if (!Array.isArray(parts)) return undefined;
+
+  const validParts = parts.filter(
+    (part): part is ToastMessagePart =>
+      (typeof part === 'string' && part.length > 0) || isToastLink(part),
+  );
+
+  return validParts.length ? validParts : undefined;
+};
+
+const normalizeMessage = (
+  message: unknown,
+  fallback: string,
+): ToastView['message'] => parseToastMessage(message) ?? [fallback];
 
 const getMessageGroupValue = (part: ToastMessagePart) =>
   typeof part === 'string'
@@ -61,7 +90,7 @@ export const showToast = ({
 }: ShowToastOptions) => {
   const config = TOAST_TYPE_CONFIG[type];
   const resolvedTitle = title || config.title;
-  const resolvedMessage = normalizeMessage(message || config.message);
+  const resolvedMessage = normalizeMessage(message, config.message);
   const groupKey = getGroupKey(type, resolvedTitle, resolvedMessage);
   const groupedToastIndex = toasts.value.findIndex(
     (item) => item.groupKey === groupKey,

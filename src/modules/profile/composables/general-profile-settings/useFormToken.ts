@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { ProfileService } from '../../api/profile.service';
 import { toast } from '@/modules/toast';
 import {
-  SUCCES_COPY_TOKEN_USER,
+  SUCCESS_COPY_TOKEN_USER,
   SUCCESS_RESET_TOKEN_USER,
 } from '@/constants/notifications';
 
@@ -20,7 +20,7 @@ export function useFormToken() {
   const handleCopyProfileToken = async () => {
     try {
       await navigator.clipboard.writeText(authToken.value);
-      toast.success(SUCCES_COPY_TOKEN_USER);
+      toast.success(SUCCESS_COPY_TOKEN_USER);
     } catch {
       toast.error();
     }

@@ -1,5 +1,5 @@
 <template>
-  <article class="app-toast" role="alert" aria-live="polite" aria-atomic="true">
+  <article class="app-toast" :role="ariaRole" aria-atomic="true">
     <span
       class="app-toast__accent"
       :style="{ backgroundColor: toast.accentColor }"
@@ -16,7 +16,7 @@
           {{ toast.title }}
         </div>
 
-        <div class="mt-2 text-sm leading-5 text-[#888] wrap-break-word">
+        <div class="mt-2 text-sm leading-5 wrap-break-word">
           <template v-for="(part, index) in toast.message" :key="index">
             <a
               v-if="isLink(part) && getSafeHref(part.href)"
@@ -54,15 +54,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ToastLink, ToastMessagePart, ToastView } from '../toast.types';
 
-defineProps<{
+const props = defineProps<{
   toast: ToastView;
 }>();
 
 const emit = defineEmits<{
   close: [];
 }>();
+
+const ariaRole = computed(() =>
+  props.toast.type === 'error' || props.toast.type === 'warning'
+    ? 'alert'
+    : 'status',
+);
 
 const isLink = (part: ToastMessagePart): part is ToastLink =>
   typeof part !== 'string';
@@ -83,11 +90,12 @@ const getSafeHref = (href: string) => {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .app-toast {
   position: relative;
   width: 360px;
   min-height: 86px;
+  flex-shrink: 0;
   overflow: visible;
   border-radius: 8px;
   background: rgb(var(--v-theme-background));
@@ -127,10 +135,10 @@ const getSafeHref = (href: string) => {
 }
 
 .app-toast__close {
-  position: absolute !important;
+  position: absolute;
   top: 6px;
   right: 6px;
-  color: rgb(var(--v-theme-text)) !important;
+  color: rgb(var(--v-theme-text));
 }
 
 .app-toast__badge {
