@@ -1,4 +1,7 @@
-import type { AiplanCreateProjectRequest } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type {
+  AiplanCreateProjectRequest,
+  TypesViewProps,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { projectsApi } from './clients';
 
@@ -21,5 +24,13 @@ export const ProjectService = {
 
   async createProject(workspaceSlug: string, data: AiplanCreateProjectRequest) {
     return (await projectsApi.createProject(workspaceSlug, data)).data;
+  },
+
+  async updateViewSettings(
+    workspaceSlug: string,
+    projectId: string,
+    settings: TypesViewProps,
+  ): Promise<void> {
+    await projectsApi.updateProjectView(workspaceSlug, projectId, settings);
   },
 };
