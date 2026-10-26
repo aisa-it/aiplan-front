@@ -1,5 +1,6 @@
 import { onMounted, reactive, ref, watch, type Ref } from 'vue';
 import { isAxiosError } from 'axios';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 import { isEmail } from '@/utils/validation';
@@ -19,6 +20,7 @@ type ApiErrorData = {
 
 export function useFormUserdata(user: Ref<DtoUser>) {
   const userStore = useUserStore();
+  const { t } = useI18n();
   const form = reactive({
     email: '',
     firstName: '',
@@ -84,7 +86,7 @@ export function useFormUserdata(user: Ref<DtoUser>) {
         error.response?.status === 409 &&
         error.response.data?.code === 6002
       ) {
-        usernameError.value = 'Пользователь с таким именем уже существует';
+        usernameError.value = t('profile.validation.usernameTaken');
       }
       // TODO: обработать ERROR_IDENTITY_USER и показать уведомление после переноса системы уведомлений.
     } finally {

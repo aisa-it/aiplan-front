@@ -30,7 +30,9 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
         try {
           const text = await res.data.text();
           res.data = JSON.parse(text);
-        } catch (_) {}
+        } catch (_) {
+          // TODO: добавить обработку ошибок, не оставлять пустой catch
+        }
       }
       const { status, data } = res ?? {};
       let refreshInterval: any;

@@ -1,9 +1,10 @@
 import { defineAsyncComponent, ref, type Component } from 'vue';
 import PageLoader from '@/components/loaders/PageLoader.vue';
 
+export type ProfileTabName = 'general' | 'activities' | 'design';
+
 type ProfileTab = {
-  name: string;
-  label: string;
+  name: ProfileTabName;
   component: Component | null;
 };
 
@@ -18,21 +19,18 @@ const createAsyncTab = (loader: () => Promise<Component>) =>
 const PROFILE_TABS: ProfileTab[] = [
   {
     name: 'general',
-    label: 'Основные',
     component: createAsyncTab(
       () => import('../components/GeneralProfileSettings.vue'),
     ),
   },
   {
     name: 'activities',
-    label: 'Активности',
     component: createAsyncTab(
       () => import('../components/ActivitiesProfileSettings.vue'),
     ),
   },
   {
     name: 'design',
-    label: 'Оформление',
     component: createAsyncTab(
       () => import('../components/DesignProfileSettings.vue'),
     ),

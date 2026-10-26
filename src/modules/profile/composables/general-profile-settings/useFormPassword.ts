@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
@@ -10,6 +11,7 @@ type FormRef = {
 
 export function useFormPassword() {
   const router = useRouter();
+  const { t } = useI18n();
   const formRef = ref<FormRef | null>(null);
   const password = ref({
     new_password: '',
@@ -23,7 +25,8 @@ export function useFormPassword() {
   const confirmPasswordRules = computed(() => [
     ...passwordRules,
     (value: string) =>
-      value === password.value.new_password || 'Пароли не совпадают',
+      value === password.value.new_password ||
+      t('profile.validation.passwordsMismatch'),
   ]);
 
   const setFormRef = (value: unknown) => {

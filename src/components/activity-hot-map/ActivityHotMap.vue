@@ -3,11 +3,11 @@
     <div class="flex">
       <div v-if="!loadReq" class="mt-7 mr-2">
         <div
-          v-for="day in ACTIVITY_WEEKDAYS"
+          v-for="day in ACTIVITY_WEEKDAY_KEYS"
           :key="day"
           class="h-5 text-center text-xs font-bold"
         >
-          {{ day }}
+          {{ t(`activityHotMap.weekdays.${day}`) }}
         </div>
       </div>
 
@@ -18,14 +18,14 @@
         >
           <div
             v-for="(month, index) in monthPositions"
-            :key="`${month.name}-${index}`"
+            :key="`${month.key}-${index}`"
             class="text-center text-xs font-bold"
             :style="{
               gridColumnStart: month.start,
               gridColumnEnd: `span ${month.span}`,
             }"
           >
-            {{ month.name }}
+            {{ t(`activityHotMap.months.${month.key}`) }}
           </div>
 
           <template v-for="(square, index) in squares" :key="index">
@@ -46,12 +46,22 @@
                     activeSquare === index ? 'border-2 border-[gray]' : '',
                   ]"
                   :style="getSquarePosition(index)"
-                  :aria-label="`Дата: ${square.date} Активность: ${square.count}`"
+                  :aria-label="
+                    t('activityHotMap.tooltip', {
+                      date: square.date,
+                      count: square.count,
+                    })
+                  "
                   @click="activeSquare = index"
                 />
               </template>
               <span>
-                {{ `Дата: ${square.date} Активность: ${square.count}` }}
+                {{
+                  t('activityHotMap.tooltip', {
+                    date: square.date,
+                    count: square.count,
+                  })
+                }}
               </span>
             </v-tooltip>
           </template>
@@ -65,10 +75,10 @@
       class="mt-4 flex gap-[3px] p-[5px]"
     >
       <v-tooltip
-        v-for="(text, index) in ACTIVITY_LEVEL_LABELS"
-        :key="text"
+        v-for="(levelKey, index) in ACTIVITY_LEVEL_KEYS"
+        :key="levelKey"
         location="top"
-        :text="text"
+        :text="t(`activityHotMap.levels.${levelKey}`)"
       >
         <template #activator="{ props: tooltipProps }">
           <div
@@ -84,12 +94,13 @@
 
 <script setup lang="ts">
 import { nextTick, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { useAppTheme } from '@/composables/useAppTheme';
 
 import {
-  ACTIVITY_LEVEL_LABELS,
-  ACTIVITY_WEEKDAYS,
+  ACTIVITY_LEVEL_KEYS,
+  ACTIVITY_WEEKDAY_KEYS,
   getActivityLevelClass,
 } from './ActivityHotMap.config';
 import { useActivityHotMap } from './composables/useActivityHotMap';
@@ -108,6 +119,8 @@ const props = withDefaults(
     exampleBlock: true,
   },
 );
+
+const { t } = useI18n();
 
 const activeSquare = ref<number | null>(null);
 const heatmapRef = ref<HTMLDivElement | null>(null);

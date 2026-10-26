@@ -1,12 +1,12 @@
 <template>
   <v-card min-width="350">
     <v-form ref="formRef">
-      <v-card-title> Выбрать статус </v-card-title>
+      <v-card-title> {{ t('userStatus.form.title') }} </v-card-title>
 
       <v-card-text class="d-flex flex-column ga-4">
         <v-select
           v-model="form.status"
-          label="Статус"
+          :label="t('common.fields.status')"
           :items="statusOptions"
           :item-title="formatStatus"
           item-value="value"
@@ -19,7 +19,7 @@
         <v-text-field
           v-if="form.status === 'custom'"
           v-model="form.customStatusText"
-          label="Текст статуса"
+          :label="t('userStatus.form.customText')"
           maxlength="50"
           :rules="customStatusRules"
         />
@@ -27,9 +27,8 @@
         <v-select
           v-if="form.status !== 'none'"
           v-model="form.selectEndDate"
-          label="Сбросить статус через"
+          :label="t('userStatus.form.resetAfter')"
           :items="durationOptions"
-          item-title="label"
           item-value="value"
           :rules="durationRules"
         />
@@ -39,8 +38,8 @@
             <v-text-field
               v-model="form.customDate"
               v-maska="'##.##.####'"
-              label="Дата"
-              placeholder="ДД.ММ.ГГГГ"
+              :label="t('common.fields.date')"
+              :placeholder="t('userStatus.form.datePlaceholder')"
               :rules="customDateRules"
               append-inner-icon="mdi-calendar"
             />
@@ -48,7 +47,7 @@
             <v-text-field
               v-model="form.customTime"
               v-maska="'##:##'"
-              label="Время"
+              :label="t('common.fields.time')"
               placeholder="--:--"
               :rules="customTimeRules"
               append-inner-icon="mdi-clock-outline"
@@ -64,7 +63,7 @@
           class="rounded-lg px-2 py-0 min-w-0 uppercase"
           @click="emit('reset')"
         >
-          Отменить
+          {{ t('common.actions.cancel') }}
         </v-btn>
 
         <v-btn
@@ -74,7 +73,7 @@
           class="rounded-lg px-2 py-0 min-w-0 uppercase"
           @click="handleSave"
         >
-          Сохранить
+          {{ t('common.actions.save') }}
         </v-btn>
       </v-card-actions>
     </v-form>
@@ -82,7 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { useValidationRules } from '../composables/useValidationRules';
 
@@ -99,11 +99,20 @@ const emit = defineEmits<{
   reset: [];
 }>();
 
+const { t } = useI18n();
+
 const formatStatus = (item: (typeof STATUS_OPTIONS)[number]) =>
-  item.emoji ? `${item.emoji} ${item.label}` : item.label;
+  item.emoji
+    ? `${item.emoji} ${t(`userStatus.statuses.${item.value}`)}`
+    : t(`userStatus.statuses.${item.value}`);
 
 const statusOptions = STATUS_OPTIONS;
-const durationOptions = DURATION_OPTIONS;
+const durationOptions = computed(() =>
+  DURATION_OPTIONS.map((option) => ({
+    title: t(`userStatus.durations.${option.value}`),
+    value: option.value,
+  })),
+);
 
 const formRef = ref();
 

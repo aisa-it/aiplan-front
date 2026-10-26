@@ -1,7 +1,7 @@
 <template>
   <UploadAvatarDialog
     v-model="model"
-    title="Загрузить аватар (не более 20 Мб)"
+    :title="t('profile.avatar.dialogTitle')"
     is-profile
     :loading="loading"
     @upload="handleUploadUserAvatar"
@@ -10,11 +10,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 
 import { ProfileService } from '../../api/profile.service';
 import UploadAvatarDialog from './UploadAvatarDialog.vue';
+
+const { t } = useI18n();
 
 const model = defineModel<boolean>({ required: true });
 const userStore = useUserStore();
