@@ -40,6 +40,7 @@ const vuetify = createVuetify({
           background: '#1f2228',
           surface: '#1f2228',
           text: '#bac4d5',
+          border: '#31363f',
         },
       },
     },
