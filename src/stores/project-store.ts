@@ -5,7 +5,7 @@ import type {
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { ref } from 'vue';
-import { projectService } from '@/services/project-service';
+import { ProjectService } from '@/services/project.service';
 
 export const useProjectStore = defineStore('project-store', () => {
   const project = ref<DtoProject>();
@@ -16,8 +16,8 @@ export const useProjectStore = defineStore('project-store', () => {
     isLoading.value = true;
 
     try {
-      project.value = await projectService.getProject(workspaceSlug, projectId);
-      meInProject.value = await projectService.getMeInProject(
+      project.value = await ProjectService.getProject(workspaceSlug, projectId);
+      meInProject.value = await ProjectService.getMeInProject(
         workspaceSlug,
         projectId,
       );
@@ -46,11 +46,7 @@ export const useProjectStore = defineStore('project-store', () => {
           : undefined,
     };
 
-    await projectService.updateViewSettings(
-      workspaceSlug,
-      projectId,
-      settings,
-    );
+    await ProjectService.updateViewSettings(workspaceSlug, projectId, settings);
 
     if (meInProject.value?.project_id === projectId) {
       meInProject.value = {

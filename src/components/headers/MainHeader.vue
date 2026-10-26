@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar flat border="b" height="50">
+  <v-app-bar flat border="b" height="50" color="background">
     <WorkspaceButton />
     <AppBreadcrumbs />
     <template #append>
