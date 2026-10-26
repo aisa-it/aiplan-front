@@ -35,7 +35,7 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
       const { status, data } = res ?? {};
       let refreshInterval: any;
 
-      if (status.toString().startsWith('5')) {
+      if (status?.toString().startsWith('5')) {
         return fetch('/api/_health/').catch(() => {
           //TODO: реализовать систему нотификаций handleNotify
           /*   handleNotify({
