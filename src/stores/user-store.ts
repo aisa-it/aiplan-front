@@ -1,14 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
+
 import type {
-  AiplanUserUpdateRequest,
   DtoUser,
+  AiplanUserUpdateRequest,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import type { RequestParams } from '@aisa-it/aiplan-api-ts/src/http-client';
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
-
-const usersApi = new (withInterceptors(Users))();
+import { UserService } from '@/services/user.service';
 
 type UpdateCurrentUserRequest = AiplanUserUpdateRequest & {
   tutorial?: DtoUser['tutorial'];
@@ -23,8 +21,7 @@ export const useUserStore = defineStore('user-store', () => {
 
   async function getUserInfo() {
     try {
-      const res = await usersApi.getCurrentUser();
-      user.value = res.data;
+      user.value = await UserService.getCurrentUser();
 
       if (user.value?.theme?.open_in_new === undefined) {
         await updateCurrentUser({
@@ -47,8 +44,7 @@ export const useUserStore = defineStore('user-store', () => {
     data: UpdateCurrentUserRequest,
     options: UpdateCurrentUserOptions = {},
   ) {
-    const res = await usersApi.updateCurrentUser(data, options);
-    user.value = res.data;
+    user.value = await UserService.updateCurrentUser(data, options);
     return user.value;
   }
 

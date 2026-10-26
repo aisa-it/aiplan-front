@@ -90,8 +90,7 @@ import ConfirmCloseProjectCreateDialog from './ConfirmCloseProjectCreateDialog.v
 // @ts-ignore
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
 import { useWorkspaceStore } from '@/stores/workspace-store';
-import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
+import { ProjectService } from '@/services/project.service';
 import {
   NETWORK_CHOICES,
   PROJECT_IDENTIFIER_LENGTH,
@@ -99,7 +98,6 @@ import {
 import { PROJECT_EMOJI_OPTIONS, PROJECT_EMOJIS } from '@/constants/emojis';
 import { getRandomEmoji } from '@/utils/helpers';
 
-const projectsApi = new (withInterceptors(Projects))();
 const cyrillicToTranslit = CyrillicToTranslit();
 
 const route = useRoute();
@@ -188,7 +186,7 @@ const createNewProject = async () => {
   };
 
   try {
-    await projectsApi.createProject(workspaceSlug, payload);
+    await ProjectService.createProject(workspaceSlug, payload);
     await workspaceStore.getWorkspaceProjects(workspaceSlug);
     isOpen.value = false;
     clear();

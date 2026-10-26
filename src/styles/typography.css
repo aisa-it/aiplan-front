@@ -1,0 +1,19 @@
+@theme {
+  --font-sans: 'Rubik', sans-serif;
+
+  --text-h1: 1.5rem; /* 24px */
+  --text-h1--line-height: 2rem;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 1.25rem; /* 20px */
+  --text-h2--line-height: 1.75rem;
+  --text-h2--font-weight: 600;
+
+  --text-h3: 1.125rem; /* 18px */
+  --text-h3--line-height: 1.5rem;
+  --text-h3--font-weight: 600;
+
+  --text-h4: 1rem; /* 16px */
+  --text-h4--line-height: 1.5rem;
+  --text-h4--font-weight: 600;
+}

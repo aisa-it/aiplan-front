@@ -4,13 +4,9 @@ import type {
   DtoWorkspace,
   DtoWorkspaceMemberWithOwner,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
-import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
 import { computed, ref } from 'vue';
-
-const projectsApi = new (withInterceptors(Projects))();
-const workspaceApi = new (withInterceptors(Workspace))();
+import { ProjectService } from '@/services/project.service';
+import { WorkspaceService } from '@/services/workspace.service';
 
 export const useWorkspaceStore = defineStore('workspace-store', () => {
   const currentWorkspaceSlug = ref<string | null>(null);
@@ -32,7 +28,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   ): Promise<DtoWorkspace | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-    workspaceInfo.value = (await workspaceApi.getWorkspace(workspaceSlug)).data;
+    workspaceInfo.value = await WorkspaceService.getWorkspace(workspaceSlug);
     await getMeInWorkspace(workspaceSlug);
   }
 
@@ -41,9 +37,8 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   ): Promise<DtoWorkspaceMemberWithOwner | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-    const res = await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug);
-
-    return (meInWorkspace.value = res.data);
+    return (meInWorkspace.value =
+      await WorkspaceService.getMeInWorkspace(workspaceSlug));
   }
 
   async function getWorkspaceProjects(
@@ -54,10 +49,10 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   ): Promise<DtoProjectLight[] | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
 
-    return projectsApi.getProjectList(workspaceSlug, filters).then((res) => {
-      workspaceProjects.value = res.data;
-      return res.data;
-    });
+    return (workspaceProjects.value = await ProjectService.getProjects(
+      workspaceSlug,
+      filters,
+    ));
   }
 
   return {
