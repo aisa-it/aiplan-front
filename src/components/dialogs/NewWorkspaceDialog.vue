@@ -61,12 +61,10 @@ import { ref, watch } from 'vue';
 import ConfirmCloseWsCreateDialog from './ConfirmCloseWsCreateDialog.vue';
 // @ts-ignore
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
-import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace';
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
+import { WorkspaceService } from '@/services/workspace.service';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 import { RESTRICTED_URLS } from '@/constants/constants';
 
-const workspaceApi = new (withInterceptors(Workspace))();
 const cyrillicToTranslit = CyrillicToTranslit();
 const workspacesStore = useWorkspacesStore();
 
@@ -152,7 +150,7 @@ const handleCreateWorkspace = async () => {
   loading.value = true;
 
   try {
-    await workspaceApi.createWorkspace({
+    await WorkspaceService.createWorkspace({
       name: workspaceValues.value.name,
       slug: workspaceValues.value.slug,
     });
