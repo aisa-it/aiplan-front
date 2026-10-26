@@ -1,10 +1,18 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import {
-  UserService,
-  type UpdateCurrentUserRequest,
-} from '@/services/user.service';
+
+import type {
+  DtoUser,
+  AiplanUserUpdateRequest,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { RequestParams } from '@aisa-it/aiplan-api-ts/src/http-client';
+import { UserService } from '@/services/user.service';
+
+type UpdateCurrentUserRequest = AiplanUserUpdateRequest & {
+  tutorial?: DtoUser['tutorial'];
+};
+
+type UpdateCurrentUserOptions = Pick<RequestParams, 'localErrorCodes'>;
 
 export const useUserStore = defineStore('user-store', () => {
   const user = ref<DtoUser | null>(null);
@@ -32,8 +40,11 @@ export const useUserStore = defineStore('user-store', () => {
     }
   }
 
-  async function updateCurrentUser(data: UpdateCurrentUserRequest) {
-    user.value = await UserService.updateCurrentUser(data);
+  async function updateCurrentUser(
+    data: UpdateCurrentUserRequest,
+    options: UpdateCurrentUserOptions = {},
+  ) {
+    user.value = await UserService.updateCurrentUser(data, options);
     return user.value;
   }
 

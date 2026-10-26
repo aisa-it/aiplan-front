@@ -8,6 +8,11 @@ import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { toast } from '@/modules/toast';
+import {
+  ERROR_IDENTITY_USER,
+  SUCCESS_CHANGE_EMAIL,
+} from '@/constants/notifications';
 
 type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
@@ -76,17 +81,18 @@ export function useFormUserdata(user: Ref<DtoUser>) {
         username: form.username.trim(),
       };
 
-      await userStore.updateCurrentUser(data);
-      // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
+      await userStore.updateCurrentUser(data, {
+        localErrorCodes: [6002],
+      });
+      toast.success();
     } catch (error) {
       if (
         isAxiosError<ApiErrorData>(error) &&
         error.response?.status === 409 &&
         error.response.data?.code === 6002
       ) {
-        usernameError.value = 'Пользователь с таким именем уже существует';
+        usernameError.value = ERROR_IDENTITY_USER;
       }
-      // TODO: обработать ERROR_IDENTITY_USER и показать уведомление после переноса системы уведомлений.
     } finally {
       saving.value = false;
     }
@@ -99,10 +105,8 @@ export function useFormUserdata(user: Ref<DtoUser>) {
     emailLoading.value = true;
     try {
       await ProfileService.changeEmail({ new_email: email });
-      // TODO: показать уведомление об отправке ссылки после переноса системы уведомлений.
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+      toast.success(SUCCESS_CHANGE_EMAIL);
+    } catch {
     } finally {
       emailLoading.value = false;
     }
@@ -124,10 +128,7 @@ export function useFormUserdata(user: Ref<DtoUser>) {
   onMounted(async () => {
     try {
       telegramBotUrl.value = await ProfileService.getTelegramBotUrl();
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
-    }
+    } catch {}
   });
 
   return {

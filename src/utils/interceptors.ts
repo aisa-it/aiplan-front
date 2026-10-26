@@ -1,8 +1,44 @@
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import { isCancel } from 'axios';
+import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { NON_VALIDATED_ROUTES } from '@/constants/constants';
 import { NOT_FOUND_ERROR_CODES } from '@/constants/notFoundErrorCodes';
 import { allowedNotFoundServices } from '@/utils/validation';
-// import { handleNotify } from './notify';
+import { parseToastMessage, toast } from '@/modules/toast/toast';
+import { startServerHealthMonitor } from './server-health-monitor';
+
+type ApiErrorData = {
+  code?: unknown;
+  error?: unknown;
+  ru_error?: unknown;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getApiErrorData = (value: unknown): ApiErrorData =>
+  isRecord(value) ? value : {};
+
+const getApiErrorCode = (data: ApiErrorData) =>
+  typeof data.code === 'number' ? data.code : undefined;
+
+const getApiErrorMessage = (data: ApiErrorData) =>
+  parseToastMessage(
+    getApiErrorCode(data) !== undefined
+      ? data.ru_error
+      : (data.error ?? data.ru_error),
+  );
+
+const isHandledLocally = (error: AxiosError, data: ApiErrorData) => {
+  const code = getApiErrorCode(data);
+
+  return (
+    code !== undefined && error.config?.localErrorCodes?.includes(code) === true
+  );
+};
+
+const showApiError = (data: ApiErrorData) => {
+  toast.error(getApiErrorMessage(data));
+};
 
 const validateRouteCheck = (route: string): boolean =>
   NON_VALIDATED_ROUTES.includes(route);
@@ -23,35 +59,34 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
       }
       return response;
     },
-    async (error) => {
-      const res = error?.response;
+    async (error: AxiosError) => {
+      const res = error.response;
 
       if (res?.data instanceof Blob && res.data.type === 'application/json') {
         try {
           const text = await res.data.text();
           res.data = JSON.parse(text);
-        } catch (_) {}
+        } catch {}
       }
-      const { status, data } = res ?? {};
-      let refreshInterval: any;
+      const status = res?.status;
+      const data = getApiErrorData(res?.data);
 
-      if (status?.toString().startsWith('5')) {
-        return fetch('/api/_health/').catch(() => {
-          //TODO: реализовать систему нотификаций handleNotify
-          /*   handleNotify({
-            open: true,
-            type: 'error',
-            customMessage: 'Сервер сейчас недоступен. Сохраните свои данные!',
-            timeout: 0,
-          }); */
-
-          refreshInterval = setInterval(() => {
-            fetch('/api/_health/').then(() => {
-              return clearInterval(refreshInterval);
-            });
-          }, 5000);
-        });
+      if (isCancel(error) || error?.code === 'ERR_CANCELED') {
+        return Promise.reject(error);
       }
+
+      if (!res) {
+        toast.error();
+        startServerHealthMonitor();
+        return Promise.reject(error);
+      }
+
+      if (status !== undefined && status >= 500) {
+        showApiError(data);
+        startServerHealthMonitor();
+        return Promise.reject(error);
+      }
+
       switch (status) {
         case 401:
           if (
@@ -64,26 +99,27 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
             window.location.href = '/signin';
           }
           break;
-        case 404:
-          if (data?.code === 9001) {
+        case 404: {
+          const code = getApiErrorCode(data);
+
+          if (code === 9001) {
             return Promise.reject(error);
           }
+
           if (
-            data?.code &&
-            NOT_FOUND_ERROR_CODES.includes(data?.code) &&
-            !allowedNotFoundServices(error.config.url)
+            code !== undefined &&
+            NOT_FOUND_ERROR_CODES.includes(code) &&
+            !allowedNotFoundServices(error.config?.url ?? '')
           ) {
             window.location.href = '/not-found';
+            return Promise.reject(error);
           }
+
+          if (!isHandledLocally(error, data)) showApiError(data);
           return Promise.reject(error);
-        case 409:
+        }
         default:
-        //TODO: реализовать систему нотификаций handleNotify
-        /*  handleNotify({
-            open: true,
-            type: 'error',
-            customMessage: data?.code ? data.ru_error : data.error,
-          }); */
+          if (!isHandledLocally(error, data)) showApiError(data);
       }
       return Promise.reject(error);
     },
