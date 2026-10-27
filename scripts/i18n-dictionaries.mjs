@@ -8,9 +8,10 @@ import { fileURLToPath } from 'node:url';
 const LOCALES = ['ru', 'en'];
 const SEARCH_DIRS = ['src/modules', 'src/components'];
 const OUTPUT_DIR = 'src/i18n/generated';
+const CORE_DIR = 'src/i18n';
 
 const RESERVED = ['common', 'timezones', '$vuetify'];
-// Имя папки попадает в код как идентификатор и путь — только kebab-case.
+
 const FOLDER_NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 // user-status → userStatus
@@ -19,6 +20,35 @@ const toCamelCase = (name) =>
 
 // Windows-пути → posix
 const toPosix = (p) => p.split(path.sep).join('/');
+
+// Словари вне <SEARCH_DIRS>/<папка>/i18n в реестр не попадут — ищем их, чтобы не пропустить молча.
+const findMisplacedDictionaries = (root) => {
+  const srcDir = path.join(root, 'src');
+  if (!fs.existsSync(srcDir)) return [];
+
+  const registered = new RegExp(`^(${SEARCH_DIRS.join('|')})/[^/]+/i18n$`);
+  const misplaced = [];
+  const walk = (absDir) => {
+    for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const absChild = path.join(absDir, entry.name);
+      const relDir = toPosix(path.relative(root, absChild));
+      if (relDir === CORE_DIR) continue;
+      walk(absChild);
+      if (
+        entry.name === 'i18n' &&
+        !registered.test(relDir) &&
+        LOCALES.some((locale) =>
+          fs.existsSync(path.join(absChild, `${locale}.ts`)),
+        )
+      ) {
+        misplaced.push(relDir);
+      }
+    }
+  };
+  walk(srcDir);
+  return misplaced.sort();
+};
 
 // Находит словари и проверяет их; при ошибках бросает исключение.
 export const collectDictionaries = (root) => {
@@ -58,6 +88,12 @@ export const collectDictionaries = (root) => {
         relDir,
       });
     }
+  }
+
+  for (const relDir of findMisplacedDictionaries(root)) {
+    errors.push(
+      `${relDir}: dictionary outside ${SEARCH_DIRS.map((d) => `${d}/<folder>/i18n`).join(' or ')} would not be registered`,
+    );
   }
 
   const byNamespace = new Map();
@@ -102,6 +138,15 @@ export const renderDictionaries = (dictionaries) => {
         (d) => `  ${d.namespace}: ${identifier(d.namespace, l)},`,
       );
       const isBase = l === baseLocale;
+      const body = isBase
+        ? `export default {\n${entries.join('\n')}\n};`
+        : [
+            `const messages = {\n${entries.join('\n')}\n} satisfies typeof ${baseLocale};`,
+            '',
+            `true satisfies (typeof ${baseLocale} extends typeof messages ? true : false);`,
+            '',
+            'export default messages;',
+          ].join('\n');
       const content = [
         '// АВТОГЕНЕРАЦИЯ — не править вручную.',
         '// Источник: scripts/i18n-dictionaries.mjs (запускается плагином Vite и `yarn i18n:generate`).',
@@ -110,7 +155,7 @@ export const renderDictionaries = (dictionaries) => {
           : [`import type ${baseLocale} from './${baseLocale}';`]),
         ...imports,
         '',
-        `export default {\n${entries.join('\n')}\n}${isBase ? '' : ` satisfies typeof ${baseLocale}`};`,
+        body,
         '',
       ].join('\n');
       return [`${OUTPUT_DIR}/${l}.ts`, content];
@@ -138,9 +183,9 @@ export const generateI18nDictionaries = (root, { check = false } = {}) => {
   return { changed: stale.length > 0 && !check, upToDate: stale.length === 0 };
 };
 
-// Файлы, при добавлении/удалении которых нужно перегенерировать реестр.
-const DICTIONARY_FILE = new RegExp(
-  `/src/(modules|components)/[^/]+/i18n/(${LOCALES.join('|')})\\.ts$`,
+// Файлы словарей и папки i18n где угодно в src: неправильно размещённые тоже, чтобы сразу показать ошибку.
+const DICTIONARY_PATH = new RegExp(
+  `/src/.+/i18n(/(${LOCALES.join('|')})\\.ts)?$`,
 );
 
 // Плагин Vite: генерация при старте и при добавлении/удалении словаря в dev.
@@ -156,7 +201,7 @@ export const i18nDictionariesPlugin = () => {
     },
     configureServer(server) {
       const regenerate = (file) => {
-        if (!DICTIONARY_FILE.test(toPosix(file))) return;
+        if (!DICTIONARY_PATH.test(toPosix(file))) return;
         try {
           if (generateI18nDictionaries(root).changed) {
             server.config.logger.info('[i18n] dictionary registry updated', {
@@ -169,6 +214,8 @@ export const i18nDictionariesPlugin = () => {
       };
       server.watcher.on('add', regenerate);
       server.watcher.on('unlink', regenerate);
+      // Пустая i18n/ после удаления файлов по одному уходит только с unlinkDir.
+      server.watcher.on('unlinkDir', regenerate);
     },
   };
 };

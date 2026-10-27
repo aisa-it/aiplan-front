@@ -7,6 +7,9 @@ import ru from './locales/ru';
 
 const ruMessages = { ...ru, ...modulesRu, $vuetify: vuetifyRu };
 
+type SharedKeyOverlap = Extract<keyof typeof ru, keyof typeof modulesRu>;
+true satisfies [SharedKeyOverlap] extends [never] ? true : false;
+
 export type MessageSchema = typeof ruMessages;
 
 export type MessageKey = PickupPaths<Omit<MessageSchema, '$vuetify'>>;
