@@ -43,7 +43,9 @@
                   class="size-[18px] hover:border-2 hover:border-[gray]"
                   :class="[
                     getActivityLevelClass(square.level, isDark),
-                    activeSquare === index ? 'border-2 border-[gray]' : '',
+                    selectedDay === square.date
+                      ? 'border-2 border-[gray]'
+                      : '',
                   ]"
                   :style="getSquarePosition(index)"
                   :aria-label="
@@ -52,7 +54,12 @@
                       count: square.count,
                     })
                   "
-                  @click="activeSquare = index"
+                  @click="
+                    emit(
+                      'update:selectedDay',
+                      selectedDay === square.date ? '' : square.date,
+                    )
+                  "
                 />
               </template>
               <span>
@@ -114,15 +121,20 @@ const props = withDefaults(
     activities: TypesActivityTable;
     exampleBlock?: boolean;
     loadReq?: boolean;
+    selectedDay?: string;
   }>(),
   {
     exampleBlock: true,
+    selectedDay: '',
   },
 );
 
+const emit = defineEmits<{
+  'update:selectedDay': [day: string];
+}>();
+
 const { t } = useI18n();
 
-const activeSquare = ref<number | null>(null);
 const heatmapRef = ref<HTMLDivElement | null>(null);
 const { isDark } = useAppTheme();
 const { monthPositions, squares } = useActivityHotMap(

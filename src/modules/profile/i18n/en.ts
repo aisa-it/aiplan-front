@@ -78,6 +78,7 @@ export default {
   },
   activities: {
     empty: 'The user has no activity',
+    notEnoughData: 'Not enough data to show activity by day',
   },
   design: {
     language: {

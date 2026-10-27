@@ -78,6 +78,7 @@ export default {
   },
   activities: {
     empty: 'У пользователя не было активности',
+    notEnoughData: 'Недостаточно данных для отображения активности по дням',
   },
   design: {
     language: {

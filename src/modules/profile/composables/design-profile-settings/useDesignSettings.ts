@@ -13,6 +13,7 @@ import {
 } from '../../configs/design-settings.config';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { toast } from '@/modules/toast';
 
 const DEFAULT_SNOW_DENSITY = 170;
 
@@ -59,12 +60,9 @@ export function useDesignSettings(user: Ref<DtoUser>) {
           autoSave: currentAutoSave.value,
         },
       });
-
-      // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
-    } catch (error) {
-      void error;
+      toast.success();
+    } catch {
       syncUserSettings(user.value);
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
     } finally {
       saving.value = false;
     }

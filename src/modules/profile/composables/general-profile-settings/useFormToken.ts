@@ -1,6 +1,11 @@
 import { onMounted, ref } from 'vue';
 
 import { ProfileService } from '../../api/profile.service';
+import { toast } from '@/modules/toast';
+import {
+  SUCCESS_COPY_TOKEN_USER,
+  SUCCESS_RESET_TOKEN_USER,
+} from '@/constants/notifications';
 
 export function useFormToken() {
   const authToken = ref('');
@@ -15,10 +20,9 @@ export function useFormToken() {
   const handleCopyProfileToken = async () => {
     try {
       await navigator.clipboard.writeText(authToken.value);
-      // TODO: показать уведомление SUCCES_COPY_TOKEN_USER после переноса системы уведомлений.
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+      toast.success(SUCCESS_COPY_TOKEN_USER);
+    } catch {
+      toast.error();
     }
   };
 
@@ -26,10 +30,8 @@ export function useFormToken() {
     tokenResetting.value = true;
     try {
       authToken.value = await ProfileService.resetAuthToken();
-      // TODO: показать уведомление SUCCESS_RESET_TOKEN_USER после переноса системы уведомлений.
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+      toast.success(SUCCESS_RESET_TOKEN_USER);
+    } catch {
     } finally {
       tokenResetting.value = false;
     }
@@ -38,9 +40,7 @@ export function useFormToken() {
   onMounted(async () => {
     try {
       authToken.value = await ProfileService.getAuthToken();
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+    } catch {
     } finally {
       tokenLoading.value = false;
     }
