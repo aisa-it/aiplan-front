@@ -17,11 +17,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import UserInfoRow from './UserInfoRow.vue';
 import UserStatus from '@/components/user-status/shared/UserStatus.vue';
 
-import { formatTime, getCityFromTimezone } from '@/utils/time.ts';
+import { formatTime, getTimezoneKey } from '@/utils/time.ts';
 import { getUserName } from '@/utils/helpers.ts';
 
 import {
@@ -38,6 +39,8 @@ const props = withDefaults(
   >(),
   DEFAULT_OPTIONS,
 );
+
+const { t } = useI18n();
 
 const fullName = computed(() => getUserName(props.user, props.hideBlockStatus));
 
@@ -73,5 +76,8 @@ const formattedTime = computed(() =>
   formatTime(new Date(), props.user?.user_timezone),
 );
 
-const timeCity = computed(() => getCityFromTimezone(props.user?.user_timezone));
+const timeCity = computed(() => {
+  const key = getTimezoneKey(props.user?.user_timezone);
+  return key ? t(`timezones.${key}`).split(',')[0] : '';
+});
 </script>

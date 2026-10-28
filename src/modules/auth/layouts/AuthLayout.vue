@@ -76,7 +76,9 @@ const checkSession = async () => {
           : (nextUrl ?? '/');
       router.replace(url as string);
     }
-  } catch (e) {}
+  } catch (e) {
+    // TODO: добавить обработку ошибок, не оставлять пустой catch
+  }
 };
 
 const startSessionPolling = () => {

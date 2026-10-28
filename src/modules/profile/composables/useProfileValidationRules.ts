@@ -1,65 +1,75 @@
 import { isEmail } from '@/utils/validation';
+import { i18n } from '@/i18n';
 
 type Rule = (value: string) => true | string;
 
+type NameFieldKey = 'firstName' | 'lastName';
+
 const required =
-  (fieldName: string): Rule =>
+  (field: 'firstName' | 'lastName' | 'username' | 'password'): Rule =>
   (value) =>
-    Boolean(value?.trim()) || `Необходимо ввести ${fieldName}`;
+    Boolean(value?.trim()) ||
+    i18n.global.t(`profile.validation.required.${field}`);
 
 const maxLength =
   (length: number): Rule =>
   (value) =>
-    value.length <= length || `Максимальный размер — ${length} символов`;
+    value.length <= length ||
+    i18n.global.t('profile.validation.maxLength', { length });
 
 const nameCharacters =
-  (fieldName: string): Rule =>
+  (field: NameFieldKey): Rule =>
   (value) =>
     /^[а-яёА-ЯЁ-]+$|^[a-zA-Z-]+$/.test(value) ||
-    `${fieldName} может содержать латинские или кириллические буквы и спец. символ дефис (-)`;
+    i18n.global.t(`profile.validation.nameCharacters.${field}`);
 
 const containsLetter =
-  (fieldName: string): Rule =>
+  (field: NameFieldKey): Rule =>
   (value) =>
     /[а-яёА-ЯЁa-zA-Z]/.test(value) ||
-    `${fieldName} пользователя должно содержать минимум одну букву латинского или кириллического алфавита`;
+    i18n.global.t(`profile.validation.containsLetter.${field}`);
 
 const usernameCharacters: Rule = (value) =>
   /^[A-Za-z0-9._/\\-]+$/.test(value) ||
-  'Имя пользователя может содержать буквы латинского алфавита и спец. символы: точка(.), нижнее подчеркивание(_), дефис (-), слэш прямой и обратный (/, \\), цифры (0-9)';
+  i18n.global.t('profile.validation.usernameCharacters');
 
 const usernameContainsLetter: Rule = (value) =>
   /[A-Za-z]/.test(value) ||
-  'Имя пользователя должно содержать минимум одну букву латинского алфавита';
+  i18n.global.t('profile.validation.usernameContainsLetter');
 
 const telegramId: Rule = (value) =>
-  !value || /^\d+$/.test(value) || 'Telegram ID может содержать только цифры';
+  !value ||
+  /^\d+$/.test(value) ||
+  i18n.global.t('profile.validation.telegramId');
 
 export function useProfileValidationRules() {
   const firstNameRules = [
-    required('имя'),
+    required('firstName'),
     maxLength(100),
-    nameCharacters('Имя'),
-    containsLetter('Имя'),
+    nameCharacters('firstName'),
+    containsLetter('firstName'),
   ];
 
   const lastNameRules = [
-    required('фамилию'),
+    required('lastName'),
     maxLength(100),
-    nameCharacters('Фамилия'),
-    containsLetter('Фамилия'),
+    nameCharacters('lastName'),
+    containsLetter('lastName'),
   ];
 
   const usernameRules = [
-    required('имя пользователя'),
+    required('username'),
     maxLength(100),
     usernameCharacters,
     usernameContainsLetter,
   ];
 
-  const emailRules = [(value: string) => isEmail(value)];
+  const emailRules = [
+    (value: string) =>
+      isEmail(value) === true || i18n.global.t('profile.validation.email'),
+  ];
   const telegramIdRules = [telegramId, maxLength(15)];
-  const passwordRules = [required('пароль')];
+  const passwordRules = [required('password')];
 
   return {
     emailRules,

@@ -1,5 +1,6 @@
 import { onMounted, reactive, ref, watch, type Ref } from 'vue';
 import { isAxiosError } from 'axios';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 import { isEmail } from '@/utils/validation';
@@ -9,10 +10,7 @@ import { useProfileValidationRules } from '../useProfileValidationRules';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { toast } from '@/modules/toast';
-import {
-  ERROR_IDENTITY_USER,
-  SUCCESS_CHANGE_EMAIL,
-} from '@/constants/notifications';
+import { SUCCESS_CHANGE_EMAIL } from '@/constants/notifications';
 
 type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
@@ -24,6 +22,7 @@ type ApiErrorData = {
 
 export function useFormUserdata(user: Ref<DtoUser>) {
   const userStore = useUserStore();
+  const { t } = useI18n();
   const form = reactive({
     email: '',
     firstName: '',
@@ -91,7 +90,7 @@ export function useFormUserdata(user: Ref<DtoUser>) {
         error.response?.status === 409 &&
         error.response.data?.code === 6002
       ) {
-        usernameError.value = ERROR_IDENTITY_USER;
+        usernameError.value = t('profile.validation.usernameTaken');
       }
     } finally {
       saving.value = false;

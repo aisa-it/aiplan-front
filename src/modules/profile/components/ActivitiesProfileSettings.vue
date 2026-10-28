@@ -9,8 +9,8 @@
     <div v-else>
       {{
         activities.length
-          ? 'Недостаточно данных для отображения активности по дням'
-          : 'У пользователя не было активности'
+          ? t('profile.activities.notEnoughData')
+          : t('profile.activities.empty')
       }}
     </div>
 
@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import ActivityHotMap from '@/components/activity-hot-map/ActivityHotMap.vue';
 import {
@@ -49,6 +50,8 @@ const currentDay = ref('');
 defineProps<{
   user: DtoUser;
 }>();
+
+const { t } = useI18n();
 
 const {
   activities,

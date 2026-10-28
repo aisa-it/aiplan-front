@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 
 import {
-  ACTIVITY_MONTHS,
+  ACTIVITY_MONTH_KEYS,
   getActivityLevel,
 } from '../ActivityHotMap.config';
 
@@ -15,7 +15,7 @@ type ActivitySquare = {
 };
 
 type MonthPosition = {
-  name: string;
+  key: (typeof ACTIVITY_MONTH_KEYS)[number];
   span: number;
   start: number;
 };
@@ -66,7 +66,7 @@ export function useActivityHotMap(activities: Ref<TypesActivityTable>) {
       if (currentMonth !== previousMonth || isLastDate) {
         const monthEnd = Math.floor((squares.length - 1) / 7) + 2;
         monthPositions.push({
-          name: ACTIVITY_MONTHS[previousMonth],
+          key: ACTIVITY_MONTH_KEYS[previousMonth],
           start: monthStart,
           span: Math.max(1, monthEnd - monthStart),
         });

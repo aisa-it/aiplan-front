@@ -1,0 +1,2 @@
+# Генерируется scripts/i18n-dictionaries.mjs; форматирование prettier'ом сломало бы `yarn i18n:check`.
+src/i18n/generated/

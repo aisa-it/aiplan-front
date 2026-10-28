@@ -29,23 +29,23 @@
           />
 
           <div v-if="isValidImage" class="text-primary">
-            <p v-if="isDragActive">Перетащите файл сюда...</p>
-            <p v-else>Перетащите или нажмите, чтобы выбрать файл</p>
+            <p v-if="isDragActive">{{ t('profile.avatar.dropActive') }}</p>
+            <p v-else>{{ t('profile.avatar.dropIdle') }}</p>
           </div>
 
-          <div
+          <v-alert
             v-else
-            class="flex max-w-[360px] gap-3 rounded-sm bg-[#ffece4] p-4 text-left text-[#474a52]"
-          >
-            <v-icon color="error">mdi-alert-circle-outline</v-icon>
-            <div>
-              <p class="font-medium">При загрузке произошла ошибка</p>
-              <p>
-                Убедитесь, что Вы загружаете файл в формате JPEG, GIF или PNG
-                <span v-if="isProfile">не более 20 Мб</span> и попробуйте снова.
-              </p>
-            </div>
-          </div>
+            type="error"
+            variant="tonal"
+            icon="mdi-alert-circle-outline"
+            class="max-w-[360px] text-left"
+            :title="t('profile.avatar.errorTitle')"
+            :text="
+              isProfile
+                ? t('profile.avatar.errorHintWithLimit')
+                : t('profile.avatar.errorHint')
+            "
+          />
         </label>
       </v-card-text>
 
@@ -57,7 +57,7 @@
           :disabled="loading"
           @click="model = false"
         >
-          Отменить
+          {{ t('common.actions.cancel') }}
         </v-btn>
         <v-btn
           width="110"
@@ -68,7 +68,7 @@
           :loading="loading"
           @click="onUpload"
         >
-          Загрузить
+          {{ t('common.actions.upload') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -76,6 +76,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { useAvatarUpload } from '../../composables/general-profile-settings/useAvatarUpload';
 
 const props = withDefaults(
@@ -92,6 +94,8 @@ const props = withDefaults(
 );
 
 const model = defineModel<boolean>({ required: true });
+
+const { t } = useI18n();
 const emit = defineEmits<{
   upload: [image: File];
 }>();

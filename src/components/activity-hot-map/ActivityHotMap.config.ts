@@ -1,34 +1,34 @@
-export const ACTIVITY_MONTHS = [
-  'Янв',
-  'Фев',
-  'Мар',
-  'Апр',
-  'Май',
-  'Июн',
-  'Июл',
-  'Авг',
-  'Сен',
-  'Окт',
-  'Ноя',
-  'Дек',
+export const ACTIVITY_MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
 ] as const;
 
-export const ACTIVITY_WEEKDAYS = [
-  'Пн',
-  'Вт',
-  'Ср',
-  'Чт',
-  'Пт',
-  'Сб',
-  'Вс',
+export const ACTIVITY_WEEKDAY_KEYS = [
+  'mon',
+  'tue',
+  'wed',
+  'thu',
+  'fri',
+  'sat',
+  'sun',
 ] as const;
 
-export const ACTIVITY_LEVEL_LABELS = [
-  '0 активностей',
-  '1-10 активностей',
-  '11-20 активностей',
-  '21-30 активностей',
-  '31+ активностей',
+export const ACTIVITY_LEVEL_KEYS = [
+  'none',
+  'low',
+  'medium',
+  'high',
+  'max',
 ] as const;
 
 const LIGHT_ACTIVITY_LEVEL_CLASSES = [

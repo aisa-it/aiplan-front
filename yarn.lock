@@ -71,6 +71,36 @@
   dependencies:
     tslib "^2.4.0"
 
+"@intlify/core-base@11.4.2":
+  version "11.4.2"
+  resolved "https://registry.npmjs.org/@intlify/core-base/-/core-base-11.4.2.tgz#36c23b50406ba9185d98799b4e13ee6ea65fc19e"
+  integrity sha512-7fpuCcVmeLv2T9qHsARqGvh8xt+sV2fH+Q+gMHFwB/rPXzo85DpbJFKn7dBH1L5p0c2cSh2DW+2h/64EKrISmA==
+  dependencies:
+    "@intlify/devtools-types" "11.4.2"
+    "@intlify/message-compiler" "11.4.2"
+    "@intlify/shared" "11.4.2"
+
+"@intlify/devtools-types@11.4.2":
+  version "11.4.2"
+  resolved "https://registry.npmjs.org/@intlify/devtools-types/-/devtools-types-11.4.2.tgz#ca0d11d1694447160171a9263c3e9c9b695e5168"
+  integrity sha512-3u8EN1kB6EMSi96KXs5k7a8y2X2g4+h3X6iwVZU47cP4n+mTuq//WMjG588BzSp/2XQ/dTXo2BLUXX+XS+PNfA==
+  dependencies:
+    "@intlify/core-base" "11.4.2"
+    "@intlify/shared" "11.4.2"
+
+"@intlify/message-compiler@11.4.2":
+  version "11.4.2"
+  resolved "https://registry.npmjs.org/@intlify/message-compiler/-/message-compiler-11.4.2.tgz#82a1eb96bf6bc51e34e3fc32dccbb468f74552ef"
+  integrity sha512-a6CDSGSMTGrg0BjD97x8TBYPf7qQMDlZipJ6UDfv/pd4OIym8TMlHu3MsH0bTNnRdAG2D6EFEykIgiQPqvtTkA==
+  dependencies:
+    "@intlify/shared" "11.4.2"
+    source-map-js "^1.0.2"
+
+"@intlify/shared@11.4.2":
+  version "11.4.2"
+  resolved "https://registry.npmjs.org/@intlify/shared/-/shared-11.4.2.tgz#23c918058160ccb3d68ce876ec62692df3eddbb2"
+  integrity sha512-NzpHbguRCsOHDwxmlBa9qu/imc+/QWgsYUaK6FZeNC0wK8QfAbhqrktEp/haVzxU1aikH8IX4ytD+mfFEMi/9A==
+
 "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"
   resolved "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz#6342a19f44347518c93e43b1ac69deb3c4656a1f"
@@ -485,7 +515,7 @@
     "@vue/compiler-dom" "3.5.40"
     "@vue/shared" "3.5.40"
 
-"@vue/devtools-api@^6.6.4":
+"@vue/devtools-api@^6.5.0", "@vue/devtools-api@^6.6.4":
   version "6.6.4"
   resolved "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.6.4.tgz#cbe97fe0162b365edc1dba80e173f90492535343"
   integrity sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==
@@ -1134,6 +1164,11 @@ sass@^1.102.0:
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
   integrity sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==
 
+source-map-js@^1.0.2:
+  version "1.2.2"
+  resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.2.tgz#79fb88d97535a21cb27162cb05d211b67acea4ab"
+  integrity sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==
+
 tailwindcss@4.3.3, tailwindcss@^4.3.3:
   version "4.3.3"
   resolved "https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.3.3.tgz#c006861611c213c1877893ab5b23daa16be2bb55"
@@ -1198,6 +1233,16 @@ vscode-uri@^3.0.8:
   version "3.1.0"
   resolved "https://registry.npmjs.org/vscode-uri/-/vscode-uri-3.1.0.tgz#dd09ec5a66a38b5c3fffc774015713496d14e09c"
   integrity sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==
+
+vue-i18n@11.4.2:
+  version "11.4.2"
+  resolved "https://registry.npmjs.org/vue-i18n/-/vue-i18n-11.4.2.tgz#36cc09bc870a6ba0bdc1c02d0360a94e331a15f6"
+  integrity sha512-sADDeKXqAGsPX6tK3t3y2ZiMpbVWN12tG+MhTiJ06rVoh58eGtM4wFyw3uWGbVkXByVp9Ne/AP+nSSzI+J9OAQ==
+  dependencies:
+    "@intlify/core-base" "11.4.2"
+    "@intlify/devtools-types" "11.4.2"
+    "@intlify/shared" "11.4.2"
+    "@vue/devtools-api" "^6.5.0"
 
 vue-router@^4.6.4:
   version "4.6.4"

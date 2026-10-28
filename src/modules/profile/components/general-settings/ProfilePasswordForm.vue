@@ -1,15 +1,17 @@
 <template>
   <section class="pt-4" aria-labelledby="password-heading">
-    <h3 id="password-heading" class="text-2xl font-medium">Смена пароля</h3>
+    <h3 id="password-heading" class="text-2xl font-medium">
+      {{ t('profile.password.heading') }}
+    </h3>
 
     <v-form :ref="setFormRef" @submit.prevent="changePassword">
       <ProfileSettingsRow
-        title="Новый пароль"
-        description="Введите новый пароль"
+        :title="t('profile.password.new.title')"
+        :description="t('profile.password.new.description')"
       >
         <v-text-field
           v-model="password.new_password"
-          label="Введите пароль"
+          :label="t('profile.password.label')"
           autocomplete="new-password"
           data-id="new-password-settings"
           :type="isNewPassword ? 'password' : 'text'"
@@ -21,20 +23,18 @@
       </ProfileSettingsRow>
 
       <ProfileSettingsRow
-        title="Новый пароль (повторно)"
-        description="Введите новый пароль ещё раз"
+        :title="t('profile.password.repeat.title')"
+        :description="t('profile.password.repeat.description')"
       >
         <v-text-field
           v-model="password.confirm_password"
-          label="Введите пароль"
+          :label="t('profile.password.label')"
           autocomplete="new-password"
           data-id="repeat-password-settings"
           :type="isRepeatNewPassword ? 'password' : 'text'"
           :rules="confirmPasswordRules"
           :disabled="loading"
-          :append-inner-icon="
-            isRepeatNewPassword ? 'mdi-eye-off' : 'mdi-eye'
-          "
+          :append-inner-icon="isRepeatNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
           @click:append-inner="isRepeatNewPassword = !isRepeatNewPassword"
         />
       </ProfileSettingsRow>
@@ -53,7 +53,7 @@
             password.new_password !== password.confirm_password
           "
         >
-          Сменить пароль
+          {{ t('profile.password.submit') }}
         </v-btn>
       </div>
     </v-form>
@@ -61,9 +61,13 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import ProfileSettingsRow from './ProfileSettingsRow.vue';
 
 import { useFormPassword } from '../../composables/general-profile-settings/useFormPassword';
+
+const { t } = useI18n();
 
 const {
   changePassword,

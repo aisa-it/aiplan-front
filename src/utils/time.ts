@@ -4,7 +4,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import { TIMEZONES } from '@/constants/timezones';
+import { TIMEZONES, type TimezoneKey } from '@/constants/timezones';
 
 dayjs.locale('ru');
 dayjs.extend(utc);
@@ -17,13 +17,9 @@ export const formatTime = (date: string | Date, userTimezone?: string) => {
     : dayjs(date).format('HH:mm');
 };
 
-export const getCityFromTimezone = (timezone: string | undefined) => {
-  const tz = TIMEZONES.find((t) => t.value === timezone);
-  if (!tz) return '';
-  const labelParts = tz.label.split(' ');
-  const cities = labelParts.slice(1).join('');
-  return cities.split(',')[0];
-};
+export const getTimezoneKey = (
+  timezone: string | undefined,
+): TimezoneKey | undefined => TIMEZONES.find((t) => t.value === timezone)?.key;
 
 export const formatDateTime = (date: string | Date, userTimezone?: string) => {
   return userTimezone
