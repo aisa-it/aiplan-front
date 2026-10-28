@@ -8,12 +8,12 @@
     <v-card class="rounded-xl">
       <v-card-text class="flex flex-col pt-6 pb-2">
         <h6 class="text-h6 font-weight-bold mb-6 text-gray-700">
-          Создание нового проекта
+          {{ t('dialogs.project.createTitle') }}
         </h6>
 
         <v-text-field
           v-model="projectValues.name"
-          label="Введите имя проекта"
+          :label="t('dialogs.project.nameLabel')"
           class="mb-2"
           :rules="[validateName]"
           @update:model-value="createIdentifier"
@@ -22,7 +22,7 @@
         <div class="flex flex-row gap-4">
           <v-text-field
             v-model="projectValues.identifier"
-            label="Введите идентификатор проекта"
+            :label="t('dialogs.project.identifierLabel')"
             class="flex-grow"
             :rules="[validateIdentifier]"
             :error="isProjectIdentifier"
@@ -37,8 +37,7 @@
 
           <v-select
             v-model="projectValues.public"
-            :items="NETWORK_CHOICES"
-            item-title="label"
+            :items="networkChoices"
             item-value="value"
             return-object
             class="max-w-[150px] flex-none"
@@ -62,7 +61,7 @@
           @click="handleClose"
           class="w-[110px]"
         >
-          Отменить
+          {{ t('common.actions.cancel') }}
         </v-btn>
         <v-btn
           color="primary"
@@ -71,7 +70,7 @@
           @click="createNewProject"
           class="w-[110px]"
         >
-          Создать
+          {{ t('common.actions.create') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -85,6 +84,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import ConfirmCloseProjectCreateDialog from './ConfirmCloseProjectCreateDialog.vue';
 // @ts-ignore
@@ -97,11 +97,19 @@ import {
 } from '@/constants/constants';
 import { PROJECT_EMOJI_OPTIONS, PROJECT_EMOJIS } from '@/constants/emojis';
 import { getRandomEmoji } from '@/utils/helpers';
+import { useTranslatedOptions } from '@/i18n/useTranslatedOptions';
+
+const { t } = useI18n();
 
 const cyrillicToTranslit = CyrillicToTranslit();
 
 const route = useRoute();
 const workspaceStore = useWorkspaceStore();
+
+// Модель селекта публичности — элемент вида { title, value }, как в списке items
+// (v-select с return-object в Vuetify 4 требует совпадения типов). Сопоставление
+// выбора идёт по value, поэтому payload бэкенда не меняется.
+const networkChoices = useTranslatedOptions(NETWORK_CHOICES);
 
 const isOpen = defineModel<boolean>();
 
@@ -115,7 +123,7 @@ const projectValues = ref({
   name: '',
   identifier: '',
   description: '',
-  public: NETWORK_CHOICES[0],
+  public: networkChoices.value[0],
   emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
   cover_image: '',
 });
@@ -125,7 +133,7 @@ const clear = () => {
     name: '',
     identifier: '',
     description: '',
-    public: NETWORK_CHOICES[0],
+    public: networkChoices.value[0],
     emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
     cover_image: '',
   };
@@ -149,16 +157,16 @@ const forceClose = () => {
 
 const validateName = (val: string) => {
   isValidName.value = val.trim().length > 0;
-  return (
-    val.trim().length > 0 || 'Название должно содержать 1 или более символов'
-  );
+  return val.trim().length > 0 || t('dialogs.project.validation.nameMin');
 };
 
 const validateIdentifier = (val: string) => {
   isValidIdentifier.value = val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN;
   return (
     val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
-    `Идентификатор должен содержать ${PROJECT_IDENTIFIER_LENGTH.MIN} и более символов`
+    t('dialogs.project.validation.identifierMin', {
+      min: PROJECT_IDENTIFIER_LENGTH.MIN,
+    })
   );
 };
 

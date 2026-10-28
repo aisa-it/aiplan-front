@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -13,9 +14,10 @@ export const renderIntegrationAdded: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} интеграцию ${
-        activity.new_value ?? ''
-      }`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.workspace.integrationTarget',
+        { value: activity.new_value ?? '' },
+      )}`,
     ),
     ...createWorkspaceContextParts(activity, context, 'in'),
   );
@@ -25,6 +27,11 @@ export const renderIntegrationRemoved: ActivityRenderer = (
   context,
 ) =>
   createActivityMessage(
-    createTextPart(`удалил(-а) интеграцию ${activity.old_value ?? ''}`),
+    createTextPart(
+      `${getActivityVerbText('deleted')} ${i18n.global.t(
+        'activities.workspace.integrationTarget',
+        { value: activity.old_value ?? '' },
+      )}`,
+    ),
     ...createWorkspaceContextParts(activity, context, 'from'),
   );

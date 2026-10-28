@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -5,14 +6,21 @@ import {
 import { createCurrentDocParts } from './doc-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
-const renderDocComment = (action: string): ActivityRenderer =>
+const renderDocComment = (messageKey: MessageKey): ActivityRenderer =>
   (activity, context) =>
     createActivityMessage(
-      createTextPart(`${action} комментарий в документе`),
+      createTextPart(i18n.global.t(messageKey)),
       ...createCurrentDocParts(activity, context),
     );
 
-export const renderDocCommentCreated = renderDocComment('добавил(-а)');
-export const renderDocCommentUpdated = renderDocComment('изменил(-а)');
-export const renderDocCommentDeleted = renderDocComment('удалил(-а)');
+export const renderDocCommentCreated = renderDocComment(
+  'activities.doc.commentAdded',
+);
+export const renderDocCommentUpdated = renderDocComment(
+  'activities.doc.commentUpdated',
+);
+export const renderDocCommentDeleted = renderDocComment(
+  'activities.doc.commentDeleted',
+);

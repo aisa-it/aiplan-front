@@ -2,18 +2,18 @@
   <v-dialog v-model="isOpen" max-width="500">
     <v-card class="rounded-2xl bg-white" color="white" elevation="0">
       <v-card-title class="text-h5 font-weight-regular"
-        >Восстановление пароля</v-card-title
+        >{{ t('auth.restore.title') }}</v-card-title
       >
 
       <v-card-text class="d-flex flex-column">
         <v-text-field
           v-model="email"
-          label="Введите Email"
+          :label="t('auth.restore.emailLabel')"
           density="comfortable"
           color="primary"
           :rules="[
-            (v) => !!v || 'Введите email',
-            (v) => isEmail(v) || 'Некорректный email',
+            (v) => !!v || t('auth.restore.emailRequired'),
+            (v) => isEmail(v) || t('common.validation.email'),
           ]"
         ></v-text-field>
 
@@ -39,7 +39,7 @@
           @click="closeDialog"
           class="text-none font-weight-medium"
         >
-          Назад
+          {{ t('common.actions.back') }}
         </v-btn>
         <v-btn
           variant="flat"
@@ -49,7 +49,7 @@
           :disabled="isEnabledCaptcha ? !captchaPayload : false"
           class="text-none"
         >
-          Восстановить
+          {{ t('auth.restore.submit') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -58,16 +58,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { AuthService } from '../api/auth.service';
 import { useUtilsStore } from '@/stores/utils-store';
 import { storeToRefs } from 'pinia';
 import CaptchaWidget from './CaptchaWidget.vue';
 import { isEmail } from '@/utils/validation';
-import { SUCCESS_RESTORE_PASS } from '../constants';
 
 const props = defineProps<{
   modelValue: boolean;
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
@@ -109,7 +111,7 @@ const restore = async () => {
   loading.value = false;
 
   if (success) {
-    successMessage.value = SUCCESS_RESTORE_PASS;
+    successMessage.value = t('auth.restore.success');
     setTimeout(() => {
       closeDialog();
     }, 3000);

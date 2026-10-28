@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -13,42 +14,50 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderDocMoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} документ`),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.doc.docTarget',
+      )}`,
+    ),
     ...createCurrentDocParts(activity, context),
-    createTextPart(' из '),
+    createTextPart(i18n.global.t('activities.doc.moveFrom')),
     createDocLocationPart(
       activity,
       activity.old_entity_detail,
       activity.old_value,
-      'корневой папки',
+      'activities.doc.rootFolderFrom',
     ),
-    createTextPart(' в '),
+    createTextPart(i18n.global.t('activities.doc.moveTo')),
     createDocLocationPart(
       activity,
       activity.new_entity_detail,
       activity.new_value,
-      'корневую папку',
+      'activities.doc.rootFolderTo',
     ),
   );
 
 export const renderChildDocDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} дочерний документ ${
-        activity.old_value ?? ''
-      }`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.doc.childDoc',
+      )} ${activity.old_value ?? ''}`,
     ),
   );
 
 export const renderChildDocRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} дочерний документ `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.doc.childDoc',
+      )} `,
+    ),
     createDocLink(
       activity,
       activity.old_entity_detail,
       activity.old_value ?? '',
     ),
-    createTextPart(' из документа'),
+    createTextPart(i18n.global.t('activities.doc.removedFromDoc')),
     ...createCurrentDocParts(activity, context),
   );
 
@@ -57,13 +66,17 @@ const createChildDocAddedRenderer = (
 ): ActivityRenderer =>
   (activity, context) =>
     createActivityMessage(
-      createTextPart(`${getActivityVerbText(action)} дочерний документ `),
+      createTextPart(
+        `${getActivityVerbText(action)} ${i18n.global.t(
+          'activities.doc.childDoc',
+        )} `,
+      ),
       createDocLink(
         activity,
         activity.new_entity_detail,
         activity.new_value ?? '',
       ),
-      createTextPart(' в документ'),
+      createTextPart(i18n.global.t('activities.doc.addedToDoc')),
       ...createCurrentDocParts(activity, context),
     );
 

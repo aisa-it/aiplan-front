@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createExternalLinkPart,
   createTextPart,
@@ -11,14 +12,16 @@ import { getDetailNumber, getDetailString } from '../../activity-value.helpers';
 import type { ActivityRenderContext } from '../../../model/activity.types';
 import type { ActivityMessagePart } from '../../activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { MessageKey } from '@/i18n';
 
 export type ProjectRelation = 'at' | 'from' | 'into' | 'of';
 
-const PROJECT_RELATION_TEXT: Readonly<Record<ProjectRelation, string>> = {
-  at: 'в проекте ',
-  from: 'из проекта ',
-  into: 'в проект ',
-  of: 'проекта ',
+// Ключ словаря для 'at' назван inside: PickupPaths из vue-i18n не пропускает имена методов массивов (Array.prototype.at)
+const PROJECT_RELATION_KEY: Readonly<Record<ProjectRelation, MessageKey>> = {
+  at: 'activities.project.relations.inside',
+  from: 'activities.project.relations.from',
+  into: 'activities.project.relations.into',
+  of: 'activities.project.relations.of',
 };
 
 const isCurrentProject = (context: ActivityRenderContext) =>
@@ -35,7 +38,7 @@ export const createProjectRelationParts = (
   isCurrentProject(context)
     ? []
     : [
-        createTextPart(PROJECT_RELATION_TEXT[relation]),
+        createTextPart(i18n.global.t(PROJECT_RELATION_KEY[relation])),
         createProjectLink(activity),
       ];
 
@@ -56,7 +59,8 @@ export const createWorkspaceSourceParts = (
   }
 
   return [
-    createTextPart('в пространстве '),
+    // та же строка, что и в контексте workspace-событий — переиспользуем существующий ключ
+    createTextPart(i18n.global.t('activities.workspaceRelations.inside')),
     createWorkspaceLink(activity),
   ];
 };

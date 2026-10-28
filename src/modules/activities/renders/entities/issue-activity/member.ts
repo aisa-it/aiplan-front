@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -9,9 +10,10 @@ import {
 import { createIssueContextParts } from './issue-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 const renderIssueMember = (
-  target: 'исполнителя' | 'наблюдателя',
+  targetKey: MessageKey,
   isAdded: boolean,
 ): ActivityRenderer => {
   return (activity, context) => {
@@ -22,10 +24,9 @@ const renderIssueMember = (
 
     return createActivityMessage(
       createTextPart(
-        `${getActivityVerbText(activity.verb)} ${target} ${getActivityUserName(
-          detail,
-          fallback,
-        )}`,
+        `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+          targetKey,
+        )} ${getActivityUserName(detail, fallback)}`,
       ),
       ...createIssueContextParts(
         activity,
@@ -37,21 +38,21 @@ const renderIssueMember = (
 };
 
 export const renderIssueAssigneeAdded = renderIssueMember(
-  'исполнителя',
+  'activities.issue.members.assignee',
   true,
 );
 
 export const renderIssueAssigneeRemoved = renderIssueMember(
-  'исполнителя',
+  'activities.issue.members.assignee',
   false,
 );
 
 export const renderIssueWatcherAdded = renderIssueMember(
-  'наблюдателя',
+  'activities.issue.members.watcher',
   true,
 );
 
 export const renderIssueWatcherRemoved = renderIssueMember(
-  'наблюдателя',
+  'activities.issue.members.watcher',
   false,
 );

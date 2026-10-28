@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <template #title> Необходимо ввести Ваши данные </template>
+    <template #title> {{ t('auth.onboarding.title') }} </template>
 
     <template #default>
       <v-form
@@ -10,7 +10,7 @@
       >
         <v-text-field
           v-model="form.first_name"
-          label="Введите имя *"
+          :label="t('auth.onboarding.firstName')"
           data-id="first-name-onboarding"
           :rules="firstNameRules"
           :disabled="saving"
@@ -18,7 +18,7 @@
 
         <v-text-field
           v-model="form.last_name"
-          label="Введите фамилию*"
+          :label="t('auth.onboarding.lastName')"
           data-id="last-name-onboarding"
           :rules="lastNameRules"
           :disabled="saving"
@@ -26,7 +26,7 @@
 
         <v-text-field
           v-model="form.username"
-          label="Введите имя пользователя*"
+          :label="t('auth.onboarding.username')"
           data-id="user-name-onboarding"
           :rules="usernameRules"
           :error-messages="usernameError"
@@ -36,27 +36,31 @@
 
         <v-text-field
           v-model="form.telegram_id"
-          label="Введите Telegram ID"
+          :label="t('auth.onboarding.telegramId')"
           data-id="telegram-id-settings"
           inputmode="numeric"
           :rules="telegramIdRules"
           :disabled="saving"
         >
           <template #details>
-            <p class="text-xs text-secondary mt-1">
-              Ваш telegram id для получения уведомлений. Напишите
-              <a
-                v-if="telegramBotUrl"
-                :href="telegramBotUrl"
-                class="text-primary text-decoration-underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                боту
-              </a>
-              <span v-else>боту</span>
-              для получения id.
-            </p>
+            <i18n-t
+              keypath="auth.onboarding.telegramHint"
+              tag="p"
+              class="text-xs text-secondary mt-1"
+            >
+              <template #bot>
+                <a
+                  v-if="telegramBotUrl"
+                  :href="telegramBotUrl"
+                  class="text-primary text-decoration-underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ t('auth.onboarding.telegramHintBot') }}
+                </a>
+                <span v-else>{{ t('auth.onboarding.telegramHintBot') }}</span>
+              </template>
+            </i18n-t>
           </template>
         </v-text-field>
 
@@ -70,7 +74,7 @@
           :loading="saving"
           :disabled="isSubmitDisabled"
         >
-          Сохранить
+          {{ t('common.actions.save') }}
         </v-btn>
       </v-form>
     </template>
@@ -81,12 +85,14 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import type { VForm } from 'vuetify/components';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { AuthLayout } from '@/modules/auth';
 import { useUserStore } from '@/stores/user-store';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 import { useProfileValidationRules } from '@/modules/profile/composables/useProfileValidationRules';
 import { ProfileService } from '@/modules/profile/api/profile.service';
-import { ERROR_IDENTITY_USER } from '@/constants/notifications';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -169,7 +175,7 @@ const handleSave = async () => {
     await navigateToNext();
   } catch (err: any) {
     if (err?.response?.status === 409 && err?.response?.data?.code === 6002) {
-      usernameError.value = ERROR_IDENTITY_USER;
+      usernameError.value = t('auth.onboarding.usernameExists');
       return;
     }
 

@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -12,35 +13,38 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 export const renderTemplateCreated: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} шаблон задачи "${
-        activity.new_value ?? ''
-      }"`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.templateTarget',
+        { value: activity.new_value ?? '' },
+      )}`,
     ),
   );
 
 export const renderTemplateDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} шаблон задачи "${
-        activity.old_value ?? ''
-      }"`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.templateTarget',
+        { value: activity.old_value ?? '' },
+      )}`,
     ),
   );
 
 export const renderTemplateName: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) название шаблона задачи с "${
-        activity.old_value ?? ''
-      }" на "${activity.new_value ?? ''}"`,
+      i18n.global.t('activities.project.templateNameChanged', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
   );
 
 export const renderTemplateContent: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) шаблон задачи "${
-        getDetailString(activity.new_entity_detail, 'name') ?? ''
-      }"`,
+      i18n.global.t('activities.project.templateContentChanged', {
+        name: getDetailString(activity.new_entity_detail, 'name') ?? '',
+      }),
     ),
   );

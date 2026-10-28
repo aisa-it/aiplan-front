@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -13,14 +14,22 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderIssueAdded: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} задачу `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.issueTarget',
+      )} `,
+    ),
     createIssueLink(activity),
     ...createProjectContextParts(activity, context, 'into'),
   );
 
 export const renderIssueCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} задачу `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.issueTarget',
+      )} `,
+    ),
     activity.new_entity_detail
       ? createIssueLink(activity)
       : createTextPart(activity.new_value ?? ''),
@@ -30,21 +39,31 @@ export const renderIssueCreated: ActivityRenderer = (activity, context) =>
 export const renderIssueDeleted: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} задачу ${activity.old_value ?? ''}`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.issueTarget',
+      )} ${activity.old_value ?? ''}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );
 
 export const renderIssueCopied: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} задачу `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.issueTarget',
+      )} `,
+    ),
     createIssueLink(activity),
     ...createProjectContextParts(activity, context, 'into'),
   );
 
 export const renderIssueRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('удалил(-а) задачу '),
+    createTextPart(
+      `${getActivityVerbText('deleted')} ${i18n.global.t(
+        'activities.project.issueTarget',
+      )} `,
+    ),
     createIssueLink(activity),
     ...createProjectContextParts(activity, context, 'from'),
   );

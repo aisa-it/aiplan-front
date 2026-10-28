@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -23,10 +24,13 @@ export const renderMemberAdded: ActivityRenderer = (activity, context) => {
     ...workspaceParts,
     ...(workspaceParts.length ? [createTextPart(' ')] : []),
     createTextPart(
-      `пользователя ${getActivityUserName(
-        activity.new_entity_detail,
-        activity.new_value,
-      )} с ролью "${getRoleText(activity.new_value)}"`,
+      i18n.global.t('activities.workspace.memberWithRole', {
+        name: getActivityUserName(
+          activity.new_entity_detail,
+          activity.new_value,
+        ),
+        role: getRoleText(activity.new_value),
+      }),
     ),
   );
 };
@@ -34,9 +38,14 @@ export const renderMemberAdded: ActivityRenderer = (activity, context) => {
 export const renderMemberRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} пользователя ${getActivityUserName(
-        activity.old_entity_detail,
-        activity.old_value,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.workspace.member',
+        {
+          name: getActivityUserName(
+            activity.old_entity_detail,
+            activity.old_value,
+          ),
+        },
       )} `,
     ),
     ...createWorkspaceRelationParts(activity, context, 'from'),
@@ -45,14 +54,16 @@ export const renderMemberRemoved: ActivityRenderer = (activity, context) =>
 export const renderMemberRole: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} роль пользователя ${getActivityUserName(
-        activity.new_entity_detail,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.workspace.roleTarget',
+        { name: getActivityUserName(activity.new_entity_detail) },
       )} `,
     ),
     ...createWorkspaceRelationParts(activity, context, 'of'),
     createTextPart(
-      ` с "${getRoleText(activity.old_value)}" на "${getRoleText(
-        activity.new_value,
-      )}"`,
+      ` ${i18n.global.t('activities.workspace.fromToQuoted', {
+        previous: getRoleText(activity.old_value),
+        next: getRoleText(activity.new_value),
+      })}`,
     ),
   );

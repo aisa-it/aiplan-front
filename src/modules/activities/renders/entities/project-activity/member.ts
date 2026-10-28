@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -14,9 +15,10 @@ import {
 } from './project-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 const renderDefaultMember = (
-  target: 'исполнителя' | 'наблюдателя',
+  targetKey: MessageKey,
 ): ActivityRenderer => {
   return (activity, context) => {
     const isAdded = Boolean(activity.new_value);
@@ -30,11 +32,17 @@ const renderDefaultMember = (
       : activity.old_entity_detail;
 
     return createActivityMessage(
-      createTextPart(`${isAdded ? 'добавил(-а)' : 'убрал(-а)'} `),
+      createTextPart(
+        `${i18n.global.t(
+          isAdded
+            ? 'activities.issue.fieldActions.added'
+            : 'activities.issue.fieldActions.removed',
+        )} `,
+      ),
       ...projectParts,
       ...(projectParts.length ? [createTextPart(' ')] : []),
       createTextPart(
-        `${target} по умолчанию ${getActivityUserName(
+        `${i18n.global.t(targetKey)} ${getActivityUserName(
           detail,
           activity.new_value ?? activity.old_value,
         )}`,
@@ -44,9 +52,13 @@ const renderDefaultMember = (
   };
 };
 
-export const renderDefaultAssignee = renderDefaultMember('исполнителя');
+export const renderDefaultAssignee = renderDefaultMember(
+  'activities.project.members.defaultAssignee',
+);
 
-export const renderDefaultWatcher = renderDefaultMember('наблюдателя');
+export const renderDefaultWatcher = renderDefaultMember(
+  'activities.project.members.defaultWatcher',
+);
 
 export const renderProjectMemberAdded: ActivityRenderer = (
   activity,
@@ -60,9 +72,10 @@ export const renderProjectMemberAdded: ActivityRenderer = (
     ...projectParts,
     ...(projectParts.length ? [createTextPart(' ')] : []),
     createTextPart(
-      `пользователя ${getActivityUserName(
-        activity.new_entity_detail,
-      )} с ролью "${getRoleText(activity.new_value)}"`,
+      i18n.global.t('activities.project.memberWithRole', {
+        name: getActivityUserName(activity.new_entity_detail),
+        role: getRoleText(activity.new_value),
+      }),
     ),
     ...(workspaceParts.length ? [createTextPart(' '), ...workspaceParts] : []),
   );
@@ -77,10 +90,19 @@ export const renderProjectMemberRemoved: ActivityRenderer = (
 
   return createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} пользователя ${getActivityUserName(
-        activity.old_entity_detail,
-        activity.old_value,
-      )}${projectParts.length ? ' ' : ' из проекта'}`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.member',
+        {
+          name: getActivityUserName(
+            activity.old_entity_detail,
+            activity.old_value,
+          ),
+        },
+      )}${
+        projectParts.length
+          ? ' '
+          : ` ${i18n.global.t('activities.project.fromProjectSuffix')}`
+      }`,
     ),
     ...projectParts,
     ...(workspaceParts.length ? [createTextPart(' '), ...workspaceParts] : []),
@@ -95,17 +117,20 @@ export const renderProjectMemberRole: ActivityRenderer = (
 
   return createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} роль пользователя ${getActivityUserName(
-        activity.new_entity_detail,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.project.roleTarget',
+        { name: getActivityUserName(activity.new_entity_detail) },
       )} `,
     ),
     ...projectParts,
     createTextPart(
-      `${projectParts.length ? ' ' : ''}с "${getRoleText(
-        activity.old_value,
-      )}" на "${getRoleText(
-        activity.new_value,
-      )}"`,
+      `${projectParts.length ? ' ' : ''}${i18n.global.t(
+        'activities.project.fromToQuoted',
+        {
+          previous: getRoleText(activity.old_value),
+          next: getRoleText(activity.new_value),
+        },
+      )}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );

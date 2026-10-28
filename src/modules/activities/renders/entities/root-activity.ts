@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createExternalLinkPart,
@@ -16,7 +17,11 @@ const renderWorkspaceCreated: ActivityRenderer = (activity) => {
   const name = activity.new_value || getDetailString(workspace, 'name') || '';
 
   return createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} пространство `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)}${i18n.global.t(
+        'activities.root.space',
+      )}`,
+    ),
     createExternalLinkPart(
       getDetailString(workspace, 'url'),
       `"${name}"`,
@@ -27,9 +32,10 @@ const renderWorkspaceCreated: ActivityRenderer = (activity) => {
 const renderWorkspaceDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} пространство "${
-        activity.old_value ?? ''
-      }"`,
+      `${getActivityVerbText(activity.verb)}${i18n.global.t(
+        'activities.root.spaceQuoted',
+        { name: activity.old_value ?? '' },
+      )}`,
     ),
   );
 

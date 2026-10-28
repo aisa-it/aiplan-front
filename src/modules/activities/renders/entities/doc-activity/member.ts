@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -6,41 +7,42 @@ import { getActivityUserName } from '../../activity-value.helpers';
 import { createCurrentDocParts } from './doc-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 type DocMemberAction = 'added' | 'removed';
 type DocMemberKind = 'watcher' | 'reader' | 'editor';
 
-const MEMBER_TEXT: Readonly<
-  Record<DocMemberKind, Record<DocMemberAction, string>>
+const MEMBER_TEXT_KEY: Readonly<
+  Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: 'добавил(-а) наблюдателя',
-    removed: 'убрал(-а) наблюдателя',
+    added: 'activities.doc.members.watcher.added',
+    removed: 'activities.doc.members.watcher.removed',
   },
   reader: {
-    added: 'добавил(-а) право на просмотр пользователю',
-    removed: 'удалил(-а) право на просмотр пользователю',
+    added: 'activities.doc.permissions.view.added',
+    removed: 'activities.doc.permissions.view.removed',
   },
   editor: {
-    added: 'добавил(-а) право на редактирование пользователю',
-    removed: 'удалил(-а) право на редактирование пользователю',
+    added: 'activities.doc.permissions.edit.added',
+    removed: 'activities.doc.permissions.edit.removed',
   },
 };
 
-const MEMBER_RELATION_TEXT: Readonly<
-  Record<DocMemberKind, Record<DocMemberAction, string>>
+const MEMBER_RELATION_KEY: Readonly<
+  Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: ' в документ',
-    removed: ' из документа',
+    added: 'activities.doc.memberRelations.watcher.added',
+    removed: 'activities.doc.memberRelations.watcher.removed',
   },
   reader: {
-    added: ' в документе',
-    removed: ' в документе',
+    added: 'activities.doc.memberRelations.reader.added',
+    removed: 'activities.doc.memberRelations.reader.removed',
   },
   editor: {
-    added: ' в документе',
-    removed: ' в документе',
+    added: 'activities.doc.memberRelations.editor.added',
+    removed: 'activities.doc.memberRelations.editor.removed',
   },
 };
 
@@ -57,10 +59,10 @@ const renderDocMember = (
 
     return createActivityMessage(
       createTextPart(
-        `${MEMBER_TEXT[kind][action]} ${getActivityUserName(
+        `${i18n.global.t(MEMBER_TEXT_KEY[kind][action])} ${getActivityUserName(
           detail,
           fallback,
-        )}${MEMBER_RELATION_TEXT[kind][action]}`,
+        )}${i18n.global.t(MEMBER_RELATION_KEY[kind][action])}`,
       ),
       ...createCurrentDocParts(activity, context),
     );

@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -6,37 +7,55 @@ import { getRoleText } from '../../activity-value.helpers';
 import { createCurrentDocParts } from './doc-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 const renderDocProperty = (
-  property: 'описание' | 'название',
+  labelKey: MessageKey,
 ): ActivityRenderer =>
   (activity, context) =>
     createActivityMessage(
-      createTextPart(`изменил(-а) ${property} документа`),
+      createTextPart(
+        i18n.global.t('activities.doc.changedField', {
+          target: i18n.global.t(labelKey),
+        }),
+      ),
       ...createCurrentDocParts(activity, context),
     );
 
 const renderDocRole = (
-  role: 'чтения' | 'редактирования',
+  roleKey: MessageKey,
 ): ActivityRenderer =>
   (activity, context) =>
     createActivityMessage(
-      createTextPart(`изменил(-а) роль ${role} документа`),
+      createTextPart(
+        i18n.global.t('activities.doc.roleChanged', {
+          target: i18n.global.t(roleKey),
+        }),
+      ),
       ...createCurrentDocParts(activity, context),
       createTextPart(
-        ` с "${getRoleText(activity.old_value)}" на "${getRoleText(
-          activity.new_value,
-        )}"`,
+        ` ${i18n.global.t('activities.doc.fromToQuoted', {
+          previous: getRoleText(activity.old_value),
+          next: getRoleText(activity.new_value),
+        })}`,
       ),
     );
 
-export const renderDocDescription = renderDocProperty('описание');
-export const renderDocTitle = renderDocProperty('название');
-export const renderDocReaderRole = renderDocRole('чтения');
-export const renderDocEditorRole = renderDocRole('редактирования');
+export const renderDocDescription = renderDocProperty(
+  'activities.doc.fields.description',
+);
+export const renderDocTitle = renderDocProperty(
+  'activities.doc.fields.title',
+);
+export const renderDocReaderRole = renderDocRole(
+  'activities.doc.roles.read',
+);
+export const renderDocEditorRole = renderDocRole(
+  'activities.doc.roles.edit',
+);
 
 export const renderDocSort: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('отсортировал(-а) список дочерних документов в документе'),
+    createTextPart(i18n.global.t('activities.doc.sortedChildDocs')),
     ...createCurrentDocParts(activity, context),
   );

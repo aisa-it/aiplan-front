@@ -1,10 +1,16 @@
+import type { MessageKey } from '@/i18n';
+
+// MessageKey (PickupPaths) не генерирует пути внутрь массивов словаря, но рантайм vue-i18n
+// резолвит скобочную запись ('...items[0]') — поэтому ключи элементов textList типизируем отдельно.
+export type MessageListItemKey = `${MessageKey}[${number}]`;
+
 export interface Step {
   el: string;
-  title: string;
-  text?: string;
-  textList?: string[];
+  titleKey: MessageKey;
+  textKey?: MessageKey;
+  textListKeys?: MessageListItemKey[];
   placement: Placement;
-  activeButtonText?: string;
+  activeButtonTextKey?: MessageKey;
   is_skip?: boolean;
   padding?: number;
   isOffScroll?: boolean;

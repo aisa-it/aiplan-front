@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -18,10 +19,16 @@ const renderSprintWatcher = (isAdded: boolean): ActivityRenderer => {
 
     return createActivityMessage(
       createTextPart(
-        `${getActivityVerbText(activity.verb)} наблюдателя ${getActivityUserName(
+        `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+          'activities.sprint.watcherTarget',
+        )} ${getActivityUserName(
           detail,
           isAdded ? activity.new_value : activity.old_value,
-        )} ${isAdded ? 'в спринт' : 'из спринта'} `,
+        )} ${i18n.global.t(
+          isAdded
+            ? 'activities.sprint.relations.to'
+            : 'activities.sprint.relations.from',
+        )}`,
       ),
       createSprintLink(activity),
     );

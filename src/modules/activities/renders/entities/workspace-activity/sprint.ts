@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createExternalLinkPart,
@@ -23,7 +24,11 @@ export const renderSprint: ActivityRenderer = (activity) => {
     : createTextPart(value);
 
   return createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} спринт `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.workspace.sprintTarget',
+      )}`,
+    ),
     sprintLink,
   );
 };
@@ -31,17 +36,19 @@ export const renderSprint: ActivityRenderer = (activity) => {
 export const renderSprintFolder: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} папку спринтов "${
-        activity.new_value || activity.old_value || ''
-      }"`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.workspace.sprintFolderTarget',
+        { value: activity.new_value || activity.old_value || '' },
+      )}`,
     ),
   );
 
 export const renderSprintFolderName: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) название папки спринтов с "${
-        activity.old_value ?? ''
-      }" на "${activity.new_value ?? ''}"`,
+      i18n.global.t('activities.workspace.sprintFolderNameChanged', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
   );

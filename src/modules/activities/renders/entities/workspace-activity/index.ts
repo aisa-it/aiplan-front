@@ -29,15 +29,19 @@ import {
 } from './sprint';
 
 export const renderWorkspaceActivity = createActivityRenderer({
-  logo: renderWorkspaceProperty('аватар'),
+  logo: renderWorkspaceProperty('activities.workspace.properties.avatar'),
   name: renderWorkspaceName,
-  integration_token: renderWorkspaceProperty('токен'),
+  integration_token: renderWorkspaceProperty(
+    'activities.workspace.properties.token',
+  ),
   member: {
     added: renderMemberAdded,
     removed: renderMemberRemoved,
   },
   role: renderMemberRole,
-  description: renderWorkspaceProperty('описание'),
+  description: renderWorkspaceProperty(
+    'activities.workspace.properties.description',
+  ),
   owner: renderWorkspaceOwner,
   doc: {
     created: renderDocCreated,
