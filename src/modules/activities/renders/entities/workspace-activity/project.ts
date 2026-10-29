@@ -25,7 +25,7 @@ export const renderProject: ActivityRenderer = (activity, context) => {
   return createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.projectTarget',
+        'workspaceActivity.projectTarget',
       )}`,
     ),
     projectLink,

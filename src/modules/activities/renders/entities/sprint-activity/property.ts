@@ -12,7 +12,7 @@ const renderSprintProperty = (labelKey: MessageKey): ActivityRenderer => {
   return (activity) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.sprint.changedField', {
+        i18n.global.t('sprintActivity.changedField', {
           target: i18n.global.t(labelKey),
         }),
       ),
@@ -21,9 +21,9 @@ const renderSprintProperty = (labelKey: MessageKey): ActivityRenderer => {
 };
 
 export const renderSprintName = renderSprintProperty(
-  'activities.sprint.fields.name',
+  'sprintActivity.fields.name',
 );
 
 export const renderSprintDescription = renderSprintProperty(
-  'activities.sprint.fields.description',
+  'sprintActivity.fields.description',
 );

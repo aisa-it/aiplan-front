@@ -15,11 +15,11 @@ export const renderSprintIssueAdded: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.sprint.relations.to',
+        'sprintActivity.relations.to',
       )}`,
     ),
     createSprintLink(activity),
-    createTextPart(i18n.global.t('activities.sprint.issueTarget')),
+    createTextPart(i18n.global.t('sprintActivity.issueTarget')),
     createSprintIssueLink(activity),
   );
 
@@ -27,10 +27,10 @@ export const renderSprintIssueRemoved: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.sprint.relations.from',
+        'sprintActivity.relations.from',
       )}`,
     ),
     createSprintLink(activity),
-    createTextPart(i18n.global.t('activities.sprint.issueTarget')),
+    createTextPart(i18n.global.t('sprintActivity.issueTarget')),
     createSprintIssueLink(activity),
   );

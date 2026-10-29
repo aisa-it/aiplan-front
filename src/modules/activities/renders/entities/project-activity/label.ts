@@ -11,7 +11,7 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 export const renderLabelCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.labelAdded', {
+      i18n.global.t('projectActivity.labelAdded', {
         value: activity.new_value ?? '',
       }),
     ),
@@ -21,7 +21,7 @@ export const renderLabelCreated: ActivityRenderer = (activity, context) =>
 export const renderLabelDeleted: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.labelRemoved', {
+      i18n.global.t('projectActivity.labelRemoved', {
         value: activity.old_value ?? '',
       }),
     ),
@@ -31,7 +31,7 @@ export const renderLabelDeleted: ActivityRenderer = (activity, context) =>
 export const renderLabelName: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.labelNameChanged', {
+      i18n.global.t('projectActivity.labelNameChanged', {
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
       }),
@@ -42,7 +42,7 @@ export const renderLabelName: ActivityRenderer = (activity, context) =>
 export const renderLabelColor: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.labelColorChanged', {
+      i18n.global.t('projectActivity.labelColorChanged', {
         name: getDetailString(activity.new_entity_detail, 'name') ?? '',
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',

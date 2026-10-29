@@ -18,7 +18,7 @@ export const renderIssueAttachment: ActivityRenderer = (
   createActivityMessage(
     createTextPart(
       `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
-        'activities.issue.attachment',
+        'issueActivity.attachment',
         { value: getChangedValue(activity) },
       )}`,
     ),

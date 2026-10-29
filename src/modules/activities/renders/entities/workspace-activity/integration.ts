@@ -15,7 +15,7 @@ export const renderIntegrationAdded: ActivityRenderer = (
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.integrationTarget',
+        'workspaceActivity.integrationTarget',
         { value: activity.new_value ?? '' },
       )}`,
     ),
@@ -29,7 +29,7 @@ export const renderIntegrationRemoved: ActivityRenderer = (
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText('deleted')} ${i18n.global.t(
-        'activities.workspace.integrationTarget',
+        'workspaceActivity.integrationTarget',
         { value: activity.old_value ?? '' },
       )}`,
     ),

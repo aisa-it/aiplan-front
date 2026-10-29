@@ -15,7 +15,7 @@ const renderDocProperty = (
   (activity, context) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.doc.changedField', {
+        i18n.global.t('docActivity.changedField', {
           target: i18n.global.t(labelKey),
         }),
       ),
@@ -28,13 +28,13 @@ const renderDocRole = (
   (activity, context) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.doc.roleChanged', {
+        i18n.global.t('docActivity.roleChanged', {
           target: i18n.global.t(roleKey),
         }),
       ),
       ...createCurrentDocParts(activity, context),
       createTextPart(
-        ` ${i18n.global.t('activities.doc.fromToQuoted', {
+        ` ${i18n.global.t('docActivity.fromToQuoted', {
           previous: getRoleText(activity.old_value),
           next: getRoleText(activity.new_value),
         })}`,
@@ -42,20 +42,20 @@ const renderDocRole = (
     );
 
 export const renderDocDescription = renderDocProperty(
-  'activities.doc.fields.description',
+  'docActivity.fields.description',
 );
 export const renderDocTitle = renderDocProperty(
-  'activities.doc.fields.title',
+  'docActivity.fields.title',
 );
 export const renderDocReaderRole = renderDocRole(
-  'activities.doc.roles.read',
+  'docActivity.roles.read',
 );
 export const renderDocEditorRole = renderDocRole(
-  'activities.doc.roles.edit',
+  'docActivity.roles.edit',
 );
 
 export const renderDocSort: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(i18n.global.t('activities.doc.sortedChildDocs')),
+    createTextPart(i18n.global.t('docActivity.sortedChildDocs')),
     ...createCurrentDocParts(activity, context),
   );

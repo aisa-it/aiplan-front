@@ -12,7 +12,7 @@ export const renderDocCreated: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.docTarget',
+        'workspaceActivity.docTarget',
       )}`,
     ),
     createDocLink(
@@ -26,7 +26,7 @@ export const renderDocDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.docTarget',
+        'workspaceActivity.docTarget',
       )}${activity.old_value ?? ''}`,
     ),
   );
@@ -35,7 +35,7 @@ export const renderChildDocAdded: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.childDocTarget',
+        'workspaceActivity.childDocTarget',
       )}`,
     ),
     createDocLink(
@@ -43,14 +43,14 @@ export const renderChildDocAdded: ActivityRenderer = (activity) =>
       activity.new_entity_detail,
       `"${activity.new_value ?? ''}"`,
     ),
-    createTextPart(i18n.global.t('activities.workspace.toRootFolder')),
+    createTextPart(i18n.global.t('workspaceActivity.toRootFolder')),
   );
 
 export const renderChildDocRemoved: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.childDocTarget',
+        'workspaceActivity.childDocTarget',
       )}`,
     ),
     createDocLink(
@@ -58,10 +58,10 @@ export const renderChildDocRemoved: ActivityRenderer = (activity) =>
       activity.old_entity_detail,
       `"${activity.old_value ?? ''}"`,
     ),
-    createTextPart(i18n.global.t('activities.workspace.fromRootFolder')),
+    createTextPart(i18n.global.t('workspaceActivity.fromRootFolder')),
   );
 
 export const renderDocSort: ActivityRenderer = () =>
   createActivityMessage(
-    createTextPart(i18n.global.t('activities.workspace.sortedRootDocs')),
+    createTextPart(i18n.global.t('workspaceActivity.sortedRootDocs')),
   );

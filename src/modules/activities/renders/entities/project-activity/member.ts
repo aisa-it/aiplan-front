@@ -35,8 +35,8 @@ const renderDefaultMember = (
       createTextPart(
         `${i18n.global.t(
           isAdded
-            ? 'activities.issue.fieldActions.added'
-            : 'activities.issue.fieldActions.removed',
+            ? 'issueActivity.fieldActions.added'
+            : 'issueActivity.fieldActions.removed',
         )} `,
       ),
       ...projectParts,
@@ -53,11 +53,11 @@ const renderDefaultMember = (
 };
 
 export const renderDefaultAssignee = renderDefaultMember(
-  'activities.project.members.defaultAssignee',
+  'projectActivity.members.defaultAssignee',
 );
 
 export const renderDefaultWatcher = renderDefaultMember(
-  'activities.project.members.defaultWatcher',
+  'projectActivity.members.defaultWatcher',
 );
 
 export const renderProjectMemberAdded: ActivityRenderer = (
@@ -72,7 +72,7 @@ export const renderProjectMemberAdded: ActivityRenderer = (
     ...projectParts,
     ...(projectParts.length ? [createTextPart(' ')] : []),
     createTextPart(
-      i18n.global.t('activities.project.memberWithRole', {
+      i18n.global.t('projectActivity.memberWithRole', {
         name: getActivityUserName(activity.new_entity_detail),
         role: getRoleText(activity.new_value),
       }),
@@ -91,7 +91,7 @@ export const renderProjectMemberRemoved: ActivityRenderer = (
   return createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.member',
+        'projectActivity.member',
         {
           name: getActivityUserName(
             activity.old_entity_detail,
@@ -101,7 +101,7 @@ export const renderProjectMemberRemoved: ActivityRenderer = (
       )}${
         projectParts.length
           ? ' '
-          : ` ${i18n.global.t('activities.project.fromProjectSuffix')}`
+          : ` ${i18n.global.t('projectActivity.fromProjectSuffix')}`
       }`,
     ),
     ...projectParts,
@@ -118,14 +118,14 @@ export const renderProjectMemberRole: ActivityRenderer = (
   return createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.roleTarget',
+        'projectActivity.roleTarget',
         { name: getActivityUserName(activity.new_entity_detail) },
       )} `,
     ),
     ...projectParts,
     createTextPart(
       `${projectParts.length ? ' ' : ''}${i18n.global.t(
-        'activities.project.fromToQuoted',
+        'projectActivity.fromToQuoted',
         {
           previous: getRoleText(activity.old_value),
           next: getRoleText(activity.new_value),

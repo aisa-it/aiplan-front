@@ -14,7 +14,7 @@ export const renderIssueComment: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
-        'activities.issue.comment',
+        'issueActivity.comment',
       )}`,
     ),
     ...createIssueContextParts(activity, context, 'in'),

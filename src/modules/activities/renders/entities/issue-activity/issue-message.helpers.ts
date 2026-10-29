@@ -13,18 +13,18 @@ import type { MessageKey } from '@/i18n';
 export type IssueRelation = 'for' | 'from' | 'in' | 'into';
 
 const ISSUE_RELATION_KEY: Readonly<Record<IssueRelation, MessageKey>> = {
-  for: 'activities.issue.relations.for',
-  from: 'activities.issue.relations.from',
-  in: 'activities.issue.relations.in',
-  into: 'activities.issue.relations.into',
+  for: 'issueActivity.relations.for',
+  from: 'issueActivity.relations.from',
+  in: 'issueActivity.relations.in',
+  into: 'issueActivity.relations.into',
 };
 
 const ISSUE_FIELD_ACTION_KEY: Readonly<Record<string, MessageKey>> = {
-  created: 'activities.issue.fieldActions.added',
-  added: 'activities.issue.fieldActions.added',
-  deleted: 'activities.issue.fieldActions.removed',
-  removed: 'activities.issue.fieldActions.removed',
-  updated: 'activities.issue.fieldActions.updated',
+  created: 'issueActivity.fieldActions.added',
+  added: 'issueActivity.fieldActions.added',
+  deleted: 'issueActivity.fieldActions.removed',
+  removed: 'issueActivity.fieldActions.removed',
+  updated: 'issueActivity.fieldActions.updated',
 };
 
 const isCurrentIssue = (context: ActivityRenderContext) =>
@@ -96,7 +96,7 @@ export const createIssueWorkspaceContextParts = (
   }
 
   return [
-    createTextPart(i18n.global.t('activities.issue.workspaceContext')),
+    createTextPart(i18n.global.t('issueActivity.workspaceContext')),
     createWorkspaceLink(activity),
   ];
 };

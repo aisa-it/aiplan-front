@@ -24,7 +24,7 @@ export const renderMemberAdded: ActivityRenderer = (activity, context) => {
     ...workspaceParts,
     ...(workspaceParts.length ? [createTextPart(' ')] : []),
     createTextPart(
-      i18n.global.t('activities.workspace.memberWithRole', {
+      i18n.global.t('workspaceActivity.memberWithRole', {
         name: getActivityUserName(
           activity.new_entity_detail,
           activity.new_value,
@@ -39,7 +39,7 @@ export const renderMemberRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.member',
+        'workspaceActivity.member',
         {
           name: getActivityUserName(
             activity.old_entity_detail,
@@ -55,13 +55,13 @@ export const renderMemberRole: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.roleTarget',
+        'workspaceActivity.roleTarget',
         { name: getActivityUserName(activity.new_entity_detail) },
       )} `,
     ),
     ...createWorkspaceRelationParts(activity, context, 'of'),
     createTextPart(
-      ` ${i18n.global.t('activities.workspace.fromToQuoted', {
+      ` ${i18n.global.t('workspaceActivity.fromToQuoted', {
         previous: getRoleText(activity.old_value),
         next: getRoleText(activity.new_value),
       })}`,

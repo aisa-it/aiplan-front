@@ -38,21 +38,21 @@ const renderIssueMember = (
 };
 
 export const renderIssueAssigneeAdded = renderIssueMember(
-  'activities.issue.members.assignee',
+  'issueActivity.members.assignee',
   true,
 );
 
 export const renderIssueAssigneeRemoved = renderIssueMember(
-  'activities.issue.members.assignee',
+  'issueActivity.members.assignee',
   false,
 );
 
 export const renderIssueWatcherAdded = renderIssueMember(
-  'activities.issue.members.watcher',
+  'issueActivity.members.watcher',
   true,
 );
 
 export const renderIssueWatcherRemoved = renderIssueMember(
-  'activities.issue.members.watcher',
+  'issueActivity.members.watcher',
   false,
 );

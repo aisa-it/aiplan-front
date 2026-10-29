@@ -14,7 +14,7 @@ export const renderIssueLink: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
-        'activities.issue.linkTarget',
+        'issueActivity.linkTarget',
       )}`,
     ),
     ...createIssueContextParts(activity, context, 'in'),
@@ -23,7 +23,7 @@ export const renderIssueLink: ActivityRenderer = (activity, context) =>
 export const renderIssueLinkUrl: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.issue.linkUrlChanged', {
+      i18n.global.t('issueActivity.linkUrlChanged', {
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
       }),
@@ -37,7 +37,7 @@ export const renderIssueLinkTitle: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.issue.linkTitleChanged', {
+      i18n.global.t('issueActivity.linkTitleChanged', {
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
       }),

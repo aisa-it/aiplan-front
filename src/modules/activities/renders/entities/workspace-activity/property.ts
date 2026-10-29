@@ -30,7 +30,7 @@ export const renderWorkspaceName: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.nameChanged',
+        'workspaceActivity.nameChanged',
         {
           previous: activity.old_value ?? '',
           next: activity.new_value ?? '',
@@ -46,12 +46,12 @@ export const renderWorkspaceOwner: ActivityRenderer = (
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.ownerTarget',
+        'workspaceActivity.ownerTarget',
       )} `,
     ),
     ...createWorkspaceRelationParts(activity, context, 'of'),
     createTextPart(
-      ` ${i18n.global.t('activities.workspace.fromToPlain', {
+      ` ${i18n.global.t('workspaceActivity.fromToPlain', {
         previous: getActivityUserName(
           activity.old_entity_detail,
           activity.old_value,

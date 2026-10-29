@@ -13,8 +13,8 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 export const renderIssueLabel: ActivityRenderer = (activity, context) => {
   const isAdded = Boolean(activity.new_value);
   const messageKey = isAdded
-    ? 'activities.issue.labelAdded'
-    : 'activities.issue.labelRemoved';
+    ? 'issueActivity.labelAdded'
+    : 'issueActivity.labelRemoved';
 
   return createActivityMessage(
     createTextPart(

@@ -10,20 +10,20 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 import type { MessageKey } from '@/i18n';
 
 const PRIORITY_KEY: Readonly<Record<string, MessageKey>> = {
-  urgent: 'activities.issue.priorities.urgent',
-  high: 'activities.issue.priorities.high',
-  medium: 'activities.issue.priorities.medium',
-  low: 'activities.issue.priorities.low',
-  null: 'activities.issue.priorities.unset',
-  none: 'activities.issue.priorities.unset',
-  '<nil>': 'activities.issue.priorities.unset',
+  urgent: 'issueActivity.priorities.urgent',
+  high: 'issueActivity.priorities.high',
+  medium: 'issueActivity.priorities.medium',
+  low: 'issueActivity.priorities.low',
+  null: 'issueActivity.priorities.unset',
+  none: 'issueActivity.priorities.unset',
+  '<nil>': 'issueActivity.priorities.unset',
 };
 
 const renderIssueProperty = (labelKey: MessageKey): ActivityRenderer => {
   return (activity, context) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.issue.changedField', {
+        i18n.global.t('issueActivity.changedField', {
           target: i18n.global.t(labelKey),
         }),
       ),
@@ -32,11 +32,11 @@ const renderIssueProperty = (labelKey: MessageKey): ActivityRenderer => {
 };
 
 export const renderIssueName = renderIssueProperty(
-  'activities.issue.fields.name',
+  'issueActivity.fields.name',
 );
 
 export const renderIssueDescription = renderIssueProperty(
-  'activities.issue.fields.description',
+  'issueActivity.fields.description',
 );
 
 export const renderIssueStatus: ActivityRenderer = (activity, context) => {
@@ -45,10 +45,10 @@ export const renderIssueStatus: ActivityRenderer = (activity, context) => {
   );
   const status = hasStatus
     ? (activity.new_value ?? '').replace(/([a-z])([A-Z])/g, '$1 $2')
-    : i18n.global.t('activities.issue.statusUnset');
+    : i18n.global.t('issueActivity.statusUnset');
 
   return createActivityMessage(
-    createTextPart(i18n.global.t('activities.issue.statusSet', { value: status })),
+    createTextPart(i18n.global.t('issueActivity.statusSet', { value: status })),
     ...createIssueContextParts(activity, context, 'in'),
   );
 };
@@ -66,8 +66,8 @@ export const renderIssuePriority: ActivityRenderer = (
   return createActivityMessage(
     createTextPart(
       isAdded
-        ? i18n.global.t('activities.issue.prioritySet', { value: priority })
-        : i18n.global.t('activities.issue.priorityRemoved'),
+        ? i18n.global.t('issueActivity.prioritySet', { value: priority })
+        : i18n.global.t('issueActivity.priorityRemoved'),
     ),
     ...createIssueContextParts(activity, context, 'in'),
   );

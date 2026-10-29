@@ -29,13 +29,13 @@ const renderIssueSprint = (isAdded: boolean): ActivityRenderer => {
     return createActivityMessage(
       createTextPart(
         `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-          'activities.issue.issueTarget',
+          'issueActivity.issueTarget',
         )}`,
       ),
       ...(issueParts.length ? [createTextPart(' '), ...issueParts] : []),
       createTextPart(
         ` ${i18n.global.t(
-          isAdded ? 'activities.issue.sprintTo' : 'activities.issue.sprintFrom',
+          isAdded ? 'issueActivity.sprintTo' : 'issueActivity.sprintFrom',
         )} `,
       ),
       createExternalLinkPart(href, `"${name}"`),

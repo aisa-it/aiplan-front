@@ -20,8 +20,8 @@ const renderIssueRelation = (
   return (activity, context) => {
     const isAdded = Boolean(activity.new_value);
     const actionKey = isAdded
-      ? 'activities.issue.fieldActions.added'
-      : 'activities.issue.fieldActions.removed';
+      ? 'issueActivity.fieldActions.added'
+      : 'issueActivity.fieldActions.removed';
 
     return createActivityMessage(
       createTextPart(
@@ -35,16 +35,16 @@ const renderIssueRelation = (
 };
 
 export const renderIssueParent = renderIssueRelation(
-  'activities.issue.relationTargets.parentAdded',
-  'activities.issue.relationTargets.parentRemoved',
+  'issueActivity.relationTargets.parentAdded',
+  'issueActivity.relationTargets.parentRemoved',
 );
 
 export const renderIssueSubIssue = renderIssueRelation(
-  'activities.issue.relationTargets.subIssue',
+  'issueActivity.relationTargets.subIssue',
 );
 
 export const renderIssueLinked = renderIssueRelation(
-  'activities.issue.relationTargets.linked',
+  'issueActivity.relationTargets.linked',
 );
 
 export const renderIssueBlocking: ActivityRenderer = (activity, context) => {
@@ -54,13 +54,13 @@ export const renderIssueBlocking: ActivityRenderer = (activity, context) => {
     createTextPart(
       i18n.global.t(
         isAdded
-          ? 'activities.issue.blockingSet'
-          : 'activities.issue.blockingUnset',
+          ? 'issueActivity.blockingSet'
+          : 'issueActivity.blockingUnset',
       ),
     ),
     createIssueLink(activity),
     createTextPart(
-      i18n.global.t('activities.issue.blocksSuffix', {
+      i18n.global.t('issueActivity.blocksSuffix', {
         value: getChangedValue(activity),
       }),
     ),
@@ -71,8 +71,8 @@ export const renderIssueBlocking: ActivityRenderer = (activity, context) => {
 export const renderIssueBlocks: ActivityRenderer = (activity, context) => {
   const isAdded = Boolean(activity.new_value);
   const messageKey = isAdded
-    ? 'activities.issue.blockerSet'
-    : 'activities.issue.blockerRemoved';
+    ? 'issueActivity.blockerSet'
+    : 'issueActivity.blockerRemoved';
 
   return createActivityMessage(
     createTextPart(

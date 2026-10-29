@@ -20,14 +20,14 @@ const renderSprintWatcher = (isAdded: boolean): ActivityRenderer => {
     return createActivityMessage(
       createTextPart(
         `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-          'activities.sprint.watcherTarget',
+          'sprintActivity.watcherTarget',
         )} ${getActivityUserName(
           detail,
           isAdded ? activity.new_value : activity.old_value,
         )} ${i18n.global.t(
           isAdded
-            ? 'activities.sprint.relations.to'
-            : 'activities.sprint.relations.from',
+            ? 'sprintActivity.relations.to'
+            : 'sprintActivity.relations.from',
         )}`,
       ),
       createSprintLink(activity),

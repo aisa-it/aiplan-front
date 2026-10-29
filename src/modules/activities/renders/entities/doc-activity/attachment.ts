@@ -19,7 +19,7 @@ export const renderDocAttachmentCreated: ActivityRenderer = (
 
   return createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.doc.attachmentAdded', { value: assetName }),
+      i18n.global.t('docActivity.attachmentAdded', { value: assetName }),
     ),
     ...createCurrentDocParts(activity, context),
   );
@@ -31,7 +31,7 @@ export const renderDocAttachmentDeleted: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.doc.attachmentDeleted', {
+      i18n.global.t('docActivity.attachmentDeleted', {
         value: activity.old_value ?? '',
       }),
     ),

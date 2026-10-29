@@ -10,11 +10,11 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 import type { MessageKey } from '@/i18n';
 
 const STATUS_GROUP_KEY: Readonly<Record<string, MessageKey>> = {
-  backlog: 'activities.project.statusGroups.backlog',
-  unstarted: 'activities.project.statusGroups.unstarted',
-  started: 'activities.project.statusGroups.started',
-  completed: 'activities.project.statusGroups.completed',
-  cancelled: 'activities.project.statusGroups.cancelled',
+  backlog: 'projectActivity.statusGroups.backlog',
+  unstarted: 'projectActivity.statusGroups.unstarted',
+  started: 'projectActivity.statusGroups.started',
+  completed: 'projectActivity.statusGroups.completed',
+  cancelled: 'projectActivity.statusGroups.cancelled',
 };
 
 const getStatusGroupText = (value?: string) => {
@@ -30,12 +30,12 @@ const renderStatusProperty = (
   return (activity, context) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.project.changedField', {
+        i18n.global.t('projectActivity.changedField', {
           target: i18n.global.t(labelKey),
         }),
       ),
       createTextPart(
-        ` ${i18n.global.t('activities.project.fromToQuoted', {
+        ` ${i18n.global.t('projectActivity.fromToQuoted', {
           previous: formatValue(activity.old_value),
           next: formatValue(activity.new_value),
         })}`,
@@ -47,7 +47,7 @@ const renderStatusProperty = (
 export const renderStatusCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.statusCreated', {
+      i18n.global.t('projectActivity.statusCreated', {
         value: activity.new_value ?? '',
       }),
     ),
@@ -57,7 +57,7 @@ export const renderStatusCreated: ActivityRenderer = (activity, context) =>
 export const renderStatusDeleted: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.statusDeleted', {
+      i18n.global.t('projectActivity.statusDeleted', {
         value: activity.old_value ?? '',
       }),
     ),
@@ -67,7 +67,7 @@ export const renderStatusDeleted: ActivityRenderer = (activity, context) =>
 export const renderDefaultStatus: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.defaultStatusChanged', {
+      i18n.global.t('projectActivity.defaultStatusChanged', {
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
       }),
@@ -76,7 +76,7 @@ export const renderDefaultStatus: ActivityRenderer = (activity, context) =>
   );
 
 export const renderStatusName = renderStatusProperty(
-  'activities.project.fields.statusName',
+  'projectActivity.fields.statusName',
 );
 
 export const renderStatusDescription: ActivityRenderer = (
@@ -85,12 +85,12 @@ export const renderStatusDescription: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.statusDescriptionChanged', {
+      i18n.global.t('projectActivity.statusDescriptionChanged', {
         name: getDetailString(activity.new_entity_detail, 'name') ?? '',
         previous:
-          activity.old_value || i18n.global.t('activities.project.noDescription'),
+          activity.old_value || i18n.global.t('projectActivity.noDescription'),
         next:
-          activity.new_value || i18n.global.t('activities.project.noDescription'),
+          activity.new_value || i18n.global.t('projectActivity.noDescription'),
       }),
     ),
     ...createProjectContextParts(activity, context, 'at'),
@@ -102,7 +102,7 @@ export const renderStatusGroup: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.statusGroupChanged', {
+      i18n.global.t('projectActivity.statusGroupChanged', {
         name: getDetailString(activity.new_entity_detail, 'name') ?? '',
         previous: getStatusGroupText(activity.old_value),
         next: getStatusGroupText(activity.new_value),
@@ -114,7 +114,7 @@ export const renderStatusGroup: ActivityRenderer = (
 export const renderStatusColor: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.project.statusColorChanged', {
+      i18n.global.t('projectActivity.statusColorChanged', {
         name: getDetailString(activity.new_entity_detail, 'name') ?? '',
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
@@ -124,5 +124,5 @@ export const renderStatusColor: ActivityRenderer = (activity, context) =>
   );
 
 export const renderStatusDefault = renderStatusProperty(
-  'activities.project.fields.defaultStatus',
+  'projectActivity.fields.defaultStatus',
 );

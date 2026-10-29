@@ -16,16 +16,16 @@ const MEMBER_TEXT_KEY: Readonly<
   Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: 'activities.doc.members.watcher.added',
-    removed: 'activities.doc.members.watcher.removed',
+    added: 'docActivity.members.watcher.added',
+    removed: 'docActivity.members.watcher.removed',
   },
   reader: {
-    added: 'activities.doc.permissions.view.added',
-    removed: 'activities.doc.permissions.view.removed',
+    added: 'docActivity.permissions.view.added',
+    removed: 'docActivity.permissions.view.removed',
   },
   editor: {
-    added: 'activities.doc.permissions.edit.added',
-    removed: 'activities.doc.permissions.edit.removed',
+    added: 'docActivity.permissions.edit.added',
+    removed: 'docActivity.permissions.edit.removed',
   },
 };
 
@@ -33,16 +33,16 @@ const MEMBER_RELATION_KEY: Readonly<
   Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: 'activities.doc.memberRelations.watcher.added',
-    removed: 'activities.doc.memberRelations.watcher.removed',
+    added: 'docActivity.memberRelations.watcher.added',
+    removed: 'docActivity.memberRelations.watcher.removed',
   },
   reader: {
-    added: 'activities.doc.memberRelations.reader.added',
-    removed: 'activities.doc.memberRelations.reader.removed',
+    added: 'docActivity.memberRelations.reader.added',
+    removed: 'docActivity.memberRelations.reader.removed',
   },
   editor: {
-    added: 'activities.doc.memberRelations.editor.added',
-    removed: 'activities.doc.memberRelations.editor.removed',
+    added: 'docActivity.memberRelations.editor.added',
+    removed: 'docActivity.memberRelations.editor.removed',
   },
 };
 

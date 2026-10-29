@@ -17,7 +17,7 @@ export const renderIssueField: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
-        'activities.issue.issueTarget',
+        'issueActivity.issueTarget',
       )} ${
         activity.old_value
           ? `${activity.project_detail?.identifier ?? ''}-${activity.old_value}`
@@ -31,7 +31,7 @@ export const renderIssueCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.issue.issueTarget',
+        'issueActivity.issueTarget',
       )}`,
     ),
     ...createIssueSubjectContextParts(activity, context),
@@ -45,24 +45,24 @@ export const renderIssueMoved: ActivityRenderer = (activity, context) => {
     context.entity.identifier === project?.identifier;
   const oldProjectName =
     activity.old_entity_detail?.name ||
-    i18n.global.t('activities.issue.hiddenProjectFrom');
+    i18n.global.t('issueActivity.hiddenProjectFrom');
   const newProjectName =
-    project?.name || i18n.global.t('activities.issue.hiddenProjectTo');
+    project?.name || i18n.global.t('issueActivity.hiddenProjectTo');
 
   return createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.issue.issueTarget',
+        'issueActivity.issueTarget',
       )} `,
     ),
     createIssueLink(activity),
     createTextPart(
-      `${i18n.global.t('activities.issue.movedFrom', {
+      `${i18n.global.t('issueActivity.movedFrom', {
         previous: oldProjectName,
       })}${
         isCurrentTargetProject
           ? ''
-          : i18n.global.t('activities.issue.movedTo', {
+          : i18n.global.t('issueActivity.movedTo', {
               next: newProjectName,
             })
       }`,

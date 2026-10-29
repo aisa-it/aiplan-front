@@ -26,7 +26,7 @@ export const renderSprint: ActivityRenderer = (activity) => {
   return createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.sprintTarget',
+        'workspaceActivity.sprintTarget',
       )}`,
     ),
     sprintLink,
@@ -37,7 +37,7 @@ export const renderSprintFolder: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.workspace.sprintFolderTarget',
+        'workspaceActivity.sprintFolderTarget',
         { value: activity.new_value || activity.old_value || '' },
       )}`,
     ),
@@ -46,7 +46,7 @@ export const renderSprintFolder: ActivityRenderer = (activity) =>
 export const renderSprintFolderName: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.workspace.sprintFolderNameChanged', {
+      i18n.global.t('workspaceActivity.sprintFolderNameChanged', {
         previous: activity.old_value ?? '',
         next: activity.new_value ?? '',
       }),

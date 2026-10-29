@@ -1,0 +1,23 @@
+// Словарь событий пространства (namespace workspaceActivity).
+// Отношения к пространству (activities.workspaceRelations.*) живут в корневом
+// словаре модуля src/modules/activities/i18n — они нужны всем рендерерам.
+export default {
+  properties: { avatar: 'аватар', token: 'токен', description: 'описание' },
+  nameChanged: 'имя пространства с "{previous}" на "{next}"',
+  ownerTarget: 'лидера',
+  fromToQuoted: 'с "{previous}" на "{next}"',
+  fromToPlain: 'с {previous} на {next}',
+  docTarget: 'документ ',
+  childDocTarget: 'дочерний документ ',
+  toRootFolder: ' в корневую папку',
+  fromRootFolder: ' из корневой папки',
+  sortedRootDocs: 'отсортировал(-а) список корневых документов',
+  member: 'пользователя {name}',
+  memberWithRole: 'пользователя {name} с ролью "{role}"',
+  roleTarget: 'роль пользователя {name}',
+  projectTarget: 'проект ',
+  integrationTarget: 'интеграцию {value}',
+  sprintTarget: 'спринт ',
+  sprintFolderTarget: 'папку спринтов "{value}"',
+  sprintFolderNameChanged: 'изменил(-а) название папки спринтов с "{previous}" на "{next}"',
+};

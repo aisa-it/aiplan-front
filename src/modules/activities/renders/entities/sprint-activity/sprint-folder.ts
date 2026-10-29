@@ -9,13 +9,13 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderSprintFolder: ActivityRenderer = (activity) =>
   createActivityMessage(
-    createTextPart(i18n.global.t('activities.sprint.folderChanged')),
+    createTextPart(i18n.global.t('sprintActivity.folderChanged')),
     createSprintLink(activity),
     createTextPart(
-      ` ${i18n.global.t('activities.sprint.fromToQuoted', {
+      ` ${i18n.global.t('sprintActivity.fromToQuoted', {
         previous:
-          activity.old_value || i18n.global.t('activities.sprint.noFolder'),
-        next: activity.new_value || i18n.global.t('activities.sprint.noFolder'),
+          activity.old_value || i18n.global.t('sprintActivity.noFolder'),
+        next: activity.new_value || i18n.global.t('sprintActivity.noFolder'),
       })}`,
     ),
   );

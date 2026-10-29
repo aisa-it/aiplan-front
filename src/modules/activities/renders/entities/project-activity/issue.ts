@@ -16,7 +16,7 @@ export const renderIssueAdded: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.issueTarget',
+        'projectActivity.issueTarget',
       )} `,
     ),
     createIssueLink(activity),
@@ -27,7 +27,7 @@ export const renderIssueCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.issueTarget',
+        'projectActivity.issueTarget',
       )} `,
     ),
     activity.new_entity_detail
@@ -40,7 +40,7 @@ export const renderIssueDeleted: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.issueTarget',
+        'projectActivity.issueTarget',
       )} ${activity.old_value ?? ''}`,
     ),
     ...createWorkspaceContextParts(activity, context),
@@ -50,7 +50,7 @@ export const renderIssueCopied: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
-        'activities.project.issueTarget',
+        'projectActivity.issueTarget',
       )} `,
     ),
     createIssueLink(activity),
@@ -61,7 +61,7 @@ export const renderIssueRemoved: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
       `${getActivityVerbText('deleted')} ${i18n.global.t(
-        'activities.project.issueTarget',
+        'projectActivity.issueTarget',
       )} `,
     ),
     createIssueLink(activity),

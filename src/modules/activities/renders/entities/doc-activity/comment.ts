@@ -16,11 +16,11 @@ const renderDocComment = (messageKey: MessageKey): ActivityRenderer =>
     );
 
 export const renderDocCommentCreated = renderDocComment(
-  'activities.doc.commentAdded',
+  'docActivity.commentAdded',
 );
 export const renderDocCommentUpdated = renderDocComment(
-  'activities.doc.commentUpdated',
+  'docActivity.commentUpdated',
 );
 export const renderDocCommentDeleted = renderDocComment(
-  'activities.doc.commentDeleted',
+  'docActivity.commentDeleted',
 );

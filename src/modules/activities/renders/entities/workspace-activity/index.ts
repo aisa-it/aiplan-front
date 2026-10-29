@@ -29,10 +29,10 @@ import {
 } from './sprint';
 
 export const renderWorkspaceActivity = createActivityRenderer({
-  logo: renderWorkspaceProperty('activities.workspace.properties.avatar'),
+  logo: renderWorkspaceProperty('workspaceActivity.properties.avatar'),
   name: renderWorkspaceName,
   integration_token: renderWorkspaceProperty(
-    'activities.workspace.properties.token',
+    'workspaceActivity.properties.token',
   ),
   member: {
     added: renderMemberAdded,
@@ -40,7 +40,7 @@ export const renderWorkspaceActivity = createActivityRenderer({
   },
   role: renderMemberRole,
   description: renderWorkspaceProperty(
-    'activities.workspace.properties.description',
+    'workspaceActivity.properties.description',
   ),
   owner: renderWorkspaceOwner,
   doc: {

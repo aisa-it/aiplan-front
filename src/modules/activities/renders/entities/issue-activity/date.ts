@@ -32,7 +32,7 @@ export const renderIssueTargetDate: ActivityRenderer = (
   if (activity.old_value === '<nil>' || !activity.old_value) {
     return createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.issue.dueDateSet', { value: newDate }),
+        i18n.global.t('issueActivity.dueDateSet', { value: newDate }),
       ),
       ...createIssueContextParts(activity, context, 'for'),
     );
@@ -41,7 +41,7 @@ export const renderIssueTargetDate: ActivityRenderer = (
   if (!activity.new_value && oldDate) {
     return createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.issue.dueDateRemoved', { value: oldDate }),
+        i18n.global.t('issueActivity.dueDateRemoved', { value: oldDate }),
       ),
       ...createIssueContextParts(activity, context, 'from'),
     );
@@ -49,7 +49,7 @@ export const renderIssueTargetDate: ActivityRenderer = (
 
   return createActivityMessage(
     createTextPart(
-      i18n.global.t('activities.issue.dueDateChanged', {
+      i18n.global.t('issueActivity.dueDateChanged', {
         previous: oldDate,
         next: newDate,
       }),
@@ -60,7 +60,7 @@ export const renderIssueTargetDate: ActivityRenderer = (
 
 export const renderIssueStartDate: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(i18n.global.t('activities.issue.started')),
+    createTextPart(i18n.global.t('issueActivity.started')),
     ...createIssueSubjectContextParts(activity, context),
   );
 
@@ -69,6 +69,6 @@ export const renderIssueCompletedAt: ActivityRenderer = (
   context,
 ) =>
   createActivityMessage(
-    createTextPart(i18n.global.t('activities.issue.completed')),
+    createTextPart(i18n.global.t('issueActivity.completed')),
     ...createIssueSubjectContextParts(activity, context),
   );

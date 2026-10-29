@@ -18,10 +18,10 @@ export type ProjectRelation = 'at' | 'from' | 'into' | 'of';
 
 // Ключ словаря для 'at' назван inside: PickupPaths из vue-i18n не пропускает имена методов массивов (Array.prototype.at)
 const PROJECT_RELATION_KEY: Readonly<Record<ProjectRelation, MessageKey>> = {
-  at: 'activities.project.relations.inside',
-  from: 'activities.project.relations.from',
-  into: 'activities.project.relations.into',
-  of: 'activities.project.relations.of',
+  at: 'projectActivity.relations.inside',
+  from: 'projectActivity.relations.from',
+  into: 'projectActivity.relations.into',
+  of: 'projectActivity.relations.of',
 };
 
 const isCurrentProject = (context: ActivityRenderContext) =>

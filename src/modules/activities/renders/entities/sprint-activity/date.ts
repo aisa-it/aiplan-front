@@ -12,7 +12,7 @@ const renderSprintDate = (dateKey: MessageKey): ActivityRenderer => {
   return (activity) =>
     createActivityMessage(
       createTextPart(
-        i18n.global.t('activities.sprint.dateChanged', {
+        i18n.global.t('sprintActivity.dateChanged', {
           target: i18n.global.t(dateKey),
         }),
       ),
@@ -21,9 +21,9 @@ const renderSprintDate = (dateKey: MessageKey): ActivityRenderer => {
 };
 
 export const renderSprintStartDate = renderSprintDate(
-  'activities.sprint.dates.start',
+  'sprintActivity.dates.start',
 );
 
 export const renderSprintEndDate = renderSprintDate(
-  'activities.sprint.dates.end',
+  'sprintActivity.dates.end',
 );
