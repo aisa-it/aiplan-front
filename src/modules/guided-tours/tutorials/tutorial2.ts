@@ -6,9 +6,9 @@ export const STEP_NUM = 2;
 export const steps: Step[] = [
   {
     el: '[data-tour="issue-table"]',
-    title: 'Ваш центр управления задачами',
-    text: 'Здесь живут все задачи вашего проекта. Хотите послушать про возможности списка задач?',
-    activeButtonText: 'Хочу послушать!',
+    titleKey: 'guidedTours.t2.issueTable.title',
+    textKey: 'guidedTours.t2.issueTable.text',
+    activeButtonTextKey: 'guidedTours.t2.issueTable.action',
     is_skip: true,
     isOffScroll: true,
     placement: {
@@ -23,9 +23,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="filter-list"]',
-    title: 'Настройте вид под себя',
-    text: 'Нажмите сюда, чтобы превратить стандартный список в идеальный для вас инструмент.',
-    activeButtonText: 'Показать настройки',
+    titleKey: 'guidedTours.t2.filters.title',
+    textKey: 'guidedTours.t2.filters.text',
+    activeButtonTextKey: 'guidedTours.t2.filters.action',
     padding: 8,
     placement: {
       mode: 'outside',
@@ -35,9 +35,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="view-options"]',
-    title: 'Как вам удобнее видеть задачи?',
-    text: 'Переключайтесь между списком (для деталей) и доской (Kanban, для визуального потока).',
-    activeButtonText: 'Далее',
+    titleKey: 'guidedTours.t2.viewOptions.title',
+    textKey: 'guidedTours.t2.viewOptions.text',
+    activeButtonTextKey: 'guidedTours.t2.viewOptions.action',
     placement: {
       mode: 'outside',
       primary: 'left',
@@ -49,9 +49,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="columns-options"]',
-    title: 'Оставляйте только важное',
-    text: 'Решите, какие данные видеть (статус, приоритет, исполнитель). Скрывайте лишнее и меняйте порядок колонок.',
-    activeButtonText: 'Понял',
+    titleKey: 'guidedTours.t2.columns.title',
+    textKey: 'guidedTours.t2.columns.text',
+    activeButtonTextKey: 'guidedTours.t2.columns.action',
     placement: {
       mode: 'outside',
       primary: 'left',
@@ -60,9 +60,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="group-options"]',
-    title: 'Упорядочьте задачи по смыслу',
-    text: 'Автоматически сортируйте задачи по статусу, исполнителю, сроку или любому другому параметру.',
-    activeButtonText: 'Здорово',
+    titleKey: 'guidedTours.t2.grouping.title',
+    textKey: 'guidedTours.t2.grouping.text',
+    activeButtonTextKey: 'guidedTours.t2.grouping.action',
     placement: {
       mode: 'outside',
       primary: 'left',
@@ -71,9 +71,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="status-options"]',
-    title: 'Сфокусируйтесь на нужном этапе',
-    text: 'Показывайте только «В работе» или скройте «Выполнено». Оставляйте в поле зрения только актуальные задачи',
-    activeButtonText: 'Ясно',
+    titleKey: 'guidedTours.t2.statusFocus.title',
+    textKey: 'guidedTours.t2.statusFocus.text',
+    activeButtonTextKey: 'guidedTours.t2.statusFocus.action',
     placement: {
       mode: 'outside',
       primary: 'left',
@@ -82,13 +82,13 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="task-general-settings"]',
-    title: 'Тонкая настройка',
-    textList: [
-      'Скрыть подзадачи: Уберите из общего списка мелкие шаги, чтобы видеть только основные цели.',
-      'Черновики: Показывайте или скрывайте неопубликованные задачи.',
-      'Пустые группы: Решите, нужно ли видеть группы, в которых пока нет задач.',
+    titleKey: 'guidedTours.t2.fineTuning.title',
+    textListKeys: [
+      'guidedTours.t2.fineTuning.items[0]',
+      'guidedTours.t2.fineTuning.items[1]',
+      'guidedTours.t2.fineTuning.items[2]',
     ],
-    activeButtonText: 'Дальше',
+    activeButtonTextKey: 'guidedTours.t2.fineTuning.action',
     padding: 4,
     placement: {
       mode: 'outside',
@@ -98,12 +98,12 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="task-personal-settings"]',
-    title: 'Персональный фокус',
-    textList: [
-      'Только активные: Сразу скройте всё завершённое и отменённое.',
-      'Мои задачи (3 тумблера): В один клик оставьте в списке только те задачи, где вы — исполнитель, наблюдатель или автор.',
+    titleKey: 'guidedTours.t2.personalFocus.title',
+    textListKeys: [
+      'guidedTours.t2.personalFocus.items[0]',
+      'guidedTours.t2.personalFocus.items[1]',
     ],
-    activeButtonText: 'Удобно!',
+    activeButtonTextKey: 'guidedTours.t2.personalFocus.action',
     placement: {
       mode: 'outside',
       primary: 'left',
@@ -112,9 +112,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="refresh-filters"]',
-    title: 'Не бойтесь экспериментировать!',
-    text: 'Запутались в настройках? Просто нажмите эту кнопку, чтобы вернуть вид задач к состоянию по умолчанию.',
-    activeButtonText: 'Всё понятно, начать работу!',
+    titleKey: 'guidedTours.t2.refresh.title',
+    textKey: 'guidedTours.t2.refresh.text',
+    activeButtonTextKey: 'guidedTours.t2.refresh.action',
     placement: {
       mode: 'outside',
       primary: 'left',

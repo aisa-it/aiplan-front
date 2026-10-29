@@ -8,12 +8,12 @@
     <v-card class="rounded-xl">
       <v-card-text class="flex flex-col">
         <h6 class="text-h6 font-weight-bold mb-6 text-gray-700">
-          Создание рабочего пространства
+          {{ t('dialogs.ws.createTitle') }}
         </h6>
 
         <v-text-field
           v-model="workspaceValues.name"
-          label="Введите имя пространства"
+          :label="t('dialogs.ws.nameLabel')"
           class="mb-2"
           :rules="[validateName]"
           @update:model-value="createSlug"
@@ -21,7 +21,7 @@
 
         <v-text-field
           v-model="workspaceValues.slug"
-          label="URL рабочего пространства"
+          :label="t('dialogs.ws.urlLabel')"
           class="mb-2"
           :prefix="host"
           :rules="[validateSlug]"
@@ -37,7 +37,7 @@
           @click="handleClose"
           class="w-[110px]"
         >
-          Отменить
+          {{ t('common.actions.cancel') }}
         </v-btn>
         <v-btn
           color="primary"
@@ -47,7 +47,7 @@
           @click="handleCreateWorkspace"
           class="w-[110px]"
         >
-          Создать
+          {{ t('common.actions.create') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -58,12 +58,15 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ConfirmCloseWsCreateDialog from './ConfirmCloseWsCreateDialog.vue';
 // @ts-ignore
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
 import { WorkspaceService } from '@/services/workspace.service';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 import { RESTRICTED_URLS } from '@/constants/constants';
+
+const { t } = useI18n();
 
 const cyrillicToTranslit = CyrillicToTranslit();
 const workspacesStore = useWorkspacesStore();
@@ -115,9 +118,7 @@ const forceClose = () => {
 
 const validateName = (val: string): boolean | string => {
   isValidName.value = val.trim().length >= 3;
-  return (
-    val.trim().length >= 3 || 'Название должно содержать 3 или более символов'
-  );
+  return val.trim().length >= 3 || t('dialogs.ws.validation.nameMin');
 };
 
 const validateSlug = (val: string): boolean | string => {
@@ -127,10 +128,9 @@ const validateSlug = (val: string): boolean | string => {
 
   isValidSlug.value = isKebab && notRestricted && minLen;
 
-  if (!minLen) return 'Идентификатор должен содержать 3 и более символов';
-  if (!isKebab)
-    return 'Разрешены только строчные буквы латинского алфавита, цифры и дефисы';
-  if (!notRestricted) return 'Недопустимое системное имя пространства';
+  if (!minLen) return t('dialogs.ws.validation.slugMin');
+  if (!isKebab) return t('dialogs.ws.validation.slugKebab');
+  if (!notRestricted) return t('dialogs.ws.validation.slugRestricted');
   return true;
 };
 
@@ -161,7 +161,7 @@ const handleCreateWorkspace = async () => {
   } catch (error: any) {
     if (error.response?.status === 409) {
       isErrorSlug.value = true;
-      errorMessageSlug.value = 'Данный URL уже занят';
+      errorMessageSlug.value = t('dialogs.ws.urlTaken');
     }
   } finally {
     loading.value = false;

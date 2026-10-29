@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+import { i18n } from '@/i18n';
 import { formatDateTime } from '@/utils/time';
 
 import {
@@ -30,21 +31,28 @@ export const renderIssueTargetDate: ActivityRenderer = (
 
   if (activity.old_value === '<nil>' || !activity.old_value) {
     return createActivityMessage(
-      createTextPart(`установил(-а) срок исполнения ${newDate}`),
+      createTextPart(
+        i18n.global.t('issueActivity.dueDateSet', { value: newDate }),
+      ),
       ...createIssueContextParts(activity, context, 'for'),
     );
   }
 
   if (!activity.new_value && oldDate) {
     return createActivityMessage(
-      createTextPart(`убрал(-а) срок исполнения ${oldDate}`),
+      createTextPart(
+        i18n.global.t('issueActivity.dueDateRemoved', { value: oldDate }),
+      ),
       ...createIssueContextParts(activity, context, 'from'),
     );
   }
 
   return createActivityMessage(
     createTextPart(
-      `изменил(-а) срок исполнения с ${oldDate} на ${newDate}`,
+      i18n.global.t('issueActivity.dueDateChanged', {
+        previous: oldDate,
+        next: newDate,
+      }),
     ),
     ...createIssueContextParts(activity, context, 'in'),
   );
@@ -52,7 +60,7 @@ export const renderIssueTargetDate: ActivityRenderer = (
 
 export const renderIssueStartDate: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('начал(-а) выполнение задачи'),
+    createTextPart(i18n.global.t('issueActivity.started')),
     ...createIssueSubjectContextParts(activity, context),
   );
 
@@ -61,6 +69,6 @@ export const renderIssueCompletedAt: ActivityRenderer = (
   context,
 ) =>
   createActivityMessage(
-    createTextPart('завершил(-а) задачу'),
+    createTextPart(i18n.global.t('issueActivity.completed')),
     ...createIssueSubjectContextParts(activity, context),
   );

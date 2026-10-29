@@ -17,7 +17,7 @@ import { useUserStore } from '@/stores/user-store';
 import { ProfileService } from '../../api/profile.service';
 import UploadAvatarDialog from './UploadAvatarDialog.vue';
 import { toast } from '@/modules/toast';
-import { SUCCESS_CREATE_IMG_PROFILE } from '@/constants/notifications';
+import { i18n } from '@/i18n';
 
 const { t } = useI18n();
 
@@ -37,7 +37,7 @@ const handleUploadUserAvatar = async (image: File) => {
     userStore.replaceUser(updatedUser);
     emit('uploaded', image);
     model.value = false;
-    toast.success(SUCCESS_CREATE_IMG_PROFILE);
+    toast.success(i18n.global.t('profile.toast.imageUploaded'));
   } catch {
   } finally {
     loading.value = false;

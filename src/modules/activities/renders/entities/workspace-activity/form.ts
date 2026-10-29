@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createExternalLinkPart,
@@ -23,7 +24,11 @@ export const renderWorkspaceForm: ActivityRenderer = (activity) => {
     : createTextPart(`"${value}"`);
 
   return createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} форму `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'activities.form.defaultTarget',
+      )} `,
+    ),
     formLink,
   );
 };

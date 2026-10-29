@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createExternalLinkPart,
@@ -26,9 +27,17 @@ const renderIssueSprint = (isAdded: boolean): ActivityRenderer => {
     const issueParts = createOptionalIssueLinkParts(activity, context);
 
     return createActivityMessage(
-      createTextPart(`${getActivityVerbText(activity.verb)} задачу`),
+      createTextPart(
+        `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+          'issueActivity.issueTarget',
+        )}`,
+      ),
       ...(issueParts.length ? [createTextPart(' '), ...issueParts] : []),
-      createTextPart(` ${isAdded ? 'в спринт' : 'из спринта'} `),
+      createTextPart(
+        ` ${i18n.global.t(
+          isAdded ? 'issueActivity.sprintTo' : 'issueActivity.sprintFrom',
+        )} `,
+      ),
       createExternalLinkPart(href, `"${name}"`),
     );
   };

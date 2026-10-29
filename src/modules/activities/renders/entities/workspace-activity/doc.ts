@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -9,7 +10,11 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderDocCreated: ActivityRenderer = (activity) =>
   createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} документ `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'workspaceActivity.docTarget',
+      )}`,
+    ),
     createDocLink(
       activity,
       activity.new_entity_detail,
@@ -20,39 +25,43 @@ export const renderDocCreated: ActivityRenderer = (activity) =>
 export const renderDocDeleted: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} документ ${
-        activity.old_value ?? ''
-      }`,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'workspaceActivity.docTarget',
+      )}${activity.old_value ?? ''}`,
     ),
   );
 
 export const renderChildDocAdded: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} дочерний документ `,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'workspaceActivity.childDocTarget',
+      )}`,
     ),
     createDocLink(
       activity,
       activity.new_entity_detail,
       `"${activity.new_value ?? ''}"`,
     ),
-    createTextPart(' в корневую папку'),
+    createTextPart(i18n.global.t('workspaceActivity.toRootFolder')),
   );
 
 export const renderChildDocRemoved: ActivityRenderer = (activity) =>
   createActivityMessage(
     createTextPart(
-      `${getActivityVerbText(activity.verb)} дочерний документ `,
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'workspaceActivity.childDocTarget',
+      )}`,
     ),
     createDocLink(
       activity,
       activity.old_entity_detail,
       `"${activity.old_value ?? ''}"`,
     ),
-    createTextPart(' из корневой папки'),
+    createTextPart(i18n.global.t('workspaceActivity.fromRootFolder')),
   );
 
 export const renderDocSort: ActivityRenderer = () =>
   createActivityMessage(
-    createTextPart('отсортировал(-а) список корневых документов'),
+    createTextPart(i18n.global.t('workspaceActivity.sortedRootDocs')),
   );

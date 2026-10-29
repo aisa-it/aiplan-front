@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user-store';
 
 import { ProfileService } from '../../api/profile.service';
 import { toast } from '@/modules/toast';
-import { SUCCESS_DELETE_IMG_PROFILE } from '@/constants/notifications';
+import { i18n } from '@/i18n';
 
 export function useFormAvatar() {
   const userStore = useUserStore();
@@ -29,7 +29,7 @@ export function useFormAvatar() {
       const updatedUser = await ProfileService.deleteAvatar();
       userStore.replaceUser(updatedUser);
       clearAvatarPreview();
-      toast.success(SUCCESS_DELETE_IMG_PROFILE);
+      toast.success(i18n.global.t('profile.toast.imageRemoved'));
     } catch {
     } finally {
       avatarDeleting.value = false;

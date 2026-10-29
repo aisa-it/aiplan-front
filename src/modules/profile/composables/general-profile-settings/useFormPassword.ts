@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
 import { toast } from '@/modules/toast';
-import { SUCCESS_IDENTITY_PASSWORD } from '@/constants/notifications';
+import { i18n } from '@/i18n';
 
 type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
@@ -46,7 +46,7 @@ export function useFormPassword() {
       password.value.confirm_password = '';
       localStorage.removeItem('next_url');
       await router.replace('/signin');
-      toast.success(SUCCESS_IDENTITY_PASSWORD);
+      toast.success(i18n.global.t('profile.toast.passwordUpdated'));
     } catch {
     } finally {
       loading.value = false;

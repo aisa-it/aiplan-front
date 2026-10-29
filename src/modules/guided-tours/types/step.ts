@@ -1,10 +1,14 @@
+import type { MessageKey } from '@/i18n';
+
+export type MessageListItemKey = `${MessageKey}[${number}]`;
+
 export interface Step {
   el: string;
-  title: string;
-  text?: string;
-  textList?: string[];
+  titleKey: MessageKey;
+  textKey?: MessageKey;
+  textListKeys?: MessageListItemKey[];
   placement: Placement;
-  activeButtonText?: string;
+  activeButtonTextKey?: MessageKey;
   is_skip?: boolean;
   padding?: number;
   isOffScroll?: boolean;

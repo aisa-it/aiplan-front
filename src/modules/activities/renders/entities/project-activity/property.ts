@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -13,15 +14,19 @@ import {
 import type { ActivityRenderer } from '../../activity-renderer.types';
 
 const getVisibilityText = (value?: string) => {
-  if (value === 'true') return 'Публичный';
-  if (value === 'false') return 'Скрытый';
+  if (value === 'true') {
+    return i18n.global.t('projectActivity.visibility.public');
+  }
+  if (value === 'false') {
+    return i18n.global.t('projectActivity.visibility.private');
+  }
 
   return value ?? '';
 };
 
 export const renderProjectIcon: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('изменил(-а) иконку проекта'),
+    createTextPart(i18n.global.t('projectActivity.iconChanged')),
     ...createOptionalProjectLinkParts(activity, context),
     ...createWorkspaceContextParts(activity, context),
   );
@@ -31,7 +36,9 @@ export const renderProjectName: ActivityRenderer = (activity, context) => {
 
   return createActivityMessage(
     createTextPart(
-      `изменил(-а) название проекта с "${activity.old_value ?? ''}" на `,
+      i18n.global.t('projectActivity.nameChangedFrom', {
+        previous: activity.old_value ?? '',
+      }),
     ),
     ...(projectParts.length
       ? [createProjectLink(activity)]
@@ -45,45 +52,52 @@ export const renderProjectIdentifier: ActivityRenderer = (
   context,
 ) =>
   createActivityMessage(
-    createTextPart('изменил(-а) идентификатор проекта'),
+    createTextPart(i18n.global.t('projectActivity.identifierChanged')),
     ...createOptionalProjectLinkParts(activity, context),
     createTextPart(
-      ` с "${activity.old_value ?? ''}" на "${activity.new_value ?? ''}"`,
+      ` ${i18n.global.t('projectActivity.fromToQuoted', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      })}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );
 
 export const renderProjectPrivacy: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('изменил(-а) приватность проекта'),
+    createTextPart(i18n.global.t('projectActivity.privacyChanged')),
     ...createOptionalProjectLinkParts(activity, context),
     createTextPart(
-      ` с "${getVisibilityText(activity.old_value)}" на "${getVisibilityText(
-        activity.new_value,
-      )}"`,
+      ` ${i18n.global.t('projectActivity.fromToQuoted', {
+        previous: getVisibilityText(activity.old_value),
+        next: getVisibilityText(activity.new_value),
+      })}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );
 
 export const renderProjectLead: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('изменил(-а) лидера проекта'),
+    createTextPart(i18n.global.t('projectActivity.leadChanged')),
     ...createOptionalProjectLinkParts(activity, context),
     createTextPart(
-      ` с ${getActivityUserName(
-        activity.old_entity_detail,
-        'Пользователь удалён',
-      )} на ${getActivityUserName(
-        activity.new_entity_detail,
-        'Пользователь удалён',
-      )}`,
+      ` ${i18n.global.t('projectActivity.fromToPlain', {
+        previous: getActivityUserName(
+          activity.old_entity_detail,
+          i18n.global.t('projectActivity.userDeleted'),
+        ),
+        next: getActivityUserName(
+          activity.new_entity_detail,
+          i18n.global.t('projectActivity.userDeleted'),
+        ),
+      })}`,
     ),
     ...createWorkspaceContextParts(activity, context),
   );
 
 export const renderProjectRules: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart('изменил(-а) сценарий проекта'),
+    createTextPart(i18n.global.t('projectActivity.rulesChanged')),
     ...createOptionalProjectLinkParts(activity, context),
     ...createWorkspaceContextParts(activity, context),
   );

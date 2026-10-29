@@ -5,9 +5,9 @@ export const STEP_NUM = 1;
 export const steps: Step[] = [
   {
     el: '',
-    title: 'Добро пожаловать в АИПлан! 🚀',
-    text: 'Это ваш новый помощник для командной работы и управления задачами. Хотите за 2 минуты увидеть, как здесь всё устроено?',
-    activeButtonText: 'Да, конечно!',
+    titleKey: 'guidedTours.t1.welcome.title',
+    textKey: 'guidedTours.t1.welcome.text',
+    activeButtonTextKey: 'guidedTours.t1.welcome.action',
     is_skip: true,
     placement: {
       mode: 'screen',
@@ -17,9 +17,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="fast-navigation"]',
-    title: 'Быстрая навигация',
-    text: 'Переключайтесь между рабочими пространствами, списком задач и документами в один клик.',
-    activeButtonText: 'Далее',
+    titleKey: 'guidedTours.t1.fastNavigation.title',
+    textKey: 'guidedTours.t1.fastNavigation.text',
+    activeButtonTextKey: 'guidedTours.t1.fastNavigation.action',
     placement: {
       mode: 'outside',
       primary: 'bottom',
@@ -28,9 +28,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="sidebar"]',
-    title: 'Всё под рукой',
-    text: 'Здесь живут ваши проекты. А ещё отсюда можно создавать формы, запускать звонки, заглянуть в инструкцию или сразу написать нам.',
-    activeButtonText: 'Понятно',
+    titleKey: 'guidedTours.t1.sidebar.title',
+    textKey: 'guidedTours.t1.sidebar.text',
+    activeButtonTextKey: 'guidedTours.t1.sidebar.action',
     placement: {
       mode: 'outside',
       primary: 'right',
@@ -39,9 +39,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="profile"]',
-    title: 'Всё для вашего удобства',
-    text: 'Настройте аккаунт, внешний вид (например, тёмную тему) и уведомления так, как комфортно именно вам.',
-    activeButtonText: 'Хорошо',
+    titleKey: 'guidedTours.t1.profile.title',
+    textKey: 'guidedTours.t1.profile.text',
+    activeButtonTextKey: 'guidedTours.t1.profile.action',
     placement: {
       mode: 'outside',
       primary: 'bottom',
@@ -50,9 +50,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="create-issue"]',
-    title: 'Создавайте задачи в один клик!',
-    text: 'Видите эту большую кнопку? Она поможет вам мгновенно добавить новую задачу, не теряя фокус на работе.',
-    activeButtonText: 'Удобно!',
+    titleKey: 'guidedTours.t1.createIssue.title',
+    textKey: 'guidedTours.t1.createIssue.text',
+    activeButtonTextKey: 'guidedTours.t1.createIssue.action',
     placement: {
       mode: 'outside',
       primary: 'bottom',
@@ -61,9 +61,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="search"]',
-    title: 'Найдите что угодно за секунды',
-    text: 'Потеряли задачу или документ? Глобальный поиск с фильтрами мгновенно всё найдёт!',
-    activeButtonText: 'Отлично!',
+    titleKey: 'guidedTours.t1.search.title',
+    textKey: 'guidedTours.t1.search.text',
+    activeButtonTextKey: 'guidedTours.t1.search.action',
     placement: {
       mode: 'outside',
       primary: 'bottom',
@@ -72,9 +72,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="notifications"]',
-    title: 'Будьте в курсе событий',
-    text: 'Здесь будут все важные оповещения от системы и вашей команды. Ничего не пропустите!',
-    activeButtonText: 'Ясно',
+    titleKey: 'guidedTours.t1.notifications.title',
+    textKey: 'guidedTours.t1.notifications.text',
+    activeButtonTextKey: 'guidedTours.t1.notifications.action',
     padding: 4,
     placement: {
       mode: 'outside',
@@ -84,9 +84,9 @@ export const steps: Step[] = [
   },
   {
     el: '[data-tour="conference"]',
-    title: 'Встречи без хлопот',
-    text: 'Видеозвонки! Создавайте собственную комнату для совещаний.',
-    activeButtonText: 'Здорово!',
+    titleKey: 'guidedTours.t1.conference.title',
+    textKey: 'guidedTours.t1.conference.text',
+    activeButtonTextKey: 'guidedTours.t1.conference.action',
     placement: {
       mode: 'outside',
       primary: 'bottom',

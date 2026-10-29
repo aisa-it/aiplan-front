@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -6,41 +7,42 @@ import { getActivityUserName } from '../../activity-value.helpers';
 import { createCurrentDocParts } from './doc-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 type DocMemberAction = 'added' | 'removed';
 type DocMemberKind = 'watcher' | 'reader' | 'editor';
 
-const MEMBER_TEXT: Readonly<
-  Record<DocMemberKind, Record<DocMemberAction, string>>
+const MEMBER_TEXT_KEY: Readonly<
+  Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: 'добавил(-а) наблюдателя',
-    removed: 'убрал(-а) наблюдателя',
+    added: 'docActivity.members.watcher.added',
+    removed: 'docActivity.members.watcher.removed',
   },
   reader: {
-    added: 'добавил(-а) право на просмотр пользователю',
-    removed: 'удалил(-а) право на просмотр пользователю',
+    added: 'docActivity.permissions.view.added',
+    removed: 'docActivity.permissions.view.removed',
   },
   editor: {
-    added: 'добавил(-а) право на редактирование пользователю',
-    removed: 'удалил(-а) право на редактирование пользователю',
+    added: 'docActivity.permissions.edit.added',
+    removed: 'docActivity.permissions.edit.removed',
   },
 };
 
-const MEMBER_RELATION_TEXT: Readonly<
-  Record<DocMemberKind, Record<DocMemberAction, string>>
+const MEMBER_RELATION_KEY: Readonly<
+  Record<DocMemberKind, Record<DocMemberAction, MessageKey>>
 > = {
   watcher: {
-    added: ' в документ',
-    removed: ' из документа',
+    added: 'docActivity.memberRelations.watcher.added',
+    removed: 'docActivity.memberRelations.watcher.removed',
   },
   reader: {
-    added: ' в документе',
-    removed: ' в документе',
+    added: 'docActivity.memberRelations.reader.added',
+    removed: 'docActivity.memberRelations.reader.removed',
   },
   editor: {
-    added: ' в документе',
-    removed: ' в документе',
+    added: 'docActivity.memberRelations.editor.added',
+    removed: 'docActivity.memberRelations.editor.removed',
   },
 };
 
@@ -57,10 +59,10 @@ const renderDocMember = (
 
     return createActivityMessage(
       createTextPart(
-        `${MEMBER_TEXT[kind][action]} ${getActivityUserName(
+        `${i18n.global.t(MEMBER_TEXT_KEY[kind][action])} ${getActivityUserName(
           detail,
           fallback,
-        )}${MEMBER_RELATION_TEXT[kind][action]}`,
+        )}${i18n.global.t(MEMBER_RELATION_KEY[kind][action])}`,
       ),
       ...createCurrentDocParts(activity, context),
     );

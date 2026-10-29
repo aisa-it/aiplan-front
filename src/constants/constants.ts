@@ -1,3 +1,5 @@
+import type { MessageKey } from '@/i18n';
+
 export const NON_VALIDATED_ROUTES = [
   '#/',
   '/reset-password',
@@ -5,9 +7,9 @@ export const NON_VALIDATED_ROUTES = [
 ];
 
 export const NETWORK_CHOICES = [
-  { value: false, label: 'Скрытый' },
-  { value: true, label: 'Публичный' },
-];
+  { value: false, labelKey: 'dialogs.project.visibility.hidden' },
+  { value: true, labelKey: 'dialogs.project.visibility.public' },
+] as const satisfies ReadonlyArray<{ labelKey: MessageKey; value: boolean }>;
 
 export const PROJECT_IDENTIFIER_LENGTH = {
   MAX: 15,

@@ -2,10 +2,7 @@ import { onMounted, ref } from 'vue';
 
 import { ProfileService } from '../../api/profile.service';
 import { toast } from '@/modules/toast';
-import {
-  SUCCESS_COPY_TOKEN_USER,
-  SUCCESS_RESET_TOKEN_USER,
-} from '@/constants/notifications';
+import { i18n } from '@/i18n';
 
 export function useFormToken() {
   const authToken = ref('');
@@ -20,7 +17,7 @@ export function useFormToken() {
   const handleCopyProfileToken = async () => {
     try {
       await navigator.clipboard.writeText(authToken.value);
-      toast.success(SUCCESS_COPY_TOKEN_USER);
+      toast.success(i18n.global.t('profile.toast.tokenCopied'));
     } catch {
       toast.error();
     }
@@ -30,7 +27,7 @@ export function useFormToken() {
     tokenResetting.value = true;
     try {
       authToken.value = await ProfileService.resetAuthToken();
-      toast.success(SUCCESS_RESET_TOKEN_USER);
+      toast.success(i18n.global.t('profile.toast.tokenReset'));
     } catch {
     } finally {
       tokenResetting.value = false;

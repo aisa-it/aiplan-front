@@ -1,4 +1,5 @@
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { i18n } from '@/i18n';
 
 export function getUrlFile(id = '', url = '/api/auth/file/'): string {
   if (!id) return '';
@@ -13,7 +14,7 @@ export function getUserName(
   let fullName = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
 
   if (isShowBlockStatus && !user.is_active) {
-    fullName += ' (Заблокирован)';
+    fullName += ` (${i18n.global.t('common.states.blocked')})`;
   }
 
   return fullName;

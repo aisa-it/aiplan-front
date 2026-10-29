@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
 
@@ -34,11 +35,13 @@ const props = defineProps<{
   message: ActivityMessageModel;
 }>();
 
+const { t } = useI18n();
+
 const actorName = computed(() => {
   const actor = props.activity.actor_detail;
 
   return actor?.is_bot
-    ? [actor.last_name, 'Бот'].filter(Boolean).join(' ')
+    ? [actor.last_name, t('activities.ui.bot')].filter(Boolean).join(' ')
     : [actor?.last_name, actor?.first_name].filter(Boolean).join(' ');
 });
 

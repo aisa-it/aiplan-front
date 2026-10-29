@@ -40,13 +40,38 @@ export default {
       date: 'Дата',
       time: 'Время',
     },
+    menu: {
+      profile: 'Профиль',
+      adminPanel: 'Админ. панель',
+      signOut: 'Выйти',
+      signOutEverywhere: 'Выйти из всех сессий',
+    },
+    screens: {
+      notFound: { title: 'Страница не найдена', home: 'Вернуться на главную' },
+      workspace: {
+        noProjects: 'Нет доступных проектов',
+        createProject: 'Создать проект',
+        title: 'Пространство {name}',
+      },
+      project: {
+        tasksTitle: 'Задачи проекта {name}',
+        tabs: { general: 'Основные', pinned: 'Закрепленные задачи', analytics: 'Аналитика' },
+      },
+    },
     states: {
+      blocked: 'Заблокирован',
       on: 'Вкл',
       off: 'Выкл',
       yes: 'Да',
       no: 'Нет',
       never: 'Никогда',
       loading: 'Загрузка...',
+    },
+    system: {
+      serverUnavailable: 'Сервер сейчас недоступен. Сохраните свои данные!',
+    },
+    validation: {
+      email: 'Некорректный email',
     },
   },
   timezones: {

@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { i18n } from '@/i18n';
 import { DEFAULT_TOAST_TIMEOUT, TOAST_TYPE_CONFIG } from './toast.config';
 import type {
   ShowToastOptions,
@@ -89,8 +90,8 @@ export const showToast = ({
   timeout = DEFAULT_TOAST_TIMEOUT,
 }: ShowToastOptions) => {
   const config = TOAST_TYPE_CONFIG[type];
-  const resolvedTitle = title || config.title;
-  const resolvedMessage = normalizeMessage(message, config.message);
+  const resolvedTitle = title || i18n.global.t(config.titleKey);
+  const resolvedMessage = normalizeMessage(message, i18n.global.t(config.fallbackKey));
   const groupKey = getGroupKey(type, resolvedTitle, resolvedMessage);
   const groupedToastIndex = toasts.value.findIndex(
     (item) => item.groupKey === groupKey,
