@@ -1,4 +1,3 @@
-// Словарь событий спринтов (namespace sprintActivity).
 export default {
   fields: { name: 'название', description: 'описание' },
   changedField: 'изменил(-а) {target} в спринте ',

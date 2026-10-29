@@ -1,6 +1,5 @@
 import type ru from './ru';
 
-// Dictionary for document events (namespace docActivity).
 export default {
   fields: { description: 'description', title: 'title' },
   changedField: 'changed the {target} of the document',
@@ -21,10 +20,18 @@ export default {
   commentAdded: 'added a comment in the document',
   commentUpdated: 'updated a comment in the document',
   commentDeleted: 'deleted a comment in the document',
-  members: { watcher: { added: 'added the watcher', removed: 'removed the watcher' } },
+  members: {
+    watcher: { added: 'added the watcher', removed: 'removed the watcher' },
+  },
   permissions: {
-    view: { added: 'granted the view permission to the user', removed: 'revoked the view permission from the user' },
-    edit: { added: 'granted the edit permission to the user', removed: 'revoked the edit permission from the user' },
+    view: {
+      added: 'granted the view permission to the user',
+      removed: 'revoked the view permission from the user',
+    },
+    edit: {
+      added: 'granted the edit permission to the user',
+      removed: 'revoked the edit permission from the user',
+    },
   },
   memberRelations: {
     watcher: { added: ' to the document', removed: ' from the document' },

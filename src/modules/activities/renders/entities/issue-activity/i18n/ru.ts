@@ -1,4 +1,3 @@
-// Словарь событий задач (namespace issueActivity).
 export default {
   fields: { name: 'название', description: 'описание' },
   changedField: 'изменил(-а) {target}',

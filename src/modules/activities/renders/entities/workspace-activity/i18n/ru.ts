@@ -1,6 +1,3 @@
-// Словарь событий пространства (namespace workspaceActivity).
-// Отношения к пространству (activities.workspaceRelations.*) живут в корневом
-// словаре модуля src/modules/activities/i18n — они нужны всем рендерерам.
 export default {
   properties: { avatar: 'аватар', token: 'токен', description: 'описание' },
   nameChanged: 'имя пространства с "{previous}" на "{next}"',

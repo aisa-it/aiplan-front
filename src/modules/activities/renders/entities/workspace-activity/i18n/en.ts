@@ -1,6 +1,5 @@
 import type ru from './ru';
 
-// Dictionary for workspace events (namespace workspaceActivity).
 export default {
   properties: { avatar: 'the avatar', token: 'the token', description: 'the description' },
   nameChanged: 'the workspace name from "{previous}" to "{next}"',

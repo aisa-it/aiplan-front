@@ -69,7 +69,6 @@ import { useDisplay } from 'vuetify';
 
 type ProjectTab = 'general' | 'pinned' | 'analytics';
 
-// Extract привязывает литералы к существующим ключам словаря: опечатка или удаление ключа падает на vue-tsc
 type TabLabelKey = Extract<
   MessageKey,
   | 'common.screens.project.tabs.general'

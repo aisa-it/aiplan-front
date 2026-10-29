@@ -1,6 +1,3 @@
-// Корневой словарь модуля activities: общие части ленты (глаголы, роли, отношения
-// к пространству, UI списка, fallback). Переводы событий конкретных сущностей —
-// отдельные словари рядом с их рендерерами: renders/entities/<сущность>/i18n.
 import type { ActivityVerb } from '../model/activity.types';
 
 export default {

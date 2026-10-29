@@ -9,7 +9,6 @@ import type { MessageKey } from '@/i18n';
 
 export type WorkspaceRelation = 'at' | 'from' | 'in' | 'of';
 
-// Ключ словаря для 'at' назван inside: PickupPaths из vue-i18n не пропускает имена методов массивов (Array.prototype.at)
 const WORKSPACE_RELATION_KEY: Readonly<Record<WorkspaceRelation, MessageKey>> = {
   at: 'activities.workspaceRelations.inside',
   from: 'activities.workspaceRelations.from',

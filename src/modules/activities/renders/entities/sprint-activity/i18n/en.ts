@@ -1,6 +1,5 @@
 import type ru from './ru';
 
-// Dictionary for sprint events (namespace sprintActivity).
 export default {
   fields: { name: 'name', description: 'description' },
   changedField: 'changed the {target} in sprint ',

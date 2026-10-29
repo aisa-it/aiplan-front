@@ -6,7 +6,6 @@ export const NON_VALIDATED_ROUTES = [
   '/workspace-member-invitation',
 ];
 
-// labelKey вместо label: текст подписи живёт в словаре, value уходит в payload бэкенда
 export const NETWORK_CHOICES = [
   { value: false, labelKey: 'dialogs.project.visibility.hidden' },
   { value: true, labelKey: 'dialogs.project.visibility.public' },

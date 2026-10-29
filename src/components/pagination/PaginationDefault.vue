@@ -67,7 +67,6 @@ const emit = defineEmits<{
   request: [options: { page: number; rowsPerPage?: number }];
 }>();
 
-// Пропс опционален: без него подпись берётся из словаря
 const labelRowsPerPageDisplay = computed(
   () => props.labelRowsPerPage ?? t('pagination.rowsPerPage'),
 );

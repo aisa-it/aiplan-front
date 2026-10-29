@@ -106,9 +106,6 @@ const cyrillicToTranslit = CyrillicToTranslit();
 const route = useRoute();
 const workspaceStore = useWorkspaceStore();
 
-// Модель селекта публичности — элемент вида { title, value }, как в списке items
-// (v-select с return-object в Vuetify 4 требует совпадения типов). Сопоставление
-// выбора идёт по value, поэтому payload бэкенда не меняется.
 const networkChoices = useTranslatedOptions(NETWORK_CHOICES);
 
 const isOpen = defineModel<boolean>();

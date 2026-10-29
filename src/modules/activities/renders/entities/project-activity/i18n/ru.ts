@@ -1,4 +1,3 @@
-// Словарь событий проектов (namespace projectActivity).
 export default {
   fields: { statusName: 'название статуса', defaultStatus: 'статус по умолчанию' },
   // Ключ 'at' нельзя: PickupPaths из vue-i18n отбрасывает имена методов массивов (Array.prototype.at)

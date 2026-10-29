@@ -1,6 +1,3 @@
-// Root dictionary of the activities module: feed-wide parts (verbs, roles,
-// workspace relations, list UI, fallback). Per-entity event texts live in their
-// own dictionaries next to the renderers: renders/entities/<entity>/i18n.
 import type ru from './ru';
 
 export default {

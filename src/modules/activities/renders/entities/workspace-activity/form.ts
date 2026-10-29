@@ -25,7 +25,6 @@ export const renderWorkspaceForm: ActivityRenderer = (activity) => {
 
   return createActivityMessage(
     createTextPart(
-      // «форму» уже переведена в ядре (activities.form.defaultTarget) — переиспользуем
       `${getActivityVerbText(activity.verb)} ${i18n.global.t(
         'activities.form.defaultTarget',
       )} `,

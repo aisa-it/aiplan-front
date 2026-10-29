@@ -59,7 +59,6 @@ export const createWorkspaceSourceParts = (
   }
 
   return [
-    // та же строка, что и в контексте workspace-событий — переиспользуем существующий ключ
     createTextPart(i18n.global.t('activities.workspaceRelations.inside')),
     createWorkspaceLink(activity),
   ];

@@ -1,6 +1,5 @@
 import type ru from './ru';
 
-// Dictionary for issue events (namespace issueActivity).
 export default {
   fields: { name: 'the name', description: 'the description' },
   changedField: 'changed {target}',
@@ -8,8 +7,19 @@ export default {
   statusUnset: 'Not selected',
   prioritySet: 'set the priority to "{value}"',
   priorityRemoved: 'removed the priority',
-  priorities: { urgent: 'Urgent', high: 'High', medium: 'Medium', low: 'Low', unset: 'Not set' },
-  relations: { for: 'for task ', from: 'from task ', in: 'in task ', into: 'into task ' },
+  priorities: {
+    urgent: 'Urgent',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    unset: 'Not set',
+  },
+  relations: {
+    for: 'for task ',
+    from: 'from task ',
+    in: 'in task ',
+    into: 'into task ',
+  },
   fieldActions: { added: 'added', removed: 'removed', updated: 'updated' },
   workspaceContext: ' in workspace ',
   attachment: 'the attachment "{value}"',
@@ -30,7 +40,12 @@ export default {
   movedFrom: ' from "{previous}"',
   movedTo: ' to "{next}"',
   members: { assignee: 'the assignee', watcher: 'the watcher' },
-  relationTargets: { parentAdded: 'the parent task', parentRemoved: 'the parent', subIssue: 'the subtask', linked: 'the linked task' },
+  relationTargets: {
+    parentAdded: 'the parent task',
+    parentRemoved: 'the parent',
+    subIssue: 'the subtask',
+    linked: 'the linked task',
+  },
   blockingSet: 'set that the task ',
   blockingUnset: 'removed that the task ',
   blocksSuffix: ' blocks {value}',

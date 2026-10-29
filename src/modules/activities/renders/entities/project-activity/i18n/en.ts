@@ -1,6 +1,5 @@
 import type ru from './ru';
 
-// Dictionary for project events (namespace projectActivity).
 export default {
   fields: { statusName: 'the status name', defaultStatus: 'the default status' },
   // Ключ 'at' нельзя: PickupPaths из vue-i18n отбрасывает имена методов массивов (Array.prototype.at)
