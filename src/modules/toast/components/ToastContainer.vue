@@ -10,7 +10,7 @@
       ]"
       :tabindex="toasts.length ? 0 : -1"
       role="region"
-      aria-label="Уведомления"
+      :aria-label="t('toast.notifications')"
     >
       <ToastItem
         v-for="item in toasts"
@@ -25,8 +25,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n';
 import ToastItem from './ToastItem.vue';
 import { useToastStack } from '../toast';
+
+const { t } = useI18n();
 
 const theme = useTheme();
 const themeClass = computed(() => `v-theme--${theme.global.name.value}`);

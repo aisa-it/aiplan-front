@@ -2,6 +2,7 @@ import { watch } from 'vue';
 import { createI18n, type PickupPaths } from 'vue-i18n';
 import { ru as vuetifyRu } from 'vuetify/locale';
 
+import { SUPPORTED_LOCALES } from './generated/locales';
 import modulesRu from './generated/ru';
 import ru from './locales/ru';
 
@@ -14,7 +15,7 @@ export type MessageSchema = typeof ruMessages;
 
 export type MessageKey = PickupPaths<Omit<MessageSchema, '$vuetify'>>;
 
-export const SUPPORTED_LOCALES = ['ru', 'en'] as const;
+export { SUPPORTED_LOCALES };
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 const DEFAULT_LOCALE = 'ru' satisfies AppLocale;
 
@@ -50,6 +51,12 @@ export const LOCALE_OPTIONS = [
   { title: 'Русский', value: 'ru' },
   { title: 'English', value: 'en' },
 ] as const satisfies ReadonlyArray<{ title: string; value: AppLocale }>;
+
+type LocaleMissingInOptions = Exclude<
+  AppLocale,
+  (typeof LOCALE_OPTIONS)[number]['value']
+>;
+true satisfies [LocaleMissingInOptions] extends [never] ? true : false;
 
 const getInitialLocale = (): AppLocale => {
   try {

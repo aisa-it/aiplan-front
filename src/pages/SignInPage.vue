@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <template #title>Авторизация</template>
+    <template #title>{{ t('auth.signIn.title') }}</template>
 
     <template #default>
       <LoginForm />
@@ -15,11 +15,14 @@
         @click="() => $router.push('/signup')"
         size="large"
       >
-        Нет аккаунта? Зарегистрируйтесь
+        {{ t('auth.signIn.noAccount') }}
       </v-btn>
     </template>
   </AuthLayout>
 </template>
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { AuthLayout, LoginForm } from '@/modules/auth';
+
+const { t } = useI18n();
 </script>

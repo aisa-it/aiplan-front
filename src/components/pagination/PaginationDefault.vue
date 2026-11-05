@@ -18,13 +18,13 @@
         v-if="showRowsPerPage"
         class="flex items-center gap-4 whitespace-nowrap"
       >
-        <span>{{ labelRowsPerPage }}</span>
+        <span>{{ labelRowsPerPageDisplay }}</span>
 
         <v-select
           class="mb-2"
           :model-value="rowsPerPage"
           :items="rowsPerPageOptions"
-          :aria-label="labelRowsPerPage"
+          :aria-label="labelRowsPerPageDisplay"
           density="compact"
           hide-details
           variant="plain"
@@ -37,6 +37,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -55,7 +58,6 @@ const props = withDefaults(
     maxPages: 6,
     rowsPerPageOptions: () => [10, 25, 50, 100],
     showRowsPerPage: true,
-    labelRowsPerPage: 'Строк на странице:',
   },
 );
 
@@ -64,6 +66,10 @@ const emit = defineEmits<{
   'update:rowsPerPage': [value: number];
   request: [options: { page: number; rowsPerPage?: number }];
 }>();
+
+const labelRowsPerPageDisplay = computed(
+  () => props.labelRowsPerPage ?? t('pagination.rowsPerPage'),
+);
 
 const pagesCount = computed(() =>
   props.rowsPerPage > 0

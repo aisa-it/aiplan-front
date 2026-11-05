@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { isActivityEntityType } from '../model/activity.types';
 import {
   createActivityMessage,
@@ -18,9 +19,11 @@ const renderFallbackActivity = (
 ): ActivityMessage =>
   createActivityMessage(
     createTextPart(
-      `совершил(-а) необработанное действие ${
-        source.entity_type || '—'
-      }, ${source.field || '—'}, ${source.verb || '—'})`,
+      i18n.global.t('activities.fallback', {
+        entity: source.entity_type || '—',
+        field: source.field || '—',
+        verb: source.verb || '—',
+      }),
     ),
   );
 

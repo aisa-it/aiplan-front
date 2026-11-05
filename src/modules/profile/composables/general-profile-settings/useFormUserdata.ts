@@ -10,7 +10,7 @@ import { useProfileValidationRules } from '../useProfileValidationRules';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { toast } from '@/modules/toast';
-import { SUCCESS_CHANGE_EMAIL } from '@/constants/notifications';
+import { i18n } from '@/i18n';
 
 type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
@@ -99,12 +99,12 @@ export function useFormUserdata(user: Ref<DtoUser>) {
 
   const changeEmail = async () => {
     const email = form.email.trim();
-    if (isEmail(email) !== true) return;
+    if (!isEmail(email)) return;
 
     emailLoading.value = true;
     try {
       await ProfileService.changeEmail({ new_email: email });
-      toast.success(SUCCESS_CHANGE_EMAIL);
+      toast.success(i18n.global.t('profile.toast.emailChangeSent'));
     } catch {
     } finally {
       emailLoading.value = false;

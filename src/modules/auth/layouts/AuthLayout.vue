@@ -17,7 +17,7 @@
           <div
             class="text-center font-medium text-2xl text-header-icon my-2"
           >
-            <slot name="title">Авторизация</slot>
+            <slot name="title">{{ t('auth.layout.title') }}</slot>
           </div>
 
           <slot name="default" />
@@ -26,18 +26,23 @@
       </div>
 
       <div class="auth-footer-info">
-        <div>
-          Написать нам в
-          <a
-            href="https://t.me/aiplan_faq"
-            target="_blank"
-            class="text-primary"
-          >
-            телеграм
-          </a>
-          или на
-          <a href="mailto:aiplan@plan.aisa.ru" class="text-primary"> почту</a>
-        </div>
+        <i18n-t keypath="auth.footer.contact" tag="div">
+          <template #telegram>
+            <a
+              href="https://t.me/aiplan_faq"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary"
+            >
+              {{ t('auth.footer.telegram') }}
+            </a>
+          </template>
+          <template #mail>
+            <a href="mailto:aiplan@plan.aisa.ru" class="text-primary">
+              {{ t('auth.footer.mail') }}
+            </a>
+          </template>
+        </i18n-t>
       </div>
     </div>
 
@@ -52,10 +57,13 @@
 <script setup lang="ts">
 import { onBeforeMount, onUnmounted, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import logo from '@/assets/logo.svg';
 import { useUserStore } from '@/stores/user-store';
 import { useUtilsStore } from '@/stores/utils-store';
 import AiplanVersion from '@/components/AiplanVersion.vue';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const userStore = useUserStore();

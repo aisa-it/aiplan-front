@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "i18n:generate": "node scripts/i18n-dictionaries.mjs",
     "i18n:check": "node scripts/i18n-dictionaries.mjs --check",
-    "test": "node --test scripts/"
+    "test": "node --test \"scripts/*.test.mjs\""
   },
   "dependencies": {
     "@aisa-it/aiplan-api-ts": "^1.139.0",

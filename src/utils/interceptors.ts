@@ -127,6 +127,5 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
     },
   );
 
-  // Если нужны request interceptor'ы, можно добавить их аналогичным образом
   return instance;
 }

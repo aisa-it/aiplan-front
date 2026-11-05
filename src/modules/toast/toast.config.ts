@@ -1,9 +1,9 @@
-import { SUCCESS_UPDATE_DATA, BASE_ERROR } from '@/constants/notifications';
+import type { MessageKey } from '@/i18n';
 import type { ToastType } from './toast.types';
 
 interface ToastTypeConfig {
-  title: string;
-  message: string;
+  titleKey: MessageKey;
+  fallbackKey: MessageKey;
   icon: string;
   accentColor: string;
 }
@@ -12,26 +12,26 @@ export const DEFAULT_TOAST_TIMEOUT = 5000;
 
 export const TOAST_TYPE_CONFIG: Record<ToastType, ToastTypeConfig> = {
   warning: {
-    title: 'Информация',
-    message: SUCCESS_UPDATE_DATA,
+    titleKey: 'toast.titles.warning',
+    fallbackKey: 'toast.fallback.success',
     icon: 'info',
-    accentColor: '#f2c037',
+    accentColor: '#f2c037', // FIXME: Убрать магические значения, вынести в глобальные переменные или стили
   },
   message: {
-    title: 'Уведомление',
-    message: SUCCESS_UPDATE_DATA,
+    titleKey: 'toast.titles.message',
+    fallbackKey: 'toast.fallback.success',
     icon: 'info',
     accentColor: 'rgb(var(--v-theme-primary))',
   },
   success: {
-    title: 'Успешно',
-    message: SUCCESS_UPDATE_DATA,
+    titleKey: 'toast.titles.success',
+    fallbackKey: 'toast.fallback.success',
     icon: 'check',
     accentColor: '#05bd8d',
   },
   error: {
-    title: 'Ошибка',
-    message: BASE_ERROR,
+    titleKey: 'toast.titles.error',
+    fallbackKey: 'toast.fallback.error',
     icon: 'close',
     accentColor: '#dc3e3e',
   },

@@ -39,7 +39,7 @@
       size="32"
       variant="text"
       :ripple="false"
-      aria-label="Закрыть уведомление"
+      :aria-label="t('toast.closeNotification')"
       @click="emit('close')"
     >
       <span class="material-symbols-rounded text-2xl">close</span>
@@ -55,7 +55,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ToastLink, ToastMessagePart, ToastView } from '../toast.types';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   toast: ToastView;

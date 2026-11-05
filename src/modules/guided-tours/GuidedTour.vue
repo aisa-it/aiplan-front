@@ -44,29 +44,29 @@
       class="absolute w-[544px] bg-white text-gray-900 p-6 rounded-2xl z-[10000] pointer-events-auto border border-solid border-gray-200"
       :style="popoverStyle"
     >
-      <p class="mb-[14px] font-bold w-full">{{ step.title }}</p>
-      <p class="text-base" v-html="step.text"></p>
+      <p class="mb-[14px] font-bold w-full">{{ t(step.titleKey) }}</p>
+      <p class="text-base">{{ step.textKey ? t(step.textKey) : '' }}</p>
       <ul class="pl-6 flex flex-col gap-2">
         <li
           class="text-base leading-[22px] tracking-[0.5px]"
-          v-for="item in step.textList"
-          :key="item"
+          v-for="key in step.textListKeys"
+          :key="key"
         >
-          {{ item }}
+          {{ t(key) }}
         </li>
       </ul>
       <div class="mt-6 flex gap-[14px] items-center">
         <v-btn
           variant="flat"
           color="primary"
-          :text="step.activeButtonText"
+          :text="step.activeButtonTextKey ? t(step.activeButtonTextKey) : undefined"
           @click="nextStep"
         />
         <v-btn
           v-if="step.is_skip"
           variant="outlined"
           color="primary"
-          text="Пропустить"
+          :text="t('guidedTours.skip')"
           @click="endTour"
         />
       </div>
@@ -76,6 +76,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { type Step } from './types/step';
 import { useGuiderStore } from './guider-store';
 
@@ -87,6 +88,8 @@ const props = defineProps<{
 const emits = defineEmits<{
   endTutorial: [];
 }>();
+
+const { t } = useI18n();
 
 const guiderStore = useGuiderStore();
 

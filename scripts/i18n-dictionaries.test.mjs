@@ -19,8 +19,7 @@ import {
 // Словарное содержимое по умолчанию: collectDictionaries смотрит только на имена файлов.
 const DEFAULT_DICT = `export default { title: 'x' };\n`;
 
-// files — объект { путь: содержимое } (undefined → словарь по умолчанию)
-// или массив путей, когда содержимое не важно.
+// Пишет файлы в проект: объект `{ путь: текст }` или массив путей (тогда подставляется DEFAULT_DICT).
 const writeFiles = (root, files = []) => {
   const entries = Array.isArray(files)
     ? files.map((file) => [file, DEFAULT_DICT])
@@ -72,6 +71,34 @@ describe('collectDictionaries — находит словари', () => {
         importBase: '@/components/user-status/i18n',
         relDir: 'src/components/user-status/i18n',
       },
+    ]);
+  });
+
+  it('вложенный словарь — свой namespace по имени папки', (t) => {
+    const root = makeProject(t, [
+      ...dict('src/modules/profile'),
+      ...dict('src/modules/activities/renders/entities/issue-activity'),
+    ]);
+    assert.deepEqual(collectDictionaries(root).map((d) => d.namespace), [
+      'issueActivity',
+      'profile',
+    ]);
+  });
+
+  it('словарь через symlink/junction на i18n/ регистрируется', (t) => {
+    // Реальная папка — вне src, чтобы misplaced-проверка не ругалась на неё.
+    const root = makeProject(t, dict('dicts/issue-activity'));
+    fs.mkdirSync(path.join(root, 'src/modules/issue-activity'), {
+      recursive: true,
+    });
+    fs.symlinkSync(
+      path.join(root, 'dicts/issue-activity/i18n'),
+      path.join(root, 'src/modules/issue-activity/i18n'),
+      // junction не требует прав на Windows; на POSIX тип игнорируется.
+      'junction',
+    );
+    assert.deepEqual(collectDictionaries(root).map((d) => d.namespace), [
+      'issueActivity',
     ]);
   });
 
@@ -159,15 +186,52 @@ describe('collectDictionaries — ошибки', () => {
     assert.match(collectError(root), /missing dictionary ru\.ts, en\.ts/);
   });
 
-  it('словарь во вложенной папке компонента — ошибка', (t) => {
-    const root = makeProject(
-      t,
-      dict('src/modules/profile/components/avatar-upload'),
-    );
+  it('словарь внутри другой папки i18n/ (включая пустую i18n/i18n) — ошибка', (t) => {
+    const root = makeProject(t, dict('src/modules/activities'));
+    fs.mkdirSync(path.join(root, 'src/modules/activities/i18n/i18n'), {
+      recursive: true,
+    });
     assert.match(
       collectError(root),
-      /dictionary outside src\/modules\/<folder>\/i18n or src\/components\/<folder>\/i18n would not be registered/,
+      /src\/modules\/activities\/i18n\/i18n: dictionary nested inside another i18n\/ folder would not be registered/,
     );
+  });
+
+  it('битый symlink/junction на i18n/ — ошибка про недостающие файлы, а не ENOENT', (t) => {
+    const root = makeProject(t);
+    fs.mkdirSync(path.join(root, 'dicts/gone/i18n'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'src/modules/broken'), { recursive: true });
+    fs.symlinkSync(
+      path.join(root, 'dicts/gone/i18n'),
+      path.join(root, 'src/modules/broken/i18n'),
+      'junction',
+    );
+    // Целевая папка исчезла — junction битый.
+    fs.rmSync(path.join(root, 'dicts'), { recursive: true, force: true });
+    assert.match(
+      collectError(root),
+      /src\/modules\/broken\/i18n: missing dictionary ru\.ts, en\.ts/,
+    );
+  });
+
+  it('symlink/junction на i18n/ не на своём месте — ошибка', (t) => {
+    const root = makeProject(t, dict('dicts/main-layout'));
+    fs.mkdirSync(path.join(root, 'src/layouts/main-layout'), {
+      recursive: true,
+    });
+    fs.symlinkSync(
+      path.join(root, 'dicts/main-layout/i18n'),
+      path.join(root, 'src/layouts/main-layout/i18n'),
+      'junction',
+    );
+    assert.match(collectError(root), /would not be registered/);
+  });
+
+  it('не kebab-case и нет en.ts — обе ошибки сразу', (t) => {
+    const root = makeProject(t, ['src/components/UserCard/i18n/ru.ts']);
+    const message = collectError(root);
+    assert.match(message, /missing dictionary en\.ts/);
+    assert.match(message, /folder name "UserCard" must be kebab-case/);
   });
 
   it('словарь в layouts — ошибка, даже только ru.ts', (t) => {
@@ -181,6 +245,19 @@ describe('collectDictionaries — ошибки', () => {
       collectError(root),
       /src\/modules\/i18n: dictionary outside/,
     );
+  });
+
+  it('вложенная папка не kebab-case — ошибка', (t) => {
+    const root = makeProject(t, dict('src/modules/profile/components/AvatarUpload'));
+    assert.match(collectError(root), /folder name "AvatarUpload" must be kebab-case/);
+  });
+
+  it('вложенному словарю не хватает en.ts — ошибка', (t) => {
+    const root = makeProject(t, [
+      ...dict('src/modules/profile'),
+      'src/modules/profile/components/avatar/i18n/ru.ts',
+    ]);
+    assert.match(collectError(root), /missing dictionary en\.ts/);
   });
 
   it('несколько ошибок — одним исключением', (t) => {
@@ -211,11 +288,24 @@ describe('renderDictionaries — текст реестра', () => {
     },
   ];
 
-  it('ключи — ровно ru.ts и en.ts в src/i18n/generated', () => {
+  it('ключи — файлы локалей и locales.ts в src/i18n/generated', () => {
     assert.deepEqual(Object.keys(renderDictionaries(dictionaries)), [
       'src/i18n/generated/ru.ts',
       'src/i18n/generated/en.ts',
+      'src/i18n/generated/locales.ts',
     ]);
+  });
+
+  it('locales.ts — SUPPORTED_LOCALES как const', () => {
+    assert.equal(
+      renderDictionaries(dictionaries)['src/i18n/generated/locales.ts'],
+      [
+        '// АВТОГЕНЕРАЦИЯ — не править вручную.',
+        '// Источник: scripts/i18n-dictionaries.mjs (запускается плагином Vite и `yarn i18n:generate`).',
+        "export const SUPPORTED_LOCALES = ['ru', 'en'] as const;",
+        '',
+      ].join('\n'),
+    );
   });
 
   it('ru.ts — реестр экспортов словарей', () => {
@@ -266,7 +356,7 @@ describe('generateI18nDictionaries — запись и check', () => {
       path.join(root, 'src/i18n/generated', `${locale}.ts`),
     );
 
-  it('первый вызов пишет оба файла', (t) => {
+  it('первый вызов пишет файлы реестра', (t) => {
     const root = makeProject(t, dict('src/modules/profile'));
     const result = generateI18nDictionaries(root);
     assert.deepEqual(result, { changed: true, upToDate: false });
@@ -329,6 +419,27 @@ describe('generateI18nDictionaries — запись и check', () => {
     for (const [file, content] of Object.entries(rendered)) {
       fs.writeFileSync(path.join(root, file), content.split('\n').join('\r\n'));
     }
+    assert.deepEqual(generateI18nDictionaries(root), {
+      changed: false,
+      upToDate: true,
+    });
+  });
+
+  it('лишний файл в generated: check видит расхождение, генерация удаляет', (t) => {
+    const root = makeProject(t, dict('src/modules/profile'));
+    generateI18nDictionaries(root);
+    writeFiles(root, { 'src/i18n/generated/de.ts': DEFAULT_DICT });
+    const checked = generateI18nDictionaries(root, { check: true });
+    assert.deepEqual(checked, { changed: false, upToDate: false });
+    assert.ok(fs.existsSync(path.join(root, 'src/i18n/generated/de.ts')));
+    assert.deepEqual(generateI18nDictionaries(root), {
+      changed: true,
+      upToDate: false,
+    });
+    assert.equal(
+      fs.existsSync(path.join(root, 'src/i18n/generated/de.ts')),
+      false,
+    );
     assert.deepEqual(generateI18nDictionaries(root), {
       changed: false,
       upToDate: true,
@@ -478,6 +589,25 @@ describe('i18nDictionariesPlugin — dev-вотчер', () => {
     emit(watcher, root, 'add', 'src/modules/silent/i18n/ru.ts');
     assert.match(readRegistry(root), /^  silent: silentRu,$/m);
   });
+
+  it('корень проекта внутри папки /src/ не вызывает ложных срабатываний на ядро src/i18n', (t) => {
+    const base = makeProject(t);
+    const root = path.join(base, 'src', 'app');
+    writeFiles(root, dict('src/modules/profile'));
+    const { watcher, logs } = makeDevServer(t, root);
+    writeFiles(root, dict('src/modules/silent'));
+    for (const [event, file] of [
+      ['unlinkDir', 'src/i18n'],
+      ['add', 'src/i18n/generated/ru.ts'],
+      ['add', 'src/i18n/locales/en.ts'],
+    ]) {
+      emit(watcher, root, event, file);
+    }
+    assert.ok(!readRegistry(root).includes('silent:'));
+    assert.deepEqual(logs, []);
+    emit(watcher, root, 'add', 'src/modules/silent/i18n/ru.ts');
+    assert.match(readRegistry(root), /^  silent: silentRu,$/m);
+  });
 });
 
 // Скрипт копируется во временный проект: CLI берёт корень от своего расположения,
@@ -525,6 +655,14 @@ describe('CLI scripts/i18n-dictionaries.mjs', () => {
     assert.match(stale.stderr, /is outdated/);
   });
 
+  it('неизвестный флаг — exit 1, реестр не создаётся', (t) => {
+    const root = makeCliProject(t, dict('src/modules/profile'));
+    const result = runCli(root, ['--chek']);
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, /unknown option: --chek/);
+    assert.equal(fs.existsSync(path.join(root, 'src/i18n/generated')), false);
+  });
+
   it('ошибка в словарях — exit 1 и [i18n] dictionary errors', (t) => {
     const root = makeCliProject(t, dict('src/components/UserCard'));
     const result = runCli(root);
@@ -570,7 +708,7 @@ describe('типы: что ловит tsc через сгенерированн�
 
   const ruDictionary = `export default { title: 'Заголовок', nested: { a: 'А' } };\n`;
 
-  // en-словарь без своего satisfies: проверяем проверки самого реестра.
+  // Без локального `satisfies typeof ru` в en.ts, чтобы проверять именно типы сгенерированного реестра.
   const makeTypedProject = (t, enDictionary) => {
     const root = makeProject(t, {
       'src/modules/profile/i18n/ru.ts': ruDictionary,
@@ -626,6 +764,11 @@ describe('типы: что ловит tsc через сгенерированн�
     assert.notEqual(result.status, 0);
     assert.match(result.stdout, /generated[\\/]en\.ts\(\d+,\d+\): error TS1360/);
   });
+});
+
+// Реестр текущего репозитория: закоммиченные файлы должны соответствовать словарям на диске.
+describe('репозиторий', () => {
+  const repoRoot = path.resolve(fileURLToPath(import.meta.url), '../..');
 
   it('реестр репозитория актуален', () => {
     assert.equal(

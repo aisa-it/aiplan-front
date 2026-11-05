@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -8,11 +9,13 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderSprintFolder: ActivityRenderer = (activity) =>
   createActivityMessage(
-    createTextPart('изменил(-а) папку спринта '),
+    createTextPart(i18n.global.t('sprintActivity.folderChanged')),
     createSprintLink(activity),
     createTextPart(
-      ` с "${activity.old_value || 'Без папки'}" на "${
-        activity.new_value || 'Без папки'
-      }"`,
+      ` ${i18n.global.t('sprintActivity.fromToQuoted', {
+        previous:
+          activity.old_value || i18n.global.t('sprintActivity.noFolder'),
+        next: activity.new_value || i18n.global.t('sprintActivity.noFolder'),
+      })}`,
     ),
   );

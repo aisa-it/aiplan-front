@@ -40,13 +40,38 @@ export default {
       date: 'Date',
       time: 'Time',
     },
+    menu: {
+      profile: 'Profile',
+      adminPanel: 'Admin panel',
+      signOut: 'Sign out',
+      signOutEverywhere: 'Sign out of all sessions',
+    },
+    screens: {
+      notFound: { title: 'Page not found', home: 'Back to home' },
+      workspace: {
+        noProjects: 'No projects available',
+        createProject: 'Create project',
+        title: 'Workspace {name}',
+      },
+      project: {
+        tasksTitle: 'Tasks of project {name}',
+        tabs: { general: 'Overview', pinned: 'Pinned tasks', analytics: 'Analytics' },
+      },
+    },
     states: {
+      blocked: 'Blocked',
       on: 'On',
       off: 'Off',
       yes: 'Yes',
       no: 'No',
       never: 'Never',
       loading: 'Loading...',
+    },
+    system: {
+      serverUnavailable: 'The server is currently unavailable. Save your data!',
+    },
+    validation: {
+      email: 'Invalid email',
     },
   },
   timezones: {

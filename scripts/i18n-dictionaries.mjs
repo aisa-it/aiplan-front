@@ -1,47 +1,91 @@
-// Генерирует src/i18n/generated/<язык>.ts из словарей src/{modules,components}/<папка>/i18n.
+// Генерирует словарный реестр src/i18n/generated/<язык>.ts из словарей src/{modules,components}/**/i18n.
+// Namespace — имя папки, в которой лежит i18n (user-status → userStatus), на любой глубине.
 // Запуск: плагин Vite, `yarn i18n:generate`, проверка — `yarn i18n:check`.
 // TODO: на Node >= 22.13 рассмотреть @intlify/unplugin-vue-i18n (предкомпиляция сообщений).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Первая локаль — базовая: эталон типа, с которым остальные сверяются через `satisfies`.
 const LOCALES = ['ru', 'en'];
 const SEARCH_DIRS = ['src/modules', 'src/components'];
-const OUTPUT_DIR = 'src/i18n/generated';
-const CORE_DIR = 'src/i18n';
+const DICTIONARY_DIR_NAME = 'i18n';
+const OUTPUT_DIR = `src/${DICTIONARY_DIR_NAME}/generated`;
+const CORE_DIR = `src/${DICTIONARY_DIR_NAME}`;
 
 const RESERVED = ['common', 'timezones', '$vuetify'];
 
 const FOLDER_NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
-// user-status → userStatus
-const toCamelCase = (name) =>
-  name.replace(/-([a-z0-9])/g, (_, ch) => ch.toUpperCase());
+// Путь относительно корня проекта: любая папка словаря или файл локали в `src/`, кроме ядра.
+const DICTIONARY_REL_PATH = new RegExp(
+  `^src/(?!${DICTIONARY_DIR_NAME}(?:/|$)).+/${DICTIONARY_DIR_NAME}(/(${LOCALES.join('|')})\\.ts)?$`,
+);
 
-// Windows-пути → posix
+// Преобразует kebab-case в camelCase (user-status → userStatus, pt-BR → ptBR).
+const toCamelCase = (name) =>
+  name.replace(/-([a-zA-Z0-9])/g, (_, ch) => ch.toUpperCase());
+
 const toPosix = (p) => p.split(path.sep).join('/');
 
-// Словари вне <SEARCH_DIRS>/<папка>/i18n в реестр не попадут — ищем их, чтобы не пропустить молча.
-const findMisplacedDictionaries = (root) => {
+// Ищет все вложенные папки словарей внутри каталога поиска (например, src/modules).
+// Прямую `<searchDir>/<словарная папка>` (isRoot) пропускает — у неё нет родительской папки для неймспейса.
+const findDictionaryDirs = (absDir, acc = [], isRoot = true) => {
+  for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
+    const absChild = path.join(absDir, entry.name);
+    if (entry.name === DICTIONARY_DIR_NAME) {
+      // Учитываем и symlink/junction на папку (включая битый, чтобы ниже выдать ошибку про отсутствие файлов).
+      const targetStat = entry.isSymbolicLink()
+        ? fs.statSync(absChild, { throwIfNoEntry: false })
+        : null;
+      const isDir =
+        entry.isDirectory() ||
+        (entry.isSymbolicLink() && (!targetStat || targetStat.isDirectory()));
+      if (isDir && !isRoot) acc.push(absChild);
+      continue;
+    }
+    if (!entry.isDirectory()) continue;
+    findDictionaryDirs(absChild, acc, false);
+  }
+  return acc;
+};
+
+// Ищет папки словарей с файлами локалей в `src/`, которые не попали в `visitedDirs`
+// (например, в `src/layouts/...` или внутри другой папки словаря), чтобы они не потерялись молча.
+const findMisplacedDictionaries = (root, visitedDirs) => {
   const srcDir = path.join(root, 'src');
   if (!fs.existsSync(srcDir)) return [];
 
-  const registered = new RegExp(`^(${SEARCH_DIRS.join('|')})/[^/]+/i18n$`);
   const misplaced = [];
   const walk = (absDir) => {
     for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
       const absChild = path.join(absDir, entry.name);
       const relDir = toPosix(path.relative(root, absChild));
-      if (relDir === CORE_DIR) continue;
-      walk(absChild);
+      // В обычные папки заходим рекурсивно (включая папку словаря, чтобы поймать вложенность), в симлинки — нет.
+      const isSymI18nDir =
+        entry.name === DICTIONARY_DIR_NAME &&
+        entry.isSymbolicLink() &&
+        Boolean(
+          fs.statSync(absChild, { throwIfNoEntry: false })?.isDirectory(),
+        );
+      if (!entry.isDirectory() && !isSymI18nDir) continue;
+      if (entry.isDirectory()) walk(absChild);
       if (
-        entry.name === 'i18n' &&
-        !registered.test(relDir) &&
-        LOCALES.some((locale) =>
-          fs.existsSync(path.join(absChild, `${locale}.ts`)),
-        )
-      ) {
+        entry.name !== DICTIONARY_DIR_NAME ||
+        relDir === CORE_DIR ||
+        visitedDirs.has(relDir)
+      )
+        continue;
+
+      const isNestedInI18n = relDir
+        .split('/')
+        .slice(0, -1)
+        .includes(DICTIONARY_DIR_NAME);
+      const isEmpty = fs.readdirSync(absChild).length === 0;
+      const hasLocaleFile = LOCALES.some((locale) =>
+        fs.existsSync(path.join(absChild, `${locale}.ts`)),
+      );
+      if (isNestedInI18n || isEmpty || hasLocaleFile) {
         misplaced.push(relDir);
       }
     }
@@ -50,49 +94,58 @@ const findMisplacedDictionaries = (root) => {
   return misplaced.sort();
 };
 
-// Находит словари и проверяет их; при ошибках бросает исключение.
+// Собирает словари модулей и компонентов, проверяет структуру папок и уникальность неймспейсов.
 export const collectDictionaries = (root) => {
   const errors = [];
   const found = [];
+  const visitedDirs = new Set();
 
   for (const searchDir of SEARCH_DIRS) {
     const absDir = path.join(root, searchDir);
     if (!fs.existsSync(absDir)) continue;
 
-    for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const i18nDir = path.join(absDir, entry.name, 'i18n');
-      if (!fs.existsSync(i18nDir)) continue;
+    for (const absI18n of findDictionaryDirs(absDir)) {
+      const relDir = toPosix(path.relative(root, absI18n));
+      visitedDirs.add(relDir);
 
-      const relDir = toPosix(path.join(searchDir, entry.name, 'i18n'));
-      if (!FOLDER_NAME.test(entry.name)) {
-        errors.push(
-          `${relDir}: folder name "${entry.name}" must be kebab-case (a-z, 0-9, "-")`,
-        );
-        continue;
-      }
       const missing = LOCALES.filter(
-        (locale) => !fs.existsSync(path.join(i18nDir, `${locale}.ts`)),
+        (locale) => !fs.existsSync(path.join(absI18n, `${locale}.ts`)),
       );
+      const nsFolder = path.basename(path.dirname(absI18n));
+      const badFolder = !FOLDER_NAME.test(nsFolder);
+
       if (missing.length) {
         errors.push(
           `${relDir}: missing dictionary ${missing.map((l) => `${l}.ts`).join(', ')}`,
         );
-        continue;
       }
+      if (badFolder) {
+        errors.push(
+          `${relDir}: folder name "${nsFolder}" must be kebab-case (a-z, 0-9, "-")`,
+        );
+      }
+      if (missing.length || badFolder) continue;
 
       found.push({
-        namespace: toCamelCase(entry.name),
-
-        importBase: `@/${toPosix(path.join(path.relative('src', searchDir), entry.name, 'i18n'))}`,
+        namespace: toCamelCase(nsFolder),
+        importBase: `@/${relDir.replace(/^src\//, '')}`,
         relDir,
       });
     }
   }
 
-  for (const relDir of findMisplacedDictionaries(root)) {
+  const allowedPattern = SEARCH_DIRS.map(
+    (d) => `${d}/<folder>/**/${DICTIONARY_DIR_NAME}`,
+  ).join(' or ');
+  for (const relDir of findMisplacedDictionaries(root, visitedDirs)) {
+    const nestedInI18n = relDir
+      .split('/')
+      .slice(0, -1)
+      .includes(DICTIONARY_DIR_NAME);
     errors.push(
-      `${relDir}: dictionary outside ${SEARCH_DIRS.map((d) => `${d}/<folder>/i18n`).join(' or ')} would not be registered`,
+      nestedInI18n
+        ? `${relDir}: dictionary nested inside another ${DICTIONARY_DIR_NAME}/ folder would not be registered`
+        : `${relDir}: dictionary outside ${allowedPattern} would not be registered`,
     );
   }
 
@@ -116,19 +169,24 @@ export const collectDictionaries = (root) => {
     throw new Error(`[i18n] dictionary errors:\n  - ${errors.join('\n  - ')}`);
   }
 
-  // Без localeCompare: порядок не должен зависеть от системной локали (CI и машины разработчиков).
-  return found.sort((a, b) => (a.namespace < b.namespace ? -1 : 1));
+  // Кодовая сортировка вместо localeCompare, чтобы порядок не зависел от локали ОС.
+  return found.sort((a, b) =>
+    a.namespace < b.namespace ? -1 : a.namespace > b.namespace ? 1 : 0,
+  );
 };
 
-// userStatus + en → userStatusEn
-const identifier = (namespace, locale) =>
-  `${namespace}${locale[0].toUpperCase()}${locale.slice(1)}`;
+// Формирует имя импорта словаря: ('userStatus', 'en') → 'userStatusEn'.
+const identifier = (namespace, locale) => {
+  const camelLocale = toCamelCase(locale);
+  return `${namespace}${camelLocale[0].toUpperCase()}${camelLocale.slice(1)}`;
+};
 
-// Текст файлов по языкам: { путь: содержимое }. Неосновные языки сверяются с ru через satisfies.
+// Генерирует текст файлов реестра `{ [путь]: код }`.
+// Базовая локаль (первая в LOCALES) задаёт эталон типа, остальные сверяются с ней в обе стороны через `satisfies`.
 export const renderDictionaries = (dictionaries) => {
   const [baseLocale] = LOCALES;
 
-  return Object.fromEntries(
+  const files = Object.fromEntries(
     LOCALES.map((l) => {
       const imports = dictionaries.map(
         (d) =>
@@ -161,9 +219,21 @@ export const renderDictionaries = (dictionaries) => {
       return [`${OUTPUT_DIR}/${l}.ts`, content];
     }),
   );
+
+  // Список локалей — тоже артефакт: index.ts берёт отсюда SUPPORTED_LOCALES,
+  files[`${OUTPUT_DIR}/locales.ts`] = [
+    '// АВТОГЕНЕРАЦИЯ — не править вручную.',
+    '// Источник: scripts/i18n-dictionaries.mjs (запускается плагином Vite и `yarn i18n:generate`).',
+    `export const SUPPORTED_LOCALES = [${LOCALES.map((l) => `'${l}'`).join(
+      ', ',
+    )}] as const;`,
+    '',
+  ].join('\n');
+  return files;
 };
 
-// Пишет только изменившиеся файлы (меньше HMR); с check — только сравнивает.
+// Синхронизирует файлы реестра на диске: перезаписывает изменившиеся и удаляет лишние.
+// При `check: true` файлы не меняет. `upToDate` показывает, был ли реестр актуален до вызова.
 export const generateI18nDictionaries = (root, { check = false } = {}) => {
   const files = renderDictionaries(collectDictionaries(root));
   const stale = Object.entries(files).filter(([file, content]) => {
@@ -175,20 +245,31 @@ export const generateI18nDictionaries = (root, { check = false } = {}) => {
     );
   });
 
-  if (stale.length && !check) {
-    fs.mkdirSync(path.join(root, OUTPUT_DIR), { recursive: true });
-    for (const [file, content] of stale)
-      fs.writeFileSync(path.join(root, file), content);
+  const outDir = path.join(root, OUTPUT_DIR);
+  const expectedNames = new Set(
+    Object.keys(files).map((file) => path.basename(file)),
+  );
+  const extraFiles = fs.existsSync(outDir)
+    ? fs
+        .readdirSync(outDir)
+        .filter((name) => !expectedNames.has(name))
+        .map((name) => path.join(outDir, name))
+    : [];
+
+  const upToDate = stale.length === 0 && extraFiles.length === 0;
+  if (!upToDate && !check) {
+    if (stale.length) {
+      fs.mkdirSync(outDir, { recursive: true });
+      for (const [file, content] of stale)
+        fs.writeFileSync(path.join(root, file), content);
+    }
+    for (const extraFile of extraFiles)
+      fs.rmSync(extraFile, { recursive: true, force: true });
   }
-  return { changed: stale.length > 0 && !check, upToDate: stale.length === 0 };
+  return { changed: !upToDate && !check, upToDate };
 };
 
-// Файлы словарей и папки i18n где угодно в src: неправильно размещённые тоже, чтобы сразу показать ошибку.
-const DICTIONARY_PATH = new RegExp(
-  `/src/.+/i18n(/(${LOCALES.join('|')})\\.ts)?$`,
-);
-
-// Плагин Vite: генерация при старте и при добавлении/удалении словаря в dev.
+// Плагин Vite: генерирует реестр при старте и обновляет его при добавлении/удалении словарей в dev.
 export const i18nDictionariesPlugin = () => {
   let root = process.cwd();
   return {
@@ -201,7 +282,8 @@ export const i18nDictionariesPlugin = () => {
     },
     configureServer(server) {
       const regenerate = (file) => {
-        if (!DICTIONARY_PATH.test(toPosix(file))) return;
+        const relFile = toPosix(path.relative(root, path.resolve(root, file)));
+        if (!DICTIONARY_REL_PATH.test(relFile)) return;
         try {
           if (generateI18nDictionaries(root).changed) {
             server.config.logger.info('[i18n] dictionary registry updated', {
@@ -214,7 +296,7 @@ export const i18nDictionariesPlugin = () => {
       };
       server.watcher.on('add', regenerate);
       server.watcher.on('unlink', regenerate);
-      // Пустая i18n/ после удаления файлов по одному уходит только с unlinkDir.
+      // Если файлы из i18n/ удаляли по одному, реестр обновится при удалении самой пустой папки.
       server.watcher.on('unlinkDir', regenerate);
     },
   };
@@ -222,20 +304,28 @@ export const i18nDictionariesPlugin = () => {
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
-// realpath с обеих сторон: через symlink/junction пути иначе не совпадут и CLI молча не запустится.
+// Проверяет, запущен ли файл напрямую через `node`, а не импортирован (`realpath` учитывает симлинки).
 const isCli = () => {
   if (!process.argv[1]) return false;
   try {
     return fs.realpathSync(process.argv[1]) === fs.realpathSync(SCRIPT_PATH);
   } catch {
-    // argv[1] — не файл (node -e, REPL): значит, модуль импортирован, а не запущен.
+    // Например, при `node -e` аргумент argv[1] не является путём к файлу.
     return false;
   }
 };
 
-// CLI: node scripts/i18n-dictionaries.mjs [--check]; корень — от расположения скрипта, не от cwd.
+// CLI: `node scripts/i18n-dictionaries.mjs [--check]` (корень проекта берётся от папки скрипта).
 if (isCli()) {
-  const check = process.argv.includes('--check');
+  const args = process.argv.slice(2);
+  const unknown = args.filter((arg) => arg !== '--check');
+  if (unknown.length) {
+    console.error(
+      `[i18n] unknown option: ${unknown.join(', ')} (expected: [--check])`,
+    );
+    process.exit(1);
+  }
+  const check = args.includes('--check');
   const root = path.resolve(path.dirname(SCRIPT_PATH), '..');
   try {
     const { upToDate } = generateI18nDictionaries(root, { check });

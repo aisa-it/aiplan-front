@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -10,19 +11,23 @@ import {
 } from './issue-message.helpers';
 
 import type { ActivityRenderer } from '../../activity-renderer.types';
+import type { MessageKey } from '@/i18n';
 
 const renderIssueRelation = (
-  addedTarget: 'родительскую задачу' | 'подзадачу' | 'связанную задачу',
-  removedTarget: string = addedTarget,
+  addedTarget: MessageKey,
+  removedTarget: MessageKey = addedTarget,
 ): ActivityRenderer => {
   return (activity, context) => {
     const isAdded = Boolean(activity.new_value);
+    const actionKey = isAdded
+      ? 'issueActivity.fieldActions.added'
+      : 'issueActivity.fieldActions.removed';
 
     return createActivityMessage(
       createTextPart(
-        `${isAdded ? 'добавил(-а)' : 'убрал(-а)'} ${
-          isAdded ? addedTarget : removedTarget
-        } ${getChangedValue(activity)}`,
+        `${i18n.global.t(actionKey)} ${i18n.global.t(
+          isAdded ? addedTarget : removedTarget,
+        )} ${getChangedValue(activity)}`,
       ),
       ...createIssueContextParts(activity, context, 'for'),
     );
@@ -30,35 +35,48 @@ const renderIssueRelation = (
 };
 
 export const renderIssueParent = renderIssueRelation(
-  'родительскую задачу',
-  'родителя',
+  'issueActivity.relationTargets.parentAdded',
+  'issueActivity.relationTargets.parentRemoved',
 );
 
-export const renderIssueSubIssue = renderIssueRelation('подзадачу');
+export const renderIssueSubIssue = renderIssueRelation(
+  'issueActivity.relationTargets.subIssue',
+);
 
-export const renderIssueLinked = renderIssueRelation('связанную задачу');
+export const renderIssueLinked = renderIssueRelation(
+  'issueActivity.relationTargets.linked',
+);
 
 export const renderIssueBlocking: ActivityRenderer = (activity, context) => {
   const isAdded = Boolean(activity.new_value);
 
   return createActivityMessage(
     createTextPart(
-      `${isAdded ? 'установил(-а)' : 'убрал(-а)'}, что задача `,
+      i18n.global.t(
+        isAdded
+          ? 'issueActivity.blockingSet'
+          : 'issueActivity.blockingUnset',
+      ),
     ),
     createIssueLink(activity),
-    createTextPart(` блокирует ${getChangedValue(activity)}`),
+    createTextPart(
+      i18n.global.t('issueActivity.blocksSuffix', {
+        value: getChangedValue(activity),
+      }),
+    ),
     ...createIssueWorkspaceContextParts(activity, context),
   );
 };
 
 export const renderIssueBlocks: ActivityRenderer = (activity, context) => {
   const isAdded = Boolean(activity.new_value);
+  const messageKey = isAdded
+    ? 'issueActivity.blockerSet'
+    : 'issueActivity.blockerRemoved';
 
   return createActivityMessage(
     createTextPart(
-      `${isAdded ? 'установил(-а)' : 'убрал(-а)'} блокировщик ${getChangedValue(
-        activity,
-      )}`,
+      i18n.global.t(messageKey, { value: getChangedValue(activity) }),
     ),
     ...createIssueContextParts(activity, context, 'for'),
   );

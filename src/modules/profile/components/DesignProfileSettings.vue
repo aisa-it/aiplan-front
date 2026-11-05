@@ -114,7 +114,6 @@ const props = defineProps<{
 const { t } = useI18n();
 const { ny } = storeToRefs(useUtilsStore());
 
-// Глобальный locale типизирован как AppLocale; запись — только через setLocale (сохраняет выбор).
 const currentLocale = computed<AppLocale>({
   get: () => i18n.global.locale.value,
   set: (locale) => void setLocale(locale),

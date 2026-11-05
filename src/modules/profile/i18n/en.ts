@@ -61,6 +61,14 @@ export default {
     label: 'Enter password',
     submit: 'Change password',
   },
+  toast: {
+    imageUploaded: 'Profile image uploaded',
+    imageRemoved: 'Profile image removed',
+    passwordUpdated: 'Password updated',
+    tokenCopied: 'Authorization token copied',
+    tokenReset: 'Authorization token updated',
+    emailChangeSent: 'Confirmation link sent to the specified email',
+  },
   notifications: {
     heading: 'Notification settings',
     description:

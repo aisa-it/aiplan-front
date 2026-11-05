@@ -4,14 +4,14 @@
       v-model="email"
       name="email"
       autocomplete="username"
-      label="Введите email"
+      :label="t('auth.login.emailLabel')"
       data-id="email"
       :rules="[
-        (val) => (val && val.length > 0) || 'Необходимо ввести email',
-        (val) => isEmail(val) || 'Введите корректный email',
+        (val) => (val && val.length > 0) || t('auth.login.emailRequired'),
+        (val) => isEmail(val) || t('common.validation.email'),
       ]"
       :error-messages="
-        loginError ? 'Некорректные данные авторизации' : undefined
+        loginError ? t('auth.login.invalidCredentials') : undefined
       "
       :error="loginError"
       @update:model-value="loginError = false"
@@ -23,13 +23,15 @@
       v-model="password"
       name="password"
       autocomplete="current-password"
-      label="Введите пароль"
-      placeholder="Введите пароль"
+      :label="t('auth.login.passwordLabel')"
+      :placeholder="t('auth.login.passwordPlaceholder')"
       data-id="password"
       :type="isPassword ? 'password' : 'text'"
-      :rules="[(val) => (val && val.length > 0) || 'Необходимо ввести пароль']"
+      :rules="[
+        (val) => (val && val.length > 0) || t('auth.login.passwordRequired'),
+      ]"
       :error-messages="
-        loginError ? 'Некорректные данные авторизации' : undefined
+        loginError ? t('auth.login.invalidCredentials') : undefined
       "
       :error="loginError"
       :disabled="loading"
@@ -50,7 +52,7 @@
       @click="restorePassword()"
       size="large"
     >
-      Забыли свой пароль?
+      {{ t('auth.login.forgotPassword') }}
     </v-btn>
 
     <v-btn
@@ -60,13 +62,13 @@
       :loading="loading"
       :disabled="
         (isEnabledCaptcha && captchaPayload === '') ||
-        (isRegister && isEmail(email) !== true)
+        (isRegister && !isEmail(email))
       "
       size="large"
       block
       active-color="rgba(255, 255, 255, 0.6)"
     >
-      {{ isRegister ? 'Зарегистрироваться' : 'Войти' }}
+      {{ isRegister ? t('auth.login.signUp') : t('auth.login.signIn') }}
     </v-btn>
 
     <PasswordRestoreDialog v-model="showRestoreDialog" />
@@ -75,6 +77,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 import { isEmail } from '@/utils/validation';
 import CaptchaWidget from './CaptchaWidget.vue';
 import PasswordRestoreDialog from './PasswordRestoreDialog.vue';
@@ -83,6 +86,8 @@ import { useUtilsStore } from '@/stores/utils-store';
 import router from '@/router';
 
 const props = defineProps<{ isRegister?: boolean }>();
+
+const { t } = useI18n();
 
 const email = ref('');
 const password = ref('');

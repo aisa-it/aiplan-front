@@ -61,6 +61,14 @@ export default {
     label: 'Введите пароль',
     submit: 'Сменить пароль',
   },
+  toast: {
+    imageUploaded: 'Изображение профиля загружено',
+    imageRemoved: 'Изображение профиля удалено',
+    passwordUpdated: 'Пароль обновлён',
+    tokenCopied: 'Токен для авторизации скопирован',
+    tokenReset: 'Токен для авторизации обновлён',
+    emailChangeSent: 'Ссылка для подтверждения отправлена на указанный email',
+  },
   notifications: {
     heading: 'Настройки уведомлений',
     description:

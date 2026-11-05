@@ -66,7 +66,7 @@ export function useProfileValidationRules() {
 
   const emailRules = [
     (value: string) =>
-      isEmail(value) === true || i18n.global.t('profile.validation.email'),
+      isEmail(value) || i18n.global.t('profile.validation.email'),
   ];
   const telegramIdRules = [telegramId, maxLength(15)];
   const passwordRules = [required('password')];

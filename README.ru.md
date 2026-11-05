@@ -47,10 +47,11 @@ VITE_MINIO_URL="https://domain.com"
 2. Всё остальное — в словарь модуля или виджета, к которому текст относится:
    - модуль: `src/modules/<имя>/i18n/{ru,en}.ts`
    - общий виджет: `src/components/<имя>/i18n/{ru,en}.ts`
+   - вложенный словарь: любая папка `i18n/` **внутри** папки модуля или виджета на любой глубине — получает **собственный** неймспейс по имени родительской папки. Пример: `src/modules/activities/renders/entities/issue-activity/i18n/{ru,en}.ts` → неймспейс `issueActivity`, ключи `issueActivity.*`. Используйте, когда у подфичи достаточно собственных текстов (как у рендереров активностей по сущностям).
 
 **Новый словарь**
 
-Имя папки — в kebab-case, из него получается неймспейс в camelCase (`user-status` → `userStatus`).
+Имя папки, в которой лежит `i18n/`, — в kebab-case, из него получается неймспейс в camelCase (`user-status` → `userStatus`, `issue-activity` → `issueActivity`).
 
 ```ts
 // src/components/user-status/i18n/ru.ts
@@ -84,8 +85,8 @@ t('profile.notifications.deadline.hours', n); // '{n} час | {n} часа | {n
 **Проверки**
 
 - `vue-tsc` падает, если в `en` не хватает ключа или есть ключ, которого нет в `ru`.
-- Генерация падает с понятной ошибкой, если имя папки не в kebab-case, нет `ru.ts`/`en.ts`, неймспейс повторяется или зарезервирован, или словарь лежит не в папках выше.
+- Генерация падает с понятной ошибкой, если имя папки не в kebab-case, нет `ru.ts`/`en.ts`, неймспейс повторяется или зарезервирован, или словарь лежит вне `src/{modules,components}/<папка>/**/i18n`.
 - `yarn i18n:check` падает, если закоммиченный реестр устарел.
 - После правки `scripts/i18n-dictionaries.mjs` запустите `yarn test`.
 
-**Новый язык**: добавить его в `SUPPORTED_LOCALES`, `LOCALE_OPTIONS` и `localeLoaders` в `src/i18n/index.ts`, в `LOCALES` в `scripts/i18n-dictionaries.mjs`, создать `src/i18n/locales/<язык>.ts` и `<язык>.ts` в каждой папке словаря.
+**Новый язык**: добавить его в `LOCALES` в `scripts/i18n-dictionaries.mjs` — `SUPPORTED_LOCALES`/`AppLocale` перегенерируются в `src/i18n/generated/locales.ts` — и в `LOCALE_OPTIONS` и `localeLoaders` в `src/i18n/index.ts` (оба напомнит vue-tsc). Создать `src/i18n/locales/<язык>.ts` и `<язык>.ts` в каждой папке словаря.
