@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -16,9 +17,10 @@ export const renderIssueAttachment: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      `${getIssueFieldActionText(activity.verb)} вложение "${getChangedValue(
-        activity,
-      )}"`,
+      `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
+        'issueActivity.attachment',
+        { value: getChangedValue(activity) },
+      )}`,
     ),
     ...createIssueContextParts(
       activity,

@@ -1,7 +1,7 @@
 <template>
   <UploadAvatarDialog
     v-model="model"
-    title="Загрузить аватар (не более 20 Мб)"
+    :title="t('profile.avatar.dialogTitle')"
     is-profile
     :loading="loading"
     @upload="handleUploadUserAvatar"
@@ -10,13 +10,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 
 import { ProfileService } from '../../api/profile.service';
 import UploadAvatarDialog from './UploadAvatarDialog.vue';
 import { toast } from '@/modules/toast';
-import { SUCCESS_CREATE_IMG_PROFILE } from '@/constants/notifications';
+import { i18n } from '@/i18n';
+
+const { t } = useI18n();
 
 const model = defineModel<boolean>({ required: true });
 const userStore = useUserStore();
@@ -34,7 +37,7 @@ const handleUploadUserAvatar = async (image: File) => {
     userStore.replaceUser(updatedUser);
     emit('uploaded', image);
     model.value = false;
-    toast.success(SUCCESS_CREATE_IMG_PROFILE);
+    toast.success(i18n.global.t('profile.toast.imageUploaded'));
   } catch {
   } finally {
     loading.value = false;

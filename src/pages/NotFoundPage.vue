@@ -9,7 +9,7 @@
     <div
       class="text-[32px] font-normal leading-[37.92px] tracking-[-0.62px] text-center mt-4"
     >
-      Страница не найдена
+      {{ t('common.screens.notFound.title') }}
     </div>
 
     <div class="flex justify-center mt-12">
@@ -20,7 +20,7 @@
         flat
         @click="goHome"
       >
-        Вернуться на главную
+        {{ t('common.screens.notFound.home') }}
       </v-btn>
     </div>
   </div>
@@ -28,7 +28,9 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 
 //TODO: доделать логику страницы 404

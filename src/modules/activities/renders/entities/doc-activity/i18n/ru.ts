@@ -1,0 +1,42 @@
+export default {
+  fields: { description: 'описание', title: 'название' },
+  changedField: 'изменил(-а) {target} документа',
+  roles: { read: 'чтения', edit: 'редактирования' },
+  roleChanged: 'изменил(-а) роль {target} документа',
+  fromToQuoted: 'с "{previous}" на "{next}"',
+  sortedChildDocs: 'отсортировал(-а) список дочерних документов в документе',
+  docTarget: 'документ',
+  rootFolderFrom: 'корневой папки',
+  rootFolderTo: 'корневую папку',
+  moveFrom: ' из ',
+  moveTo: ' в ',
+  childDoc: 'дочерний документ',
+  removedFromDoc: ' из документа',
+  addedToDoc: ' в документ',
+  attachmentAdded: 'добавил(-а) вложение {value} в документ',
+  attachmentDeleted: 'удалил(-а) вложение {value} в документе',
+  commentAdded: 'добавил(-а) комментарий в документе',
+  commentUpdated: 'изменил(-а) комментарий в документе',
+  commentDeleted: 'удалил(-а) комментарий в документе',
+  members: {
+    watcher: {
+      added: 'добавил(-а) наблюдателя',
+      removed: 'убрал(-а) наблюдателя',
+    },
+  },
+  permissions: {
+    view: {
+      added: 'добавил(-а) право на просмотр пользователю',
+      removed: 'удалил(-а) право на просмотр пользователю',
+    },
+    edit: {
+      added: 'добавил(-а) право на редактирование пользователю',
+      removed: 'удалил(-а) право на редактирование пользователю',
+    },
+  },
+  memberRelations: {
+    watcher: { added: ' в документ', removed: ' из документа' },
+    reader: { added: ' в документе', removed: ' в документе' },
+    editor: { added: ' в документе', removed: ' в документе' },
+  },
+};

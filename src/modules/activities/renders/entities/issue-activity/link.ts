@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -11,16 +12,21 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderIssueLink: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`${getIssueFieldActionText(activity.verb)} ссылку`),
+    createTextPart(
+      `${getIssueFieldActionText(activity.verb)} ${i18n.global.t(
+        'issueActivity.linkTarget',
+      )}`,
+    ),
     ...createIssueContextParts(activity, context, 'in'),
   );
 
 export const renderIssueLinkUrl: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) ссылку с "${activity.old_value ?? ''}" на "${
-        activity.new_value ?? ''
-      }"`,
+      i18n.global.t('issueActivity.linkUrlChanged', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
     ...createIssueContextParts(activity, context, 'in'),
   );
@@ -31,9 +37,10 @@ export const renderIssueLinkTitle: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) название ссылки с "${
-        activity.old_value ?? ''
-      }" на "${activity.new_value ?? ''}"`,
+      i18n.global.t('issueActivity.linkTitleChanged', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
     ...createIssueContextParts(activity, context, 'in'),
   );

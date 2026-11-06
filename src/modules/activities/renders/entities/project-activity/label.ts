@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -9,22 +10,31 @@ import type { ActivityRenderer } from '../../activity-renderer.types';
 
 export const renderLabelCreated: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`добавил(-а) тег "${activity.new_value ?? ''}"`),
+    createTextPart(
+      i18n.global.t('projectActivity.labelAdded', {
+        value: activity.new_value ?? '',
+      }),
+    ),
     ...createProjectContextParts(activity, context, 'into'),
   );
 
 export const renderLabelDeleted: ActivityRenderer = (activity, context) =>
   createActivityMessage(
-    createTextPart(`убрал(-а) тег "${activity.old_value ?? ''}"`),
+    createTextPart(
+      i18n.global.t('projectActivity.labelRemoved', {
+        value: activity.old_value ?? '',
+      }),
+    ),
     ...createProjectContextParts(activity, context, 'from'),
   );
 
 export const renderLabelName: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) название тега с "${activity.old_value ?? ''}" на "${
-        activity.new_value ?? ''
-      }"`,
+      i18n.global.t('projectActivity.labelNameChanged', {
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
     ...createProjectContextParts(activity, context, 'at'),
   );
@@ -32,9 +42,11 @@ export const renderLabelName: ActivityRenderer = (activity, context) =>
 export const renderLabelColor: ActivityRenderer = (activity, context) =>
   createActivityMessage(
     createTextPart(
-      `изменил(-а) цвет тега "${
-        getDetailString(activity.new_entity_detail, 'name') ?? ''
-      }" с "${activity.old_value ?? ''}" на "${activity.new_value ?? ''}"`,
+      i18n.global.t('projectActivity.labelColorChanged', {
+        name: getDetailString(activity.new_entity_detail, 'name') ?? '',
+        previous: activity.old_value ?? '',
+        next: activity.new_value ?? '',
+      }),
     ),
     ...createProjectContextParts(activity, context, 'at'),
   );

@@ -66,7 +66,9 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
         try {
           const text = await res.data.text();
           res.data = JSON.parse(text);
-        } catch {}
+        } catch (_) {
+          // TODO: добавить обработку ошибок, не оставлять пустой catch
+        }
       }
       const status = res?.status;
       const data = getApiErrorData(res?.data);
@@ -125,6 +127,5 @@ export function applyInterceptors(instance: AxiosInstance): AxiosInstance {
     },
   );
 
-  // Если нужны request interceptor'ы, можно добавить их аналогичным образом
   return instance;
 }

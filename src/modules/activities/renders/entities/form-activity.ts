@@ -1,20 +1,23 @@
+import { i18n } from '@/i18n';
+import { getActivityVerbText } from '../activity-value.helpers';
+
 import type {
   ActivityMessage,
   ActivityMessagePart,
 } from '../activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { getActivityVerbText } from '../activity-value.helpers';
+import type { MessageKey } from '@/i18n';
 
-const FORM_ACTION_BY_FIELD: Readonly<Record<string, string>> = {
-  title: 'название в форме',
-  description: 'описание в форме',
-  end_date: 'дату окончания в форме',
-  fields: 'поля в форме',
+const FORM_ACTION_BY_FIELD: Readonly<Record<string, MessageKey>> = {
+  title: 'activities.form.actions.title',
+  description: 'activities.form.actions.description',
+  end_date: 'activities.form.actions.end_date',
+  fields: 'activities.form.actions.fields',
 };
 
-const DEFAULT_FORM_ACTION = 'форму';
-
-const getFormActionTarget = (field?: string | null) => {
+const getFormActionTarget = (
+  field?: string | null,
+): MessageKey | undefined => {
   if (
     !field ||
     !Object.prototype.hasOwnProperty.call(FORM_ACTION_BY_FIELD, field)
@@ -42,8 +45,10 @@ export const renderFormActivity = (
 ): ActivityMessage => {
   const target = getFormActionTarget(activity.field);
   const action = target
-    ? `${getActivityVerbText(activity.verb)} ${target}`
-    : `обновил(-а) ${DEFAULT_FORM_ACTION}`;
+    ? `${getActivityVerbText(activity.verb)} ${i18n.global.t(target)}`
+    : `${i18n.global.t('activities.form.fallbackVerb')} ${i18n.global.t(
+        'activities.form.defaultTarget',
+      )}`;
 
   return {
     parts: [

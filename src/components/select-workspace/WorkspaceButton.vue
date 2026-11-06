@@ -17,7 +17,9 @@
       <v-list min-width="280" rounded="lg" class="py-1">
         <v-list-item>
           <template #title>
-            <span class="text-sm text-text">Пространства</span>
+            <span class="text-sm text-text">{{
+              t('selectWorkspace.workspaces')
+            }}</span>
           </template>
           <template #append>
             <v-btn
@@ -99,13 +101,17 @@
                   <v-list-item>
                     <div class="flex items-center gap-2 text-text">
                       <BellIcon :width="16" :height="16" color="#474a52" />
-                      <span class="text-xs font-normal">Уведомления</span>
+                      <span class="text-xs font-normal">{{
+                        t('selectWorkspace.notifications')
+                      }}</span>
                     </div>
                   </v-list-item>
                   <v-list-item>
                     <div class="flex items-center gap-2 text-text">
                       <SettingsIcon :width="16" :height="16" color="#474a52" />
-                      <span class="text-xs font-normal">Настройки</span>
+                      <span class="text-xs font-normal">{{
+                        t('selectWorkspace.settings')
+                      }}</span>
                     </div>
                   </v-list-item>
                 </v-list>
@@ -132,10 +138,13 @@ import WorkspaceAvatar from './components/WorkspaceAvatar.vue';
 import type { DtoWorkspaceWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { onMounted, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useWorkspacesStore } from '@/stores/workspaces-store';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import NewWorkspaceDialog from '@/components/dialogs/NewWorkspaceDialog.vue';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();

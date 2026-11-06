@@ -62,13 +62,15 @@
         "
         class="flex flex-col items-center justify-center w-full pt-10 gap-3.5"
       >
-        <span class="text-lg text-gray-600">Нет доступных проектов</span>
+        <span class="text-lg text-gray-600">{{
+          t('common.screens.workspace.noProjects')
+        }}</span>
         <v-btn
           size="large"
           prepend-icon="mdi-plus"
           @click="isProjectCreateOpen = true"
         >
-          Создать проект
+          {{ t('common.screens.workspace.createProject') }}
         </v-btn>
 
         <NewProjectDialog v-model="isProjectCreateOpen" />
@@ -88,6 +90,7 @@
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTitle } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
 
 import newYearTree from '@/assets/newYearTree.svg';
@@ -102,6 +105,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useUtilsStore } from '@/stores/utils-store';
 import { getFirstSymbol, getUrlFile } from '@/utils/helpers';
 
+const { t } = useI18n();
 const route = useRoute();
 const { mobile } = useDisplay();
 
@@ -134,8 +138,8 @@ const defineDescription = computed(() => workspaceInfo.value?.description);
 useTitle(
   computed(() =>
     workspaceInfo.value?.name
-      ? `Пространство ${workspaceInfo.value.name}`
-      : 'Загрузка...',
+      ? t('common.screens.workspace.title', { name: workspaceInfo.value.name })
+      : t('common.states.loading'),
   ),
 );
 </script>

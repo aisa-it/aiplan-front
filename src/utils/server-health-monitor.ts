@@ -1,9 +1,8 @@
+import { i18n } from '@/i18n';
 import { toast } from '@/modules/toast/toast';
 
 const HEALTH_CHECK_INTERVAL = 5000;
 const HEALTH_CHECK_TIMEOUT = 5000;
-const SERVER_UNAVAILABLE_MESSAGE =
-  'Сервер сейчас недоступен. Сохраните свои данные!';
 
 let monitoring = false;
 let unavailableToastShown = false;
@@ -59,9 +58,10 @@ const runHealthCheck = async () => {
   }
 
   if (!unavailableToastShown) {
-    dismissUnavailableToast = toast.error(SERVER_UNAVAILABLE_MESSAGE, {
-      timeout: 0,
-    });
+    dismissUnavailableToast = toast.error(
+      i18n.global.t('common.system.serverUnavailable'),
+      { timeout: 0 },
+    );
     unavailableToastShown = true;
   }
 
