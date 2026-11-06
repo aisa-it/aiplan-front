@@ -1,17 +1,23 @@
 <template>
   <v-menu
-    open-on-hover
+    v-model="model"
+    :open-on-click="!target"
+    :open-on-hover="!target"
+    :close-delay="150"
+    :target="target"
     transition="scale-transition"
     :location="isShowPopupMiddle ? 'bottom center' : undefined"
     :origin="isShowPopupMiddle ? 'top center' : undefined"
   >
-    <template #activator="{ props: activatorProps }">
+    <template v-if="!target" #activator="{ props: activatorProps }">
       <div v-bind="activatorProps" class="inline-flex cursor-pointer">
         <UserAvatar :user="user" v-bind="displayUserAvatarOptions" />
       </div>
     </template>
     <div
       class="shadow-menu flex max-h-60 max-w-85 items-center justify-center gap-4 p-2.5 rounded-2xl"
+      @pointerenter="emit('contentPointerenter')"
+      @pointerleave="emit('contentPointerleave')"
     >
       <UserAvatar :user="user" :rounded="false" />
 
@@ -45,6 +51,7 @@ const props = withDefaults(
     {
       user: DtoUser;
       isShowPopupMiddle?: boolean;
+      target?: HTMLElement;
     } & InfoDisplayOptions &
       AvatarDisplayOptions
   >(),
@@ -54,6 +61,13 @@ const props = withDefaults(
     ...INFO_DEFAULT,
   },
 );
+
+const model = defineModel<boolean>({ default: false });
+
+const emit = defineEmits<{
+  contentPointerenter: [];
+  contentPointerleave: [];
+}>();
 
 const displayUserInfoOptions = computed(() =>
   pickDefinedKeys(props, INFO_DEFAULT),
