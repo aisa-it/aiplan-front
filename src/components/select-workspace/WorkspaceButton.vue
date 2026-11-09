@@ -47,7 +47,7 @@
           </template>
 
           <v-list-item-title
-            class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
+            class="abbreviated-text min-w-0 max-w-[150px] text-sm"
             :class="
               workspace.slug === route.params.workspace
                 ? 'text-primary'
