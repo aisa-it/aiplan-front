@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessagePart,
@@ -26,10 +27,7 @@ const getProjectReference = (
 
   return linkPart(
     project?.name ?? '',
-    getProjectHref(
-      workspace?.slug ?? project?.workspace,
-      project?.identifier,
-    ),
+    getProjectHref(workspace?.slug ?? project?.workspace, project?.identifier),
   );
 };
 
@@ -66,43 +64,100 @@ export const renderProjectNotification = (
 
   switch (data.field) {
     case 'emoji':
-      return [textPart('изменил(-а) эмодзи проекта '), project];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectEmoji',
+          ),
+        ),
+        project,
+      ];
     case 'logo':
-      return [textPart('изменил(-а) лого проекта '), project];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectLogo',
+          ),
+        ),
+        project,
+      ];
     case 'name':
       return [
-        textPart(`изменил(-а) имя проекта с "${oldValue}" на `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectNameFromTo',
+            { p0: oldValue },
+          ),
+        ),
         hasProject ? project : textPart(`"${newValue}"`),
       ];
     case 'description':
       return [
-        textPart('изменил(-а) описание проекта '),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectDescription',
+          ),
+        ),
         project,
         textPart(
-          ` с "${oldValue || 'Без описания'}" на "${newValue || 'Без описания'}"`,
+          i18n.global.t('workspaceNotifications.renders.project.fromTo5', {
+            p0:
+              oldValue ||
+              i18n.global.t(
+                'workspaceNotifications.renders.project.noDescription3',
+              ),
+            p1:
+              newValue ||
+              i18n.global.t(
+                'workspaceNotifications.renders.project.noDescription4',
+              ),
+          }),
         ),
       ];
     case 'identifier':
       return [
-        textPart('изменил(-а) идентификатор проекта '),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectIdentifier',
+          ),
+        ),
         project,
-        textPart(` с "${oldValue}" на "${newValue}"`),
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.project.fromTo4', {
+            p0: oldValue,
+            p1: newValue,
+          }),
+        ),
       ];
     case 'network':
     case 'public':
       return [
-        textPart('изменил(-а) приватность проекта '),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectVisibility',
+          ),
+        ),
         project,
         textPart(
-          ` с "${getNetworkText(data.old_value)}" на "${getNetworkText(data.new_value)}"`,
+          i18n.global.t('workspaceNotifications.renders.project.fromTo3', {
+            p0: getNetworkText(data.old_value),
+            p1: getNetworkText(data.new_value),
+          }),
         ),
       ];
     case 'project_lead':
       return [
-        textPart('изменил(-а) лидера проекта '),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheProjectLead',
+          ),
+        ),
         project,
         textPart(
-          ` с ${getFullName(data.old_entity_detail)} на ${getFullName(data.new_entity_detail)}`,
+          i18n.global.t('workspaceNotifications.renders.project.fromTo2', {
+            p0: getFullName(data.old_entity_detail),
+            p1: getFullName(data.new_entity_detail),
+          }),
         ),
       ];
     case 'default_assignees':
@@ -110,13 +165,36 @@ export const renderProjectNotification = (
       const isAdded = Boolean(data.new_value);
       const role =
         data.field === 'default_assignees'
-          ? 'исполнителя по умолчанию'
-          : 'наблюдателя по умолчанию';
+          ? i18n.global.t(
+              'workspaceNotifications.renders.project.defaultAssignee',
+            )
+          : i18n.global.t(
+              'workspaceNotifications.renders.project.defaultWatcher',
+            );
       const user = isAdded ? data.new_entity_detail : data.old_entity_detail;
       return [
-        textPart(`${isAdded ? 'добавил(-а)' : 'убрал(-а)'} `),
+        textPart(
+          `${isAdded ? i18n.global.t('workspaceNotifications.renders.project.added') : i18n.global.t('workspaceNotifications.renders.project.removed')} `,
+        ),
         ...(hasProject
-          ? [textPart(`${isAdded ? 'в' : 'из'} проект `), project, textPart(' ')]
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.project',
+                  {
+                    p0: isAdded
+                      ? i18n.global.t(
+                          'workspaceNotifications.renders.project.to',
+                        )
+                      : i18n.global.t(
+                          'workspaceNotifications.renders.project.from',
+                        ),
+                  },
+                ),
+              ),
+              project,
+              textPart(' '),
+            ]
           : []),
         textPart(`${role} ${getFullName(user)}`),
       ];
@@ -126,16 +204,45 @@ export const renderProjectNotification = (
       if (data.verb === 'added') {
         return [
           textPart(`${action} `),
-          ...(hasProject ? [textPart('в проект '), project] : []),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.toProject5',
+                  ),
+                ),
+                project,
+              ]
+            : []),
           textPart(
-            ` пользователя ${getFullName(data.new_entity_detail)} с ролью "${getRoleText(data.new_value)}"`,
+            i18n.global.t(
+              'workspaceNotifications.renders.project.userWithRole',
+              {
+                p0: getFullName(data.new_entity_detail),
+                p1: getRoleText(data.new_value),
+              },
+            ),
           ),
         ];
       }
       if (data.verb === 'removed' || data.verb === 'deleted') {
         return [
-          textPart(`${action} пользователя ${getFullName(data.old_entity_detail)} `),
-          ...(hasProject ? [textPart('из проекта '), project] : []),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.user', {
+              p0: action,
+              p1: getFullName(data.old_entity_detail),
+            }),
+          ),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.fromProject2',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       break;
@@ -143,24 +250,70 @@ export const renderProjectNotification = (
     case 'role':
       return [
         textPart(
-          `${getVerbText(data.verb)} роль пользователя ${getFullName(data.new_entity_detail)} `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.theRoleOfUser',
+            {
+              p0: getVerbText(data.verb),
+              p1: getFullName(data.new_entity_detail),
+            },
+          ),
         ),
-        ...(hasProject ? [textPart('проекта '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.ofProject',
+                ),
+              ),
+              project,
+            ]
+          : []),
         textPart(
-          ` с "${getRoleText(data.old_value)}" на "${getRoleText(data.new_value)}"`,
+          i18n.global.t('workspaceNotifications.renders.project.fromTo', {
+            p0: getRoleText(data.old_value),
+            p1: getRoleText(data.new_value),
+          }),
         ),
       ];
     case 'status':
       if (data.verb === 'created') {
         return [
-          textPart(`${getVerbText(data.verb)} статус "${newValue}" `),
-          ...(hasProject ? [textPart('в проект '), project] : []),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.theStatus2', {
+              p0: getVerbText(data.verb),
+              p1: newValue,
+            }),
+          ),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.toProject4',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       if (data.verb === 'deleted') {
         return [
-          textPart(`${getVerbText(data.verb)} статус "${oldValue}" `),
-          ...(hasProject ? [textPart('в проекте '), project] : []),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.theStatus', {
+              p0: getVerbText(data.verb),
+              p1: oldValue,
+            }),
+          ),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.inProject12',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       break;
@@ -168,55 +321,162 @@ export const renderProjectNotification = (
       if (data.verb === 'updated') {
         return [
           textPart(
-            `поменял(-а) статус по умолчанию с "${oldValue}" на "${newValue}" `,
+            i18n.global.t(
+              'workspaceNotifications.renders.project.changedTheDefaultStatusFromTo2',
+              { p0: oldValue, p1: newValue },
+            ),
           ),
-          ...(hasProject ? [textPart('в проекте '), project] : []),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.inProject11',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       break;
     case 'status_default':
       return [
         textPart(
-          `изменил(-а) статус по умолчанию с "${oldValue}" на "${newValue}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheDefaultStatusFromTo',
+            { p0: oldValue, p1: newValue },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject10',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'status_name':
       return [
         textPart(
-          `изменил(-а) имя статуса с "${oldValue}" на "${newValue}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheStatusNameFromTo',
+            { p0: oldValue, p1: newValue },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject9',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'status_description':
       return [
         textPart(
-          `изменил(-а) описание статуса "${getEntity(data.new_entity_detail).name || data.new_identifier || ''}" с "${oldValue || 'Без описания'}" на "${newValue || 'Без описания'}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheDescriptionOfStatusFromTo',
+            {
+              p0:
+                getEntity(data.new_entity_detail).name ||
+                data.new_identifier ||
+                '',
+              p1:
+                oldValue ||
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.noDescription',
+                ),
+              p2:
+                newValue ||
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.noDescription2',
+                ),
+            },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject8',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'status_group':
       return [
         textPart(
-          `изменил(-а) группу статуса "${getEntity(data.new_entity_detail).name || data.new_identifier || ''}" с "${getStateText(data.old_value)}" на "${getStateText(data.new_value)}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheStatusGroupOfFromTo',
+            {
+              p0:
+                getEntity(data.new_entity_detail).name ||
+                data.new_identifier ||
+                '',
+              p1: getStateText(data.old_value),
+              p2: getStateText(data.new_value),
+            },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject7',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'status_color':
       return [
         textPart(
-          `изменил(-а) цвет статуса с "${oldValue.toUpperCase()}" на "${newValue.toUpperCase()}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheStatusColorFromTo',
+            { p0: oldValue.toUpperCase(), p1: newValue.toUpperCase() },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject6',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'label':
       if (data.verb === 'created' || data.verb === 'deleted') {
         const value = data.verb === 'created' ? newValue : oldValue;
         return [
-          textPart(`${getVerbText(data.verb)} тег "${value}" `),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.theLabel', {
+              p0: getVerbText(data.verb),
+              p1: value,
+            }),
+          ),
           ...(hasProject
             ? [
-                textPart(data.verb === 'created' ? 'в проект ' : 'в проекте '),
+                textPart(
+                  data.verb === 'created'
+                    ? i18n.global.t(
+                        'workspaceNotifications.renders.project.toProject3',
+                      )
+                    : i18n.global.t(
+                        'workspaceNotifications.renders.project.inProject5',
+                      ),
+                ),
                 project,
               ]
             : []),
@@ -226,57 +486,131 @@ export const renderProjectNotification = (
     case 'label_name':
       return [
         textPart(
-          `изменил(-а) имя тега с "${oldValue}" на "${newValue}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheLabelNameFromTo',
+            { p0: oldValue, p1: newValue },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject4',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'label_color':
       return [
         textPart(
-          `изменил(-а) цвет тега с "${oldValue.toUpperCase()}" на "${newValue.toUpperCase()}" `,
+          i18n.global.t(
+            'workspaceNotifications.renders.project.changedTheLabelColorFromTo',
+            { p0: oldValue.toUpperCase(), p1: newValue.toUpperCase() },
+          ),
         ),
-        ...(hasProject ? [textPart('в проекте '), project] : []),
+        ...(hasProject
+          ? [
+              textPart(
+                i18n.global.t(
+                  'workspaceNotifications.renders.project.inProject3',
+                ),
+              ),
+              project,
+            ]
+          : []),
       ];
     case 'issue':
       if (data.verb === 'created') {
         const entity = getEntity(data.new_entity_detail);
         const priority = entity.priority
-          ? `с приоритетом "${capitalizeFirstLetter(getPriorityText(entity.priority))}"`
-          : 'без приоритета';
+          ? i18n.global.t(
+              'workspaceNotifications.renders.project.withPriority',
+              { p0: capitalizeFirstLetter(getPriorityText(entity.priority)) },
+            )
+          : i18n.global.t(
+              'workspaceNotifications.renders.project.withoutPriority',
+            );
         return [
-          textPart('создал(-а) задачу '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.project.createdTheIssue',
+            ),
+          ),
           getChangedIssueReference(notification, data),
           textPart(` ${priority} `),
-          ...(hasProject ? [textPart('в проекте '), project] : []),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.inProject2',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       if (data.verb === 'deleted') {
         return [
-          textPart(`удалил(-а) задачу "${oldValue}" `),
-          ...(hasProject ? [textPart('в проекте '), project] : []),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.project.deletedTheIssue',
+              { p0: oldValue },
+            ),
+          ),
+          ...(hasProject
+            ? [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.project.inProject',
+                  ),
+                ),
+                project,
+              ]
+            : []),
         ];
       }
       if (data.verb === 'copied') {
         return [
-          textPart('скопировал(-а) задачу '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.project.copiedTheIssue',
+            ),
+          ),
           getChangedIssueReference(notification, data),
-          textPart(' в проект '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.toProject2'),
+          ),
           project,
         ];
       }
       if (data.verb === 'removed') {
         return [
-          textPart('убрал(-а) задачу '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.project.removedTheIssue',
+            ),
+          ),
           getChangedIssueReference(notification, data, true),
-          textPart(' из проекта '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.fromProject'),
+          ),
           project,
         ];
       }
       if (data.verb === 'added') {
         return [
-          textPart('добавил(-а) задачу '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.project.addedTheIssue',
+            ),
+          ),
           getChangedIssueReference(notification, data),
-          textPart(' в проект '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.project.toProject'),
+          ),
           project,
         ];
       }
@@ -286,7 +620,20 @@ export const renderProjectNotification = (
         const value = data.verb === 'created' ? newValue : oldValue;
         return [
           textPart(
-            `${data.verb === 'created' ? 'создал(-а)' : 'удалил(-а)'} шаблон задачи "${value}" в проекте `,
+            i18n.global.t(
+              'workspaceNotifications.renders.project.theIssueTemplateInProject',
+              {
+                p0:
+                  data.verb === 'created'
+                    ? i18n.global.t(
+                        'workspaceNotifications.renders.project.created',
+                      )
+                    : i18n.global.t(
+                        'workspaceNotifications.renders.project.deleted',
+                      ),
+                p1: value,
+              },
+            ),
           ),
           project,
         ];
@@ -296,7 +643,10 @@ export const renderProjectNotification = (
       if (data.verb === 'updated') {
         return [
           textPart(
-            `изменил(-а) название шаблона задачи с "${oldValue}" на "${newValue}" в проекте `,
+            i18n.global.t(
+              'workspaceNotifications.renders.project.changedTheIssueTemplateTitleFromToInProject',
+              { p0: oldValue, p1: newValue },
+            ),
           ),
           project,
         ];
@@ -306,7 +656,10 @@ export const renderProjectNotification = (
       if (data.verb === 'updated') {
         return [
           textPart(
-            `изменил(-а) шаблон задачи "${getEntity(data.new_entity_detail).name ?? ''}" в проекте `,
+            i18n.global.t(
+              'workspaceNotifications.renders.project.changedTheIssueTemplateInProject',
+              { p0: getEntity(data.new_entity_detail).name ?? '' },
+            ),
           ),
           project,
         ];
@@ -315,10 +668,22 @@ export const renderProjectNotification = (
   }
 
   if (data.verb === 'created') {
-    return [textPart('добавил(-а) проект '), project];
+    return [
+      textPart(
+        i18n.global.t('workspaceNotifications.renders.project.addedTheProject'),
+      ),
+      project,
+    ];
   }
   if (data.verb === 'deleted') {
-    return [textPart(`удалил(-а) проект "${oldValue}`)];
+    return [
+      textPart(
+        i18n.global.t(
+          'workspaceNotifications.renders.project.deletedTheProject',
+          { p0: oldValue },
+        ),
+      ),
+    ];
   }
 
   return [];

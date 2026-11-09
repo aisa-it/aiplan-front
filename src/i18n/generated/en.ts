@@ -16,6 +16,7 @@ import sprintActivityEn from '@/modules/activities/renders/entities/sprint-activ
 import toastEn from '@/modules/toast/i18n/en';
 import userStatusEn from '@/components/user-status/i18n/en';
 import workspaceActivityEn from '@/modules/activities/renders/entities/workspace-activity/i18n/en';
+import workspaceNotificationsEn from '@/modules/workspace-notifications/i18n/en';
 
 const messages = {
   activities: activitiesEn,
@@ -33,6 +34,7 @@ const messages = {
   toast: toastEn,
   userStatus: userStatusEn,
   workspaceActivity: workspaceActivityEn,
+  workspaceNotifications: workspaceNotificationsEn,
 } satisfies typeof ru;
 
 true satisfies (typeof ru extends typeof messages ? true : false);

@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessagePart,
@@ -41,9 +42,7 @@ export const linkPart = (
   href?: string,
 ): NotificationMessagePart => {
   const safeHref = getSafeHref(href);
-  return safeHref
-    ? { href: safeHref, text, type: 'link' }
-    : textPart(text);
+  return safeHref ? { href: safeHref, text, type: 'link' } : textPart(text);
 };
 
 export const getStringValue = (value: unknown) => {
@@ -63,13 +62,11 @@ export const getEntity = (value: unknown): NotificationEntity =>
 export const getEntityByChange = (data: NotificationActivityData) =>
   getEntity(data.new_value ? data.new_entity_detail : data.old_entity_detail);
 
-export const getFullName = (
-  value: unknown,
-  entityType?: string,
-): string => {
+export const getFullName = (value: unknown, entityType?: string): string => {
   const user = getEntity(value);
 
-  if (!Object.keys(user).length) return 'Пользователь удалён';
+  if (!Object.keys(user).length)
+    return i18n.global.t('workspaceNotifications.renders.helpers.userDeleted');
 
   if (!user.is_onboarded && entityType === 'form') {
     return `${user.last_name ?? ''} ${user.first_name ?? ''}`.trim();
@@ -89,7 +86,9 @@ export const getUserDisplayName = (value: unknown) => {
   const name = [
     user.last_name,
     user.first_name,
-    user.is_active === false ? '(Заблокирован)' : '',
+    user.is_active === false
+      ? i18n.global.t('workspaceNotifications.renders.helpers.blocked')
+      : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -100,15 +99,15 @@ export const getUserDisplayName = (value: unknown) => {
 export const getVerbText = (verb?: string) => {
   switch (verb) {
     case 'created':
-      return 'добавил(-a)';
+      return i18n.global.t('workspaceNotifications.renders.helpers.added2');
     case 'deleted':
     case 'remove':
     case 'removed':
-      return 'убрал(-а)';
+      return i18n.global.t('workspaceNotifications.renders.helpers.removed');
     case 'added':
-      return 'добавил(-а)';
+      return i18n.global.t('workspaceNotifications.renders.helpers.added');
     case 'updated':
-      return 'обновил(-a)';
+      return i18n.global.t('workspaceNotifications.renders.helpers.updated');
     default:
       return verb ?? '';
   }
@@ -117,17 +116,19 @@ export const getVerbText = (verb?: string) => {
 export const getPriorityText = (priority: unknown) => {
   switch (getStringValue(priority)) {
     case 'urgent':
-      return 'критический';
+      return i18n.global.t('workspaceNotifications.renders.helpers.critical');
     case 'high':
-      return 'высокий';
+      return i18n.global.t('workspaceNotifications.renders.helpers.high');
     case 'medium':
-      return 'средний';
+      return i18n.global.t('workspaceNotifications.renders.helpers.medium');
     case 'low':
-      return 'низкий';
+      return i18n.global.t('workspaceNotifications.renders.helpers.low');
     case 'null':
     case 'none':
     case '<nil>':
-      return 'не выбран';
+      return i18n.global.t(
+        'workspaceNotifications.renders.helpers.notSelected',
+      );
     default:
       return getStringValue(priority);
   }
@@ -136,26 +137,34 @@ export const getPriorityText = (priority: unknown) => {
 export const getRoleText = (role: unknown) => {
   switch (Number(role)) {
     case 10:
-      return 'Участник';
+      return i18n.global.t('workspaceNotifications.renders.helpers.member');
     case 15:
-      return 'Администратор';
+      return i18n.global.t(
+        'workspaceNotifications.renders.helpers.administrator',
+      );
     case 20:
-      return 'Никто';
+      return i18n.global.t('workspaceNotifications.renders.helpers.nobody');
     default:
-      return 'Гость';
+      return i18n.global.t('workspaceNotifications.renders.helpers.guest');
   }
 };
 
 export const getNetworkText = (value: unknown) => {
   if (typeof value === 'string') {
     try {
-      return JSON.parse(value) ? 'Публичный' : 'Скрытый';
+      return JSON.parse(value)
+        ? i18n.global.t('workspaceNotifications.renders.helpers.public3')
+        : i18n.global.t('workspaceNotifications.renders.helpers.hidden3');
     } catch {
-      return value ? 'Публичный' : 'Скрытый';
+      return value
+        ? i18n.global.t('workspaceNotifications.renders.helpers.public2')
+        : i18n.global.t('workspaceNotifications.renders.helpers.hidden2');
     }
   }
 
-  return value ? 'Публичный' : 'Скрытый';
+  return value
+    ? i18n.global.t('workspaceNotifications.renders.helpers.public')
+    : i18n.global.t('workspaceNotifications.renders.helpers.hidden');
 };
 
 export const getStateText = (value: unknown) => {
@@ -163,15 +172,15 @@ export const getStateText = (value: unknown) => {
 
   switch (state.toLowerCase()) {
     case 'backlog':
-      return 'Открыто';
+      return i18n.global.t('workspaceNotifications.renders.helpers.open');
     case 'unstarted':
-      return 'Не начато';
+      return i18n.global.t('workspaceNotifications.renders.helpers.notStarted');
     case 'started':
-      return 'Начато';
+      return i18n.global.t('workspaceNotifications.renders.helpers.started');
     case 'completed':
-      return 'Завершено';
+      return i18n.global.t('workspaceNotifications.renders.helpers.completed');
     case 'cancelled':
-      return 'Отменено';
+      return i18n.global.t('workspaceNotifications.renders.helpers.cancelled');
     default:
       return state;
   }

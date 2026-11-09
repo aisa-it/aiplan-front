@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessagePart,
@@ -24,31 +25,74 @@ export const renderWorkspaceNotification = (
 
   switch (data.field) {
     case 'logo':
-      return [textPart(`${action} иконку`)];
+      return [
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.workspace.theIcon', {
+            p0: action,
+          }),
+        ),
+      ];
     case 'name':
-      return [textPart(`${action} название пространства`)];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.workspace.theWorkspaceName',
+            { p0: action },
+          ),
+        ),
+      ];
     case 'owner':
       return [
         textPart(
-          `${action} лидера пространства с ${getFullName(data.old_entity_detail)} на ${getFullName(data.new_entity_detail)}`,
+          i18n.global.t(
+            'workspaceNotifications.renders.workspace.theWorkspaceLeadFromTo',
+            {
+              p0: action,
+              p1: getFullName(data.old_entity_detail),
+              p2: getFullName(data.new_entity_detail),
+            },
+          ),
         ),
       ];
     case 'description':
-      return [textPart(`${action} описание пространства`)];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.workspace.theWorkspaceDescription',
+            { p0: action },
+          ),
+        ),
+      ];
     case 'integration_token':
-      return [textPart(`${action} токен`)];
+      return [
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.workspace.theToken', {
+            p0: action,
+          }),
+        ),
+      ];
     case 'member':
       if (data.verb === 'added') {
         return [
           textPart(
-            `${action} нового пользователя ${getFullName(data.new_entity_detail)} с ролью "${getRoleText(data.new_value)}"`,
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.newUserWithRole',
+              {
+                p0: action,
+                p1: getFullName(data.new_entity_detail),
+                p2: getRoleText(data.new_value),
+              },
+            ),
           ),
         ];
       }
       if (data.verb === 'removed') {
         return [
           textPart(
-            `${action} пользователя ${getFullName(data.old_entity_detail)}`,
+            i18n.global.t('workspaceNotifications.renders.workspace.user', {
+              p0: action,
+              p1: getFullName(data.old_entity_detail),
+            }),
           ),
         ];
       }
@@ -56,12 +100,24 @@ export const renderWorkspaceNotification = (
     case 'role':
       return [
         textPart(
-          `изменил(-а) роль пользователя ${getFullName(data.new_entity_detail)} с "${getRoleText(data.old_value)}" на "${getRoleText(data.new_value)}"`,
+          i18n.global.t(
+            'workspaceNotifications.renders.workspace.changedTheRoleOfUserFromTo',
+            {
+              p0: getFullName(data.new_entity_detail),
+              p1: getRoleText(data.old_value),
+              p2: getRoleText(data.new_value),
+            },
+          ),
         ),
       ];
     case 'integration':
       return [
-        textPart(`${action} интеграцию "${newValue || oldValue}"`),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.workspace.theIntegration',
+            { p0: action, p1: newValue || oldValue },
+          ),
+        ),
       ];
     case 'project':
       if (data.verb === 'created') {
@@ -73,10 +129,24 @@ export const renderWorkspaceNotification = (
         const projectText = project.name
           ? `${newValue} "${project.name}"`
           : newValue;
-        return [textPart('создал(-а) проект '), linkPart(projectText, href)];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.createdTheProject',
+            ),
+          ),
+          linkPart(projectText, href),
+        ];
       }
       if (data.verb === 'deleted') {
-        return [textPart(`удалил(-а) проект ${oldValue}`)];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.deletedTheProject',
+              { p0: oldValue },
+            ),
+          ),
+        ];
       }
       break;
     case 'doc': {
@@ -88,15 +158,44 @@ export const renderWorkspaceNotification = (
       const value = data.verb === 'removed' ? oldValue : newValue;
       const doc = linkPart(`"${value}"`, entity.url);
 
-      if (data.verb === 'created') return [textPart('создал(-а) документ '), doc];
+      if (data.verb === 'created')
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.createdTheDocument',
+            ),
+          ),
+          doc,
+        ];
       if (data.verb === 'deleted') {
-        return [textPart(`удалил(-а) документ ${oldValue}`)];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.deletedTheDocument',
+              { p0: oldValue },
+            ),
+          ),
+        ];
       }
       if (data.verb === 'added') {
-        return [textPart('добавил(-а) дочерний документ '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.addedTheChildDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       if (data.verb === 'removed') {
-        return [textPart('убрал(-а) дочерний документ '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.removedTheChildDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     }
@@ -104,12 +203,23 @@ export const renderWorkspaceNotification = (
       if (data.verb === 'created') {
         const sprint = getEntity(data.new_entity_detail);
         return [
-          textPart('создал(-а) спринт '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.createdTheSprint',
+            ),
+          ),
           linkPart(newValue, sprint.url),
         ];
       }
       if (data.verb === 'deleted') {
-        return [textPart(`удалил(-а) спринт "${oldValue}"`)];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.workspace.deletedTheSprint',
+              { p0: oldValue },
+            ),
+          ),
+        ];
       }
       break;
   }

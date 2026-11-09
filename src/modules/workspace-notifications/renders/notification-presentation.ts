@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessageData,
@@ -29,8 +30,12 @@ const getTitle = (notification: WorkspaceNotification) => {
     return typeof data.title === 'string' ? data.title : '';
   }
 
-  if (data.entity_type === 'doc' || data.field === 'doc') return 'АИДок';
-  if (data.entity_type === 'workspace') return 'Настройки пространства';
+  if (data.entity_type === 'doc' || data.field === 'doc')
+    return i18n.global.t('workspaceNotifications.renders.presentation.aidoc');
+  if (data.entity_type === 'workspace')
+    return i18n.global.t(
+      'workspaceNotifications.renders.presentation.workspaceSettings',
+    );
   if (data.entity_type === 'sprint') {
     return notification.detail.sprint?.name ?? '';
   }
@@ -44,13 +49,23 @@ const renderActivityNotification = (
   const data = notification.data as NotificationActivityData;
 
   if (data.field === 'completed_at') {
-    return [textPart('завершил(-а) задачу')];
+    return [
+      textPart(
+        i18n.global.t(
+          'workspaceNotifications.renders.presentation.completedTheIssue',
+        ),
+      ),
+    ];
   }
 
   if (data.field === 'form_answers') {
     const form = notification.detail.form;
     return [
-      textPart('прошёл(-ла) форму '),
+      textPart(
+        i18n.global.t(
+          'workspaceNotifications.renders.presentation.completedTheForm',
+        ),
+      ),
       linkPart(`"${form?.title ?? ''}"`, form?.url),
     ];
   }
@@ -90,8 +105,7 @@ export const getNotificationPresentation = (
       ? getFullName(notification.detail.user, data.entity_type)
       : undefined,
     parts:
-      notification.type === 'message' ||
-      notification.type === 'service_message'
+      notification.type === 'message' || notification.type === 'service_message'
         ? renderMessageNotification(notification)
         : isActivity
           ? renderActivityNotification(notification)

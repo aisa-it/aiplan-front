@@ -2,10 +2,12 @@
   <v-dialog v-model="isOpen" persistent max-width="576">
     <v-card class="flex flex-col gap-3 p-6 text-default" rounded="xl">
       <div class="flex items-center justify-between">
-        <h6 class="m-0 text-lg font-semibold">Создать уведомление</h6>
+        <h6 class="m-0 text-lg font-semibold">
+          {{ t('workspaceNotifications.create') }}
+        </h6>
 
         <v-btn
-          aria-label="Закрыть"
+          :aria-label="t('common.actions.close')"
           icon="mdi-close"
           variant="text"
           color="text"
@@ -13,14 +15,18 @@
         />
       </div>
 
-      <v-text-field v-model="form.title" density="compact" label="Тема" />
+      <v-text-field
+        v-model="form.title"
+        density="compact"
+        :label="t('workspaceNotifications.dialog.subject')"
+      />
 
       <v-textarea
         v-model="form.msg"
         auto-grow
         counter
         density="compact"
-        label="Описание"
+        :label="t('common.fields.description')"
         maxlength="100"
         rows="3"
       />
@@ -32,7 +38,7 @@
           class="shrink-0"
           density="compact"
           hide-details
-          label="Отправить всем"
+          :label="t('workspaceNotifications.dialog.sendToAll')"
           :model-value="isAllSelected"
           @update:model-value="setAllSelected"
         />
@@ -47,9 +53,9 @@
           density="compact"
           hide-details
           item-value="id"
-          label="Получатели"
+          :label="t('workspaceNotifications.dialog.recipients')"
           multiple
-          no-data-text="Пользователь не найден"
+          :no-data-text="t('workspaceNotifications.dialog.userNotFound')"
           :disabled="isAllSelected"
           :item-title="getMemberName"
           :items="availableMembers"
@@ -72,7 +78,7 @@
           class="shrink-0"
           density="compact"
           hide-details
-          label="Отправить сейчас"
+          :label="t('workspaceNotifications.dialog.sendNow')"
           :model-value="isSendNow"
           @update:model-value="setSendNow"
         />
@@ -83,12 +89,14 @@
           class="w-84 max-sm:w-full"
           density="compact"
           hide-details="auto"
-          label="Дата и время отправки"
+          :label="t('workspaceNotifications.dialog.sendAt')"
           type="datetime-local"
           :disabled="isSendNow"
           :error="isDateInvalid"
           :error-messages="
-            isDateInvalid ? 'Время не может быть меньше текущего' : undefined
+            isDateInvalid
+              ? t('workspaceNotifications.dialog.pastDate')
+              : undefined
           "
           :min="minimumDateTime"
           @update:model-value="isDateInvalid = false"
@@ -103,7 +111,7 @@
           variant="outlined"
           @click="isOpen = false"
         >
-          Отменить
+          {{ t('common.actions.cancel') }}
         </v-btn>
         <v-btn
           class="normal-case max-sm:w-full"
@@ -113,7 +121,7 @@
           :loading="isSending"
           @click="onSend"
         >
-          Отправить
+          {{ t('workspaceNotifications.dialog.send') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -123,6 +131,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import dayjs from 'dayjs';
+import { useI18n } from 'vue-i18n';
 
 import UserAvatarMenu from '@/components/user-avatar-menu/UserAvatarMenu.vue';
 import { useCreateWorkspaceNotification } from '../composables';
@@ -135,6 +144,8 @@ import type {
 const props = defineProps<{
   workspaceSlug: string;
 }>();
+
+const { t } = useI18n();
 
 const isOpen = defineModel<boolean>({ required: true });
 
@@ -161,7 +172,7 @@ const getMemberName = (membership: DtoWorkspaceMemberLight) => {
   return (
     [member?.last_name, member?.first_name].filter(Boolean).join(' ') ||
     member?.email ||
-    'Не Выбран'
+    t('workspaceNotifications.dialog.notSelected')
   );
 };
 
