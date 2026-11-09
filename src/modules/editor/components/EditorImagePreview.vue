@@ -11,7 +11,7 @@
       <ZoomImg
         class="editor-image-preview__zoom"
         :src="src"
-        :alt="alt || 'Изображение'"
+        :alt="alt || t('editor.image')"
         zoom-type="drag"
         trigger="click"
         :zoom-scale="3"
@@ -28,8 +28,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { ref } from 'vue';
 import { ZoomImg } from 'vue3-zoomer';
+
+const { t } = useI18n();
 
 withDefaults(defineProps<{
   alt?: string;

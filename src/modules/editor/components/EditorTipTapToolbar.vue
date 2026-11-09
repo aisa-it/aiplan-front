@@ -1,7 +1,7 @@
 <template>
-  <div ref="toolbarRoot" class="editor-toolbar" :class="{ 'editor-toolbar--mobile': mobile }" role="toolbar" aria-label="Форматирование" @wheel.prevent="handleWheel">
+  <div ref="toolbarRoot" class="editor-toolbar" :class="{ 'editor-toolbar--mobile': mobile }" role="toolbar" :aria-label="t('editor.formatting')" @wheel.prevent="handleWheel">
     <button v-if="canScrollBack" type="button" class="editor-toolbar__scroll-arrow editor-toolbar__scroll-arrow--back"
-      :aria-label="mobile ? 'Прокрутить инструменты вверх' : 'Прокрутить инструменты влево'"
+      :aria-label="mobile ? t('editor.scrollToolsUp') : t('editor.scrollToolsLeft')"
       @mousedown.prevent @click="scrollToolbar(-1)">
       <v-icon :icon="mobile ? 'mdi-chevron-up' : 'mdi-chevron-left'" size="22" />
     </button>
@@ -12,39 +12,39 @@
         <EditorToolbarSelect
           :model-value="currentHeading"
           :items="EDITOR_HEADING_OPTIONS"
-          tooltip="Заголовок"
+          :tooltip="t('editor.heading')"
           heading-preview
           width="128px"
           @update:model-value="setHeading"
         />
         <EditorToolbarButton
           icon="headings"
-          tooltip="Вставить оглавление"
+          :tooltip="t('editor.insertTableOfContents')"
           :disabled="isActive('codeBlock')"
           @click="editor.chain().focus().insertDocumentOutline().run()"
         />
       </template>
       <EditorToolbarButton
         icon="bold"
-        tooltip="Жирный"
+        :tooltip="t('editor.bold')"
         :active="isActive('bold')"
         @click="editor.chain().focus().toggleBold().run()"
       />
       <EditorToolbarButton
         icon="italic"
-        tooltip="Курсив"
+        :tooltip="t('editor.italic')"
         :active="isActive('italic')"
         @click="editor.chain().focus().toggleItalic().run()"
       />
       <EditorToolbarButton
         icon="underline"
-        tooltip="Подчеркнутый"
+        :tooltip="t('editor.underline')"
         :active="isActive('underline')"
         @click="editor.chain().focus().toggleUnderline().run()"
       />
       <EditorToolbarButton
         icon="strike"
-        tooltip="Зачеркнутый"
+        :tooltip="t('editor.strikethrough')"
         :active="isActive('strike')"
         @click="editor.chain().focus().toggleStrike().run()"
       />
@@ -53,13 +53,13 @@
     <div class="editor-toolbar__group">
       <EditorToolbarButton
         icon="quote"
-        tooltip="Цитата"
+        :tooltip="t('editor.quote')"
         :active="isActive('blockquote')"
         @click="editor.chain().focus().toggleBlockquote().run()"
       />
       <EditorToolbarButton
         icon="code"
-        tooltip="Код"
+        :tooltip="t('editor.code')"
         :active="isActive('codeBlock')"
         @click="editor.chain().focus().toggleCodeBlock().run()"
       />
@@ -68,31 +68,31 @@
     <div class="editor-toolbar__group">
       <EditorToolbarButton
         icon="list-dot"
-        tooltip="Маркированный список"
+        :tooltip="t('editor.bulletedList')"
         :active="isActive('bulletList')"
         @click="editor.chain().focus().toggleBulletList().run()"
       />
       <EditorToolbarButton
         icon="list-numbered"
-        tooltip="Нумерованный список"
+        :tooltip="t('editor.numberedList')"
         :active="isActive('orderedList')"
         @click="editor.chain().focus().toggleOrderedList().run()"
       />
       <EditorToolbarButton
         icon="check"
-        tooltip="Список задач"
+        :tooltip="t('editor.taskList')"
         :active="isActive('taskList')"
         @click="editor.chain().focus().toggleTaskList().run()"
       />
       <EditorToolbarButton
         icon="superscript"
-        tooltip="Надстрочный индекс"
+        :tooltip="t('editor.superscript')"
         :active="isActive('superscript')"
         @click="toggleScript('superscript')"
       />
       <EditorToolbarButton
         icon="subscript"
-        tooltip="Подстрочный индекс"
+        :tooltip="t('editor.subscript')"
         :active="isActive('subscript')"
         @click="toggleScript('subscript')"
       />
@@ -102,7 +102,7 @@
       />
       <EditorToolbarButton
         icon="calendar"
-        tooltip="Дата"
+        :tooltip="t('editor.date')"
         :active="isActive('date-node')"
         :disabled="isActive('codeBlock')"
         @click="editor.chain().focus().insertDate().run()"
@@ -116,13 +116,13 @@
     <div class="editor-toolbar__group">
       <EditorToolbarButton
         icon="indent-left"
-        tooltip="Уменьшить отступ"
+        :tooltip="t('editor.decreaseIndent')"
         :disabled="isIndentDisabled"
         @click="decreaseIndent"
       />
       <EditorToolbarButton
         icon="indent-right"
-        tooltip="Увеличить отступ"
+        :tooltip="t('editor.increaseIndent')"
         :disabled="isIndentDisabled"
         @click="increaseIndent"
       />
@@ -133,19 +133,19 @@
         :model-value="currentFontSize"
         :items="EDITOR_FONT_SIZES"
         :disabled="isTextStyleDisabled"
-        tooltip="Размер шрифта"
+        :tooltip="t('editor.fontSize')"
         width="72px"
         @update:model-value="setFontSize"
       />
       <EditorToolbarButton
         icon="font-increase"
-        tooltip="Увеличить размер шрифта"
+        :tooltip="t('editor.increaseFontSize')"
         :disabled="isTextStyleDisabled"
         @click="editor.chain().focus().stepFontSize(2).run()"
       />
       <EditorToolbarButton
         icon="font-decrease"
-        tooltip="Уменьшить размер шрифта"
+        :tooltip="t('editor.decreaseFontSize')"
         :disabled="isTextStyleDisabled"
         @click="editor.chain().focus().stepFontSize(-2).run()"
       />
@@ -153,7 +153,7 @@
         :model-value="currentFontFamily"
         :items="EDITOR_FONT_FAMILIES"
         :disabled="isTextStyleDisabled"
-        tooltip="Шрифт"
+        :tooltip="t('editor.font')"
         width="112px"
         @update:model-value="setFontFamily"
       />
@@ -182,8 +182,8 @@
         icon="table"
         :tooltip="
           showTableToolbar
-            ? 'Скрыть панель инструментов таблицы'
-            : 'Показать панель инструментов таблицы'
+            ? t('editor.hideTableToolbar')
+            : t('editor.showTableToolbar')
         "
         :active="showTableToolbar"
         @click="showTableToolbar = !showTableToolbar"
@@ -194,7 +194,7 @@
       />
       <EditorToolbarButton
         icon="clear-format"
-        tooltip="Очистить форматирование"
+        :tooltip="t('editor.clearFormatting')"
         :disabled="isActive('codeBlock')"
         @click="editor.chain().focus().unsetAllMarks().run()"
       />
@@ -211,21 +211,21 @@
       <EditorToolbarButton
         v-if="!excludedTabs.includes('drawio')"
         icon="drawio"
-        tooltip="Вставить диаграмму"
+        :tooltip="t('editor.insertDiagram')"
         :disabled="isActive('codeBlock')"
         @click="editor.chain().focus().insertDrawio().run()"
       />
       <EditorToolbarButton
         v-if="!excludedTabs.includes('mermaid')"
         icon="account-tree"
-        tooltip="Вставить Mermaid диаграмму"
+        :tooltip="t('editor.insertMermaidDiagram')"
         :disabled="isActive('codeBlock')"
         @click="editor.chain().focus().insertMermaid().run()"
       />
       <EditorToolbarButton
         v-if="allowFullscreen"
         :icon="fullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
-        :tooltip="fullscreen ? 'Свернуть' : 'Развернуть'"
+        :tooltip="fullscreen ? t('editor.collapse') : t('editor.expand')"
         @click="emit('toggleFullscreen')"
       />
     </div>
@@ -234,7 +234,7 @@
       <EditorTableToolbar v-if="showTableToolbar" :editor="editor" />
     </div>
     <button v-if="canScrollForward" type="button" class="editor-toolbar__scroll-arrow editor-toolbar__scroll-arrow--forward"
-      :aria-label="mobile ? 'Прокрутить инструменты вниз' : 'Прокрутить инструменты вправо'"
+      :aria-label="mobile ? t('editor.scrollToolsDown') : t('editor.scrollToolsRight')"
       @mousedown.prevent @click="scrollToolbar(1)">
       <v-icon :icon="mobile ? 'mdi-chevron-down' : 'mdi-chevron-right'" size="22" />
     </button>
@@ -242,6 +242,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { Level } from '@tiptap/extension-heading';
 import type { Editor } from '@tiptap/vue-3';
@@ -266,6 +268,8 @@ import EditorSpoilerMenu from './EditorSpoilerMenu.vue';
 import EditorTableToolbar from './EditorTableToolbar.vue';
 import EditorToolbarButton from './EditorToolbarButton.vue';
 import EditorToolbarSelect from './EditorToolbarSelect.vue';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{

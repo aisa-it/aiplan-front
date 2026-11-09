@@ -1,12 +1,12 @@
 <template>
-  <div class="editor-table-toolbar" aria-label="Инструменты таблицы" @wheel.stop.prevent="handleWheel">
+  <div class="editor-table-toolbar" :aria-label="t('editor.tableTools')" @wheel.stop.prevent="handleWheel">
     <EditorInsertTableMenu :editor="editor" :disabled="!canInsertTable" />
 
     <EditorToolbarButton
       v-for="operation in TABLE_OPERATIONS"
       :key="operation.command"
       :icon="operation.icon"
-      :tooltip="operation.tooltip"
+      :tooltip="t(operation.tooltipKey)"
       :disabled="!canRunCommand(operation.command)"
       @click="runCommand(operation.command)"
     />
@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 
@@ -23,6 +25,8 @@ import { useEditorRevision } from '../composables/useEditorRevision';
 import EditorInsertTableMenu from './EditorInsertTableMenu.vue';
 import EditorTableFillMenu from './EditorTableFillMenu.vue';
 import EditorToolbarButton from './EditorToolbarButton.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   editor: Editor;
@@ -39,52 +43,52 @@ const TABLE_OPERATIONS = [
   {
     command: 'addColumnBefore',
     icon: 'table-add-column-before',
-    tooltip: 'Вставить столбец слева',
+    tooltipKey: 'editor.insertColumnToTheLeft',
   },
   {
     command: 'addColumnAfter',
     icon: 'table-add-column-after',
-    tooltip: 'Вставить столбец справа',
+    tooltipKey: 'editor.insertColumnToTheRight',
   },
   {
     command: 'deleteColumn',
     icon: 'table-delete-column',
-    tooltip: 'Удалить столбец',
+    tooltipKey: 'editor.deleteColumn',
   },
   {
     command: 'addRowBefore',
     icon: 'table-add-row-before',
-    tooltip: 'Вставить строку сверху',
+    tooltipKey: 'editor.insertRowAbove',
   },
   {
     command: 'addRowAfter',
     icon: 'table-add-row-after',
-    tooltip: 'Вставить строку снизу',
+    tooltipKey: 'editor.insertRowBelow',
   },
   {
     command: 'deleteRow',
     icon: 'table-delete-row',
-    tooltip: 'Удалить строку',
+    tooltipKey: 'editor.deleteRow',
   },
   {
     command: 'deleteTable',
     icon: 'table-delete',
-    tooltip: 'Удалить таблицу',
+    tooltipKey: 'editor.deleteTable',
   },
   {
     command: 'mergeCells',
     icon: 'table-merge-cells',
-    tooltip: 'Объединить ячейки',
+    tooltipKey: 'editor.mergeCells',
   },
   {
     command: 'splitCell',
     icon: 'table-split-cell',
-    tooltip: 'Разделить ячейку',
+    tooltipKey: 'editor.splitCell',
   },
   {
     command: 'toggleHeaderCell',
     icon: 'table-header-cell',
-    tooltip: 'Переключить ячейку заголовка',
+    tooltipKey: 'editor.toggleHeaderCell',
   },
 ] as const;
 

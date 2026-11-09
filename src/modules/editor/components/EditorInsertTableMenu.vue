@@ -7,7 +7,7 @@
       <EditorToolbarButton
         v-bind="menuProps"
         icon="table-insert"
-        tooltip="Вставить таблицу"
+        :tooltip="t('editor.insertTable')"
         :disabled="disabled"
         aria-haspopup="menu"
       />
@@ -27,7 +27,7 @@
             v-for="cell in gridCells"
             :key="`${cell.row}-${cell.col}`"
             type="button"
-            :aria-label="`Таблица ${cell.row} на ${cell.col}`"
+            :aria-label="t('editor.tableSize', { rows: cell.row, columns: cell.col })"
             class="editor-insert-table-menu__cell"
             :class="{
               'editor-insert-table-menu__cell--active': isCellActive(cell),
@@ -45,7 +45,7 @@
           class="editor-insert-table-menu__custom-button"
           @click="isCustomSize = true"
         >
-          Свой размер
+          {{ t('editor.customSize') }}
         </v-btn>
       </template>
 
@@ -53,7 +53,7 @@
         <v-text-field
           v-model.number="customSize.cols"
           type="number"
-          label="Число столбцов"
+          :label="t('editor.numberOfColumns')"
           min="1"
           max="100"
           density="compact"
@@ -63,7 +63,7 @@
         <v-text-field
           v-model.number="customSize.rows"
           type="number"
-          label="Число строк"
+          :label="t('editor.numberOfRows')"
           min="1"
           max="100"
           density="compact"
@@ -73,7 +73,7 @@
 
         <div class="editor-insert-table-menu__actions">
           <v-btn variant="text" size="small" @click="isCustomSize = false">
-            Отмена
+            {{ t('editor.cancel') }}
           </v-btn>
           <v-btn
             variant="text"
@@ -81,7 +81,7 @@
             :disabled="!isCustomSizeValid"
             @click="insertTable(customSize)"
           >
-            Вставить
+            {{ t('editor.insert') }}
           </v-btn>
         </div>
       </template>
@@ -90,10 +90,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, reactive, ref, watch } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 
 import EditorToolbarButton from './EditorToolbarButton.vue';
+
+const { t } = useI18n();
 
 interface TableSize {
   rows: number;
@@ -127,8 +131,8 @@ const gridCells = Array.from({ length: 100 }, (_, index) => ({
 
 const menuTitle = computed(() =>
   hoveredSize.value
-    ? `Таблица: ${hoveredSize.value.row} x ${hoveredSize.value.col}`
-    : 'Вставка таблицы',
+    ? t('editor.tableX', { p0: hoveredSize.value.row, p1: hoveredSize.value.col })
+    : t('editor.tableInsertion'),
 );
 
 const isCustomSizeValid = computed(
@@ -144,8 +148,8 @@ const isCustomSizeValid = computed(
 const validateSize = (field: keyof TableSize) => (value: number) => {
   if (!Number.isInteger(value) || value < 1 || value > 100) {
     return field === 'rows'
-      ? 'Число строк от 1 до 100'
-      : 'Число столбцов от 1 до 100';
+      ? t('editor.numberOfRowsFromTo')
+      : t('editor.numberOfColumnsFromTo');
   }
 
   return true;

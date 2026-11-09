@@ -7,11 +7,11 @@
     <template #activator="{ props: activatorProps }">
       <v-btn
         v-bind="activatorProps"
-        aria-label="Оглавление"
+        :aria-label="t('editor.tableOfContents')"
         color="text"
         icon
         size="small"
-        title="Оглавление"
+        :title="t('editor.tableOfContents')"
         variant="text"
         class="editor-table-of-contents__activator"
       >
@@ -20,7 +20,7 @@
     </template>
 
     <v-card class="editor-table-of-contents" max-width="360">
-      <v-card-title class="text-base font-medium">Оглавление</v-card-title>
+      <v-card-title class="text-base font-medium">{{ t('editor.tableOfContents') }}</v-card-title>
       <v-divider />
       <v-list density="compact" max-height="300">
         <v-list-item
@@ -40,10 +40,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed } from 'vue';
 
 import type { EditorHeadingLink } from '../model/editor.types';
 import EditorIcon from './EditorIcon.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   links: EditorHeadingLink[];

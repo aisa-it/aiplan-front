@@ -14,27 +14,31 @@
       </template>
       <v-card min-width="260" class="editor-doc-anchor__menu" @click.stop>
         <form @submit.prevent="renameAnchor">
-          <v-text-field v-model="draftTitle" label="Название якоря" density="compact" color="text" hide-details="auto" autofocus />
+          <v-text-field v-model="draftTitle" :label="t('editor.anchorName')" density="compact" color="text" hide-details="auto" autofocus />
           <div class="d-flex justify-end ga-1 mt-2">
-            <v-btn type="submit" color="primary" variant="flat" class="editor-doc-anchor__rename" :disabled="!draftTitle.trim()">Переименовать</v-btn>
+            <v-btn type="submit" color="primary" variant="flat" class="editor-doc-anchor__rename" :disabled="!draftTitle.trim()">{{ t('editor.rename') }}</v-btn>
           </div>
         </form>
         <v-divider class="my-2" />
         <div class="d-flex flex-column align-start">
-          <v-btn v-if="canCopyLink" prepend-icon="mdi-link-variant" color="text" variant="text" class="editor-doc-anchor__menu-item" @click="copyLink">Скопировать ссылку</v-btn>
-          <v-btn prepend-icon="mdi-delete" color="text" variant="text" class="editor-doc-anchor__menu-item" @click="deleteNode(); open = false">Удалить</v-btn>
+          <v-btn v-if="canCopyLink" prepend-icon="mdi-link-variant" color="text" variant="text" class="editor-doc-anchor__menu-item" @click="copyLink">{{ t('editor.copyLink') }}</v-btn>
+          <v-btn prepend-icon="mdi-delete" color="text" variant="text" class="editor-doc-anchor__menu-item" @click="deleteNode(); open = false">{{ t('editor.delete') }}</v-btn>
         </div>
-        <div v-if="copyError" role="alert" class="text-error text-caption pa-1">Не удалось скопировать ссылку</div>
+        <div v-if="copyError" role="alert" class="text-error text-caption pa-1">{{ t('editor.couldNotCopyLink') }}</div>
       </v-card>
     </v-menu>
   </NodeViewWrapper>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, ref, watch } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
 import { EDITOR_ANCHOR_CONTEXT_KEY, EDITOR_READONLY_KEY, type EditorAnchorContext } from '../model/editor.injection';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const readonly = inject(EDITOR_READONLY_KEY, computed(() => !props.editor.isEditable));
@@ -42,7 +46,7 @@ const anchorContext = inject(EDITOR_ANCHOR_CONTEXT_KEY, computed<EditorAnchorCon
 const open = ref(false);
 const draftTitle = ref('');
 const copyError = ref(false);
-const label = computed(() => props.node.attrs.title || props.node.attrs.anchorId || 'Якорь');
+const label = computed(() => props.node.attrs.title || props.node.attrs.anchorId || t('editor.anchor'));
 const canCopyLink = computed(() => Boolean(
   anchorContext.value.workspaceSlug && anchorContext.value.documentSlug && props.node.attrs.anchorId,
 ));

@@ -17,13 +17,13 @@
         size="20"
         class="editor-spoiler__chevron"
       />
-      <span v-if="readonly" class="editor-spoiler__title">{{ title || 'Спойлер' }}</span>
+      <span v-if="readonly" class="editor-spoiler__title">{{ title || t('editor.spoiler') }}</span>
       <input
         v-else
         v-model="title"
         :readonly="readonly"
-        placeholder="Спойлер"
-        aria-label="Заголовок спойлера"
+        :placeholder="t('editor.spoiler')"
+        :aria-label="t('editor.spoilerTitle')"
         class="editor-spoiler__title"
         @focus="selectEditorBlockContent(editor, getPos)"
         @blur="updateTitle"
@@ -33,7 +33,7 @@
       <v-btn
         v-if="!readonly"
         icon="mdi-close"
-        aria-label="Удалить спойлер"
+        :aria-label="t('editor.deleteSpoiler')"
         size="x-small"
         variant="text"
         @click.stop="deleteSpoiler"
@@ -42,7 +42,7 @@
 
     <div v-show="expanded" class="editor-spoiler__content">
       <span v-if="isEmpty" class="editor-spoiler__placeholder">
-        Скрытый контент
+        {{ t('editor.hiddenContent') }}
       </span>
       <NodeViewContent />
     </div>
@@ -50,6 +50,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, ref, watch } from 'vue';
 import {
   NodeViewContent,
@@ -59,6 +61,8 @@ import {
 
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
 import { selectEditorBlockContent } from '../utils/selectEditorBlockContent';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const injectedReadonly = inject(EDITOR_READONLY_KEY);

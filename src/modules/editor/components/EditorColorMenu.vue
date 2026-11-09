@@ -32,8 +32,8 @@
         <button
           v-if="mode === 'highlight'"
           type="button"
-          title="Отсутствует"
-          aria-label="Отсутствует"
+          :title="t('editor.none')"
+          :aria-label="t('editor.none')"
           class="editor-color-menu__swatch editor-color-menu__swatch--empty"
           :class="{
             'editor-color-menu__swatch--active': !currentColor,
@@ -68,6 +68,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 import { useTheme } from 'vuetify';
@@ -80,6 +82,8 @@ import {
 import type { EditorColorMode } from '../model/editor.types';
 import type { EditorIconName } from '../icons/editor-icons';
 import EditorIcon from './EditorIcon.vue';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -98,7 +102,7 @@ const isOpen = ref(false);
 
 const isDark = computed(() => theme.current.value.dark);
 const tooltip = computed(() =>
-  props.mode === 'text' ? 'Цвет шрифта' : 'Выделить',
+  props.mode === 'text' ? t('editor.fontColor') : t('editor.highlight'),
 );
 const icon = computed<EditorIconName>(() =>
   props.mode === 'text' ? 'font-color' : 'font-background',

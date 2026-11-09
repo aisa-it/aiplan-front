@@ -1,10 +1,10 @@
 <template>
   <NodeViewWrapper class="editor-document-outline" contenteditable="false">
     <div v-if="!isReadonly" class="editor-document-outline__placeholder">
-      <span>Оглавление</span>
+      <span>{{ t('editor.tableOfContents') }}</span>
       <v-btn
         icon="mdi-close"
-        aria-label="Удалить оглавление"
+        :aria-label="t('editor.deleteTableOfContents')"
         variant="text"
         size="x-small"
         @click="removeNode"
@@ -13,7 +13,7 @@
     <nav
       v-else-if="savedLinks.length"
       class="editor-document-outline__links"
-      aria-label="Оглавление документа"
+      :aria-label="t('editor.documentTableOfContents')"
     >
       <a
         v-for="(link, index) in savedLinks"
@@ -32,11 +32,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, shallowRef } from 'vue';
 import { NodeViewContent, NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
 import { useEditorHeadings } from '../composables/useEditorHeadings';
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
+
+const { t } = useI18n();
 
 interface SavedLink {
   id: string;

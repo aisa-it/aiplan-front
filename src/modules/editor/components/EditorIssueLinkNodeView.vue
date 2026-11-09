@@ -31,6 +31,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
@@ -40,6 +42,8 @@ import type {
   EditorIssueLinkPreview,
   EditorSpecialLink,
 } from '../model/editor.types';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const resolvers = inject(EDITOR_SPECIAL_LINK_RESOLVERS_KEY);
@@ -76,7 +80,7 @@ const { loading, preview, error } = useEditorLinkPreview<EditorIssueLinkPreview>
 );
 const errorLabel = computed(() => {
   const reason = error.value as { response?: { data?: { code?: number } } } | undefined;
-  return reason?.response?.data?.code === 4001 ? 'Задача удалена' : 'Нет доступа';
+  return reason?.response?.data?.code === 4001 ? t('editor.taskDeleted') : t('editor.accessDenied');
 });
 </script>
 

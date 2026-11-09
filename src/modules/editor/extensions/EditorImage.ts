@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { Image } from '@tiptap/extension-image';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
@@ -8,7 +9,8 @@ import { insertAsyncEditorContent } from '../utils/insertAsyncEditorContent';
 import type { Editor, JSONContent } from '@tiptap/core';
 
 const UNSUPPORTED_IMAGE_FORMATS = new Set(['heic', 'tif', 'tiff']);
-export const IMAGE_FORMAT_ERROR = 'Данный формат файла не поддерживается';
+export const getImageFormatError = () =>
+  i18n.global.t('editor.thisFileFormatIsNotSupported');
 
 const getImageFormat = (file: File) => file.type.split('/')[1]?.toLowerCase();
 
@@ -70,7 +72,7 @@ export const insertImageFiles = (
       const content: JSONContent[] = [];
       for (const file of files) {
         if (!isSupportedImageFile(file)) {
-          toast.error(IMAGE_FORMAT_ERROR);
+          toast.error(getImageFormatError());
           continue;
         }
         try {

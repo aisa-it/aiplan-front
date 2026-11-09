@@ -3,7 +3,7 @@
     <v-card class="editor-comment-preview">
       <v-card-title class="editor-comment-preview__header">
         <span>{{ contextTitle }}</span>
-        <v-btn icon="mdi-close" variant="text" size="small" aria-label="Закрыть комментарий" @click="open = false" />
+        <v-btn icon="mdi-close" variant="text" size="small" :aria-label="t('editor.closeComment')" @click="open = false" />
       </v-card-title>
 
       <v-card-text>
@@ -11,18 +11,18 @@
         <p v-else-if="error" role="alert">
           {{ error }}
           <a v-if="fallbackHref" :href="fallbackHref" target="_blank" rel="noopener noreferrer">
-            Открыть исходную ссылку
+            {{ t('editor.openOriginalLink') }}
           </a>
         </p>
         <template v-else-if="comment">
           <p class="editor-comment-preview__context">
-            {{ link?.contextType === 'aidoc' ? 'Документ:' : 'Задача:' }}
+            {{ link?.contextType === 'aidoc' ? t('editor.documentContext') : t('editor.taskContext') }}
             <a v-if="contextHref" :href="contextHref" target="_blank" rel="noopener noreferrer">
               {{ contextName }}
             </a>
             <span v-else>{{ contextName }}</span>
           </p>
-          <p v-if="author" class="editor-comment-preview__meta">Автор: {{ author }}</p>
+          <p v-if="author" class="editor-comment-preview__meta">{{ t('editor.author', { author }) }}</p>
           <component
             :is="ReadonlyEditor"
             :model-value="comment.comment_html || ''"
@@ -35,7 +35,7 @@
           <p v-if="createdAt || comment.updated_by_id" class="editor-comment-preview__meta">
             {{ createdAt }}
             <span v-if="comment.updated_by_id" class="editor-comment-preview__edited">
-              изменено
+              {{ t('editor.edited') }}
               <v-tooltip v-if="updatedAt" activator="parent">{{ updatedAt }}</v-tooltip>
             </span>
           </p>
@@ -46,6 +46,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import type { DtoDocComment, DtoIssueComment } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { formatDateTimeWithDay } from '@/utils/time';
@@ -53,6 +55,8 @@ import { formatDateTimeWithDay } from '@/utils/time';
 import type { EditorSpecialLink } from '../model/editor.types';
 import { resolveEditorAttachmentLink, resolveEditorCommentLink } from '../utils/editorIntegration';
 import { getEditorCommentContextHref, getEditorCommentFailure } from '../utils/editorSpecialLinks';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;
@@ -72,7 +76,7 @@ const error = ref('');
 const fallbackHref = ref<string>();
 
 const contextTitle = computed(() =>
-  props.link?.contextType === 'aidoc' ? 'Комментарий к документу' : 'Комментарий к задаче',
+  props.link?.contextType === 'aidoc' ? t('editor.commentOnADocument') : t('editor.commentOnATask'),
 );
 const contextName = computed(() =>
   props.link?.contextType === 'aidoc'
@@ -110,17 +114,17 @@ watch(
       if (!cancelled) {
         documentTitle.value = context?.sourceTitle || '';
         if (result) comment.value = result;
-        else error.value = 'Не удалось найти комментарий';
+        else error.value = t('editor.couldNotFindTheComment');
       }
     } catch (reason) {
       if (!cancelled) {
         const failure = getEditorCommentFailure(reason, link.originalUrl);
         if (failure.notFound) {
-          error.value = 'Комментарий не найден';
+          error.value = t('editor.commentNotFound');
           fallbackHref.value = failure.fallbackHref;
           if (fallbackHref.value) window.open(fallbackHref.value, '_blank', 'noopener,noreferrer');
         } else {
-          error.value = 'Не удалось загрузить комментарий';
+          error.value = t('editor.couldNotLoadTheComment');
         }
       }
     } finally {

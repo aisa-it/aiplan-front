@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { mergeAttributes, Node } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 
@@ -26,9 +27,9 @@ export const EditorInfoBlock = Node.create({
   addAttributes() {
     return {
       title: {
-        default: 'Информация',
+        default: i18n.global.t('editor.information'),
         parseHTML: (element) =>
-          element.getAttribute('data-title') ?? 'Информация',
+          element.getAttribute('data-title') ?? i18n.global.t('editor.information'),
         renderHTML: ({ title }) => ({ 'data-title': title }),
       },
       icon: {
@@ -64,7 +65,7 @@ export const EditorInfoBlock = Node.create({
           commands.insertContent({
             type: this.name,
             attrs: {
-              title: attributes.title ?? 'Информация',
+              title: attributes.title ?? i18n.global.t('editor.information'),
               icon: attributes.icon || 'infoIcon',
               iconColor: attributes.iconColor || '',
             },

@@ -38,7 +38,7 @@ interface CreateEditorExtensionsOptions {
   allowImages: boolean;
   enableAnchors?: boolean;
   mention?: AnyExtension;
-  placeholder: string;
+  placeholder: string | (() => string);
 }
 
 export const createEditorExtensions = ({

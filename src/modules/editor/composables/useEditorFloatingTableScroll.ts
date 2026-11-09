@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type { Editor } from '@tiptap/core';
 import { watch, type Ref } from 'vue';
 
@@ -32,7 +33,7 @@ export function useEditorFloatingTableScroll(editor: Ref<Editor | null>) {
       const track = document.createElement('div');
       const spacer = document.createElement('div');
       floating.className = 'editor-floating-table-scroll';
-      floating.setAttribute('aria-label', 'Горизонтальная прокрутка таблицы');
+      floating.setAttribute('aria-label', i18n.global.t('editor.horizontalTableScroll'));
       floating.style.cssText =
         'position:fixed;display:none;box-sizing:border-box;height:16px;padding-top:1px;z-index:2601;opacity:.75;pointer-events:none';
       track.style.cssText =

@@ -1,11 +1,11 @@
 <template>
   <div class="editor-emoji-menu">
-    <v-tooltip text="Добавить реакцию" location="bottom">
+    <v-tooltip :text="t('editor.addReaction')" location="bottom">
       <template #activator="{ props: tooltipProps }">
         <v-btn
           v-bind="tooltipProps"
           :disabled="disabled"
-          :aria-label="`Добавить реакцию ${selectedEmoji}`"
+          :aria-label="t('editor.addReactionEmoji', { emoji: selectedEmoji })"
           color="text"
           size="small"
           variant="text"
@@ -22,7 +22,7 @@
         <v-btn
           v-bind="menuProps"
           :disabled="disabled"
-          aria-label="Выбрать реакцию"
+          :aria-label="t('editor.selectReaction')"
           color="text"
           icon="mdi-chevron-down"
           size="x-small"
@@ -36,7 +36,7 @@
           v-for="emoji in EMOJIS"
           :key="emoji"
           type="button"
-          :aria-label="`Добавить ${emoji}`"
+          :aria-label="t('editor.addEmoji', { emoji })"
           class="editor-emoji-menu__option"
           @click="selectEmoji(emoji)"
         >
@@ -48,8 +48,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { ref } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
+
+const { t } = useI18n();
 
 const EMOJIS = [
   '🙂',

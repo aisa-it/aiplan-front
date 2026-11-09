@@ -1,7 +1,7 @@
 <template>
   <v-menu v-model="isOpen" :close-on-content-click="false">
     <template #activator="{ props: menuProps }">
-      <v-tooltip text="Заливка ячейки" location="bottom">
+      <v-tooltip :text="t('editor.cellFill')" location="bottom">
         <template #activator="{ props: tooltipProps }">
           <v-btn
             v-bind="{ ...menuProps, ...tooltipProps }"
@@ -9,7 +9,7 @@
             size="small"
             variant="text"
             :disabled="disabled"
-            aria-label="Заливка ячейки"
+            :aria-label="t('editor.cellFill')"
             class="editor-table-fill-menu__activator"
             @mousedown.prevent
           >
@@ -30,8 +30,8 @@
       <div class="editor-table-fill-menu__palette">
         <button
           type="button"
-          title="Отсутствует"
-          aria-label="Отсутствует"
+          :title="t('editor.none')"
+          :aria-label="t('editor.none')"
           class="editor-table-fill-menu__swatch editor-table-fill-menu__swatch--empty"
           :class="{
             'editor-table-fill-menu__swatch--active': !currentColor,
@@ -61,12 +61,16 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 import { useTheme } from 'vuetify';
 
 import { useEditorRevision } from '../composables/useEditorRevision';
 import { EDITOR_TABLE_CELL_COLORS } from '../constants/editor.constants';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{

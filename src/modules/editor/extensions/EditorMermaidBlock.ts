@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import EditorMermaidNodeView from '../components/EditorMermaidNodeView.vue';
@@ -10,12 +11,13 @@ declare module '@tiptap/core' {
   }
 }
 
-const DEFAULT_DIAGRAM = [
-  'flowchart TD',
-  '    A[Начало] --> B{Условие}',
-  '    B -->|Да| C[Действие]',
-  '    B -->|Нет| D[Конец]',
-].join('\n');
+const getDefaultDiagram = () =>
+  [
+    'flowchart TD',
+    `    A[${i18n.global.t('editor.mermaidStart')}] --> B{${i18n.global.t('editor.mermaidCondition')}}`,
+    `    B -->|${i18n.global.t('editor.mermaidYes')}| C[${i18n.global.t('editor.mermaidAction')}]`,
+    `    B -->|${i18n.global.t('editor.mermaidNo')}| D[${i18n.global.t('editor.mermaidEnd')}]`,
+  ].join('\n');
 
 export const EditorMermaidBlock = Node.create({
   name: 'mermaidBlock',
@@ -57,7 +59,7 @@ export const EditorMermaidBlock = Node.create({
         ({ commands }) =>
           commands.insertContent({
             type: this.name,
-            content: [{ type: 'text', text: DEFAULT_DIAGRAM }],
+            content: [{ type: 'text', text: getDefaultDiagram() }],
           }),
     };
   },

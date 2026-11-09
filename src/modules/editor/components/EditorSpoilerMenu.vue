@@ -1,11 +1,11 @@
 <template>
   <v-menu v-model="isOpen" :close-on-content-click="false">
     <template #activator="{ props: menuProps }">
-      <v-tooltip text="Спойлер" location="bottom">
+      <v-tooltip :text="t('editor.spoiler')" location="bottom">
         <template #activator="{ props: tooltipProps }">
           <v-btn
             v-bind="{ ...menuProps, ...tooltipProps }"
-            aria-label="Спойлер"
+            :aria-label="t('editor.spoiler')"
             :class="{ 'editor-spoiler-menu__button--active': isActive }"
             :color="isActive ? 'primary' : 'text'"
             :disabled="disabled"
@@ -21,7 +21,7 @@
     </template>
 
     <v-card class="editor-spoiler-menu__card" elevation="4">
-      <div class="editor-spoiler-menu__label">Цвет фона</div>
+      <div class="editor-spoiler-menu__label">{{ t('editor.backgroundColor') }}</div>
       <div class="editor-spoiler-menu__palette">
         <button
           v-for="color in backgroundColors"
@@ -39,7 +39,7 @@
         />
       </div>
 
-      <div class="editor-spoiler-menu__label">Цвет текста</div>
+      <div class="editor-spoiler-menu__label">{{ t('editor.textColor') }}</div>
       <div class="editor-spoiler-menu__palette">
         <button
           v-for="color in textColors"
@@ -61,10 +61,10 @@
         </button>
       </div>
 
-      <div class="editor-spoiler-menu__label">Прозрачность</div>
+      <div class="editor-spoiler-menu__label">{{ t('editor.opacity') }}</div>
       <v-slider
         v-model="opacity"
-        aria-label="Прозрачность фона"
+        :aria-label="t('editor.backgroundOpacity')"
         :min="0"
         :max="1"
         :step="0.01"
@@ -73,13 +73,15 @@
       />
 
       <v-btn block color="primary" size="small" @click="applySpoiler">
-        Применить
+        {{ t('editor.apply') }}
       </v-btn>
     </v-card>
   </v-menu>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref, watch } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 import { useTheme } from 'vuetify';
@@ -91,6 +93,8 @@ import {
 } from '../constants/editor.constants';
 import EditorIcon from './EditorIcon.vue';
 import { getSelectedEditorBlock } from '../utils/selectEditorBlockContent';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{

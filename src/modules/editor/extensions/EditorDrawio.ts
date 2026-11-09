@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { Node, mergeAttributes } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import EditorImageNodeView from '../components/EditorImageNodeView.vue';
@@ -23,7 +24,7 @@ export const EditorDrawio = Node.create({
         parseHTML: (element: HTMLElement) => element.getAttribute('src') || '',
       },
       xml: { default: '' },
-      alt: { default: 'Диаграмма' },
+      alt: { default: i18n.global.t('editor.diagram') },
       width: { default: null }, height: { default: null },
       style: { default: 'height: auto;' },
     };
@@ -35,7 +36,7 @@ export const EditorDrawio = Node.create({
     return {
       insertDrawio: () => ({ commands }) => commands.insertContent({
         type: this.name,
-        attrs: { src: placeholder, alt: 'Диаграмма', xml: '' },
+        attrs: { src: placeholder, alt: i18n.global.t('editor.diagram'), xml: '' },
       }),
     };
   },

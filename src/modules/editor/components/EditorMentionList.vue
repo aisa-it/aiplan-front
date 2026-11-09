@@ -27,17 +27,21 @@
       </button>
     </template>
 
-    <div v-else class="editor-mention-list__empty">Нет результатов</div>
+    <div v-else class="editor-mention-list__empty">{{ t('editor.noResults') }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { ref, watch } from 'vue';
 
 import UserAvatar from '@/components/user-avatar/UserAvatar.vue';
 import { getUserName } from '@/utils/helpers';
 import type { EditorMentionItem } from '../model/editor.types';
 import { getEditorMentionStorageAttributes } from '../utils/editorMentionStorage';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   items: EditorMentionItem[];

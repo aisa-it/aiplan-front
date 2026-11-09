@@ -1,11 +1,11 @@
 <template>
   <v-menu v-model="isOpen">
     <template #activator="{ props: menuProps }">
-      <v-tooltip text="Информация" location="bottom">
+      <v-tooltip :text="t('editor.information')" location="bottom">
         <template #activator="{ props: tooltipProps }">
           <v-btn
             v-bind="{ ...menuProps, ...tooltipProps }"
-            aria-label="Информация"
+            :aria-label="t('editor.information')"
             :class="{ 'editor-info-menu__button--active': isActive }"
             :color="isActive ? 'primary' : 'text'"
             :disabled="disabled"
@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 import { useTheme } from 'vuetify';
@@ -44,6 +46,8 @@ import { useTheme } from 'vuetify';
 import { useEditorRevision } from '../composables/useEditorRevision';
 import EditorIcon from './EditorIcon.vue';
 import { getSelectedEditorBlock } from '../utils/selectEditorBlockContent';
+
+const { t } = useI18n();
 
 interface InfoBlockOption {
   name: string;
@@ -76,25 +80,25 @@ const options = computed<InfoBlockOption[]>(() => {
     {
       name: 'infoIcon',
       icon: 'mdi-information-outline',
-      label: 'Информация',
+      label: t('editor.information'),
       color: dark ? '#7EA2FC' : '#3F76FF',
     },
     {
       name: 'checkStatusIcon',
       icon: 'mdi-check-circle-outline',
-      label: 'Успешно',
+      label: t('editor.success'),
       color: dark ? '#7CB342' : '#43A047',
     },
     {
       name: 'closeIconBorder',
       icon: 'mdi-close-box-outline',
-      label: 'Ошибка',
+      label: t('editor.error'),
       color: dark ? '#FF7A7A' : '#DC3E3E',
     },
     {
       name: 'alertIcon',
       icon: 'mdi-alert-outline',
-      label: 'Предупреждение',
+      label: t('editor.warning'),
       color: dark ? '#FFAB00' : '#FF8B00',
     },
   ];

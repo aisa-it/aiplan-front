@@ -1,7 +1,7 @@
 <template>
   <EditorToolbarButton
     icon="picture"
-    tooltip="Загрузить изображение"
+    :tooltip="t('editor.uploadImage')"
     @click="openFileDialog"
   />
 
@@ -16,11 +16,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import type { Editor } from '@tiptap/vue-3';
 import { ref } from 'vue';
 
 import { insertImageFiles } from '../extensions/EditorImage';
 import EditorToolbarButton from './EditorToolbarButton.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   editor: Editor;

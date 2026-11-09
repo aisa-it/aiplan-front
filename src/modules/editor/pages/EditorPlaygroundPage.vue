@@ -1,29 +1,29 @@
 <template>
   <main class="mx-auto flex w-full max-w-[960px] flex-col gap-4 p-4 sm:p-8">
     <header>
-      <h1 class="text-2xl font-medium">Editor playground</h1>
-      <p class="mt-1 text-secondary">Документы пространства {{ workspaceSlug }}</p>
+      <h1 class="text-2xl font-medium">{{ t('editor.playgroundTitle') }}</h1>
+      <p class="mt-1 text-secondary">{{ t('editor.workspaceDocuments', { workspace: workspaceSlug }) }}</p>
     </header>
 
     <v-card>
-      <v-card-title>Документ API</v-card-title>
+      <v-card-title>{{ t('editor.apiDocument') }}</v-card-title>
       <v-card-text>
         <v-autocomplete
           :model-value="selectedDocument"
           :items="documentOptions"
           item-title="label"
           item-value="id"
-          label="Документ"
+          :label="t('editor.document')"
           density="compact"
           variant="outlined"
           :loading="documentsLoading"
           :disabled="documentsLoading || editable || saving"
-          :no-data-text="documentsLoading ? 'Загрузка документов…' : 'Документы не найдены'"
+          :no-data-text="documentsLoading ? t('editor.loadingDocuments') : t('editor.documentsNotFound')"
           hide-details
           @update:model-value="selectDocument"
         />
         <p v-if="apiDocument" class="mt-2 text-sm">
-          Загружен: {{ apiDocument.title }} ({{ workspaceSlug }} / {{ activeDocument }})
+          {{ t('editor.loadedDocument', { title: apiDocument.title, workspace: workspaceSlug, document: activeDocument }) }}
         </p>
         <p v-if="documentsError || apiError" role="alert" class="mt-2 text-sm text-error">
           {{ documentsError || apiError }}
@@ -33,7 +33,7 @@
     </v-card>
 
     <v-card v-if="apiDocument" class="editor-playground__card">
-      <v-card-title>Редактор</v-card-title>
+      <v-card-title>{{ t('editor.editor') }}</v-card-title>
       <v-divider />
       <v-card-text class="pa-0">
         <EditorTipTap
@@ -53,16 +53,16 @@
           @save="saveContent"
         />
         <p v-if="lastSpecialLink" class="mt-3 text-xs text-secondary">
-          Последняя специальная ссылка: {{ lastSpecialLink.kind }}
+          {{ t('editor.lastSpecialLink', { kind: lastSpecialLink.kind }) }}
         </p>
       </v-card-text>
     </v-card>
     <v-card v-else-if="!loading">
-      <v-card-text>Выберите документ, чтобы открыть его в редакторе.</v-card-text>
+      <v-card-text>{{ t('editor.selectADocumentToOpenItInTheEditor') }}</v-card-text>
     </v-card>
 
     <v-card v-if="apiDocument">
-      <v-card-title>HTML из v-model</v-card-title>
+      <v-card-title>{{ t('editor.htmlFromVModel') }}</v-card-title>
       <v-divider />
       <v-card-text>
         <pre class="max-h-[280px] overflow-auto whitespace-pre-wrap break-all rounded-lg bg-[rgb(var(--v-theme-background))] p-3 text-xs"><code>{{ draftContent }}</code></pre>
@@ -72,6 +72,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from 'vuetify';
@@ -85,6 +87,8 @@ import {
   type PlaygroundDocument,
   type PlaygroundDocumentOption,
 } from '../utils/editorDocumentApi';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -142,10 +146,10 @@ const loadDocument = async (id: string) => {
     activeDocument.value = id;
     savedContent.value = loaded.content;
     draftContent.value = loaded.content;
-    apiSuccess.value = 'Документ загружен';
+    apiSuccess.value = t('editor.documentLoaded');
   } catch (error) {
     if (run === documentRun) {
-      apiError.value = error instanceof Error ? error.message : 'Не удалось загрузить документ';
+      apiError.value = error instanceof Error ? error.message : t('editor.couldNotLoadTheDocument');
     }
   } finally {
     if (run === documentRun) loading.value = false;
@@ -159,7 +163,7 @@ const openSelectedDocument = () => {
   if (selectedDocument.value) {
     void loadDocument(selectedDocument.value);
   } else if (id) {
-    apiError.value = 'Документ не найден в этом пространстве';
+    apiError.value = t('editor.documentNotFoundInThisWorkspace');
   }
 };
 
@@ -179,7 +183,7 @@ watch(workspaceSlug, async (workspace) => {
     openSelectedDocument();
   } catch (error) {
     if (run === workspaceRun) {
-      documentsError.value = error instanceof Error ? error.message : 'Не удалось загрузить список документов';
+      documentsError.value = error instanceof Error ? error.message : t('editor.couldNotLoadTheDocumentList');
     }
   } finally {
     if (run === workspaceRun) documentsLoading.value = false;
@@ -224,10 +228,10 @@ const saveContent = async () => {
     savedContent.value = loaded.content;
     draftContent.value = loaded.content;
     editable.value = false;
-    apiSuccess.value = 'Документ сохранён и повторно загружен';
+    apiSuccess.value = t('editor.documentSavedAndLoadedAgain');
   } catch (error) {
     if (run === documentRun) {
-      apiError.value = error instanceof Error ? error.message : 'Не удалось сохранить документ';
+      apiError.value = error instanceof Error ? error.message : t('editor.couldNotSaveTheDocument');
     }
   } finally {
     saving.value = false;

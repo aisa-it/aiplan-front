@@ -21,15 +21,15 @@
         <v-text-field
           v-model="inputDate"
           type="date"
-          label="Дата"
+          :label="t('editor.date')"
           density="compact"
           hide-details
           variant="outlined"
         />
         <v-card-actions>
-          <v-btn variant="text" @click="isOpen = false"> Отмена </v-btn>
+          <v-btn variant="text" @click="isOpen = false"> {{ t('editor.cancel') }} </v-btn>
           <v-btn color="primary" variant="text" :disabled="!toEditorDate(inputDate)" @click="saveDate">
-            Выбрать
+            {{ t('editor.select') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -38,11 +38,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, ref, watch } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
 import { toInputDate, toEditorDate } from '../utils/editorDate';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const injectedReadonly = inject(EDITOR_READONLY_KEY);

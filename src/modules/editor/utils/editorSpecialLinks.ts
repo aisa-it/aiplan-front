@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type { EditorSpecialLink } from '../model/editor.types';
 
 export const ISSUE_LINK_NODE = 'issueLinkMention';
@@ -126,7 +127,7 @@ const parseAttachmentLink = (
     type,
     slug,
     originalUrl: `${url.origin}${url.pathname}`,
-    title: url.searchParams.get('name') || 'Вложение',
+    title: url.searchParams.get('name') || i18n.global.t('editor.attachment'),
   };
 
   if (type === 'aidoc') {

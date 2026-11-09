@@ -1,9 +1,9 @@
 <template>
-  <v-tooltip text="Якорь" location="bottom">
+  <v-tooltip :text="t('editor.anchor')" location="bottom">
     <template #activator="{ props: tooltipProps }">
       <v-btn
         v-bind="tooltipProps"
-        aria-label="Якорь"
+        :aria-label="t('editor.anchor')"
         icon="mdi-bookmark"
         size="small"
         variant="text"
@@ -28,14 +28,14 @@
           <v-btn
             type="submit"
             icon="mdi-content-save"
-            aria-label="Сохранить якорь"
+            :aria-label="t('editor.saveAnchor')"
             size="x-small"
             color="primary"
             class="editor-anchor-menu__action"
           />
           <v-btn
             icon="mdi-close"
-            aria-label="Отменить создание якоря"
+            :aria-label="t('editor.cancelCreatingAnchor')"
             size="x-small"
             class="editor-anchor-menu__action editor-anchor-menu__cancel"
             @click="open = false"
@@ -44,7 +44,7 @@
         <div class="editor-anchor-menu__input">
           <v-text-field
             v-model="title"
-            label="Название якоря"
+            :label="t('editor.anchorName')"
             density="compact"
             variant="underlined"
             hide-details
@@ -57,10 +57,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { onBeforeUnmount, ref, watch } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 
 import { collectAnchorIds, makeUniqueSlug } from '../utils/editorAnchorSlug';
+
+const { t } = useI18n();
 
 const props = defineProps<{ editor: Editor }>();
 const open = ref(false);

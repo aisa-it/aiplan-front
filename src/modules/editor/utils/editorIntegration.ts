@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import { Docs } from '@aisa-it/aiplan-api-ts/src/Docs';
 import { Issues } from '@aisa-it/aiplan-api-ts/src/Issues';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
@@ -192,12 +193,12 @@ export const downloadEditorAttachment = async (link: EditorSpecialLink) => {
   }
   const response = await fetch(url, { credentials: 'include' });
   if (!response.ok)
-    throw new Error(`Не удалось скачать вложение: ${response.status}`);
+    throw new Error(i18n.global.t('editor.couldNotDownloadAttachment', { p0: response.status }));
   const objectUrl = URL.createObjectURL(await response.blob());
   try {
     const anchor = document.createElement('a');
     anchor.href = objectUrl;
-    anchor.download = link.title || 'Вложение';
+    anchor.download = link.title || i18n.global.t('editor.attachment');
     document.body.append(anchor);
     anchor.click();
     anchor.remove();

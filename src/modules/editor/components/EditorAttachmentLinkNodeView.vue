@@ -12,6 +12,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
@@ -21,6 +23,8 @@ import type {
   EditorAttachmentLinkPreview,
   EditorSpecialLink,
 } from '../model/editor.types';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const resolvers = inject(EDITOR_SPECIAL_LINK_RESOLVERS_KEY);
@@ -40,8 +44,8 @@ const title = computed(() => link.value.title || '#attachment');
 const tooltip = computed(() => {
   if (!preview.value?.sourceTitle) return;
 
-  const source = link.value.contextType === 'aidoc' ? 'документу' : 'задаче';
-  return `${title.value} прикреплён к ${source} ${preview.value.sourceTitle}`;
+  const source = link.value.contextType === 'aidoc' ? t('editor.attachmentDocumentTarget') : t('editor.attachmentTaskTarget');
+  return t('editor.isAttachedTo', { p0: title.value, p1: source, p2: preview.value.sourceTitle });
 });
 
 const { loading, preview } = useEditorLinkPreview<EditorAttachmentLinkPreview>(

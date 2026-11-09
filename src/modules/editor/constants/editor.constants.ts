@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type { Level } from '@tiptap/extension-heading';
 
 import type {
@@ -31,71 +32,269 @@ export const EDITOR_FONT_FAMILIES: Array<EditorSelectOption<string>> = [
   'monospace',
 ].map((value) => ({ title: value, value }));
 
-export const EDITOR_HEADING_OPTIONS: Array<
-  EditorSelectOption<Level | 0>
-> = [
-  { title: 'Абзац', value: 0 },
-  { title: 'Заголовок 1', value: 1 },
-  { title: 'Заголовок 2', value: 2 },
-  { title: 'Заголовок 3', value: 3 },
-  { title: 'Заголовок 4', value: 4 },
-  { title: 'Заголовок 5', value: 5 },
-  { title: 'Заголовок 6', value: 6 },
+export const EDITOR_HEADING_OPTIONS: Array<EditorSelectOption<Level | 0>> = [
+  {
+    get title() {
+      return i18n.global.t('editor.paragraph');
+    },
+    value: 0,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading1');
+    },
+    value: 1,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading2');
+    },
+    value: 2,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading3');
+    },
+    value: 3,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading4');
+    },
+    value: 4,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading5');
+    },
+    value: 5,
+  },
+  {
+    get title() {
+      return i18n.global.t('editor.heading6');
+    },
+    value: 6,
+  },
 ];
 
 export const EDITOR_ALIGNMENT_OPTIONS: EditorAlignmentOption[] = [
   {
     value: 'left',
     icon: 'align-left',
-    tooltip: 'Выровнять по левому краю',
+    get tooltip() {
+      return i18n.global.t('editor.alignLeft');
+    },
   },
   {
     value: 'center',
     icon: 'align-center',
-    tooltip: 'Выровнять по центру',
+    get tooltip() {
+      return i18n.global.t('editor.alignCenter');
+    },
   },
   {
     value: 'right',
     icon: 'align-right',
-    tooltip: 'Выровнять по правому краю',
+    get tooltip() {
+      return i18n.global.t('editor.alignRight');
+    },
   },
   {
     value: 'justify',
     icon: 'align-justify',
-    tooltip: 'Выровнять по ширине',
+    get tooltip() {
+      return i18n.global.t('editor.justify');
+    },
   },
 ];
 
 export const EDITOR_TEXT_COLORS: EditorColorOption[] = [
-  { light: '#474A52', dark: '#BAC4D5', label: 'Стандартный' },
-  { light: '#3F76FF', dark: '#7EA2FC', label: 'Синий' },
-  { light: '#1DABB8', dark: '#42D4E1', label: 'Бирюзовый' },
-  { light: '#43A047', dark: '#7CB342', label: 'Зелёный' },
-  { light: '#DC3E3E', dark: '#FF7A7A', label: 'Красный' },
-  { light: '#FF8B00', dark: '#FFAB00', label: 'Оранжевый' },
-  { light: '#E7AF41', dark: '#EFC980', label: 'Жёлтый' },
-  { light: '#DF49A7', dark: '#FA99D6', label: 'Розовый' },
-  { light: '#582EFF', dark: '#BA88FC', label: 'Фиолетовый' },
-  { light: '#795548', dark: '#BCAAA4', label: 'Коричневый' },
-  { light: '#000000', dark: '#FFFFFF', label: 'Монохромный' },
+  {
+    light: '#474A52',
+    dark: '#BAC4D5',
+    get label() {
+      return i18n.global.t('editor.default');
+    },
+  },
+  {
+    light: '#3F76FF',
+    dark: '#7EA2FC',
+    get label() {
+      return i18n.global.t('editor.blue');
+    },
+  },
+  {
+    light: '#1DABB8',
+    dark: '#42D4E1',
+    get label() {
+      return i18n.global.t('editor.turquoise');
+    },
+  },
+  {
+    light: '#43A047',
+    dark: '#7CB342',
+    get label() {
+      return i18n.global.t('editor.green');
+    },
+  },
+  {
+    light: '#DC3E3E',
+    dark: '#FF7A7A',
+    get label() {
+      return i18n.global.t('editor.red');
+    },
+  },
+  {
+    light: '#FF8B00',
+    dark: '#FFAB00',
+    get label() {
+      return i18n.global.t('editor.orange');
+    },
+  },
+  {
+    light: '#E7AF41',
+    dark: '#EFC980',
+    get label() {
+      return i18n.global.t('editor.yellow');
+    },
+  },
+  {
+    light: '#DF49A7',
+    dark: '#FA99D6',
+    get label() {
+      return i18n.global.t('editor.pink');
+    },
+  },
+  {
+    light: '#582EFF',
+    dark: '#BA88FC',
+    get label() {
+      return i18n.global.t('editor.purple');
+    },
+  },
+  {
+    light: '#795548',
+    dark: '#BCAAA4',
+    get label() {
+      return i18n.global.t('editor.brown');
+    },
+  },
+  {
+    light: '#000000',
+    dark: '#FFFFFF',
+    get label() {
+      return i18n.global.t('editor.monochrome');
+    },
+  },
 ];
 
 export const EDITOR_HIGHLIGHT_COLORS: EditorColorOption[] = [
-  { light: '#E1F5FE', dark: '#052C48', label: 'Синий' },
-  { light: '#DCF7F9', dark: '#0C4246', label: 'Бирюзовый' },
-  { light: '#E8F5E9', dark: '#17351A', label: 'Зелёный' },
-  { light: '#FCE4EC', dark: '#47000B', label: 'Красный' },
-  { light: '#FFE4CC', dark: '#522C00', label: 'Оранжевый' },
-  { light: '#FFF1E1', dark: '#524400', label: 'Жёлтый' },
-  { light: '#FEDCF2', dark: '#530436', label: 'Розовый' },
+  {
+    light: '#E1F5FE',
+    dark: '#052C48',
+    get label() {
+      return i18n.global.t('editor.blue');
+    },
+  },
+  {
+    light: '#DCF7F9',
+    dark: '#0C4246',
+    get label() {
+      return i18n.global.t('editor.turquoise');
+    },
+  },
+  {
+    light: '#E8F5E9',
+    dark: '#17351A',
+    get label() {
+      return i18n.global.t('editor.green');
+    },
+  },
+  {
+    light: '#FCE4EC',
+    dark: '#47000B',
+    get label() {
+      return i18n.global.t('editor.red');
+    },
+  },
+  {
+    light: '#FFE4CC',
+    dark: '#522C00',
+    get label() {
+      return i18n.global.t('editor.orange');
+    },
+  },
+  {
+    light: '#FFF1E1',
+    dark: '#524400',
+    get label() {
+      return i18n.global.t('editor.yellow');
+    },
+  },
+  {
+    light: '#FEDCF2',
+    dark: '#530436',
+    get label() {
+      return i18n.global.t('editor.pink');
+    },
+  },
 ];
 
 export const EDITOR_TABLE_CELL_COLORS = [
-  { value: 'red', light: '#FCE4EC', dark: '#47000B', label: 'Красный' },
-  { value: 'blue', light: '#E1F5FE', dark: '#052C48', label: 'Синий' },
-  { value: 'cyan', light: '#DCF7F9', dark: '#0C4246', label: 'Бирюзовый' },
-  { value: 'green', light: '#E8F5E9', dark: '#17351A', label: 'Зелёный' },
-  { value: 'orange', light: '#FFE4CC', dark: '#522C00', label: 'Оранжевый' },
-  { value: 'yellow', light: '#FFF1E1', dark: '#524400', label: 'Жёлтый' },
-  { value: 'pink', light: '#FEDCF2', dark: '#530436', label: 'Розовый' },
+  {
+    value: 'red',
+    light: '#FCE4EC',
+    dark: '#47000B',
+    get label() {
+      return i18n.global.t('editor.red');
+    },
+  },
+  {
+    value: 'blue',
+    light: '#E1F5FE',
+    dark: '#052C48',
+    get label() {
+      return i18n.global.t('editor.blue');
+    },
+  },
+  {
+    value: 'cyan',
+    light: '#DCF7F9',
+    dark: '#0C4246',
+    get label() {
+      return i18n.global.t('editor.turquoise');
+    },
+  },
+  {
+    value: 'green',
+    light: '#E8F5E9',
+    dark: '#17351A',
+    get label() {
+      return i18n.global.t('editor.green');
+    },
+  },
+  {
+    value: 'orange',
+    light: '#FFE4CC',
+    dark: '#522C00',
+    get label() {
+      return i18n.global.t('editor.orange');
+    },
+  },
+  {
+    value: 'yellow',
+    light: '#FFF1E1',
+    dark: '#524400',
+    get label() {
+      return i18n.global.t('editor.yellow');
+    },
+  },
+  {
+    value: 'pink',
+    light: '#FEDCF2',
+    dark: '#530436',
+    get label() {
+      return i18n.global.t('editor.pink');
+    },
+  },
 ] as const;

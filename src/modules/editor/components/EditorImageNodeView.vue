@@ -26,7 +26,7 @@
           <v-btn
             v-for="item in ALIGNMENT_ACTIONS"
             :key="item.value"
-            :aria-label="item.tooltip"
+            :aria-label="t(item.tooltipKey)"
             :class="{ 'editor-image__align-button--active': isAligned(item.value) }"
             :icon="item.icon"
             size="x-small"
@@ -37,8 +37,8 @@
             <v-tooltip activator="parent" location="top">
               {{
                 isAligned(item.value)
-                  ? 'Сбросить выравнивание'
-                  : item.tooltip
+                  ? t('editor.resetAlignment')
+                  : t(item.tooltipKey)
               }}
             </v-tooltip>
           </v-btn>
@@ -63,11 +63,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import { computed, inject, onBeforeUnmount, ref } from 'vue';
 
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
 import EditorDrawioDialog from './EditorDrawioDialog.vue';
+
+const { t } = useI18n();
 
 type ImageAlignment = 'left' | 'center' | 'right';
 type ResizeDirection = 'left' | 'right';
@@ -78,27 +82,23 @@ const openDiagram = () => {
   if (props.node.type.name === 'drawio' && !isReadonly.value) diagramOpen.value = true;
 };
 
-const ALIGNMENT_ACTIONS: Array<{
-  value: ImageAlignment;
-  icon: string;
-  tooltip: string;
-}> = [
+const ALIGNMENT_ACTIONS = [
   {
     value: 'left',
     icon: 'mdi-format-align-left',
-    tooltip: 'Выровнять по левому краю',
+    tooltipKey: 'editor.alignLeft',
   },
   {
     value: 'center',
     icon: 'mdi-format-align-center',
-    tooltip: 'Выровнять по центру',
+    tooltipKey: 'editor.alignCenter',
   },
   {
     value: 'right',
     icon: 'mdi-format-align-right',
-    tooltip: 'Выровнять по правому краю',
+    tooltipKey: 'editor.alignRight',
   },
-];
+] as const;
 
 const RESIZE_HANDLES: Array<{
   position: string;

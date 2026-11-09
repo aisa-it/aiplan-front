@@ -1,11 +1,11 @@
 <template>
   <v-menu v-model="isOpen" :close-on-content-click="false">
     <template #activator="{ props: menuProps }">
-      <v-tooltip text="Ссылка" location="bottom">
+      <v-tooltip :text="t('editor.link')" location="bottom">
         <template #activator="{ props: tooltipProps }">
           <v-btn
             v-bind="{ ...menuProps, ...tooltipProps }"
-            aria-label="Ссылка"
+            :aria-label="t('editor.link')"
             :class="{ 'editor-link-menu__button--active': isActive }"
             :color="isActive ? 'primary' : 'text'"
             :disabled="!canOpen"
@@ -26,7 +26,7 @@
           <v-btn
             type="submit"
             icon="mdi-content-save-outline"
-            aria-label="Сохранить ссылку"
+            :aria-label="t('editor.saveLink')"
             color="primary"
             size="small"
             variant="tonal"
@@ -35,7 +35,7 @@
             v-if="isActive"
             type="button"
             icon="mdi-link-variant-off"
-            aria-label="Удалить ссылку"
+            :aria-label="t('editor.deleteLink')"
             color="error"
             size="small"
             variant="tonal"
@@ -44,7 +44,7 @@
           <v-btn
             type="button"
             icon="mdi-close"
-            aria-label="Закрыть"
+            :aria-label="t('editor.close')"
             size="small"
             variant="text"
             @click="isOpen = false"
@@ -52,8 +52,8 @@
         </div>
 
         <v-btn-toggle v-if="enableAnchors" v-model="mode" mandatory density="compact" color="primary" class="mb-2">
-          <v-btn value="url" size="small">Ссылка</v-btn>
-          <v-btn value="anchor" size="small">Якорь в документе</v-btn>
+          <v-btn value="url" size="small">{{ t('editor.link') }}</v-btn>
+          <v-btn value="anchor" size="small">{{ t('editor.anchorInDocument') }}</v-btn>
         </v-btn-toggle>
         <v-select
           v-if="mode === 'anchor' && anchorTargets.length"
@@ -61,16 +61,16 @@
           :items="anchorTargets"
           item-title="label"
           item-value="id"
-          label="Выберите якорь"
+          :label="t('editor.selectAnAnchor')"
           density="compact"
           hide-details="auto"
           variant="outlined"
         />
-        <div v-else-if="mode === 'anchor'" class="pa-2 text-caption">В документе нет якорей — сначала добавьте якорь или заголовок.</div>
+        <div v-else-if="mode === 'anchor'" class="pa-2 text-caption">{{ t('editor.thisDocumentHasNoAnchorsAddAnAnchorOrHeadingFirst') }}</div>
         <v-text-field
           v-else
           v-model="href"
-          label="Введите ссылку"
+          :label="t('editor.enterALink')"
           :error-messages="errorMessage"
           autofocus
           density="compact"
@@ -84,6 +84,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, ref, watch } from 'vue';
 import type { Editor } from '@tiptap/vue-3';
 
@@ -91,6 +93,8 @@ import { useEditorRevision } from '../composables/useEditorRevision';
 import EditorIcon from './EditorIcon.vue';
 import { COMMENT_LINK_NODE, parseEditorSpecialLink } from '../utils/editorSpecialLinks';
 import { collectAnchorTargets } from '../utils/editorAnchorSlug';
+
+const { t } = useI18n();
 
 const isValidLink = (value: string) => {
   if (!value || /[\u0000-\u0020]/.test(value)) return false;
@@ -143,7 +147,7 @@ const saveLink = () => {
   const value = href.value.trim();
 
   if (!isValidLink(value)) {
-    errorMessage.value = 'Введите URL, относительный путь или якорь (#раздел)';
+    errorMessage.value = t('editor.enterAUrlRelativePathOrAnchorSection');
     return;
   }
 
@@ -161,7 +165,7 @@ const saveLink = () => {
     })).run()
     : chain.setLink({ href: value }).run();
   if (!applied) {
-    errorMessage.value = 'Не удалось применить ссылку к выделению';
+    errorMessage.value = t('editor.couldNotApplyTheLinkToTheSelection');
     return;
   }
   isOpen.value = false;

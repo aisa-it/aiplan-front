@@ -2,27 +2,31 @@
   <v-dialog :model-value="true" fullscreen persistent>
     <v-card>
       <v-toolbar density="compact">
-        <v-toolbar-title>Редактор диаграммы</v-toolbar-title>
-        <v-btn icon="mdi-close" aria-label="Закрыть редактор диаграммы" :disabled="exporting" @click="confirmClose = true" />
+        <v-toolbar-title>{{ t('editor.diagramEditor') }}</v-toolbar-title>
+        <v-btn icon="mdi-close" :aria-label="t('editor.closeDiagramEditor')" :disabled="exporting" @click="confirmClose = true" />
       </v-toolbar>
       <p v-if="error" role="alert" class="pa-4 text-error">{{ error }}</p>
       <iframe ref="frame" :src="url" title="Draw.io" class="editor-drawio-frame" />
     </v-card>
   </v-dialog>
   <v-dialog v-model="confirmClose" max-width="420">
-    <v-card title="Закрыть редактор диаграммы?">
-      <v-card-text>Несохранённые изменения будут потеряны.</v-card-text>
+    <v-card :title="t('editor.confirmCloseDiagramEditor')">
+      <v-card-text>{{ t('editor.unsavedChangesWillBeLost') }}</v-card-text>
       <v-card-actions>
-        <v-btn @click="confirmClose = false">Продолжить редактирование</v-btn>
-        <v-btn color="error" @click="emit('close')">Закрыть без сохранения</v-btn>
+        <v-btn @click="confirmClose = false">{{ t('editor.continueEditing') }}</v-btn>
+        <v-btn color="error" @click="emit('close')">{{ t('editor.closeWithoutSaving') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { forceLightDrawioSvg } from '../utils/forceLightDrawioSvg';
+
+const { t } = useI18n();
 
 const props = defineProps<{ xml: string; src: string }>();
 const emit = defineEmits<{
@@ -65,7 +69,7 @@ const receive = async (event: MessageEvent) => {
         if (!controller.signal.aborted) send({ action: 'load', xmlpng: data });
       }
     } catch {
-      if (!controller.signal.aborted) error.value = 'Не удалось загрузить диаграмму.';
+      if (!controller.signal.aborted) error.value = t('editor.couldNotLoadTheDiagram');
     }
   } else if (message.event === 'save' && typeof message.xml === 'string') {
     savedXml = message.xml;
@@ -74,7 +78,7 @@ const receive = async (event: MessageEvent) => {
   } else if (message.event === 'export' && exporting.value) {
     exporting.value = false;
     if (typeof message.data !== 'string' || !message.data.startsWith('data:image/svg+xml;base64,')) {
-      error.value = 'Не удалось сохранить изображение диаграммы.';
+      error.value = t('editor.couldNotSaveTheDiagramImage');
       send({ action: 'spinner', show: false });
       return;
     }

@@ -7,8 +7,8 @@
         v-else
         v-model="title"
         :readonly="readonly"
-        placeholder="Введите текст"
-        aria-label="Заголовок информационного блока"
+        :placeholder="t('editor.enterText')"
+        :aria-label="t('editor.infoBlockTitle')"
         class="editor-info-block__title"
         @focus="selectEditorBlockContent(editor, getPos)"
         @blur="updateTitle"
@@ -20,6 +20,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, ref, watch } from 'vue';
 import {
   NodeViewContent,
@@ -29,6 +31,8 @@ import {
 
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
 import { selectEditorBlockContent } from '../utils/selectEditorBlockContent';
+
+const { t } = useI18n();
 
 const ICONS: Record<string, string> = {
   infoIcon: 'mdi-information-outline',

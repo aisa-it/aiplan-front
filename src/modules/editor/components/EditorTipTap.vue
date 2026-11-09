@@ -74,8 +74,8 @@
                 v-if="canEdit"
                 type="button"
                 class="editor-tiptap__readonly-button"
-                title="Нажмите для редактирования"
-                aria-label="Нажмите для редактирования"
+                :title="t('editor.clickToEdit')"
+                :aria-label="t('editor.clickToEdit')"
                 @click="emit('enableEditing')"
               >
                 <EditorIcon name="edit" :size="30" />
@@ -101,8 +101,8 @@
             !isEditable &&
             headingLinks.length
           "
-          aria-label="Оглавление"
-          title="Оглавление"
+          :aria-label="t('editor.tableOfContents')"
+          :title="t('editor.tableOfContents')"
           icon
           color="primary"
           class="editor-tiptap-shell__toc-fab"
@@ -118,11 +118,11 @@
           :z-index="fullscreen ? 2700 : undefined"
         >
           <v-card class="editor-tiptap-shell__toc-sheet">
-            <v-card-title>Оглавление</v-card-title>
+            <v-card-title>{{ t('editor.tableOfContents') }}</v-card-title>
             <v-divider />
             <v-list class="editor-tiptap-shell__toc-sheet-list">
               <v-list-item
-                title="В начало документа"
+                :title="t('editor.toTheBeginningOfTheDocument')"
                 @click="selectTocSheetTarget('top')"
               />
               <v-divider class="my-1" />
@@ -137,7 +137,7 @@
               />
               <v-divider class="my-1" />
               <v-list-item
-                title="К комментариям"
+                :title="t('editor.toComments')"
                 @click="selectTocSheetTarget('comments')"
               />
             </v-list>
@@ -155,7 +155,7 @@
             variant="outlined"
             class="editor-tiptap-shell__action"
             @click="emit('cancel')"
-            >Отмена</v-btn
+            >{{ t('editor.cancel') }}</v-btn
           >
           <v-btn
             :loading="saving"
@@ -165,7 +165,7 @@
             variant="flat"
             class="editor-tiptap-shell__action"
             @click="handleSave"
-            >Сохранить</v-btn
+            >{{ t('editor.save') }}</v-btn
           >
         </div>
       </div>
@@ -199,6 +199,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, nextTick, onBeforeUnmount, provide, ref, watch } from 'vue';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { EditorContent, type Editor } from '@tiptap/vue-3';
@@ -245,6 +247,8 @@ import {
   resolveEditorIssueLink,
 } from '../utils/editorIntegration';
 
+const { t, locale } = useI18n();
+
 const props = withDefaults(defineProps<EditorTipTapProps>(), {
   modelValue: '',
   editable: true,
@@ -253,7 +257,6 @@ const props = withDefaults(defineProps<EditorTipTapProps>(), {
   loading: false,
   saving: false,
   showActions: true,
-  placeholder: 'Описание',
   showHeadings: false,
   enableAnchors: false,
   fullscreen: false,
@@ -460,9 +463,12 @@ const { editor } = useEditorInstance({
       allowImages: !props.disableImages,
       enableAnchors: props.enableAnchors,
       mention,
-      placeholder: props.placeholder,
+      placeholder: () => props.placeholder ?? t('editor.description'),
     }),
   onUpdate: (html) => emit('update:modelValue', html),
+});
+watch(locale, () => {
+  if (editor.value) editor.value.view.dispatch(editor.value.state.tr);
 });
 useEditorFloatingTableScroll(editor);
 

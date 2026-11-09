@@ -8,11 +8,11 @@
       </template>
       <v-card class="pa-2" width="300">
         <form @submit.prevent="save">
-          <v-text-field v-model="title" label="Введите название" autofocus
+          <v-text-field v-model="title" :label="t('editor.enterAName')" autofocus
             density="compact" hide-details variant="outlined" />
           <div class="d-flex justify-end mt-2">
-            <v-btn variant="text" @click="open = false">Отмена</v-btn>
-            <v-btn type="submit" color="primary" :disabled="!title.trim()">Сохранить название</v-btn>
+            <v-btn variant="text" @click="open = false">{{ t('editor.cancel') }}</v-btn>
+            <v-btn type="submit" color="primary" :disabled="!title.trim()">{{ t('editor.saveName') }}</v-btn>
           </div>
         </form>
       </v-card>
@@ -21,9 +21,13 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { computed, inject, ref, watch } from 'vue';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import { EDITOR_READONLY_KEY } from '../model/editor.injection';
+
+const { t } = useI18n();
 
 const props = defineProps(nodeViewProps);
 const injectedReadonly = inject(EDITOR_READONLY_KEY);

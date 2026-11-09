@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 export interface PlaygroundDocument {
   id?: string;
   title: string;
@@ -25,14 +26,14 @@ const readResponse = async (response: Response) => {
   const message =
     body && typeof body === 'object' && 'ru_error' in body
       ? String(body.ru_error)
-      : `Ошибка HTTP ${response.status}`;
+      : i18n.global.t('editor.httpError', { p0: response.status });
   throw new Error(message);
 };
 
 const readDocumentList = async (path: string): Promise<DocLight[]> => {
   const body = await readResponse(await fetch(path, { credentials: 'include' }));
   if (!Array.isArray(body)) {
-    throw new Error('API вернул неверный список документов');
+    throw new Error(i18n.global.t('editor.apiReturnedAnInvalidDocumentList'));
   }
   return body as DocLight[];
 };
@@ -73,7 +74,7 @@ export const loadPlaygroundDocument = async (
     !('content' in body) ||
     typeof body.content !== 'string'
   ) {
-    throw new Error('API вернул документ без HTML-содержимого');
+    throw new Error(i18n.global.t('editor.apiReturnedADocumentWithoutHtmlContent'));
   }
   return body as PlaygroundDocument;
 };
