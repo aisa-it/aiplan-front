@@ -16,10 +16,10 @@
 
     <div class="text-center">
       <span class="text-sm font-medium">
-        {{ status || 'Выбрать статус' }}
+        {{ status || t('userStatus.select') }}
 
         <span v-if="formattedStatusEndDate" class="text-xs">
-          (до {{ formattedStatusEndDate }})
+          {{ t('userStatus.until', { date: formattedStatusEndDate }) }}
         </span>
       </span>
     </div>
@@ -28,8 +28,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { formatDateTime, formatTime, isTodayDate } from '@/utils/time';
+
+import { getStatusKeyByText } from '../UserStatus.config';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -40,7 +43,13 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const status = computed(() => props.user.status);
+const { t } = useI18n();
+
+const status = computed(() => {
+  const key = getStatusKeyByText(props.user.status);
+  return key ? t(`userStatus.statuses.${key}`) : props.user.status;
+});
+
 const statusEmoji = computed(() => props.user.status_emoji);
 const statusEndDate = computed(() => props.user.status_end_date);
 

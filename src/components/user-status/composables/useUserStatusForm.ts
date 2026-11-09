@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import {
+  getStatusKeyByText,
   USER_STATUS,
   USER_STATUS_DURATION,
   type UserStatusFormModel,
@@ -24,11 +25,7 @@ export function useUserStatusForm() {
       return USER_STATUS.none.value;
     }
 
-    const found = Object.values(USER_STATUS).find(
-      (item) => item.label === status,
-    );
-
-    return found?.value ?? USER_STATUS.custom.value;
+    return getStatusKeyByText(status) ?? USER_STATUS.custom.value;
   };
 
   const setUser = (user: DtoUser) => {
@@ -72,7 +69,7 @@ export function useUserStatusForm() {
       status:
         statusData.value === USER_STATUS.custom.value
           ? form.customStatusText
-          : statusData.label,
+          : statusData.storedLabel,
 
       emoji: statusData.emoji,
     };

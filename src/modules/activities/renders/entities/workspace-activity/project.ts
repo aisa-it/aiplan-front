@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createExternalLinkPart,
@@ -22,7 +23,11 @@ export const renderProject: ActivityRenderer = (activity, context) => {
   const relation = activity.verb === 'created' ? 'at' : 'from';
 
   return createActivityMessage(
-    createTextPart(`${getActivityVerbText(activity.verb)} проект `),
+    createTextPart(
+      `${getActivityVerbText(activity.verb)} ${i18n.global.t(
+        'workspaceActivity.projectTarget',
+      )}`,
+    ),
     projectLink,
     ...createWorkspaceContextParts(
       activity,

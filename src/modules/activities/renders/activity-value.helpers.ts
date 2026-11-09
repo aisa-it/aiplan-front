@@ -1,18 +1,20 @@
-import { WORKSPACE_ROLE_TEXT } from '../model/activity-role.constants';
+import { i18n } from '@/i18n';
+import { WORKSPACE_ROLE_KEY } from '../model/activity-role.constants';
 
 import type { ActivityVerb } from '../model/activity.types';
+import type { MessageKey } from '@/i18n';
 
-const ACTIVITY_VERB_TEXT: Readonly<Record<ActivityVerb, string>> = {
-  created: 'создал(-а)',
-  deleted: 'удалил(-а)',
-  removed: 'убрал(-а)',
-  added: 'добавил(-а)',
-  updated: 'обновил(-а)',
-  move: 'перенес(-ла)',
-  copied: 'скопировал(-а)',
-  move_doc_to_workspace: 'перенес(-ла)',
-  move_doc_to_doc: 'перенес(-ла)',
-  move_workspace_to_doc: 'перенес(-ла)',
+const ACTIVITY_VERB_KEY: Readonly<Record<ActivityVerb, MessageKey>> = {
+  created: 'activities.verbs.created',
+  deleted: 'activities.verbs.deleted',
+  removed: 'activities.verbs.removed',
+  added: 'activities.verbs.added',
+  updated: 'activities.verbs.updated',
+  move: 'activities.verbs.move',
+  copied: 'activities.verbs.copied',
+  move_doc_to_workspace: 'activities.verbs.move_doc_to_workspace',
+  move_doc_to_doc: 'activities.verbs.move_doc_to_doc',
+  move_workspace_to_doc: 'activities.verbs.move_workspace_to_doc',
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -40,7 +42,7 @@ export const getActivityUserName = (user: unknown, fallback = '') => {
   const name = [
     getDetailString(user, 'last_name'),
     getDetailString(user, 'first_name'),
-    user.is_active === false ? '(Заблокирован)' : undefined,
+    user.is_active === false ? `(${i18n.global.t('common.states.blocked')})` : undefined,
   ]
     .filter(Boolean)
     .join(' ');
@@ -48,8 +50,13 @@ export const getActivityUserName = (user: unknown, fallback = '') => {
   return name || getDetailString(user, 'email') || fallback;
 };
 
-export const getRoleText = (value?: string) =>
-  WORKSPACE_ROLE_TEXT[Number(value)] ?? value ?? '';
+export const getRoleText = (value?: string) => {
+  const role = value !== undefined ? WORKSPACE_ROLE_KEY[Number(value)] : undefined;
+
+  return role ? i18n.global.t(role.labelKey) : (value ?? '');
+};
 
 export const getActivityVerbText = (verb?: string) =>
-  (verb && ACTIVITY_VERB_TEXT[verb as ActivityVerb]) ?? verb ?? '';
+  verb && ACTIVITY_VERB_KEY[verb as ActivityVerb]
+    ? i18n.global.t(ACTIVITY_VERB_KEY[verb as ActivityVerb])
+    : (verb ?? '');

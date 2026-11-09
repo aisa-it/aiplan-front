@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createActivityMessage,
   createTextPart,
@@ -17,7 +18,9 @@ export const renderDocAttachmentCreated: ActivityRenderer = (
     '';
 
   return createActivityMessage(
-    createTextPart(`добавил(-а) вложение ${assetName} в документ`),
+    createTextPart(
+      i18n.global.t('docActivity.attachmentAdded', { value: assetName }),
+    ),
     ...createCurrentDocParts(activity, context),
   );
 };
@@ -28,7 +31,9 @@ export const renderDocAttachmentDeleted: ActivityRenderer = (
 ) =>
   createActivityMessage(
     createTextPart(
-      `удалил(-а) вложение ${activity.old_value ?? ''} в документе`,
+      i18n.global.t('docActivity.attachmentDeleted', {
+        value: activity.old_value ?? '',
+      }),
     ),
     ...createCurrentDocParts(activity, context),
   );

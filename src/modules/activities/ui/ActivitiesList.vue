@@ -2,7 +2,11 @@
   <section class="my-4">
     <div class="flex items-center justify-between gap-4 px-4">
       <h4 class="text-2xl font-medium">
-        Активность {{ currentDay ? `${currentDay} г.` : '' }}
+        {{
+          currentDay
+            ? t('activities.ui.titleWithDate', { date: currentDay })
+            : t('activities.ui.title')
+        }}
       </h4>
 
       <v-btn
@@ -10,7 +14,7 @@
         icon="mdi-close"
         size="x-small"
         variant="text"
-        aria-label="Закрыть активности за выбранный день"
+        :aria-label="t('activities.ui.closeDay')"
         @click="closeCurrentDay"
       />
     </div>
@@ -29,7 +33,9 @@
       />
     </ul>
 
-    <div v-else class="flex min-h-24 items-center px-4">Нет данных</div>
+    <div v-else class="flex min-h-24 items-center px-4">
+      {{ t('activities.ui.noData') }}
+    </div>
 
     <PaginationDefault
       v-if="!loading && rowsCount > 0"
@@ -44,6 +50,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
 import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
@@ -76,6 +83,8 @@ const emit = defineEmits<{
   request: [options: ActivitiesListRequest];
   closeCurrentDay: [];
 }>();
+
+const { t } = useI18n();
 
 const page = ref(1);
 const rowsPerPage = ref(10);

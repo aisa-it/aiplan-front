@@ -3,6 +3,8 @@ import { onBeforeUnmount, ref } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 
 import { ProfileService } from '../../api/profile.service';
+import { toast } from '@/modules/toast';
+import { i18n } from '@/i18n';
 
 export function useFormAvatar() {
   const userStore = useUserStore();
@@ -27,10 +29,8 @@ export function useFormAvatar() {
       const updatedUser = await ProfileService.deleteAvatar();
       userStore.replaceUser(updatedUser);
       clearAvatarPreview();
-      // TODO: показать уведомление SUCCESS_DELETE_IMG_PROFILE после переноса системы уведомлений.
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+      toast.success(i18n.global.t('profile.toast.imageRemoved'));
+    } catch {
     } finally {
       avatarDeleting.value = false;
     }

@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import {
   createExternalLinkPart,
   createTextPart,
@@ -7,14 +8,23 @@ import { createWorkspaceLink } from '../../entity-link.helpers';
 import type { ActivityRenderContext } from '../../../model/activity.types';
 import type { ActivityMessagePart } from '../../activity-renderer.types';
 import type { DtoActivityEventFull } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { MessageKey } from '@/i18n';
 
 export type IssueRelation = 'for' | 'from' | 'in' | 'into';
 
-const ISSUE_RELATION_TEXT: Readonly<Record<IssueRelation, string>> = {
-  for: 'для задачи ',
-  from: 'из задачи ',
-  in: 'в задаче ',
-  into: 'в задачу ',
+const ISSUE_RELATION_KEY: Readonly<Record<IssueRelation, MessageKey>> = {
+  for: 'issueActivity.relations.for',
+  from: 'issueActivity.relations.from',
+  in: 'issueActivity.relations.in',
+  into: 'issueActivity.relations.into',
+};
+
+const ISSUE_FIELD_ACTION_KEY: Readonly<Record<string, MessageKey>> = {
+  created: 'issueActivity.fieldActions.added',
+  added: 'issueActivity.fieldActions.added',
+  deleted: 'issueActivity.fieldActions.removed',
+  removed: 'issueActivity.fieldActions.removed',
+  updated: 'issueActivity.fieldActions.updated',
 };
 
 const isCurrentIssue = (context: ActivityRenderContext) =>
@@ -30,11 +40,9 @@ export const getChangedDetail = (activity: DtoActivityEventFull) =>
   activity.new_value ? activity.new_entity_detail : activity.old_entity_detail;
 
 export const getIssueFieldActionText = (verb?: string) => {
-  if (verb === 'created' || verb === 'added') return 'добавил(-а)';
-  if (verb === 'deleted' || verb === 'removed') return 'убрал(-а)';
-  if (verb === 'updated') return 'обновил(-а)';
+  const key = verb ? ISSUE_FIELD_ACTION_KEY[verb] : undefined;
 
-  return verb ?? '';
+  return key ? i18n.global.t(key) : (verb ?? '');
 };
 
 export const createIssueLink = (
@@ -75,7 +83,7 @@ export const createIssueRelationParts = (
   isCurrentIssue(context)
     ? []
     : [
-        createTextPart(ISSUE_RELATION_TEXT[relation]),
+        createTextPart(i18n.global.t(ISSUE_RELATION_KEY[relation])),
         createIssueLink(activity),
       ];
 
@@ -88,7 +96,7 @@ export const createIssueWorkspaceContextParts = (
   }
 
   return [
-    createTextPart(' в пространстве '),
+    createTextPart(i18n.global.t('issueActivity.workspaceContext')),
     createWorkspaceLink(activity),
   ];
 };
