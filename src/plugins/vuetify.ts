@@ -52,6 +52,7 @@ const vuetify = createVuetify({
           surface: '#1f2228',
           border: '#31363f',
           text: '#bac4d5',
+          border: '#31363f',
         },
       },
     },
