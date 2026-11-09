@@ -1,8 +1,12 @@
 <template>
   <div class="flex h-full min-h-0 flex-col px-6 pb-2">
     <v-tabs v-model="activeTab" color="primary" grow height="40">
-      <v-tab class="normal-case" value="unread">Непрочитанные</v-tab>
-      <v-tab class="normal-case" value="read">Прочитанные</v-tab>
+      <v-tab class="normal-case" value="unread">{{
+        t('workspaceNotifications.tabs.unread')
+      }}</v-tab>
+      <v-tab class="normal-case" value="read">{{
+        t('workspaceNotifications.tabs.read')
+      }}</v-tab>
     </v-tabs>
 
     <v-virtual-scroll
@@ -30,7 +34,7 @@
             :disabled="isMarkingAsRead"
             @click="emit('readAll')"
           >
-            Прочитать все
+            {{ t('workspaceNotifications.readAll') }}
           </v-btn>
         </div>
 
@@ -44,7 +48,7 @@
     </v-virtual-scroll>
 
     <div v-else class="grid min-h-65 flex-1 place-items-center text-secondary">
-      Уведомления не найдены
+      {{ t('workspaceNotifications.notFound') }}
     </div>
 
     <div v-if="isLoadingMore" class="flex h-8 shrink-0 justify-center pt-1">
@@ -55,6 +59,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import DefaultLoader from '@/components/loaders/DefaultLoader.vue';
 import NotificationItem from './NotificationItem.vue';
@@ -64,19 +69,19 @@ import type {
   WorkspaceNotification,
 } from '../models';
 
-const MONTH_NAMES = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь',
+const MONTH_KEYS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
 ] as const;
 
 interface NotificationDateGroup {
@@ -98,6 +103,8 @@ const props = defineProps<{
   readNotifications: WorkspaceNotification[];
   unreadNotifications: WorkspaceNotification[];
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   loadMore: [type: NotificationTab];
@@ -151,7 +158,13 @@ const rows = computed<NotificationListRow[]>(() => {
       {
         date: group.key,
         key: `date:${group.key}`,
-        label: `${group.date.getDate()} ${MONTH_NAMES[group.date.getMonth()]} ${group.date.getFullYear()}`,
+        label: t('workspaceNotifications.dateLabel', {
+          day: group.date.getDate(),
+          month: t(
+            `workspaceNotifications.months.${MONTH_KEYS[group.date.getMonth()]}`,
+          ),
+          year: group.date.getFullYear(),
+        }),
         type: 'date',
       },
       ...group.notifications.map(

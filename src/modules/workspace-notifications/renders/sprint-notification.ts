@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessagePart,
@@ -27,9 +28,7 @@ export const renderSprintNotification = (
     ? linkPart(sprintName, sprintHref)
     : textPart(sprintName ? `"${sprintName}"` : '');
   const issueEntity = getEntity(
-    data.verb === 'removed'
-      ? data.old_entity_detail
-      : data.new_entity_detail,
+    data.verb === 'removed' ? data.old_entity_detail : data.new_entity_detail,
   );
   const issueKey = getStringValue(
     data.verb === 'removed' ? data.old_value : data.new_value,
@@ -55,11 +54,22 @@ export const renderSprintNotification = (
   switch (data.field) {
     case 'sprint':
       if (data.verb === 'created') {
-        return [textPart('создал(-а) спринт '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.createdTheSprint',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       if (data.verb === 'deleted') {
         return [
-          textPart('удалил(-а) спринт '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.deletedTheSprint',
+            ),
+          ),
           sprintName
             ? sprintReference
             : textPart(getStringValue(data.old_value)),
@@ -69,30 +79,65 @@ export const renderSprintNotification = (
     case 'name':
     case 'sprint_name':
       if (data.verb === 'updated') {
-        return [textPart('обновил(-а) название спринта '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.updatedTheSprintTitle',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       break;
     case 'description':
     case 'sprint_description':
       if (data.verb === 'updated') {
-        return [textPart('обновил(-а) описание спринта '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.updatedTheSprintDescription',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       break;
     case 'start_date':
     case 'sprint_start':
       if (data.verb === 'updated') {
-        return [textPart('изменил(-а) дату начала спринта '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.changedTheSprintStartDate',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       break;
     case 'end_date':
     case 'sprint_end':
       if (data.verb === 'updated') {
-        return [textPart('изменил(-а) дату конца спринта '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.changedTheSprintEndDate',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       break;
     case 'sprint_date':
       if (data.verb === 'updated') {
-        return [textPart('изменил(-а) даты спринта '), sprintReference];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.changedTheSprintDates',
+            ),
+          ),
+          sprintReference,
+        ];
       }
       break;
     case 'issue_list':
@@ -100,17 +145,29 @@ export const renderSprintNotification = (
     case 'issue':
       if (data.verb === 'added') {
         return [
-          textPart('добавил(-а) в спринт '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.addedToTheSprint',
+            ),
+          ),
           sprintReference,
-          textPart(' задачу '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.sprint.theIssue2'),
+          ),
           issue,
         ];
       }
       if (data.verb === 'removed') {
         return [
-          textPart('убрал(-а) из спринта '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.removedFromTheSprint',
+            ),
+          ),
           sprintReference,
-          textPart(' задачу '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.sprint.theIssue'),
+          ),
           issue,
         ];
       }
@@ -120,7 +177,10 @@ export const renderSprintNotification = (
       if (data.verb === 'added') {
         return [
           textPart(
-            `добавил(-а) наблюдателя ${getFullName(data.new_entity_detail)} в спринт `,
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.addedWatcherToTheSprint',
+              { p0: getFullName(data.new_entity_detail) },
+            ),
           ),
           sprintReference,
         ];
@@ -128,7 +188,10 @@ export const renderSprintNotification = (
       if (data.verb === 'removed') {
         return [
           textPart(
-            `убрал(-а) наблюдателя ${getFullName(data.old_entity_detail)} из спринта `,
+            i18n.global.t(
+              'workspaceNotifications.renders.sprint.removedWatcherFromTheSprint',
+              { p0: getFullName(data.old_entity_detail) },
+            ),
           ),
           sprintReference,
         ];

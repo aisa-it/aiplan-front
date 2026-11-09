@@ -10,7 +10,7 @@
   >
     <v-btn
       v-bind="$attrs"
-      aria-label="Уведомления"
+      :aria-label="t('workspaceNotifications.title')"
       icon
       variant="text"
       :ripple="false"
@@ -22,7 +22,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import BellIcon from '@/components/icons/BellIcon.vue';
+
+const { t } = useI18n();
 
 defineOptions({ inheritAttrs: false });
 

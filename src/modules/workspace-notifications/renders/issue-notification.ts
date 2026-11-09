@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import dayjs from 'dayjs';
 
 import { formatDateTime } from '@/utils/time';
@@ -51,35 +52,67 @@ export const renderIssueNotification = (
     case 'issue':
       return [
         textPart(
-          `${getVerbText(data.verb)} задачу ${oldValue ? `"${notification.detail.project?.identifier}-${oldValue}"` : ''}`,
+          i18n.global.t('workspaceNotifications.renders.issue.theIssue2', {
+            p0: getVerbText(data.verb),
+            p1: oldValue
+              ? `"${notification.detail.project?.identifier}-${oldValue}"`
+              : '',
+          }),
         ),
       ];
     case 'labels':
       return [
         textPart(
-          `${newValue ? 'добавил(-а) новый тег' : 'убрал(-а) тег'} "${changedValue}" в задаче `,
+          i18n.global.t('workspaceNotifications.renders.issue.inTheIssue3', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.addedANewLabel',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedALabel',
+                ),
+            p1: changedValue,
+          }),
         ),
         issue,
       ];
     case 'status':
       return [
         textPart(
-          `поменял(-а) статус на "${newValue ? addSpaceIfCamelCase(newValue) : 'Не выбрано'}" в задаче `,
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.changedTheStatusToInTheIssue',
+            {
+              p0: newValue
+                ? addSpaceIfCamelCase(newValue)
+                : i18n.global.t(
+                    'workspaceNotifications.renders.issue.notSelected',
+                  ),
+            },
+          ),
         ),
         issue,
       ];
     case 'priority': {
       const action = newValue
         ? oldValue && oldValue !== '<nil>'
-          ? 'изменил(-а) приоритет на'
-          : 'установил(-а) приоритет'
-        : 'убрал(-а) приоритет';
+          ? i18n.global.t(
+              'workspaceNotifications.renders.issue.changedThePriorityTo',
+            )
+          : i18n.global.t('workspaceNotifications.renders.issue.setThePriority')
+        : i18n.global.t(
+            'workspaceNotifications.renders.issue.removedThePriority',
+          );
       const priority = getPriorityText(data.new_value);
       const priorityText = priority
         ? ` "${priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()}"`
         : '';
       return [
-        textPart(`${action}${priorityText} в задаче `),
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.issue.inTheIssue2', {
+            p0: action,
+            p1: priorityText,
+          }),
+        ),
         issue,
       ];
     }
@@ -87,16 +120,33 @@ export const renderIssueNotification = (
       return [
         textPart(
           newValue
-            ? 'установил(-а), что задача '
-            : 'убрал(-а), что задача ',
+            ? i18n.global.t(
+                'workspaceNotifications.renders.issue.setTheConditionThatTheIssue',
+              )
+            : i18n.global.t(
+                'workspaceNotifications.renders.issue.removedTheConditionThatTheIssue',
+              ),
         ),
         issue,
-        textPart(` блокирует ${changedValue}`),
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.issue.blocks', {
+            p0: changedValue,
+          }),
+        ),
       ];
     case 'blocks':
       return [
         textPart(
-          `${newValue ? 'установил(-а) блокировщик' : 'убрал(-а) блокировщик'} ${changedValue} для задачи `,
+          i18n.global.t('workspaceNotifications.renders.issue.forTheIssue5', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.setTheBlocker',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedTheBlocker',
+                ),
+            p1: changedValue,
+          }),
         ),
         issue,
       ];
@@ -105,7 +155,16 @@ export const renderIssueNotification = (
       const date = dayjs(value).isValid() ? formatDateTime(value) : value;
       return [
         textPart(
-          `${newValue ? 'установил(-а) срок исполнения' : 'убрал(-а) срок исполнения'} ${date} для задачи `,
+          i18n.global.t('workspaceNotifications.renders.issue.forTheIssue4', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.setTheDueDate',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedTheDueDate',
+                ),
+            p1: date,
+          }),
         ),
         issue,
       ];
@@ -113,64 +172,135 @@ export const renderIssueNotification = (
     case 'parent':
       return [
         textPart(
-          `${newValue ? 'добавил(-а) родительскую задачу ' : 'убрал(-а) родителя'} ${changedValue} для задачи `,
+          i18n.global.t('workspaceNotifications.renders.issue.forTheIssue3', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.addedTheParentIssue',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedTheParentIssue',
+                ),
+            p1: changedValue,
+          }),
         ),
         issue,
       ];
     case 'sub_issue':
       return [
         textPart(
-          `${newValue ? 'добавил(-а) подзадачу ' : 'убрал(-а) подзадачу'} ${changedValue} для задачи `,
+          i18n.global.t('workspaceNotifications.renders.issue.forTheIssue2', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.addedTheSubissue',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedTheSubissue',
+                ),
+            p1: changedValue,
+          }),
         ),
         issue,
       ];
     case 'linked':
       return [
         textPart(
-          `${newValue ? 'добавил(-а) связанную задачу ' : 'убрал(-а) связанную задачу '} ${changedValue} для задачи `,
+          i18n.global.t('workspaceNotifications.renders.issue.forTheIssue', {
+            p0: newValue
+              ? i18n.global.t(
+                  'workspaceNotifications.renders.issue.addedTheLinkedIssue',
+                )
+              : i18n.global.t(
+                  'workspaceNotifications.renders.issue.removedTheLinkedIssue',
+                ),
+            p1: changedValue,
+          }),
         ),
         issue,
       ];
     case 'watchers':
     case 'assignees': {
       const entity = getEntityByChange(data);
-      const action = newValue ? 'добавил(-а)' : 'убрал(-а)';
-      const role = data.field === 'watchers' ? 'наблюдателя' : 'исполнителя';
+      const action = newValue
+        ? i18n.global.t('workspaceNotifications.renders.issue.added')
+        : i18n.global.t('workspaceNotifications.renders.issue.removed');
+      const role =
+        data.field === 'watchers'
+          ? i18n.global.t('workspaceNotifications.renders.issue.watcher')
+          : i18n.global.t('workspaceNotifications.renders.issue.assignee');
       return [
         textPart(
-          `${action} ${role} ${getUserDisplayName(entity)} ${newValue ? 'в задачу' : 'из задачи'} `,
+          `${action} ${role} ${getUserDisplayName(entity)} ${newValue ? i18n.global.t('workspaceNotifications.renders.issue.toTheIssue') : i18n.global.t('workspaceNotifications.renders.issue.fromTheIssue')} `,
         ),
         issue,
       ];
     }
     case 'description':
-      return [textPart('обновил(-а) описание в задаче '), issue];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.updatedTheDescriptionInTheIssue',
+          ),
+        ),
+        issue,
+      ];
     case 'name':
-      return [textPart('обновил(-а) название в задаче '), issue];
+      return [
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.updatedTheTitleInTheIssue',
+          ),
+        ),
+        issue,
+      ];
     case 'attachment':
       return [
-        textPart(`${getVerbText(data.verb)} вложение в задачу `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.anAttachmentToTheIssue',
+            { p0: getVerbText(data.verb) },
+          ),
+        ),
         issue,
       ];
     case 'link':
     case 'link_url':
       return [
-        textPart(`${getVerbText(data.verb)} ссылку в задачe `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.aLinkInTheIssue',
+            { p0: getVerbText(data.verb) },
+          ),
+        ),
         issue,
       ];
     case 'link_title':
       return [
-        textPart(`${getVerbText(data.verb)} название ссылки в задачe `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.aLinkTitleInTheIssue',
+            { p0: getVerbText(data.verb) },
+          ),
+        ),
         issue,
       ];
     case 'comment':
       return [
-        textPart(`${getVerbText(data.verb)} комментарий в задачe `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.aCommentInTheIssue',
+            { p0: getVerbText(data.verb) },
+          ),
+        ),
         issue,
       ];
     case 'label':
       return [
-        textPart(`${getVerbText(data.verb)} тег в задачe `),
+        textPart(
+          i18n.global.t(
+            'workspaceNotifications.renders.issue.aLabelInTheIssue',
+            { p0: getVerbText(data.verb) },
+          ),
+        ),
         issue,
       ];
     case 'project': {
@@ -180,12 +310,18 @@ export const renderIssueNotification = (
 
       if (data.verb === 'move') {
         return [
-          textPart('перенес(-ла) задачу '),
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.issue.movedTheIssue'),
+          ),
           issue,
           textPart(' '),
           ...(oldValue
             ? [
-                textPart('из проекта '),
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.issue.fromProject2',
+                  ),
+                ),
                 linkPart(
                   oldProject.name ?? '',
                   getProjectHref(
@@ -194,11 +330,21 @@ export const renderIssueNotification = (
                   ),
                 ),
               ]
-            : [textPart('из скрытого/удаленного проекта')]),
+            : [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.issue.fromAHiddenDeletedProject2',
+                  ),
+                ),
+              ]),
           textPart(' '),
           ...(newValue
             ? [
-                textPart('в проект '),
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.issue.toProject2',
+                  ),
+                ),
                 linkPart(
                   newProject.name ?? '',
                   getProjectHref(
@@ -207,22 +353,42 @@ export const renderIssueNotification = (
                   ),
                 ),
               ]
-            : [textPart('в скрытый/удаленный проект')]),
+            : [
+                textPart(
+                  i18n.global.t(
+                    'workspaceNotifications.renders.issue.toAHiddenDeletedProject2',
+                  ),
+                ),
+              ]),
         ];
       }
       break;
     }
     case 'issue_transfer': {
       const action =
-        data.verb === 'copied' ? 'скопировал(-а)' : 'перенес(-ла)';
+        data.verb === 'copied'
+          ? i18n.global.t('workspaceNotifications.renders.issue.copied')
+          : i18n.global.t('workspaceNotifications.renders.issue.moved');
       const oldProject = oldValue
-        ? `из проекта "${oldValue}"`
-        : 'из скрытого/удаленного проекта';
+        ? i18n.global.t('workspaceNotifications.renders.issue.fromProject', {
+            p0: oldValue,
+          })
+        : i18n.global.t(
+            'workspaceNotifications.renders.issue.fromAHiddenDeletedProject',
+          );
       const newProject = newValue
-        ? `в проект "${newValue}"`
-        : 'в скрытый/удаленный проект';
+        ? i18n.global.t('workspaceNotifications.renders.issue.toProject', {
+            p0: newValue,
+          })
+        : i18n.global.t(
+            'workspaceNotifications.renders.issue.toAHiddenDeletedProject',
+          );
       return [
-        textPart(`${action} задачу `),
+        textPart(
+          i18n.global.t('workspaceNotifications.renders.issue.theIssue', {
+            p0: action,
+          }),
+        ),
         issue,
         textPart(` ${oldProject} ${newProject}`),
       ];
@@ -243,24 +409,67 @@ export const renderIssueNotification = (
       );
 
       if (data.verb === 'added') {
-        return [textPart('добавил(-а) задачу '), issue, textPart(' в спринт '), sprint];
+        return [
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.issue.addedTheIssue'),
+          ),
+          issue,
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.issue.toTheSprint'),
+          ),
+          sprint,
+        ];
       }
       if (data.verb === 'removed') {
-        return [textPart('убрал(-а) задачу '), issue, textPart(' из спринта '), sprint];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.issue.removedTheIssue',
+            ),
+          ),
+          issue,
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.issue.fromTheSprint'),
+          ),
+          sprint,
+        ];
       }
       if (data.verb === 'updated') {
-        return [textPart('изменил(-а) спринт на '), sprint, textPart(' в задаче '), issue];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.issue.changedTheSprintTo',
+            ),
+          ),
+          sprint,
+          textPart(
+            i18n.global.t('workspaceNotifications.renders.issue.inTheIssue'),
+          ),
+          issue,
+        ];
       }
       break;
     }
   }
 
   if (data.verb === 'created') {
-    return [textPart('создал(-а) задачу '), issue];
+    return [
+      textPart(
+        i18n.global.t('workspaceNotifications.renders.issue.createdTheIssue'),
+      ),
+      issue,
+    ];
   }
 
   if (data.comment_stripped) {
-    return [textPart('добавил(-а) комментарий в задачe '), issue];
+    return [
+      textPart(
+        i18n.global.t(
+          'workspaceNotifications.renders.issue.addedACommentToTheIssue',
+        ),
+      ),
+      issue,
+    ];
   }
 
   return [];

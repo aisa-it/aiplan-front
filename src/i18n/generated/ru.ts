@@ -15,6 +15,7 @@ import sprintActivityRu from '@/modules/activities/renders/entities/sprint-activ
 import toastRu from '@/modules/toast/i18n/ru';
 import userStatusRu from '@/components/user-status/i18n/ru';
 import workspaceActivityRu from '@/modules/activities/renders/entities/workspace-activity/i18n/ru';
+import workspaceNotificationsRu from '@/modules/workspace-notifications/i18n/ru';
 
 export default {
   activities: activitiesRu,
@@ -32,4 +33,5 @@ export default {
   toast: toastRu,
   userStatus: userStatusRu,
   workspaceActivity: workspaceActivityRu,
+  workspaceNotifications: workspaceNotificationsRu,
 };

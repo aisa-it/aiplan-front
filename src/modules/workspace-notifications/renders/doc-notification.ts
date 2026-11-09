@@ -1,3 +1,4 @@
+import { i18n } from '@/i18n';
 import type {
   NotificationActivityData,
   NotificationMessagePart,
@@ -27,38 +28,90 @@ export const renderDocNotification = (
   switch (data.field) {
     case 'title':
       if (data.verb === 'updated') {
-        return [textPart('обновил(-а) название в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.updatedTheTitleInTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     case 'description':
       if (data.verb === 'updated') {
-        return [textPart('обновил(-а) описание в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.updatedTheDescriptionInTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     case 'attachment':
       if (data.verb === 'created') {
-        return [textPart('добавил(-а) вложение в документ '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.addedAnAttachmentToTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       if (data.verb === 'deleted') {
-        return [textPart('удалил(-а) вложение в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.deletedAnAttachmentFromTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     case 'comment':
       if (data.verb === 'created') {
-        return [textPart('добавил(-а) комментарий в документ '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.addedACommentToTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       if (data.verb === 'deleted') {
-        return [textPart('удалил(-а) комментарий в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.deletedACommentInTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       if (data.verb === 'updated') {
-        return [textPart('изменил(-а) комментарий в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.editedACommentInTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     case 'watchers':
       if (data.verb === 'added') {
         return [
           textPart(
-            `добавил(-а) наблюдателя ${getFullName(data.new_entity_detail)} в документ `,
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.addedWatcherToTheDocument',
+              { p0: getFullName(data.new_entity_detail) },
+            ),
           ),
           doc,
         ];
@@ -66,7 +119,10 @@ export const renderDocNotification = (
       if (data.verb === 'removed') {
         return [
           textPart(
-            `убрал(-а) наблюдателя ${getFullName(data.old_entity_detail)} из документа `,
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.removedWatcherFromTheDocument',
+              { p0: getFullName(data.old_entity_detail) },
+            ),
           ),
           doc,
         ];
@@ -75,7 +131,14 @@ export const renderDocNotification = (
     case 'reader_role':
     case 'editor_role':
       if (data.verb === 'updated') {
-        return [textPart('обновил(-а) права доступа в документе '), doc];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.updatedAccessPermissionsInTheDocument',
+            ),
+          ),
+          doc,
+        ];
       }
       break;
     case 'readers':
@@ -87,7 +150,10 @@ export const renderDocNotification = (
             : data.old_entity_detail;
         return [
           textPart(
-            `обновил(-а) индивидуальные права доступа пользователя ${getFullName(user)} в документе `,
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.updatedIndividualAccessPermissionsForInTheDocument',
+              { p0: getFullName(user) },
+            ),
           ),
           doc,
         ];
@@ -100,12 +166,23 @@ export const renderDocNotification = (
       if (data.verb === 'created') {
         const entity = getEntity(data.new_entity_detail);
         return [
-          textPart('создал(-а) документ '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.createdTheDocument',
+            ),
+          ),
           linkPart(`"${newValue}"`, entity.url),
         ];
       }
       if (data.verb === 'deleted') {
-        return [textPart(`удалил(-а) документ ${oldValue}`)];
+        return [
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.deletedTheDocument',
+              { p0: oldValue },
+            ),
+          ),
+        ];
       }
       if (
         data.verb === 'move_doc_to_doc' ||
@@ -113,22 +190,45 @@ export const renderDocNotification = (
         data.verb === 'move_workspace_to_doc'
       ) {
         return [
-          textPart('перенес(-ла) документ '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.movedTheDocument',
+            ),
+          ),
           doc,
           textPart(
-            ` из ${data.old_entity_detail ? oldValue : 'корневой папки'} в ${data.new_entity_detail ? newValue : 'корневую папку'}`,
+            i18n.global.t('workspaceNotifications.renders.doc.fromTo', {
+              p0: data.old_entity_detail
+                ? oldValue
+                : i18n.global.t(
+                    'workspaceNotifications.renders.doc.theRootFolder',
+                  ),
+              p1: data.new_entity_detail
+                ? newValue
+                : i18n.global.t(
+                    'workspaceNotifications.renders.doc.theRootFolder2',
+                  ),
+            }),
           ),
         ];
       }
       if (data.verb === 'added') {
         return [
-          textPart('добавил(-а) дочерний документ '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.addedTheChildDocument',
+            ),
+          ),
           linkPart(`"${newValue}"`, getEntity(data.new_entity_detail).url),
         ];
       }
       if (data.verb === 'removed') {
         return [
-          textPart('убрал(-а) дочерний документ '),
+          textPart(
+            i18n.global.t(
+              'workspaceNotifications.renders.doc.removedTheChildDocument',
+            ),
+          ),
           linkPart(`"${oldValue}"`, getEntity(data.old_entity_detail).url),
         ];
       }

@@ -30,7 +30,7 @@
           <template #activator="{ props: tooltipProps }">
             <v-btn
               v-bind="tooltipProps"
-              aria-label="Пометить как прочитанное"
+              :aria-label="t('workspaceNotifications.markAsRead')"
               class="shrink-0 text-center"
               icon
               size="32"
@@ -45,7 +45,7 @@
             </v-btn>
           </template>
 
-          Пометить как прочитанное
+          {{ t('workspaceNotifications.markAsRead') }}
         </v-tooltip>
       </div>
 
@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 import { formatDateTime } from '@/utils/time';
@@ -70,6 +71,8 @@ const props = defineProps<{
   isMarkingAsRead: boolean;
   notification: WorkspaceNotification;
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   read: [id: string];
