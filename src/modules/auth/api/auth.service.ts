@@ -1,19 +1,17 @@
-import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
-export const authApi = new (withInterceptors(Users))();
+import { usersApi } from '@/services/clients';
 
 export const AuthService = {
   async login(email: string, password?: string, captchaPayload?: string) {
-    const res = await authApi.emailLogin({
+    const res = await usersApi.emailLogin({
       email,
       password,
       captcha_payload: captchaPayload || '',
     });
-    return res;
+    return res.data;
   },
 
   async registerViaEmail(email: string, captchaPayload?: string) {
-    await authApi.signUp({
+    await usersApi.signUp({
       email,
       captcha_payload: captchaPayload || '',
     });
@@ -21,7 +19,7 @@ export const AuthService = {
 
   async forgotPassword(email: string, captchaPayload?: string) {
     try {
-      await authApi.forgotPassword({
+      await usersApi.forgotPassword({
         email,
         captcha_payload: captchaPayload || '',
       });
@@ -34,7 +32,7 @@ export const AuthService = {
 
   async signOut() {
     try {
-      await authApi.signOut();
+      await usersApi.signOut();
     } catch (e) {
       console.error(e);
     }
@@ -42,7 +40,7 @@ export const AuthService = {
 
   async signOutEverywhere() {
     try {
-      await authApi.signOutEverywhere();
+      await usersApi.signOutEverywhere();
     } catch (e) {
       console.error(e);
     }

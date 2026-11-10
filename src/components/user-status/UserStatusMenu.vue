@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import { useUserStore } from '@/stores/user-store.ts';
 

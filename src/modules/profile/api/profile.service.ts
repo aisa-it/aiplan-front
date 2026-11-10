@@ -1,18 +1,14 @@
-import { Integrations } from '@aisa-it/aiplan-api-ts/src/Integrations';
-import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
 import type {
   AiplanEmailRequest,
   AiplanPasswordRequest,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
-
-const usersApi = new (withInterceptors(Users))();
-const integrationsApi = new (withInterceptors(Integrations))();
+import { integrationsApi, usersApi } from '@/services/clients';
 
 type ActivitiesTableRequest = Parameters<
   typeof usersApi.getMyActivitiesTable
 >[0];
+type ActivitiesListRequest = Parameters<typeof usersApi.getMyActivityList>[0];
 
 export const ProfileService = {
   async changeEmail(data: AiplanEmailRequest) {
@@ -37,6 +33,10 @@ export const ProfileService = {
 
   async getActivitiesTable(params: ActivitiesTableRequest) {
     return (await usersApi.getMyActivitiesTable(params)).data;
+  },
+
+  async getActivitiesList(params: ActivitiesListRequest) {
+    return (await usersApi.getMyActivityList(params)).data;
   },
 
   async resetAuthToken() {

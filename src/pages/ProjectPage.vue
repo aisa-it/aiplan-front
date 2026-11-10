@@ -12,7 +12,7 @@
         />
 
         <span v-else class="block truncate">
-          Задачи проекта {{ project?.name }}
+          {{ t('common.screens.project.tasksTitle', { name: project?.name }) }}
         </span>
       </div>
       <DotListIcon />
@@ -37,7 +37,7 @@
         />
         <span
           class="text-base normal-case tracking-[0.5px] ml-2 hidden sm:inline"
-          >{{ tab.label }}</span
+          >{{ t(tab.labelKey) }}</span
         >
       </v-tab>
     </v-tabs>
@@ -49,7 +49,7 @@
         :value="tab.value"
         class="min-h-[80vh]"
       >
-        <span>{{ tab.label }}</span>
+        <span>{{ t(tab.labelKey) }}</span>
       </v-tabs-window-item>
     </v-tabs-window>
   </main>
@@ -58,8 +58,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 import { useProjectStore } from '@/stores/project-store';
+import type { MessageKey } from '@/i18n';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
 import PinIcon from '@/components/icons/PinIcon.vue';
@@ -67,27 +69,36 @@ import { useDisplay } from 'vuetify';
 
 type ProjectTab = 'general' | 'pinned' | 'analytics';
 
+type TabLabelKey = Extract<
+  MessageKey,
+  | 'common.screens.project.tabs.general'
+  | 'common.screens.project.tabs.pinned'
+  | 'common.screens.project.tabs.analytics'
+>;
+
 const tabs: Array<{
   value: ProjectTab;
-  label: string;
+  labelKey: TabLabelKey;
   icon: typeof DotListIcon;
 }> = [
   {
     value: 'general',
-    label: 'Основные',
+    labelKey: 'common.screens.project.tabs.general',
     icon: DotListIcon,
   },
   {
     value: 'pinned',
-    label: 'Закрепленные задачи',
+    labelKey: 'common.screens.project.tabs.pinned',
     icon: PinIcon,
   },
   {
     value: 'analytics',
-    label: 'Аналитика',
+    labelKey: 'common.screens.project.tabs.analytics',
     icon: AnalyticsIcon,
   },
 ];
+
+const { t } = useI18n();
 
 const currentTab = ref<ProjectTab>('general');
 const { mobile } = useDisplay();

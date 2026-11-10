@@ -3,6 +3,7 @@
 body,
 .v-application {
   color: rgb(var(--v-theme-text));
+  font-size: 14px;
 }
 /*
   Глобальный фикс бага автозаполнения Chrome для Vuetify 3.

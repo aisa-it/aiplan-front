@@ -1,12 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import axios from 'axios';
-import { applyInterceptors } from '@/utils/interceptors';
+import { AppService } from '@/services/app.service';
 import { isCurrentDateInMonthRange } from '@/utils/time';
-
-const api = applyInterceptors(
-  axios.create({ baseURL: '', withCredentials: true }),
-);
 
 export const useUtilsStore = defineStore('utils', () => {
   const version = ref('');
@@ -19,14 +14,14 @@ export const useUtilsStore = defineStore('utils', () => {
 
   async function getVersion() {
     try {
-      const res = await api.get('/api/version/');
-      isDemo.value = res.data.demo;
-      isSingUp.value = res.data.sign_up;
-      version.value = res.data.version;
-      ny.value = res.data.ny;
+      const data = await AppService.getVersion();
+      isDemo.value = data.demo;
+      isSingUp.value = data.sign_up;
+      version.value = data.version;
+      ny.value = data.ny;
       wd.value = isCurrentDateInMonthRange(3, 5, 9);
-      isEnabledJitsi.value = res.data.jitsi;
-      isEnabledCaptcha.value = res.data.captcha;
+      isEnabledJitsi.value = data.jitsi;
+      isEnabledCaptcha.value = data.captcha;
 
       if (
         ny.value === true &&
@@ -35,7 +30,7 @@ export const useUtilsStore = defineStore('utils', () => {
         localStorage.setItem('snow', 'enable');
       }
 
-      return res.data;
+      return data;
     } catch (err) {
       console.error(err);
     }

@@ -1,11 +1,22 @@
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
-import '@mdi/font/css/materialdesignicons.css';
 import { createVuetify } from 'vuetify';
 import { md3 } from 'vuetify/blueprints';
+import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';
+import { useI18n } from 'vue-i18n';
+
+import { i18n } from '@/i18n';
 
 const vuetify = createVuetify({
   blueprint: md3,
+  locale: {
+    adapter: createVueI18nAdapter({
+      i18n: i18n as unknown as Parameters<
+        typeof createVueI18nAdapter
+      >[0]['i18n'],
+      useI18n,
+    }),
+  },
   theme: {
     defaultTheme: 'light',
     themes: {
@@ -38,7 +49,9 @@ const vuetify = createVuetify({
           success: '#81C784',
           warning: '#FFD54F',
           background: '#1f2228',
+          surface: '#1f2228',
           text: '#bac4d5',
+          border: '#31363f',
         },
       },
     },

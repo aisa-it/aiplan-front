@@ -4,10 +4,7 @@ import type {
   DtoWorkspace,
   DtoWorkspaceWithCount,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts'
-import { Workspace } from '@aisa-it/aiplan-api-ts/src/Workspace'
-import { withInterceptors } from '@/utils/interceptorsWithInstanceClass'
-
-const workspaceApi = new (withInterceptors(Workspace))()
+import { WorkspaceService } from '@/services/workspace.service'
 
 export const useWorkspacesStore = defineStore('workspaces', () => {
   const workspaces = ref<DtoWorkspaceWithCount[]>([])
@@ -17,8 +14,7 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
   const getUserWorkspaces = async () => {
     isLoading.value = true
     try {
-      const { data } = await workspaceApi.getUserWorkspaceList()
-      workspaces.value = data ?? []
+      workspaces.value = await WorkspaceService.getUserWorkspaces()
     } finally {
       isLoading.value = false
     }
@@ -26,8 +22,7 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
 
   const getWorkspace = async (slug: string) => {
     if (!slug) return
-    const { data } = await workspaceApi.getWorkspace(slug)
-    workspace.value = data
+    workspace.value = await WorkspaceService.getWorkspace(slug)
   }
 
   const toggleFavorite = async (workspaceId?: string) => {
@@ -37,13 +32,12 @@ export const useWorkspacesStore = defineStore('workspaces', () => {
     if (!item) return
 
     if (item.is_favorite) {
-      await workspaceApi.removeWorkspaceFromFavorites(workspaceId)
+      await WorkspaceService.removeFromFavorites(workspaceId)
     } else {
-      await workspaceApi.addWorkspaceToFavorites({ workspace: workspaceId })
+      await WorkspaceService.addToFavorites(workspaceId)
     }
 
-    const { data } = await workspaceApi.getUserWorkspaceList()
-    workspaces.value = data ?? []
+    workspaces.value = await WorkspaceService.getUserWorkspaces()
   }
 
   return {

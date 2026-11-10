@@ -3,11 +3,10 @@
     <v-card class="rounded-2xl">
       <v-card-text class="flex flex-col pt-6 pb-4 px-6">
         <h6 class="text-lg font-weight-bold mb-4 text-gray-800">
-          Закрыть создание проекта
+          {{ t('dialogs.closeConfirm.projectTitle') }}
         </h6>
         <span class="text-sm text-gray-700">
-          Вы уверены, что хотите закрыть окно? Все внесенные данные будут
-          утеряны.
+          {{ t('dialogs.closeConfirm.body') }}
         </span>
       </v-card-text>
       <v-card-actions class="pt-0 pr-6 pb-6 justify-end gap-3 mt-2">
@@ -17,7 +16,7 @@
           @click="isOpen = false"
           class="w-[110px]"
         >
-          Вернуться
+          {{ t('dialogs.closeConfirm.back') }}
         </v-btn>
         <v-btn
           color="primary"
@@ -25,7 +24,7 @@
           @click="onClose"
           class="w-[110px]"
         >
-          Закрыть
+          {{ t('common.actions.close') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -33,6 +32,10 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 const isOpen = defineModel<boolean>();
 const emit = defineEmits<{ close: [] }>();
 

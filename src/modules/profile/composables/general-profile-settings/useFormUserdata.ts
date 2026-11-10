@@ -1,5 +1,6 @@
 import { onMounted, reactive, ref, watch, type Ref } from 'vue';
 import { isAxiosError } from 'axios';
+import { useI18n } from 'vue-i18n';
 
 import { useUserStore } from '@/stores/user-store';
 import { isEmail } from '@/utils/validation';
@@ -8,6 +9,8 @@ import { ProfileService } from '../../api/profile.service';
 import { useProfileValidationRules } from '../useProfileValidationRules';
 
 import type { DtoUser } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { toast } from '@/modules/toast';
+import { i18n } from '@/i18n';
 
 type FormRef = {
   validate: () => Promise<{ valid: boolean }>;
@@ -19,6 +22,7 @@ type ApiErrorData = {
 
 export function useFormUserdata(user: Ref<DtoUser>) {
   const userStore = useUserStore();
+  const { t } = useI18n();
   const form = reactive({
     email: '',
     firstName: '',
@@ -76,17 +80,18 @@ export function useFormUserdata(user: Ref<DtoUser>) {
         username: form.username.trim(),
       };
 
-      await userStore.updateCurrentUser(data);
-      // TODO: показать уведомление SUCCESS_UPDATE_DATA после переноса системы уведомлений.
+      await userStore.updateCurrentUser(data, {
+        localErrorCodes: [6002],
+      });
+      toast.success();
     } catch (error) {
       if (
         isAxiosError<ApiErrorData>(error) &&
         error.response?.status === 409 &&
         error.response.data?.code === 6002
       ) {
-        usernameError.value = 'Пользователь с таким именем уже существует';
+        usernameError.value = t('profile.validation.usernameTaken');
       }
-      // TODO: обработать ERROR_IDENTITY_USER и показать уведомление после переноса системы уведомлений.
     } finally {
       saving.value = false;
     }
@@ -94,15 +99,13 @@ export function useFormUserdata(user: Ref<DtoUser>) {
 
   const changeEmail = async () => {
     const email = form.email.trim();
-    if (isEmail(email) !== true) return;
+    if (!isEmail(email)) return;
 
     emailLoading.value = true;
     try {
       await ProfileService.changeEmail({ new_email: email });
-      // TODO: показать уведомление об отправке ссылки после переноса системы уведомлений.
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
+      toast.success(i18n.global.t('profile.toast.emailChangeSent'));
+    } catch {
     } finally {
       emailLoading.value = false;
     }
@@ -124,10 +127,7 @@ export function useFormUserdata(user: Ref<DtoUser>) {
   onMounted(async () => {
     try {
       telegramBotUrl.value = await ProfileService.getTelegramBotUrl();
-    } catch (error) {
-      void error;
-      // TODO: показать уведомление об ошибке после переноса системы уведомлений.
-    }
+    } catch {}
   });
 
   return {

@@ -1,25 +1,26 @@
 import type { TypesUserSettings } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { MessageKey } from '@/i18n';
 
 export const NOTIFICATION_CHANNELS = [
-  { title: 'Email', key: 'email_notification_mute' },
-  { title: 'Telegram', key: 'telegram_notification_mute' },
-  { title: 'Система', key: 'app_notification_mute' },
+  {
+    labelKey: 'common.fields.email',
+    key: 'email_notification_mute',
+  },
+  {
+    labelKey: 'common.fields.telegram',
+    key: 'telegram_notification_mute',
+  },
+  {
+    labelKey: 'profile.notifications.channels.app',
+    key: 'app_notification_mute',
+  },
 ] as const satisfies ReadonlyArray<{
-  title: string;
+  labelKey: MessageKey;
   key: keyof TypesUserSettings;
 }>;
 
 export const DEADLINE_NOTIFICATION_OPTIONS = [
-  { title: 'Никогда', value: 0 },
-  { title: '1 час', value: 1 },
-  { title: '2 часа', value: 2 },
-  { title: '3 часа', value: 3 },
-  { title: '4 часа', value: 4 },
-  { title: '5 часов', value: 5 },
-  { title: '6 часов', value: 6 },
-  { title: '1 день', value: 24 },
-  { title: '2 дня', value: 48 },
-  { title: '3 дня', value: 72 },
+  0, 1, 2, 3, 4, 5, 6, 24, 48, 72,
 ] as const;
 
 export const hoursToNanoseconds = (hours: number) =>

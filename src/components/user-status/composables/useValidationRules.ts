@@ -1,16 +1,22 @@
+import { useI18n } from 'vue-i18n';
+
 import type { UserStatusFormModel } from '../UserStatus.config';
 
 export function useValidationRules(form: { value: UserStatusFormModel }) {
+  const { t } = useI18n();
+
   const customStatusRules = [
     (value: string) =>
       form.value.status !== 'custom' ||
       !!value ||
-      'Введите текст своего статуса',
+      t('userStatus.validation.customTextRequired'),
   ];
 
   const durationRules = [
     (value: string) =>
-      form.value.status === 'none' || !!value || 'Выберите длительность',
+      form.value.status === 'none' ||
+      !!value ||
+      t('userStatus.validation.durationRequired'),
   ];
 
   const isValidDate = (value: string): boolean => {
@@ -44,15 +50,16 @@ export function useValidationRules(form: { value: UserStatusFormModel }) {
     const statusEndDate = new Date(year, month - 1, day, hours, minutes);
 
     return (
-      statusEndDate.getTime() > Date.now() || 'Дата не может быть в прошлом'
+      statusEndDate.getTime() > Date.now() ||
+      t('userStatus.validation.dateInPast')
     );
   };
 
   const customDateRules = [
     (value: string) => {
       if (form.value.selectEndDate !== 'custom') return true;
-      if (!value) return 'Введите дату в формате ДД.ММ.ГГГГ';
-      if (!isValidDate(value)) return 'Некорректная дата';
+      if (!value) return t('userStatus.validation.dateRequired');
+      if (!isValidDate(value)) return t('userStatus.validation.dateInvalid');
       return validateFutureDateTime();
     },
   ];
@@ -60,8 +67,8 @@ export function useValidationRules(form: { value: UserStatusFormModel }) {
   const customTimeRules = [
     (value: string) => {
       if (form.value.selectEndDate !== 'custom') return true;
-      if (!value) return 'Укажите время';
-      return isValidTime(value) || 'Некорректное время';
+      if (!value) return t('userStatus.validation.timeRequired');
+      return isValidTime(value) || t('userStatus.validation.timeInvalid');
     },
   ];
   return { customStatusRules, durationRules, customDateRules, customTimeRules };
