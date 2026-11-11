@@ -5,6 +5,7 @@ import activityHotMapRu from '@/components/activity-hot-map/i18n/ru';
 import authRu from '@/modules/auth/i18n/ru';
 import dialogsRu from '@/components/dialogs/i18n/ru';
 import docActivityRu from '@/modules/activities/renders/entities/doc-activity/i18n/ru';
+import editorRu from '@/modules/editor/i18n/ru';
 import guidedToursRu from '@/modules/guided-tours/i18n/ru';
 import issueActivityRu from '@/modules/activities/renders/entities/issue-activity/i18n/ru';
 import paginationRu from '@/components/pagination/i18n/ru';
@@ -23,6 +24,7 @@ export default {
   auth: authRu,
   dialogs: dialogsRu,
   docActivity: docActivityRu,
+  editor: editorRu,
   guidedTours: guidedToursRu,
   issueActivity: issueActivityRu,
   pagination: paginationRu,

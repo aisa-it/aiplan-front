@@ -6,6 +6,7 @@ import activityHotMapEn from '@/components/activity-hot-map/i18n/en';
 import authEn from '@/modules/auth/i18n/en';
 import dialogsEn from '@/components/dialogs/i18n/en';
 import docActivityEn from '@/modules/activities/renders/entities/doc-activity/i18n/en';
+import editorEn from '@/modules/editor/i18n/en';
 import guidedToursEn from '@/modules/guided-tours/i18n/en';
 import issueActivityEn from '@/modules/activities/renders/entities/issue-activity/i18n/en';
 import paginationEn from '@/components/pagination/i18n/en';
@@ -24,6 +25,7 @@ const messages = {
   auth: authEn,
   dialogs: dialogsEn,
   docActivity: docActivityEn,
+  editor: editorEn,
   guidedTours: guidedToursEn,
   issueActivity: issueActivityEn,
   pagination: paginationEn,

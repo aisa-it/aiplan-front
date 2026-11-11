@@ -27,6 +27,13 @@ export const formatDateTime = (date: string | Date, userTimezone?: string) => {
     : dayjs(date).format('DD.MM.YYYY HH:mm');
 };
 
+export const formatDateTimeWithDay = (value: string, userTimezone?: string) => {
+  const date = userTimezone ? dayjs(value).tz(userTimezone) : dayjs(value);
+  if (!date.isValid()) return '';
+  const formatted = date.locale('ru').format('dd. DD.MM.YYYY HH:mm');
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+};
+
 export const formatRelativeTime = (date: string | Date) =>
   dayjs(date).fromNow().toLowerCase();
 

@@ -50,6 +50,7 @@ const vuetify = createVuetify({
           warning: '#FFD54F',
           background: '#1f2228',
           surface: '#1f2228',
+          border: '#31363f',
           text: '#bac4d5',
           border: '#31363f',
         },
