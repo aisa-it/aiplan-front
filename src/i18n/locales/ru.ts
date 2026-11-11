@@ -1,6 +1,38 @@
 import type { TimezoneKey } from '@/constants/timezones';
 
 export default {
+  sidebar: {
+    openMenu: 'Открыть меню',
+    collapseMenu: 'Свернуть меню',
+    expandMenu: 'Развернуть меню',
+    home: 'Главная',
+    projects: 'Проекты',
+    sprints: 'Спринты',
+    help: 'Помощь и поддержка',
+    userGuide: 'Руководство пользователя',
+    shortGuide: 'Руководство',
+    leaveFeedback: 'Оставить отзыв',
+    contactSupport: 'Написать в поддержку',
+    shortSupport: 'Поддержка',
+    version: 'Версия',
+    createProject: 'Создать проект',
+    importJira: 'Импорт из Jira',
+    createSprint: 'Создать спринт',
+    notificationSettings: 'Настроить уведомления',
+    allProjects: 'Просмотр всех проектов',
+    allSprints: 'Просмотр всех спринтов',
+    projectSettings: 'Настройки',
+    copyLink: 'Скопировать ссылку',
+    taskNotifications: 'Уведомления задач',
+    projectNotifications: 'Уведомления проекта',
+    deleteSprint: 'Удалить спринт',
+    addFavorite: 'Добавить в избранное',
+    removeFavorite: 'Убрать из избранного',
+    favoriteAdded: 'Проект добавлен в избранное',
+    favoriteRemoved: 'Проект удален из избранного',
+    favoriteAddError: 'Ошибка при добавлении проекта в избранное',
+    favoriteRemoveError: 'Ошибка при удалении проекта из избранного',
+  },
   common: {
     actions: {
       save: 'Сохранить',

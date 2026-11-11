@@ -22,4 +22,12 @@ export const ProjectService = {
   async createProject(workspaceSlug: string, data: AiplanCreateProjectRequest) {
     return (await projectsApi.createProject(workspaceSlug, data)).data;
   },
+
+  async addToFavorites(workspaceSlug: string, projectId: string) {
+    await projectsApi.addProjectToFavorites(workspaceSlug, { project: projectId });
+  },
+
+  async removeFromFavorites(workspaceSlug: string, projectId: string) {
+    await projectsApi.removeProjectFromFavorites(workspaceSlug, projectId);
+  },
 };

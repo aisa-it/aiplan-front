@@ -21,6 +21,7 @@
     "dayjs": "^1.11.21",
     "maska": "^3.2.0",
     "pinia": "^4.0.2",
+    "sortablejs": "^1.15.6",
     "vue": "^3.5.39",
     "vue-i18n": "11.4.2",
     "vue-router": "^4.6.4",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
+    "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "sass": "^1.102.0",

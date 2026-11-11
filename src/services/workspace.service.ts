@@ -11,6 +11,10 @@ export const WorkspaceService = {
     return (await workspaceApi.getWorkspace(workspaceSlug)).data;
   },
 
+  async getWorkspaceSummary(workspaceSlug: string) {
+    return (await workspaceApi.getWorkspaceSummary(workspaceSlug)).data;
+  },
+
   async getMeInWorkspace(workspaceSlug: string) {
     return (await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug))
       .data;
