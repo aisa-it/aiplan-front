@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 // core
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 
@@ -69,19 +69,25 @@ defineProps<{
   isNight: boolean;
 }>();
 
-onMounted(async () => {
-  await useUserStore().getUserInfo();
-
+onMounted(() => {
   const roomParam = route.params.roomName;
   const parsedRoomName = Array.isArray(roomParam) ? roomParam[0] : roomParam;
 
   if (parsedRoomName) {
     roomName.value = parsedRoomName;
     connectToConference(true);
-  } else {
-    roomName.value = user.value?.last_workspace_slug || '';
   }
 });
+
+watch(
+  () => user.value?.last_workspace_slug,
+  (slug) => {
+    if (!roomName.value) {
+      roomName.value = slug || '';
+    }
+  },
+  { immediate: true },
+);
 
 const connectToConference = async (routeByQuery = false) => {
   if (formRef.value) {
