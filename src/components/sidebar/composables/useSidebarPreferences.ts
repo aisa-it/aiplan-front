@@ -1,8 +1,8 @@
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue'
 
 export type SidebarSectionId = 'projects' | 'sprints'
 type StoredSectionId = SidebarSectionId | 'forms'
-type SectionLayout = { weights: Record<string, number>; open: Record<string, boolean> }
+type SectionLayout = { weights: Record<string, unknown>; open: Record<string, unknown> }
 
 const defaultOrder: StoredSectionId[] = ['projects', 'sprints', 'forms']
 const layoutKey = 'menuItemsLayout'
@@ -30,24 +30,49 @@ export function useSidebarPreferences(workspaceSlug: Ref<string | null>) {
     open: rawLayout?.open && typeof rawLayout.open === 'object' ? rawLayout.open : {},
   }
   const open = ref<Record<SidebarSectionId, boolean>>({
-    projects: storedLayout.open.project ?? true,
-    sprints: storedLayout.open.sprints ?? true,
+    projects: validBoolean(storedLayout.open.project, true),
+    sprints: validBoolean(storedLayout.open.sprints, true),
   })
   const weights = ref<Record<SidebarSectionId, number>>({
     projects: validWeight(storedLayout.weights.project),
     sprints: validWeight(storedLayout.weights.sprints),
   })
-  const helpOpen = ref(storedLayout.open.help ?? false)
+  const helpOpen = ref(validBoolean(storedLayout.open.help, false))
   const order = ref<StoredSectionId[]>([...defaultOrder])
 
   watch(mini, value => saveJson('isMiniState', value))
-  watch(width, value => saveJson('menuSidebarWidth', Math.round(value)))
-  watch([open, weights, helpOpen], () => {
+  let widthSaveTimer: ReturnType<typeof setTimeout> | null = null
+  watch(width, value => {
+    if (widthSaveTimer !== null) clearTimeout(widthSaveTimer)
+    widthSaveTimer = setTimeout(() => {
+      saveJson('menuSidebarWidth', Math.round(value))
+      widthSaveTimer = null
+    }, 150)
+  })
+  onBeforeUnmount(() => {
+    if (widthSaveTimer === null) return
+    clearTimeout(widthSaveTimer)
+    saveJson('menuSidebarWidth', Math.round(width.value))
+  })
+  const saveLayout = () => {
     saveJson(layoutKey, {
       weights: { ...storedLayout.weights, project: weights.value.projects, sprints: weights.value.sprints },
       open: { ...storedLayout.open, project: open.value.projects, sprints: open.value.sprints, help: helpOpen.value },
     })
+  }
+  let layoutSaveTimer: ReturnType<typeof setTimeout> | null = null
+  watch([open, weights, helpOpen], () => {
+    if (layoutSaveTimer !== null) clearTimeout(layoutSaveTimer)
+    layoutSaveTimer = setTimeout(() => {
+      saveLayout()
+      layoutSaveTimer = null
+    }, 150)
   }, { deep: true })
+  onBeforeUnmount(() => {
+    if (layoutSaveTimer === null) return
+    clearTimeout(layoutSaveTimer)
+    saveLayout()
+  })
 
   watch(workspaceSlug, slug => {
     if (!slug) { order.value = [...defaultOrder]; return }
@@ -75,4 +100,8 @@ export function useSidebarPreferences(workspaceSlug: Ref<string | null>) {
 
 function validWeight(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 1
+}
+
+function validBoolean(value: unknown, fallback: boolean) {
+  return typeof value === 'boolean' ? value : fallback
 }

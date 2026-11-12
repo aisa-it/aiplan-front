@@ -192,7 +192,10 @@ const createNewProject = async () => {
 
   try {
     await ProjectService.createProject(workspaceSlug, payload);
-    await workspaceStore.getWorkspaceProjects(workspaceSlug);
+    await Promise.all([
+      workspaceStore.getWorkspaceProjects(workspaceSlug),
+      workspaceStore.getWorkspaceSummary(workspaceSlug),
+    ]);
     isOpen.value = false;
     clear();
   } catch (error) {

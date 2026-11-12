@@ -1,38 +1,6 @@
 import type ru from './ru';
 
 export default {
-  sidebar: {
-    openMenu: 'Open menu',
-    collapseMenu: 'Collapse menu',
-    expandMenu: 'Expand menu',
-    home: 'Home',
-    projects: 'Projects',
-    sprints: 'Sprints',
-    help: 'Help and support',
-    userGuide: 'User guide',
-    shortGuide: 'Guide',
-    leaveFeedback: 'Leave feedback',
-    contactSupport: 'Contact support',
-    shortSupport: 'Support',
-    version: 'Version',
-    createProject: 'Create project',
-    importJira: 'Import from Jira',
-    createSprint: 'Create sprint',
-    notificationSettings: 'Configure notifications',
-    allProjects: 'View all projects',
-    allSprints: 'View all sprints',
-    projectSettings: 'Settings',
-    copyLink: 'Copy link',
-    taskNotifications: 'Task notifications',
-    projectNotifications: 'Project notifications',
-    deleteSprint: 'Delete sprint',
-    addFavorite: 'Add to favorites',
-    removeFavorite: 'Remove from favorites',
-    favoriteAdded: 'Project added to favorites',
-    favoriteRemoved: 'Project removed from favorites',
-    favoriteAddError: 'Failed to add project to favorites',
-    favoriteRemoveError: 'Failed to remove project from favorites',
-  },
   common: {
     actions: {
       save: 'Save',

@@ -16,6 +16,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   const workspaceSummary = ref<DtoWorkspaceSummaryResponse | null>(null);
   const meInWorkspace = ref<DtoWorkspaceMemberWithOwner>({});
   const isLoading = ref(false);
+  let latestSummaryRequest = 0;
 
   const workspaceLogo = computed<string | undefined>(
     () => workspaceInfo.value?.logo ?? undefined,
@@ -64,9 +65,11 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
 
   async function getWorkspaceSummary(workspaceSlug: string) {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
-    workspaceSummary.value = null;
+    const request = ++latestSummaryRequest;
     const summary = await WorkspaceService.getWorkspaceSummary(workspaceSlug);
-    if (currentWorkspaceSlug.value === workspaceSlug) workspaceSummary.value = summary;
+    if (request === latestSummaryRequest && currentWorkspaceSlug.value === workspaceSlug) {
+      workspaceSummary.value = summary;
+    }
   }
 
   async function toggleProjectFavorite(project: DtoProjectLight) {
@@ -77,7 +80,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     } else {
       await ProjectService.addToFavorites(workspaceSlug, project.id);
     }
-    await getWorkspaceProjects(workspaceSlug);
+    await Promise.all([getWorkspaceProjects(workspaceSlug), getWorkspaceSummary(workspaceSlug)]);
   }
 
   return {

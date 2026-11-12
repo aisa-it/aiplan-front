@@ -1,0 +1,14 @@
+.sidebar-section { display: flex; position: relative; flex: 0 0 0; flex-direction: column; min-height: 40px; border-bottom: 1px solid rgb(var(--v-theme-border)); transition: flex-grow .4s ease, min-height .4s ease; }
+.sidebar-section--open { flex: 1 0 0; min-height: 300px; }
+.sidebar-section-header { display: flex; flex: none; align-items: center; gap: 16px; height: 40px; min-height: 40px; padding: 0 16px; cursor: pointer; user-select: none; }
+.sidebar-section-header:hover { background: rgba(var(--v-theme-primary), .08); }
+.sidebar-active { background: rgba(var(--v-theme-primary), .08); }
+.sidebar-header-add { color: rgb(var(--v-theme-text)) !important; }
+.sidebar-section-title { flex: 1; }
+.sidebar-chevron { transition: transform .4s ease; font-size: 16px; }
+.sidebar-action-icon { font-size: 16px; }
+.sidebar-chevron--open { transform: rotate(180deg); }
+.sidebar-section-content { flex: 1; min-height: 0; overflow: hidden; transition: opacity .2s ease; }
+.sidebar-section-content--closed { opacity: 0; pointer-events: none; }
+.sidebar-height-handle { position: absolute; top: -3px; left: 0; right: 0; height: 6px; z-index: 2; cursor: row-resize; touch-action: none; }
+@media (max-width: 1023px) { .sidebar-section, .sidebar-section--open { flex-basis: auto; } .sidebar-section--open { min-height: 40px; flex-grow: 0 !important; } .sidebar-section-content { max-height: min(50vh, 420px); overflow: auto; } }
