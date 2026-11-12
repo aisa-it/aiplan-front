@@ -1,12 +1,11 @@
 <template>
   <div
     v-show="!loading"
-    class="w-full max-w-[762px] max-h-[330px] rounded-2xl backdrop-blur-[48px] p-8 bg-transparent max-[860px]:max-w-[640px] max-[670px]:max-w-[440px] max-[670px]:max-h-[330px] max-[480px]:max-h-[360px] max-[480px]:max-w-[310px] border"
-    :class="isNight ? 'border-[#5e5e5e]' : 'border-[#dbdbdb]'"
+    class="w-full max-w-[47.625rem] max-h-[20.625rem] rounded-2xl backdrop-blur-[3rem] p-8 bg-transparent max-[53.75rem]:max-w-[40rem] max-[41.875rem]:max-w-[27.5rem] max-[41.875rem]:max-h-[20.625rem] max-[30rem]:max-h-[22.5rem] max-[30rem]:max-w-[19.375rem] border border-[color:var(--conf-border)]"
   >
-    <div class="flex flex-col gap-6 max-[670px]:gap-3">
-      <ConferenceEntryHeader :is-night="isNight" />
-      <ConferenceEntrySubText :is-night="isNight" />
+    <div class="flex flex-col gap-6 max-[41.875rem]:gap-3">
+      <ConferenceEntryHeader />
+      <ConferenceEntrySubText />
       <ConferenceEntryForm :is-night="isNight" />
     </div>
   </div>

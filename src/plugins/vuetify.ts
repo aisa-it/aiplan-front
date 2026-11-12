@@ -1,4 +1,4 @@
-import '@mdi/font/css/materialdesignicons.css';
+import '@mdi/font/css/materialdesignicons.css'; //FIXME: установить mdi/js, сейчас тянутся все иконки (−740 KB с первой загрузки)
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import { md3 } from 'vuetify/blueprints';

@@ -1,20 +1,10 @@
-export function getCurrentTimeOfDay() {
-  const now = new Date();
-  const hours = now.getHours();
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
 
-  let timeOfDay;
-  if (hours >= 5 && hours < 12) {
-    timeOfDay = 'morning';
-  } else if (hours >= 12 && hours < 17) {
-    timeOfDay = 'afternoon';
-  } else if (hours >= 17 && hours < 22) {
-    timeOfDay = 'evening';
-  } else {
-    timeOfDay = 'night';
-  }
+export function getCurrentTimeOfDay(): TimeOfDay {
+  const hours = new Date().getHours();
 
-  return {
-    time: now.toLocaleTimeString(),
-    timeOfDay: timeOfDay,
-  };
+  if (hours >= 5 && hours < 12) return 'morning';
+  if (hours >= 12 && hours < 17) return 'afternoon';
+  if (hours >= 17 && hours < 22) return 'evening';
+  return 'night';
 }

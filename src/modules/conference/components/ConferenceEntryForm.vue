@@ -10,9 +10,12 @@
       density="compact"
       variant="solo"
       flat
-      :bg-color="isNight ? '#383838' : 'white'"
-      :rules="[(value) => !!value?.length || 'Введите название комнаты']"
-      label="Имя комнаты"
+      bg-color="var(--conf-field-bg)"
+      :rules="[
+        (value) => !!value?.trim() || t('conference.roomNameRequired'),
+        (value) => ROOM_NAME_RE.test(value) || t('conference.roomNameInvalid'),
+      ]"
+      :label="t('conference.roomName')"
       class="w-full"
       :theme="isNight ? 'dark' : 'light'"
     />
@@ -20,29 +23,24 @@
       <v-btn
         color="primary"
         class="text-none"
-        height="40"
+        height="2.5rem"
         variant="flat"
         @click="connectToConference()"
       >
-        <span v-if="smAndUp">Начать встречу</span>
+        <span v-if="smAndUp">{{ t('conference.startMeeting') }}</span>
         <v-icon v-else>mdi-check</v-icon>
       </v-btn>
       <v-btn
         variant="flat"
-        height="40"
-        width="40"
-        min-width="40"
-        class="px-0 min-w-0"
-        :class="
-          isNight
-            ? 'bg-[#383838] border border-[#5e5e5e] text-[#bac4d5]'
-            : 'bg-[#ffffff7a] text-[#474a52]'
-        "
+        height="2.5rem"
+        width="2.5rem"
+        min-width="2.5rem"
+        class="px-0 min-w-0 bg-[color:var(--conf-surface)] border border-[color:var(--conf-border)] text-[color:var(--conf-text)]"
         @click="copyLinkToConference"
       >
         <v-icon>mdi-link-variant</v-icon>
         <v-tooltip activator="parent" location="bottom">
-          Скопировать ссылку
+          {{ t('conference.copyLink') }}
         </v-tooltip>
       </v-btn>
     </div>
@@ -53,14 +51,19 @@
 // core
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
 
 // stores
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user-store';
 
+// modules
+import { toast } from '@/modules/toast';
+
 const { user } = storeToRefs(useUserStore());
 const { smAndUp } = useDisplay();
+const { t } = useI18n();
 const route = useRoute();
 const roomName = ref(user.value?.last_workspace_slug || '');
 const formRef = ref();
@@ -68,6 +71,8 @@ const formRef = ref();
 defineProps<{
   isNight: boolean;
 }>();
+
+const ROOM_NAME_RE = /^[\p{L}\p{N}_. -]+$/u;
 
 onMounted(() => {
   const roomParam = route.params.roomName;
@@ -90,6 +95,13 @@ watch(
 );
 
 const connectToConference = async (routeByQuery = false) => {
+  // Имя комнаты попадает в location.href, в том числе из URL (/conf/:roomName,
+  // где валидация формы пропускается) — пропускаем его через белый список
+  if (!ROOM_NAME_RE.test(roomName.value)) {
+    toast.error(t('conference.roomNameInvalid'));
+    return;
+  }
+
   if (formRef.value) {
     const { valid } = await formRef.value.validate();
     if (!valid && !routeByQuery) return;
@@ -107,10 +119,23 @@ const connectToConference = async (routeByQuery = false) => {
   }
 };
 
-const copyLinkToConference = () => {
-  //TODO: Добавит уведомление об успехе
-  navigator.clipboard.writeText(
-    `${location.protocol}//${location.host}/conf/${roomName.value}/`,
-  );
+const copyLinkToConference = async () => {
+  if (!roomName.value.trim()) {
+    toast.error(t('conference.roomNameRequired'));
+    return;
+  }
+  if (!ROOM_NAME_RE.test(roomName.value)) {
+    toast.error(t('conference.roomNameInvalid'));
+    return;
+  }
+
+  const link = `${location.protocol}//${location.host}/conf/${roomName.value}/`;
+
+  try {
+    await navigator.clipboard.writeText(link);
+    toast.success(t('common.messages.linkCopied'));
+  } catch {
+    toast.error(t('common.messages.linkCopyFailed'));
+  }
 };
 </script>
