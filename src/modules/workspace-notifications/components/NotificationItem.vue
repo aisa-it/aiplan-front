@@ -39,6 +39,7 @@
               :disabled="isMarkingAsRead"
               @click.stop="onRead"
             >
+              <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
               <span class="material-symbols-rounded size-4.5 text-[18px]!"
                 >domain_verification</span
               >

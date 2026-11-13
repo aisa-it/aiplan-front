@@ -138,6 +138,7 @@
         :title="t('common.fields.token')"
         :description="t('profile.data.token.description')"
       >
+        <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
         <v-text-field
           :model-value="authToken"
           :type="isToken ? 'password' : 'text'"
@@ -148,6 +149,7 @@
         >
           <template #append>
             <div class="flex gap-1">
+              <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
               <v-btn
                 icon="mdi-lock-reset"
                 color="error"
@@ -158,6 +160,7 @@
                 :disabled="tokenLoading"
                 @click="handleResetProfileToken"
               />
+              <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
               <v-btn
                 icon="mdi-content-copy"
                 variant="outlined"

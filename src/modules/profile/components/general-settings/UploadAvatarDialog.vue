@@ -33,6 +33,7 @@
             <p v-else>{{ t('profile.avatar.dropIdle') }}</p>
           </div>
 
+          <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
           <v-alert
             v-else
             type="error"

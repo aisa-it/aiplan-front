@@ -28,7 +28,7 @@
         @click="connectToConference()"
       >
         <span v-if="smAndUp">{{ t('conference.startMeeting') }}</span>
-        <v-icon v-else>mdi-check</v-icon>
+        <CheckIcon v-else />
       </v-btn>
       <v-btn
         variant="flat"
@@ -38,7 +38,7 @@
         class="px-0 min-w-0 bg-[color:var(--conf-surface)] border border-[color:var(--conf-border)] text-[color:var(--conf-text)]"
         @click="copyLinkToConference"
       >
-        <v-icon>mdi-link-variant</v-icon>
+        <LinkIcon />
         <v-tooltip activator="parent" location="bottom">
           {{ t('conference.copyLink') }}
         </v-tooltip>
@@ -57,6 +57,10 @@ import { useDisplay } from 'vuetify';
 // stores
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user-store';
+
+// components
+import CheckIcon from '@/components/icons/CheckIcon.vue';
+import LinkIcon from '@/components/icons/LinkIcon.vue';
 
 // modules
 import { toast } from '@/modules/toast';

@@ -7,6 +7,8 @@
     />
 
     <div class="app-toast__content">
+      <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из
+           components/icons -->
       <span class="material-symbols-rounded app-toast__icon" aria-hidden="true">
         {{ toast.icon }}
       </span>
@@ -42,6 +44,7 @@
       :aria-label="t('toast.closeNotification')"
       @click="emit('close')"
     >
+      <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
       <span class="material-symbols-rounded text-2xl">close</span>
     </v-btn>
 

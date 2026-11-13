@@ -36,7 +36,7 @@
       color="error"
       @click="routeToWorkspace()"
     >
-      <v-icon>mdi-exit-to-app</v-icon>
+      <ExitToAppIcon />
       <v-tooltip activator="parent" location="bottom left">
         {{ t('conference.toAiplan') }}
       </v-tooltip>
@@ -59,6 +59,7 @@ import { storeToRefs } from 'pinia';
 import ConferenceEntryCard from './components/ConferenceEntryCard.vue';
 import CloudsEnable from '@/components/icons/CloudsEnable.vue';
 import CloudsDisable from '@/components/icons/CloudsDisable.vue';
+import ExitToAppIcon from '@/components/icons/ExitToAppIcon.vue';
 
 // utils
 import { getCurrentTimeOfDay } from './utils/timeOfDay';

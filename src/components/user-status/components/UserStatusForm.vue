@@ -35,6 +35,7 @@
 
         <template v-if="form.selectEndDate === 'custom'">
           <div class="grid grid-cols-2 gap-4">
+            <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
             <v-text-field
               v-model="form.customDate"
               v-maska="'##.##.####'"
@@ -44,6 +45,7 @@
               append-inner-icon="mdi-calendar"
             />
 
+            <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
             <v-text-field
               v-model="form.customTime"
               v-maska="'##:##'"
