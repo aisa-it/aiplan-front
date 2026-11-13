@@ -18,7 +18,7 @@
       :disabled="loading"
     />
 
-    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
+    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
     <v-text-field
       v-if="!isRegister"
       v-model="password"

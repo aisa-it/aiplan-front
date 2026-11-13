@@ -9,7 +9,7 @@
         }}
       </h4>
 
-      <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
+      <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
       <v-btn
         v-if="currentDay"
         icon="mdi-close"

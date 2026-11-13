@@ -47,6 +47,14 @@ const router = createRouter({
           }),
           beforeEnter: loadWorkspaceGuard,
         },
+        // TODO: стенд для теста редактора, убрать после переноса страницы AIDOC
+        {
+          path: ':workspace/editor-playground',
+          name: 'editor-playground',
+          component: () =>
+            import('@/modules/editor/pages/EditorPlaygroundPage.vue'),
+          beforeEnter: loadWorkspaceGuard,
+        },
         {
           path: ':workspace/projects/:project',
           name: 'project',

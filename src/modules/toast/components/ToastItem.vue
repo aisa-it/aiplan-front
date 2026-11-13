@@ -44,7 +44,7 @@
       :aria-label="t('toast.closeNotification')"
       @click="emit('close')"
     >
-      <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
+      <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из components/icons -->
       <span class="material-symbols-rounded text-2xl">close</span>
     </v-btn>
 

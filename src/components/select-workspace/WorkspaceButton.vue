@@ -47,7 +47,7 @@
           </template>
 
           <v-list-item-title
-            class="abbreviated-text min-w-0 max-w-[150px] text-[14px]"
+            class="abbreviated-text min-w-0 max-w-[150px] text-sm"
             :class="
               workspace.slug === route.params.workspace
                 ? 'text-primary'
@@ -91,7 +91,7 @@
                     class="h-5 w-5"
                     @click.stop
                   >
-                    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons (docs/vuetify-dev.md §8) -->
+                    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
                     <v-icon size="18" color="#474a52"
                       >mdi-dots-horizontal</v-icon
                     >
