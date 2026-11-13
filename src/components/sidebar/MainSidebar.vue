@@ -68,7 +68,9 @@
             :can-create-project="canCreateProject"
             :project-create-items="projectCreateItems"
             :sprint-header-items="sprintHeaderItems"
-            @resize="startHeightResize($event, section, visibleSections[index - 1])"
+            @resize="
+              startHeightResize($event, section, visibleSections[index - 1])
+            "
             @toggle="toggleSection($event, section)"
             @navigate="onNavigate"
           />
@@ -103,12 +105,9 @@ import { useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useI18n } from 'vue-i18n';
 import HomeIcon from '@/components/icons/HomeIcon.vue';
-import PlusIcon from './icons/PlusIcon.vue';
-import UnmutedIcon from './icons/UnmutedIcon.vue';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useUserStore } from '@/stores/user-store';
 import { useUtilsStore } from '@/stores/utils-store';
-import { checkPermissionByWs } from '@/utils/permissions';
 import SidebarCompactSection from './components/SidebarCompactSection.vue';
 import SidebarExpandedSection from './components/SidebarExpandedSection.vue';
 import SidebarHelp from './components/SidebarHelp.vue';
@@ -118,6 +117,7 @@ import {
 } from './composables/useSidebarPreferences';
 import { useSidebarProjectMemberships } from './composables/useSidebarProjectMemberships';
 import { useSidebarResize } from './composables/useSidebarResize';
+import { useSidebarSections } from './composables/useSidebarSections';
 import { useSidebarSortable } from './composables/useSidebarSortable';
 
 const props = defineProps<{ mobileOpen: boolean }>();
@@ -132,15 +132,8 @@ const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug, workspaceSummary } = storeToRefs(workspaceStore);
 const { workspaceRoleName } = storeToRefs(useUserStore());
 const workspaceSlug = computed(() => currentWorkspaceSlug.value);
-const {
-  mini,
-  width: sidebarWidth,
-  open: storedOpen,
-  weights,
-  helpOpen: savedHelpOpen,
-  sections,
-  setVisibleOrder,
-} = useSidebarPreferences(workspaceSlug);
+const preferences = useSidebarPreferences(workspaceSlug);
+const { mini, width: sidebarWidth, weights, setVisibleOrder } = preferences;
 const {
   isWidthResizing,
   isHeightResizing,
@@ -151,45 +144,6 @@ const projectMemberships = useSidebarProjectMemberships(
   currentWorkspaceSlug,
   workspaceSummary,
 );
-const mobileSectionOpen = ref<Record<SidebarSectionId, boolean>>({
-  projects: true,
-  sprints: true,
-});
-const open = computed(() =>
-  isNarrow.value ? mobileSectionOpen.value : storedOpen.value,
-);
-const mobileHelpOpen = ref(false);
-const helpOpen = computed({
-  get: () => (isNarrow.value ? mobileHelpOpen.value : savedHelpOpen.value),
-  set: (value) => {
-    if (isNarrow.value) mobileHelpOpen.value = value;
-    else savedHelpOpen.value = value;
-  },
-});
-const visibleSections = computed(() =>
-  sections.value.filter(
-    (id) =>
-      id !== 'sprints' ||
-      checkPermissionByWs(workspaceRoleName.value, 'show-sprints-nav'),
-  ),
-);
-const canCreateProject = computed(() =>
-  checkPermissionByWs(workspaceRoleName.value, 'create-project'),
-);
-const canCreateSprint = computed(() =>
-  checkPermissionByWs(workspaceRoleName.value, 'create-sprint'),
-);
-const projectCreateItems = computed(() => [
-  { label: t('sidebar.createProject') },
-  { label: t('sidebar.createForm') },
-  { label: t('sidebar.importJira') },
-]);
-const sprintHeaderItems = computed(() => [
-  ...(canCreateSprint.value
-    ? [{ label: t('sidebar.createSprint'), icon: PlusIcon }]
-    : []),
-  { label: t('sidebar.notificationSettings'), icon: UnmutedIcon },
-]);
 const showToggle = ref(false);
 const popupOpen = ref<Record<SidebarSectionId, boolean>>({
   projects: false,
@@ -204,15 +158,28 @@ const { ignoreNextClick } = useSidebarSortable(
   isAiDocRoute,
   setVisibleOrder,
 );
+const {
+  open,
+  helpOpen,
+  visibleSections,
+  canCreateProject,
+  projectCreateItems,
+  sprintHeaderItems,
+  sectionGrow,
+  toggleSection,
+} = useSidebarSections(
+  preferences,
+  workspaceRoleName,
+  isNarrow,
+  viewportWidth,
+  ignoreNextClick,
+);
 
 watch(() => route.fullPath, onNavigate);
 watch(
   currentWorkspaceSlug,
   (slug) => {
-    if (slug)
-      void workspaceStore
-        .getWorkspaceSummary(slug)
-        .catch((error) => console.error('Failed to load sidebar data', error));
+    if (slug) workspaceStore.getWorkspaceSummary(slug);
   },
   { immediate: true },
 );
@@ -239,30 +206,6 @@ function isActive(id: SidebarSectionId) {
   return id === 'projects'
     ? route.path.includes('/projects/')
     : route.path.includes('/sprints/');
-}
-function sectionGrow(id: SidebarSectionId) {
-  if (!open.value[id]) return 0;
-  const expanded = visibleSections.value.filter(
-    (section) => open.value[section],
-  );
-  const totalWeight = expanded.reduce(
-    (sum, section) => sum + weights.value[section],
-    0,
-  );
-  return totalWeight > 0
-    ? weights.value[id] / totalWeight
-    : 1 / expanded.length;
-}
-function toggleSection(event: Event, id: SidebarSectionId) {
-  if (ignoreNextClick.value) {
-    event.preventDefault();
-    ignoreNextClick.value = false;
-    return;
-  }
-  if (viewportWidth.value <= 650 && !open.value[id]) {
-    for (const other of visibleSections.value) open.value[other] = false;
-  }
-  open.value[id] = !open.value[id];
 }
 </script>
 

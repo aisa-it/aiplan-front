@@ -55,7 +55,9 @@ const emit = defineEmits<{
   navigate: [];
 }>();
 const { t } = useI18n();
-const sectionIcon = computed(() => props.section === 'projects' ? MenuProjectsIcon : SprintIcon);
+const sectionIcon = computed(() =>
+  props.section === 'projects' ? MenuProjectsIcon : SprintIcon,
+);
 </script>
 
 <style scoped src="../styles/SidebarCompactSection.css"></style>

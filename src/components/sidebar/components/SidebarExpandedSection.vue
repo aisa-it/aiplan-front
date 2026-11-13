@@ -41,10 +41,14 @@
             :aria-label="t('sidebar.createProject')"
             @pointerdown.stop
             @click.stop
-          ><PlusIcon /></v-btn>
+            ><PlusIcon
+          /></v-btn>
         </template>
       </SidebarContextMenu>
-      <SidebarContextMenu v-if="section === 'sprints'" :items="sprintHeaderItems">
+      <SidebarContextMenu
+        v-if="section === 'sprints'"
+        :items="sprintHeaderItems"
+      >
         <template #activator="{ props: menuProps }">
           <v-btn
             v-bind="menuProps"
@@ -55,13 +59,17 @@
             :aria-label="t('sidebar.notificationSettings')"
             @pointerdown.stop
             @click.stop
-          ><span class="material-symbols-rounded sidebar-action-icon">more_horiz</span></v-btn>
+            ><span class="material-symbols-rounded sidebar-action-icon"
+              >more_horiz</span
+            ></v-btn
+          >
         </template>
       </SidebarContextMenu>
       <span
         class="material-symbols-rounded sidebar-chevron"
         :class="{ 'sidebar-chevron--open': open }"
-      >expand_more</span>
+        >expand_more</span
+      >
     </div>
     <div
       class="sidebar-section-content"
@@ -109,7 +117,9 @@ const emit = defineEmits<{
   navigate: [];
 }>();
 const { t } = useI18n();
-const sectionIcon = computed(() => props.section === 'projects' ? MenuProjectsIcon : SprintIcon);
+const sectionIcon = computed(() =>
+  props.section === 'projects' ? MenuProjectsIcon : SprintIcon,
+);
 </script>
 
 <style scoped src="../styles/SidebarExpandedSection.css"></style>

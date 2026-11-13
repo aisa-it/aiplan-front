@@ -45,7 +45,6 @@ export function useSidebarSortable(
                 id === 'projects' || id === 'sprints',
             );
 
-          // Sortable moves the DOM node. Restore it before Vue applies the reactive order.
           item.remove();
           event.from.insertBefore(
             item,

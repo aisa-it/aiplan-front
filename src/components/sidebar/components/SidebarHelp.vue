@@ -21,9 +21,13 @@
       <span
         class="material-symbols-rounded sidebar-chevron"
         :class="{ 'sidebar-chevron--open': open }"
-      >expand_more</span>
+        >expand_more</span
+      >
     </button>
-    <div class="sidebar-help-content" :class="{ 'sidebar-help-content--open': open }">
+    <div
+      class="sidebar-help-content"
+      :class="{ 'sidebar-help-content--open': open }"
+    >
       <div class="sidebar-help-content-inner"><HelpItems /></div>
     </div>
   </div>

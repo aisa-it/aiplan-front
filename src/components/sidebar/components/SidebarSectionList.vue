@@ -13,18 +13,18 @@
 </template>
 
 <script setup lang="ts">
-import type { DtoProjectMemberWithLead } from '@aisa-it/aiplan-api-ts/src/data-contracts'
-import SidebarProjects from './SidebarProjects.vue'
-import SidebarSprints from './SidebarSprints.vue'
+import type { DtoProjectMemberWithLead } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import SidebarProjects from './SidebarProjects.vue';
+import SidebarSprints from './SidebarSprints.vue';
 
 defineProps<{
-  section: 'projects' | 'sprints'
-  compact?: boolean
-  canCreateProject: boolean
-  projectCreateItems: { label: string }[]
-  projectMemberships: Record<string, DtoProjectMemberWithLead>
-}>()
-const emit = defineEmits<{ navigate: [] }>()
+  section: 'projects' | 'sprints';
+  compact?: boolean;
+  canCreateProject: boolean;
+  projectCreateItems: { label: string }[];
+  projectMemberships: Record<string, DtoProjectMemberWithLead>;
+}>();
+const emit = defineEmits<{ navigate: [] }>();
 </script>
 
 <style src="../styles/SidebarSectionList.css"></style>
