@@ -1,4 +1,7 @@
-import type { AiplanCreateProjectRequest } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type {
+  AiplanCreateProjectRequest,
+  TypesViewProps,
+} from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { projectsApi } from './clients';
 
@@ -24,10 +27,20 @@ export const ProjectService = {
   },
 
   async addToFavorites(workspaceSlug: string, projectId: string) {
-    await projectsApi.addProjectToFavorites(workspaceSlug, { project: projectId });
+    await projectsApi.addProjectToFavorites(workspaceSlug, {
+      project: projectId,
+    });
   },
 
   async removeFromFavorites(workspaceSlug: string, projectId: string) {
     await projectsApi.removeProjectFromFavorites(workspaceSlug, projectId);
+  },
+
+  async updateViewSettings(
+    workspaceSlug: string,
+    projectId: string,
+    settings: TypesViewProps,
+  ): Promise<void> {
+    await projectsApi.updateProjectView(workspaceSlug, projectId, settings);
   },
 };

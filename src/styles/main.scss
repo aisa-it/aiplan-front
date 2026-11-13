@@ -3,7 +3,7 @@
 body,
 .v-application {
   color: rgb(var(--v-theme-text));
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
 }
 /*
   Глобальный фикс бага автозаполнения Chrome для Vuetify 3.
@@ -21,6 +21,12 @@ body,
     visibility: visible !important;
     opacity: 1 !important;
   }
+}
+
+.v-field,
+.v-input,
+.v-label {
+  font-size: 0.875rem; /* 14px */
 }
 
 /* Scrollbar */

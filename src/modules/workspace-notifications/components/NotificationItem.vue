@@ -39,7 +39,7 @@
               :disabled="isMarkingAsRead"
               @click.stop="onRead"
             >
-              <span class="material-symbols-rounded size-4.5 text-[18px]!"
+              <span class="material-symbols-rounded size-4.5 text-lg!"
                 >domain_verification</span
               >
             </v-btn>
