@@ -39,6 +39,7 @@
               :disabled="isMarkingAsRead"
               @click.stop="onRead"
             >
+              <!-- TODO: заменить material-symbols-шрифтовую иконку на SVG-компонент из components/icons -->
               <span class="material-symbols-rounded size-4.5 text-lg!"
                 >domain_verification</span
               >

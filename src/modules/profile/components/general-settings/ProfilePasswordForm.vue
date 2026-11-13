@@ -9,6 +9,7 @@
         :title="t('profile.password.new.title')"
         :description="t('profile.password.new.description')"
       >
+        <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
         <v-text-field
           v-model="password.new_password"
           :label="t('profile.password.label')"
@@ -26,6 +27,7 @@
         :title="t('profile.password.repeat.title')"
         :description="t('profile.password.repeat.description')"
       >
+        <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
         <v-text-field
           v-model="password.confirm_password"
           :label="t('profile.password.label')"

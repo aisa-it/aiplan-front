@@ -6,6 +6,7 @@
           {{ t('workspaceNotifications.create') }}
         </h6>
 
+        <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
         <v-btn
           :aria-label="t('common.actions.close')"
           icon="mdi-close"

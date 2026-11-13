@@ -3,6 +3,7 @@
 import activitiesRu from '@/modules/activities/i18n/ru';
 import activityHotMapRu from '@/components/activity-hot-map/i18n/ru';
 import authRu from '@/modules/auth/i18n/ru';
+import conferenceRu from '@/modules/conference/i18n/ru';
 import dialogsRu from '@/components/dialogs/i18n/ru';
 import docActivityRu from '@/modules/activities/renders/entities/doc-activity/i18n/ru';
 import editorRu from '@/modules/editor/i18n/ru';
@@ -22,6 +23,7 @@ export default {
   activities: activitiesRu,
   activityHotMap: activityHotMapRu,
   auth: authRu,
+  conference: conferenceRu,
   dialogs: dialogsRu,
   docActivity: docActivityRu,
   editor: editorRu,

@@ -1,4 +1,4 @@
-import '@mdi/font/css/materialdesignicons.css';
+import '@mdi/font/css/materialdesignicons.css'; //FIXME: установить mdi/js, сейчас тянутся все иконки (−740 KB с первой загрузки)
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import { md3 } from 'vuetify/blueprints';
@@ -52,7 +52,6 @@ const vuetify = createVuetify({
           surface: '#1f2228',
           border: '#31363f',
           text: '#bac4d5',
-          border: '#31363f',
         },
       },
     },
@@ -66,15 +65,18 @@ const vuetify = createVuetify({
     VTextField: {
       color: 'primary',
       variant: 'underlined',
+      rounded: 'lg',
     },
-    VSelect: { color: 'primary', variant: 'underlined' },
+    VSelect: { color: 'primary', variant: 'underlined', rounded: 'lg' },
     VTextarea: {
       color: 'primary',
       variant: 'underlined',
+      rounded: 'lg',
     },
     VAutocomplete: {
       color: 'primary',
       variant: 'underlined',
+      rounded: 'lg',
     },
     VDialog: {
       VCardText: {

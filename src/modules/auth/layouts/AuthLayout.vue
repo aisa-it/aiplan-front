@@ -111,9 +111,6 @@ onMounted(() => {
   startSessionPolling();
 });
 
-onBeforeMount(() => {
-  utilsStore.getVersion();
-});
 
 onUnmounted(() => {
   stopSessionPolling();

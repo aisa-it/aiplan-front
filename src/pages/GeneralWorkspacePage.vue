@@ -65,6 +65,7 @@
         <span class="text-lg text-gray-600">{{
           t('common.screens.workspace.noProjects')
         }}</span>
+        <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
         <v-btn
           size="large"
           prepend-icon="mdi-plus"

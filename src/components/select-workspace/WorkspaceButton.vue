@@ -91,6 +91,7 @@
                     class="h-5 w-5"
                     @click.stop
                   >
+                    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
                     <v-icon size="18" color="#474a52"
                       >mdi-dots-horizontal</v-icon
                     >

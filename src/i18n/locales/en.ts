@@ -46,6 +46,10 @@ export default {
       signOut: 'Sign out',
       signOutEverywhere: 'Sign out of all sessions',
     },
+    messages: {
+      linkCopied: 'Link copied',
+      linkCopyFailed: 'Failed to copy link',
+    },
     screens: {
       notFound: { title: 'Page not found', home: 'Back to home' },
       workspace: {

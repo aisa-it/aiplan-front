@@ -4,6 +4,7 @@ import type ru from './ru';
 import activitiesEn from '@/modules/activities/i18n/en';
 import activityHotMapEn from '@/components/activity-hot-map/i18n/en';
 import authEn from '@/modules/auth/i18n/en';
+import conferenceEn from '@/modules/conference/i18n/en';
 import dialogsEn from '@/components/dialogs/i18n/en';
 import docActivityEn from '@/modules/activities/renders/entities/doc-activity/i18n/en';
 import editorEn from '@/modules/editor/i18n/en';
@@ -23,6 +24,7 @@ const messages = {
   activities: activitiesEn,
   activityHotMap: activityHotMapEn,
   auth: authEn,
+  conference: conferenceEn,
   dialogs: dialogsEn,
   docActivity: docActivityEn,
   editor: editorEn,

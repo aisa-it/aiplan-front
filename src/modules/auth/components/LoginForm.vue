@@ -18,6 +18,7 @@
       :disabled="loading"
     />
 
+    <!-- TODO: заменить шрифтовую mdi-иконку на SVG-компонент из components/icons -->
     <v-text-field
       v-if="!isRegister"
       v-model="password"

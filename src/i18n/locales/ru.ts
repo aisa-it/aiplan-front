@@ -46,6 +46,10 @@ export default {
       signOut: 'Выйти',
       signOutEverywhere: 'Выйти из всех сессий',
     },
+    messages: {
+      linkCopied: 'Ссылка скопирована',
+      linkCopyFailed: 'Не удалось скопировать ссылку',
+    },
     screens: {
       notFound: { title: 'Страница не найдена', home: 'Вернуться на главную' },
       workspace: {

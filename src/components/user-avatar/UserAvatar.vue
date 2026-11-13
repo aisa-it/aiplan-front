@@ -74,5 +74,6 @@ const roundClass = computed(() =>
   props.rounded ? 'rounded-full' : 'rounded-lg',
 );
 
-const { ny } = storeToRefs(useUtilsStore());
+const utilsStore = useUtilsStore();
+const { ny } = storeToRefs(utilsStore);
 </script>
