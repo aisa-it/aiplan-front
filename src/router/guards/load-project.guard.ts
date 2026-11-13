@@ -1,4 +1,4 @@
-import type { NavigationGuard } from 'vue-router';
+import type { RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from '@/stores/project-store';
@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user-store';
 import { getStringParam } from '@/utils/object';
 import { checkPermissionByProject, defineRole } from '@/utils/permissions';
 
-export const loadProjectGuard: NavigationGuard = async (to) => {
+export const loadProjectGuard = async (to: RouteLocationNormalized) => {
   const workspace = getStringParam(to.params.workspace);
   const project = getStringParam(to.params.project);
 
