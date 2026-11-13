@@ -96,6 +96,7 @@
       @pointerdown="startWidthResize"
     />
   </v-navigation-drawer>
+  <NewProjectDialog v-model="isProjectCreateOpen" :workspace-slug="workspaceSlug" />
 </template>
 
 <script setup lang="ts">
@@ -105,6 +106,7 @@ import { useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useI18n } from 'vue-i18n';
 import HomeIcon from '@/components/icons/HomeIcon.vue';
+import NewProjectDialog from '@/components/dialogs/NewProjectDialog.vue';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useUserStore } from '@/stores/user-store';
 import { useUtilsStore } from '@/stores/utils-store';
@@ -145,6 +147,7 @@ const projectMemberships = useSidebarProjectMemberships(
   workspaceSummary,
 );
 const showToggle = ref(false);
+const isProjectCreateOpen = ref(false);
 const popupOpen = ref<Record<SidebarSectionId, boolean>>({
   projects: false,
   sprints: false,
@@ -163,7 +166,6 @@ const {
   helpOpen,
   visibleSections,
   canCreateProject,
-  projectCreateItems,
   sprintHeaderItems,
   sectionGrow,
   toggleSection,
@@ -174,6 +176,11 @@ const {
   viewportWidth,
   ignoreNextClick,
 );
+const projectCreateItems = computed(() => [
+  { label: t('sidebar.createProject'), onClick: openProjectDialog },
+  { label: t('sidebar.createForm') },
+  { label: t('sidebar.importJira') },
+]);
 
 watch(() => route.fullPath, onNavigate);
 watch(
@@ -196,6 +203,11 @@ watch(
 );
 function closeMobile() {
   if (isNarrow.value && props.mobileOpen) emit('update:mobileOpen', false);
+}
+function openProjectDialog() {
+  popupOpen.value.projects = false;
+  closeMobile();
+  isProjectCreateOpen.value = true;
 }
 function onNavigate() {
   popupOpen.value.projects = false;

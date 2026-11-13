@@ -72,17 +72,6 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     }
   }
 
-  async function toggleProjectFavorite(project: DtoProjectLight) {
-    const workspaceSlug = currentWorkspaceSlug.value;
-    if (!workspaceSlug || !project.id) return;
-    if (project.is_favorite) {
-      await ProjectService.removeFromFavorites(workspaceSlug, project.id);
-    } else {
-      await ProjectService.addToFavorites(workspaceSlug, project.id);
-    }
-    await Promise.all([getWorkspaceProjects(workspaceSlug), getWorkspaceSummary(workspaceSlug)]);
-  }
-
   return {
     currentWorkspaceSlug,
     workspaceInfo,
@@ -96,6 +85,5 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
     getWorkspaceInfo,
     getWorkspaceProjects,
     getWorkspaceSummary,
-    toggleProjectFavorite,
   };
 });

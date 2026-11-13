@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import HelpIcon from '@/components/icons/HelpIcon.vue';
+import HelpIcon from '../icons/HelpIcon.vue';
 import HelpItems from './SidebarHelpItems.vue';
 
 defineProps<{ compact: boolean; open: boolean }>();

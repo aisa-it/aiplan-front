@@ -92,7 +92,7 @@
 import { computed, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DtoProjectMemberWithLead } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import MenuProjectsIcon from '@/components/icons/MenuProjectsIcon.vue';
+import MenuProjectsIcon from '../icons/MenuProjectsIcon.vue';
 import SprintIcon from '@/components/icons/SprintIcon.vue';
 import PlusIcon from '../icons/PlusIcon.vue';
 import type { SidebarSectionId } from '../composables/useSidebarPreferences';

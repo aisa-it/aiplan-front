@@ -17,27 +17,36 @@
     <div v-else class="sidebar-project-link">
       <SidebarProjectIdentity :project="project" :compact="compact" />
     </div>
-    <v-btn
+    <v-tooltip
       v-if="!compact && project.id && canFavorite"
-      class="sidebar-row-action"
-      :class="{ 'sidebar-favorite-inactive': !project.is_favorite }"
-      color="text"
-      icon
-      size="x-small"
-      variant="text"
-      :aria-label="
-        project.is_favorite
-          ? t('sidebar.removeFavorite')
-          : t('sidebar.addFavorite')
-      "
-      :loading="favoritePending"
-      @click.stop="emit('favorite')"
-      ><StarIcon
-        :width="16"
-        :height="16"
-        :filled="project.is_favorite"
-        :color="project.is_favorite ? '#F2994A' : 'rgb(var(--v-theme-text))'"
-    /></v-btn>
+      location="bottom"
+      :open-delay="0"
+    >
+      <template #activator="{ props: tooltipProps }">
+        <v-btn
+          v-bind="tooltipProps"
+          class="sidebar-row-action"
+          :class="{ 'sidebar-favorite-inactive': !project.is_favorite }"
+          color="text"
+          icon
+          size="x-small"
+          variant="text"
+          :aria-label="
+            project.is_favorite
+              ? t('sidebar.removeFavorite')
+              : t('sidebar.addFavorite')
+          "
+          :loading="favoritePending"
+          @click.stop="emit('favorite')"
+          ><StarIcon
+            :width="16"
+            :height="16"
+            :filled="project.is_favorite"
+            :color="project.is_favorite ? '#F2994A' : 'rgb(var(--v-theme-text))'"
+        /></v-btn>
+      </template>
+      {{ project.is_favorite ? t('sidebar.removeFavorite') : t('sidebar.addFavorite') }}
+    </v-tooltip>
     <SidebarContextMenu v-if="!compact && canShowMenu" :items="menuItems">
       <template #activator="{ props: menuProps }">
         <v-btn

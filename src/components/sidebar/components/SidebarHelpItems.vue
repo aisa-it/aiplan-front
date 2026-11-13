@@ -28,9 +28,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import AiplanVersion from '@/components/AiplanVersion.vue';
-import BookIcon from '@/components/icons/BookIcon.vue';
+import BookIcon from '../icons/BookIcon.vue';
 import EditIcon from '@/components/icons/EditIcon.vue';
-import ChatIcon from '@/components/icons/ChatIcon.vue';
+import ChatIcon from '../icons/ChatIcon.vue';
 defineProps<{ compact?: boolean }>();
 const { t } = useI18n();
 </script>

@@ -72,6 +72,7 @@ import CopyNameIcon from '../icons/CopyNameIcon.vue';
 import SidebarContextMenu from './SidebarContextMenu.vue';
 import SidebarProjectContextMenu from './SidebarProjectContextMenu.vue';
 import SidebarProjectRow from './SidebarProjectRow.vue';
+import { ProjectService } from '@/services/project.service';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -227,10 +228,16 @@ async function copyProjectLink(project: DtoProjectLight) {
 }
 
 async function toggleFavorite(project: DtoProjectLight) {
-  if (!project.id || favoritePending.value) return;
+  const slug = workspaceSlug.value;
+  if (!slug || !project.id || favoritePending.value) return;
   favoritePending.value = project.id;
   try {
-    await workspaceStore.toggleProjectFavorite(project);
+    if (project.is_favorite) {
+      await ProjectService.removeFromFavorites(slug, project.id);
+    } else {
+      await ProjectService.addToFavorites(slug, project.id);
+    }
+    await workspaceStore.getWorkspaceSummary(slug);
     toast.success(
       t(
         project.is_favorite

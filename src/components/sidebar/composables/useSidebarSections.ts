@@ -48,11 +48,6 @@ export function useSidebarSections(
   const canCreateSprint = computed(() =>
     checkPermissionByWs(workspaceRoleName.value, 'create-sprint'),
   );
-  const projectCreateItems = computed(() => [
-    { label: t('sidebar.createProject') },
-    { label: t('sidebar.createForm') },
-    { label: t('sidebar.importJira') },
-  ]);
   const sprintHeaderItems = computed(() => [
     ...(canCreateSprint.value
       ? [{ label: t('sidebar.createSprint'), icon: PlusIcon }]
@@ -91,7 +86,6 @@ export function useSidebarSections(
     helpOpen,
     visibleSections,
     canCreateProject,
-    projectCreateItems,
     sprintHeaderItems,
     sectionGrow,
     toggleSection,
