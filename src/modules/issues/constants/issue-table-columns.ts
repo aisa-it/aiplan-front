@@ -1,4 +1,4 @@
-import type { IssueColumnKey } from '../model/issue-list.types';
+import type { IssueColumnKey, StandardIssueColumnKey } from '../model/issue-list.types';
 
 export type IssueTableColumnWidth = number | string;
 
@@ -41,7 +41,7 @@ const countColumn = (
   headerProps: { class: 'issue-count-header' },
 });
 
-export const ISSUE_TABLE_COLUMNS: Record<IssueColumnKey, IssueTableColumn> = {
+export const ISSUE_TABLE_COLUMNS: Record<StandardIssueColumnKey, IssueTableColumn> = {
   sequence_id: {
     key: 'sequence_id',
     title: 'ID',
@@ -97,6 +97,13 @@ export const ISSUE_TABLE_COLUMNS: Record<IssueColumnKey, IssueTableColumn> = {
     ...fixedWidth(180),
     align: 'center',
     sortable: true,
+  },
+  watchers: {
+    key: 'watchers',
+    title: 'Наблюдатели',
+    ...fixedWidth(180),
+    align: 'center',
+    sortable: false,
   },
   labels: {
     key: 'labels',

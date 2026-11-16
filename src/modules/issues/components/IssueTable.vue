@@ -66,11 +66,28 @@
         <template #item.assignees="{ item }">
           <AssigneesColumn :users="item.assignee_details" />
         </template>
+        <template #item.watchers="{ item }">
+          <AssigneesColumn :users="item.watcher_details" />
+        </template>
         <template #item.labels="{ item }">
           <LabelsColumn :labels="item.label_details" />
         </template>
         <template #item.sprint="{ item }">
           <SprintColumn :sprints="item.sprints" />
+        </template>
+        <template
+          v-for="template in visiblePropertyTemplates"
+          :key="`header-${template.id}`"
+          #[`header.property:${template.id}`]
+        >
+          <span class="block truncate" :title="template.name">{{ template.name }}</span>
+        </template>
+        <template
+          v-for="template in visiblePropertyTemplates"
+          :key="template.id"
+          #[`item.property:${template.id}`]="{ item }"
+        >
+          <PropertyColumn :issue="item" :property="template" />
         </template>
         <template
           v-for="column in countColumns"
@@ -105,6 +122,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
 import DocumentIcon from '@/components/icons/DocumentIcon.vue';
@@ -127,11 +146,16 @@ import AssigneesColumn from './issue-table/AssigneesColumn.vue';
 import LabelsColumn from './issue-table/LabelsColumn.vue';
 import SprintColumn from './issue-table/SprintColumn.vue';
 import ChipCountColumn from './issue-table/ChipCountColumn.vue';
+import PropertyColumn from './issue-table/PropertyColumn.vue';
 import IssueTableSkeleton from './IssueTableSkeleton.vue';
 
-defineProps<{ hideParent?: boolean }>();
+const props = defineProps<{
+  hideParent?: boolean;
+  propertyTemplates?: DtoProjectPropertyTemplate[];
+}>();
 
 const countColumns = ISSUE_COUNT_COLUMN_KEYS;
+const { t } = useI18n();
 
 const {
   items,
@@ -146,8 +170,24 @@ const {
 
 const showSkeleton = computed(() => isLoading.value && !items.value.length);
 
+const visiblePropertyTemplates = computed(() =>
+  (props.propertyTemplates ?? []).filter((template) =>
+    template.id && columns.includes(`property:${template.id}`),
+  ),
+);
 const tableColumns = computed(() =>
-  columns.map((column) => ISSUE_TABLE_COLUMNS[column]),
+  columns.flatMap((column) => {
+    if (column.startsWith('property:')) {
+      const template = props.propertyTemplates?.find(
+        (item) => `property:${item.id}` === column,
+      );
+      return template
+        ? [{ key: column, title: template.name ?? '', width: 200, minWidth: 200, maxWidth: 200, sortable: false }]
+        : [];
+    }
+    const key = column as keyof typeof ISSUE_TABLE_COLUMNS;
+    return [{ ...ISSUE_TABLE_COLUMNS[key], title: t(`issues.columns.${key}`) }];
+  }),
 );
 const sortBy = computed(() => [
   {

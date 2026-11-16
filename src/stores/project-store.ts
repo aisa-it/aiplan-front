@@ -11,6 +11,8 @@ export const useProjectStore = defineStore('project-store', () => {
   const project = ref<DtoProject>();
   const meInProject = ref<DtoProjectMemberWithLead>();
   const isLoading = ref(false);
+  let viewSettingsRequest = Promise.resolve();
+  let viewSettingsVersion = 0;
 
   const getProjectInfo = async (workspaceSlug: string, projectId: string) => {
     isLoading.value = true;
@@ -30,29 +32,38 @@ export const useProjectStore = defineStore('project-store', () => {
     workspaceSlug: string,
     projectId: string,
     patch: TypesViewProps,
+    replace = false,
   ) => {
     if (meInProject.value?.project_id !== projectId) return;
 
     const currentSettings = meInProject.value?.view_props;
-    const settings: TypesViewProps = {
-      ...currentSettings,
-      ...patch,
-      filters:
-        currentSettings?.filters || patch.filters
-          ? {
-              ...currentSettings?.filters,
-              ...patch.filters,
-            }
-          : undefined,
-    };
+    const settings: TypesViewProps = replace
+      ? patch
+      : {
+          ...currentSettings,
+          ...patch,
+          filters:
+            currentSettings?.filters || patch.filters
+              ? { ...currentSettings?.filters, ...patch.filters }
+              : undefined,
+        };
 
-    await ProjectService.updateViewSettings(workspaceSlug, projectId, settings);
-
-    if (meInProject.value?.project_id === projectId) {
-      meInProject.value = {
-        ...meInProject.value,
-        view_props: settings,
-      };
+    meInProject.value = { ...meInProject.value, view_props: settings };
+    const version = ++viewSettingsVersion;
+    const request = viewSettingsRequest.then(() =>
+      ProjectService.updateViewSettings(workspaceSlug, projectId, settings),
+    );
+    viewSettingsRequest = request.catch(() => undefined);
+    try {
+      await request;
+    } catch (error) {
+      if (
+        meInProject.value?.project_id === projectId &&
+        version === viewSettingsVersion
+      ) {
+        meInProject.value = { ...meInProject.value, view_props: currentSettings };
+      }
+      throw error;
     }
   };
 

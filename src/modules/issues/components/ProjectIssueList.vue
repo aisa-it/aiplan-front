@@ -1,13 +1,13 @@
 <template>
   <div class="h-full min-h-0">
-    <IssueTable :hide-parent="hideParent" />
+    <IssueTable :hide-parent="hideParent" :property-templates="propertyTemplates" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
 
-import type { TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoProjectPropertyTemplate, TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { createProjectIssueListSource } from '../api/project-issue-list.source';
 import { provideIssueListController } from '../model/issue-list.context';
@@ -21,6 +21,7 @@ const props = defineProps<{
   scope: ProjectIssueListScope;
   viewSettings?: TypesViewProps;
   hideParent?: boolean;
+  propertyTemplates?: DtoProjectPropertyTemplate[];
 }>();
 
 const controller = useIssueListController(
@@ -28,6 +29,8 @@ const controller = useIssueListController(
   createIssueListInitialState(props.viewSettings),
   useProjectIssueListActions(props.scope),
 );
+
+watch(() => props.viewSettings, controller.applyViewSettings);
 
 provideIssueListController(controller);
 
