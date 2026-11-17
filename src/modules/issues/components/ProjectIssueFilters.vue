@@ -82,9 +82,7 @@ const save = async (patch: TypesViewProps, replace = false) => {
       patch,
       replace,
     );
-  } catch {
-    // Общий HTTP interceptor показывает ошибку; стор возвращает прежние настройки.
-  }
+  } catch {}
 };
 const reset = () => {
   void save(DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS, true);

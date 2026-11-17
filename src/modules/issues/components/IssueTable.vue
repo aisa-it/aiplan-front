@@ -76,11 +76,25 @@
           <SprintColumn :sprints="item.sprints" />
         </template>
         <template
-          v-for="template in visiblePropertyTemplates"
-          :key="`header-${template.id}`"
-          #[`header.property:${template.id}`]
+          v-for="resizableColumn in resizableColumns"
+          :key="`header-${resizableColumn.key}`"
+          #[`header.${resizableColumn.key}`]="{ column, getSortIcon }"
         >
-          <span class="block truncate" :title="template.name">{{ template.name }}</span>
+          <div class="v-data-table-header__content min-w-0">
+            <span
+              class="truncate"
+              :title="column.key?.startsWith('property:') ? column.title : undefined"
+            >{{ column.title }}</span>
+            <v-icon
+              v-if="column.sortable"
+              class="v-data-table-header__sort-icon"
+              :icon="getSortIcon(column)"
+            />
+          </div>
+          <IssueColumnResizer
+            @start="startResize($event, resizableColumn.key)"
+            @reset="resetWidth(resizableColumn.key)"
+          />
         </template>
         <template
           v-for="template in visiblePropertyTemplates"
@@ -111,7 +125,7 @@
       <PaginationDefault
         :selected-page="query.page"
         :rows-per-page="query.rowsPerPage"
-        :rows-per-page-options="[10, 25, 50]"
+        :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="total"
         show-rows-per-page
         @request="handlePaginationRequest"
@@ -131,9 +145,12 @@ import DocumentIcon from '@/components/icons/DocumentIcon.vue';
 import {
   ISSUE_COUNT_COLUMN_KEYS,
   ISSUE_TABLE_COLUMNS,
+  type IssueTableColumn,
 } from '../constants/issue-table-columns';
+import { isResizableIssueColumn, useIssueColumnResize } from '../composables/useIssueColumnResize';
 import { useSyncedHorizontalScroll } from '../composables/useSyncedHorizontalScroll';
 import { useIssueListControllerContext } from '../model/issue-list.context';
+import type { IssueColumnKey, ProjectIssueListScope } from '../model/issue-list.types';
 import '../styles/issue-table-columns.css';
 import SequenceIdColumn from './issue-table/SequenceIdColumn.vue';
 import NameColumn from './issue-table/NameColumn.vue';
@@ -147,9 +164,11 @@ import LabelsColumn from './issue-table/LabelsColumn.vue';
 import SprintColumn from './issue-table/SprintColumn.vue';
 import ChipCountColumn from './issue-table/ChipCountColumn.vue';
 import PropertyColumn from './issue-table/PropertyColumn.vue';
+import IssueColumnResizer from './issue-table/IssueColumnResizer.vue';
 import IssueTableSkeleton from './IssueTableSkeleton.vue';
 
 const props = defineProps<{
+  scope: ProjectIssueListScope;
   hideParent?: boolean;
   propertyTemplates?: DtoProjectPropertyTemplate[];
 }>();
@@ -169,25 +188,54 @@ const {
 } = useIssueListControllerContext();
 
 const showSkeleton = computed(() => isLoading.value && !items.value.length);
+const { widthFor, startResize, resetWidth } = useIssueColumnResize(
+  () => `project:${props.scope.workspaceSlug}:${props.scope.projectId}`,
+);
 
 const visiblePropertyTemplates = computed(() =>
   (props.propertyTemplates ?? []).filter((template) =>
     template.id && columns.includes(`property:${template.id}`),
   ),
 );
-const tableColumns = computed(() =>
-  columns.flatMap((column) => {
+const tableColumns = computed<IssueTableColumn[]>(() =>
+  columns.flatMap<IssueTableColumn>((column) => {
     if (column.startsWith('property:')) {
       const template = props.propertyTemplates?.find(
         (item) => `property:${item.id}` === column,
       );
-      return template
-        ? [{ key: column, title: template.name ?? '', width: 200, minWidth: 200, maxWidth: 200, sortable: false }]
-        : [];
+      if (!template) return [];
+      const width = widthFor(column) ?? 200;
+      return [{
+        key: column,
+        title: template.name ?? '',
+        width,
+        minWidth: width,
+        maxWidth: width,
+        sortable: false,
+        headerProps: { class: 'issue-resizable-header', 'data-column': column },
+      }];
     }
     const key = column as keyof typeof ISSUE_TABLE_COLUMNS;
-    return [{ ...ISSUE_TABLE_COLUMNS[key], title: t(`issues.columns.${key}`) }];
+    const base = ISSUE_TABLE_COLUMNS[key];
+    const width = widthFor(key) ?? base.width;
+    return [{
+      ...base,
+      title: t(`issues.columns.${key}`),
+      width,
+      minWidth: width,
+      maxWidth: width,
+      headerProps: {
+        ...base.headerProps,
+        class: [base.headerProps?.class, isResizableIssueColumn(key) && 'issue-resizable-header']
+          .filter(Boolean)
+          .join(' '),
+        'data-column': key,
+      },
+    }];
   }),
+);
+const resizableColumns = computed(() =>
+  tableColumns.value.filter((column) => isResizableIssueColumn(column.key as IssueColumnKey)),
 );
 const sortBy = computed(() => [
   {
@@ -268,6 +316,10 @@ const handlePaginationRequest = (options: {
   white-space: nowrap;
 }
 
+:deep(.issue-table .issue-resizable-header:not(.v-data-table-column--fixed)) {
+  position: relative;
+}
+
 :deep(.issue-table .issue-count-header) {
   padding-inline: 4px;
 }
@@ -277,7 +329,8 @@ const handlePaginationRequest = (options: {
 }
 
 :deep(.issue-table .v-data-table-column--last-fixed) {
-  border-right: 2px solid rgba(var(--v-theme-on-background), 0.12) !important;
+  border-right: 0 !important;
+  box-shadow: inset -2px 0 rgba(var(--v-theme-on-background), 0.12);
 }
 
 .issue-table-scrollbar {

@@ -1,5 +1,5 @@
 <template>
-  <span class="block max-w-[200px] truncate" :title="display.text">
+  <span class="block w-full min-w-0 truncate" :title="display.text">
     <v-icon
       v-if="property.type === 'boolean' && display.checked"
       icon="mdi-check"

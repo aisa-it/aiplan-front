@@ -11,7 +11,7 @@ export interface IssueTableColumn {
   align?: 'start' | 'center';
   fixed?: boolean;
   sortable?: boolean;
-  headerProps?: { class: string };
+  headerProps?: { class?: string; 'data-column'?: string };
 }
 
 export const ISSUE_COUNT_COLUMN_KEYS = [

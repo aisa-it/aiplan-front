@@ -1,6 +1,6 @@
 <template>
   <div class="h-full min-h-0">
-    <IssueTable :hide-parent="hideParent" :property-templates="propertyTemplates" />
+    <IssueTable :scope="scope" :hide-parent="hideParent" :property-templates="propertyTemplates" />
   </div>
 </template>
 
