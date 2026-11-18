@@ -104,6 +104,7 @@ const { t } = useI18n();
 const cyrillicToTranslit = CyrillicToTranslit();
 
 const route = useRoute();
+const props = defineProps<{ workspaceSlug?: string | null }>();
 const workspaceStore = useWorkspaceStore();
 
 const networkChoices = useTranslatedOptions(NETWORK_CHOICES);
@@ -176,7 +177,7 @@ const createIdentifier = () => {
 };
 
 const createNewProject = async () => {
-  const workspaceSlug = route.params.workspace as string;
+  const workspaceSlug = props.workspaceSlug || (route.params.workspace as string);
   if (!workspaceSlug) return;
 
   const payload = {
@@ -192,7 +193,10 @@ const createNewProject = async () => {
 
   try {
     await ProjectService.createProject(workspaceSlug, payload);
-    await workspaceStore.getWorkspaceProjects(workspaceSlug);
+    await Promise.all([
+      workspaceStore.getWorkspaceProjects(workspaceSlug),
+      workspaceStore.getWorkspaceSummary(workspaceSlug),
+    ]);
     isOpen.value = false;
     clear();
   } catch (error) {

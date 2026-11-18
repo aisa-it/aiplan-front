@@ -26,6 +26,16 @@ export const ProjectService = {
     return (await projectsApi.createProject(workspaceSlug, data)).data;
   },
 
+  async addToFavorites(workspaceSlug: string, projectId: string) {
+    await projectsApi.addProjectToFavorites(workspaceSlug, {
+      project: projectId,
+    });
+  },
+
+  async removeFromFavorites(workspaceSlug: string, projectId: string) {
+    await projectsApi.removeProjectFromFavorites(workspaceSlug, projectId);
+  },
+
   async updateViewSettings(
     workspaceSlug: string,
     projectId: string,

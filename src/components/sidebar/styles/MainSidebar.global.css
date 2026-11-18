@@ -1,0 +1,5 @@
+.main-sidebar--resizing, .main-sidebar--resizing ~ .v-main { transition: none !important; }
+.main-sidebar--resizing-height .sidebar-section { transition: none !important; }
+.sidebar-sort-ghost { opacity: .5; border-top: 2px solid rgb(var(--v-theme-primary)); }
+.sidebar-sort-chosen { cursor: grabbing; }
+.sidebar-sort-fallback { opacity: .9; background: rgb(var(--v-theme-surface)); box-shadow: 0 4px 12px #0003; }

@@ -15,6 +15,10 @@ export const UserService = {
     return (await usersApi.getCurrentUser()).data;
   },
 
+  async getCurrentUserProjectMemberships(projectIds: string[]) {
+    return (await usersApi.getCurrentUserProjectMemberships(projectIds)).data;
+  },
+
   async updateCurrentUser(
     data: UpdateCurrentUserRequest,
     params?: RequestParams,

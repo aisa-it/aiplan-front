@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getStringParam } from '@/utils/object';
 import {
-  loadProjectGuard,
   loadUserDataGuard,
   loadWorkspaceGuard,
+  resolveProjectGuard,
   redirectToWorkspaceGuard,
   globalGuard,
   onboardingGuard,
@@ -63,7 +63,6 @@ const router = createRouter({
             workspaceSlug: getStringParam(route.params.workspace),
             projectId: getStringParam(route.params.project),
           }),
-          beforeEnter: [loadWorkspaceGuard, loadProjectGuard],
         },
       ],
     },
@@ -90,5 +89,6 @@ const router = createRouter({
 });
 
 router.beforeEach(globalGuard);
+router.beforeResolve(resolveProjectGuard);
 
 export default router;

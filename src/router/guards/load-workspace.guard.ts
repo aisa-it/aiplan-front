@@ -1,4 +1,4 @@
-import type { NavigationGuard } from 'vue-router';
+import type { RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from '@/stores/user-store';
@@ -6,7 +6,7 @@ import { useWorkspaceStore } from '@/stores/workspace-store';
 import { getStringParam } from '@/utils/object';
 import { checkPermissionByWs, defineRole } from '@/utils/permissions';
 
-export const loadWorkspaceGuard: NavigationGuard = async (to) => {
+export const loadWorkspaceGuard = async (to: RouteLocationNormalized) => {
   const workspace = getStringParam(to.params.workspace);
 
   if (!workspace) {
