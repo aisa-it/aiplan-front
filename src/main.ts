@@ -4,6 +4,7 @@ import { vMaska } from 'maska/vue';
 import './styles/tailwind.css';
 import './css/fonts.scss';
 import './styles/main.scss';
+import './styles/text-fields.scss';
 import App from './App.vue';
 import router from './router';
 import vuetify from './plugins/vuetify';

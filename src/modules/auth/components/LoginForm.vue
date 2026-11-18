@@ -24,7 +24,6 @@
       name="password"
       autocomplete="current-password"
       :label="t('auth.login.passwordLabel')"
-      :placeholder="t('auth.login.passwordPlaceholder')"
       data-id="password"
       :type="isPassword ? 'password' : 'text'"
       :rules="[

@@ -34,6 +34,12 @@ const vuetify = createVuetify({
           text: '#474a52',
           icon: '#474a52',
           surface: '#ffffff',
+          // Компоненты Vuetify (v-card, v-btn, v-data-table, v-app-bar и др.)
+          // красят текст через on-*, а не через text; без явного значения
+          // Vuetify генерирует on-* как чистый чёрный/белый.
+          'on-background': '#474a52',
+          'on-surface': '#474a52',
+          'on-surface-variant': '#474a52',
         },
         variables: {
           'hover-opacity': 0.08,
@@ -52,7 +58,11 @@ const vuetify = createVuetify({
           surface: '#1f2228',
           border: '#31363f',
           text: '#bac4d5',
-          border: '#31363f',
+          icon: '#bac4d5',
+          // См. комментарий в светлой теме: on-* задают цвет текста компонентов Vuetify
+          'on-background': '#bac4d5',
+          'on-surface': '#bac4d5',
+          'on-surface-variant': '#bac4d5',
         },
       },
     },
