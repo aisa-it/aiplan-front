@@ -1,0 +1,47 @@
+/*
+  Глобальные размеры шрифтов для полей ввода Vuetify
+  (VTextField, VTextarea, VSelect, VAutocomplete и т.п.).
+
+  Почему именно так:
+  - .v-field жёстко задаёт font-size: 16px, а input/textarea наследуют его
+    через font: inherit из reset Vuetify;
+  - .v-label задаёт font-size: 1rem непосредственно элементу и не наследует
+    размер от .v-field — поэтому лейбл переопределяется отдельно;
+  - всплывший лейбл (.v-field-label--floating) имеет
+    font-size: var(--v-field-label-scale) = 0.75em от .v-field, то есть
+    уменьшается при фокусе автоматически, пропорционально базовому размеру;
+  - сообщения об ошибках и подсказки живут в .v-input__details.
+
+  Слой vuetify-overrides объявлен в public/layers.css после
+  vuetify-components, поэтому переопределения выигрывают без !important.
+*/
+@layer vuetify-overrides {
+  /* Текст внутри поля */
+  .v-input .v-field {
+    font-size: 0.875rem; /* 14px */
+  }
+
+  /* Лейбл в покое; :not() не даёт перебить em-масштабирование всплывшего лейбла */
+  .v-input .v-field .v-label.v-field-label:not(.v-field-label--floating) {
+    font-size: inherit; /* 14px */
+  }
+
+  /*
+    Всплывший лейбл: 0.75em от базового размера поля = 10.5px при 14px.
+    Для другого масштаба поменяйте переменную на конкретном поле, например
+    --v-field-label-scale: 0.857em (12px).
+  */
+  .v-input .v-label.v-field-label--floating {
+    font-size: var(--v-field-label-scale);
+  }
+
+  /* Текст ошибок и подсказок */
+  .v-input__details {
+    font-size: 0.75rem; /* 12px */
+  }
+
+  /* Цвет вводимого текста */
+  .v-input .v-field__input {
+    color: rgb(var(--v-theme-text));
+  }
+}

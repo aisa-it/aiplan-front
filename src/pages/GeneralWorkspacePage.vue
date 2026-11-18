@@ -49,8 +49,13 @@
 
         <v-divider class="w-full my-4" />
 
-        <div v-if="defineDescription" class="w-full">
-          <div v-html="defineDescription"></div>
+        <div v-if="defineDescription" class="w-full workspace-description">
+          <EditorTipTap
+            editor-id="desc-editor"
+            :model-value="defineDescription"
+            :read-only-editor="true"
+            :can-edit="false"
+          />
         </div>
       </div>
 
@@ -95,6 +100,7 @@ import { useDisplay } from 'vuetify';
 
 import newYearTree from '@/assets/newYearTree.svg';
 import womanDayLogo from '@/assets/woman-day-logo.png';
+import { EditorTipTap } from '@/modules/editor';
 import GuidedTour from '@/modules/guided-tours/GuidedTour.vue';
 import { steps, STEP_NUM } from '@/modules/guided-tours/tutorials/tutorial1';
 import NewProjectDialog from '@/components/dialogs/NewProjectDialog.vue';
@@ -143,3 +149,17 @@ useTitle(
   ),
 );
 </script>
+
+<style scoped>
+/* Если такие же переопределения понадобятся ещё где-то — не копировать,
+   а добавить в EditorTipTap «plain»-режим (проп), тогда этот блок удалить. */
+.workspace-description :deep(.editor-tiptap) {
+  border: 0;
+}
+
+.workspace-description :deep(.editor-tiptap__body),
+.workspace-description :deep(.editor-tiptap__editor-content),
+.workspace-description :deep(.editor-tiptap__content) {
+  min-height: 0;
+}
+</style>

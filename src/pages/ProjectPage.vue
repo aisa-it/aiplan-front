@@ -17,7 +17,14 @@
           {{ t('common.screens.project.tasksTitle', { name: project?.name }) }}
         </span>
       </div>
-      <DotListIcon />
+      <ProjectIssueFilters
+        v-if="issueListScope && !isLoading"
+        :scope="issueListScope"
+        :settings="meInProject?.view_props"
+        :statuses="statuses"
+        :property-templates="propertyTemplates"
+        :options-loading="optionsLoading"
+      />
     </div>
 
     <v-tabs
@@ -25,7 +32,7 @@
       align-tabs="start"
       color="primary"
       :grow="mobile"
-      class="mb-2"
+      class="project-tabs mb-2"
     >
       <v-tab
         v-for="tab in tabs"
@@ -56,10 +63,11 @@
       >
         <ProjectIssueList
           v-if="tab.value === 'general' && issueListScope && !isLoading"
-          :key="issueListScope.projectId"
+          :key="`${issueListScope.workspaceSlug}:${issueListScope.projectId}`"
           :scope="issueListScope"
           :view-settings="meInProject?.view_props"
           :hide-parent="project?.hide_fields?.includes('sub_issues_count')"
+          :property-templates="propertyTemplates"
         />
         <IssueTableSkeleton v-else-if="tab.value === 'general' && isLoading" />
         <PinnedIssueList
@@ -90,6 +98,8 @@ import {
   PinnedIssueList,
   type ProjectIssueListScope,
 } from '@/modules/issues';
+import ProjectIssueFilters from '@/modules/issues/components/ProjectIssueFilters.vue';
+import { useProjectIssueOptions } from '@/modules/issues/composables/useProjectIssueOptions';
 
 const props = defineProps<{
   workspaceSlug: string;
@@ -149,9 +159,18 @@ const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
     projectId: project.value.id,
   };
 });
+const {
+  statuses,
+  propertyTemplates,
+  isLoading: optionsLoading,
+} = useProjectIssueOptions(issueListScope);
 </script>
 
 <style scoped>
+.project-tabs {
+  flex: 0 0 auto;
+}
+
 .project-tabs-window :deep(.v-window__container),
 .project-tabs-window :deep(.v-window-item) {
   height: 100%;

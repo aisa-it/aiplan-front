@@ -13,6 +13,8 @@ import type {
   IssueListInitialState,
   IssueListSource,
 } from '../model/issue-list.types';
+import { createIssueListInitialState } from '../model/issue-list.defaults';
+import { toast } from '@/modules/toast/toast';
 
 export const useIssueListController = (
   source: IssueListSource,
@@ -23,20 +25,14 @@ export const useIssueListController = (
   const total = ref(0);
   const isLoading = ref(false);
   const query = reactive({ ...initialState.query });
-  const columns = initialState.columns;
+  const filters = reactive({ ...initialState.filters });
+  const columns = reactive([...initialState.columns]);
 
   let requestController: AbortController | undefined;
   let requestNumber = 0;
-  let viewSettingsRequest = Promise.resolve();
-
   const updateViewSettings = (settings: TypesViewProps) => {
     if (!actions) return;
-
-    viewSettingsRequest = viewSettingsRequest
-      .then(() => actions.updateViewSettings(settings))
-      .catch(() => {
-        // TODO: показать уведомление после переноса общей системы уведомлений.
-      });
+    void actions.updateViewSettings(settings).catch(() => {});
   };
 
   const load = async () => {
@@ -48,11 +44,7 @@ export const useIssueListController = (
     isLoading.value = true;
 
     try {
-      const result = await source.load(
-        initialState.filters,
-        query,
-        controller.signal,
-      );
+      const result = await source.load(filters, query, controller.signal);
 
       if (currentRequest !== requestNumber) return;
 
@@ -60,8 +52,6 @@ export const useIssueListController = (
       total.value = result.total;
     } catch {
       if (controller.signal.aborted || currentRequest !== requestNumber) return;
-
-      // TODO: показать уведомление после переноса общей системы уведомлений.
     } finally {
       if (currentRequest === requestNumber) isLoading.value = false;
     }
@@ -69,6 +59,24 @@ export const useIssueListController = (
 
   const setPage = (page: number) => {
     query.page = page;
+    void load();
+  };
+
+  const applyViewSettings = (settings: TypesViewProps | undefined) => {
+    const next = createIssueListInitialState(settings);
+    const changed =
+      Object.keys(next.query).some(
+        (key) =>
+          query[key as keyof typeof query] !==
+          next.query[key as keyof typeof query],
+      ) ||
+      JSON.stringify(filters) !== JSON.stringify(next.filters) ||
+      JSON.stringify(columns) !== JSON.stringify(next.columns);
+    if (!changed) return;
+
+    Object.assign(query, next.query, { page: 1 });
+    Object.assign(filters, next.filters);
+    columns.splice(0, columns.length, ...next.columns);
     void load();
   };
 
@@ -124,8 +132,8 @@ export const useIssueListController = (
       item.id === issue.id ? { ...item, ...updatedIssue } : item,
     );
 
+    toast.success();
     await load();
-    // TODO: показать уведомление об успешном сохранении.
   };
 
   const getAvailableStates = (issue: DtoIssueWithCount) =>
@@ -140,6 +148,7 @@ export const useIssueListController = (
     query,
     columns,
     load,
+    applyViewSettings,
     setPage,
     setRowsPerPage,
     setSort,

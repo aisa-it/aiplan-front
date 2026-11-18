@@ -16,6 +16,7 @@ export const ISSUE_COLUMN_KEYS = [
   'updated_at',
   'author',
   'assignees',
+  'watchers',
   'labels',
   'sub_issues_count',
   'linked_issues_count',
@@ -24,7 +25,8 @@ export const ISSUE_COLUMN_KEYS = [
   'sprint',
 ] as const;
 
-export type IssueColumnKey = (typeof ISSUE_COLUMN_KEYS)[number];
+export type StandardIssueColumnKey = (typeof ISSUE_COLUMN_KEYS)[number];
+export type IssueColumnKey = StandardIssueColumnKey | `property:${string}`;
 
 export type EditableIssueField = 'priority' | 'state' | 'target_date';
 export type IssueFieldPatch = Partial<
@@ -52,6 +54,7 @@ export interface IssueListQuery {
   hideSubIssues: boolean;
   onlyActive: boolean;
   draft: boolean;
+  includeProperties: boolean;
 }
 
 export interface IssueListResult {
