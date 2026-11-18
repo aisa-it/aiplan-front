@@ -62,7 +62,12 @@
           :hide-parent="project?.hide_fields?.includes('sub_issues_count')"
         />
         <IssueTableSkeleton v-else-if="tab.value === 'general' && isLoading" />
-        <span v-else-if="tab.value !== 'general'">{{ t(tab.labelKey) }}</span>
+        <PinnedIssueList
+          v-else-if="tab.value === 'pinned' && currentTab === 'pinned' && issueListScope && !isLoading"
+          :key="`pinned-${issueListScope.projectId}`"
+          :scope="issueListScope"
+        />
+        <span v-else-if="tab.value === 'analytics'">{{ t(tab.labelKey) }}</span>
       </v-tabs-window-item>
     </v-tabs-window>
   </div>
@@ -82,6 +87,7 @@ import PinIcon from '@/components/icons/PinIcon.vue';
 import {
   ProjectIssueList,
   IssueTableSkeleton,
+  PinnedIssueList,
   type ProjectIssueListScope,
 } from '@/modules/issues';
 
