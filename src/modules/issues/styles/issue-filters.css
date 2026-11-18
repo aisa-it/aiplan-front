@@ -1,0 +1,72 @@
+.issue-filters-menu {
+  width: 320px;
+  max-height: min(720px, calc(100dvh - 32px));
+  overflow-y: auto;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.issue-filters-panel { padding-bottom: 6px; }
+.issue-filters-activator, .issue-filters-reset { color: rgb(var(--v-theme-text)) !important; }
+.issue-filters-reset .mdi { font-size: 20px; line-height: 1; }
+.issue-filters-panel, .issue-columns-menu { color: rgb(var(--v-theme-text)); }
+.issue-filters-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 4px 12px 4px 16px;
+  font-size: 14px;
+  color: rgb(var(--v-theme-on-surface));
+}
+.issue-filters-field { padding: 8px 16px; }
+.issue-column-picker .v-select__selection { min-width: 0; overflow: hidden; }
+.issue-columns-selection { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.issue-filters-toggle {
+  min-height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+.issue-status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+.issue-columns-menu {
+  width: 288px;
+  max-height: min(620px, calc(100dvh - 64px));
+  overflow-y: auto;
+  background: rgb(var(--v-theme-surface));
+}
+.issue-columns-menu .v-list { padding: 0; background: transparent; }
+.issue-columns-option {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 24px;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 20px 0 24px;
+  font-size: 14px;
+  color: rgb(var(--v-theme-primary));
+}
+.issue-columns-option:hover { background: rgba(var(--v-theme-on-surface), 0.05); }
+.v-theme--dark .issue-columns-option:hover { background: rgba(var(--v-theme-on-surface), 0.16); }
+.issue-columns-check { display: flex; align-items: center; }
+.issue-columns-check .v-selection-control { flex: 0 0 auto; }
+.issue-columns-option .v-selection-control__input > .v-icon { font-size: 20px; }
+.issue-columns-drag { cursor: grab; color: rgb(var(--v-theme-primary)); }
+.issue-columns-ghost { opacity: 0.45; }
+
+.issue-filters-reset-message {
+  padding: 16px !important;
+  color: rgb(var(--v-theme-text));
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+.issue-filters-reset-actions { padding: 8px !important; }
+.issue-filters-reset-action {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.75px;
+  text-transform: none;
+}

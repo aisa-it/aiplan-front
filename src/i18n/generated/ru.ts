@@ -8,6 +8,7 @@ import docActivityRu from '@/modules/activities/renders/entities/doc-activity/i1
 import editorRu from '@/modules/editor/i18n/ru';
 import guidedToursRu from '@/modules/guided-tours/i18n/ru';
 import issueActivityRu from '@/modules/activities/renders/entities/issue-activity/i18n/ru';
+import issuesRu from '@/modules/issues/i18n/ru';
 import paginationRu from '@/components/pagination/i18n/ru';
 import profileRu from '@/modules/profile/i18n/ru';
 import projectActivityRu from '@/modules/activities/renders/entities/project-activity/i18n/ru';
@@ -27,6 +28,7 @@ export default {
   editor: editorRu,
   guidedTours: guidedToursRu,
   issueActivity: issueActivityRu,
+  issues: issuesRu,
   pagination: paginationRu,
   profile: profileRu,
   projectActivity: projectActivityRu,
