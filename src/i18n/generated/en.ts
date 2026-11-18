@@ -9,6 +9,7 @@ import docActivityEn from '@/modules/activities/renders/entities/doc-activity/i1
 import editorEn from '@/modules/editor/i18n/en';
 import guidedToursEn from '@/modules/guided-tours/i18n/en';
 import issueActivityEn from '@/modules/activities/renders/entities/issue-activity/i18n/en';
+import issuesEn from '@/modules/issues/i18n/en';
 import paginationEn from '@/components/pagination/i18n/en';
 import profileEn from '@/modules/profile/i18n/en';
 import projectActivityEn from '@/modules/activities/renders/entities/project-activity/i18n/en';
@@ -29,6 +30,7 @@ const messages = {
   editor: editorEn,
   guidedTours: guidedToursEn,
   issueActivity: issueActivityEn,
+  issues: issuesEn,
   pagination: paginationEn,
   profile: profileEn,
   projectActivity: projectActivityEn,

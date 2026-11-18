@@ -10,15 +10,17 @@ import {
 import { NotificationsService } from '../api';
 import type { NotificationTab, WorkspaceNotification } from '../models';
 import { useNotificationsSocket } from './useNotificationsSocket';
+import { toast } from '@/modules/toast';
 
 const INITIAL_LIMIT = 100;
 const LOAD_MORE_LIMIT = 50;
 const MAX_UNREAD_COUNT = 100;
 const SOCKET_REFRESH_DELAY = 300;
 
-const countUnreadNotifications = (
-  notifications: WorkspaceNotification[],
-) =>
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const countUnreadNotifications = (notifications: WorkspaceNotification[]) =>
   Math.min(
     notifications.filter((notification) => !notification.viewed).length,
     MAX_UNREAD_COUNT,
@@ -192,18 +194,20 @@ export function useNotificationsController() {
     }, SOCKET_REFRESH_DELAY);
   };
 
-  const handleSocketMessage = () => {
-    // TODO: показывать сообщения типа message после переноса toast-уведомлений.
-    unreadCount.value = Math.min(
-      unreadCount.value + 1,
-      MAX_UNREAD_COUNT,
-    );
-
-    if (isOpen.value) {
-      scheduleNotificationsRefresh();
-      return;
+  const handleSocketMessage = (payload: unknown) => {
+    if (
+      isRecord(payload) &&
+      payload.type === 'message' &&
+      isRecord(payload.data) &&
+      typeof payload.data.msg === 'string'
+    ) {
+      toast.message(payload.data.msg, {
+        title: typeof payload.data.title === 'string' ? payload.data.title : undefined,
+      });
     }
+    unreadCount.value = Math.min(unreadCount.value + 1, MAX_UNREAD_COUNT);
 
+    if (isOpen.value) scheduleNotificationsRefresh();
   };
 
   const socket = useNotificationsSocket({

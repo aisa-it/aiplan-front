@@ -38,7 +38,7 @@
             v-if="issue.priority && canEdit && !isSaving"
             type="button"
             aria-label="Убрать приоритет"
-            class="absolute top-1/2 right-5 z-10 flex size-5 -translate-y-1/2 cursor-pointer items-center justify-center opacity-60 transition-opacity hover:opacity-100 focus:opacity-100"
+            class="absolute top-1/2 right-5 flex size-5 -translate-y-1/2 cursor-pointer items-center justify-center opacity-60 transition-opacity hover:opacity-100 focus:opacity-100"
             @pointerdown.stop
             @click.stop.prevent="clearPriority"
           >
