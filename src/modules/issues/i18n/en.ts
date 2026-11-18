@@ -1,17 +1,34 @@
 import type ru from './ru';
 
 export default {
+  parent: 'Parent: {identifier} - {sequence}',
+  pinned: {
+    empty: 'No pinned tasks',
+    draft: 'Draft',
+  },
   columns: {
-    sequence_id: 'ID', name: 'Name', priority: 'Priority', state: 'Status',
-    target_date: 'Due date', created_at: 'Created', updated_at: 'Last updated',
-    author: 'Author', assignees: 'Assignee', watchers: 'Watchers', labels: 'Tags',
-    sub_issues_count: 'Subtasks', linked_issues_count: 'Relations',
-    link_count: 'Links', attachment_count: 'Attachments', sprint: 'Sprint',
+    sequence_id: 'ID',
+    name: 'Name',
+    priority: 'Priority',
+    state: 'Status',
+    target_date: 'Due date',
+    created_at: 'Created',
+    updated_at: 'Last updated',
+    author: 'Author',
+    assignees: 'Assignee',
+    watchers: 'Watchers',
+    labels: 'Tags',
+    sub_issues_count: 'Subtasks',
+    linked_issues_count: 'Relations',
+    link_count: 'Links',
+    attachment_count: 'Attachments',
+    sprint: 'Sprint',
   },
   filters: {
     display: 'Display',
     reset: 'Reset',
-    resetQuestion: 'Task list display settings will be reset to their defaults. Continue?',
+    resetQuestion:
+      'Task list display settings will be reset to their defaults. Continue?',
     cancel: 'Cancel',
     execute: 'Confirm',
     view: 'View',

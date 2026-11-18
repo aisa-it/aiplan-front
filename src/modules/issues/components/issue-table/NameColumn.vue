@@ -11,20 +11,18 @@
     </div>
 
     <!-- TODO: открывать предпросмотр родителя после переноса панели задачи. -->
-    <span
-      v-if="issue.parent && issue.parent_detail?.sequence_id && !hideParent"
-      class="inline-flex min-h-8 shrink-0 items-center rounded-2xl border border-border px-1.5 py-px text-primary"
-      :title="`Родитель: ${issue.project_detail?.identifier} - ${issue.parent_detail.sequence_id}`"
-    >
-      <ConnectIcon :width="16" :height="16" class="mx-0.5" />
-      {{ issue.parent_detail.sequence_id }}
-    </span>
+    <ParentIssueChip
+      :issue="issue"
+      :hide-parent="hideParent"
+      compact
+      class="shrink-0"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import ConnectIcon from '@/components/icons/ConnectIcon.vue';
+import ParentIssueChip from '../ParentIssueChip.vue';
 
 defineProps<{
   issue: DtoIssueWithCount;
