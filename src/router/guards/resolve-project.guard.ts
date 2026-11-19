@@ -2,6 +2,7 @@ import type { NavigationGuard } from 'vue-router';
 
 import { loadProjectGuard } from './load-project.guard';
 import { loadWorkspaceGuard } from './load-workspace.guard';
+import { getRouteLoadSignal } from './route-load';
 
 export const resolveProjectGuard: NavigationGuard = async (to, from) => {
   if (
@@ -14,6 +15,7 @@ export const resolveProjectGuard: NavigationGuard = async (to, from) => {
   }
 
   const workspaceResult = await loadWorkspaceGuard(to);
+  if (getRouteLoadSignal(to)?.aborted) return;
   if (workspaceResult) return workspaceResult;
 
   return loadProjectGuard(to);

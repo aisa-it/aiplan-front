@@ -1,70 +1,66 @@
-import { nextTick, onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
+
+interface HorizontalScrollOptions {
+  initialScrollLeft?: number;
+  onScroll?: (scrollLeft: number) => void;
+}
 
 export const useSyncedHorizontalScroll = (
   tableRoot: Ref<HTMLElement | null>,
   scrollbar: Ref<HTMLElement | null>,
+  options: HorizontalScrollOptions = {},
 ) => {
   const contentWidth = ref(0);
+  const hasOverflow = ref(false);
   let resizeObserver: ResizeObserver | undefined;
-  let scrollingSource: 'viewport' | 'scrollbar' | undefined;
-
-  const getViewport = () =>
-    tableRoot.value?.querySelector<HTMLElement>('.v-table__wrapper');
-
-  const getTable = () =>
-    tableRoot.value?.querySelector<HTMLTableElement>('.v-table__wrapper table');
+  let viewport: HTMLElement | null | undefined;
 
   const measure = () => {
-    contentWidth.value = getTable()?.scrollWidth ?? 0;
+    if (!viewport?.clientWidth) return;
+    contentWidth.value = viewport.scrollWidth;
+    hasOverflow.value = viewport.scrollWidth > viewport.clientWidth;
   };
 
   const syncViewport = () => {
-    const viewport = getViewport();
-
-    if (!viewport || !scrollbar.value || scrollingSource === 'viewport') {
-      return;
+    const bar = scrollbar.value;
+    if (viewport && bar?.clientWidth && viewport.scrollLeft !== bar.scrollLeft) {
+      viewport.scrollLeft = bar.scrollLeft;
     }
-
-    scrollingSource = 'scrollbar';
-    viewport.scrollLeft = scrollbar.value.scrollLeft;
-    requestAnimationFrame(() => (scrollingSource = undefined));
   };
 
   const syncScrollbar = () => {
-    const viewport = getViewport();
-
-    if (!viewport || !scrollbar.value || scrollingSource === 'scrollbar') {
-      return;
+    if (!viewport?.clientWidth) return;
+    const scrollLeft = viewport.scrollLeft;
+    const bar = scrollbar.value;
+    if (bar?.clientWidth && bar.scrollLeft !== scrollLeft) {
+      bar.scrollLeft = scrollLeft;
     }
-
-    scrollingSource = 'viewport';
-    scrollbar.value.scrollLeft = viewport.scrollLeft;
-    requestAnimationFrame(() => (scrollingSource = undefined));
+    options.onScroll?.(scrollLeft);
   };
 
   onMounted(async () => {
     await nextTick();
+    viewport = tableRoot.value?.querySelector<HTMLElement>('.v-table__wrapper');
+    if (!viewport) return;
+    if (options.initialScrollLeft !== undefined) {
+      viewport.scrollLeft = options.initialScrollLeft;
+    }
     measure();
 
     resizeObserver = new ResizeObserver(measure);
-    const viewport = getViewport();
-    const table = getTable();
-
-    if (viewport) {
-      viewport.addEventListener('scroll', syncScrollbar, { passive: true });
-      resizeObserver.observe(viewport);
-    }
+    viewport.addEventListener('scroll', syncScrollbar, { passive: true });
+    resizeObserver.observe(viewport);
+    const table = viewport.querySelector('table');
     if (table) resizeObserver.observe(table);
+    syncScrollbar();
   });
 
+  watch([contentWidth, hasOverflow], syncScrollbar, { flush: 'post' });
+
   onBeforeUnmount(() => {
-    getViewport()?.removeEventListener('scroll', syncScrollbar);
+    viewport?.removeEventListener('scroll', syncScrollbar);
     resizeObserver?.disconnect();
   });
 
-  return {
-    contentWidth,
-    measure,
-    syncViewport,
-  };
+  return { contentWidth, hasOverflow, syncViewport };
 };

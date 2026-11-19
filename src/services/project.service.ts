@@ -12,13 +12,24 @@ export const ProjectService = {
     return (await projectsApi.getProjectList(workspaceSlug, query)).data;
   },
 
-  async getProject(workspaceSlug: string, projectId: string) {
-    return (await projectsApi.getProject(workspaceSlug, projectId)).data;
+  async getProject(
+    workspaceSlug: string,
+    projectId: string,
+    signal?: AbortSignal,
+  ) {
+    return (await projectsApi.getProject(workspaceSlug, projectId, { signal }))
+      .data;
   },
 
-  async getMeInProject(workspaceSlug: string, projectId: string) {
+  async getMeInProject(
+    workspaceSlug: string,
+    projectId: string,
+    signal?: AbortSignal,
+  ) {
     return (
-      await projectsApi.getProjectCurrentMembership(workspaceSlug, projectId)
+      await projectsApi.getProjectCurrentMembership(workspaceSlug, projectId, {
+        signal,
+      })
     ).data;
   },
 
