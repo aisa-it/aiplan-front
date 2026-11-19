@@ -16,6 +16,18 @@ export const ProjectService = {
     return (await projectsApi.getProject(workspaceSlug, projectId)).data;
   },
 
+  async getProjectStats(
+    workspaceSlug: string,
+    projectId: string,
+    signal: AbortSignal,
+  ) {
+    return (
+      await projectsApi.getProjectStats(workspaceSlug, projectId, undefined, {
+        signal,
+      })
+    ).data;
+  },
+
   async getMeInProject(workspaceSlug: string, projectId: string) {
     return (
       await projectsApi.getProjectCurrentMembership(workspaceSlug, projectId)

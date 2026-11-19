@@ -75,7 +75,11 @@
           :key="`pinned-${issueListScope.projectId}`"
           :scope="issueListScope"
         />
-        <span v-else-if="tab.value === 'analytics'">{{ t(tab.labelKey) }}</span>
+        <ProjectAnalytics
+          v-else-if="tab.value === 'analytics' && currentTab === 'analytics' && analyticsScope"
+          :key="`${analyticsScope.workspaceSlug}:${analyticsScope.projectId}`"
+          :scope="analyticsScope"
+        />
       </v-tabs-window-item>
     </v-tabs-window>
   </div>
@@ -87,6 +91,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
 import { useProjectStore } from '@/stores/project-store';
+import { useWorkspaceStore } from '@/stores/workspace-store';
 import type { MessageKey } from '@/i18n';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
@@ -96,6 +101,7 @@ import {
   ProjectIssueList,
   IssueTableSkeleton,
   PinnedIssueList,
+  ProjectAnalytics,
   type ProjectIssueListScope,
 } from '@/modules/issues';
 import ProjectIssueFilters from '@/modules/issues/components/ProjectIssueFilters.vue';
@@ -159,6 +165,21 @@ const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
     projectId: project.value.id,
   };
 });
+const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const analyticsScope = computed(() => {
+  const currentProject = project.value;
+  if (
+    isLoading.value ||
+    currentWorkspaceSlug.value !== props.workspaceSlug ||
+    (currentProject?.id !== props.projectId &&
+      currentProject?.identifier?.toLowerCase() !== props.projectId.toLowerCase())
+  ) {
+    return undefined;
+  }
+
+  return issueListScope.value;
+});
+
 const {
   statuses,
   propertyTemplates,
