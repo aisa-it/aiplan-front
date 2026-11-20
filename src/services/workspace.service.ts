@@ -7,17 +7,20 @@ export const WorkspaceService = {
     return (await workspaceApi.getUserWorkspaceList()).data ?? [];
   },
 
-  async getWorkspace(workspaceSlug: string) {
-    return (await workspaceApi.getWorkspace(workspaceSlug)).data;
+  async getWorkspace(workspaceSlug: string, signal?: AbortSignal) {
+    return (await workspaceApi.getWorkspace(workspaceSlug, { signal })).data;
   },
 
   async getWorkspaceSummary(workspaceSlug: string) {
     return (await workspaceApi.getWorkspaceSummary(workspaceSlug)).data;
   },
 
-  async getMeInWorkspace(workspaceSlug: string) {
-    return (await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug))
-      .data;
+  async getMeInWorkspace(workspaceSlug: string, signal?: AbortSignal) {
+    return (
+      await workspaceApi.getWorkspaceCurrentMembership(workspaceSlug, {
+        signal,
+      })
+    ).data;
   },
 
   async createWorkspace(data: AiplanCreateWorkspaceRequest) {

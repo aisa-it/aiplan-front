@@ -167,6 +167,7 @@ import type { DtoStateLight, TypesViewProps } from '@aisa-it/aiplan-api-ts/src/d
 import DotListIcon from '@/components/icons/DotListIcon.vue';
 import DotListSelectIcon from '@/components/icons/DotListSelectIcon.vue';
 import type { IssueColumnKey } from '../model/issue-list.types';
+import { normalizeIssueGroupBy } from '../model/issue-groups';
 import type {
   IssueDisplayToggleKey,
   IssueFilterColumnOption,
@@ -202,7 +203,7 @@ const selectedView = computed(() =>
   props.viewOptions[0]?.value,
 );
 const selectedGroup = computed(() =>
-  props.groupOptions.find((option) => option.value === props.settings?.filters?.group_by)?.value ??
+  props.groupOptions.find((option) => option.value === normalizeIssueGroupBy(props.settings?.filters?.group_by))?.value ??
   props.groupOptions[0]?.value,
 );
 const selectedColumns = computed<IssueColumnKey[]>(() =>
@@ -217,7 +218,7 @@ const hasIndicators = computed(() =>
     props.settings?.hideSubIssues ||
       props.settings?.showOnlyActive ||
       props.settings?.filters?.states?.length ||
-      (props.settings?.filters?.group_by && props.settings.filters.group_by !== 'none') ||
+      (selectedGroup.value && selectedGroup.value !== 'none') ||
       props.columnOptions.some(
         (option) => !selectedColumns.value.includes(option.key),
       ),

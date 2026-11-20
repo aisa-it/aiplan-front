@@ -37,7 +37,10 @@ export interface IssueListActions {
   canEdit(issue: DtoIssueWithCount, field: EditableIssueField): boolean;
   update(issue: DtoIssueWithCount, patch: IssueFieldPatch): Promise<DtoIssue>;
   getAvailableStates(issue: DtoIssueWithCount): Promise<DtoStateLight[]>;
-  updateViewSettings(settings: TypesViewProps): Promise<void>;
+  updateViewSettings(
+    settings: TypesViewProps,
+    options?: { optimistic?: boolean },
+  ): Promise<void>;
 }
 
 export interface ProjectIssueListScope {

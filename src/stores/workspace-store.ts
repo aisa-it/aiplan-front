@@ -29,8 +29,13 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
 
   async function getWorkspaceInfo(
     workspaceSlug: string,
+    signal?: AbortSignal,
   ): Promise<DtoWorkspace | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    const workspace = await WorkspaceService.getWorkspace(workspaceSlug, signal);
+    signal?.throwIfAborted();
+    const membership = await WorkspaceService.getMeInWorkspace(workspaceSlug, signal);
+    signal?.throwIfAborted();
 
     if (currentWorkspaceSlug.value !== workspaceSlug) {
       latestProjectsRequest++;
@@ -38,9 +43,10 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       workspaceSummary.value = null;
     }
 
-    workspaceInfo.value = await WorkspaceService.getWorkspace(workspaceSlug);
-    currentWorkspaceSlug.value = workspaceInfo.value.slug ?? '';
-    await getMeInWorkspace(workspaceSlug);
+    workspaceInfo.value = workspace;
+    currentWorkspaceSlug.value = workspace.slug ?? '';
+    meInWorkspace.value = membership;
+    return workspace;
   }
 
   async function getMeInWorkspace(

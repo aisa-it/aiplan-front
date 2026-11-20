@@ -5,6 +5,9 @@ import { useUserStore } from '@/stores/user-store';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { getStringParam } from '@/utils/object';
 import { checkPermissionByWs, defineRole } from '@/utils/permissions';
+import { getRouteLoadSignal } from './route-load';
+
+let latestWorkspaceLoad = 0;
 
 export const loadWorkspaceGuard: NavigationGuard = async (to) => {
   const workspace = getStringParam(to.params.workspace);
@@ -20,10 +23,18 @@ export const loadWorkspaceGuard: NavigationGuard = async (to) => {
     return;
   }
 
+  const signal = getRouteLoadSignal(to);
+  if (signal?.aborted) return;
+  const request = ++latestWorkspaceLoad;
+  const finish = () => {
+    if (request === latestWorkspaceLoad) isLoading.value = false;
+  };
+  signal?.addEventListener('abort', finish, { once: true });
   try {
     isLoading.value = true;
 
-    await workspaceStore.getWorkspaceInfo(workspace);
+    await workspaceStore.getWorkspaceInfo(workspace, signal);
+    if (signal?.aborted) return;
 
     if (meInWorkspace.value.is_workspace_owner) {
       workspaceRoleName.value = 'owner';
@@ -35,12 +46,14 @@ export const loadWorkspaceGuard: NavigationGuard = async (to) => {
       window.location.href = '/access-denied';
     }
   } catch (error: any) {
+    if (signal?.aborted) return;
     if (error?.response?.status == 404) {
       return { name: 'not-found' };
     }
 
     throw error;
   } finally {
-    isLoading.value = false;
+    signal?.removeEventListener('abort', finish);
+    finish();
   }
 };

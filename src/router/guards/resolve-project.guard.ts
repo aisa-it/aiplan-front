@@ -1,6 +1,7 @@
 import type { NavigationGuard } from 'vue-router';
 
 import { loadProjectGuard } from './load-project.guard';
+import { getRouteLoadSignal } from './route-load';
 
 export const resolveProjectGuard: NavigationGuard = (to, from) => {
   if (
@@ -11,6 +12,8 @@ export const resolveProjectGuard: NavigationGuard = (to, from) => {
   ) {
     return;
   }
+
+  if (getRouteLoadSignal(to)?.aborted) return;
 
   return loadProjectGuard(to);
 };

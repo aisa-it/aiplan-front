@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getStringParam } from '@/utils/object';
+import { applyLoadedProject } from './guards/load-project.guard';
+import { startRouteLoad } from './guards/route-load';
 import {
   loadUserDataGuard,
   loadWorkspaceGuard,
@@ -93,8 +95,10 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
 router.beforeResolve(loadWorkspaceGuard);
 router.beforeResolve(resolveProjectGuard);
+router.afterEach(applyLoadedProject);
 
 export default router;

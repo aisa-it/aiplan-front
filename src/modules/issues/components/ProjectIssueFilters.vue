@@ -34,6 +34,7 @@ import type {
 } from '../model/issue-filters.types';
 import type { ProjectIssueListScope } from '../model/issue-list.types';
 import IssueFiltersMenu from './IssueFiltersMenu.vue';
+import { ISSUE_GROUP_FIELDS, normalizeIssueGroupBy } from '../model/issue-groups';
 
 const props = defineProps<{
   scope: ProjectIssueListScope;
@@ -62,10 +63,20 @@ const viewOptions = computed<IssueViewOption[]>(() => [
 ]);
 const groupOptions = computed<IssueFilterOption[]>(() => [
   { value: 'none', title: t('issues.filters.noGrouping') },
+  ...ISSUE_GROUP_FIELDS.map((value) => ({
+    value,
+    title: value === 'watchers' ? t('issues.groups.watcher') : t(`issues.columns.${value}`),
+  })),
+  ...props.propertyTemplates.flatMap((template) => template.id && template.name
+    ? [{ value: `property:${template.id}`, title: t('issues.groups.propertyOption', { name: template.name }) }]
+    : []),
 ]);
 const displayToggles = computed(() => [
   { key: 'hideSubIssues' as const, label: t('issues.filters.hideSubIssues') },
   { key: 'draft' as const, label: t('issues.filters.showDrafts') },
+  ...(normalizeIssueGroupBy(props.settings?.filters?.group_by)
+    ? [{ key: 'showEmptyGroups' as const, label: t('issues.filters.showEmptyGroups') }]
+    : []),
   { key: 'showOnlyActive' as const, label: t('issues.filters.onlyActive') },
 ]);
 const personalToggles = computed(() => [
@@ -80,7 +91,7 @@ const save = async (patch: TypesViewProps, replace = false) => {
       props.scope.workspaceSlug,
       props.scope.projectId,
       patch,
-      replace,
+      { replace },
     );
   } catch {}
 };
