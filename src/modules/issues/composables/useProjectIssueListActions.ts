@@ -48,11 +48,12 @@ export const useProjectIssueListActions = (
         issue.id,
       );
     },
-    updateViewSettings(settings) {
+    updateViewSettings(settings, options) {
       return projectStore.updateViewSettings(
         scope.workspaceSlug,
         scope.projectId,
         settings,
+        options,
       );
     },
   };

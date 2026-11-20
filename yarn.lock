@@ -537,6 +537,18 @@
     "@tailwindcss/oxide" "4.3.3"
     tailwindcss "4.3.3"
 
+"@tanstack/virtual-core@3.19.11":
+  version "3.19.11"
+  resolved "https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.19.11.tgz#089fd1a9a92503f8f2329c7e48ceb84178726fc1"
+  integrity sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A==
+
+"@tanstack/vue-virtual@^3.13.52":
+  version "3.13.52"
+  resolved "https://registry.npmjs.org/@tanstack/vue-virtual/-/vue-virtual-3.13.52.tgz#d008aaead599ed42e5912d2a9b6b972ec1df6eb8"
+  integrity sha512-qTwG7HNr5o+FPd/u+T05N73A8howtkB9FgQI71VcBzx6J2KsYzlVugRz/0ji17kl26D8SAdKux1Wmk3yhTI1Kw==
+  dependencies:
+    "@tanstack/virtual-core" "3.19.11"
+
 "@tiptap/core@3.10.1", "@tiptap/core@^3.10.1":
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/@tiptap/core/-/core-3.10.1.tgz#89fec750db261ee569f64926b3b9f9a509b81ea3"

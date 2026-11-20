@@ -1,10 +1,11 @@
 <template>
   <div
-    class="issue-table-columns issue-table-wrapper flex h-full min-w-0 flex-col"
+    class="issue-table-columns issue-table-wrapper flex min-w-0 flex-col"
+    :class="group ? 'issue-table-wrapper--grouped' : 'h-full'"
   >
     <div
       ref="tableRoot"
-      class="issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+      :class="group ? 'min-w-0' : 'issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto'"
     >
       <IssueTableSkeleton
         v-if="showSkeleton"
@@ -17,7 +18,7 @@
         :items="items"
         :items-length="total"
         :items-per-page="query.rowsPerPage"
-        :page="query.page"
+        :page="group?.page ?? query.page"
         :sort-by="sortBy"
         :loading="isLoading"
         item-value="id"
@@ -113,8 +114,12 @@
       </v-data-table-server>
     </div>
 
-    <div class="z-10 shrink-0 bg-[rgb(var(--v-theme-background))]">
+    <div
+      class="z-10 shrink-0 bg-[rgb(var(--v-theme-background))]"
+      :class="{ 'issue-table-footer--sticky': group }"
+    >
       <div
+        v-show="!group || hasOverflow"
         ref="scrollbar"
         class="issue-table-scrollbar overflow-x-auto overflow-y-hidden"
         @scroll="syncViewport"
@@ -123,7 +128,7 @@
       </div>
 
       <PaginationDefault
-        :selected-page="query.page"
+        :selected-page="group?.page ?? query.page"
         :rows-per-page="query.rowsPerPage"
         :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="total"
@@ -147,10 +152,11 @@ import {
   ISSUE_TABLE_COLUMNS,
   type IssueTableColumn,
 } from '../constants/issue-table-columns';
-import { isResizableIssueColumn, useIssueColumnResize } from '../composables/useIssueColumnResize';
+import { isResizableIssueColumn, type useIssueColumnResize } from '../composables/useIssueColumnResize';
 import { useSyncedHorizontalScroll } from '../composables/useSyncedHorizontalScroll';
 import { useIssueListControllerContext } from '../model/issue-list.context';
-import type { IssueColumnKey, ProjectIssueListScope } from '../model/issue-list.types';
+import type { IssueColumnKey } from '../model/issue-list.types';
+import type { IssueGroup } from '../model/issue-groups';
 import '../styles/issue-table-columns.css';
 import SequenceIdColumn from './issue-table/SequenceIdColumn.vue';
 import NameColumn from './issue-table/NameColumn.vue';
@@ -168,18 +174,24 @@ import IssueColumnResizer from './issue-table/IssueColumnResizer.vue';
 import IssueTableSkeleton from './IssueTableSkeleton.vue';
 
 const props = defineProps<{
-  scope: ProjectIssueListScope;
+  columnResize: ReturnType<typeof useIssueColumnResize>;
   hideParent?: boolean;
   propertyTemplates?: DtoProjectPropertyTemplate[];
+  group?: IssueGroup;
+  initialScrollLeft?: number;
+}>();
+const emit = defineEmits<{
+  groupPage: [page: number];
+  horizontalScroll: [scrollLeft: number];
 }>();
 
 const countColumns = ISSUE_COUNT_COLUMN_KEYS;
 const { t } = useI18n();
 
 const {
-  items,
-  total,
-  isLoading,
+  items: listItems,
+  total: listTotal,
+  isLoading: listLoading,
   query,
   columns,
   setPage,
@@ -187,10 +199,11 @@ const {
   setSort,
 } = useIssueListControllerContext();
 
-const showSkeleton = computed(() => isLoading.value && !items.value.length);
-const { widthFor, startResize, resetWidth } = useIssueColumnResize(
-  () => `project:${props.scope.workspaceSlug}:${props.scope.projectId}`,
-);
+const items = computed(() => props.group?.items ?? listItems.value);
+const total = computed(() => props.group?.total ?? listTotal.value);
+const isLoading = computed(() => props.group?.loading ?? listLoading.value);
+const showSkeleton = computed(() => !props.group && isLoading.value && !items.value.length);
+const { widthFor, startResize, resetWidth } = props.columnResize;
 
 const visiblePropertyTemplates = computed(() =>
   (props.propertyTemplates ?? []).filter((template) =>
@@ -246,9 +259,13 @@ const sortBy = computed(() => [
 
 const tableRoot = ref<HTMLElement | null>(null);
 const scrollbar = ref<HTMLElement | null>(null);
-const { contentWidth, syncViewport } = useSyncedHorizontalScroll(
+const { contentWidth, hasOverflow, syncViewport } = useSyncedHorizontalScroll(
   tableRoot,
   scrollbar,
+  {
+    initialScrollLeft: props.initialScrollLeft,
+    onScroll: props.group ? (scrollLeft) => emit('horizontalScroll', scrollLeft) : undefined,
+  },
 );
 
 const handleSort = (
@@ -269,13 +286,19 @@ const handlePaginationRequest = (options: {
     return;
   }
 
-  setPage(options.page);
+  if (props.group) emit('groupPage', options.page);
+  else setPage(options.page);
 };
 </script>
 
 <style scoped>
 .issue-table-wrapper {
   position: relative;
+}
+
+.issue-table-footer--sticky {
+  position: sticky;
+  bottom: 0;
 }
 
 :deep(.issue-table .v-table__wrapper) {
@@ -354,7 +377,8 @@ const handlePaginationRequest = (options: {
   background: rgba(var(--v-theme-on-background), 0.5);
 }
 
-.issue-table-wrapper:hover .issue-table-scrollbar {
+.issue-table-wrapper:hover .issue-table-scrollbar,
+.issue-table-wrapper--grouped .issue-table-scrollbar {
   opacity: 1;
 }
 
