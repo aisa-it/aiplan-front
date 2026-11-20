@@ -1,5 +1,5 @@
 <template>
-  <v-locale-provider locale="ru" :messages="{ ru }">
+  <v-locale-provider :locale="locale" :messages="{ en, ru }">
     <v-card class="flex! max-h-[85dvh] max-w-[calc(100vw-24px)] flex-col">
       <div
         class="flex min-h-0 flex-col items-center gap-4 overflow-y-auto px-2 py-2 min-[662px]:flex-row"
@@ -29,7 +29,7 @@
           class="flex-1 normal-case"
           @click="emit('save', null)"
         >
-          Без даты
+          {{ t('issues.targetDate.clear') }}
         </v-btn>
         <v-btn
           color="primary"
@@ -39,7 +39,7 @@
           class="flex-1 normal-case"
           @click="save"
         >
-          Установить
+          {{ t('issues.targetDate.set') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -47,8 +47,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import { en, ru } from 'vuetify/locale';
 import { useIssueTargetDate } from '../../composables/useIssueTargetDate';
-import { ru } from 'vuetify/locale';
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{ initialDate?: string | null; isSaving: boolean }>();
 const emit = defineEmits<{ save: [value: string | null] }>();
