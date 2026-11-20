@@ -39,7 +39,6 @@
             v-model="projectValues.public"
             :items="networkChoices"
             item-value="value"
-            return-object
             class="max-w-[150px] flex-none"
           />
 
@@ -66,7 +65,7 @@
         <v-btn
           color="primary"
           variant="flat"
-          :disabled="!isValidName || !isValidIdentifier"
+          :disabled="!isValidProject"
           @click="createNewProject"
           class="w-[110px]"
         >
@@ -83,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import ConfirmCloseProjectCreateDialog from './ConfirmCloseProjectCreateDialog.vue';
@@ -102,6 +101,12 @@ import { useTranslatedOptions } from '@/i18n/useTranslatedOptions';
 const { t } = useI18n();
 
 const cyrillicToTranslit = CyrillicToTranslit();
+const maxProjectNameLength = 100;
+const projectNamePattern =
+  /^[A-Za-zА-Яа-яёЁ0-9 ._\/\-\\!#\$%&'\"\(\)\*\+,\-.:;№<=>?@\[\\\]\^_\{\|\}~]+$/;
+const defaultProjectEmoji =
+  PROJECT_EMOJI_OPTIONS.find(({ label }) => label === '💼') ??
+  PROJECT_EMOJI_OPTIONS[0];
 
 const route = useRoute();
 const props = defineProps<{ workspaceSlug?: string | null }>();
@@ -113,28 +118,25 @@ const isOpen = defineModel<boolean>();
 
 const isProjectIdentifier = ref(false);
 const errorMessageProjectIdentifier = ref('');
-const isValidName = ref(false);
-const isValidIdentifier = ref(false);
 const isConfirmOpen = ref(false);
 
-const projectValues = ref({
+const initialProjectValues = () => ({
   name: '',
   identifier: '',
   description: '',
-  public: networkChoices.value[0],
-  emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
+  public: true,
+  emoji_and_icon: defaultProjectEmoji,
   cover_image: '',
 });
+const projectValues = ref(initialProjectValues());
+const isValidProject = computed(
+  () =>
+    validateName(projectValues.value.name) === true &&
+    validateIdentifier(projectValues.value.identifier) === true,
+);
 
 const clear = () => {
-  projectValues.value = {
-    name: '',
-    identifier: '',
-    description: '',
-    public: networkChoices.value[0],
-    emoji_and_icon: PROJECT_EMOJI_OPTIONS[0],
-    cover_image: '',
-  };
+  projectValues.value = initialProjectValues();
   isProjectIdentifier.value = false;
   errorMessageProjectIdentifier.value = '';
 };
@@ -153,20 +155,26 @@ const forceClose = () => {
   clear();
 };
 
-const validateName = (val: string) => {
-  isValidName.value = val.trim().length > 0;
-  return val.trim().length > 0 || t('dialogs.project.validation.nameMin');
-};
+function validateName(value: string) {
+  if (!value.trim()) return t('dialogs.project.validation.nameMin');
+  if (value.length > maxProjectNameLength) {
+    return t('dialogs.project.validation.maxLength', {
+      max: maxProjectNameLength,
+    });
+  }
+  return projectNamePattern.test(value) || t('dialogs.project.validation.nameFormat');
+}
 
-const validateIdentifier = (val: string) => {
-  isValidIdentifier.value = val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN;
-  return (
-    val.trim().length >= PROJECT_IDENTIFIER_LENGTH.MIN ||
-    t('dialogs.project.validation.identifierMin', {
-      min: PROJECT_IDENTIFIER_LENGTH.MIN,
-    })
-  );
-};
+function validateIdentifier(value: string) {
+  const { MIN, MAX } = PROJECT_IDENTIFIER_LENGTH;
+  if (value.trim().length < MIN) {
+    return t('dialogs.project.validation.identifierMin', { min: MIN });
+  }
+  if (value.length > MAX) {
+    return t('dialogs.project.validation.maxLength', { max: MAX });
+  }
+  return /^[A-Z0-9]+$/.test(value) || t('dialogs.project.validation.identifierFormat');
+}
 
 const createIdentifier = () => {
   if (projectValues.value.name) {
@@ -178,7 +186,7 @@ const createIdentifier = () => {
 
 const createNewProject = async () => {
   const workspaceSlug = props.workspaceSlug || (route.params.workspace as string);
-  if (!workspaceSlug) return;
+  if (!workspaceSlug || !isValidProject.value) return;
 
   const payload = {
     cover_image: '/images/vercel.jpeg',
@@ -188,7 +196,7 @@ const createNewProject = async () => {
       getRandomEmoji(PROJECT_EMOJIS),
     identifier: projectValues.value.identifier,
     name: projectValues.value.name,
-    public: projectValues.value.public.value,
+    public: projectValues.value.public,
   };
 
   try {
