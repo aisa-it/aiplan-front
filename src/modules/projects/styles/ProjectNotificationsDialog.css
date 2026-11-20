@@ -1,0 +1,65 @@
+.project-notifications-title.v-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.project-notifications-tab.v-btn {
+  text-transform: uppercase;
+}
+
+.project-notifications-subtitle {
+  color: rgba(var(--v-theme-text), 0.7);
+}
+
+.project-notifications-list {
+  max-height: max(30dvh, calc(100dvh - 400px));
+  overflow-y: auto;
+}
+
+.project-notifications-row {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  align-items: center;
+  padding: 0 8px;
+  gap: 4px;
+  min-height: 48px;
+}
+
+.project-notifications-list--task .project-notifications-row {
+  grid-template-columns: minmax(0, 3fr) repeat(2, minmax(60px, 1fr));
+}
+
+.project-notifications-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 32px;
+  background: rgb(var(--v-theme-surface));
+}
+
+.project-notifications-header span {
+  text-align: center;
+}
+
+.project-notifications-checkbox {
+  /* Vuetify places selection controls in the named control area by default. */
+  grid-area: auto;
+  justify-self: center;
+}
+
+.project-notifications-actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 480px) {
+  .project-notifications-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .project-notifications-actions :deep(.v-btn) {
+    margin-inline: 0;
+  }
+}

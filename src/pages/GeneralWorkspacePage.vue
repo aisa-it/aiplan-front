@@ -61,6 +61,7 @@
 
       <div
         v-if="
+          projectsLoaded &&
           workspaceProjects.length === 0 &&
           !route.fullPath.includes('settings') &&
           !generalLoader
@@ -92,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTitle } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
@@ -139,7 +140,29 @@ const props = defineProps<{
 }>();
 
 const isProjectCreateOpen = ref(false);
+const projectsLoaded = ref(false);
 const defineDescription = computed(() => workspaceInfo.value?.description);
+
+watch(
+  () => props.slug,
+  async (slug, _, onCleanup) => {
+    projectsLoaded.value = false;
+    if (!slug) return;
+
+    let stale = false;
+    onCleanup(() => {
+      stale = true;
+    });
+
+    try {
+      const projects = await workspaceStore.getWorkspaceProjects(slug);
+      if (!stale) projectsLoaded.value = projects !== undefined;
+    } catch {
+      // API errors are displayed by the response interceptor.
+    }
+  },
+  { immediate: true },
+);
 
 useTitle(
   computed(() =>

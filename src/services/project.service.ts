@@ -1,5 +1,6 @@
 import type {
   AiplanCreateProjectRequest,
+  AiplanProjectNotificationRequest,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -8,8 +9,12 @@ import { projectsApi } from './clients';
 type ProjectListQuery = Parameters<typeof projectsApi.getProjectList>[1];
 
 export const ProjectService = {
-  async getProjects(workspaceSlug: string, query?: ProjectListQuery) {
-    return (await projectsApi.getProjectList(workspaceSlug, query)).data;
+  async getProjects(
+    workspaceSlug: string,
+    query?: ProjectListQuery,
+    signal?: AbortSignal,
+  ) {
+    return (await projectsApi.getProjectList(workspaceSlug, query, { signal })).data;
   },
 
   async getProject(
@@ -31,6 +36,14 @@ export const ProjectService = {
         signal,
       })
     ).data;
+  },
+
+  async updateMyNotifications(
+    workspaceSlug: string,
+    projectId: string,
+    settings: AiplanProjectNotificationRequest,
+  ) {
+    await projectsApi.updateMyNotifications(workspaceSlug, projectId, settings);
   },
 
   async createProject(workspaceSlug: string, data: AiplanCreateProjectRequest) {

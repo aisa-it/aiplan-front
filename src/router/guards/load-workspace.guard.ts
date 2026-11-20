@@ -1,4 +1,4 @@
-import type { RouteLocationNormalized } from 'vue-router';
+import type { NavigationGuard } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useUserStore } from '@/stores/user-store';
@@ -9,12 +9,9 @@ import { getRouteLoadSignal } from './route-load';
 
 let latestWorkspaceLoad = 0;
 
-export const loadWorkspaceGuard = async (to: RouteLocationNormalized) => {
+export const loadWorkspaceGuard: NavigationGuard = async (to) => {
   const workspace = getStringParam(to.params.workspace);
-
-  if (!workspace) {
-    return { name: 'not-found' };
-  }
+  if (!workspace) return;
 
   const workspaceStore = useWorkspaceStore();
 
@@ -48,8 +45,6 @@ export const loadWorkspaceGuard = async (to: RouteLocationNormalized) => {
     if (!checkPermissionByWs(workspaceRoleName.value, 'show-ws')) {
       window.location.href = '/access-denied';
     }
-
-    workspaceStore.getWorkspaceProjects(workspace);
   } catch (error: any) {
     if (signal?.aborted) return;
     if (error?.response?.status == 404) {

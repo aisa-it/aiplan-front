@@ -25,9 +25,9 @@
         :section="section"
         :project-memberships="projectMemberships"
         :can-create-project="canCreateProject"
-        :project-create-items="projectCreateItems"
         compact
         @navigate="emit('navigate')"
+        @create-project="emit('create-project')"
       />
     </div>
   </v-menu>
@@ -47,12 +47,12 @@ const props = defineProps<{
   open: boolean;
   active: boolean;
   canCreateProject: boolean;
-  projectCreateItems: { label: string }[];
   projectMemberships: Record<string, DtoProjectMemberWithLead>;
 }>();
 const emit = defineEmits<{
   'update:open': [value: boolean];
   navigate: [];
+  'create-project': [];
 }>();
 const { t } = useI18n();
 const sectionIcon = computed(() =>

@@ -25,26 +25,11 @@
         :color="active ? 'rgb(var(--v-theme-primary))' : 'currentColor'"
       />
       <span class="sidebar-section-title">{{ t(`sidebar.${section}`) }}</span>
-      <SidebarContextMenu
+      <ProjectCreateMenu
         v-if="section === 'projects' && canCreateProject"
-        :items="projectCreateItems"
-        plain
-      >
-        <template #activator="{ props: menuProps }">
-          <v-btn
-            v-bind="menuProps"
-            class="sidebar-header-add"
-            color="text"
-            icon
-            size="x-small"
-            variant="text"
-            :aria-label="t('sidebar.createProject')"
-            @pointerdown.stop
-            @click.stop
-            ><PlusIcon
-          /></v-btn>
-        </template>
-      </SidebarContextMenu>
+        class="sidebar-header-add"
+        @create="emit('create-project')"
+      />
       <SidebarContextMenu
         v-if="section === 'sprints'"
         :items="sprintHeaderItems"
@@ -80,9 +65,8 @@
       <SidebarSectionList
         :section="section"
         :project-memberships="projectMemberships"
-        :can-create-project="canCreateProject"
-        :project-create-items="projectCreateItems"
         @navigate="emit('navigate')"
+        @open-notifications="emit('open-notifications', $event)"
       />
     </div>
   </section>
@@ -94,9 +78,10 @@ import { useI18n } from 'vue-i18n';
 import type { DtoProjectMemberWithLead } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import MenuProjectsIcon from '../icons/MenuProjectsIcon.vue';
 import SprintIcon from '@/components/icons/SprintIcon.vue';
-import PlusIcon from '../icons/PlusIcon.vue';
+import ProjectCreateMenu from '@/modules/projects/components/ProjectCreateMenu.vue';
+import type { ProjectNotificationTarget } from '@/modules/projects/model/project-notifications';
 import type { SidebarSectionId } from '../composables/useSidebarPreferences';
-import SidebarContextMenu from './SidebarContextMenu.vue';
+import SidebarContextMenu from '@/components/menus/ActionMenu.vue';
 import SidebarSectionList from './SidebarSectionList.vue';
 
 const props = defineProps<{
@@ -107,7 +92,6 @@ const props = defineProps<{
   active: boolean;
   grow: number;
   canCreateProject: boolean;
-  projectCreateItems: { label: string }[];
   sprintHeaderItems: { label: string; icon?: Component }[];
   projectMemberships: Record<string, DtoProjectMemberWithLead>;
 }>();
@@ -115,6 +99,8 @@ const emit = defineEmits<{
   resize: [event: PointerEvent];
   toggle: [event: Event];
   navigate: [];
+  'create-project': [];
+  'open-notifications': [target: ProjectNotificationTarget];
 }>();
 const { t } = useI18n();
 const sectionIcon = computed(() =>

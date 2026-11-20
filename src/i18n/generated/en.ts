@@ -13,6 +13,7 @@ import issuesEn from '@/modules/issues/i18n/en';
 import paginationEn from '@/components/pagination/i18n/en';
 import profileEn from '@/modules/profile/i18n/en';
 import projectActivityEn from '@/modules/activities/renders/entities/project-activity/i18n/en';
+import projectsEn from '@/modules/projects/i18n/en';
 import selectWorkspaceEn from '@/components/select-workspace/i18n/en';
 import sidebarEn from '@/components/sidebar/i18n/en';
 import sprintActivityEn from '@/modules/activities/renders/entities/sprint-activity/i18n/en';
@@ -34,6 +35,7 @@ const messages = {
   pagination: paginationEn,
   profile: profileEn,
   projectActivity: projectActivityEn,
+  projects: projectsEn,
   selectWorkspace: selectWorkspaceEn,
   sidebar: sidebarEn,
   sprintActivity: sprintActivityEn,
