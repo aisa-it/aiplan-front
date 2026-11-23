@@ -2,9 +2,12 @@ import type ru from './ru';
 
 export default {
   parent: 'Parent: {identifier} - {sequence}',
+  draft: 'Draft',
+  notSelected: 'None selected',
+  noDueDate: 'Not set',
+  clearPriority: 'Clear priority',
   pinned: {
     empty: 'No pinned tasks',
-    draft: 'Draft',
   },
   columns: {
     sequence_id: 'ID',
@@ -33,6 +36,7 @@ export default {
     execute: 'Confirm',
     view: 'View',
     list: 'List',
+    board: 'Board',
     columns: 'Columns',
     grouping: 'Grouping',
     noGrouping: 'None',
@@ -46,6 +50,7 @@ export default {
     authoredToMe: 'I am the author',
   },
   groups: {
+    empty: 'No tasks',
     watcher: 'Watcher',
     propertyOption: 'Parameter: {name}',
     propertyError: 'Could not group by parameter',
@@ -62,4 +67,13 @@ export default {
     priorities: { urgent: 'Critical', high: 'High', medium: 'Medium', low: 'Low' },
   },
   property: { yes: 'Yes' },
+  board: {
+    dueDate: 'Due date',
+    sprints: {
+      title: 'Select sprints for the task',
+      description: 'Select the sprints that should include task {issue}',
+      empty: 'There are no active sprints. Create a sprint first to add the task.',
+      loadError: 'Could not load sprints',
+    },
+  },
 } satisfies typeof ru;

@@ -5,9 +5,11 @@
       :key="groupBy"
       :scope="scope"
       :group-by="groupBy"
+      :board="isBoard"
       :groups="groups"
       :is-streaming="isStreaming"
       :load-failed="loadFailed"
+      :board-page-size="controller.query.rowsPerPage"
       :view-settings="viewSettings"
       :hide-parent="hideParent"
       :property-templates="propertyTemplates"
@@ -15,6 +17,7 @@
       @page="grouped.setPage"
       @retry="grouped.retry"
       @change="saveSettings"
+      @sprints-changed="grouped.refreshAfterUpdate"
     />
     <IssueTable
       v-else
@@ -61,9 +64,11 @@ const { t } = useI18n();
 const source = createProjectIssueListSource(props.scope);
 const actions = useProjectIssueListActions(props.scope);
 const pendingPropertyResets = new Set<string>();
+const isBoard = computed(() => props.viewSettings?.issueView === 'kanban');
 const groupBy = computed(() => {
   const value = normalizeIssueGroupBy(props.viewSettings?.filters?.group_by);
-  return value === 'project' ? null : value;
+  const projectGroup = value === 'project' ? null : value;
+  return projectGroup ?? (isBoard.value ? 'state' : null);
 });
 const columnResize = useIssueColumnResize(
   () => `project:${props.scope.workspaceSlug}:${props.scope.projectId}`,
@@ -94,7 +99,9 @@ const grouped = useGroupedIssues(
   source,
   () => ({
     groupBy: groupBy.value,
-    query: controller.query,
+    query: isBoard.value
+      ? { ...controller.query, sortBy: 'sequence_id', descending: true }
+      : controller.query,
     filters: controller.filters,
   }),
   (error, groupBy) => {
@@ -108,7 +115,7 @@ const grouped = useGroupedIssues(
       pendingPropertyResets.add(groupBy);
       void actions
         .updateViewSettings(
-          { filters: { group_by: 'none' } },
+          { filters: { group_by: isBoard.value ? 'state' : 'none' } },
           { optimistic: false },
         )
         .catch(() => {})

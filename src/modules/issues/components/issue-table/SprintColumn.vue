@@ -7,13 +7,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const props = defineProps<{ sprints?: DtoSprintLight[] }>();
+const { t } = useI18n();
 
 const sprintText = computed(() =>
   props.sprints?.length
     ? props.sprints.map((sprint) => sprint.name).join(', ')
-    : 'Не Выбран',
+    : t('issues.notSelected'),
 );
 </script>
