@@ -10,7 +10,7 @@
           v-if="issue.draft"
           class="absolute -top-1.5 left-0.5 rounded bg-orange-500 px-1 py-0.5 text-xs leading-3 text-white"
         >
-          {{ t('issues.pinned.draft') }}
+          {{ t('issues.draft') }}
         </span>
       </div>
     </div>

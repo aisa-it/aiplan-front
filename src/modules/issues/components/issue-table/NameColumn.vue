@@ -6,7 +6,7 @@
         v-if="issue.draft"
         class="absolute -top-1.5 left-0.5 rounded bg-orange-500 px-1 py-0.5 text-xs leading-3 text-white"
       >
-        Черновик
+        {{ t('issues.draft') }}
       </span>
     </div>
 
@@ -22,10 +22,12 @@
 
 <script setup lang="ts">
 import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { useI18n } from 'vue-i18n';
 import ParentIssueChip from '../ParentIssueChip.vue';
 
 defineProps<{
   issue: DtoIssueWithCount;
   hideParent?: boolean;
 }>();
+const { t } = useI18n();
 </script>

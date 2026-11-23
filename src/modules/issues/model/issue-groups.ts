@@ -116,6 +116,10 @@ export const getIssueGroupKey = (
 export const getSavedGroupKey = (entity: IssueGroupEntity) =>
   getEntityId(entity) ?? String(entity);
 
+// The Quasar board persists the entity's ID or the entity itself as a key.
+export const getSavedBoardGroupKey = (entity: IssueGroupEntity) =>
+  String((entity && typeof entity === 'object' && entity.id) || entity);
+
 export const getGroupUser = (
   groupBy: IssueGroupBy,
   entity: IssueGroupEntity,

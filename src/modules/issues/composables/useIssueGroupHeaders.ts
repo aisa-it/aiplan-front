@@ -9,6 +9,7 @@ import type {
 import {
   getEntityId,
   getGroupUser,
+  getSavedBoardGroupKey,
   getSavedGroupKey,
   isEmptyGroupEntity,
 } from '../model/issue-groups';
@@ -25,6 +26,7 @@ export const useIssueGroupHeaders = (
   getSettings: () => TypesViewProps | undefined,
   getTemplate: () => DtoProjectPropertyTemplate | undefined,
   lookupLabels: Ref<Record<string, string>>,
+  isBoard: () => boolean,
 ) => {
   const { t } = useI18n();
 
@@ -106,6 +108,8 @@ export const useIssueGroupHeaders = (
   return computed<(IssueGroup & IssueGroupHeader)[]>(() => {
     const groupBy = getGroupBy();
     const settings = getSettings();
+    const hiddenGroups = settings?.group_tables_hide;
+    const board = isBoard();
     return groups.value
       .filter((group) => group.total > 0 || settings?.showEmptyGroups)
       .map((group) => ({
@@ -118,8 +122,10 @@ export const useIssueGroupHeaders = (
             : undefined,
         user: getGroupUser(groupBy, group.entity),
         expanded: !(
-          settings?.group_tables_hide?.[group.key] ??
-          settings?.group_tables_hide?.[getSavedGroupKey(group.entity)]
+          board
+            ? hiddenGroups?.[getSavedBoardGroupKey(group.entity)]
+            : (hiddenGroups?.[group.key] ??
+              hiddenGroups?.[getSavedGroupKey(group.entity)])
         ),
       }));
   });

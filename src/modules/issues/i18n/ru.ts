@@ -1,8 +1,11 @@
 export default {
   parent: 'Родитель: {identifier} - {sequence}',
+  draft: 'Черновик',
+  notSelected: 'Не Выбран',
+  noDueDate: 'Не установлен',
+  clearPriority: 'Убрать приоритет',
   pinned: {
     empty: 'Нет закрепленных задач',
-    draft: 'Черновик',
   },
   columns: {
     sequence_id: 'ID',
@@ -31,6 +34,7 @@ export default {
     execute: 'Выполнить',
     view: 'Вид',
     list: 'Список',
+    board: 'Доска',
     columns: 'Колонки',
     grouping: 'Группировка',
     noGrouping: 'Нет',
@@ -44,6 +48,7 @@ export default {
     authoredToMe: 'Я автор',
   },
   groups: {
+    empty: 'Нет задач',
     watcher: 'Наблюдатель',
     propertyOption: 'Параметр: {name}',
     propertyError: 'Ошибка группировки по параметру',
@@ -60,4 +65,13 @@ export default {
     priorities: { urgent: 'Критический', high: 'Высокий', medium: 'Средний', low: 'Низкий' },
   },
   property: { yes: 'Да' },
+  board: {
+    dueDate: 'Срок',
+    sprints: {
+      title: 'Выберите спринты для задачи',
+      description: 'Отметьте спринты, в которых должна участвовать задача {issue}',
+      empty: 'Нет активных спринтов. Чтобы добавить задачу, сначала создайте спринт.',
+      loadError: 'Не удалось загрузить спринты',
+    },
+  },
 };

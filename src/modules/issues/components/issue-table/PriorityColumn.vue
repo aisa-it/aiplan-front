@@ -37,7 +37,7 @@
           <button
             v-if="issue.priority && canEdit && !isSaving"
             type="button"
-            aria-label="Убрать приоритет"
+            :aria-label="t('issues.clearPriority')"
             class="absolute top-1/2 right-5 flex size-5 -translate-y-1/2 cursor-pointer items-center justify-center opacity-60 transition-opacity hover:opacity-100 focus:opacity-100"
             @pointerdown.stop
             @click.stop.prevent="clearPriority"
@@ -75,6 +75,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import PrioritySingleIcon from '@/components/icons/PrioritySingleIcon.vue';
@@ -82,27 +83,26 @@ import PrioritySingleIcon from '@/components/icons/PrioritySingleIcon.vue';
 import { useIssueFieldEditor } from '../../composables/useIssueFieldEditor';
 
 const props = defineProps<{ issue: DtoIssueWithCount }>();
+const { t } = useI18n();
 const isOpen = ref(false);
 const { canEdit, isSaving, save } = useIssueFieldEditor(
   () => props.issue,
   'priority',
 );
 
-const PRIORITY_OPTIONS = [
-  { value: 'low', title: 'Низкий' },
-  { value: 'medium', title: 'Средний' },
-  { value: 'high', title: 'Высокий' },
-  { value: 'urgent', title: 'Критический' },
-] as const;
+const priorities = ['low', 'medium', 'high', 'urgent'] as const;
+const PRIORITY_OPTIONS = computed(() =>
+  priorities.map((value) => ({ value, title: t(`issues.groups.priorities.${value}`) })),
+);
 
 const priorityTitle = computed(
   () =>
-    PRIORITY_OPTIONS.find((option) => option.value === props.issue.priority)
-      ?.title ?? 'Не Выбран',
+    PRIORITY_OPTIONS.value.find((option) => option.value === props.issue.priority)
+      ?.title ?? t('issues.notSelected'),
 );
 
 const selectPriority = async (
-  value: (typeof PRIORITY_OPTIONS)[number]['value'],
+  value: (typeof priorities)[number],
 ) => {
   if (value === props.issue.priority || (await save(value))) {
     isOpen.value = false;

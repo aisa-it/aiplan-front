@@ -60,9 +60,12 @@ const columnOptions = computed<IssueFilterColumnOption[]>(() => [
 ]);
 const viewOptions = computed<IssueViewOption[]>(() => [
   { value: 'list', title: t('issues.filters.list') },
+  { value: 'kanban', title: t('issues.filters.board') },
 ]);
 const groupOptions = computed<IssueFilterOption[]>(() => [
-  { value: 'none', title: t('issues.filters.noGrouping') },
+  ...(props.settings?.issueView === 'kanban'
+    ? []
+    : [{ value: 'none', title: t('issues.filters.noGrouping') }]),
   ...ISSUE_GROUP_FIELDS.map((value) => ({
     value,
     title: value === 'watchers' ? t('issues.groups.watcher') : t(`issues.columns.${value}`),
@@ -74,7 +77,7 @@ const groupOptions = computed<IssueFilterOption[]>(() => [
 const displayToggles = computed(() => [
   { key: 'hideSubIssues' as const, label: t('issues.filters.hideSubIssues') },
   { key: 'draft' as const, label: t('issues.filters.showDrafts') },
-  ...(normalizeIssueGroupBy(props.settings?.filters?.group_by)
+  ...(props.settings?.issueView === 'kanban' || normalizeIssueGroupBy(props.settings?.filters?.group_by)
     ? [{ key: 'showEmptyGroups' as const, label: t('issues.filters.showEmptyGroups') }]
     : []),
   { key: 'showOnlyActive' as const, label: t('issues.filters.onlyActive') },

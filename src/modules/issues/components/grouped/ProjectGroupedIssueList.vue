@@ -16,14 +16,27 @@
         {{ t('issues.groups.retry') }}
       </v-btn>
     </div>
-    <IssueTableSkeleton v-if="isStreaming && !visibleGroups.length" />
+    <component
+      :is="board ? IssueBoardSkeleton : IssueTableSkeleton"
+      v-if="isStreaming && !visibleGroups.length"
+    />
     <div
       v-else-if="!visibleGroups.length && !loadFailed"
       class="flex flex-1 flex-col items-center justify-center gap-2"
     >
       <DocumentIcon :width="56" :height="56" />
-      <h6 class="text-xl">Нет задач</h6>
+      <h6 class="text-xl">{{ t('issues.groups.empty') }}</h6>
     </div>
+    <IssueBoard
+      v-else-if="board && visibleGroups.length"
+      :groups="visibleGroups"
+      :rows-per-page="boardPageSize"
+      :color-labels="groupBy === 'labels'"
+      :property-templates="propertyTemplates"
+      @toggle="toggleGroup"
+      @page="(group, page) => emit('page', group, page)"
+      @manage-sprints="sprintIssue = $event"
+    />
     <GroupedIssueTables
       v-else-if="visibleGroups.length"
       :groups="visibleGroups"
@@ -47,13 +60,20 @@
         </div>
       </template>
     </GroupedIssueTables>
+    <IssueBoardSprintDialog
+      v-if="sprintIssue"
+      v-model="sprintIssue"
+      :workspace-slug="scope.workspaceSlug"
+      @change="(before, after) => emit('sprints-changed', before, after)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue';
+import { computed, defineAsyncComponent, shallowRef, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
+  DtoIssueWithCount,
   DtoProjectPropertyTemplate,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
@@ -62,6 +82,7 @@ import DocumentIcon from '@/components/icons/DocumentIcon.vue';
 import type { useIssueColumnResize } from '../../composables/useIssueColumnResize';
 import { useGroupLookupLabels } from '../../composables/useGroupLookupLabels';
 import { useIssueGroupHeaders } from '../../composables/useIssueGroupHeaders';
+import { getSavedBoardGroupKey } from '../../model/issue-groups';
 import type {
   IssueGroup,
   IssueGroupBy,
@@ -71,11 +92,23 @@ import type { ProjectIssueListScope } from '../../model/issue-list.types';
 import IssueTable from '../IssueTable.vue';
 import IssueTableSkeleton from '../IssueTableSkeleton.vue';
 import GroupedIssueTables from './GroupedIssueTables.vue';
+import IssueBoardSkeleton from '../board/IssueBoardSkeleton.vue';
+
+const IssueBoard = defineAsyncComponent({
+  loader: () => import('../board/IssueBoard.vue'),
+  loadingComponent: IssueBoardSkeleton,
+  delay: 0,
+});
+const IssueBoardSprintDialog = defineAsyncComponent(
+  () => import('../board/IssueBoardSprintDialog.vue'),
+);
 
 const props = defineProps<{
   scope: ProjectIssueListScope;
   groupBy: IssueGroupBy;
   groups: IssueGroup[];
+  board: boolean;
+  boardPageSize: number;
   isStreaming: boolean;
   loadFailed: boolean;
   viewSettings?: TypesViewProps;
@@ -87,9 +120,11 @@ const emit = defineEmits<{
   page: [group: IssueGroup, page: number];
   retry: [];
   change: [patch: TypesViewProps];
+  'sprints-changed': [before: DtoIssueWithCount, after: DtoIssueWithCount];
 }>();
 
 const { t } = useI18n();
+const sprintIssue = shallowRef<DtoIssueWithCount | null>(null);
 const scrollPositions = new Map<string, number>();
 const groupTemplate = computed(() =>
   props.propertyTemplates?.find(
@@ -106,9 +141,12 @@ const visibleGroups = useIssueGroupHeaders(
   () => props.viewSettings,
   () => groupTemplate.value,
   lookupLabels,
+  () => props.board,
 );
 
 const estimateBodyHeight = (group: IssueGroup) => 104 + group.items.length * 56;
-const toggleGroup = (group: IssueGroupHeader) =>
-  emit('change', { group_tables_hide: { [group.key]: group.expanded } });
+const toggleGroup = (group: IssueGroup & IssueGroupHeader) => {
+  const key = props.board ? getSavedBoardGroupKey(group.entity) : group.key;
+  emit('change', { group_tables_hide: { [key]: group.expanded } });
+};
 </script>

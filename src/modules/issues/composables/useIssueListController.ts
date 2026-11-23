@@ -8,6 +8,7 @@ import type {
 import type {
   IssueColumnKey,
   EditableIssueField,
+  IssuePermissionField,
   IssueFieldPatch,
   IssueListActions,
   IssueListInitialState,
@@ -124,7 +125,7 @@ export const useIssueListController = (
     requestNumber++;
   };
 
-  const canEditField = (issue: DtoIssueWithCount, field: EditableIssueField) =>
+  const canEditField = (issue: DtoIssueWithCount, field: IssuePermissionField) =>
     actions?.canEdit(issue, field) ?? false;
 
   const updateIssue = async (

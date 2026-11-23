@@ -231,7 +231,15 @@ const setView = (value: string) => {
   if (props.viewOptions.length <= 1) return;
   const option = props.viewOptions.find((item) => item.value === value);
   if (option && option.value !== props.settings?.issueView) {
-    emit('change', { issueView: option.value });
+    const group = normalizeIssueGroupBy(props.settings?.filters?.group_by);
+    const groupOption = props.groupOptions.find((item) => item.value === group);
+    const defaultGroup = props.groupOptions.find((item) => item.value !== 'none');
+    emit('change', {
+      issueView: option.value,
+      ...(option.value === 'kanban' && !groupOption && defaultGroup
+        ? { filters: { group_by: defaultGroup.value } }
+        : {}),
+    });
   }
 };
 const setGroup = (value: string) => {
