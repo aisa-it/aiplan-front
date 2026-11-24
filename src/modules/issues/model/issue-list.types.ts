@@ -28,7 +28,7 @@ export const ISSUE_COLUMN_KEYS = [
 export type StandardIssueColumnKey = (typeof ISSUE_COLUMN_KEYS)[number];
 export type IssueColumnKey = StandardIssueColumnKey | `property:${string}`;
 
-export type EditableIssueField = 'priority' | 'state' | 'target_date';
+export type EditableIssueField = 'name' | 'priority' | 'state' | 'target_date';
 export type IssuePermissionField = EditableIssueField | 'sprints';
 export type IssueFieldPatch = Partial<
   Pick<DtoIssueWithCount, EditableIssueField>

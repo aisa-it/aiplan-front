@@ -18,7 +18,7 @@
         </span>
       </div>
       <ProjectIssueFilters
-        v-if="issueListScope && !isLoading"
+        v-if="issueListScope && !isLoading && !isCalendar"
         :scope="issueListScope"
         :settings="meInProject?.view_props"
         :statuses="statuses"
@@ -61,8 +61,15 @@
         :value="tab.value"
         class="h-full min-h-0"
       >
+        <ProjectIssueCalendar
+          v-if="tab.value === 'general' && issueListScope && !isLoading && isCalendar"
+          :key="`calendar:${issueListScope.workspaceSlug}:${issueListScope.projectId}`"
+          :scope="issueListScope"
+          :workspace-id="workspaceInfo?.id"
+          :view-settings="meInProject?.view_props"
+        />
         <ProjectIssueList
-          v-if="tab.value === 'general' && issueListScope && !isLoading"
+          v-else-if="tab.value === 'general' && issueListScope && !isLoading"
           :key="`${issueListScope.workspaceSlug}:${issueListScope.projectId}`"
           :scope="issueListScope"
           :view-settings="meInProject?.view_props"
@@ -82,11 +89,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
 import { useProjectStore } from '@/stores/project-store';
+import { useWorkspaceStore } from '@/stores/workspace-store';
 import type { MessageKey } from '@/i18n';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
@@ -100,6 +108,10 @@ import {
 } from '@/modules/issues';
 import ProjectIssueFilters from '@/modules/issues/components/ProjectIssueFilters.vue';
 import { useProjectIssueOptions } from '@/modules/issues/composables/useProjectIssueOptions';
+
+const ProjectIssueCalendar = defineAsyncComponent(
+  () => import('@/modules/issues/components/calendar/components/ProjectIssueCalendar.vue'),
+);
 
 const props = defineProps<{
   workspaceSlug: string;
@@ -145,6 +157,8 @@ const currentTab = ref<ProjectTab>('general');
 
 const { mobile } = useDisplay();
 const { project, meInProject, isLoading } = storeToRefs(useProjectStore());
+const { workspaceInfo } = storeToRefs(useWorkspaceStore());
+const isCalendar = computed(() => meInProject.value?.view_props?.issueView === 'calendar');
 
 const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
   const workspaceSlug = props.workspaceSlug;

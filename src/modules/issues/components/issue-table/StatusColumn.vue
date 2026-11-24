@@ -67,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import type {
   DtoIssueWithCount,
   DtoStateLight,
@@ -75,7 +74,7 @@ import type {
 import { useIssueStatusEditor } from '../../composables/useIssueStatusEditor';
 
 const props = defineProps<{ issue: DtoIssueWithCount }>();
-const isOpen = ref(false);
+const isOpen = defineModel<boolean>('open', { default: false });
 const { canEdit, isSaving, save, items, isLoading, error, load } =
   useIssueStatusEditor(() => props.issue);
 

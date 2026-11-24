@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 import type {
   DtoProjectPropertyTemplate,
   DtoStateLight,
@@ -44,6 +45,7 @@ const props = defineProps<{
   optionsLoading: boolean;
 }>();
 const { t } = useI18n();
+const { platform } = useDisplay();
 const projectStore = useProjectStore();
 
 const columnOptions = computed<IssueFilterColumnOption[]>(() => [
@@ -61,6 +63,9 @@ const columnOptions = computed<IssueFilterColumnOption[]>(() => [
 const viewOptions = computed<IssueViewOption[]>(() => [
   { value: 'list', title: t('issues.filters.list') },
   { value: 'kanban', title: t('issues.filters.board') },
+  ...(platform.value.android || platform.value.ios
+    ? []
+    : [{ value: 'calendar' as const, title: t('issues.filters.calendar') }]),
 ]);
 const groupOptions = computed<IssueFilterOption[]>(() => [
   ...(props.settings?.issueView === 'kanban'
