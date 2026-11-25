@@ -26,6 +26,7 @@ export default {
     link_count: 'Links',
     attachment_count: 'Attachments',
     sprint: 'Sprint',
+    project: 'Project',
   },
   filters: {
     display: 'Display',

@@ -7,7 +7,7 @@ import type {
 import { ISSUE_COLUMN_KEYS } from './issue-list.types';
 
 export const DEFAULT_VISIBLE_ISSUE_COLUMNS = ISSUE_COLUMN_KEYS.filter(
-  (column) => column !== 'sequence_id',
+  (column) => column !== 'sequence_id' && column !== 'project',
 );
 
 export const DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS: TypesViewProps = {
@@ -55,7 +55,8 @@ export const createIssueListInitialState = (
           ? settings.page_size
           : 25,
       sortBy:
-        sortBy && ISSUE_COLUMN_KEYS.includes(sortBy as (typeof ISSUE_COLUMN_KEYS)[number])
+        sortBy && sortBy !== 'project' &&
+          ISSUE_COLUMN_KEYS.includes(sortBy as (typeof ISSUE_COLUMN_KEYS)[number])
           ? (sortBy as IssueColumnKey)
           : 'sequence_id',
       descending: settings?.filters?.orderDesc ?? true,

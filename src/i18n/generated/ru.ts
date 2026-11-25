@@ -15,6 +15,7 @@ import projectActivityRu from '@/modules/activities/renders/entities/project-act
 import selectWorkspaceRu from '@/components/select-workspace/i18n/ru';
 import sidebarRu from '@/components/sidebar/i18n/ru';
 import sprintActivityRu from '@/modules/activities/renders/entities/sprint-activity/i18n/ru';
+import sprintsRu from '@/modules/sprints/i18n/ru';
 import toastRu from '@/modules/toast/i18n/ru';
 import userStatusRu from '@/components/user-status/i18n/ru';
 import workspaceActivityRu from '@/modules/activities/renders/entities/workspace-activity/i18n/ru';
@@ -36,6 +37,7 @@ export default {
   selectWorkspace: selectWorkspaceRu,
   sidebar: sidebarRu,
   sprintActivity: sprintActivityRu,
+  sprints: sprintsRu,
   toast: toastRu,
   userStatus: userStatusRu,
   workspaceActivity: workspaceActivityRu,

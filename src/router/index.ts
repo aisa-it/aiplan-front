@@ -66,6 +66,15 @@ const router = createRouter({
             projectId: getStringParam(route.params.project),
           }),
         },
+        {
+          path: ':workspace/sprints/:sprint',
+          name: 'sprint',
+          component: () => import('@/pages/SprintPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+            sprintId: getStringParam(route.params.sprint),
+          }),
+        },
       ],
     },
     {
@@ -93,6 +102,9 @@ const router = createRouter({
 router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
 router.beforeResolve(resolveProjectGuard);
+router.beforeResolve((to) => {
+  if (to.name === 'sprint') return loadWorkspaceGuard(to);
+});
 router.afterEach(applyLoadedProject);
 
 export default router;

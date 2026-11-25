@@ -60,6 +60,13 @@ export const useIssueListController = (
 
       if (currentRequest !== requestNumber) return;
 
+      const lastPage = Math.max(1, Math.ceil(result.total / query.rowsPerPage));
+      if (query.page > lastPage) {
+        query.page = lastPage;
+        await load();
+        return;
+      }
+
       items.value = result.items;
       total.value = result.total;
     } catch {

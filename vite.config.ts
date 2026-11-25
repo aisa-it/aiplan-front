@@ -37,6 +37,15 @@ export default defineConfig(({ mode }) => {
         src: fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
+    optimizeDeps: {
+      // Vuetify auto-imports these after scanning, during the first issue-list navigation.
+      include: [
+        'vuetify/components/VDataTable',
+        'vuetify/components/VPagination',
+        'vuetify/components/VSwitch',
+        'vuetify/components/transitions',
+      ],
+    },
     server: {
       host: true,
       proxy: {

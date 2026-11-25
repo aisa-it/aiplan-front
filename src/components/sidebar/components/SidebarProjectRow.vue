@@ -11,6 +11,7 @@
         name: 'project',
         params: { workspace: workspaceSlug, project: project.identifier },
       }"
+      :aria-current="active ? 'page' : undefined"
       @click="emit('navigate')"
       ><SidebarProjectIdentity :project="project" :compact="compact"
     /></RouterLink>

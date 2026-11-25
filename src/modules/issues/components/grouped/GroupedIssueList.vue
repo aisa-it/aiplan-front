@@ -35,7 +35,7 @@
       :property-templates="propertyTemplates"
       @toggle="toggleGroup"
       @page="(group, page) => emit('page', group, page)"
-      @manage-sprints="sprintIssue = $event"
+      @manage-sprints="emit('manageSprints', $event)"
     />
     <GroupedIssueTables
       v-else-if="visibleGroups.length"
@@ -56,21 +56,16 @@
             :initial-scroll-left="scrollPositions.get(group.key)"
             @horizontal-scroll="scrollPositions.set(group.key, $event)"
             @group-page="emit('page', group, $event)"
+            @manage-sprints="emit('manageSprints', $event)"
           />
         </div>
       </template>
     </GroupedIssueTables>
-    <IssueBoardSprintDialog
-      v-if="sprintIssue"
-      v-model="sprintIssue"
-      :workspace-slug="scope.workspaceSlug"
-      @change="(before, after) => emit('sprints-changed', before, after)"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, shallowRef, toRef } from 'vue';
+import { computed, defineAsyncComponent, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
   DtoIssueWithCount,
@@ -88,7 +83,6 @@ import type {
   IssueGroupBy,
   IssueGroupHeader,
 } from '../../model/issue-groups';
-import type { ProjectIssueListScope } from '../../model/issue-list.types';
 import IssueTable from '../IssueTable.vue';
 import IssueTableSkeleton from '../IssueTableSkeleton.vue';
 import GroupedIssueTables from './GroupedIssueTables.vue';
@@ -99,12 +93,9 @@ const IssueBoard = defineAsyncComponent({
   loadingComponent: IssueBoardSkeleton,
   delay: 0,
 });
-const IssueBoardSprintDialog = defineAsyncComponent(
-  () => import('../board/IssueBoardSprintDialog.vue'),
-);
-
 const props = defineProps<{
-  scope: ProjectIssueListScope;
+  workspaceSlug: string;
+  projectId?: string;
   groupBy: IssueGroupBy;
   groups: IssueGroup[];
   board: boolean;
@@ -120,11 +111,10 @@ const emit = defineEmits<{
   page: [group: IssueGroup, page: number];
   retry: [];
   change: [patch: TypesViewProps];
-  'sprints-changed': [before: DtoIssueWithCount, after: DtoIssueWithCount];
+  manageSprints: [issue: DtoIssueWithCount];
 }>();
 
 const { t } = useI18n();
-const sprintIssue = shallowRef<DtoIssueWithCount | null>(null);
 const scrollPositions = new Map<string, number>();
 const groupTemplate = computed(() =>
   props.propertyTemplates?.find(
@@ -132,7 +122,8 @@ const groupTemplate = computed(() =>
   ),
 );
 const lookupLabels = useGroupLookupLabels(
-  props.scope,
+  props.workspaceSlug,
+  props.projectId,
   () => groupTemplate.value,
 );
 const visibleGroups = useIssueGroupHeaders(

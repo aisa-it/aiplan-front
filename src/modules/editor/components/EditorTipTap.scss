@@ -258,6 +258,21 @@
   line-height: 1.5;
 }
 
+.editor-tiptap--plain {
+  border: 0;
+  background-color: transparent;
+
+  .editor-tiptap__body,
+  .editor-tiptap__editor-content,
+  :deep(.editor-tiptap__content) {
+    min-height: 0;
+  }
+
+  :deep(.editor-tiptap__content) {
+    padding-inline: 0;
+  }
+}
+
 .editor-tiptap :deep(h1) {
   font-size: 1.715em;
 }

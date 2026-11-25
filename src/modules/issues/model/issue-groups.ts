@@ -47,6 +47,7 @@ export interface IssueGroupHeader {
 }
 
 export interface GroupedIssueSource {
+  getGroupKey?(groupBy: IssueGroupBy, entity: IssueGroupEntity): string;
   streamGroups(
     filters: TypesIssuesListFilters,
     query: IssueListQuery,
@@ -70,6 +71,7 @@ const LEGACY_GROUP_FIELDS = new Map<string, IssueGroupBy>([
   ['Created by', 'author'],
   ['Assignee to', 'assignees'],
   ['Watchers', 'watchers'],
+  ['Project', 'project'],
 ]);
 
 export const normalizeIssueGroupBy = (value?: string): IssueGroupBy | null => {

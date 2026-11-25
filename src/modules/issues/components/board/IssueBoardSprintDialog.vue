@@ -78,7 +78,7 @@ const ROOT_FOLDER_ID = '00000000-0000-0000-0000-000000000000';
 type SprintOption = DtoSprintLight & { id: string };
 type SprintFolder = { id: string; name?: string; sprints: SprintOption[] };
 
-const props = defineProps<{ workspaceSlug: string }>();
+const props = defineProps<{ workspaceSlug: string; requiredSprint?: DtoSprintLight }>();
 const issue = defineModel<DtoIssueWithCount | null>({ required: true });
 const emit = defineEmits<{
   change: [before: DtoIssueWithCount, after: DtoIssueWithCount];
@@ -132,8 +132,9 @@ watch(issue, async (target, _, onCleanup) => {
   if (!target) return;
   const controller = new AbortController();
   onCleanup(() => controller.abort());
+  const memberships = [...(target.sprints ?? []), ...(props.requiredSprint ? [props.requiredSprint] : [])];
   confirmed.value = new Map(
-    target.sprints?.flatMap((sprint) =>
+    memberships.flatMap((sprint) =>
       sprint.id ? [[sprint.id, sprint] as const] : [],
     ),
   );

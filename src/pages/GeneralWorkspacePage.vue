@@ -49,11 +49,12 @@
 
         <v-divider class="w-full my-4" />
 
-        <div v-if="defineDescription" class="w-full workspace-description">
+        <div v-if="defineDescription" class="w-full px-4">
           <EditorTipTap
             editor-id="desc-editor"
             :model-value="defineDescription"
             :read-only-editor="true"
+            plain
             :can-edit="false"
           />
         </div>
@@ -149,17 +150,3 @@ useTitle(
   ),
 );
 </script>
-
-<style scoped>
-/* Если такие же переопределения понадобятся ещё где-то — не копировать,
-   а добавить в EditorTipTap «plain»-режим (проп), тогда этот блок удалить. */
-.workspace-description :deep(.editor-tiptap) {
-  border: 0;
-}
-
-.workspace-description :deep(.editor-tiptap__body),
-.workspace-description :deep(.editor-tiptap__editor-content),
-.workspace-description :deep(.editor-tiptap__content) {
-  min-height: 0;
-}
-</style>

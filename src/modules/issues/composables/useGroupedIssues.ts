@@ -21,6 +21,7 @@ export const useGroupedIssues = (
   },
   onStreamError: (error: unknown, groupBy: IssueGroupBy) => void,
 ) => {
+  const groupKey = source.getGroupKey ?? getIssueGroupKey;
   const groups = shallowRef<IssueGroup[]>([]);
   const isStreaming = ref(false);
   const loadFailed = ref(false);
@@ -94,7 +95,7 @@ export const useGroupedIssues = (
     };
     const append = (result: IssueGroupResult) => {
       if (!isCurrent()) return;
-      const key = getIssueGroupKey(groupBy, result.entity);
+      const key = groupKey(groupBy, result.entity);
       pending.set(key, { ...result, key, page: 1, loading: false });
       frame ??= requestAnimationFrame(flush);
     };
@@ -187,8 +188,8 @@ export const useGroupedIssues = (
       return load(true);
     }
 
-    const beforeKeys = getMembershipKeys(groupBy, before);
-    const afterKeys = getMembershipKeys(groupBy, after);
+    const beforeKeys = getMembershipKeys(groupBy, before, groupKey);
+    const afterKeys = getMembershipKeys(groupBy, after, groupKey);
     if (
       afterKeys.some(
         (key) =>
@@ -223,9 +224,12 @@ export const useGroupedIssues = (
   };
 };
 
-const getMembershipKeys = (groupBy: IssueGroupBy, issue: DtoIssueWithCount) => {
-  const key = (value?: string | null) =>
-    getIssueGroupKey(groupBy, value ?? null);
+const getMembershipKeys = (
+  groupBy: IssueGroupBy,
+  issue: DtoIssueWithCount,
+  groupKey: typeof getIssueGroupKey,
+) => {
+  const key = (value?: string | null) => groupKey(groupBy, value ?? null);
   switch (groupBy) {
     case 'state':
       return [key(issue.state ?? issue.state_detail?.id)];
@@ -234,7 +238,7 @@ const getMembershipKeys = (groupBy: IssueGroupBy, issue: DtoIssueWithCount) => {
     case 'author':
       return [key(issue.author_detail?.id)];
     case 'project':
-      return [key(issue.project)];
+      return [key(issue.project ?? issue.project_detail?.id)];
     case 'assignees':
       return issue.assignee_details?.length
         ? issue.assignee_details.map(({ id }) => key(id))

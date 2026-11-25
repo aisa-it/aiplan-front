@@ -1,10 +1,10 @@
 import { shallowRef, watch } from 'vue';
 import type { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { httpClient } from '@/services/clients';
-import type { ProjectIssueListScope } from '../model/issue-list.types';
 
 export const useGroupLookupLabels = (
-  scope: ProjectIssueListScope,
+  workspaceSlug: string,
+  projectId: string | undefined,
   getTemplate: () => DtoProjectPropertyTemplate | undefined,
 ) => {
   const labels = shallowRef<Record<string, string>>({});
@@ -16,13 +16,13 @@ export const useGroupLookupLabels = (
       const lookup = template as
         | (DtoProjectPropertyTemplate & { dictionary_id?: string | null })
         | undefined;
-      if (lookup?.type !== 'lookup' || !lookup.dictionary_id) return;
+      if (!projectId || lookup?.type !== 'lookup' || !lookup.dictionary_id) return;
 
       const controller = new AbortController();
       onCleanup(() => controller.abort());
       const [workspace, project, dictionary] = [
-        scope.workspaceSlug,
-        scope.projectId,
+        workspaceSlug,
+        projectId,
         lookup.dictionary_id,
       ].map(encodeURIComponent);
       const endpoint = `/api/auth/workspaces/${workspace}/projects/${project}/dictionaries/${dictionary}/rows/`;
