@@ -147,7 +147,7 @@ function shift(direction: -1 | 1, unit = period.value) {
   currentDate.value = shiftPeriod(currentDate.value, unit, direction);
 }
 
-function changeView(view: 'list' | 'kanban') {
+function changeView(view: 'list' | 'kanban' | 'gantt_chart') {
   const group = normalizeIssueGroupBy(props.viewSettings?.filters?.group_by);
   const patch = {
     issueView: view,

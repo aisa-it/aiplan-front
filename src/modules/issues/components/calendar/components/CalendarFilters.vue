@@ -69,7 +69,7 @@ import type { CalendarFilters } from '../utils/calendar-events';
 
 const props = defineProps<{ workspaceId?: string; projectId: string }>();
 const filters = defineModel<CalendarFilters>({ required: true });
-const emit = defineEmits<{ view: [view: 'list' | 'kanban'] }>();
+const emit = defineEmits<{ view: [view: 'list' | 'kanban' | 'gantt_chart'] }>();
 const { t } = useI18n();
 const memberFields = ['authors', 'assignees', 'watchers'] as const;
 const priorities = computed(() =>
@@ -81,11 +81,12 @@ const priorities = computed(() =>
 const viewOptions = computed(() => [
   { value: 'list', title: t('issues.filters.list') },
   { value: 'kanban', title: t('issues.filters.board') },
+  { value: 'gantt_chart', title: t('issues.filters.gantt') },
   { value: 'calendar', title: t('issues.filters.calendar') },
 ]);
 
 function changeView(view: string) {
-  if (view === 'list' || view === 'kanban') emit('view', view);
+  if (view === 'list' || view === 'kanban' || view === 'gantt_chart') emit('view', view);
 }
 
 function setFilter(key: Exclude<keyof CalendarFilters, 'onlyActive'>, value: string[]) {

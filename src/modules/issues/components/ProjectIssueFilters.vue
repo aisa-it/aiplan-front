@@ -65,7 +65,10 @@ const viewOptions = computed<IssueViewOption[]>(() => [
   { value: 'kanban', title: t('issues.filters.board') },
   ...(platform.value.android || platform.value.ios
     ? []
-    : [{ value: 'calendar' as const, title: t('issues.filters.calendar') }]),
+    : [
+        { value: 'gantt_chart' as const, title: t('issues.filters.gantt') },
+        { value: 'calendar' as const, title: t('issues.filters.calendar') },
+      ]),
 ]);
 const groupOptions = computed<IssueFilterOption[]>(() => [
   ...(props.settings?.issueView === 'kanban'

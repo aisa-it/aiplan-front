@@ -5,6 +5,7 @@
   >
     <div
       ref="tableRoot"
+      :data-gantt-table="plainGantt ? '' : undefined"
       :class="group ? 'min-w-0' : 'issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto'"
     >
       <IssueTableSkeleton
@@ -21,6 +22,8 @@
         :page="group?.page ?? query.page"
         :sort-by="sortBy"
         :loading="isLoading"
+        :fixed-header="plainGantt"
+        :row-props="ganttRows"
         item-value="id"
         no-data-text="Нет задач"
         must-sort
@@ -140,7 +143,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { ganttLayoutKey } from './gantt/model/gantt-rows';
 import { useI18n } from 'vue-i18n';
 import type { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
@@ -200,6 +204,8 @@ const {
 } = useIssueListControllerContext();
 
 const items = computed(() => props.group?.items ?? listItems.value);
+const ganttRows = inject(ganttLayoutKey, undefined)?.rowProps;
+const plainGantt = computed(() => Boolean(ganttRows) && !props.group);
 const total = computed(() => props.group?.total ?? listTotal.value);
 const isLoading = computed(() => props.group?.loading ?? listLoading.value);
 const showSkeleton = computed(() => !props.group && isLoading.value && !items.value.length);
@@ -293,7 +299,24 @@ const handlePaginationRequest = (options: {
 
 <style scoped>
 .issue-table-wrapper {
+  --issue-table-header-height: 48px;
   position: relative;
+}
+
+[data-gantt-table] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: calc(var(--gantt-header-height) - var(--issue-table-header-height));
+}
+
+[data-gantt-table] :deep(.issue-table) {
+  flex: 1;
+  min-height: 0;
+}
+
+[data-gantt-table] :deep(.issue-table thead th) {
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 
 .issue-table-footer--sticky {
@@ -334,7 +357,7 @@ const handlePaginationRequest = (options: {
 }
 
 :deep(.issue-table .v-data-table__th) {
-  height: 48px;
+  height: var(--issue-table-header-height);
   font-size: 12px;
   white-space: nowrap;
 }
