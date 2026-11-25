@@ -9,8 +9,8 @@
     :group-options="groupOptions"
     :display-toggles="displayToggles"
     :personal-toggles="personalToggles"
-    @change="save"
-    @reset="reset"
+    @change="emit('change', $event)"
+    @reset="emit('reset')"
   />
 </template>
 
@@ -23,7 +23,6 @@ import type {
   DtoStateLight,
   TypesViewProps,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { useProjectStore } from '@/stores/project-store';
 import {
   DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS,
   DEFAULT_VISIBLE_ISSUE_COLUMNS,
@@ -33,27 +32,27 @@ import type {
   IssueFilterOption,
   IssueViewOption,
 } from '../model/issue-filters.types';
-import type { ProjectIssueListScope } from '../model/issue-list.types';
 import IssueFiltersMenu from './IssueFiltersMenu.vue';
 import { ISSUE_GROUP_FIELDS, normalizeIssueGroupBy } from '../model/issue-groups';
 
 const props = defineProps<{
-  scope: ProjectIssueListScope;
   settings?: TypesViewProps;
-  statuses: DtoStateLight[];
-  propertyTemplates: DtoProjectPropertyTemplate[];
+  statuses: (DtoStateLight & { ids?: string[] })[];
+  propertyTemplates?: DtoProjectPropertyTemplate[];
   optionsLoading: boolean;
+  sprint?: boolean;
 }>();
+const emit = defineEmits<{ change: [patch: TypesViewProps]; reset: [] }>();
 const { t } = useI18n();
 const { platform } = useDisplay();
-const projectStore = useProjectStore();
 
 const columnOptions = computed<IssueFilterColumnOption[]>(() => [
   ...DEFAULT_VISIBLE_ISSUE_COLUMNS.map((key) => ({
     key,
     title: t(`issues.columns.${key}`),
   })),
-  ...props.propertyTemplates
+  ...(props.sprint ? [{ key: 'project' as const, title: t('issues.columns.project') }] : []),
+  ...(props.propertyTemplates ?? [])
     .filter((template) => template.id && template.name)
     .map((template) => ({
       key: `property:${template.id}` as const,
@@ -67,7 +66,7 @@ const viewOptions = computed<IssueViewOption[]>(() => [
     ? []
     : [
         { value: 'gantt_chart' as const, title: t('issues.filters.gantt') },
-        { value: 'calendar' as const, title: t('issues.filters.calendar') },
+        ...(props.sprint ? [] : [{ value: 'calendar' as const, title: t('issues.filters.calendar') }]),
       ]),
 ]);
 const groupOptions = computed<IssueFilterOption[]>(() => [
@@ -78,7 +77,8 @@ const groupOptions = computed<IssueFilterOption[]>(() => [
     value,
     title: value === 'watchers' ? t('issues.groups.watcher') : t(`issues.columns.${value}`),
   })),
-  ...props.propertyTemplates.flatMap((template) => template.id && template.name
+  ...(props.sprint ? [{ value: 'project', title: t('issues.columns.project') }] : []),
+  ...(props.propertyTemplates ?? []).flatMap((template) => template.id && template.name
     ? [{ value: `property:${template.id}`, title: t('issues.groups.propertyOption', { name: template.name }) }]
     : []),
 ]);
@@ -95,18 +95,4 @@ const personalToggles = computed(() => [
   { key: 'watchedToMe' as const, label: t('issues.filters.watchedToMe') },
   { key: 'authoredToMe' as const, label: t('issues.filters.authoredToMe') },
 ]);
-
-const save = async (patch: TypesViewProps, replace = false) => {
-  try {
-    await projectStore.updateViewSettings(
-      props.scope.workspaceSlug,
-      props.scope.projectId,
-      patch,
-      { replace },
-    );
-  } catch {}
-};
-const reset = () => {
-  void save(DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS, true);
-};
 </script>

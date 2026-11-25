@@ -77,7 +77,16 @@
           <LabelsColumn :labels="item.label_details" />
         </template>
         <template #item.sprint="{ item }">
-          <SprintColumn :sprints="item.sprints" />
+          <SprintColumn
+            :sprints="item.sprints"
+            :editable="canEditField(item, 'sprints')"
+            @edit="emit('manageSprints', item)"
+          />
+        </template>
+        <template #item.project="{ item }">
+          <span class="block truncate" :title="item.project_detail?.name">
+            {{ item.project_detail?.name }}
+          </span>
         </template>
         <template
           v-for="resizableColumn in resizableColumns"
@@ -146,7 +155,7 @@
 import { computed, inject, ref } from 'vue';
 import { ganttLayoutKey } from './gantt/model/gantt-rows';
 import { useI18n } from 'vue-i18n';
-import type { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoIssueWithCount, DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
 import DocumentIcon from '@/components/icons/DocumentIcon.vue';
@@ -187,6 +196,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   groupPage: [page: number];
   horizontalScroll: [scrollLeft: number];
+  manageSprints: [issue: DtoIssueWithCount];
 }>();
 
 const countColumns = ISSUE_COUNT_COLUMN_KEYS;
@@ -201,6 +211,7 @@ const {
   setPage,
   setRowsPerPage,
   setSort,
+  canEditField,
 } = useIssueListControllerContext();
 
 const items = computed(() => props.group?.items ?? listItems.value);

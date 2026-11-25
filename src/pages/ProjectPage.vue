@@ -17,13 +17,14 @@
           {{ t('common.screens.project.tasksTitle', { name: project?.name }) }}
         </span>
       </div>
-      <ProjectIssueFilters
+      <IssueListFilters
         v-if="issueListScope && !isLoading && !isCalendar"
-        :scope="issueListScope"
         :settings="meInProject?.view_props"
         :statuses="statuses"
         :property-templates="propertyTemplates"
         :options-loading="optionsLoading"
+        @change="saveSettings"
+        @reset="saveSettings(DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS, true)"
       />
     </div>
 
@@ -92,6 +93,7 @@
 import { computed, defineAsyncComponent, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import type { TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { useProjectStore } from '@/stores/project-store';
 import { useWorkspaceStore } from '@/stores/workspace-store';
@@ -106,7 +108,8 @@ import {
   PinnedIssueList,
   type ProjectIssueListScope,
 } from '@/modules/issues';
-import ProjectIssueFilters from '@/modules/issues/components/ProjectIssueFilters.vue';
+import IssueListFilters from '@/modules/issues/components/IssueListFilters.vue';
+import { DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS } from '@/modules/issues/model/issue-list.defaults';
 import { useProjectIssueOptions } from '@/modules/issues/composables/useProjectIssueOptions';
 
 const ProjectIssueCalendar = defineAsyncComponent(
@@ -156,7 +159,8 @@ const { t } = useI18n();
 const currentTab = ref<ProjectTab>('general');
 
 const { mobile } = useDisplay();
-const { project, meInProject, isLoading } = storeToRefs(useProjectStore());
+const projectStore = useProjectStore();
+const { project, meInProject, isLoading } = storeToRefs(projectStore);
 const { workspaceInfo } = storeToRefs(useWorkspaceStore());
 const isCalendar = computed(() => meInProject.value?.view_props?.issueView === 'calendar');
 
@@ -178,6 +182,12 @@ const {
   propertyTemplates,
   isLoading: optionsLoading,
 } = useProjectIssueOptions(issueListScope);
+
+function saveSettings(patch: TypesViewProps, replace = false) {
+  const scope = issueListScope.value;
+  if (!scope) return;
+  void projectStore.updateViewSettings(scope.workspaceSlug, scope.projectId, patch, { replace }).catch(() => {});
+}
 </script>
 
 <style scoped>

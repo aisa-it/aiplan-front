@@ -23,6 +23,7 @@ export const ISSUE_COLUMN_KEYS = [
   'link_count',
   'attachment_count',
   'sprint',
+  'project',
 ] as const;
 
 export type StandardIssueColumnKey = (typeof ISSUE_COLUMN_KEYS)[number];
@@ -48,6 +49,12 @@ export interface ProjectIssueListScope {
   type: 'project';
   workspaceSlug: string;
   projectId: string;
+}
+
+export interface SprintIssueListScope {
+  type: 'sprint';
+  workspaceSlug: string;
+  sprintId: string;
 }
 
 export interface IssueListQuery {

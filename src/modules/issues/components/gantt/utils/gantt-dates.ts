@@ -1,4 +1,4 @@
-import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoIssueWithCount, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 const DAY_MS = 86_400_000;
 export const DAY_WIDTH = 40;
@@ -22,9 +22,20 @@ function issueDay(value: string | null | undefined) {
     : localGanttDay(date);
 }
 
-export function ganttRange(issues: readonly DtoIssueWithCount[], today: number) {
-  let start = today;
-  let end = today;
+export function sprintGanttRange(sprint?: DtoSprint) {
+  const start = issueDay(sprint?.start_date?.slice(0, 10));
+  const end = issueDay(sprint?.end_date?.slice(0, 10));
+  if (start === undefined || end === undefined || end < start) return;
+  return { start, end: end + 1 };
+}
+
+export function ganttRange(
+  issues: readonly DtoIssueWithCount[],
+  today: number,
+  sprintRange?: { start: number; end: number },
+) {
+  let start = Math.min(today, sprintRange?.start ?? today);
+  let end = Math.max(today, sprintRange?.end ?? today);
   const now = Date.now();
   for (const issue of issues) {
     const bar = issueBar(issue, today, now);

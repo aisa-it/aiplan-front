@@ -25,6 +25,15 @@
           {{ day.label }}
         </span>
       </div>
+      <SprintProgress
+        v-if="sprintRange"
+        class="gantt-sprint-bar"
+        :style="{ left: `${xForDay(sprintRange.start)}px`, width: `${(sprintRange.end - sprintRange.start) * DAY_WIDTH}px` }"
+        :stats="sprint?.stats"
+        :title="sprintLabel"
+      >
+        {{ sprintLabel }}
+      </SprintProgress>
       <div class="gantt-grid">
         <div
           v-for="bar in bars"
@@ -77,7 +86,8 @@
 import { computed, ref, watch } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
-import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoIssueWithCount, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import SprintProgress from '@/modules/sprints/components/SprintProgress.vue';
 import type { GanttRow } from '../model/gantt-rows';
 import { DAY_WIDTH, ganttRange, issueBar, localGanttDay, timelineDate } from '../utils/gantt-dates';
 import alertIcon from '../icons/alert.svg';
@@ -97,6 +107,8 @@ const icons: Record<string, string> = {
 const props = defineProps<{
   issues: readonly DtoIssueWithCount[];
   rows: readonly GanttRow[];
+  sprint?: DtoSprint;
+  sprintRange?: { start: number; end: number };
 }>();
 const emit = defineEmits<{ verticalScroll: [delta: number] }>();
 const { t, locale } = useI18n();
@@ -104,7 +116,8 @@ const viewport = ref<HTMLElement | null>(null);
 const { width } = useElementSize(viewport);
 const scrollLeft = ref(0);
 const today = localGanttDay(new Date());
-const range = computed(() => ganttRange(props.issues, today));
+const range = computed(() => ganttRange(props.issues, today, props.sprintRange));
+const sprintStart = computed(() => props.sprintRange?.start);
 const startDay = computed(() => range.value.start);
 const dayCount = computed(() =>
   Math.max(Math.ceil(width.value / DAY_WIDTH), range.value.end - startDay.value),
@@ -114,6 +127,17 @@ const xForDay = (day: number) => (day - startDay.value) * DAY_WIDTH;
 const todayX = computed(() => xForDay(today + 1));
 const right = computed(() => scrollLeft.value + width.value);
 const monthFormat = computed(() => new Intl.DateTimeFormat(locale.value, { month: 'long', timeZone: 'UTC' }));
+const sprintLabel = computed(() => {
+  if (!props.sprintRange) return '';
+  const format = new Intl.DateTimeFormat(locale.value, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  const { start, end } = props.sprintRange;
+  return `${props.sprint?.name ?? ''} ${format.format(timelineDate(start))} – ${format.format(timelineDate(end - 1))}`;
+});
 
 const dayLabels = computed(() => {
   const first = Math.max(0, Math.floor(scrollLeft.value / DAY_WIDTH) - 1);
@@ -178,10 +202,12 @@ function updateScrollLeft() {
 }
 
 let initialized = false;
-watch([startDay, width], ([start, viewportWidth], [previousStart]) => {
+watch([startDay, width, sprintStart], ([start, viewportWidth, sprintDay], [previousStart, , previousSprintDay]) => {
   if (!viewport.value || !viewportWidth) return;
-  if (!initialized) {
-    viewport.value.scrollLeft = todayX.value - viewportWidth / 2;
+  if (!initialized || sprintDay !== previousSprintDay) {
+    viewport.value.scrollLeft = sprintDay === undefined
+      ? todayX.value - viewportWidth / 2
+      : xForDay(sprintDay) - DAY_WIDTH;
     initialized = true;
   } else if (previousStart !== undefined && start !== previousStart) {
     viewport.value.scrollLeft = scrollLeft.value + (previousStart - start) * DAY_WIDTH;
@@ -246,11 +272,17 @@ function wheel(event: WheelEvent) {
 
 .gantt-scale {
   position: relative;
-  height: var(--gantt-header-height);
+  height: var(--gantt-scale-height);
   border-bottom: 2px solid var(--gantt-line);
   background: rgb(var(--v-theme-background));
   font-size: 14px;
   font-weight: 500;
+}
+
+.gantt-sprint-bar {
+  position: absolute;
+  top: calc(var(--gantt-scale-height) + 7px);
+  height: 32px;
 }
 
 .gantt-month {
@@ -336,7 +368,7 @@ function wheel(event: WheelEvent) {
 
 .gantt-today {
   position: absolute;
-  inset-block: calc(var(--gantt-header-height) - 5px) 0;
+  inset-block: calc(var(--gantt-scale-height) - 5px) 0;
   width: 1px;
   background: #e64949;
   pointer-events: none;

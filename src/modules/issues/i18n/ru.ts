@@ -24,6 +24,7 @@ export default {
     link_count: 'Ссылки',
     attachment_count: 'Вложения',
     sprint: 'Спринт',
+    project: 'Проект',
   },
   filters: {
     display: 'Отображение',

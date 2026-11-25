@@ -120,4 +120,9 @@ export const ISSUE_TABLE_COLUMNS: Record<StandardIssueColumnKey, IssueTableColum
     title: 'Спринт',
     ...fixedWidth(200),
   },
+  project: {
+    key: 'project',
+    title: 'Проект',
+    ...fixedWidth(200),
+  },
 };

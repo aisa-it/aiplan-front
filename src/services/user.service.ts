@@ -15,8 +15,8 @@ export const UserService = {
     return (await usersApi.getCurrentUser()).data;
   },
 
-  async getCurrentUserProjectMemberships(projectIds: string[]) {
-    return (await usersApi.getCurrentUserProjectMemberships(projectIds)).data;
+  async getCurrentUserProjectMemberships(projectIds: string[], signal?: AbortSignal) {
+    return (await usersApi.getCurrentUserProjectMemberships(projectIds, { signal })).data;
   },
 
   async updateCurrentUser(

@@ -27,7 +27,7 @@
       :project="project"
       :compact="compact"
       :workspace-slug="workspaceSlug"
-      :active="route.params.project === project.identifier"
+      :active="isActiveProject(project)"
       :can-open="canOpenProject(project)"
       :can-favorite="hasProjectPermission(project, 'add-to-fav')"
       :can-show-menu="hasProjectPermission(project, 'show-project-popup')"
@@ -102,6 +102,20 @@ const projects = computed(() =>
   ),
 );
 const compactProjects = computed(() => workspaceSummary.value?.projects ?? []);
+const activeProjectParam = computed(() => {
+  const { workspace, project } = route.params;
+  if (
+    route.name !== 'project' ||
+    workspace !== workspaceSlug.value ||
+    typeof project !== 'string'
+  ) return;
+
+  return project;
+});
+function isActiveProject({ id, identifier }: DtoProjectLight) {
+  const active = activeProjectParam.value;
+  return !!active && (active === id || active === identifier);
+}
 const favoritePending = ref<string | null>(null);
 const projectContextOpen = ref(false);
 const projectContextTarget = ref<[number, number]>([0, 0]);
