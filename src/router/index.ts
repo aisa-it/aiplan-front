@@ -49,6 +49,14 @@ const router = createRouter({
           }),
           beforeEnter: loadWorkspaceGuard,
         },
+        {
+          path: ':workspace/forms',
+          name: 'forms',
+          component: () => import('@/modules/forms/pages/FormsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
+        },
         // TODO: стенд для теста редактора, убрать после переноса страницы AIDOC
         {
           path: ':workspace/editor-playground',
@@ -93,6 +101,9 @@ const router = createRouter({
 router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
 router.beforeResolve(resolveProjectGuard);
+router.beforeResolve((to) => {
+  if (to.name === 'forms') return loadWorkspaceGuard(to);
+});
 router.afterEach(applyLoadedProject);
 
 export default router;
