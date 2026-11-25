@@ -36,6 +36,7 @@ export default {
     list: 'Список',
     board: 'Доска',
     calendar: 'Календарь',
+    gantt: 'Диаграмма Ганта',
     columns: 'Колонки',
     grouping: 'Группировка',
     noGrouping: 'Нет',
@@ -66,6 +67,13 @@ export default {
     priorities: { urgent: 'Критический', high: 'Высокий', medium: 'Средний', low: 'Низкий' },
   },
   property: { yes: 'Да' },
+  gantt: {
+    today: 'сегодня',
+    timeline: 'Шкала диаграммы Ганта',
+    divider: 'Ширина таблицы задач',
+    verticalScroll: 'Вертикальная прокрутка диаграммы Ганта',
+    noStatus: 'Без статуса',
+  },
   calendar: {
     period: 'Период календаря',
     week: 'Неделя',

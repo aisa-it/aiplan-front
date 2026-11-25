@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full min-h-0 min-w-0">
+  <component :is="isGantt ? GanttView : 'div'" v-bind="ganttProps" class="h-full min-h-0 min-w-0">
     <ProjectGroupedIssueList
       v-if="groupBy"
       :key="groupBy"
@@ -25,11 +25,11 @@
       :hide-parent="hideParent"
       :property-templates="propertyTemplates"
     />
-  </div>
+  </component>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type {
@@ -61,10 +61,12 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const GanttView = defineAsyncComponent(() => import('./gantt/components/GanttView.vue'));
 const source = createProjectIssueListSource(props.scope);
 const actions = useProjectIssueListActions(props.scope);
 const pendingPropertyResets = new Set<string>();
 const isBoard = computed(() => props.viewSettings?.issueView === 'kanban');
+const isGantt = computed(() => props.viewSettings?.issueView === 'gantt_chart');
 const groupBy = computed(() => {
   const value = normalizeIssueGroupBy(props.viewSettings?.filters?.group_by);
   const projectGroup = value === 'project' ? null : value;
@@ -130,6 +132,9 @@ const grouped = useGroupedIssues(
   },
 );
 const { groups, isStreaming, loadFailed } = grouped;
+const ganttProps = computed(() => isGantt.value
+  ? { issues: groupBy.value ? groups.value.flatMap((group) => group.items) : controller.items.value }
+  : {});
 
 provideIssueListController(controller);
 

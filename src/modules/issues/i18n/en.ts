@@ -38,6 +38,7 @@ export default {
     list: 'List',
     board: 'Board',
     calendar: 'Calendar',
+    gantt: 'Gantt chart',
     columns: 'Columns',
     grouping: 'Grouping',
     noGrouping: 'None',
@@ -68,6 +69,13 @@ export default {
     priorities: { urgent: 'Critical', high: 'High', medium: 'Medium', low: 'Low' },
   },
   property: { yes: 'Yes' },
+  gantt: {
+    today: 'today',
+    timeline: 'Gantt timeline',
+    divider: 'Task table width',
+    verticalScroll: 'Gantt vertical scroll',
+    noStatus: 'No status',
+  },
   calendar: {
     period: 'Calendar period',
     week: 'Week',

@@ -1,6 +1,7 @@
 <template>
   <div
     ref="viewport"
+    :data-gantt-scroll="ganttLayout ? '' : undefined"
     class="min-h-0 min-w-0 flex-1 overflow-y-auto [overflow-anchor:none]"
   >
     <div :style="spacerStyles">
@@ -41,11 +42,12 @@
 </template>
 
 <script setup lang="ts" generic="Group extends IssueGroupHeader">
-import { computed, ref, type ComponentPublicInstance } from 'vue';
+import { computed, inject, ref, type ComponentPublicInstance } from 'vue';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 
 import IssueGroupHeading from './IssueGroupHeading.vue';
 import type { IssueGroupHeader } from '../../model/issue-groups';
+import { ganttLayoutKey } from '../gantt/model/gantt-rows';
 
 const props = defineProps<{
   groups: readonly Group[];
@@ -55,6 +57,7 @@ const emit = defineEmits<{ toggle: [group: Group] }>();
 defineSlots<{ default(props: { group: Group }): unknown }>();
 
 const viewport = ref<HTMLElement | null>(null);
+const ganttLayout = inject(ganttLayoutKey, undefined);
 const groupKeys = computed((previous: string[] | undefined) => {
   const keys = props.groups.map((group) => group.key);
   return previous?.length === keys.length &&
@@ -80,6 +83,7 @@ const virtualizer = useVirtualizer<HTMLElement, HTMLElement>(
     },
     overscan: 1,
     useAnimationFrameWithResizeObserver: true,
+    onChange: ganttLayout?.layoutChanged,
   })),
 );
 
