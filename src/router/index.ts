@@ -67,6 +67,14 @@ const router = createRouter({
           }),
         },
         {
+          path: ':workspace/sprints',
+          name: 'sprints',
+          component: () => import('@/pages/SprintsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
+        },
+        {
           path: ':workspace/sprints/:sprint',
           name: 'sprint',
           component: () => import('@/pages/SprintPage.vue'),
@@ -103,7 +111,7 @@ router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
 router.beforeResolve(resolveProjectGuard);
 router.beforeResolve((to) => {
-  if (to.name === 'sprint') return loadWorkspaceGuard(to);
+  if (to.name === 'sprint' || to.name === 'sprints') return loadWorkspaceGuard(to);
 });
 router.afterEach(applyLoadedProject);
 

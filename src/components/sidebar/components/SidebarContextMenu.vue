@@ -1,5 +1,5 @@
 <template>
-  <v-menu location="bottom start" :offset="4" :close-on-content-click="true">
+  <v-menu :location="location ?? 'bottom start'" :offset="4" :close-on-content-click="true">
     <template #activator="{ props: menuProps }">
       <slot name="activator" :props="menuProps" />
     </template>
@@ -33,6 +33,7 @@ import type { Component } from 'vue';
 defineProps<{
   items: { label: string; icon?: Component; onClick?: () => void }[];
   plain?: boolean;
+  location?: 'bottom start' | 'bottom end';
 }>();
 </script>
 

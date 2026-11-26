@@ -67,19 +67,26 @@
     </div>
   </div>
   <RouterLink
-    v-if="compact && workspaceSlug"
+    v-if="workspaceSlug"
     class="sidebar-list-footer"
-    :to="`/${workspaceSlug}/sprints`"
+    :to="{ name: 'sprints', params: { workspace: workspaceSlug } }"
     @click="emit('navigate')"
     >{{ t('sidebar.allSprints') }}</RouterLink
   >
+  <SprintOverviewDialog
+    v-if="deleteAction && workspaceSlug"
+    :key="workspaceSlug"
+    v-model="deleteAction"
+    :workspace-slug="workspaceSlug"
+    @saved="onSprintDeleted"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, defineAsyncComponent, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import type {
   DtoSprintFolder,
   DtoSprintLight,
@@ -89,6 +96,7 @@ import LinkIcon from '../icons/LinkIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
 import SidebarContextMenu from './SidebarContextMenu.vue';
 import SidebarSprintProgress from './SidebarSprintProgress.vue';
+import type { SprintOverviewAction } from '@/modules/sprints/model/sprint-folders';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useUserStore } from '@/stores/user-store';
 import { checkPermissionByWs } from '@/utils/permissions';
@@ -97,13 +105,25 @@ defineProps<{ compact?: boolean }>();
 const emit = defineEmits<{ navigate: [] }>();
 const { t, locale } = useI18n();
 const route = useRoute();
+const router = useRouter();
+const SprintOverviewDialog = defineAsyncComponent(
+  () => import('@/modules/sprints/components/SprintOverviewDialog.vue'),
+);
+const workspaceStore = useWorkspaceStore();
 const { currentWorkspaceSlug, workspaceSummary } =
-  storeToRefs(useWorkspaceStore());
+  storeToRefs(workspaceStore);
 const { workspaceRoleName } = storeToRefs(useUserStore());
 const workspaceSlug = computed(() => currentWorkspaceSlug.value);
 const canShowSprintMenu = computed(() =>
   checkPermissionByWs(workspaceRoleName.value, 'show-sprint-popup'),
 );
+const canDeleteSprint = computed(() =>
+  checkPermissionByWs(workspaceRoleName.value, 'delete-sprint'),
+);
+const deleteAction = shallowRef<SprintOverviewAction | null>(null);
+watch(workspaceSlug, () => {
+  deleteAction.value = null;
+});
 const sprints = computed<DtoSprintLight[]>(() => {
   const entries = (workspaceSummary.value?.sprints ?? []) as Array<
     DtoSprintFolder | DtoSprintLight
@@ -111,7 +131,7 @@ const sprints = computed<DtoSprintLight[]>(() => {
   return entries.flatMap((entry) =>
     Array.isArray((entry as DtoSprintFolder).sprints)
       ? ((entry as DtoSprintFolder).sprints ?? [])
-      : [entry as DtoSprintLight],
+      : 'sequence_id' in entry ? [entry as DtoSprintLight] : [],
   );
 });
 const activeSprintParam = computed(() => {
@@ -131,6 +151,7 @@ function isActiveSprint({ id, sequence_id }: DtoSprintLight) {
 }
 
 function sprintMenuItems(sprint: DtoSprintLight) {
+  const { id } = sprint;
   return [
     { label: t('sidebar.projectSettings'), icon: SettingsIcon },
     {
@@ -138,8 +159,23 @@ function sprintMenuItems(sprint: DtoSprintLight) {
       icon: LinkIcon,
       onClick: () => void copySprintLink(sprint),
     },
-    { label: t('sidebar.deleteSprint'), icon: BinIcon },
+    ...(canDeleteSprint.value && id ? [{
+      label: t('sidebar.deleteSprint'),
+      icon: BinIcon,
+      onClick: () => {
+        deleteAction.value = { type: 'deleteSprint', id, name: sprintLabel(sprint) };
+      },
+    }] : []),
   ];
+}
+
+function onSprintDeleted(workspace: string, action: SprintOverviewAction) {
+  if (action.type !== 'deleteSprint' || workspaceSlug.value !== workspace) return;
+  const sprint = sprints.value.find(({ id }) => id === action.id);
+  void workspaceStore.getWorkspaceSummary(workspace).catch(() => {});
+  if (sprint && isActiveSprint(sprint)) {
+    void router.replace({ name: 'sprints', params: { workspace } });
+  }
 }
 
 function sprintPath(id: string) {

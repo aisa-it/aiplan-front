@@ -45,7 +45,7 @@
     @click="emit('navigate')"
     >{{ t('sidebar.allProjects') }}</RouterLink
   >
-  <SidebarProjectContextMenu
+  <ContextMenu
     v-if="compact"
     v-model="projectContextOpen"
     :target="projectContextTarget"
@@ -70,7 +70,7 @@ import OpenNewTabIcon from '../icons/OpenNewTabIcon.vue';
 import OpenNewWindowIcon from '../icons/OpenNewWindowIcon.vue';
 import CopyNameIcon from '../icons/CopyNameIcon.vue';
 import SidebarContextMenu from './SidebarContextMenu.vue';
-import SidebarProjectContextMenu from './SidebarProjectContextMenu.vue';
+import ContextMenu from '@/components/ContextMenu.vue';
 import SidebarProjectRow from './SidebarProjectRow.vue';
 import { ProjectService } from '@/services/project.service';
 import { useWorkspaceStore } from '@/stores/workspace-store';

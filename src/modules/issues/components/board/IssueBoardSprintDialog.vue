@@ -72,9 +72,9 @@ import type {
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { toast } from '@/modules/toast';
+import { ROOT_SPRINT_FOLDER_ID } from '@/modules/sprints/model/sprint-folders';
 import { issueSprintsService } from '../../api/issue-sprints.service';
 
-const ROOT_FOLDER_ID = '00000000-0000-0000-0000-000000000000';
 type SprintOption = DtoSprintLight & { id: string };
 type SprintFolder = { id: string; name?: string; sprints: SprintOption[] };
 
@@ -115,7 +115,7 @@ const changes = computed(() => {
   ];
 });
 
-const hasFolderHeading = (id?: string) => !!id && id !== ROOT_FOLDER_ID;
+const hasFolderHeading = (id?: string) => !!id && id !== ROOT_SPRINT_FOLDER_ID;
 
 function onDialogUpdate(open: boolean) {
   if (!open) issue.value = null;
@@ -150,7 +150,7 @@ watch(issue, async (target, _, onCleanup) => {
     if (controller.signal.aborted) return;
     const options = result
       .map(({ id, name, sprints }) => ({
-        id: id ?? ROOT_FOLDER_ID,
+        id: id ?? ROOT_SPRINT_FOLDER_ID,
         name,
         sprints: sprints?.filter((sprint): sprint is SprintOption => !!sprint.id) ?? [],
       }))

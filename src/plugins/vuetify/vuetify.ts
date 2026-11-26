@@ -69,6 +69,7 @@ const vuetify = createVuetify({
   },
   defaults: {
     VCard: { elevation: 1 },
+    VTooltip: { color: 'text' },
     VBtn: {
       variant: 'flat',
       rounded: 'lg',
