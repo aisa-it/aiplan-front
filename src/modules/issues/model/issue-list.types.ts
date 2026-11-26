@@ -23,27 +23,38 @@ export const ISSUE_COLUMN_KEYS = [
   'link_count',
   'attachment_count',
   'sprint',
+  'project',
 ] as const;
 
 export type StandardIssueColumnKey = (typeof ISSUE_COLUMN_KEYS)[number];
 export type IssueColumnKey = StandardIssueColumnKey | `property:${string}`;
 
-export type EditableIssueField = 'priority' | 'state' | 'target_date';
+export type EditableIssueField = 'name' | 'priority' | 'state' | 'target_date';
+export type IssuePermissionField = EditableIssueField | 'sprints';
 export type IssueFieldPatch = Partial<
   Pick<DtoIssueWithCount, EditableIssueField>
 >;
 
 export interface IssueListActions {
-  canEdit(issue: DtoIssueWithCount, field: EditableIssueField): boolean;
+  canEdit(issue: DtoIssueWithCount, field: IssuePermissionField): boolean;
   update(issue: DtoIssueWithCount, patch: IssueFieldPatch): Promise<DtoIssue>;
   getAvailableStates(issue: DtoIssueWithCount): Promise<DtoStateLight[]>;
-  updateViewSettings(settings: TypesViewProps): Promise<void>;
+  updateViewSettings(
+    settings: TypesViewProps,
+    options?: { optimistic?: boolean },
+  ): Promise<void>;
 }
 
 export interface ProjectIssueListScope {
   type: 'project';
   workspaceSlug: string;
   projectId: string;
+}
+
+export interface SprintIssueListScope {
+  type: 'sprint';
+  workspaceSlug: string;
+  sprintId: string;
 }
 
 export interface IssueListQuery {

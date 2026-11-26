@@ -1,10 +1,19 @@
-import type { RouteLocationNormalized } from 'vue-router';
+import type { NavigationHookAfter, RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 
 import { useProjectStore } from '@/stores/project-store';
 import { useUserStore } from '@/stores/user-store';
 import { getStringParam } from '@/utils/object';
 import { checkPermissionByProject, defineRole } from '@/utils/permissions';
+import { getRouteLoadSignal } from './route-load';
+
+const resolvedProjects = new WeakMap<RouteLocationNormalized, () => void>();
+
+export const applyLoadedProject: NavigationHookAfter = (to, _from, failure) => {
+  const apply = resolvedProjects.get(to);
+  resolvedProjects.delete(to);
+  if (!failure) apply?.();
+};
 
 export const loadProjectGuard = async (to: RouteLocationNormalized) => {
   const workspace = getStringParam(to.params.workspace);
@@ -16,21 +25,25 @@ export const loadProjectGuard = async (to: RouteLocationNormalized) => {
 
   const projectStore = useProjectStore();
   const { projectRoleName } = storeToRefs(useUserStore());
-  const { meInProject } = storeToRefs(projectStore);
+  const signal = getRouteLoadSignal(to);
 
   try {
-    await projectStore.getProjectInfo(workspace, project);
+    const info = await projectStore.getProjectInfo(workspace, project, signal);
+    if (signal?.aborted) return;
+    const role = info.membership.is_project_lead
+      ? 'lead'
+      : defineRole(info.membership.role ?? 0);
 
-    if (meInProject.value?.is_project_lead) {
-      projectRoleName.value = 'lead';
-    } else {
-      projectRoleName.value = defineRole(meInProject.value?.role ?? 0);
-    }
-
-    if (!checkPermissionByProject(projectRoleName.value, 'show-project')) {
+    if (!checkPermissionByProject(role, 'show-project')) {
       window.location.href = '/access-denied';
+      return false;
     }
+    resolvedProjects.set(to, () => {
+      projectStore.applyProjectInfo(workspace, project, info);
+      projectRoleName.value = role;
+    });
   } catch (error: any) {
+    if (signal?.aborted) return;
     if (error?.response?.status === 404) {
       return { name: 'not-found' };
     }

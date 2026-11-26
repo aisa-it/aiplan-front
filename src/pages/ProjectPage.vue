@@ -17,13 +17,14 @@
           {{ t('common.screens.project.tasksTitle', { name: project?.name }) }}
         </span>
       </div>
-      <ProjectIssueFilters
-        v-if="issueListScope && !isLoading"
-        :scope="issueListScope"
+      <IssueListFilters
+        v-if="issueListScope && !isLoading && !isCalendar"
         :settings="meInProject?.view_props"
         :statuses="statuses"
         :property-templates="propertyTemplates"
         :options-loading="optionsLoading"
+        @change="saveSettings"
+        @reset="saveSettings(DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS, true)"
       />
     </div>
 
@@ -61,8 +62,15 @@
         :value="tab.value"
         class="h-full min-h-0"
       >
+        <ProjectIssueCalendar
+          v-if="tab.value === 'general' && issueListScope && !isLoading && isCalendar"
+          :key="`calendar:${issueListScope.workspaceSlug}:${issueListScope.projectId}`"
+          :scope="issueListScope"
+          :workspace-id="workspaceInfo?.id"
+          :view-settings="meInProject?.view_props"
+        />
         <ProjectIssueList
-          v-if="tab.value === 'general' && issueListScope && !isLoading"
+          v-else-if="tab.value === 'general' && issueListScope && !isLoading"
           :key="`${issueListScope.workspaceSlug}:${issueListScope.projectId}`"
           :scope="issueListScope"
           :view-settings="meInProject?.view_props"
@@ -82,11 +90,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import type { TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import { useProjectStore } from '@/stores/project-store';
+import { useWorkspaceStore } from '@/stores/workspace-store';
 import type { MessageKey } from '@/i18n';
 import AnalyticsIcon from '@/components/icons/AnalyticsIcon.vue';
 import DotListIcon from '@/components/icons/DotListIcon.vue';
@@ -98,8 +108,13 @@ import {
   PinnedIssueList,
   type ProjectIssueListScope,
 } from '@/modules/issues';
-import ProjectIssueFilters from '@/modules/issues/components/ProjectIssueFilters.vue';
+import IssueListFilters from '@/modules/issues/components/IssueListFilters.vue';
+import { DEFAULT_PROJECT_ISSUE_VIEW_SETTINGS } from '@/modules/issues/model/issue-list.defaults';
 import { useProjectIssueOptions } from '@/modules/issues/composables/useProjectIssueOptions';
+
+const ProjectIssueCalendar = defineAsyncComponent(
+  () => import('@/modules/issues/components/calendar/components/ProjectIssueCalendar.vue'),
+);
 
 const props = defineProps<{
   workspaceSlug: string;
@@ -144,7 +159,10 @@ const { t } = useI18n();
 const currentTab = ref<ProjectTab>('general');
 
 const { mobile } = useDisplay();
-const { project, meInProject, isLoading } = storeToRefs(useProjectStore());
+const projectStore = useProjectStore();
+const { project, meInProject, isLoading } = storeToRefs(projectStore);
+const { workspaceInfo } = storeToRefs(useWorkspaceStore());
+const isCalendar = computed(() => meInProject.value?.view_props?.issueView === 'calendar');
 
 const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
   const workspaceSlug = props.workspaceSlug;
@@ -164,6 +182,12 @@ const {
   propertyTemplates,
   isLoading: optionsLoading,
 } = useProjectIssueOptions(issueListScope);
+
+function saveSettings(patch: TypesViewProps, replace = false) {
+  const scope = issueListScope.value;
+  if (!scope) return;
+  void projectStore.updateViewSettings(scope.workspaceSlug, scope.projectId, patch, { replace }).catch(() => {});
+}
 </script>
 
 <style scoped>

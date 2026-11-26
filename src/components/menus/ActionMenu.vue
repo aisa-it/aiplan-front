@@ -4,14 +4,14 @@
       <slot name="activator" :props="menuProps" />
     </template>
     <div
-      class="sidebar-context-menu"
-      :class="{ 'sidebar-context-menu--plain': plain }"
+      class="action-menu"
+      :class="{ 'action-menu--plain': plain }"
     >
       <button
         v-for="item in items"
         :key="item.label"
         type="button"
-        class="sidebar-context-item"
+        class="action-menu-item"
         @click="item.onClick?.()"
       >
         <component
@@ -37,7 +37,7 @@ defineProps<{
 </script>
 
 <style scoped>
-.sidebar-context-menu {
+.action-menu {
   min-width: 225px;
   overflow: hidden;
   border: 1px solid rgb(var(--v-theme-border));
@@ -46,10 +46,10 @@ defineProps<{
   color: rgb(var(--v-theme-text));
   box-shadow: 0 3px 6px #0005;
 }
-.sidebar-context-menu--plain {
+.action-menu--plain {
   min-width: 140px;
 }
-.sidebar-context-item {
+.action-menu-item {
   display: flex;
   align-items: center;
   width: 100%;
@@ -62,11 +62,11 @@ defineProps<{
   text-align: left;
   white-space: nowrap;
 }
-.sidebar-context-menu--plain .sidebar-context-item {
+.action-menu--plain .action-menu-item {
   font-size: 14px;
 }
-.sidebar-context-item:hover,
-.sidebar-context-item:focus-visible {
+.action-menu-item:hover,
+.action-menu-item:focus-visible {
   background: rgba(var(--v-theme-on-background), 0.05);
 }
 </style>

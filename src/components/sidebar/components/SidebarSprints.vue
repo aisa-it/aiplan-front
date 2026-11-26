@@ -3,11 +3,17 @@
     {{ t('sidebar.sprints') }}
   </div>
   <div class="sidebar-list-scroll">
-    <div v-for="sprint in sprints" :key="sprint.id" class="sidebar-sprint-row">
+    <div
+      v-for="sprint in sprints"
+      :key="sprint.id"
+      class="sidebar-sprint-row"
+      :class="{ 'sidebar-row-active': isActiveSprint(sprint) }"
+    >
       <RouterLink
         v-if="workspaceSlug && sprint.id"
         class="sidebar-sprint-link"
         :to="sprintPath(sprint.id)"
+        :aria-current="isActiveSprint(sprint) ? 'page' : undefined"
         @click="emit('navigate')"
       >
         <SidebarSprintProgress :stats="sprint.stats ?? {}" />
@@ -73,14 +79,15 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import type {
   DtoSprintFolder,
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import SettingsIcon from '../icons/SettingsIcon.vue';
-import LinkIcon from '../icons/LinkIcon.vue';
+import SettingsIcon from '@/components/icons/MenuSettingsIcon.vue';
+import LinkIcon from '@/components/icons/LinkIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
-import SidebarContextMenu from './SidebarContextMenu.vue';
+import SidebarContextMenu from '@/components/menus/ActionMenu.vue';
 import SidebarSprintProgress from './SidebarSprintProgress.vue';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { useUserStore } from '@/stores/user-store';
@@ -89,6 +96,7 @@ import { checkPermissionByWs } from '@/utils/permissions';
 defineProps<{ compact?: boolean }>();
 const emit = defineEmits<{ navigate: [] }>();
 const { t, locale } = useI18n();
+const route = useRoute();
 const { currentWorkspaceSlug, workspaceSummary } =
   storeToRefs(useWorkspaceStore());
 const { workspaceRoleName } = storeToRefs(useUserStore());
@@ -106,6 +114,21 @@ const sprints = computed<DtoSprintLight[]>(() => {
       : [entry as DtoSprintLight],
   );
 });
+const activeSprintParam = computed(() => {
+  const { workspace, sprint } = route.params;
+  if (
+    route.name !== 'sprint' ||
+    workspace !== workspaceSlug.value ||
+    typeof sprint !== 'string'
+  ) return;
+
+  return sprint;
+});
+
+function isActiveSprint({ id, sequence_id }: DtoSprintLight) {
+  const active = activeSprintParam.value;
+  return !!active && (active === id || active === String(sequence_id ?? ''));
+}
 
 function sprintMenuItems(sprint: DtoSprintLight) {
   return [

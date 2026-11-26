@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getStringParam } from '@/utils/object';
+import { applyLoadedProject } from './guards/load-project.guard';
+import { startRouteLoad } from './guards/route-load';
 import {
   loadUserDataGuard,
   loadWorkspaceGuard,
@@ -36,7 +38,6 @@ const router = createRouter({
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
-          beforeEnter: loadWorkspaceGuard,
         },
         {
           path: ':workspace/profile',
@@ -45,7 +46,6 @@ const router = createRouter({
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
-          beforeEnter: loadWorkspaceGuard,
         },
         // TODO: стенд для теста редактора, убрать после переноса страницы AIDOC
         {
@@ -53,7 +53,14 @@ const router = createRouter({
           name: 'editor-playground',
           component: () =>
             import('@/modules/editor/pages/EditorPlaygroundPage.vue'),
-          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/projects',
+          name: 'workspace-projects',
+          component: () => import('@/pages/ProjectsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
         },
         {
           path: ':workspace/projects/:project',
@@ -62,6 +69,15 @@ const router = createRouter({
           props: (route) => ({
             workspaceSlug: getStringParam(route.params.workspace),
             projectId: getStringParam(route.params.project),
+          }),
+        },
+        {
+          path: ':workspace/sprints/:sprint',
+          name: 'sprint',
+          component: () => import('@/pages/SprintPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+            sprintId: getStringParam(route.params.sprint),
           }),
         },
       ],
@@ -88,7 +104,10 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
+router.beforeResolve(loadWorkspaceGuard);
 router.beforeResolve(resolveProjectGuard);
+router.afterEach(applyLoadedProject);
 
 export default router;

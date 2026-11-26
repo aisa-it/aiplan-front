@@ -9,11 +9,7 @@
           class="flex min-h-8 items-center gap-1.5 rounded-lg whitespace-nowrap enabled:cursor-pointer enabled:hover:text-primary"
         >
           <CalendarIcon class="shrink-0" />
-          <span>{{
-            issue.target_date
-              ? formatDateTime(issue.target_date)
-              : 'Не установлен'
-          }}</span>
+          <span>{{ dateLabel }}</span>
           <v-progress-circular
             v-if="isSaving"
             indeterminate
@@ -35,14 +31,24 @@
 <script setup lang="ts">
 import CalendarIcon from '@/components/icons/CalendarIcon.vue';
 import { formatDateTime } from '@/utils/time';
-import { defineAsyncComponent, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useIssueFieldEditor } from '../../composables/useIssueFieldEditor';
 const TargetDatePicker = defineAsyncComponent(
   () => import('./TargetDatePicker.vue'),
 );
 
-const props = defineProps<{ issue: DtoIssueWithCount }>();
+const props = defineProps<{ issue: DtoIssueWithCount; compact?: boolean }>();
+const { t } = useI18n();
+const dateLabel = computed(() => {
+  const date = props.issue.target_date;
+  if (!date) return t(props.compact ? 'issues.board.dueDate' : 'issues.noDueDate');
+
+  return props.compact
+    ? date.split('T')[0].split('-').reverse().join('.')
+    : formatDateTime(date);
+});
 const isOpen = ref(false);
 const { canEdit, isSaving, save } = useIssueFieldEditor(
   () => props.issue,
