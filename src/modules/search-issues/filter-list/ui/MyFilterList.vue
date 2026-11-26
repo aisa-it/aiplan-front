@@ -3,7 +3,7 @@
     <div class="filters__buttons">
       <q-btn
         no-caps
-        class="primary-btn full-w q-mb-sm"
+        class="primary-btn full-w"
         @click="
           {
             isOpenAddingFilter = true;
@@ -14,7 +14,7 @@
       <q-btn
         v-if="currentFilter"
         no-caps
-        class="secondary-btn full-w"
+        class="secondary-btn full-w q-mt-sm"
         @click="
           () => {
             currentFilter = null;
@@ -26,11 +26,16 @@
       >
     </div>
     <div
-      v-if="!loading && myFilterList.length > 0"
+      v-if="!loading && shownFilters.length > 0"
       class="filters__list scrollable-content"
     >
       <q-list>
-        <q-item v-for="filter in myFilterList" :key="filter.id" clickable>
+        <q-item
+          v-for="filter in shownFilters"
+          :key="filter.id"
+          clickable
+          class="filters__item"
+        >
           <q-item-section class="no-wrap centered-horisontally">
             <q-radio
               dense
@@ -59,7 +64,18 @@
                 }
               "
             />
-            <span class="abbriviated-text">{{ filter?.name }}</span>
+            <span class="abbriviated-text filters__name">{{
+              filter?.name
+            }}</span>
+            <q-btn
+              flat
+              dense
+              :disable="!filter.aql?.trim()"
+              @click="copyAqlLink(filter.aql ?? '')"
+            >
+              <LinkIcon :width="16" :height="16" />
+              <HintTooltip>Скопировать ссылку</HintTooltip>
+            </q-btn>
             <q-btn
               flat
               dense
@@ -95,15 +111,14 @@
         </q-item>
       </q-list>
     </div>
-  </div>
-  <div
-    v-if="loading || (!loading && myFilterList.length == 0)"
-    class="column justify-center"
-    style="height: 90%"
-  >
-    <DefaultLoader v-if="loading" class="self-center" :size="2" unit="em" />
-    <div v-if="!loading && myFilterList.length == 0" class="self-center">
-      <h6>Нет фильтров</h6>
+    <div
+      v-if="loading || (!loading && shownFilters.length == 0)"
+      class="filters__empty column justify-center"
+    >
+      <DefaultLoader v-if="loading" class="self-center" :size="2" unit="em" />
+      <div v-if="!loading && shownFilters.length == 0" class="self-center">
+        <h6>Нет фильтров</h6>
+      </div>
     </div>
   </div>
   <AddFilterDialog
@@ -145,12 +160,13 @@
 
 <script setup lang="ts">
 // core
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // stores
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
 import { useUserStore } from 'src/stores/user-store';
+import { useAqlStore } from 'src/modules/search-issues/aql/stores/aql-store';
 
 // interfaces
 import {
@@ -162,11 +178,15 @@ import {
 import AddFilterDialog from './add-filter/AddFilterDialog.vue';
 import BinIcon from 'src/components/icons/BinIcon.vue';
 import EditIcon from 'src/components/icons/EditIcon.vue';
+import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import DefaultLoader from 'components/loaders/DefaultLoader.vue';
 import ConfirmDeleteFilterDialog from 'src/modules/search-issues/filter-list/ui/ConfirmDeleteFilterDialog.vue';
 
 //services
 import { getMyFilters, getFilterById } from '../../services/api';
+import { AqlFilter } from 'src/modules/search-issues/aql/services/api';
+import { useCopyAqlLink } from 'src/modules/search-issues/aql/utils/copyLink';
+import { hasOldConditions } from '../utils/conditions';
 
 const emits = defineEmits<{
   'update-filter': [value?: TypesIssuesListFilters];
@@ -178,6 +198,15 @@ const userStore = useUserStore();
 
 // store to refs
 const { myFilterList } = storeToRefs(filtersStore);
+
+// фильтр без старых условий сохранён запросом AQL: штатному поиску он пуст
+const shownFilters = computed(() =>
+  (myFilterList.value as AqlFilter[]).filter((filter) =>
+    hasOldConditions(filter.filter),
+  ),
+);
+
+const copyAqlLink = useCopyAqlLink();
 
 // loader
 const loading = ref(false);
@@ -198,7 +227,21 @@ const getUserFilters = async () => {
 
 onMounted(async () => {
   if (!!filtersStore.filterIdFromRoute) {
-    filterToEdit.value = await getFilterById(filtersStore.filterIdFromRoute);
+    const filter: AqlFilter = await getFilterById(
+      filtersStore.filterIdFromRoute,
+    );
+
+    // ссылка на фильтр, сохранённый запросом: его открывает режим AQL
+    if (!hasOldConditions(filter.filter) && filter.aql?.trim()) {
+      // список смонтирован не в одном месте: запрос отдаёт первый
+      if (filtersStore.filterIdFromRoute) {
+        filtersStore.setFilterId(null);
+        useAqlStore().setQueryFromRoute(filter.aql);
+      }
+      return;
+    }
+
+    filterToEdit.value = filter;
     isOpenAddingFilter.value = true;
   }
 });
@@ -218,19 +261,32 @@ onMounted(async () => {
   top: 0;
   left: 0;
   z-index: 10;
-  padding: 10px 10px 16px 10px;
+  padding: 10px 10px 8px 10px;
   background-color: $bg-color;
   display: flex;
   flex-direction: column;
 }
 
+// заглушка занимает остаток меню: отдельным блоком она добавляла ему прокрутку
+.filters__empty {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .filters__list {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 0 10px 10px 10px;
+  padding: 0 2px 6px 2px;
 }
 
-:deep(.q-item:nth-child(1)) {
-  padding-top: 0;
+// размеры строки те же, что у списка фильтров в режиме AQL
+.filters__item {
+  min-height: 0;
+  padding: 2px 4px 2px 8px;
+  border-radius: 8px;
+}
+
+.filters__name {
+  font-size: 13px;
 }
 </style>

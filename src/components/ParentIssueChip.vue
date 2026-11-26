@@ -4,7 +4,7 @@
     flat
     no-caps
     v-if="!!row.parent && !!row?.parent_detail?.sequence_id"
-    :to="`/${$route.params.workspace}/projects/${row.project_detail?.identifier ?? $route.params.project}/issues/${row?.parent_detail?.sequence_id}`"
+    :to="`/${row.workspace_detail?.slug ?? $route.params.workspace}/projects/${row.project_detail?.identifier ?? $route.params.project}/issues/${row?.parent_detail?.sequence_id}`"
     :target="target ?? '_self'"
     class="base-chip base-chip--bordered"
     :style="'padding: 1px 6px'"

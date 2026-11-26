@@ -58,38 +58,49 @@
 
     <template v-slot:body-cell-name="props">
       <q-td :props="props">
-        <div
-          style="
-            text-overflow: ellipsis;
-            overflow: hidden;
-            font-size: 0.813rem;
-            line-height: 1.25rem;
-          "
-        >
-          <span v-html="parseBoldText(props.value)" />
-          <HintTooltip>
-            <span v-html="parseBoldText(props.value)"
-          /></HintTooltip>
-        </div>
-        <div v-if="showDescHighlighted(props.row.desc_highlighted)">
-          <span
-            class="desc-highlighted"
-            v-html="
-              getDescHighlightedText(
-                parseBoldText(props.row.desc_highlighted),
-                undefined,
-                true,
-              )
-            "
-          />
-          <HintTooltip>
-            <span
-              v-html="
-                getDescHighlightedText(
-                  parseBoldText(props.row.desc_highlighted),
-                )
+        <div class="name-cell">
+          <div class="name-cell__text">
+            <div
+              style="
+                text-overflow: ellipsis;
+                overflow: hidden;
+                font-size: 0.813rem;
+                line-height: 1.25rem;
               "
-          /></HintTooltip>
+            >
+              <span v-html="parseBoldText(props.value)" />
+              <HintTooltip>
+                <span v-html="parseBoldText(props.value)"
+              /></HintTooltip>
+            </div>
+            <div v-if="showDescHighlighted(props.row.desc_highlighted)">
+              <span
+                class="desc-highlighted"
+                v-html="
+                  getDescHighlightedText(
+                    parseBoldText(props.row.desc_highlighted),
+                    undefined,
+                    true,
+                  )
+                "
+              />
+              <HintTooltip>
+                <span
+                  v-html="
+                    getDescHighlightedText(
+                      parseBoldText(props.row.desc_highlighted),
+                    )
+                  "
+              /></HintTooltip>
+            </div>
+          </div>
+          <!-- клик по бейджу открывает родителя, а не задачу строки -->
+          <ParentIssueChip
+            :row="props.row"
+            target="_blank"
+            class="name-cell__parent"
+            @click.stop
+          />
         </div>
       </q-td>
     </template>
@@ -196,6 +207,7 @@ import { Screen } from 'quasar';
 
 import AvatarImage from 'src/components/AvatarImage.vue';
 import ColumnResizer from 'src/components/ColumnResizer.vue';
+import ParentIssueChip from 'src/components/ParentIssueChip.vue';
 import { useColumnResize } from 'src/composables/useColumnResize';
 import PrioritySingleIcon from 'src/components/icons/PrioritySingleIcon.vue';
 import PaginationDefault from 'src/components/pagination/PaginationDefault.vue';
@@ -385,6 +397,21 @@ const getWordForm = (count: number) => {
 
 :deep(.table-scroll-off.search-filters-table) {
   max-height: none;
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  &__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__parent {
+    flex-shrink: 0;
+  }
 }
 
 .desc-highlighted {

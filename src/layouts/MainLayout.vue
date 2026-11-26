@@ -51,6 +51,7 @@ import { useUserStore } from 'src/stores/user-store';
 import { useUtilsStore } from 'src/stores/utils-store';
 import { useLoaderStore } from 'src/stores/loader-store';
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useAqlStore } from 'src/modules/search-issues/aql/stores/aql-store';
 
 import { useSingleIssueStore } from 'src/stores/single-issue-store';
 
@@ -79,6 +80,7 @@ const utilsStore = useUtilsStore();
 const loaderStore = useLoaderStore();
 const singleIssueStore = useSingleIssueStore();
 const filterStore = useFiltersStore();
+const aqlStore = useAqlStore();
 
 // store to refs
 const { currentIssueID } = storeToRefs(singleIssueStore);
@@ -141,6 +143,18 @@ onBeforeMount(async () => {
 
     router.replace(
       `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug}`,
+    );
+    return;
+  }
+
+  if (route.name === 'aql-search') {
+    // ссылка без запроса тоже открывает поиск в режиме AQL
+    const aql = route.query.aql;
+    aqlStore.setQueryFromRoute((Array.isArray(aql) ? aql[0] : aql) ?? '');
+
+    // пользователь ещё не загружен — корневой роут сам выберет пространство
+    router.replace(
+      `/${user.value?.last_workspace_slug || userWorkspaces.value[0]?.slug || ''}`,
     );
     return;
   }

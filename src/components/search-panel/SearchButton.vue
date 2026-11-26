@@ -21,8 +21,10 @@ import SearchByFiltersDialog from 'src/modules/search-issues/ui/SearchByFiltersD
 import SearchIcon from 'src/components/icons/SearchIcon.vue';
 
 import { useFiltersStore } from 'src/modules/search-issues/stores/filters-store';
+import { useAqlStore } from 'src/modules/search-issues/aql/stores/aql-store';
 
 const filterStore = useFiltersStore();
+const aqlStore = useAqlStore();
 
 const props = defineProps<{
   isMobile?: boolean;
@@ -34,7 +36,7 @@ const router = useRouter();
 
 const removeHook = router.afterEach(() => {
   nextTick(() => {
-    if (!!filterStore.filterIdFromRoute) {
+    if (!!filterStore.filterIdFromRoute || aqlStore.queryFromRoute !== null) {
       isSearchOpened.value = true;
     }
   });

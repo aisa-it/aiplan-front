@@ -1,11 +1,11 @@
 <template>
   <p class="q-mb-sm q-mt-sm">Выберите из списка или создайте новый</p>
   <q-list
-    v-if="!loading && (myFilterList.length !== 0 || filterList.length !== 0)"
+    v-if="!loading && shownFilters.length !== 0"
     style="height: 70vh !important; overflow-y: scroll"
     class="scrollable-content"
   >
-    <q-item v-for="filter in filterList" :key="filter.id" clickable>
+    <q-item v-for="filter in shownFilters" :key="filter.id" clickable>
       <q-item-section class="no-wrap centered-horisontally">
         <q-radio
           v-model="filterToSave"
@@ -36,11 +36,7 @@
           <AddIcon :width="16" :height="16" />
         </q-btn>
         <q-btn
-          v-if="
-            myFilterList.find(
-              (el: DtoSearchFilterFull) => el.id === filter?.id,
-            ) && filter.author_id !== user.id
-          "
+          v-if="isForeignMine(filter)"
           flat
           dense
           @click="handleDeleteFromMyFilters(filter?.id)"
@@ -52,15 +48,12 @@
     </q-item>
   </q-list>
   <div
-    v-if="loading || (!loading && !myFilterList.length && !filterList.length)"
+    v-if="loading || (!loading && !shownFilters.length)"
     class="column self-center justify-center"
     style="height: 90%"
   >
     <DefaultLoader v-if="loading" :size="2" unit="em" class="self-center" />
-    <div
-      v-if="!loading && !myFilterList.length && !filterList.length"
-      class="self-center"
-    >
+    <div v-if="!loading && !shownFilters.length" class="self-center">
       <h6>Нет фильтров</h6>
     </div>
   </div>
@@ -69,7 +62,7 @@
 <script setup lang="ts">
 // core
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 // stores
 import { useUserStore } from 'src/stores/user-store';
@@ -88,6 +81,12 @@ import {
   getMyFilters,
 } from 'src/modules/search-issues/services/api';
 import { addMyFilter, deleteMyFilter } from '../../services/api';
+import { hasOldConditions } from '../../utils/conditions';
+
+const props = defineProps<{
+  // окно фильтра AQL: в списке и фильтры без условий штатного поиска
+  aql?: boolean;
+}>();
 
 const emits = defineEmits<{
   setFilter: [filter: DtoSearchFilterLight];
@@ -104,6 +103,12 @@ const { myFilterList } = storeToRefs(filterStore);
 const loading = ref(false);
 const filterToSave = ref();
 
+const shownFilters = computed(() =>
+  props.aql
+    ? filterList.value
+    : filterList.value.filter((filter) => hasOldConditions(filter.filter)),
+);
+
 const refresh = async () => {
   loading.value = true;
 
@@ -111,6 +116,13 @@ const refresh = async () => {
     (filterStore.myFilterList = await getMyFilters()),
     (filterStore.filterList = await getFilters()),
   ]).then(() => (loading.value = false));
+};
+
+// Чужой фильтр из моего списка: только его можно убрать из списка. Автора знает
+// мой список, в общем списке фильтры приходят без author_id
+const isForeignMine = (filter: DtoSearchFilterLight) => {
+  const mine = myFilterList.value.find((el) => el.id === filter.id);
+  return !!mine && mine.author_id !== user.value?.id;
 };
 
 const setFilter = (filter?: DtoSearchFilterLight) => {

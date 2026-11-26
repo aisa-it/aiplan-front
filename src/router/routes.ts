@@ -182,6 +182,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('src/layouts/MainLayout.vue'),
   },
   {
+    // ссылка на поиск по запросу AQL: /s/?aql=...
+    path: '/s/',
+    name: 'aql-search',
+    component: () => import('src/layouts/MainLayout.vue'),
+  },
+  {
     path: '/signin',
     component: () => import('components/LoginPanel.vue'),
   },
