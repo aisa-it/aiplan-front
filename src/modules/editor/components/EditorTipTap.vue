@@ -23,6 +23,7 @@
           :class="{
             'editor-tiptap--editable': isEditable,
             'editor-tiptap--dark': theme.current.value.dark,
+            'editor-tiptap--plain': plain,
           }"
         >
           <EditorTipTapToolbar

@@ -17,6 +17,7 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
   const meInWorkspace = ref<DtoWorkspaceMemberWithOwner>({});
   const isLoading = ref(false);
   let latestSummaryRequest = 0;
+  let latestProjectsRequest = 0;
 
   const workspaceLogo = computed<string | undefined>(
     () => workspaceInfo.value?.logo ?? undefined,
@@ -28,17 +29,24 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
 
   async function getWorkspaceInfo(
     workspaceSlug: string,
+    signal?: AbortSignal,
   ): Promise<DtoWorkspace | void> {
     if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    const workspace = await WorkspaceService.getWorkspace(workspaceSlug, signal);
+    signal?.throwIfAborted();
+    const membership = await WorkspaceService.getMeInWorkspace(workspaceSlug, signal);
+    signal?.throwIfAborted();
 
     if (currentWorkspaceSlug.value !== workspaceSlug) {
+      latestProjectsRequest++;
       workspaceProjects.value = [];
       workspaceSummary.value = null;
     }
 
-    workspaceInfo.value = await WorkspaceService.getWorkspace(workspaceSlug);
-    currentWorkspaceSlug.value = workspaceInfo.value.slug ?? '';
-    await getMeInWorkspace(workspaceSlug);
+    workspaceInfo.value = workspace;
+    currentWorkspaceSlug.value = workspace.slug ?? '';
+    meInWorkspace.value = membership;
+    return workspace;
   }
 
   async function getMeInWorkspace(
@@ -56,10 +64,16 @@ export const useWorkspaceStore = defineStore('workspace-store', () => {
       search_query?: string;
     },
   ): Promise<DtoProjectLight[] | void> {
-    if (!workspaceSlug || workspaceSlug === 'undefined') return;
+    if (!workspaceSlug || workspaceSlug !== currentWorkspaceSlug.value) return;
 
+    const request = ++latestProjectsRequest;
     const projects = await ProjectService.getProjects(workspaceSlug, filters);
-    if (currentWorkspaceSlug.value === workspaceSlug) workspaceProjects.value = projects;
+    if (
+      request === latestProjectsRequest &&
+      currentWorkspaceSlug.value === workspaceSlug
+    ) {
+      workspaceProjects.value = projects;
+    }
     return projects;
   }
 

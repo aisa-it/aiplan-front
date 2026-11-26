@@ -1,10 +1,12 @@
 <template>
   <div
-    class="issue-table-columns issue-table-wrapper flex h-full min-w-0 flex-col"
+    class="issue-table-columns issue-table-wrapper flex min-w-0 flex-col"
+    :class="group ? 'issue-table-wrapper--grouped' : 'h-full'"
   >
     <div
       ref="tableRoot"
-      class="issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+      :data-gantt-table="plainGantt ? '' : undefined"
+      :class="group ? 'min-w-0' : 'issue-table-vertical-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto'"
     >
       <IssueTableSkeleton
         v-if="showSkeleton"
@@ -17,9 +19,11 @@
         :items="items"
         :items-length="total"
         :items-per-page="query.rowsPerPage"
-        :page="query.page"
+        :page="group?.page ?? query.page"
         :sort-by="sortBy"
         :loading="isLoading"
+        :fixed-header="plainGantt"
+        :row-props="ganttRows"
         item-value="id"
         no-data-text="Нет задач"
         must-sort
@@ -73,7 +77,16 @@
           <LabelsColumn :labels="item.label_details" />
         </template>
         <template #item.sprint="{ item }">
-          <SprintColumn :sprints="item.sprints" />
+          <SprintColumn
+            :sprints="item.sprints"
+            :editable="canEditField(item, 'sprints')"
+            @edit="emit('manageSprints', item)"
+          />
+        </template>
+        <template #item.project="{ item }">
+          <span class="block truncate" :title="item.project_detail?.name">
+            {{ item.project_detail?.name }}
+          </span>
         </template>
         <template
           v-for="resizableColumn in resizableColumns"
@@ -113,8 +126,12 @@
       </v-data-table-server>
     </div>
 
-    <div class="z-10 shrink-0 bg-[rgb(var(--v-theme-background))]">
+    <div
+      class="z-10 shrink-0 bg-[rgb(var(--v-theme-background))]"
+      :class="{ 'issue-table-footer--sticky': group }"
+    >
       <div
+        v-show="!group || hasOverflow"
         ref="scrollbar"
         class="issue-table-scrollbar overflow-x-auto overflow-y-hidden"
         @scroll="syncViewport"
@@ -123,7 +140,7 @@
       </div>
 
       <PaginationDefault
-        :selected-page="query.page"
+        :selected-page="group?.page ?? query.page"
         :rows-per-page="query.rowsPerPage"
         :rows-per-page-options="[10, 25, 50, 100]"
         :rows-number="total"
@@ -135,9 +152,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { ganttLayoutKey } from './gantt/model/gantt-rows';
 import { useI18n } from 'vue-i18n';
-import type { DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoIssueWithCount, DtoProjectPropertyTemplate } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 
 import PaginationDefault from '@/components/pagination/PaginationDefault.vue';
 import DocumentIcon from '@/components/icons/DocumentIcon.vue';
@@ -147,10 +165,11 @@ import {
   ISSUE_TABLE_COLUMNS,
   type IssueTableColumn,
 } from '../constants/issue-table-columns';
-import { isResizableIssueColumn, useIssueColumnResize } from '../composables/useIssueColumnResize';
+import { isResizableIssueColumn, type useIssueColumnResize } from '../composables/useIssueColumnResize';
 import { useSyncedHorizontalScroll } from '../composables/useSyncedHorizontalScroll';
 import { useIssueListControllerContext } from '../model/issue-list.context';
-import type { IssueColumnKey, ProjectIssueListScope } from '../model/issue-list.types';
+import type { IssueColumnKey } from '../model/issue-list.types';
+import type { IssueGroup } from '../model/issue-groups';
 import '../styles/issue-table-columns.css';
 import SequenceIdColumn from './issue-table/SequenceIdColumn.vue';
 import NameColumn from './issue-table/NameColumn.vue';
@@ -168,29 +187,40 @@ import IssueColumnResizer from './issue-table/IssueColumnResizer.vue';
 import IssueTableSkeleton from './IssueTableSkeleton.vue';
 
 const props = defineProps<{
-  scope: ProjectIssueListScope;
+  columnResize: ReturnType<typeof useIssueColumnResize>;
   hideParent?: boolean;
   propertyTemplates?: DtoProjectPropertyTemplate[];
+  group?: IssueGroup;
+  initialScrollLeft?: number;
+}>();
+const emit = defineEmits<{
+  groupPage: [page: number];
+  horizontalScroll: [scrollLeft: number];
+  manageSprints: [issue: DtoIssueWithCount];
 }>();
 
 const countColumns = ISSUE_COUNT_COLUMN_KEYS;
 const { t } = useI18n();
 
 const {
-  items,
-  total,
-  isLoading,
+  items: listItems,
+  total: listTotal,
+  isLoading: listLoading,
   query,
   columns,
   setPage,
   setRowsPerPage,
   setSort,
+  canEditField,
 } = useIssueListControllerContext();
 
-const showSkeleton = computed(() => isLoading.value && !items.value.length);
-const { widthFor, startResize, resetWidth } = useIssueColumnResize(
-  () => `project:${props.scope.workspaceSlug}:${props.scope.projectId}`,
-);
+const items = computed(() => props.group?.items ?? listItems.value);
+const ganttRows = inject(ganttLayoutKey, undefined)?.rowProps;
+const plainGantt = computed(() => Boolean(ganttRows) && !props.group);
+const total = computed(() => props.group?.total ?? listTotal.value);
+const isLoading = computed(() => props.group?.loading ?? listLoading.value);
+const showSkeleton = computed(() => !props.group && isLoading.value && !items.value.length);
+const { widthFor, startResize, resetWidth } = props.columnResize;
 
 const visiblePropertyTemplates = computed(() =>
   (props.propertyTemplates ?? []).filter((template) =>
@@ -246,9 +276,13 @@ const sortBy = computed(() => [
 
 const tableRoot = ref<HTMLElement | null>(null);
 const scrollbar = ref<HTMLElement | null>(null);
-const { contentWidth, syncViewport } = useSyncedHorizontalScroll(
+const { contentWidth, hasOverflow, syncViewport } = useSyncedHorizontalScroll(
   tableRoot,
   scrollbar,
+  {
+    initialScrollLeft: props.initialScrollLeft,
+    onScroll: props.group ? (scrollLeft) => emit('horizontalScroll', scrollLeft) : undefined,
+  },
 );
 
 const handleSort = (
@@ -269,13 +303,36 @@ const handlePaginationRequest = (options: {
     return;
   }
 
-  setPage(options.page);
+  if (props.group) emit('groupPage', options.page);
+  else setPage(options.page);
 };
 </script>
 
 <style scoped>
 .issue-table-wrapper {
+  --issue-table-header-height: 48px;
   position: relative;
+}
+
+[data-gantt-table] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: calc(var(--gantt-header-height) - var(--issue-table-header-height));
+}
+
+[data-gantt-table] :deep(.issue-table) {
+  flex: 1;
+  min-height: 0;
+}
+
+[data-gantt-table] :deep(.issue-table thead th) {
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.issue-table-footer--sticky {
+  position: sticky;
+  bottom: 0;
 }
 
 :deep(.issue-table .v-table__wrapper) {
@@ -311,7 +368,7 @@ const handlePaginationRequest = (options: {
 }
 
 :deep(.issue-table .v-data-table__th) {
-  height: 48px;
+  height: var(--issue-table-header-height);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -354,7 +411,8 @@ const handlePaginationRequest = (options: {
   background: rgba(var(--v-theme-on-background), 0.5);
 }
 
-.issue-table-wrapper:hover .issue-table-scrollbar {
+.issue-table-wrapper:hover .issue-table-scrollbar,
+.issue-table-wrapper--grouped .issue-table-scrollbar {
   opacity: 1;
 }
 

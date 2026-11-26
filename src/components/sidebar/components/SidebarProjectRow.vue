@@ -11,6 +11,7 @@
         name: 'project',
         params: { workspace: workspaceSlug, project: project.identifier },
       }"
+      :aria-current="active ? 'page' : undefined"
       @click="emit('navigate')"
       ><SidebarProjectIdentity :project="project" :compact="compact"
     /></RouterLink>
@@ -71,7 +72,7 @@ import type { Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import StarIcon from '@/components/icons/StarIcon.vue';
-import SidebarContextMenu from './SidebarContextMenu.vue';
+import SidebarContextMenu from '@/components/menus/ActionMenu.vue';
 import SidebarProjectIdentity from './SidebarProjectIdentity.vue';
 
 defineProps<{

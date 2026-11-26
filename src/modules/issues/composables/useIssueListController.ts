@@ -8,6 +8,7 @@ import type {
 import type {
   IssueColumnKey,
   EditableIssueField,
+  IssuePermissionField,
   IssueFieldPatch,
   IssueListActions,
   IssueListInitialState,
@@ -20,6 +21,10 @@ export const useIssueListController = (
   source: IssueListSource,
   initialState: IssueListInitialState,
   actions?: IssueListActions,
+  grouping?: {
+    isActive: () => boolean;
+    refreshAfterUpdate: (before: DtoIssueWithCount, after: DtoIssueWithCount) => Promise<void>;
+  },
 ) => {
   const items = shallowRef<DtoIssueWithCount[]>([]);
   const total = ref(0);
@@ -30,13 +35,20 @@ export const useIssueListController = (
 
   let requestController: AbortController | undefined;
   let requestNumber = 0;
+  let disposed = false;
   const updateViewSettings = (settings: TypesViewProps) => {
     if (!actions) return;
     void actions.updateViewSettings(settings).catch(() => {});
   };
 
   const load = async () => {
+    if (disposed) return;
     requestController?.abort();
+    if (grouping?.isActive()) {
+      requestNumber++;
+      isLoading.value = false;
+      return;
+    }
     const controller = new AbortController();
     requestController = controller;
     const currentRequest = ++requestNumber;
@@ -47,6 +59,13 @@ export const useIssueListController = (
       const result = await source.load(filters, query, controller.signal);
 
       if (currentRequest !== requestNumber) return;
+
+      const lastPage = Math.max(1, Math.ceil(result.total / query.rowsPerPage));
+      if (query.page > lastPage) {
+        query.page = lastPage;
+        await load();
+        return;
+      }
 
       items.value = result.items;
       total.value = result.total;
@@ -62,7 +81,7 @@ export const useIssueListController = (
     void load();
   };
 
-  const applyViewSettings = (settings: TypesViewProps | undefined) => {
+  const applyViewSettings = (settings: TypesViewProps | undefined, reload = true) => {
     const next = createIssueListInitialState(settings);
     const changed =
       Object.keys(next.query).some(
@@ -77,7 +96,7 @@ export const useIssueListController = (
     Object.assign(query, next.query, { page: 1 });
     Object.assign(filters, next.filters);
     columns.splice(0, columns.length, ...next.columns);
-    void load();
+    if (reload) void load();
   };
 
   const setRowsPerPage = (rowsPerPage: number) => {
@@ -108,11 +127,12 @@ export const useIssueListController = (
   };
 
   const dispose = () => {
+    disposed = true;
     requestController?.abort();
     requestNumber++;
   };
 
-  const canEditField = (issue: DtoIssueWithCount, field: EditableIssueField) =>
+  const canEditField = (issue: DtoIssueWithCount, field: IssuePermissionField) =>
     actions?.canEdit(issue, field) ?? false;
 
   const updateIssue = async (
@@ -128,6 +148,13 @@ export const useIssueListController = (
       throw new Error('Issue cannot be edited');
     }
     const updatedIssue = await actions.update(issue, patch);
+    if (disposed) return;
+
+    if (grouping?.isActive()) {
+      toast.success();
+      await grouping.refreshAfterUpdate(issue, { ...issue, ...patch, ...updatedIssue });
+      return;
+    }
     items.value = items.value.map((item) =>
       item.id === issue.id ? { ...item, ...updatedIssue } : item,
     );
@@ -146,6 +173,7 @@ export const useIssueListController = (
     total,
     isLoading,
     query,
+    filters,
     columns,
     load,
     applyViewSettings,

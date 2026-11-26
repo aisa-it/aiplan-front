@@ -20,6 +20,7 @@ export interface EditorTipTapProps {
   enableAnchors?: boolean;
   fullscreen?: boolean;
   readOnlyEditor?: boolean;
+  plain?: boolean;
   editorId?: string;
   canResize?: boolean;
   excludedTabs?: string[];

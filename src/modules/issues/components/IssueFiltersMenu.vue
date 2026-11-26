@@ -70,7 +70,7 @@
       <div class="issue-filters-field">
         <v-select
           :label="t('issues.filters.statusFilter')"
-          :model-value="settings?.filters?.states ?? []"
+          :model-value="selectedStates"
           :items="statuses"
           :loading="optionsLoading"
           :disabled="optionsLoading"
@@ -167,6 +167,7 @@ import type { DtoStateLight, TypesViewProps } from '@aisa-it/aiplan-api-ts/src/d
 import DotListIcon from '@/components/icons/DotListIcon.vue';
 import DotListSelectIcon from '@/components/icons/DotListSelectIcon.vue';
 import type { IssueColumnKey } from '../model/issue-list.types';
+import { normalizeIssueGroupBy } from '../model/issue-groups';
 import type {
   IssueDisplayToggleKey,
   IssueFilterColumnOption,
@@ -181,7 +182,7 @@ import '../styles/issue-filters.css';
 const props = defineProps<{
   settings?: TypesViewProps;
   defaults: TypesViewProps;
-  statuses: DtoStateLight[];
+  statuses: (DtoStateLight & { ids?: string[] })[];
   optionsLoading: boolean;
   columnOptions: IssueFilterColumnOption[];
   viewOptions: IssueViewOption[];
@@ -202,7 +203,7 @@ const selectedView = computed(() =>
   props.viewOptions[0]?.value,
 );
 const selectedGroup = computed(() =>
-  props.groupOptions.find((option) => option.value === props.settings?.filters?.group_by)?.value ??
+  props.groupOptions.find((option) => option.value === normalizeIssueGroupBy(props.settings?.filters?.group_by))?.value ??
   props.groupOptions[0]?.value,
 );
 const selectedColumns = computed<IssueColumnKey[]>(() =>
@@ -212,14 +213,27 @@ const selectedColumns = computed<IssueColumnKey[]>(() =>
       key.startsWith('property:'),
   ),
 );
+const selectedStates = computed(() => {
+  const states = props.settings?.filters?.states ?? [];
+  const groups = props.statuses.filter((option) => option.ids?.length);
+  if (!groups.length) return states;
+  const matched = new Set(groups.flatMap((option) => option.ids ?? []));
+  const selected = new Set(states);
+  return [
+    ...groups.flatMap((option) =>
+      option.id && option.ids?.some((id) => selected.has(id)) ? [option.id] : [],
+    ),
+    ...states.filter((id) => !matched.has(id)),
+  ];
+});
 const hasIndicators = computed(() =>
   Boolean(
     props.settings?.hideSubIssues ||
       props.settings?.showOnlyActive ||
       props.settings?.filters?.states?.length ||
-      (props.settings?.filters?.group_by && props.settings.filters.group_by !== 'none') ||
+      (selectedGroup.value && selectedGroup.value !== 'none') ||
       props.columnOptions.some(
-        (option) => !selectedColumns.value.includes(option.key),
+        (option) => option.key !== 'project' && !selectedColumns.value.includes(option.key),
       ),
   ),
 );
@@ -230,7 +244,15 @@ const setView = (value: string) => {
   if (props.viewOptions.length <= 1) return;
   const option = props.viewOptions.find((item) => item.value === value);
   if (option && option.value !== props.settings?.issueView) {
-    emit('change', { issueView: option.value });
+    const group = normalizeIssueGroupBy(props.settings?.filters?.group_by);
+    const groupOption = props.groupOptions.find((item) => item.value === group);
+    const defaultGroup = props.groupOptions.find((item) => item.value !== 'none');
+    emit('change', {
+      issueView: option.value,
+      ...(option.value === 'kanban' && !groupOption && defaultGroup
+        ? { filters: { group_by: defaultGroup.value } }
+        : {}),
+    });
   }
 };
 const setGroup = (value: string) => {
@@ -246,7 +268,9 @@ const setColumns = (columns: IssueColumnKey[]) => {
   emit('change', { columns_to_show: columns });
 };
 const setStates = (states: string[] | null) => {
-  emit('change', { filters: { states: states ?? [] } });
+  const idsByValue = new Map(props.statuses.map((option) => [option.id, option.ids]));
+  const ids = (states ?? []).flatMap((value) => idsByValue.get(value) ?? [value]);
+  emit('change', { filters: { states: [...new Set(ids)] } });
 };
 const confirmReset = () => {
   resetDialog.value = false;

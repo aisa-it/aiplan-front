@@ -3,11 +3,11 @@ import type {
   DtoIssueWithCount,
   DtoStateLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import { useIssueListControllerContext } from '../model/issue-list.context';
+import { useIssueEditorActions } from '../model/issue-list.context';
 import { useIssueFieldEditor } from './useIssueFieldEditor';
 
 export const useIssueStatusEditor = (getIssue: () => DtoIssueWithCount) => {
-  const controller = useIssueListControllerContext();
+  const actions = useIssueEditorActions();
   const editor = useIssueFieldEditor(getIssue, 'state');
   const items = ref<DtoStateLight[]>([]);
   const isLoading = ref(false);
@@ -22,7 +22,7 @@ export const useIssueStatusEditor = (getIssue: () => DtoIssueWithCount) => {
     error.value = '';
 
     try {
-      const states = await controller.getAvailableStates(getIssue());
+      const states = await actions.getAvailableStates(getIssue());
       if (currentRequest === requestNumber) items.value = states;
     } catch {
       if (currentRequest === requestNumber) {
