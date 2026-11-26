@@ -1,8 +1,8 @@
 import { computed, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { checkPermissionByWs } from '@/utils/permissions';
-import PlusIcon from '../icons/PlusIcon.vue';
-import UnmutedIcon from '../icons/UnmutedIcon.vue';
+import PlusIcon from '@/components/icons/PlusIcon.vue';
+import UnmutedIcon from '@/components/icons/UnmutedIcon.vue';
 import type { SidebarSectionId } from './useSidebarPreferences';
 import type { useSidebarPreferences } from './useSidebarPreferences';
 
