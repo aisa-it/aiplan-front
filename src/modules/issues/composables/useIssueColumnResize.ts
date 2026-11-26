@@ -1,18 +1,20 @@
 import { onBeforeUnmount, ref, watch } from 'vue';
-import type { IssueColumnKey } from '../model/issue-list.types';
 
 const MIN_WIDTH = 60;
 const MAX_WIDTH = 1600;
 const STORAGE_PREFIX = 'issue-table-columns:';
 
-export const isResizableIssueColumn = (key: IssueColumnKey) =>
+export const isResizableIssueColumn = (key: string) =>
   key === 'sequence_id' ||
   key === 'name' ||
   key === 'labels' ||
   key === 'sprint' ||
   key.startsWith('property:');
 
-export const useIssueColumnResize = (contextKey: () => string) => {
+export const useIssueColumnResize = (
+  contextKey: () => string,
+  canResize = isResizableIssueColumn,
+) => {
   const widths = ref<Record<string, number>>({});
 
   const storageKey = () => `${STORAGE_PREFIX}${contextKey()}`;
@@ -47,8 +49,8 @@ export const useIssueColumnResize = (contextKey: () => string) => {
     } catch {}
   };
 
-  const widthFor = (key: IssueColumnKey) => widths.value[key];
-  const resetWidth = (key: IssueColumnKey) => {
+  const widthFor = (key: string) => widths.value[key];
+  const resetWidth = (key: string) => {
     const next = { ...widths.value };
     delete next[key];
     widths.value = next;
@@ -56,7 +58,7 @@ export const useIssueColumnResize = (contextKey: () => string) => {
   };
 
   let active: {
-    key: IssueColumnKey;
+    key: string;
     pointerId: number;
     startX: number;
     lastX: number;
@@ -99,9 +101,9 @@ export const useIssueColumnResize = (contextKey: () => string) => {
     window.removeEventListener('pointerup', stopResize);
     window.removeEventListener('pointercancel', stopResize);
   };
-  const startResize = (event: PointerEvent, key: IssueColumnKey) => {
+  const startResize = (event: PointerEvent, key: string) => {
     const th = (event.target as HTMLElement).closest('th');
-    if (!th || !isResizableIssueColumn(key)) return;
+    if (!th || !canResize(key)) return;
     stopResize();
     const assignees = th.parentElement?.querySelector<HTMLElement>(
       'th[data-column="assignees"]',

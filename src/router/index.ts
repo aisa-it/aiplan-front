@@ -80,6 +80,14 @@ const router = createRouter({
           }),
         },
         {
+          path: ':workspace/sprints',
+          name: 'sprints',
+          component: () => import('@/pages/SprintsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
+        },
+        {
           path: ':workspace/sprints/:sprint',
           name: 'sprint',
           component: () => import('@/pages/SprintPage.vue'),

@@ -1,13 +1,11 @@
 import { Sprint } from '@aisa-it/aiplan-api-ts/src/Sprint';
 import { withInterceptors } from '@/utils/interceptorsWithInstanceClass';
+import { sprintService } from '@/modules/sprints/api/sprint.service';
 
 const sprintApi = new (withInterceptors(Sprint))();
 
 export const issueSprintsService = {
-  async list(workspaceSlug: string, signal: AbortSignal) {
-    const { data } = await sprintApi.getSprintList(workspaceSlug, { signal });
-    return data ?? [];
-  },
+  list: sprintService.list,
 
   async setMembership(
     workspaceSlug: string,

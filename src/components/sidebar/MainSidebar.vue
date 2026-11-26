@@ -224,7 +224,7 @@ function onNavigate() {
 function isActive(id: SidebarSectionId) {
   return id === 'projects'
     ? route.name === 'workspace-projects' || route.path.includes('/projects/')
-    : route.path.includes('/sprints/');
+    : route.name === 'sprint' || route.name === 'sprints';
 }
 </script>
 

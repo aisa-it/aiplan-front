@@ -8,18 +8,26 @@
         :style="{ width: `${segment.percent}%`, backgroundColor: `var(--sprint-progress-${segment.key})` }"
       />
     </div>
-    <span class="truncate"><slot /></span>
+    <span class="truncate"><slot>{{ progressLabel }}</slot></span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { TypesSprintStats } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import { getSprintProgress } from '../model/sprint-progress';
 
 const props = defineProps<{ stats?: TypesSprintStats }>();
+const { t } = useI18n();
+const progress = computed(() => getSprintProgress(props.stats));
+const progressLabel = computed(() => {
+  const { percent, done, total } = progress.value;
+  return `${t('sprints.progress', { percent })}${total ? ` (${done}/${total})` : ''}`;
+});
 const statusKeys = ['cancelled', 'completed', 'in_progress'] as const;
 const segments = computed(() => {
-  const total = props.stats?.all_issues ?? 0;
+  const { total } = progress.value;
   if (!total) return [];
   return statusKeys.map((key) => ({
     key,

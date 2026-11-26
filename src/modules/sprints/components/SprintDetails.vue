@@ -6,9 +6,7 @@
           <h1 class="min-w-0 wrap-break-word text-xl leading-8">
             {{ sprint.name }} {{ dates }}
           </h1>
-          <SprintProgress :stats="sprint.stats" class="w-80 max-w-full">
-            {{ progressLabel }}
-          </SprintProgress>
+          <SprintProgress :stats="sprint.stats" class="w-80 max-w-full" />
         </div>
         <IssueListFilters
           sprint
@@ -85,14 +83,6 @@ const dates = computed(() => {
   const short = (value: string) => `${value.slice(8, 10)}.${value.slice(5, 7)}`;
   return `(${short(start_date)} – ${short(end_date)})`;
 });
-const progressLabel = computed(() => {
-  const stats = sprint.value?.stats;
-  const total = stats?.all_issues ?? 0;
-  const done = (stats?.completed ?? 0) + (stats?.cancelled ?? 0);
-  const percent = total ? Math.round((done / total) * 100) : 0;
-  return `${t('sprints.progress', { percent })}${total ? ` (${done}/${total})` : ''}`;
-});
-
 function saveSettings(patch: TypesViewProps, replace = false) {
   void saveView(patch, { replace }).catch(() => {});
 }

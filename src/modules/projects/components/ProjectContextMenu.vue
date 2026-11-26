@@ -9,9 +9,9 @@ import { useRouter } from 'vue-router';
 import type { DtoProjectLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import CursorActionMenu from '@/components/menus/CursorActionMenu.vue';
 import SettingsIcon from '@/components/icons/MenuSettingsIcon.vue';
-import CopyNameIcon from '../icons/CopyNameIcon.vue';
-import OpenNewTabIcon from '../icons/OpenNewTabIcon.vue';
-import OpenNewWindowIcon from '../icons/OpenNewWindowIcon.vue';
+import CopyNameIcon from '@/components/icons/CopyNameIcon.vue';
+import OpenNewTabIcon from '@/components/icons/OpenNewTabIcon.vue';
+import OpenNewWindowIcon from '@/components/icons/OpenNewWindowIcon.vue';
 import { toast } from '@/modules/toast';
 import { getProjectRoute } from '../model/project-routes';
 
@@ -47,17 +47,17 @@ const items = computed(() => {
         ]
       : []),
     {
-      label: t('projects.openNewTab'),
+      label: t('common.actions.openNewTab'),
       icon: OpenNewTabIcon,
       onClick: () => window.open(href, '_blank', 'noopener'),
     },
     {
-      label: t('projects.openNewWindow'),
+      label: t('common.actions.openNewWindow'),
       icon: OpenNewWindowIcon,
       onClick: () => window.open(href, '_blank', 'popup,noopener'),
     },
     {
-      label: t('projects.copyName'),
+      label: t('common.actions.copyName'),
       icon: CopyNameIcon,
       onClick: async () => {
         try {

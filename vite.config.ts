@@ -38,10 +38,12 @@ export default defineConfig(({ mode }) => {
       },
     },
     optimizeDeps: {
-      // Vuetify auto-imports these after scanning, during the first issue-list navigation.
+      // Vuetify auto-imports these after scanning, on the first visit to the list pages.
       include: [
         'vuetify/components/VDataTable',
+        'vuetify/components/VForm',
         'vuetify/components/VPagination',
+        'vuetify/components/VProgressLinear',
         'vuetify/components/VSwitch',
         'vuetify/components/transitions',
       ],
