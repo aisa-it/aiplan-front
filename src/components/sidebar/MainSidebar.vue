@@ -52,8 +52,8 @@
             :active="isActive(section)"
             :project-memberships="projectMemberships"
             :can-create-project="canCreateProject"
-            :project-create-items="projectCreateItems"
             @navigate="onNavigate"
+            @create-project="openProjectDialog"
           />
 
           <SidebarExpandedSection
@@ -66,13 +66,14 @@
             :grow="sectionGrow(section)"
             :project-memberships="projectMemberships"
             :can-create-project="canCreateProject"
-            :project-create-items="projectCreateItems"
             :sprint-header-items="sprintHeaderItems"
             @resize="
               startHeightResize($event, section, visibleSections[index - 1])
             "
             @toggle="toggleSection($event, section)"
             @navigate="onNavigate"
+            @create-project="openProjectDialog"
+            @open-notifications="openProjectNotifications"
           />
         </template>
       </div>
@@ -97,6 +98,10 @@
     />
   </v-navigation-drawer>
   <NewProjectDialog v-model="isProjectCreateOpen" :workspace-slug="workspaceSlug" />
+  <ProjectNotificationsDialog
+    v-if="notificationTarget"
+    v-model="notificationTarget"
+  />
 </template>
 
 <script setup lang="ts">
@@ -117,7 +122,9 @@ import {
   useSidebarPreferences,
   type SidebarSectionId,
 } from './composables/useSidebarPreferences';
-import { useSidebarProjectMemberships } from './composables/useSidebarProjectMemberships';
+import { useProjectMemberships } from '@/modules/projects/composables/useProjectMemberships';
+import ProjectNotificationsDialog from '@/modules/projects/components/ProjectNotificationsDialog.vue';
+import type { ProjectNotificationTarget } from '@/modules/projects/model/project-notifications';
 import { useSidebarResize } from './composables/useSidebarResize';
 import { useSidebarSections } from './composables/useSidebarSections';
 import { useSidebarSortable } from './composables/useSidebarSortable';
@@ -142,12 +149,13 @@ const {
   startWidthResize,
   startHeightResize,
 } = useSidebarResize(sidebarWidth, viewportWidth, weights);
-const projectMemberships = useSidebarProjectMemberships(
+const { memberships: projectMemberships } = useProjectMemberships(
   currentWorkspaceSlug,
-  workspaceSummary,
+  computed(() => workspaceSummary.value?.projects ?? []),
 );
 const showToggle = ref(false);
 const isProjectCreateOpen = ref(false);
+const notificationTarget = ref<ProjectNotificationTarget | null>(null);
 const popupOpen = ref<Record<SidebarSectionId, boolean>>({
   projects: false,
   sprints: false,
@@ -176,16 +184,11 @@ const {
   viewportWidth,
   ignoreNextClick,
 );
-const projectCreateItems = computed(() => [
-  { label: t('sidebar.createProject'), onClick: openProjectDialog },
-  { label: t('sidebar.createForm') },
-  { label: t('sidebar.importJira') },
-]);
-
 watch(() => route.fullPath, onNavigate);
 watch(
   currentWorkspaceSlug,
   (slug) => {
+    notificationTarget.value = null;
     if (slug) workspaceStore.getWorkspaceSummary(slug);
   },
   { immediate: true },
@@ -209,6 +212,10 @@ function openProjectDialog() {
   closeMobile();
   isProjectCreateOpen.value = true;
 }
+function openProjectNotifications(target: ProjectNotificationTarget) {
+  closeMobile();
+  notificationTarget.value = target;
+}
 function onNavigate() {
   popupOpen.value.projects = false;
   popupOpen.value.sprints = false;
@@ -216,7 +223,7 @@ function onNavigate() {
 }
 function isActive(id: SidebarSectionId) {
   return id === 'projects'
-    ? route.path.includes('/projects/')
+    ? route.name === 'workspace-projects' || route.path.includes('/projects/')
     : route.name === 'sprint' || route.name === 'sprints';
 }
 </script>

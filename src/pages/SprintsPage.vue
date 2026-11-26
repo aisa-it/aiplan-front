@@ -4,7 +4,7 @@
       <h1 class="min-w-0 wrap-break-word text-2xl font-normal sm:text-[34px]">
         {{ t('sprints.overview.title', { workspace: workspaceSlug }) }}
       </h1>
-      <SidebarContextMenu
+      <ActionMenu
         v-if="canCreateFolder"
         :items="createMenuItems"
         location="bottom end"
@@ -23,7 +23,7 @@
             <PlusIcon />
           </v-btn>
         </template>
-      </SidebarContextMenu>
+      </ActionMenu>
     </header>
 
     <v-progress-linear v-if="loading && !folders.length" indeterminate color="primary" />
@@ -81,7 +81,7 @@
       </v-expand-transition>
     </section>
 
-    <ContextMenu v-model="menuOpen" :target="menuTarget" :items="menuItems" />
+    <CursorActionMenu v-model="menuOpen" :target="menuTarget" :items="menuItems" />
 
     <SprintOverviewDialog
       :key="`move:${workspaceSlug}`"
@@ -109,15 +109,15 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { DtoSprintLight } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import type { SortItem } from 'vuetify/lib/components/VDataTable/composables/sort.js';
-import ContextMenu from '@/components/ContextMenu.vue';
+import ActionMenu from '@/components/menus/ActionMenu.vue';
+import CursorActionMenu from '@/components/menus/CursorActionMenu.vue';
+import CopyNameIcon from '@/components/icons/CopyNameIcon.vue';
 import EditIcon from '@/components/icons/EditIcon.vue';
-import SidebarContextMenu from '@/components/sidebar/components/SidebarContextMenu.vue';
+import SettingsIcon from '@/components/icons/MenuSettingsIcon.vue';
+import OpenNewTabIcon from '@/components/icons/OpenNewTabIcon.vue';
+import OpenNewWindowIcon from '@/components/icons/OpenNewWindowIcon.vue';
+import PlusIcon from '@/components/icons/PlusIcon.vue';
 import BinIcon from '@/components/sidebar/icons/BinIcon.vue';
-import CopyNameIcon from '@/components/sidebar/icons/CopyNameIcon.vue';
-import OpenNewTabIcon from '@/components/sidebar/icons/OpenNewTabIcon.vue';
-import OpenNewWindowIcon from '@/components/sidebar/icons/OpenNewWindowIcon.vue';
-import PlusIcon from '@/components/sidebar/icons/PlusIcon.vue';
-import SettingsIcon from '@/components/sidebar/icons/SettingsIcon.vue';
 import { useIssueColumnResize } from '@/modules/issues/composables/useIssueColumnResize';
 import { sprintDeletedKey, sprintService } from '@/modules/sprints/api/sprint.service';
 import SprintFolderTable from '@/modules/sprints/components/SprintFolderTable.vue';
@@ -233,16 +233,16 @@ const menuItems = computed(() => {
       onClick: () => void copy(new URL(href, location.href).href),
     },
     {
-      label: t('sidebar.openNewTab'),
+      label: t('common.actions.openNewTab'),
       icon: OpenNewTabIcon,
       onClick: () => window.open(href, '_blank', 'noopener'),
     },
     {
-      label: t('sidebar.openNewWindow'),
+      label: t('common.actions.openNewWindow'),
       icon: OpenNewWindowIcon,
       onClick: () => window.open(href, '_blank', 'popup,noopener'),
     },
-    { label: t('sidebar.copyName'), icon: CopyNameIcon, onClick: () => void copy(name) },
+    { label: t('common.actions.copyName'), icon: CopyNameIcon, onClick: () => void copy(name) },
     ...(canDeleteSprint.value ? [{
       label: t('common.actions.delete'),
       icon: BinIcon,

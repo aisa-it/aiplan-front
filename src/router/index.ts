@@ -38,7 +38,6 @@ const router = createRouter({
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
-          beforeEnter: loadWorkspaceGuard,
         },
         {
           path: ':workspace/profile',
@@ -47,7 +46,14 @@ const router = createRouter({
           props: (route) => ({
             slug: getStringParam(route.params.workspace),
           }),
-          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/forms',
+          name: 'forms',
+          component: () => import('@/modules/forms/pages/FormsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
         },
         // TODO: стенд для теста редактора, убрать после переноса страницы AIDOC
         {
@@ -55,7 +61,14 @@ const router = createRouter({
           name: 'editor-playground',
           component: () =>
             import('@/modules/editor/pages/EditorPlaygroundPage.vue'),
-          beforeEnter: loadWorkspaceGuard,
+        },
+        {
+          path: ':workspace/projects',
+          name: 'workspace-projects',
+          component: () => import('@/pages/ProjectsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
         },
         {
           path: ':workspace/projects/:project',
@@ -109,10 +122,8 @@ const router = createRouter({
 
 router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
+router.beforeResolve(loadWorkspaceGuard);
 router.beforeResolve(resolveProjectGuard);
-router.beforeResolve((to) => {
-  if (to.name === 'sprint' || to.name === 'sprints') return loadWorkspaceGuard(to);
-});
 router.afterEach(applyLoadedProject);
 
 export default router;

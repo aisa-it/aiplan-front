@@ -2,7 +2,6 @@
   <svg
     :width="width"
     :height="height"
-    :class="color ? '' : 'default-icon-color'"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -25,6 +24,7 @@ withDefaults(
     height?: number;
   }>(),
   {
+    color: 'currentColor',
     width: 24,
     height: 24,
   },

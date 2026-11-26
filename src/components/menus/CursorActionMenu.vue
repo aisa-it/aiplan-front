@@ -7,18 +7,18 @@
     :close-on-content-click="true"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <div class="context-menu" role="menu">
+    <div class="cursor-action-menu" role="menu">
       <div
         v-for="item in items"
         :key="item.label"
-        class="context-menu-row"
+        class="cursor-action-menu-row"
         :tabindex="item.disabledTooltip ? 0 : undefined"
         :aria-label="item.disabledTooltip ? item.label : undefined"
         @click="item.disabled && $event.stopPropagation()"
       >
         <button
-          class="context-menu-item"
-          :class="{ 'context-menu-item--destructive': item.destructive }"
+          class="cursor-action-menu-item"
+          :class="{ 'cursor-action-menu-item--destructive': item.destructive }"
           :disabled="item.disabled"
           type="button"
           role="menuitem"
@@ -48,7 +48,7 @@ import type { Component } from 'vue';
 
 defineProps<{
   modelValue: boolean;
-  target: HTMLElement | [number, number] | undefined;
+  target?: [number, number];
   items: {
     label: string;
     icon: Component;
@@ -62,7 +62,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 </script>
 
 <style scoped>
-.context-menu {
+.cursor-action-menu {
   min-width: 244px;
   overflow: hidden;
   border: 1px solid rgb(var(--v-theme-border));
@@ -71,7 +71,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
   color: rgb(var(--v-theme-text));
   box-shadow: 0 3px 6px #0005;
 }
-.context-menu-item {
+.cursor-action-menu-item {
   display: flex;
   align-items: center;
   width: 100%;
@@ -82,17 +82,17 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
   text-align: left;
   white-space: nowrap;
 }
-.context-menu-row + .context-menu-row {
+.cursor-action-menu-row + .cursor-action-menu-row {
   border-top: 1px solid rgb(var(--v-theme-border));
 }
-.context-menu-item:enabled:hover,
-.context-menu-item:focus-visible {
+.cursor-action-menu-item:enabled:hover,
+.cursor-action-menu-item:focus-visible {
   background: rgba(var(--v-theme-on-background), 0.05);
 }
-.context-menu-item--destructive {
+.cursor-action-menu-item--destructive {
   color: #cd5c5c;
 }
-.context-menu-item:disabled {
+.cursor-action-menu-item:disabled {
   opacity: 0.5;
   pointer-events: none;
 }

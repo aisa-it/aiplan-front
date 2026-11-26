@@ -91,10 +91,10 @@ import type {
   DtoSprintFolder,
   DtoSprintLight,
 } from '@aisa-it/aiplan-api-ts/src/data-contracts';
-import SettingsIcon from '../icons/SettingsIcon.vue';
-import LinkIcon from '../icons/LinkIcon.vue';
+import SettingsIcon from '@/components/icons/MenuSettingsIcon.vue';
+import LinkIcon from '@/components/icons/LinkIcon.vue';
 import BinIcon from '../icons/BinIcon.vue';
-import SidebarContextMenu from './SidebarContextMenu.vue';
+import SidebarContextMenu from '@/components/menus/ActionMenu.vue';
 import SidebarSprintProgress from './SidebarSprintProgress.vue';
 import type { SprintOverviewAction } from '@/modules/sprints/model/sprint-folders';
 import { useWorkspaceStore } from '@/stores/workspace-store';

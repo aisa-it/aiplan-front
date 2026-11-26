@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Forms } from '@aisa-it/aiplan-api-ts/src/Forms';
 import { Integrations } from '@aisa-it/aiplan-api-ts/src/Integrations';
 import { Projects } from '@aisa-it/aiplan-api-ts/src/Projects';
 import { Users } from '@aisa-it/aiplan-api-ts/src/Users';
@@ -11,6 +12,7 @@ export const usersApi = new (withInterceptors(Users))();
 export const workspaceApi = new (withInterceptors(Workspace))();
 export const projectsApi = new (withInterceptors(Projects))();
 export const integrationsApi = new (withInterceptors(Integrations))();
+export const formsApi = new (withInterceptors(Forms))();
 
 export const httpClient = applyInterceptors(
   axios.create({ baseURL: '', withCredentials: true }),
