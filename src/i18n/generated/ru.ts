@@ -13,9 +13,11 @@ import issuesRu from '@/modules/issues/i18n/ru';
 import paginationRu from '@/components/pagination/i18n/ru';
 import profileRu from '@/modules/profile/i18n/ru';
 import projectActivityRu from '@/modules/activities/renders/entities/project-activity/i18n/ru';
+import projectsRu from '@/modules/projects/i18n/ru';
 import selectWorkspaceRu from '@/components/select-workspace/i18n/ru';
 import sidebarRu from '@/components/sidebar/i18n/ru';
 import sprintActivityRu from '@/modules/activities/renders/entities/sprint-activity/i18n/ru';
+import sprintsRu from '@/modules/sprints/i18n/ru';
 import toastRu from '@/modules/toast/i18n/ru';
 import userStatusRu from '@/components/user-status/i18n/ru';
 import workspaceActivityRu from '@/modules/activities/renders/entities/workspace-activity/i18n/ru';
@@ -35,9 +37,11 @@ export default {
   pagination: paginationRu,
   profile: profileRu,
   projectActivity: projectActivityRu,
+  projects: projectsRu,
   selectWorkspace: selectWorkspaceRu,
   sidebar: sidebarRu,
   sprintActivity: sprintActivityRu,
+  sprints: sprintsRu,
   toast: toastRu,
   userStatus: userStatusRu,
   workspaceActivity: workspaceActivityRu,

@@ -31,6 +31,10 @@
           @update:model-value="updateRowsPerPage"
         />
       </div>
+
+      <span v-if="showRowRange && rowsNumber > 0" class="whitespace-nowrap">
+        {{ rowRange }}
+      </span>
     </div>
   </div>
 </template>
@@ -49,6 +53,7 @@ const props = withDefaults(
     maxPages?: number;
     rowsPerPageOptions?: readonly number[];
     showRowsPerPage?: boolean;
+    showRowRange?: boolean;
     labelRowsPerPage?: string;
   }>(),
   {
@@ -76,6 +81,16 @@ const pagesCount = computed(() =>
     ? Math.max(1, Math.ceil(props.rowsNumber / props.rowsPerPage))
     : 1,
 );
+
+const rowRange = computed(() => {
+  const page = Math.min(props.selectedPage, pagesCount.value);
+  const pageSize = props.rowsPerPage > 0 ? props.rowsPerPage : props.rowsNumber;
+  return t('pagination.rowRange', {
+    start: (page - 1) * pageSize + 1,
+    end: Math.min(page * pageSize, props.rowsNumber),
+    total: props.rowsNumber,
+  });
+});
 
 const updateSelectedPage = (value: number) => {
   emit('update:selectedPage', value);

@@ -21,6 +21,9 @@ export default {
     validation: {
       nameMin: 'Name must contain 1 or more characters',
       identifierMin: 'Identifier must contain {min} or more characters',
+      maxLength: 'Maximum length is {max} characters',
+      nameFormat: 'Name may contain Latin and Cyrillic letters, digits and special characters',
+      identifierFormat: 'Identifier may contain uppercase Latin letters and digits',
     },
   },
   closeConfirm: {

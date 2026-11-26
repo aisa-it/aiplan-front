@@ -2,6 +2,7 @@
   <div
     ref="container"
     class="gantt-view"
+    :class="{ 'gantt-view--sprint': sprintRange }"
     :style="{ gridTemplateColumns: `minmax(0, ${split}fr) 8px minmax(0, ${100 - split}fr) auto` }"
   >
     <div ref="pane" class="gantt-table-pane" @scroll.capture="onTableScroll">
@@ -19,7 +20,13 @@
       @lostpointercapture="stop"
       @keydown="keydown"
     />
-    <GanttTimeline :issues="issues" :rows="rows" @vertical-scroll="scrollTable" />
+    <GanttTimeline
+      :issues="issues"
+      :rows="rows"
+      :sprint="sprint"
+      :sprint-range="sprintRange"
+      @vertical-scroll="scrollTable"
+    />
     <div
       v-show="scrollRange > 0"
       ref="scrollbar"
@@ -35,14 +42,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { DtoIssueWithCount } from '@aisa-it/aiplan-api-ts/src/data-contracts';
+import type { DtoIssueWithCount, DtoSprint } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { useGanttRows } from '../composables/useGanttRows';
 import { useGanttSplitter } from '../composables/useGanttSplitter';
+import { sprintGanttRange } from '../utils/gantt-dates';
 import GanttTimeline from './GanttTimeline.vue';
 
-defineProps<{ issues: readonly DtoIssueWithCount[] }>();
+const props = defineProps<{ issues: readonly DtoIssueWithCount[]; sprint?: DtoSprint }>();
+const sprintRange = computed(() => sprintGanttRange(props.sprint));
 
 const { t } = useI18n();
 const container = ref<HTMLElement | null>(null);
@@ -55,11 +64,17 @@ const { split, start, move, stop, keydown } = useGanttSplitter(container, scroll
 
 <style scoped>
 .gantt-view {
-  --gantt-header-height: 84px;
+  --gantt-scale-height: 84px;
+  --gantt-sprint-row-height: 0px;
+  --gantt-header-height: calc(var(--gantt-scale-height) + var(--gantt-sprint-row-height));
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
+}
+
+.gantt-view--sprint {
+  --gantt-sprint-row-height: 46px;
 }
 
 .gantt-table-pane {
@@ -69,6 +84,7 @@ const { split, start, move, stop, keydown } = useGanttSplitter(container, scroll
 }
 
 .gantt-table-pane :deep([data-gantt-scroll]) {
+  margin-block-start: var(--gantt-sprint-row-height);
   scrollbar-width: none;
 }
 

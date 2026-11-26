@@ -4,12 +4,13 @@ import { httpClient } from '@/services/clients';
 import type {
   IssueListQuery,
   IssueListSource,
-  ProjectIssueListScope,
 } from '../model/issue-list.types';
 import { filtersForIssueGroup } from '../model/issue-groups';
 import type {
   GroupIssueFilters,
   GroupedIssueSource,
+  IssueGroupBy,
+  IssueGroupEntity,
 } from '../model/issue-groups';
 import { readIssueGroups } from './read-issue-groups';
 
@@ -33,11 +34,11 @@ export class IssueGroupRequestError extends Error {
   }
 }
 
-export const createProjectIssueListSource = (
-  scope: ProjectIssueListScope,
+export const createIssueListSource = (
+  endpoint: string,
+  groupFiltersFor: typeof filtersForIssueGroup = filtersForIssueGroup,
+  getGroupKey?: (groupBy: IssueGroupBy, entity: IssueGroupEntity) => string,
 ): IssueListSource & GroupedIssueSource => {
-  const endpoint = `/api/auth/workspaces/${encodeURIComponent(scope.workspaceSlug)}/projects/${encodeURIComponent(scope.projectId)}/issues/search`;
-
   const load = async (
     filters: GroupIssueFilters,
     query: IssueListQuery,
@@ -56,6 +57,7 @@ export const createProjectIssueListSource = (
 
   return {
     load,
+    getGroupKey,
     async streamGroups(filters, query, groupBy, onGroup, signal) {
       const params = new URLSearchParams();
       for (const [key, value] of Object.entries({
@@ -82,7 +84,7 @@ export const createProjectIssueListSource = (
       if (response.body) await readIssueGroups(response.body, onGroup);
     },
     async loadGroup(filters, query, groupBy, entity, signal) {
-      const groupFilters = filtersForIssueGroup(filters, groupBy, entity);
+      const groupFilters = groupFiltersFor(filters, groupBy, entity);
       if (!groupFilters) return { items: [], total: 0 };
       return load(groupFilters, query, signal);
     },

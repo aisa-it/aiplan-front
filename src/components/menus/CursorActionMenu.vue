@@ -7,11 +7,11 @@
     :close-on-content-click="true"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <div class="sidebar-project-context-menu" role="menu">
+    <div class="cursor-action-menu" role="menu">
       <button
         v-for="item in items"
         :key="item.label"
-        class="sidebar-project-context-item"
+        class="cursor-action-menu-item"
         type="button"
         role="menuitem"
         @click="item.onClick?.()"
@@ -40,7 +40,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 </script>
 
 <style scoped>
-.sidebar-project-context-menu {
+.cursor-action-menu {
   min-width: 244px;
   overflow: hidden;
   border: 1px solid rgb(var(--v-theme-border));
@@ -49,7 +49,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
   color: rgb(var(--v-theme-text));
   box-shadow: 0 3px 6px #0005;
 }
-.sidebar-project-context-item {
+.cursor-action-menu-item {
   display: flex;
   align-items: center;
   width: 100%;
@@ -60,11 +60,11 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
   text-align: left;
   white-space: nowrap;
 }
-.sidebar-project-context-item + .sidebar-project-context-item {
+.cursor-action-menu-item + .cursor-action-menu-item {
   border-top: 1px solid rgb(var(--v-theme-border));
 }
-.sidebar-project-context-item:hover,
-.sidebar-project-context-item:focus-visible {
+.cursor-action-menu-item:hover,
+.cursor-action-menu-item:focus-visible {
   background: rgba(var(--v-theme-on-background), 0.05);
 }
 </style>
