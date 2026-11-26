@@ -47,6 +47,14 @@ const router = createRouter({
             slug: getStringParam(route.params.workspace),
           }),
         },
+        {
+          path: ':workspace/forms',
+          name: 'forms',
+          component: () => import('@/modules/forms/pages/FormsPage.vue'),
+          props: (route) => ({
+            workspaceSlug: getStringParam(route.params.workspace),
+          }),
+        },
         // TODO: стенд для теста редактора, убрать после переноса страницы AIDOC
         {
           path: ':workspace/editor-playground',
