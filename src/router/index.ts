@@ -108,9 +108,6 @@ router.beforeEach(startRouteLoad);
 router.beforeEach(globalGuard);
 router.beforeResolve(loadWorkspaceGuard);
 router.beforeResolve(resolveProjectGuard);
-router.beforeResolve((to) => {
-  if (to.name === 'sprint') return loadWorkspaceGuard(to);
-});
 router.afterEach(applyLoadedProject);
 
 export default router;

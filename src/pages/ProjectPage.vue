@@ -83,7 +83,11 @@
           :key="`pinned-${issueListScope.projectId}`"
           :scope="issueListScope"
         />
-        <span v-else-if="tab.value === 'analytics'">{{ t(tab.labelKey) }}</span>
+        <ProjectAnalytics
+          v-else-if="tab.value === 'analytics' && currentTab === 'analytics' && analyticsScope"
+          :key="`${analyticsScope.workspaceSlug}:${analyticsScope.projectId}`"
+          :scope="analyticsScope"
+        />
       </v-tabs-window-item>
     </v-tabs-window>
   </div>
@@ -106,6 +110,7 @@ import {
   ProjectIssueList,
   IssueTableSkeleton,
   PinnedIssueList,
+  ProjectAnalytics,
   type ProjectIssueListScope,
 } from '@/modules/issues';
 import IssueListFilters from '@/modules/issues/components/IssueListFilters.vue';
@@ -177,6 +182,21 @@ const issueListScope = computed<ProjectIssueListScope | undefined>(() => {
     projectId: project.value.id,
   };
 });
+const { currentWorkspaceSlug } = storeToRefs(useWorkspaceStore());
+const analyticsScope = computed(() => {
+  const currentProject = project.value;
+  if (
+    isLoading.value ||
+    currentWorkspaceSlug.value !== props.workspaceSlug ||
+    (currentProject?.id !== props.projectId &&
+      currentProject?.identifier?.toLowerCase() !== props.projectId.toLowerCase())
+  ) {
+    return undefined;
+  }
+
+  return issueListScope.value;
+});
+
 const {
   statuses,
   propertyTemplates,
