@@ -36,6 +36,9 @@
     <div class="row items-center q-mt-sm aql-search-bar__actions">
       <div v-if="total != null" class="aql-search-bar__total">
         Найдено задач: <b>{{ total }}</b>
+        <span v-if="time != null" class="aql-search-bar__time">
+          за {{ formatTime(time) }}
+        </span>
       </div>
       <div class="row no-wrap aql-search-bar__aux-group">
         <q-btn
@@ -80,6 +83,8 @@ const props = defineProps<{
   loading?: boolean;
   // сколько задач нашёл выполненный запрос; null — показывать нечего
   total?: number | null;
+  // время выполнения запроса на бэке, мс
+  time?: number | null;
   // есть выполненный запрос, который можно повторить
   refreshable?: boolean;
   columns: any[];
@@ -101,6 +106,11 @@ const submit = () => {
   if (isEmpty.value || props.loading) return;
   emits('search');
 };
+
+const formatTime = (ms: number) =>
+  ms < 1000
+    ? `${Math.round(ms)} мс`
+    : `${(ms / 1000).toFixed(1).replace('.', ',')} с`;
 
 const copyAqlLink = useCopyAqlLink();
 const copyLink = () => copyAqlLink(props.modelValue);
@@ -135,6 +145,15 @@ defineExpose({
 
     b {
       font-weight: 700;
+    }
+  }
+
+  &__time {
+    color: $sub-text-color;
+
+    // в узком окне время вытесняло кнопки на вторую строку
+    @media (max-width: 880px) {
+      display: none;
     }
   }
 

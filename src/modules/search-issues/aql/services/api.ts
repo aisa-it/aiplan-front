@@ -24,8 +24,9 @@ export interface AqlFailure {
   queryError: AqlQueryError | null;
 }
 
+// durationMs — время выполнения запроса на бэке; null — бэк его не прислал
 export type AqlSearchResult =
-  | { ok: true; count: number; issues: any[] }
+  | { ok: true; count: number; issues: any[]; durationMs: number | null }
   | AqlFailure;
 
 const failure = (error: unknown): AqlFailure => {
@@ -57,7 +58,12 @@ export async function searchIssuesByAql(
       params: { aql, limit, offset },
     });
 
-    return { ok: true, count: data?.count ?? 0, issues: data?.issues ?? [] };
+    return {
+      ok: true,
+      count: data?.count ?? 0,
+      issues: data?.issues ?? [],
+      durationMs: data?.duration_ms ?? null,
+    };
   } catch (error) {
     return failure(error);
   }

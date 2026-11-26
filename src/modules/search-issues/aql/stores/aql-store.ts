@@ -39,6 +39,14 @@ export const useAqlStore = defineStore('aql-store', {
         // хранилище недоступно или переполнено: история живёт до перезагрузки
       }
     },
+    clearHistory() {
+      this.history = [];
+      try {
+        localStorage.removeItem(HISTORY_KEY);
+      } catch {
+        // хранилище недоступно: история и так жила только до перезагрузки
+      }
+    },
     setQueryFromRoute(query: string | null) {
       this.queryFromRoute = query;
     },

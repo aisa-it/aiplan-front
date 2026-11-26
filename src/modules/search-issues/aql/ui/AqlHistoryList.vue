@@ -1,6 +1,35 @@
 <template>
   <div class="aql-history">
-    <div class="aql-history__title">История запросов</div>
+    <div class="aql-history__title">
+      <span>История запросов</span>
+      <q-btn
+        v-if="history.length"
+        flat
+        dense
+        class="aql-history__clear"
+        aria-label="Очистить историю"
+      >
+        <BinIcon color="#DC3E3E" :width="16" :height="16" />
+        <!-- над кнопкой: под ней открывается подтверждение -->
+        <HintTooltip anchor="top middle" self="bottom middle">
+          Очистить историю
+        </HintTooltip>
+        <!-- подтверждение: случайный клик не должен стирать все запросы -->
+        <q-menu anchor="bottom right" self="top right" :offset="[0, 4]">
+          <div class="aql-history__confirm">
+            <span>Очистить историю?</span>
+            <q-btn
+              v-close-popup
+              no-caps
+              class="delete-btn aql-history__confirm-btn"
+              @click="aqlStore.clearHistory()"
+            >
+              Очистить
+            </q-btn>
+          </div>
+        </q-menu>
+      </q-btn>
+    </div>
     <div v-if="history.length" class="aql-history__list scrollable-content">
       <q-list>
         <q-item
@@ -41,12 +70,14 @@ import { useAqlStore } from 'src/modules/search-issues/aql/stores/aql-store';
 
 // components
 import HintTooltip from 'src/components/HintTooltip.vue';
+import BinIcon from 'src/components/icons/BinIcon.vue';
 
 const emit = defineEmits<{
   select: [query: string];
 }>();
 
-const { history } = storeToRefs(useAqlStore());
+const aqlStore = useAqlStore();
+const { history } = storeToRefs(aqlStore);
 
 // запись, над которой открыта подсказка
 const hinted = ref<string | null>(null);
@@ -87,12 +118,30 @@ const onSelect = (query: string) => {
   flex-direction: column;
 }
 
+// высота строки задана под кнопку: с корзиной и без неё заголовок не прыгает
 .aql-history__title {
   flex-shrink: 0;
-  padding: 10px 10px 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 4px 6px 2px 10px;
   font-size: 12px;
   line-height: 16px;
   color: $sub-text-color;
+}
+
+.aql-history__confirm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.aql-history__confirm-btn {
+  min-height: 32px;
 }
 
 .aql-history__list {

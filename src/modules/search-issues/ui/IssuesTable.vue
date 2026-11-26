@@ -24,7 +24,7 @@
         label="AQL"
         :aria-pressed="isAql"
         class="aql-toggle q-mr-sm"
-        :class="isAql ? 'primary-btn' : 'secondary-btn'"
+        :class="isAql ? 'primary-btn' : 'secondary-btn aql-toggle--glow'"
         @click="isAql = !isAql"
       />
       <q-input
@@ -43,6 +43,7 @@
         :error="aqlError"
         :loading="aqlLoading"
         :total="aqlTotal"
+        :time="aqlTime"
         :refreshable="aqlExecuted !== null"
         :columns="allColumns"
         @update:model-value="onAqlInput"
@@ -240,6 +241,7 @@ import {
   getOrderBy,
   setOrderBy,
 } from 'src/modules/search-issues/aql/utils/order';
+import { quoteAqlValue } from 'src/modules/search-issues/aql/utils/suggest';
 
 // services
 import {
@@ -309,6 +311,8 @@ const aqlSearchBarRef = ref<InstanceType<typeof AqlSearchBar> | null>(null);
 const aqlQuery = ref('');
 // последний успешно выполненный запрос: его повторяет пагинация
 const aqlExecuted = ref<string | null>(null);
+// время выполнения запроса на бэке, мс
+const aqlTime = ref<number | null>(null);
 const aqlError = ref<AqlQueryError | null>(null);
 const aqlRows = ref([] as any);
 const aqlLoading = ref(false);
@@ -543,6 +547,7 @@ const requestAql = async (query: string, page: number) => {
   const order = getOrderBy(query);
   aqlRows.value = res.issues;
   aqlExecuted.value = query;
+  aqlTime.value = res.durationMs;
   aqlPagination.value = {
     sortBy: order?.column ?? null,
     descending: order?.desc ?? false,
@@ -640,9 +645,20 @@ watch(
 
 watch(isAql, (value) => {
   emits('update:aqlMode', value);
-  if (value) nextTick(() => aqlSearchBarRef.value?.focus());
-  // результаты штатного поиска могли устареть
-  else onRequest(pagination.value);
+  if (!value) {
+    // результаты штатного поиска могли устареть
+    onRequest(pagination.value);
+    return;
+  }
+
+  // Пустой режим AQL открывается задачами текущего пространства, как штатный
+  // поиск. В историю такой запрос не пишется: его никто не набирал
+  if (!aqlQuery.value.trim() && canScopeToWorkspace.value) {
+    const slug = currentWorkspaceSlug.value as string;
+    onAqlInput(`workspace = ${quoteAqlValue(slug)}`);
+    startAqlSearch(false);
+  }
+  nextTick(() => aqlSearchBarRef.value?.focus());
 });
 
 watch(() => aqlStore.queryFromRoute, applyQueryFromRoute);
@@ -779,6 +795,54 @@ const columnsToShow = ref(columns.map((el) => el.name));
 
 .aql-toggle {
   flex-shrink: 0;
+}
+
+// В штатном режиме кнопка светится и переливается всеми цветами: зовёт
+// попробовать поиск запросом. Цвет идёт по кругу оттенков, ореол при этом дышит
+.aql-toggle--glow {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--primary) 45%, transparent),
+    0 0 16px 4px color-mix(in srgb, var(--primary) 65%, transparent);
+  animation: aql-toggle-glow 2s linear infinite;
+
+  // без анимации — ровный ореол цветом темы
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes aql-toggle-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px hsl(0 100% 55% / 50%),
+      0 0 12px 3px hsl(0 100% 55% / 65%);
+  }
+  16.667% {
+    box-shadow:
+      0 0 0 3px hsl(60 100% 55% / 70%),
+      0 0 26px 8px hsl(60 100% 55% / 90%);
+  }
+  33.333% {
+    box-shadow:
+      0 0 0 1px hsl(120 100% 55% / 50%),
+      0 0 12px 3px hsl(120 100% 55% / 65%);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px hsl(180 100% 55% / 70%),
+      0 0 26px 8px hsl(180 100% 55% / 90%);
+  }
+  66.667% {
+    box-shadow:
+      0 0 0 1px hsl(240 100% 55% / 50%),
+      0 0 12px 3px hsl(240 100% 55% / 65%);
+  }
+  83.333% {
+    box-shadow:
+      0 0 0 3px hsl(300 100% 55% / 70%),
+      0 0 26px 8px hsl(300 100% 55% / 90%);
+  }
 }
 
 .aql-idle-hint {

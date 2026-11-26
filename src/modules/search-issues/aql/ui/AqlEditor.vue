@@ -51,11 +51,22 @@
         autocorrect="off"
         autocapitalize="off"
         @input="onInput"
-        @keydown.enter="onEnter"
+        @keydown="onKeydown"
+        @mousedown="closeSuggest"
+        @blur="closeSuggest"
         @mousemove="onMouseMove"
         @mouseleave="hideTip"
       ></textarea>
     </div>
+
+    <AqlSuggestList
+      v-if="suggest"
+      :items="suggest.items"
+      :selected="selected"
+      :anchor="suggest.anchor"
+      :footer="suggest.footer"
+      @pick="(index) => accept(index)"
+    />
 
     <q-tooltip
       v-if="error && tipTarget"
@@ -74,9 +85,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, watch } from 'vue';
+
+import AqlSuggestList from './AqlSuggestList.vue';
 
 import { tokenizeAql, type AqlTokenType } from '../utils/tokenize';
+import {
+  filterAqlSuggest,
+  getAqlSuggest,
+  valueItem,
+  type AqlSuggestItem,
+} from '../utils/suggest';
+import { loadAqlSuggestValues } from '../services/suggestData';
 
 interface AqlError {
   message: string;
@@ -186,12 +206,205 @@ const view = computed(() => {
 function onInput(event: Event) {
   hideTip();
   emits('update:modelValue', (event.target as HTMLTextAreaElement).value);
+  updateSuggest(false);
 }
 
 function onEnter(event: KeyboardEvent) {
   if (event.shiftKey || event.isComposing) return;
   event.preventDefault();
   emits('submit');
+}
+
+// ---------------------- Автодополнение ----------------------
+
+interface Suggest {
+  from: number;
+  to: number;
+  items: AqlSuggestItem[];
+  footer?: string;
+  anchor: { left: number; top: number; bottom: number };
+}
+
+const suggest = ref<Suggest | null>(null);
+// Заранее ничего не выбрано: Enter по-прежнему запускает поиск
+const selected = ref(-1);
+// отсекает ответ списка значений, пришедший после следующего нажатия
+let suggestRequest = 0;
+
+function closeSuggest() {
+  suggestRequest++;
+  suggest.value = null;
+  selected.value = -1;
+}
+
+// Каретку ищем в слое подсветки: он повторяет текст поля символ в символ
+function caretRect(index: number) {
+  const layer = highlightRef.value;
+  if (!layer) return null;
+
+  const walker = document.createTreeWalker(layer, NodeFilter.SHOW_TEXT);
+  let rest = index;
+  let node = walker.nextNode();
+  // пустые текстовые узлы — служебные метки Vue, в них каретки не бывает
+  while (node && (!node.textContent || rest > node.textContent.length)) {
+    rest -= node.textContent?.length ?? 0;
+    node = walker.nextNode();
+  }
+  if (!node) return layer.getBoundingClientRect();
+
+  const length = node.textContent?.length ?? 0;
+  const range = document.createRange();
+  const measure = (from: number, to: number) => {
+    range.setStart(node as Node, from);
+    range.setEnd(node as Node, to);
+    return range.getClientRects()[0];
+  };
+
+  // у пустого диапазона прямоугольника может не быть: берём край соседнего символа
+  const caret = measure(rest, rest);
+  if (caret?.height) return caret;
+
+  const next = rest < length ? measure(rest, rest + 1) : undefined;
+  if (next?.height) {
+    return { left: next.left, top: next.top, bottom: next.bottom };
+  }
+  const prev = rest > 0 ? measure(rest - 1, rest) : undefined;
+  if (prev?.height) {
+    return { left: prev.right, top: prev.top, bottom: prev.bottom };
+  }
+  return layer.getBoundingClientRect();
+}
+
+async function updateSuggest(manual: boolean) {
+  const input = inputRef.value;
+  if (!input || input.selectionStart !== input.selectionEnd) {
+    return closeSuggest();
+  }
+
+  const text = input.value;
+  const caret = input.selectionStart;
+  // пустое поле подсказывает только по Ctrl+Пробел
+  const context = manual || text.trim() ? getAqlSuggest(text, caret) : null;
+  if (!context) return closeSuggest();
+
+  const request = ++suggestRequest;
+  let items = context.items;
+  if (context.source) {
+    const values = await loadAqlSuggestValues(context.source);
+    if (request !== suggestRequest) return;
+    items = [
+      ...items,
+      ...values.map((value) => valueItem(value, context.valueSuffix)),
+    ];
+  }
+
+  items = filterAqlSuggest(items, context.prefix);
+  // слой подсветки должен успеть перерисоваться под новый текст
+  await nextTick();
+  if (request !== suggestRequest) return;
+
+  // список стоит у начала дополняемого слова и не едет за кареткой
+  const rect = items.length ? caretRect(context.from) : null;
+  if (!rect) return closeSuggest();
+
+  suggest.value = {
+    from: context.from,
+    to: context.to,
+    items,
+    footer: context.footer,
+    anchor: { left: rect.left, top: rect.top, bottom: rect.bottom },
+  };
+  selected.value = -1;
+}
+
+async function accept(index: number) {
+  const input = inputRef.value;
+  const current = suggest.value;
+  const item = current?.items[index];
+  if (!input || !current || !item) return;
+
+  const text = input.value;
+  let insert = item.insert;
+  // вставка вплотную к оператору или запятой: отделяем пробелом
+  if (
+    current.from === current.to &&
+    /[^\s(]/.test(text[current.from - 1] ?? ' ')
+  ) {
+    insert = ` ${insert}`;
+  }
+  // пробел после вставки уже есть
+  if (insert.endsWith(' ') && text[current.to] === ' ') {
+    insert = insert.slice(0, -1);
+  }
+
+  const caret = current.from + insert.length - (item.caretBack ?? 0);
+  closeSuggest();
+  emits(
+    'update:modelValue',
+    text.slice(0, current.from) + insert + text.slice(current.to),
+  );
+
+  // значение поля придёт от родителя на следующем тике
+  await nextTick();
+  input.focus();
+  input.setSelectionRange(caret, caret);
+  // следом за полем сразу предлагаем оператор, за оператором — значение
+  updateSuggest(false);
+}
+
+const CARET_KEYS = new Set([
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+]);
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.isComposing) return;
+
+  if (event.code === 'Space' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    updateSuggest(true);
+    return;
+  }
+
+  const count = suggest.value?.items.length ?? 0;
+  if (count) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      // от «ничего не выбрано» стрелка вверх ведёт на последнюю строку
+      const start = selected.value < 0 && step < 0 ? 0 : selected.value;
+      selected.value = (start + step + count) % count;
+      return;
+    }
+    if (event.key === 'Tab' && !event.shiftKey) {
+      event.preventDefault();
+      accept(Math.max(selected.value, 0));
+      return;
+    }
+    if (event.key === 'Enter' && !event.shiftKey && selected.value >= 0) {
+      event.preventDefault();
+      accept(selected.value);
+      return;
+    }
+    if (event.key === 'Escape') {
+      // иначе Esc закроет и окно поиска
+      event.preventDefault();
+      event.stopPropagation();
+      closeSuggest();
+      return;
+    }
+  }
+
+  if (CARET_KEYS.has(event.key)) closeSuggest();
+
+  if (event.key === 'Enter') {
+    closeSuggest();
+    onEnter(event);
+  }
 }
 
 // textarea перекрывает слой подсветки, поэтому подчёркнутый участок ищем по координатам.
