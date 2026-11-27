@@ -90,11 +90,13 @@
 
 <script setup lang="ts">
 import { computed, ref, shallowRef } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import type { TypesViewProps } from '@aisa-it/aiplan-api-ts/src/data-contracts';
 import { toast } from '@/modules/toast';
 import { useProjectIssueListActions } from '../../../composables/useProjectIssueListActions';
 import { provideIssueEditorActions } from '../../../model/issue-list.context';
+import { issueCreatedEvent } from '../../../model/issue-list.events';
 import type { EditableIssueField, ProjectIssueListScope } from '../../../model/issue-list.types';
 import CalendarFilters from './CalendarFilters.vue';
 import CalendarGrid from './CalendarGrid.vue';
@@ -141,6 +143,12 @@ const request = computed<CalendarRequest>(() => ({
   workspaceId: props.workspaceId,
 }));
 const { data, loading, failed, reload, updateIssue } = useCalendarEvents(() => request.value);
+
+useEventBus(issueCreatedEvent).on(({ workspaceSlug, projectId }) => {
+  if (workspaceSlug === props.scope.workspaceSlug && projectId === props.scope.projectId) {
+    reload();
+  }
+});
 
 function shift(direction: -1 | 1, unit = period.value) {
   transition.value = direction === 1 ? 'calendar-forward' : 'calendar-backward';

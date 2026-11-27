@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 
 import type {
@@ -51,6 +52,7 @@ import type {
 import { toast } from '@/modules/toast/toast';
 import { IssueGroupRequestError } from '../api/issue-list.source';
 import { provideIssueListController } from '../model/issue-list.context';
+import { issueCreatedEvent } from '../model/issue-list.events';
 import { createIssueListInitialState } from '../model/issue-list.defaults';
 import { normalizeIssueGroupBy, type GroupedIssueSource } from '../model/issue-groups';
 import type { IssueListActions, IssueListSource } from '../model/issue-list.types';
@@ -153,12 +155,27 @@ const ganttProps = computed(() => isGantt.value
     }
   : {});
 
+function reloadIssues() {
+  return groupBy.value ? grouped.retry() : controller.load();
+}
+
+useEventBus(issueCreatedEvent).on(({ workspaceSlug, projectId }) => {
+  if (
+    workspaceSlug !== props.workspaceSlug ||
+    (!props.sprint && projectId !== props.projectId)
+  ) {
+    return;
+  }
+
+  if (props.sprint) emit('sprintMembershipChanged');
+  void reloadIssues();
+});
+
 function onSprintsChanged(before: DtoIssueWithCount, after: DtoIssueWithCount) {
   const currentSprintId = props.sprint?.id;
   if (currentSprintId && !after.sprints?.some((sprint) => sprint.id === currentSprintId)) {
     emit('sprintMembershipChanged');
-    if (groupBy.value) void grouped.retry();
-    else void controller.load();
+    void reloadIssues();
   } else if (groupBy.value) {
     void grouped.refreshAfterUpdate(before, after);
   } else {

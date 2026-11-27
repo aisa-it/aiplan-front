@@ -23,6 +23,8 @@ const vuetify = createVuetify({
       light: {
         colors: {
           primary: '#3f75ff',
+          'issue-dialog-action': '#3f75ff',
+          'on-issue-dialog-action': '#ffffff',
           secondary: '#5CBBF6',
           accent: '#AA3BFF',
           error: '#FF5252',
@@ -43,11 +45,15 @@ const vuetify = createVuetify({
         },
         variables: {
           'hover-opacity': 0.08,
+          'issue-dialog-shadow':
+            '0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12)',
         },
       },
       dark: {
         colors: {
           primary: '#6C8CFF',
+          'issue-dialog-action': '#5685fb',
+          'on-issue-dialog-action': '#ffffff',
           secondary: '#80D0FF',
           accent: '#C084FC',
           error: '#FF5252',
@@ -63,6 +69,10 @@ const vuetify = createVuetify({
           'on-background': '#bac4d5',
           'on-surface': '#bac4d5',
           'on-surface-variant': '#bac4d5',
+        },
+        variables: {
+          'issue-dialog-shadow':
+            '0 1px 5px rgba(255, 255, 255, 0.2), 0 2px 2px rgba(255, 255, 255, 0.14), 0 3px 1px -2px rgba(255, 255, 255, 0.12)',
         },
       },
     },
