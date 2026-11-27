@@ -7,6 +7,7 @@ import authEn from '@/modules/auth/i18n/en';
 import dialogsEn from '@/components/dialogs/i18n/en';
 import docActivityEn from '@/modules/activities/renders/entities/doc-activity/i18n/en';
 import editorEn from '@/modules/editor/i18n/en';
+import formsEn from '@/modules/forms/i18n/en';
 import guidedToursEn from '@/modules/guided-tours/i18n/en';
 import issueActivityEn from '@/modules/activities/renders/entities/issue-activity/i18n/en';
 import issuesEn from '@/modules/issues/i18n/en';
@@ -30,6 +31,7 @@ const messages = {
   dialogs: dialogsEn,
   docActivity: docActivityEn,
   editor: editorEn,
+  forms: formsEn,
   guidedTours: guidedToursEn,
   issueActivity: issueActivityEn,
   issues: issuesEn,

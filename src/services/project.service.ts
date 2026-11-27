@@ -26,6 +26,18 @@ export const ProjectService = {
       .data;
   },
 
+  async getProjectStats(
+    workspaceSlug: string,
+    projectId: string,
+    signal: AbortSignal,
+  ) {
+    return (
+      await projectsApi.getProjectStats(workspaceSlug, projectId, undefined, {
+        signal,
+      })
+    ).data;
+  },
+
   async getMeInProject(
     workspaceSlug: string,
     projectId: string,
