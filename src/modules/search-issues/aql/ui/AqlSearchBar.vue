@@ -51,6 +51,35 @@
           <LinkIcon :width="18" :height="18" />
           <span>Скопировать ссылку</span>
         </q-btn>
+        <q-btn
+          flat
+          no-caps
+          class="btn-sm aql-search-bar__aux"
+          :disable="isEmpty"
+        >
+          <FileZIPIcon :width="18" :height="18" />
+          <span>Экспорт</span>
+          <q-popup-proxy ref="exportPopupRef">
+            <q-card style="min-width: 300px">
+              <q-card-section class="q-pa-md">
+                <q-checkbox
+                  v-model="includeProperties"
+                  label="Выгружать дополнительные параметры"
+                />
+              </q-card-section>
+              <q-card-actions align="right" class="q-px-md q-pb-md">
+                <q-btn
+                  flat
+                  no-caps
+                  color="primary"
+                  label="Скачать"
+                  :loading="exporting"
+                  @click="exportZip"
+                />
+              </q-card-actions>
+            </q-card>
+          </q-popup-proxy>
+        </q-btn>
         <AqlColumnsButton
           class="aql-search-bar__aux"
           :columns="columns"
@@ -70,6 +99,7 @@ import { computed, ref } from 'vue';
 import AqlEditor from './AqlEditor.vue';
 import AqlColumnsButton from './AqlColumnsButton.vue';
 import AqlHelpPopup from './AqlHelpPopup.vue';
+import FileZIPIcon from 'src/components/icons/FileZIPIcon.vue';
 import HelpIcon from 'src/components/icons/HelpIcon.vue';
 import LinkIcon from 'src/components/icons/LinkIcon.vue';
 import RefreshIcon from 'src/components/icons/RefreshIcon.vue';
@@ -87,6 +117,8 @@ const props = defineProps<{
   time?: number | null;
   // есть выполненный запрос, который можно повторить
   refreshable?: boolean;
+  // выгрузка архива: true — успешно, окно выбора закрывается
+  exportIssues: (includeProperties: boolean) => Promise<boolean>;
   columns: any[];
   columnsToShow: string[];
 }>();
@@ -111,6 +143,21 @@ const formatTime = (ms: number) =>
   ms < 1000
     ? `${Math.round(ms)} мс`
     : `${(ms / 1000).toFixed(1).replace('.', ',')} с`;
+
+const exportPopupRef = ref();
+const includeProperties = ref(false);
+const exporting = ref(false);
+
+const exportZip = async () => {
+  if (exporting.value) return;
+  exporting.value = true;
+  try {
+    if (await props.exportIssues(includeProperties.value))
+      exportPopupRef.value?.hide();
+  } finally {
+    exporting.value = false;
+  }
+};
 
 const copyAqlLink = useCopyAqlLink();
 const copyLink = () => copyAqlLink(props.modelValue);

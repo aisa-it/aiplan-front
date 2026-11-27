@@ -130,6 +130,13 @@ onBeforeMount(async () => {
   appVisibleTimeout(() => userStore.getUserInfo());
   currentIssueID.value = route.params.issue as string;
 
+  // запрос в адресе любой страницы: окно поиска откроется поверх неё
+  const aqlInAddress = route.query.aql;
+  if (route.name !== 'aql-search' && aqlInAddress != null)
+    aqlStore.setQueryFromRoute(
+      (Array.isArray(aqlInAddress) ? aqlInAddress[0] : aqlInAddress) ?? '',
+    );
+
   if (user.value?.status === 'На звонке') {
     await userStore.updateCurrentUser({
       status: '',

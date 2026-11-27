@@ -200,6 +200,10 @@ export const AQL_USER_FUNCTIONS: AqlFunction[] = [
 
 // Списки задач: только после IN
 export const AQL_ISSUE_FUNCTIONS: AqlFunction[] = [
-  { code: 'childrenOf("")', text: 'все подзадачи задачи', caretBack: 2 },
+  {
+    code: 'childrenOf("")',
+    text: 'вся ветка подзадач, на любую глубину',
+    caretBack: 2,
+  },
   { code: 'linkedTo("")', text: 'связанные с задачей', caretBack: 2 },
 ];

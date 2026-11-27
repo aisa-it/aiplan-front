@@ -45,6 +45,7 @@
         :total="aqlTotal"
         :time="aqlTime"
         :refreshable="aqlExecuted !== null"
+        :export-issues="exportAql"
         :columns="allColumns"
         @update:model-value="onAqlInput"
         @search="startAqlSearch"
@@ -227,7 +228,7 @@
 
 <script setup lang="ts">
 import { debounce, Screen } from 'quasar';
-import { onMounted, ref, watch, computed, nextTick } from 'vue';
+import { onMounted, onUnmounted, ref, watch, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 
 // stores
@@ -242,10 +243,12 @@ import {
   setOrderBy,
 } from 'src/modules/search-issues/aql/utils/order';
 import { quoteAqlValue } from 'src/modules/search-issues/aql/utils/suggest';
+import { setAqlInAddress } from 'src/modules/search-issues/aql/utils/copyLink';
 
 // services
 import {
   AqlQueryError,
+  exportIssuesByAql,
   searchIssuesByAql,
 } from 'src/modules/search-issues/aql/services/api';
 
@@ -574,6 +577,32 @@ const onAqlInput = (value: string) => {
   aqlError.value = null;
 };
 
+// выгружает задачи по тексту в поле; ошибку в запросе показывает редактор
+const exportAql = async (includeProperties: boolean) => {
+  const query = aqlQuery.value;
+  const res = await exportIssuesByAql(query, includeProperties);
+  if (res.ok) {
+    setNotificationView({
+      open: true,
+      type: 'success',
+      customMessage: 'Файл успешно скачан',
+    });
+    return true;
+  }
+
+  if (res.queryError) {
+    if (query === aqlQuery.value) aqlError.value = res.queryError;
+    return true;
+  }
+
+  setNotificationView({
+    open: true,
+    type: 'error',
+    customMessage: res.message || 'Не удалось скачать файл',
+  });
+  return false;
+};
+
 // подставить запрос в поле и выполнить: история запросов, ссылка
 const searchAql = (query: string) => {
   isAql.value = true;
@@ -597,7 +626,7 @@ const onAqlSort = (p) => {
   aqlExecuted.value = null;
 };
 
-// запрос из ссылки /s/?aql=...
+// запрос из ссылки /s/?aql=... или из адреса страницы
 const applyQueryFromRoute = () => {
   const query = aqlStore.queryFromRoute;
   if (props.isCreateSprint || query == null) return false;
@@ -645,6 +674,11 @@ watch(
 
 watch(isAql, (value) => {
   emits('update:aqlMode', value);
+  // пустой aqlExecuted адрес не трогает: запрос из ссылки ещё выполняется
+  if (!props.isCreateSprint) {
+    if (!value) setAqlInAddress(null);
+    else if (aqlExecuted.value !== null) setAqlInAddress(aqlExecuted.value);
+  }
   if (!value) {
     // результаты штатного поиска могли устареть
     onRequest(pagination.value);
@@ -662,6 +696,16 @@ watch(isAql, (value) => {
 });
 
 watch(() => aqlStore.queryFromRoute, applyQueryFromRoute);
+
+// выполненный запрос держим в адресе, чтобы ссылку можно было скопировать
+// из строки браузера; ошибочный запрос адрес не меняет
+watch(aqlExecuted, (query) => {
+  if (isAql.value && query !== null) setAqlInAddress(query);
+});
+
+onUnmounted(() => {
+  if (!props.isCreateSprint) setAqlInAddress(null);
+});
 
 defineExpose({ searchAql, aqlQuery });
 

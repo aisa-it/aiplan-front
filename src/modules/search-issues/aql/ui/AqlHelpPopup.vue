@@ -195,7 +195,10 @@ const fieldGroups: FieldGroup[] = [
       { code: 'project', text: 'проект: идентификатор или id' },
       { code: 'workspace', text: 'пространство: идентификатор или id' },
       { code: 'issue', text: 'задача: ключ вида PRJ-123 или id' },
-      { code: 'parent', text: 'родительская задача: ключ или id' },
+      {
+        code: 'parent',
+        text: 'родительская задача: ключ или id; parent = "PRJ-1" — прямые подзадачи',
+      },
       { code: 'status', text: 'статус: название или id' },
       {
         code: 'statusGroup',
@@ -311,7 +314,7 @@ const functions: HelpRow[] = [
   },
   {
     code: 'childrenOf("PRJ-1")',
-    text: 'все подзадачи задачи на любую глубину; только после IN',
+    text: 'вся ветка подзадач на любую глубину, одним списком без уровней; ветка идёт только через видимые вам задачи; только после IN. Прямые подзадачи — parent = "PRJ-1"',
   },
   {
     code: 'linkedTo("PRJ-1")',

@@ -5,6 +5,16 @@ import { ERROR_COPY_LINK_TO_CLIPBOARD } from 'src/constants/notifications';
 export const aqlLink = (query: string) =>
   `${window.location.origin}/s/?aql=${encodeURIComponent(query)}`;
 
+// Запрос в адресе текущей страницы, null — убрать. Мимо роутера: страница под
+// окном поиска не должна реагировать, шаг в истории браузера не добавляется
+export const setAqlInAddress = (query: string | null) => {
+  const url = new URL(window.location.href);
+  if (query === null) url.searchParams.delete('aql');
+  else url.searchParams.set('aql', query);
+  if (url.href !== window.location.href)
+    window.history.replaceState(window.history.state, '', url);
+};
+
 // вызывать в setup: возвращает функцию, копирующую ссылку на запрос
 export const useCopyAqlLink = () => {
   const { setNotificationView } = useNotificationStore();

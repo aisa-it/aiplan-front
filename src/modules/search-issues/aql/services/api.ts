@@ -69,6 +69,43 @@ export async function searchIssuesByAql(
   }
 }
 
+export type AqlExportResult = { ok: true } | AqlFailure;
+
+// Скачивает архив с задачами, найденными запросом
+export async function exportIssuesByAql(
+  aql: string,
+  includeProperties: boolean,
+): Promise<AqlExportResult> {
+  try {
+    const res = await api.get(`${API_AUTH_PREFIX}/search/export/`, {
+      params: {
+        aql,
+        ...(includeProperties ? { include_properties: true } : {}),
+      },
+      responseType: 'blob',
+    });
+
+    const url = window.URL.createObjectURL(res.data);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'issues-export.zip');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    return { ok: true };
+  } catch (error) {
+    // при responseType blob тело ошибки тоже приходит blob
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        error.response.data = JSON.parse(await error.response.data.text());
+      } catch {}
+    }
+    return failure(error);
+  }
+}
+
 // Фильтр поиска; aql есть у любого: у старых фильтров его собирает бэк
 export type AqlFilter = DtoSearchFilterFull & { aql?: string };
 

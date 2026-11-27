@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 //core
-import { ref, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
 //components
@@ -34,13 +34,18 @@ const isSearchOpened = ref(false);
 
 const router = useRouter();
 
+const openFromLink = () => {
+  if (!!filterStore.filterIdFromRoute || aqlStore.queryFromRoute !== null) {
+    isSearchOpened.value = true;
+  }
+};
+
 const removeHook = router.afterEach(() => {
-  nextTick(() => {
-    if (!!filterStore.filterIdFromRoute || aqlStore.queryFromRoute !== null) {
-      isSearchOpened.value = true;
-    }
-  });
+  nextTick(openFromLink);
 });
+
+// запрос в адресе страницы при загрузке: переходов не было, хук не сработает
+onMounted(openFromLink);
 
 onUnmounted(() => {
   removeHook();
